@@ -1,9 +1,32 @@
 inspecode:
 
+  global:
+    ignore:
+      - '**/test/'
+      - '**/tests/'
+      - '**/unittest/'
+      - '**/unittests/'
+
   tools:
 
     astyle:
-      options: {-A: 1}
+      # (no options:)
+      # options: {-A: 1}    # too many issues detected: 13341 > 1000
+      # options: {-A: 2}    # too many issues detected: 12753 > 1000
+      # options: {-A: 3}    # too many issues detected: 13343 > 1000
+      # options: {-A: 4}    # too many issues detected: 12747 > 1000
+      # options: {-A: 5}    # too many issues detected: 13404 > 1000
+      # options: {-A: 6}    # too many issues detected: 12816 > 1000
+      # options: {-A: 7}    # too many issues detected: 13345 > 1000
+      # options: {-A: 8}    # too many issues detected: 13343 > 1000
+      # options: {-A: 9}    # too many issues detected: 13404 > 1000
+      # options: {-A: 10}   # too many issues detected: 13349 > 1000
+      # options: {-A: 11}   # too many issues detected: 13347 > 1000
+      # options: {-A: 12}   # too many issues detected: 12968 > 1000
+      # options: {-A: 13}   # Invalid command line options: A13
+      # options: {-A: 14}   # too many issues detected: 12754 > 1000
+      # options: {-A: 15}   # too many issues detected: 13345 > 1000
+      # options: {-A: 16}   # too many issues detected: 12761 > 1000
       auto-fix: true
       thresholds: {num-issues: 999}
 

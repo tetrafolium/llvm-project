@@ -2,7 +2,10 @@ inspecode:
     
   global:
     ignore:
-      - '**/test*/'
+      - '**/test/'
+      - '**/tests/'
+      - '**/unittest/'
+      - '**/unittests/'
 
   tools:
 

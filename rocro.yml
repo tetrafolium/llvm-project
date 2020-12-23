@@ -3,6 +3,7 @@ inspecode:
   tools:
 
     astyle:
+      options: [-A1]
       auto-fix: true
       thresholds: {num-issues: 999}
 

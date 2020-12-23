@@ -1,5 +1,12 @@
 inspecode:
 
+  global:
+    ignore:
+      - '**/test/'
+      - '**/tests/'
+      - '**/unittest/'
+      - '**/unittests/'
+
   tools:
 
     astyle:

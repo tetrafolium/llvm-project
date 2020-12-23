@@ -5,7 +5,9 @@ inspecode:
   tools:
 
     clang-format:
-      # auto-fix: true
+      options:
+        -style: Microsoft
+      auto-fix: true
       thresholds: {num-issues: 999}
 
     uncrustify:

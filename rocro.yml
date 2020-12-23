@@ -29,9 +29,9 @@ inspecode:
     cpd:
     # - options: [--skip-lexical-errors]
     #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
-    - machine: {cpu: 1.0}
-      options: [--skip-lexical-errors]
-      thresholds: {num-issues: 999}
+    # - machine: {cpu: 1.0}
+    #   options: [--skip-lexical-errors]
+    #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
     - machine: {cpu: 1.5}
       options: [--skip-lexical-errors]
       thresholds: {num-issues: 999}
@@ -67,7 +67,7 @@ inspecode:
     # fossology:
     # - thresholds: {num-issues: 999}   # FOSSology timed out.
     # - machine: {cpu: 1.0}
-    #   thresholds: {num-issues: 999}   # 
+    #   thresholds: {num-issues: 999}   # Succeeded / (blank console)
     # - machine: {cpu: 2.0}
     #   thresholds: {num-issues: 999}   # 
 

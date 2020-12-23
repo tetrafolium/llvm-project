@@ -1,6 +1,8 @@
 inspecode:
     
   global:
+    ignore:
+      - '**/test*/'
 
   tools:
 
@@ -9,8 +11,6 @@ inspecode:
       thresholds: {num-issues: 999}
 
     clang-format:
-      options:
-        -style: LLVM
       auto-fix: true
       thresholds: {num-issues: 999}
 

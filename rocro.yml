@@ -28,22 +28,38 @@ inspecode:
       options:
         --filter:
           - +build
+          - -legal
+          - -readability
+          - -runtime
+          - -whitespace
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
+          - -build
+          - -legal
           - +readability
+          - -runtime
+          - -whitespace
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
+          - -build
+          - -legal
+          - -readability
           - +runtime
           - -runtime/int
           - -runtime/references
+          - -whitespace
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
+          - -build
+          - -legal
+          - -readability
+          - -runtime
           - +whitespace
           - -whitespace/comments
           - -whitespace/indent

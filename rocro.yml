@@ -26,18 +26,18 @@ inspecode:
     #   auto-fix: true
     #   thresholds: {num-issues: 999}   # too many issues detected: 7314 > 1000
 
-    cpd:
+    # cpd:
     # - options: [--skip-lexical-errors]
     #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
     # - machine: {cpu: 1.0}
     #   options: [--skip-lexical-errors]
     #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
-    - machine: {cpu: 1.5}
-      options: [--skip-lexical-errors]
-      thresholds: {num-issues: 999}
-    - machine: {cpu: 2.0}
-      options: [--skip-lexical-errors]
-      thresholds: {num-issues: 999}
+    # - machine: {cpu: 1.5}
+    #   options: [--skip-lexical-errors]
+    #   thresholds: {num-issues: 999}     # /opt/pmd/pmd-bin-6.25.0/bin/run.sh: line 221:   161 Killed                  java ${HEAPSIZE} ${PMD_JAVA_OPTS} $(jre_specific_vm_options) -cp "${classpath}" "${CLASSNAME}" "$@"
+    # - machine: {cpu: 2.0}
+    #   options: [--skip-lexical-errors]
+    #   thresholds: {num-issues: 999}     # /opt/pmd/pmd-bin-6.25.0/bin/run.sh: line 221:   160 Killed                  java ${HEAPSIZE} ${PMD_JAVA_OPTS} $(jre_specific_vm_options) -cp "${classpath}" "${CLASSNAME}" "$@"
 
     # cppcheck:
     # - machine: {cpu: 1.0}   # increase resource to avoid OOM killed
@@ -45,7 +45,7 @@ inspecode:
     # - machine: {cpu: 1.1}   # increase resource to avoid OOM killed
     #   thresholds: {num-issues: 999}   # too many issues detected: 1443 > 1000
 
-    # cpplint:
+    cpplint:
     # - machine: {cpu: 1.0}
     #   options:
     #     --filter:
@@ -53,13 +53,13 @@ inspecode:
     #       - -whitespace/comments
     #     --linelength: 120
     #   thresholds: {num-issues: 999}   # Timed Out / the console log exceeds the maximum size
-    # - machine: {cpu: 2.0}
-    #   options:
-    #     --filter:
-    #       - -legal/copyright
-    #       - -whitespace/comments
-    #     --linelength: 120
-    #   thresholds: {num-issues: 999}   #
+    - machine: {cpu: 2.0}
+      options:
+        --filter:
+          - -legal/copyright
+          - -whitespace/comments
+        --linelength: 120
+      thresholds: {num-issues: 999}   # Aborted / cpplint was aborted unexpectedly. Please retry later.
 
     # fortify:
     #   thresholds: {num-issues: 999}

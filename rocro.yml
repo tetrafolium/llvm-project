@@ -19,7 +19,6 @@ inspecode:
     #       - -runtime
     #       - -whitespace
     #   thresholds: {num-issues: 999}   # too many issues detected: 47998 > 1000
-<<<<<<< HEAD
     # - machine: {cpu: 1.0}
     #   options:
     #     --filter:
@@ -82,56 +81,26 @@ inspecode:
           - -whitespace
           - +whitespace/braces
       thresholds: {num-issues: 999}
-=======
->>>>>>> 612ad1c2f92bec669b7b4d19f0edb4325fb0ba27
     - machine: {cpu: 1.0}
       options:
         --filter:
           - -build
-<<<<<<< HEAD
           - -legal
-=======
-          # - -legal
->>>>>>> 612ad1c2f92bec669b7b4d19f0edb4325fb0ba27
           - -readability
           - -runtime
           - -whitespace
           - +whitespace/comments
       thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       # - -readability
-    #       - -runtime
-    #       - -whitespace
-    #   thresholds: {num-issues: 999}   # too many issues detected: 21638 > 1000
     - machine: {cpu: 1.0}
       options:
         --filter:
           - -build
           - -legal
           - -readability
-<<<<<<< HEAD
           - -runtime
-=======
-          # - -runtime
->>>>>>> 612ad1c2f92bec669b7b4d19f0edb4325fb0ba27
           - -whitespace
           - +whitespace/indent
       thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       # - -runtime
-    #       - -runtime/int
-    #       - -runtime/references
-    #       - -whitespace
-    #   thresholds: {num-issues: 999}   # too many issues detected: 6749 > 1000
     - machine: {cpu: 1.0}
       options:
         --filter:
@@ -139,7 +108,6 @@ inspecode:
           - -legal
           - -readability
           - -runtime
-<<<<<<< HEAD
           - -whitespace
           - +whitespace/parens
       thresholds: {num-issues: 999}
@@ -152,62 +120,4 @@ inspecode:
           - -runtime
           - -whitespace
           - +whitespace/tab
-=======
-          # - -whitespace
-          - -whitespace/braces
-          - -whitespace/comments
-          - -whitespace/indent
-          - -whitespace/parens
-          - -whitespace/tab
->>>>>>> 612ad1c2f92bec669b7b4d19f0edb4325fb0ba27
       thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       - -runtime
-    #       - -whitespace
-    #       - +whitespace/braces
-    #   thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       - -runtime
-    #       - -whitespace
-    #       - +whitespace/comments
-    #   thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       - -runtime
-    #       - -whitespace
-    #       - +whitespace/indent
-    #   thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       - -runtime
-    #       - -whitespace
-    #       - +whitespace/parens
-    #   thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   options:
-    #     --filter:
-    #       - -build
-    #       - -legal
-    #       - -readability
-    #       - -runtime
-    #       - -whitespace
-    #       - +whitespace/tab
-    #   thresholds: {num-issues: 999}

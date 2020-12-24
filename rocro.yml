@@ -9,43 +9,7 @@ inspecode:
 
   tools:
 
-    # astyle:
-    #   auto-fix: true
-    #   thresholds: {num-issues: 999}   # too many issues detected: 12705 > 1000
-
-    # clang-format:
-    # - auto-fix: true
-    #   thresholds: {num-issues: 999}   # xargs: clang-format: terminated by signal 9
-    # - machine: {cpu: 1.0}
-    #   # auto-fix: true
-    #   thresholds: {num-issues: 999}   # Timed Out / (blank console)
-    # - machine: {cpu: 1.5}
-    #   # auto-fix: true
-    #   thresholds: {num-issues: 999}   #
-    # - machine: {cpu: 2.0}
-    #   auto-fix: true
-    #   thresholds: {num-issues: 999}   # too many issues detected: 7314 > 1000
-
-    cpd:
-    # - options: [--skip-lexical-errors]
-    #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
-    # - machine: {cpu: 1.0}
-    #   options: [--skip-lexical-errors]
-    #   thresholds: {num-issues: 999}   # Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
-    - machine: {cpu: 1.5}
-      options: [--skip-lexical-errors]
-      thresholds: {num-issues: 999}
-    - machine: {cpu: 2.0}
-      options: [--skip-lexical-errors]
-      thresholds: {num-issues: 999}
-
-    # cppcheck:
-    # - machine: {cpu: 1.0}   # increase resource to avoid OOM killed
-    #   thresholds: {num-issues: 999}   # Killed
-    # - machine: {cpu: 1.1}   # increase resource to avoid OOM killed
-    #   thresholds: {num-issues: 999}   # too many issues detected: 1443 > 1000
-
-    # cpplint:
+    cpplint:
     # - machine: {cpu: 1.0}
     #   options:
     #     --filter:
@@ -60,61 +24,29 @@ inspecode:
     #       - -whitespace/comments
     #     --linelength: 120
     #   thresholds: {num-issues: 999}   #
-
-    # fortify:
-    #   thresholds: {num-issues: 999}
-
-    # fossology:
-    # - thresholds: {num-issues: 999}   # FOSSology timed out.
-    # - machine: {cpu: 1.0}
-    #   thresholds: {num-issues: 999}   # Succeeded / (blank console)
-    # - machine: {cpu: 2.0}
-    #   thresholds: {num-issues: 999}   # 
-
-    # grep:
-    #   thresholds: {num-issues: 999}   # too many issues detected: 12945 > 1000
-
-    ### CMake Error at CMakeLists.txt:3 (add_custom_target):
-    ###   Error evaluating generator expression:
-    ###     $<TARGET_FILE_DIR:libclang>
-    ###   No target "libclang"
-    # infer:
-    #   thresholds: {num-issues: 999}
-
-    # jscpd:
-    # - thresholds: {num-issues: 999}   # jscpd timed out.
-    # - machine: {cpu: 1.0}
-    #   thresholds: {num-issues: 999}   # Failed / (blank console)
-    # - machine: {cpu: 2.0}
-    #   thresholds: {num-issues: 999}   # 
-
-    # misspell:
-    #   auto-fix: true
-    #   thresholds: {num-issues: 999}   # too many issues detected: 1566 > 1000
-
-    ### CMake Error at CMakeLists.txt:3 (add_custom_target):
-    ###   Error evaluating generator expression:
-    ###     $<TARGET_FILE_DIR:libclang>
-    ###   No target "libclang"
-    # scan-build:
-    #   thresholds: {num-issues: 999}
-
-    ### parse_cleanup(780): Unmatched BRACE_CLOSE
-    ###    orig_line is 321, orig_col is 3
-    ### parse_cleanup(785): Try the option 'tok_split_gte = true'
-    # uncrustify:
-    #   auto-fix: true
-    #   thresholds: {num-issues: 999}
-
-    # understand:
-    #   thresholds: {num-issues: 999}
-
-    # unused:
-    # - options: [--single-occurrence, --all-likelihoods]
-    #   thresholds: {num-issues: 999}   # Unused timed out.
-    # - machine: {cpu: 1.0}
-    #   options: [--single-occurrence, --all-likelihoods]
-    #   thresholds: {num-issues: 999}   # Timed Out / (blank console)
-    # - machine: {cpu: 2.0}
-    #   options: [--single-occurrence, --all-likelihoods]
-    #   thresholds: {num-issues: 999}   # 
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - build
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - readability
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - runtime
+          - -runtime/int
+          - -runtime/references
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - whitespace
+          - -whitespace/comments
+          - -whitespace/indent
+          - -whitespace/braces
+          - -whitespace/parens
+      thresholds: {num-issues: 999}

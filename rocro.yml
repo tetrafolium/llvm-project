@@ -27,24 +27,24 @@ inspecode:
     - machine: {cpu: 1.0}
       options:
         --filter:
-          - build
+          - +build
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
-          - readability
+          - +readability
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
-          - runtime
+          - +runtime
           - -runtime/int
           - -runtime/references
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
         --filter:
-          - whitespace
+          - +whitespace
           - -whitespace/comments
           - -whitespace/indent
           - -whitespace/braces

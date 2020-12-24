@@ -13,45 +13,73 @@ inspecode:
     # - machine: {cpu: 1.0}
     #   options:
     #     --filter:
-    #       - -legal/copyright
-    #       - -whitespace/comments
-    #     --linelength: 120
-    #   thresholds: {num-issues: 999}   # Timed Out / the console log exceeds the maximum size
-    # - machine: {cpu: 2.0}
+    #       # - -build
+    #       - -legal
+    #       - -readability
+    #       - -runtime
+    #       - -whitespace
+    #   thresholds: {num-issues: 999}   # too many issues detected: 47998 > 1000
+    # - machine: {cpu: 1.0}
     #   options:
     #     --filter:
-    #       - -legal/copyright
+    #       - -build
+    #       # - -legal
+    #       - -readability
+    #       - -runtime
+    #       - -whitespace
+    #   thresholds: {num-issues: 999}   # too many issues detected: 13579 > 1000
+    # - machine: {cpu: 1.0}
+    #   options:
+    #     --filter:
+    #       - -build
+    #       - -legal
+    #       # - -readability
+    #       - -runtime
+    #       - -whitespace
+    #   thresholds: {num-issues: 999}   # too many issues detected: 21638 > 1000
+    # - machine: {cpu: 1.0}
+    #   options:
+    #     --filter:
+    #       - -build
+    #       - -legal
+    #       - -readability
+    #       # - -runtime
+    #       - -whitespace
+    #   thresholds: {num-issues: 999}   # the console log exceeds the maximum size
+    # - machine: {cpu: 1.0}
+    #   options:
+    #     --filter:
+    #       - -build
+    #       - -legal
+    #       - -readability
+    #       # - -runtime
+    #       - -runtime/int
+    #       - -runtime/references
+    #       - -whitespace
+    #   thresholds: {num-issues: 999}   # too many issues detected: 6749 > 1000
+    # - machine: {cpu: 1.0}
+    #   options:
+    #     --filter:
+    #       - -build
+    #       - -legal
+    #       - -readability
+    #       - -runtime
+    #       # - -whitespace
+    #       - -whitespace/braces
     #       - -whitespace/comments
-    #     --linelength: 120
-    #   thresholds: {num-issues: 999}   #
-    - machine: {cpu: 1.0}
-      options:
-        --filter:
-          - +build
-          - -legal
-          - -readability
-          - -runtime
-          - -whitespace
-      thresholds: {num-issues: 999}
-    - machine: {cpu: 1.0}
-      options:
-        --filter:
-          - -build
-          - -legal
-          - +readability
-          - -runtime
-          - -whitespace
-      thresholds: {num-issues: 999}
+    #       - -whitespace/indent
+    #       - -whitespace/parens
+    #       - -whitespace/tab
+    #   thresholds: {num-issues: 999}   # too many issues detected: 29917 > 1000
     - machine: {cpu: 1.0}
       options:
         --filter:
           - -build
           - -legal
           - -readability
-          - +runtime
-          - -runtime/int
-          - -runtime/references
+          - -runtime
           - -whitespace
+          - +whitespace/braces
       thresholds: {num-issues: 999}
     - machine: {cpu: 1.0}
       options:
@@ -60,9 +88,36 @@ inspecode:
           - -legal
           - -readability
           - -runtime
-          - +whitespace
-          - -whitespace/comments
-          - -whitespace/indent
-          - -whitespace/braces
-          - -whitespace/parens
+          - -whitespace
+          - +whitespace/comments
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - -build
+          - -legal
+          - -readability
+          - -runtime
+          - -whitespace
+          - +whitespace/indent
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - -build
+          - -legal
+          - -readability
+          - -runtime
+          - -whitespace
+          - +whitespace/parens
+      thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      options:
+        --filter:
+          - -build
+          - -legal
+          - -readability
+          - -runtime
+          - -whitespace
+          - +whitespace/tab
       thresholds: {num-issues: 999}

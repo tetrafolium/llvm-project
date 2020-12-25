@@ -10,7 +10,7 @@ inspecode:
   tools:
 
     astyle:
-      # (no options:)
+      # (no options:)       # too many issues detected: 12705 > 1000
       # options: {-A: 1}    # too many issues detected: 13341 > 1000
       # options: {-A: 2}    # too many issues detected: 12753 > 1000
       # options: {-A: 3}    # too many issues detected: 13343 > 1000
@@ -27,6 +27,12 @@ inspecode:
       # options: {-A: 14}   # too many issues detected: 12754 > 1000
       # options: {-A: 15}   # too many issues detected: 13345 > 1000
       # options: {-A: 16}   # too many issues detected: 12761 > 1000
+      options:
+        --attach-namespaces:    # Attach braces to a namespace statement.
+        --attach-classes:       # Attach braces to a class statement.
+        --attach-inlines:       # Attach braces to class inline function definitions.
+        --attach-extern-c:      # Attach braces to an extern "C" statement.
+        --attach-closing-while: # Attach closing while of do-while to the closing brace.
       auto-fix: true
       thresholds: {num-issues: 999}
 

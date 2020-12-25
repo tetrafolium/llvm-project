@@ -28,11 +28,12 @@ inspecode:
       # options: {-A: 15}   # too many issues detected: 13345 > 1000
       # options: {-A: 16}   # too many issues detected: 12761 > 1000
       options:
-        --attach-namespaces:    # Attach braces to a namespace statement.
-        --attach-classes:       # Attach braces to a class statement.
-        --attach-inlines:       # Attach braces to class inline function definitions.
-        --attach-extern-c:      # Attach braces to an extern "C" statement.
-        --attach-closing-while: # Attach closing while of do-while to the closing brace.
+        -s: 2   # Indent using # spaces per indent.
+        -xn:    # Attach braces to a namespace statement.
+        -xc:    # Attach braces to a class statement.
+        -xl:    # Attach braces to class inline function definitions.
+        -xk:    # Attach braces to an extern "C" statement.
+        -xV:    # Attach closing while of do-while to the closing brace.
       auto-fix: true
       thresholds: {num-issues: 999}
 

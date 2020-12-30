@@ -24,9 +24,9 @@ inspecode:
       auto-fix: true
       thresholds: {num-issues: 999}
 
-    # cpd:
-    #   options: [--skip-lexical-errors]
-    #   thresholds: {num-issues: 999}
+    cpd:
+      options: [--skip-lexical-errors]
+      thresholds: {num-issues: 999}
 
     cppcheck:
       machine: {cpu: 1.1}   # increase resource to avoid OOM killed
@@ -70,10 +70,10 @@ inspecode:
     # infer:
     #   thresholds: {num-issues: 999}
 
-    # jscpd:
+    jscpd:
     # - thresholds: {num-issues: 999}
-    # - machine: {cpu: 1.0}
-    #   thresholds: {num-issues: 999}
+    - machine: {cpu: 1.0}
+      thresholds: {num-issues: 999}
     # - machine: {cpu: 2.0}
     #   thresholds: {num-issues: 999}
 
@@ -84,19 +84,19 @@ inspecode:
     # scan-build:
     #   thresholds: {num-issues: 999}
 
-    # uncrustify:
-    #   auto-fix: true
-    #   thresholds: {num-issues: 999}
+    uncrustify:
+      auto-fix: true
+      thresholds: {num-issues: 999}
 
     # understand:
     #   thresholds: {num-issues: 999}
 
-    # unused:
+    unused:
     # - options: [--single-occurrence, --all-likelihoods]
     #   thresholds: {num-issues: 999}
     # - machine: {cpu: 1.0}
     #   options: [--single-occurrence, --all-likelihoods]
     #   thresholds: {num-issues: 999}
-    # - machine: {cpu: 2.0}
-    #   options: [--single-occurrence, --all-likelihoods]
-    #   thresholds: {num-issues: 999}
+    - machine: {cpu: 2.0}
+      options: [--single-occurrence, --all-likelihoods]
+      thresholds: {num-issues: 999}

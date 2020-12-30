@@ -234,7 +234,7 @@ void MachOLinkingContext::configure(HeaderFileType type, Arch arch, OS os,
     // Initial base address is __PAGEZERO size.
     _baseAddress = _pageZeroSize;
 
-    // Make PIE by default when targetting newer OSs.
+    // Make PIE by default when targeting newer OSs.
     switch (os) {
     case OS::macOSX:
       if (minOSVersion >= 0x000A0700) // MacOSX 10.7

@@ -401,7 +401,7 @@ void OmpStructureChecker::Enter(const parser::OmpClause &x) {
   SetContextClause(x);
 }
 
-// Following clauses do not have a seperate node in parse-tree.h.
+// Following clauses do not have a separate node in parse-tree.h.
 // They fall under 'struct OmpClause' in parse-tree.h.
 CHECK_SIMPLE_CLAUSE(Allocate, OMPC_allocate)
 CHECK_SIMPLE_CLAUSE(Copyin, OMPC_copyin)
@@ -493,7 +493,7 @@ void OmpStructureChecker::CheckIsVarPartOfAnotherVar(
         ompObject.u);
   }
 }
-// Following clauses have a seperate node in parse-tree.h.
+// Following clauses have a separate node in parse-tree.h.
 CHECK_SIMPLE_PARSER_CLAUSE(OmpReductionClause, OMPC_reduction)
 // Atomic-clause
 CHECK_SIMPLE_PARSER_CLAUSE(OmpAtomicRead, OMPC_read)

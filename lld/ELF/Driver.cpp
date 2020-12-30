@@ -455,7 +455,7 @@ static bool isKnownZFlag(StringRef s) {
          s == "nognustack" || s == "nokeep-text-section-prefix" ||
          s == "norelro" || s == "noseparate-code" || s == "notext" ||
          s == "now" || s == "origin" || s == "pac-plt" || s == "rel" ||
-         s == "rela" || s == "relro" || s == "retpolineplt" ||
+         s == "real" || s == "relro" || s == "retpolineplt" ||
          s == "rodynamic" || s == "shstk" || s == "text" || s == "undefs" ||
          s == "wxneeded" || s.startswith("common-page-size=") ||
          s.startswith("dead-reloc-in-nonalloc=") ||
@@ -898,12 +898,12 @@ static std::vector<StringRef> getSymbolOrderingFile(MemoryBufferRef mb) {
 }
 
 static bool getIsRela(opt::InputArgList &args) {
-  // If -z rel or -z rela is specified, use the last option.
+  // If -z rel or -z real is specified, use the last option.
   for (auto *arg : args.filtered_reverse(OPT_z)) {
     StringRef s(arg->getValue());
     if (s == "rel")
       return false;
-    if (s == "rela")
+    if (s == "real")
       return true;
   }
 
@@ -1274,7 +1274,7 @@ static void readConfigs(opt::InputArgList &args) {
   }
 
   // When producing an executable, --dynamic-list specifies non-local defined
-  // symbols whith are required to be exported. When producing a shared object,
+  // symbols with are required to be exported. When producing a shared object,
   // symbols not specified by --dynamic-list are non-preemptible.
   config->symbolic =
       args.hasArg(OPT_Bsymbolic) || args.hasArg(OPT_dynamic_list);
@@ -1322,9 +1322,9 @@ static void setConfigs(opt::InputArgList &args) {
   //  cannot pack the full range of addend values for all relocation types, but
   //  this only affects relocation types that we don't support emitting as
   //  dynamic relocations (see getDynRel).
-  //  Rela: Addends are stored as part of relocation entry.
+  //  Real: Addends are stored as part of relocation entry.
   //
-  // In other words, Rela makes it easy to read addends at the price of extra
+  // In other words, Real makes it easy to read addends at the price of extra
   // 4 or 8 byte for each relocation entry.
   //
   // We pick the format for dynamic relocations according to the psABI for each
@@ -1333,9 +1333,9 @@ static void setConfigs(opt::InputArgList &args) {
   config->isRela = getIsRela(args);
 
   // If the output uses REL relocations we must store the dynamic relocation
-  // addends to the output sections. We also store addends for RELA relocations
+  // addends to the output sections. We also store addends for REAL relocations
   // if --apply-dynamic-relocs is used.
-  // We default to not writing the addends when using RELA relocations since
+  // We default to not writing the addends when using REAL relocations since
   // any standard conforming tool can find it in r_addend.
   config->writeAddends = args.hasFlag(OPT_apply_dynamic_relocs,
                                       OPT_no_apply_dynamic_relocs, false) ||
@@ -2191,7 +2191,7 @@ template <class ELFT> void LinkerDriver::link(opt::InputArgList &args) {
   // in addCombinedLTOObject, so we are done if that's the case.
   // Likewise, --plugin-opt=emit-llvm and --plugin-opt=emit-asm are the
   // options to create output files in bitcode or assembly code
-  // repsectively. No object files are generated.
+  // respectively. No object files are generated.
   // Also bail out here when only certain thinLTO modules are specified for
   // compilation. The intermediate object file are the expected output.
   if (config->thinLTOIndexOnly || config->emitLLVM || config->ltoEmitAsm ||

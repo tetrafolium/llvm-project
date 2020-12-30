@@ -390,7 +390,7 @@ void PPCExpandISEL::reorganizeBlockLayout(BlockISELList &BIL,
     MBB->removeSuccessor(Successor);
   }
 
-  // Note that this needs to be done *after* transfering the successors from MBB
+  // Note that this needs to be done *after* transferring the successors from MBB
   // to the NewSuccessor block, otherwise these blocks will also be transferred
   // as successors!
   MBB->addSuccessor(IsTrueBlockRequired ? TrueBlock : Successor);

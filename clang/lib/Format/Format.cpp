@@ -1919,7 +1919,7 @@ private:
     return Fixes;
   }
 
-  // Class for less-than inequality comparason for the set `RedundantTokens`.
+  // Class for less-than inequality comparison for the set `RedundantTokens`.
   // We store tokens in the order they appear in the translation unit so that
   // we do not need to sort them in `generateFixes()`.
   struct FormatTokenLess {

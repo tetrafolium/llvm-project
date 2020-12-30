@@ -212,7 +212,7 @@ void ObjFile::parseRelocations(const section_64 &sec,
   for (size_t i = 0; i < relInfos.size(); i++) {
     // Paired relocations serve as Mach-O's method for attaching a
     // supplemental datum to a primary relocation record. ELF does not
-    // need them because the *_RELOC_RELA records contain the extra
+    // need them because the *_RELOC_REAL records contain the extra
     // addend field, vs. *_RELOC_REL which omit the addend.
     //
     // The {X86_64,ARM64}_RELOC_SUBTRACTOR record holds the subtrahend,

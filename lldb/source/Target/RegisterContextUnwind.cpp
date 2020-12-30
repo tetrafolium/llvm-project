@@ -601,7 +601,7 @@ bool RegisterContextUnwind::CheckIfLoopingStack() {
   // trying to unwind the stack. To detect when we have the same CFA value
   // multiple times, we compare the
   // CFA of the current
-  // frame with the 2nd next frame because in some specail case (e.g. signal
+  // frame with the 2nd next frame because in some special case (e.g. signal
   // hanlders, hand written assembly without ABI compliance) we can have 2
   // frames with the same
   // CFA (in theory we

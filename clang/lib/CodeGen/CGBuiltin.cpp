@@ -11377,7 +11377,7 @@ Value *CodeGenFunction::EmitBPFBuiltinExpr(unsigned BuiltinID,
          "unexpected BPF builtin");
 
   // A sequence number, injected into IR builtin functions, to
-  // prevent CSE given the only difference of the funciton
+  // prevent CSE given the only difference of the function
   // may just be the debuginfo metadata.
   static uint32_t BuiltinSeqNum;
 

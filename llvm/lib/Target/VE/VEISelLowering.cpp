@@ -1391,7 +1391,7 @@ SDValue VETargetLowering::lowerVAARG(SDValue Op, SelectionDAG &DAG) const {
   if (VT == MVT::f128) {
     // VE f128 values must be stored with 16 bytes alignment.  We doesn't
     // know the actual alignment of VAList, so we take alignment of it
-    // dyanmically.
+    // dynamically.
     int Align = 16;
     VAList = DAG.getNode(ISD::ADD, DL, PtrVT, VAList,
                          DAG.getConstant(Align - 1, DL, PtrVT));
@@ -1874,7 +1874,7 @@ bool VETargetLowering::hasAndNot(SDValue Y) const {
   return true;
 }
 
-/// \returns the VVP_* SDNode opcode corresponsing to \p OC.
+/// \returns the VVP_* SDNode opcode corresponding to \p OC.
 static Optional<unsigned> getVVPOpcode(unsigned OC) {
   switch (OC) {
 #define ADD_VVP_OP(VVPNAME, SDNAME)                                            \

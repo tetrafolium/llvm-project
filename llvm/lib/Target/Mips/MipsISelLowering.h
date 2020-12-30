@@ -442,7 +442,7 @@ protected:
   // (add (shl (add (shl (add %highest(sym), %higher(sim)), 16), %high(sym)),
   //            16), %lo(%sym))
   //
-  // FIXME: This method is not efficent for (micro)MIPS64R6.
+  // FIXME: This method is not efficient for (micro)MIPS64R6.
   template <class NodeTy>
   SDValue getAddrNonPICSym64(NodeTy *N, const SDLoc &DL, EVT Ty,
                              SelectionDAG &DAG) const {

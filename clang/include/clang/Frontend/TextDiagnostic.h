@@ -40,7 +40,7 @@ public:
 
   ~TextDiagnostic() override;
 
-  /// Print the diagonstic level to a raw_ostream.
+  /// Print the diagnostic level to a raw_ostream.
   ///
   /// This is a static helper that handles colorizing the level and formatting
   /// it into an arbitrary output stream. This is used internally by the

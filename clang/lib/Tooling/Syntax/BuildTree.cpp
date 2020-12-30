@@ -475,7 +475,7 @@ public:
   }
 
   /// Returns true if \p D is the last declarator in a chain and is thus
-  /// reponsible for creating SimpleDeclaration for the whole chain.
+  /// responsible for creating SimpleDeclaration for the whole chain.
   bool isResponsibleForCreatingDeclaration(const Decl *D) const {
     assert((isa<DeclaratorDecl, TypedefNameDecl>(D)) &&
            "only DeclaratorDecl and TypedefNameDecl are supported.");
@@ -1034,7 +1034,7 @@ public:
 
   bool WalkUpFromMemberExpr(MemberExpr *S) {
     // For `MemberExpr` with implicit `this->` we generate a simple
-    // `id-expression` syntax node, beacuse an implicit `member-expression` is
+    // `id-expression` syntax node, because an implicit `member-expression` is
     // syntactically undistinguishable from an `id-expression`
     if (S->isImplicitAccess()) {
       buildIdExpression(S->getQualifierLoc(), S->getTemplateKeywordLoc(),

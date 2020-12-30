@@ -32,7 +32,7 @@ def _load(file_path: str) -> pd.DataFrame:
 
 class Benchmark:
     """
-    Becnhmark class encapsulates one functionality: it runs the analysis
+    Benchmark class encapsulates one functionality: it runs the analysis
     multiple times for the given set of projects and stores results in the
     specified file.
     """

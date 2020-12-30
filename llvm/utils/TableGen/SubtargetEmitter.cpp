@@ -955,7 +955,7 @@ void SubtargetEmitter::ExpandProcResources(RecVec &PRVec,
       for (Record *SubDef = PRDef;
            SubDef->getValueInit("Super")->isComplete();) {
         if (SubDef->isSubClassOf("ProcResGroup")) {
-          // Disallow this for simplicitly.
+          // Disallow this for simplicity.
           PrintFatalError(SubDef->getLoc(), "Processor resource group "
                                             " cannot be a super resources.");
         }
@@ -1550,7 +1550,7 @@ static void collectVariantClasses(const CodeGenSchedModels &SchedModels,
 static void collectProcessorIndices(const CodeGenSchedClass &SC,
                                     IdxVec &ProcIndices) {
   // A variant scheduling class may define transitions for multiple
-  // processors.  This function identifies wich processors are associated with
+  // processors.  This function identifies which processors are associated with
   // transition rules specified by variant class `SC`.
   for (const CodeGenSchedTransition &T : SC.Transitions) {
     IdxVec PI;

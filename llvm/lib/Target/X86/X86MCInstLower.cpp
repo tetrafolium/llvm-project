@@ -1785,7 +1785,7 @@ void X86AsmPrinter::LowerPATCHABLE_OP(const MachineInstr &MI,
     if (MinSize == 2 && Subtarget->is32Bit() &&
         Subtarget->isTargetWindowsMSVC() &&
         (Subtarget->getCPU().empty() || Subtarget->getCPU() == "pentium3")) {
-      // For compatibilty reasons, when targetting MSVC, is is important to
+      // For compatibility reasons, when targeting MSVC, is is important to
       // generate a 'legacy' NOP in the form of a 8B FF MOV EDI, EDI. Some tools
       // rely specifically on this pattern to be able to patch a function.
       // This is only for 32-bit targets, when using /arch:IA32 or /arch:SSE.
@@ -2330,7 +2330,7 @@ static void printConstant(const APInt &Val, raw_ostream &CS) {
 
 static void printConstant(const APFloat &Flt, raw_ostream &CS) {
   SmallString<32> Str;
-  // Force scientific notation to distinquish from integers.
+  // Force scientific notation to distinguish from integers.
   Flt.toString(Str, 0, 0);
   CS << Str;
 }

@@ -650,7 +650,7 @@ bool DwarfLinkerForBinary::AddressManager::hasValidRelocationAt(
 }
 
 /// Get the starting and ending (exclusive) offset for the
-/// attribute with index \p Idx descibed by \p Abbrev. \p Offset is
+/// attribute with index \p Idx described by \p Abbrev. \p Offset is
 /// supposed to point to the position of the first attribute described
 /// by \p Abbrev.
 /// \return [StartOffset, EndOffset) as a pair.

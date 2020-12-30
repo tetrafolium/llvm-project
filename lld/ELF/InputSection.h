@@ -177,10 +177,10 @@ public:
         numRelocations);
   }
 
-  template <class ELFT> ArrayRef<typename ELFT::Rela> relas() const {
+  template <class ELFT> ArrayRef<typename ELFT::Real> relas() const {
     assert(areRelocsRela);
     return llvm::makeArrayRef(
-        static_cast<const typename ELFT::Rela *>(firstRelocation),
+        static_cast<const typename ELFT::Real *>(firstRelocation),
         numRelocations);
   }
 

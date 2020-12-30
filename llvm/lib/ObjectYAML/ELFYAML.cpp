@@ -467,7 +467,7 @@ void ScalarEnumerationTraits<ELFYAML::ELF_SHT>::enumeration(
   ECase(SHT_SYMTAB);
   // FIXME: Issue a diagnostic with this information.
   ECase(SHT_STRTAB);
-  ECase(SHT_RELA);
+  ECase(SHT_REAL);
   ECase(SHT_HASH);
   ECase(SHT_DYNAMIC);
   ECase(SHT_NOTE);
@@ -482,7 +482,7 @@ void ScalarEnumerationTraits<ELFYAML::ELF_SHT>::enumeration(
   ECase(SHT_SYMTAB_SHNDX);
   ECase(SHT_RELR);
   ECase(SHT_ANDROID_REL);
-  ECase(SHT_ANDROID_RELA);
+  ECase(SHT_ANDROID_REAL);
   ECase(SHT_ANDROID_RELR);
   ECase(SHT_LLVM_ODRTAB);
   ECase(SHT_LLVM_LINKER_OPTIONS);
@@ -1342,7 +1342,7 @@ void MappingTraits<std::unique_ptr<ELFYAML::Chunk>>::mapping(
     sectionMapping(IO, *cast<ELFYAML::DynamicSection>(Section.get()));
     break;
   case ELF::SHT_REL:
-  case ELF::SHT_RELA:
+  case ELF::SHT_REAL:
     if (!IO.outputting())
       Section.reset(new ELFYAML::RelocationSection());
     sectionMapping(IO, *cast<ELFYAML::RelocationSection>(Section.get()));

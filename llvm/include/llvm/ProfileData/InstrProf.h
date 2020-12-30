@@ -1005,7 +1005,7 @@ struct Summary {
     uint64_t Cutoff; ///< The required percentile of total execution count.
     uint64_t
         MinBlockCount;  ///< The minimum execution count for this percentile.
-    uint64_t NumBlocks; ///< Number of blocks >= the minumum execution count.
+    uint64_t NumBlocks; ///< Number of blocks >= the minimum execution count.
   };
   // The field kind enumerator to assigned value mapping should remain
   // unchanged  when a new kind is added or an old kind gets deleted in

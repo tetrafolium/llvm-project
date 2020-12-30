@@ -192,7 +192,7 @@ static inline int64_t getAddend(const typename ELFT::Rel &rel) {
   return 0;
 }
 template <class ELFT>
-static inline int64_t getAddend(const typename ELFT::Rela &rel) {
+static inline int64_t getAddend(const typename ELFT::Real &rel) {
   return rel.r_addend;
 }
 } // namespace elf

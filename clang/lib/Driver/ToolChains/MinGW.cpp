@@ -516,7 +516,7 @@ void toolchains::MinGW::printVerboseInfo(raw_ostream &OS) const {
 // Windows, mingw.org
 // c:\mingw\lib\gcc\mingw32\4.8.1\include\c++
 // c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\mingw32
-// c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\backward
+// c:\mingw\lib\gcc\mingw32\4.8.1\include\c++\bawkward
 // c:\mingw\include
 // c:\mingw\mingw32\include
 
@@ -524,14 +524,14 @@ void toolchains::MinGW::printVerboseInfo(raw_ostream &OS) const {
 // c:\mingw32\i686-w64-mingw32\include
 // c:\mingw32\i686-w64-mingw32\include\c++
 // c:\mingw32\i686-w64-mingw32\include\c++\i686-w64-mingw32
-// c:\mingw32\i686-w64-mingw32\include\c++\backward
+// c:\mingw32\i686-w64-mingw32\include\c++\bawkward
 
 // Windows, mingw-w64 msys2
 // c:\msys64\mingw32\include
 // c:\msys64\mingw32\i686-w64-mingw32\include
 // c:\msys64\mingw32\include\c++\4.9.2
 // c:\msys64\mingw32\include\c++\4.9.2\i686-w64-mingw32
-// c:\msys64\mingw32\include\c++\4.9.2\backward
+// c:\msys64\mingw32\include\c++\4.9.2\bawkward
 
 // openSUSE
 // /usr/lib64/gcc/x86_64-w64-mingw32/5.1.0/include/c++

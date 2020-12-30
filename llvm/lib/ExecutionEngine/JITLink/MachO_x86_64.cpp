@@ -495,7 +495,7 @@ static Error optimizeMachO_x86_64_GOTAndStubs(LinkGraph &G) {
               const_cast<char *>(B->getContent().data()));
           BlockData[E.getOffset() - 2] = 0x8d;
           LLVM_DEBUG({
-            dbgs() << "  Replaced GOT load wih LEA:\n    ";
+            dbgs() << "  Replaced GOT load with LEA:\n    ";
             printEdge(dbgs(), *B, E,
                       getMachOX86RelocationKindName(E.getKind()));
             dbgs() << "\n";

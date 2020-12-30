@@ -105,8 +105,8 @@ StringRef elf::getOutputSectionName(const InputSectionBase *s) {
   if (auto *isec = dyn_cast<InputSection>(s)) {
     if (InputSectionBase *rel = isec->getRelocatedSection()) {
       OutputSection *out = rel->getOutputSection();
-      if (s->type == SHT_RELA)
-        return saver.save(".rela" + out->name);
+      if (s->type == SHT_REAL)
+        return saver.save(".real" + out->name);
       return saver.save(".rel" + out->name);
     }
   }
@@ -691,8 +691,8 @@ template <class ELFT> static void markUsedLocalSymbols() {
         continue;
       if (isec->type == SHT_REL)
         markUsedLocalSymbolsImpl(f, isec->getDataAs<typename ELFT::Rel>());
-      else if (isec->type == SHT_RELA)
-        markUsedLocalSymbolsImpl(f, isec->getDataAs<typename ELFT::Rela>());
+      else if (isec->type == SHT_REAL)
+        markUsedLocalSymbolsImpl(f, isec->getDataAs<typename ELFT::Real>());
     }
   }
 }
@@ -805,7 +805,7 @@ template <class ELFT> void Writer<ELFT>::addSectionSymbols() {
     InputSectionBase *isec = cast<InputSectionDescription>(*i)->sections[0];
 
     // Relocations are not using REL[A] section symbols.
-    if (isec->type == SHT_REL || isec->type == SHT_RELA)
+    if (isec->type == SHT_REL || isec->type == SHT_REAL)
       continue;
 
     // Unlike other synthetic sections, mergeable output sections contain data
@@ -1089,16 +1089,16 @@ template <class ELFT> void Writer<ELFT>::addRelIpltSymbols() {
   if (config->relocatable || needsInterpSection())
     return;
 
-  // By default, __rela_iplt_{start,end} belong to a dummy section 0
+  // By default, __real_iplt_{start,end} belong to a dummy section 0
   // because .rela.plt might be empty and thus removed from output.
   // We'll override Out::elfHeader with In.relaIplt later when we are
   // sure that .rela.plt exists in output.
   ElfSym::relaIpltStart = addOptionalRegular(
-      config->isRela ? "__rela_iplt_start" : "__rel_iplt_start", Out::elfHeader,
+      config->isRela ? "__real_iplt_start" : "__rel_iplt_start", Out::elfHeader,
       0, STV_HIDDEN, STB_WEAK);
 
   ElfSym::relaIpltEnd =
-      addOptionalRegular(config->isRela ? "__rela_iplt_end" : "__rel_iplt_end",
+      addOptionalRegular(config->isRela ? "__real_iplt_end" : "__rel_iplt_end",
                          Out::elfHeader, 0, STV_HIDDEN, STB_WEAK);
 }
 
@@ -1138,7 +1138,7 @@ template <class ELFT> void Writer<ELFT>::setReservedSymbolSections() {
     ElfSym::globalOffsetTable->section = gotSection;
   }
 
-  // .rela_iplt_{start,end} mark the start and the end of in.relaIplt.
+  // .real_iplt_{start,end} mark the start and the end of in.relaIplt.
   if (ElfSym::relaIpltStart && in.relaIplt->isNeeded()) {
     ElfSym::relaIpltStart->section = in.relaIplt;
     ElfSym::relaIpltEnd->section = in.relaIplt;
@@ -1446,7 +1446,7 @@ static void sortSection(OutputSection *sec,
 
   // IRelative relocations that usually live in the .rel[a].dyn section should
   // be proccessed last by the dynamic loader. To achieve that we add synthetic
-  // sections in the required order from the begining so that the in.relaIplt
+  // sections in the required order from the beginning so that the in.relaIplt
   // section is placed last in an output section. Here we just do not apply
   // sorting for an output section which holds the in.relaIplt section.
   if (in.relaIplt->getParent() == sec)
@@ -1768,7 +1768,7 @@ template <class ELFT> void Writer<ELFT>::finalizeAddressDependentContent() {
              Twine(os->alignment) + ")");
 }
 
-// If Input Sections have been shrinked (basic block sections) then
+// If Input Sections have been shrunk (basic block sections) then
 // update symbol values and sizes associated with these sections.  With basic
 // block sections, input sections can shrink when the jump instructions at
 // the end of the section are relaxed.
@@ -2941,11 +2941,11 @@ template <class ELFT> void Writer<ELFT>::writeSections() {
   // ELf_Rel targets we might find out that we need to modify the relocated
   // section while doing it.
   for (OutputSection *sec : outputSections)
-    if (sec->type == SHT_REL || sec->type == SHT_RELA)
+    if (sec->type == SHT_REL || sec->type == SHT_REAL)
       sec->writeTo<ELFT>(Out::bufferStart + sec->offset);
 
   for (OutputSection *sec : outputSections)
-    if (sec->type != SHT_REL && sec->type != SHT_RELA)
+    if (sec->type != SHT_REL && sec->type != SHT_REAL)
       sec->writeTo<ELFT>(Out::bufferStart + sec->offset);
 }
 

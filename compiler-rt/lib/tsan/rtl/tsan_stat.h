@@ -20,7 +20,7 @@ enum StatType {
   StatMop,
   StatMopRead,
   StatMopWrite,
-  StatMop1,  // These must be consequtive.
+  StatMop1,  // These must be consecutive.
   StatMop2,
   StatMop4,
   StatMop8,

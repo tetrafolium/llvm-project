@@ -7146,7 +7146,7 @@ static void appendSelectorForMessageRefTable(std::string &buffer,
 /// struct as the second parameter.  The runtime determines whether
 /// the selector is currently emitted using vtable dispatch; if so, it
 /// substitutes a stub function which simply tail-calls through the
-/// appropriate vtable slot, and if not, it substitues a stub function
+/// appropriate vtable slot, and if not, it substitutes a stub function
 /// which tail-calls objc_msgSend.  Both stubs adjust the selector
 /// argument to correctly point to the selector.
 RValue CGObjCNonFragileABIMac::EmitVTableMessageSend(

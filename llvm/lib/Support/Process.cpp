@@ -80,7 +80,7 @@ static const char colorcodes[2][2][8][10] = {
     {ALLCOLORS("3", ""), ALLCOLORS("3", "1;")},
     {ALLCOLORS("4", ""), ALLCOLORS("4", "1;")}};
 
-// A CMake option controls wheter we emit core dumps by default. An application
+// A CMake option controls whether we emit core dumps by default. An application
 // may disable core dumps by calling Process::PreventCoreFiles().
 static bool coreFilesPrevented = !LLVM_ENABLE_CRASH_DUMPS;
 

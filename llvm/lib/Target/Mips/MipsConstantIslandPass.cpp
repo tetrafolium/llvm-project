@@ -1324,7 +1324,7 @@ bool MipsConstantIslands::handleConstantPoolUser(unsigned CPUserIndex) {
     NewMBB = &*++WaterBB->getIterator();
   } else {
     // No water found.
-    // we first see if a longer form of the instrucion could have reached
+    // we first see if a longer form of the instruction could have reached
     // the constant. in that case we won't bother to split
     if (!NoLoadRelaxation) {
       result = findLongFormInRangeCPEntry(U, UserOffset);

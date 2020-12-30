@@ -718,8 +718,8 @@ void OrcMips64::writeResolverCode(char *ResolverWorkingMem,
       0xffbf00c8, // 0x68: sd ra,200(sp)
 
       // JIT re-entry ctx addr.
-      0x00000000, // 0x6c: lui $a0,heighest(ctx)
-      0x00000000, // 0x70: daddiu $a0,$a0,heigher(ctx)
+      0x00000000, // 0x6c: lui $a0,heights(ctx)
+      0x00000000, // 0x70: daddiu $a0,$a0,higher(ctx)
       0x00000000, // 0x74: dsll $a0,$a0,16
       0x00000000, // 0x78: daddiu $a0,$a0,hi(ctx)
       0x00000000, // 0x7c: dsll $a0,$a0,16

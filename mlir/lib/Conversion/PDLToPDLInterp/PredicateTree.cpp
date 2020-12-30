@@ -187,7 +187,7 @@ namespace {
 
 /// This class represents a specific predicate applied to a position, and
 /// provides hashing and ordering operators. This class allows for computing a
-/// frequence sum and ordering predicates based on a cost model.
+/// frequencies sum and ordering predicates based on a cost model.
 struct OrderedPredicate {
   OrderedPredicate(const std::pair<Position *, Qualifier *> &ip)
       : position(ip.first), question(ip.second) {}

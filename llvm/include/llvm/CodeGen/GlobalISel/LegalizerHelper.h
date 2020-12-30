@@ -80,7 +80,7 @@ public:
   /// registers as \p MI.
   LegalizeResult legalizeInstrStep(MachineInstr &MI);
 
-  /// Legalize an instruction by emiting a runtime library call instead.
+  /// Legalize an instruction by emitting a runtime library call instead.
   LegalizeResult libcall(MachineInstr &MI);
 
   /// Legalize an instruction by reducing the width of the underlying scalar

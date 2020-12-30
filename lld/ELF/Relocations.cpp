@@ -656,7 +656,7 @@ static int64_t computeMipsAddend(const RelTy &rel, const RelTy *end,
   return 0;
 }
 
-// Returns an addend of a given relocation. If it is RELA, an addend
+// Returns an addend of a given relocation. If it is REAL, an addend
 // is in a relocation itself. If it is REL, we need to read it from an
 // input section.
 template <class ELFT, class RelTy>
@@ -1486,7 +1486,7 @@ static void scanReloc(InputSectionBase &sec, OffsetGetter &getOffset, RelTy *&i,
     //   not require any form of dynamic relocation. To handle these relocations
     //   correctly, the IRELATIVE relocations are stored in an array which a
     //   statically linked executable's startup code must enumerate using the
-    //   linker-defined symbols __rela?_iplt_{start,end}.
+    //   linker-defined symbols __real?_iplt_{start,end}.
     if (!sym.isInPlt()) {
       // Create PLT and GOTPLT slots for the symbol.
       sym.isInIplt = true;
@@ -1646,7 +1646,7 @@ static void forEachInputSectionDescription(
 // Thunk Implementation
 //
 // Thunks (sometimes called stubs, veneers or branch islands) are small pieces
-// of code that the linker inserts inbetween a caller and a callee. The thunks
+// of code that the linker inserts between a caller and a callee. The thunks
 // are added at link time rather than compile time as the decision on whether
 // a thunk is needed, such as the caller and callee being out of range, can only
 // be made at link time.

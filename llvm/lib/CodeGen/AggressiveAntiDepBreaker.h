@@ -135,7 +135,7 @@ public:
   /// Initialize anti-dep breaking for a new basic block.
   void StartBlock(MachineBasicBlock *BB) override;
 
-  /// Identifiy anti-dependencies along the critical path
+  /// Identify anti-dependencies along the critical path
   /// of the ScheduleDAG and break them by renaming registers.
   unsigned BreakAntiDependencies(const std::vector<SUnit> &SUnits,
                                  MachineBasicBlock::iterator Begin,

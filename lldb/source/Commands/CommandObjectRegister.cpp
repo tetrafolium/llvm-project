@@ -211,7 +211,7 @@ protected:
       } else {
         for (auto &entry : command) {
           // in most LLDB commands we accept $rbx as the name for register RBX
-          // - and here we would reject it and non-existant. we should be more
+          // - and here we would reject it and non-existent. we should be more
           // consistent towards the user and allow them to say reg read $rbx -
           // internally, however, we should be strict and not allow ourselves
           // to call our registers $rbx in our own API
@@ -359,7 +359,7 @@ protected:
       auto value_str = command[1].ref();
 
       // in most LLDB commands we accept $rbx as the name for register RBX -
-      // and here we would reject it and non-existant. we should be more
+      // and here we would reject it and non-existent. we should be more
       // consistent towards the user and allow them to say reg write $rbx -
       // internally, however, we should be strict and not allow ourselves to
       // call our registers $rbx in our own API

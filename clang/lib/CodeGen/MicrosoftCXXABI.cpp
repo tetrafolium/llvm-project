@@ -2905,7 +2905,7 @@ llvm::Value *MicrosoftCXXABI::EmitMemberPointerComparison(
   }
 
   // Combine the comparison of the first field, which must always be true for
-  // this comparison to succeeed.
+  // this comparison to succeed.
   return Builder.CreateBinOp(And, Res, Cmp0, "memptr.cmp");
 }
 

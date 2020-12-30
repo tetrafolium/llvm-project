@@ -1045,7 +1045,7 @@ void SIRegisterInfo::buildSGPRSpillLoadStore(
          SuperReg != AMDGPU::EXEC && "exec should never spill");
 
   // On Wave32 only handle EXEC_LO.
-  // On Wave64 only update EXEC_HI if there is sufficent space for a copy.
+  // On Wave64 only update EXEC_HI if there is sufficient space for a copy.
   bool OnlyExecLo = isWave32 || NumSubRegs == 1 || SuperReg == AMDGPU::EXEC_HI;
 
   unsigned ExecMovOpc = OnlyExecLo ? AMDGPU::S_MOV_B32 : AMDGPU::S_MOV_B64;

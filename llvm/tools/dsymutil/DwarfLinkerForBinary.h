@@ -78,7 +78,7 @@ private:
     std::vector<ValidReloc> ValidRelocs;
 
     /// Index into ValidRelocs of the next relocation to consider. As we walk
-    /// the DIEs in acsending file offset and as ValidRelocs is sorted by file
+    /// the DIEs in ascending file offset and as ValidRelocs is sorted by file
     /// offset, keeping this index up to date is all we have to do to have a
     /// cheap lookup during the root DIE selection and during DIE cloning.
     unsigned NextValidReloc = 0;

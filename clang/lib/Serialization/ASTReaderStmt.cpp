@@ -645,7 +645,7 @@ void ASTStmtReader::VisitStringLiteral(StringLiteral *E) {
   E->StringLiteralBits.IsPascal = Record.readInt();
 
   // The character width is originally computed via mapCharByteWidth.
-  // Check that the deserialized character width is consistant with the result
+  // Check that the deserialized character width is consistent with the result
   // of calling mapCharByteWidth.
   assert((CharByteWidth ==
           StringLiteral::mapCharByteWidth(Record.getContext().getTargetInfo(),

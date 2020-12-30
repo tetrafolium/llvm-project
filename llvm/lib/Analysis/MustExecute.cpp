@@ -585,7 +585,7 @@ MustBeExecutedContextExplorer::findForwardJoinPoint(const BasicBlock *InitBB) {
   // the adjacent blocks to the JoinBB, looking at all intermediate blocks.
 
   // If we know the function is "will-return" and "no-throw" there is no need
-  // for futher checks.
+  // for further checks.
   if (!F.hasFnAttribute(Attribute::WillReturn) || !F.doesNotThrow()) {
 
     auto BlockTransfersExecutionToSuccessor = [](const BasicBlock *BB) {
@@ -720,7 +720,7 @@ MustBeExecutedContextExplorer::getMustBeExecutedNextInstruction(
     return nullptr;
 
   // If this is not a terminator we know that there is a single instruction
-  // after this one that is executed next if control is transfered. If not,
+  // after this one that is executed next if control is transferred. If not,
   // we can try to go back to a call site we entered earlier. If none exists, we
   // do not know any instruction that has to be executd next.
   if (!PP->isTerminator()) {

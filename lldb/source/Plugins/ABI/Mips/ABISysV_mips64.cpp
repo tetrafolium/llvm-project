@@ -922,7 +922,7 @@ ValueObjectSP ABISysV_mips64::GetReturnValueObjectImpl(
       // True if return values are in r3 register.
       bool use_r3 = false;
       // True if the result is copied into our data buffer
-      bool sucess = false;
+      bool success = false;
       std::string name;
       bool is_complex;
       uint32_t count;
@@ -1097,7 +1097,7 @@ ValueObjectSP ABISysV_mips64::GetReturnValueObjectImpl(
             error);
         if (bytes_copied != r2_info->byte_size)
           return return_valobj_sp;
-        sucess = true;
+        success = true;
       }
       if (use_r3) {
         reg_ctx->ReadRegister(r3_info, r3_value);
@@ -1107,9 +1107,9 @@ ValueObjectSP ABISysV_mips64::GetReturnValueObjectImpl(
 
         if (bytes_copied != r3_info->byte_size)
           return return_valobj_sp;
-        sucess = true;
+        success = true;
       }
-      if (sucess) {
+      if (success) {
         // The result is in our data buffer.  Create a variable object out of
         // it
         return_valobj_sp = ValueObjectConstResult::Create(

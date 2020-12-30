@@ -362,7 +362,7 @@ class VariablePattern {
   };
 
   /// All occurrences of referenced variables in the order of appearance.
-  std::vector<VariableOccurence> Occurences;
+  std::vector<VariableOccurence> Occurrences;
   /// List of referenced variables in the order of appearance.
   /// Every item in this list is unique.
   std::vector<const VarDecl *> Variables;

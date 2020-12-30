@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 //
 // This pass introduces separate 'alloca' instructions for read-only
-// by-reference function parameters to indicate that these paramters are
+// by-reference function parameters to indicate that these parameters are
 // read-only. After this transformation -mem2reg has more freedom to promote
 // variables to registers, which allows SCEV to work in more cases.
 //

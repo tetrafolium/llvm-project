@@ -193,7 +193,7 @@ int main(int argc, const char **argv) {
 
   // Fail early if an invalid format was provided.
   std::string Format = getFormatString();
-  llvm::outs() << "Emiting docs in " << Format << " format.\n";
+  llvm::outs() << "Emitting docs in " << Format << " format.\n";
   auto G = doc::findGeneratorByName(Format);
   if (!G) {
     llvm::errs() << toString(G.takeError()) << "\n";

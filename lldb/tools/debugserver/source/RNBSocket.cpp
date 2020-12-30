@@ -120,7 +120,7 @@ rnb_err_t RNBSocket::Listen(const char *listen_host, uint16_t port,
     // We were asked to listen on port zero which means we must now read the
     // actual port that was given to us as port zero is a special code for "find
     // an open port for me". This will only execute on the first socket created,
-    // subesquent sockets will reuse this port number.
+    // subsequent sockets will reuse this port number.
     if (port == 0) {
       socklen_t sa_len = address.GetLength();
       if (getsockname(sock_fd, &address.sockaddr(), &sa_len) == 0)

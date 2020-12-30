@@ -108,10 +108,10 @@ Error COFFReader::readSymbols(Object &Obj, bool IsBigObj) const {
     ArrayRef<uint8_t> AuxData = COFFObj.getSymbolAuxData(SymRef);
     size_t SymSize = IsBigObj ? sizeof(coff_symbol32) : sizeof(coff_symbol16);
     assert(AuxData.size() == SymSize * SymRef.getNumberOfAuxSymbols());
-    // The auxillary symbols are structs of sizeof(coff_symbol16) each.
+    // The auxiliary symbols are structs of sizeof(coff_symbol16) each.
     // In the big object format (where symbols are coff_symbol32), each
-    // auxillary symbol is padded with 2 bytes at the end. Copy each
-    // auxillary symbol to the Sym.AuxData vector. For file symbols,
+    // auxiliary symbol is padded with 2 bytes at the end. Copy each
+    // auxiliary symbol to the Sym.AuxData vector. For file symbols,
     // the whole range of aux symbols are interpreted as one null padded
     // string instead.
     if (SymRef.isFileRecord())

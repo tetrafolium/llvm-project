@@ -62,7 +62,7 @@ tryToFindPtrOrigin(const clang::Expr *E, bool StopAtFirstRefCountedObj);
 /// this-pointer. The logic relies on the set of recursive rules we enforce for
 /// WebKit codebase.
 ///
-/// \returns Whether \p E is a safe call arugment.
+/// \returns Whether \p E is a safe call argument.
 bool isASafeCallArg(const clang::Expr *E);
 
 /// \returns name of AST node or empty string.

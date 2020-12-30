@@ -105,7 +105,7 @@ class Scheduler : public HardwareUnit {
   // the PendingSet to the ReadySet.
   //
   // An Instruction is moved from the ReadySet to the `IssuedSet` when it starts
-  // exection. This event also causes an instruction state transition (i.e. from
+  // execution. This event also causes an instruction state transition (i.e. from
   // state IS_READY, to state IS_EXECUTING). An Instruction leaves the IssuedSet
   // only when it reaches the write-back stage.
   std::vector<InstRef> WaitSet;

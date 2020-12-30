@@ -48,7 +48,7 @@ StringRef recordToString(BlockVerifier::State R) {
   case BlockVerifier::State::Unknown:
     return "Unknown";
   }
-  llvm_unreachable("Unkown state!");
+  llvm_unreachable("Unknown state!");
 }
 
 struct Transition {

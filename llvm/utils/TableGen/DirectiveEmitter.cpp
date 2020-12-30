@@ -162,7 +162,7 @@ bool HasDuplicateClausesInDirectives(const std::vector<Record *> &Directives) {
   return HasDuplicate;
 }
 
-// Check consitency of records. Return true if an error has been detected.
+// Check consistency of records. Return true if an error has been detected.
 // Return false if the records are valid.
 bool DirectiveLanguage::HasValidityErrors() const {
   if (getDirectiveLanguages().size() != 1) {

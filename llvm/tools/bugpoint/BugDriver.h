@@ -220,7 +220,7 @@ public:
                                       ArrayRef<std::string> ExtraArgs = {});
 
   /// runPasses - Run the specified passes on Program, outputting a bitcode
-  /// file and writting the filename into OutputFile if successful.  If the
+  /// file and writing the filename into OutputFile if successful.  If the
   /// optimizations fail for some reason (optimizer crashes), return true,
   /// otherwise return false.  If DeleteOutput is set to true, the bitcode is
   /// deleted on success, and the filename string is undefined.  This prints to

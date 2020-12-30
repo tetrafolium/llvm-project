@@ -598,7 +598,7 @@ void SSACCmpConv::convert(SmallVectorImpl<MachineBasicBlock *> &RemovedBlocks) {
                              Head2Tail + Head2CmpBB * CmpBB2Tail);
 
     // We will transfer successors of CmpBB to Head in a moment without
-    // normalizing the successor probabilities. Set the successor probabilites
+    // normalizing the successor probabilities. Set the successor probabilities
     // before doing so.
     //
     // Pr(I|Head) = Pr(CmpBB|Head) * Pr(I|CmpBB).

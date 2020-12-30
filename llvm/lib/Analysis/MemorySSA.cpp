@@ -385,7 +385,7 @@ static bool isUseTriviallyOptimizableToLiveOnEntry(AliasAnalysisType &AA,
 }
 
 /// Verifies that `Start` is clobbered by `ClobberAt`, and that nothing
-/// inbetween `Start` and `ClobberAt` can clobbers `Start`.
+/// between `Start` and `ClobberAt` can clobbers `Start`.
 ///
 /// This is meant to be as simple and self-contained as possible. Because it
 /// uses no cache, etc., it can be relatively expensive.
@@ -1259,7 +1259,7 @@ MemorySSA::MemorySSA(Function &Func, AliasAnalysis *AA, DominatorTree *DT)
   assert(AA && "No alias analysis?");
   BatchAAResults BatchAA(*AA);
   buildMemorySSA(BatchAA);
-  // Intentionally leave AA to nullptr while building so we don't accidently
+  // Intentionally leave AA to nullptr while building so we don't accidentally
   // use non-batch AliasAnalysis.
   this->AA = AA;
   // Also create the walker here.

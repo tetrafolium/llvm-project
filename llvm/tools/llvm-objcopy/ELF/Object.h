@@ -130,7 +130,7 @@ template <class ELFT> class ELFSectionWriter : public SectionWriter {
 private:
   using Elf_Word = typename ELFT::Word;
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
   using Elf_Sym = typename ELFT::Sym;
 
 public:
@@ -149,7 +149,7 @@ public:
 template <class ELFT> class ELFSectionSizer : public MutableSectionVisitor {
 private:
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
   using Elf_Sym = typename ELFT::Sym;
   using Elf_Word = typename ELFT::Word;
   using Elf_Xword = typename ELFT::Xword;
@@ -743,7 +743,7 @@ public:
   void setSection(SectionBase *Sec) { SecToApplyRel = Sec; }
 
   static bool classof(const SectionBase *S) {
-    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_RELA;
+    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_REAL;
   }
 };
 
@@ -784,7 +784,7 @@ public:
   static bool classof(const SectionBase *S) {
     if (S->OriginalFlags & ELF::SHF_ALLOC)
       return false;
-    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_RELA;
+    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_REAL;
   }
 };
 
@@ -864,7 +864,7 @@ public:
   static bool classof(const SectionBase *S) {
     if (!(S->OriginalFlags & ELF::SHF_ALLOC))
       return false;
-    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_RELA;
+    return S->OriginalType == ELF::SHT_REL || S->OriginalType == ELF::SHT_REAL;
   }
 };
 

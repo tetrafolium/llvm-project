@@ -1680,7 +1680,7 @@ bool X86AsmParser::VerifyAndAdjustOperands(OperandVector &OrigOperands,
         unsigned OrigReg = OrigOp.Mem.BaseReg;
         unsigned FinalReg = FinalOp.Mem.BaseReg;
 
-        // If we've already encounterd a register class, make sure all register
+        // If we've already encountered a register class, make sure all register
         // bases are of the same register class
         if (RegClassID != -1 &&
             !X86MCRegisterClasses[RegClassID].contains(OrigReg)) {

@@ -69,7 +69,7 @@ private:
   std::vector<std::string> RocmDeviceLibPathArg;
   // HIP version specified by --hip-version.
   StringRef HIPVersionArg;
-  // Wheter -nogpulib is specified.
+  // Whether -nogpulib is specified.
   bool NoBuiltinLibs = false;
 
   // Paths

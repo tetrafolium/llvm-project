@@ -47,7 +47,7 @@ class BPFAsmParser : public MCTargetAsmParser {
 
   bool ParseDirective(AsmToken DirectiveID) override;
 
-  // "=" is used as assignment operator for assembly statment, so can't be used
+  // "=" is used as assignment operator for assembly statement, so can't be used
   // for symbol assignment.
   bool equalIsAsmAssignment() override { return false; }
   // "*" is used for dereferencing memory that it will be the start of
@@ -221,7 +221,7 @@ public:
     return Op;
   }
 
-  // Identifiers that can be used at the start of a statment.
+  // Identifiers that can be used at the start of a statement.
   static bool isValidIdAtStart(StringRef Name) {
     return StringSwitch<bool>(Name.lower())
         .Case("if", true)
@@ -234,7 +234,7 @@ public:
         .Default(false);
   }
 
-  // Identifiers that can be used in the middle of a statment.
+  // Identifiers that can be used in the middle of a statement.
   static bool isValidIdInMiddle(StringRef Name) {
     return StringSwitch<bool>(Name.lower())
         .Case("u64", true)

@@ -878,7 +878,7 @@ NativeProcessNetBSD::GetAuxvData() const {
    * ELF_AUX_ENTRIES is currently restricted to kernel
    * (<sys/exec_elf.h> r. 1.155 specifies 15)
    *
-   * ptrace(2) returns the whole AUXV including extra fiels after AT_NULL this
+   * ptrace(2) returns the whole AUXV including extra fields after AT_NULL this
    * information isn't needed.
    */
   size_t auxv_size = 100 * sizeof(AuxInfo);

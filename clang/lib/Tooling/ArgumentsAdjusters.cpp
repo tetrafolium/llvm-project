@@ -52,7 +52,7 @@ ArgumentsAdjuster getClangSyntaxOnlyAdjuster() {
       if (!Arg.startswith("-fcolor-diagnostics") &&
           !Arg.startswith("-fdiagnostics-color"))
         AdjustedArgs.push_back(Args[i]);
-      // If we strip a color option, make sure we strip any preceeding `-Xclang`
+      // If we strip a color option, make sure we strip any preceding `-Xclang`
       // option as well.
       // FIXME: This should be added to most argument adjusters!
       else if (!AdjustedArgs.empty() && AdjustedArgs.back() == "-Xclang")

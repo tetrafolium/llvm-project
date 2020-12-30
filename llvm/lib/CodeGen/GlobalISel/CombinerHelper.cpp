@@ -697,7 +697,7 @@ bool CombinerHelper::findPostIndexCandidate(MachineInstr &MI, Register &Addr,
     return false;
 
   LLVM_DEBUG(dbgs() << "Searching for post-indexing opportunity for: " << MI);
-  // FIXME: The following use traversal needs a bail out for patholigical cases.
+  // FIXME: The following use traversal needs a bail out for pathological cases.
   for (auto &Use : MRI.use_nodbg_instructions(Base)) {
     if (Use.getOpcode() != TargetOpcode::G_PTR_ADD)
       continue;

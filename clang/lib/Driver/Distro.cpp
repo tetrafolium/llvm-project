@@ -95,7 +95,7 @@ static Distro::DistroType DetectLsbRelease(llvm::vfs::FileSystem &VFS) {
 static Distro::DistroType DetectDistro(llvm::vfs::FileSystem &VFS) {
   Distro::DistroType Version = Distro::UnknownDistro;
 
-  // Newer freedesktop.org's compilant systemd-based systems
+  // Newer freedesktop.org's compliant systemd-based systems
   // should provide /etc/os-release or /usr/lib/os-release.
   Version = DetectOsRelease(VFS);
   if (Version != Distro::UnknownDistro)

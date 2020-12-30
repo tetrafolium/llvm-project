@@ -463,7 +463,7 @@ public:
 template <class ELFT> class DynamicSection final : public SyntheticSection {
   using Elf_Dyn = typename ELFT::Dyn;
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
   using Elf_Relr = typename ELFT::Relr;
   using Elf_Shdr = typename ELFT::Shdr;
   using Elf_Sym = typename ELFT::Sym;
@@ -515,7 +515,7 @@ protected:
 template <class ELFT>
 class RelocationSection final : public RelocationBaseSection {
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
 
 public:
   RelocationSection(StringRef name, bool sort);
@@ -528,7 +528,7 @@ private:
 template <class ELFT>
 class AndroidPackedRelocationSection final : public RelocationBaseSection {
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
 
 public:
   AndroidPackedRelocationSection(StringRef name);

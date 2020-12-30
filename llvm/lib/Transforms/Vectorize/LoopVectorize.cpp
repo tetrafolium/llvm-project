@@ -337,7 +337,7 @@ cl::opt<bool> EnableVPlanPredication(
              "support for outer loop vectorization."));
 
 // This flag enables the stress testing of the VPlan H-CFG construction in the
-// VPlan-native vectorization path. It must be used in conjuction with
+// VPlan-native vectorization path. It must be used in conjunction with
 // -enable-vplan-native-path. -vplan-verify-hcfg can also be used to enable the
 // verification of the H-CFGs built.
 static cl::opt<bool> VPlanBuildStressTest(
@@ -476,7 +476,7 @@ public:
   /// is generated around the vectorized (and scalar epilogue) loops consisting
   /// of various checks and bypasses. Return the pre-header block of the new
   /// loop.
-  /// In the case of epilogue vectorization, this function is overriden to
+  /// In the case of epilogue vectorization, this function is overridden to
   /// handle the more complex control flow around the loops.
   virtual BasicBlock *createVectorizedLoopSkeleton();
 

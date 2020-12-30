@@ -82,8 +82,8 @@ decltype(__hwasan_shadow)* __hwasan_premap_shadow() {
 INTERFACE_ATTRIBUTE __attribute__((ifunc("__hwasan_premap_shadow"))) void
 __hwasan_shadow();
 
-extern __attribute((weak, visibility("hidden"))) ElfW(Rela) __rela_iplt_start[],
-    __rela_iplt_end[];
+extern __attribute((weak, visibility("hidden"))) ElfW(Real) __real_iplt_start[],
+    __real_iplt_end[];
 
 }  // extern "C"
 
@@ -94,7 +94,7 @@ void InitShadowGOT() {
   // needs to be done before other ifunc resolvers (which are handled by libc)
   // because a resolver might read __hwasan_shadow.
   typedef ElfW(Addr) (*ifunc_resolver_t)(void);
-  for (ElfW(Rela)* r = __rela_iplt_start; r != __rela_iplt_end; ++r) {
+  for (ElfW(Real)* r = __real_iplt_start; r != __real_iplt_end; ++r) {
     ElfW(Addr)* offset = reinterpret_cast<ElfW(Addr)*>(r->r_offset);
     ElfW(Addr) resolver = r->r_addend;
     if (resolver == reinterpret_cast<ElfW(Addr)>(&__hwasan_premap_shadow)) {

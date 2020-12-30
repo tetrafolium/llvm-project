@@ -1000,7 +1000,7 @@ private:
 
     int UnknownStates = 0;
 
-    // Loop goes through all of the columns exept the last one ('UnknownX2').
+    // Loop goes through all of the columns except the last one ('UnknownX2').
     // We treat `UnknownX2` column separately at the end of the loop body.
     for (size_t i = 0; i < CmpOpTable.getCmpOpCount(); ++i) {
 
@@ -1700,7 +1700,7 @@ inline void EquivalenceClass::addToDisequalityInfo(
   Info = F.add(Info, First, NewSet);
 
   // 3. If Second is known to be a constant, we can delete this point
-  //    from the constraint asociated with First.
+  //    from the constraint associated with First.
   //
   //    So, if Second == 10, it means that First != 10.
   //    At the same time, the same logic does not apply to ranges.

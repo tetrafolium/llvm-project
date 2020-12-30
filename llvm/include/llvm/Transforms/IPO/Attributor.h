@@ -331,7 +331,7 @@ struct IRPosition {
     case ENC_CALL_SITE_ARGUMENT_USE:
       return *(getAsUsePtr()->getUser());
     default:
-      llvm_unreachable("Unkown encoding!");
+      llvm_unreachable("Unknown encoding!");
     };
   }
 
@@ -1094,7 +1094,7 @@ struct Attributor {
     // Use the static create method.
     auto &AA = AAType::createForPosition(IRP, *this);
 
-    // If we are currenty seeding attributes, enforce seeding rules.
+    // If we are currently seeding attributes, enforce seeding rules.
     if (Phase == AttributorPhase::SEEDING && !shouldSeedAttribute(AA)) {
       AA.getState().indicatePessimisticFixpoint();
       return AA;
@@ -1195,7 +1195,7 @@ struct Attributor {
   /// with the TrackDependence flag passed to the method set to false. This can
   /// be beneficial to avoid false dependences but it requires the users of
   /// `getAAFor` to explicitly record true dependences through this method.
-  /// The \p DepClass flag indicates if the dependence is striclty necessary.
+  /// The \p DepClass flag indicates if the dependence is strictly necessary.
   /// That means for required dependences, if \p FromAA changes to an invalid
   /// state, \p ToAA can be moved to a pessimistic fixpoint because it required
   /// information from \p FromAA but none are available anymore.
@@ -1570,7 +1570,7 @@ private:
 
   /// Gets called after attributes have been manifested, cleans up the IR.
   /// Deletes dead functions, blocks and instructions.
-  /// Rewrites function signitures and updates the call graph.
+  /// Rewrites function signatures and updates the call graph.
   ChangeStatus cleanupIR();
 
   /// Identify internal functions that are effectively dead, thus not reachable
@@ -1742,7 +1742,7 @@ struct AbstractState {
 /// The interface ensures that the assumed bits are always a subset of the known
 /// bits. Users can only add known bits and, except through adding known bits,
 /// they can only remove assumed bits. This should guarantee monotoniticy and
-/// thereby the existence of a fixpoint (if used corretly). The fixpoint is
+/// thereby the existence of a fixpoint (if used correctly). The fixpoint is
 /// reached when the assumed and known state/bits are equal. Users can
 /// force/inidicate a fixpoint. If an optimistic one is indicated, the known
 /// state will catch up with the assumed one, for a pessimistic fixpoint it is
@@ -2862,7 +2862,7 @@ struct DerefState : AbstractState {
   /// }
   /// ```
   /// In that case, AccessedBytesMap is `{0:4, 4:4, 8:4, 40:4}`.
-  /// AccessedBytesMap is std::map so it is iterated in accending order on
+  /// AccessedBytesMap is std::map so it is iterated in ascending order on
   /// key(Offset). So KnownBytes will be updated like this:
   ///
   /// |Access | KnownBytes
@@ -2881,7 +2881,7 @@ struct DerefState : AbstractState {
     DerefBytesState.takeKnownMaximum(KnownBytes);
   }
 
-  /// State representing that whether the value is globaly dereferenceable.
+  /// State representing that whether the value is globally dereferenceable.
   BooleanState GlobalState;
 
   /// See AbstractState::isValidState()
@@ -3306,10 +3306,10 @@ struct AAMemoryLocation
     NO_ARGUMENT_MEM = 1 << 4,
     NO_INACCESSIBLE_MEM = 1 << 5,
     NO_MALLOCED_MEM = 1 << 6,
-    NO_UNKOWN_MEM = 1 << 7,
+    NO_UNKNOWN_MEM = 1 << 7,
     NO_LOCATIONS = NO_LOCAL_MEM | NO_CONST_MEM | NO_GLOBAL_INTERNAL_MEM |
                    NO_GLOBAL_EXTERNAL_MEM | NO_ARGUMENT_MEM |
-                   NO_INACCESSIBLE_MEM | NO_MALLOCED_MEM | NO_UNKOWN_MEM,
+                   NO_INACCESSIBLE_MEM | NO_MALLOCED_MEM | NO_UNKNOWN_MEM,
 
     // Helper bit to track if we gave up or not.
     VALID_STATE = NO_LOCATIONS + 1,
@@ -3380,7 +3380,7 @@ struct AAMemoryLocation
         inverseLocation(NO_INACCESSIBLE_MEM | NO_ARGUMENT_MEM, true, true));
   }
 
-  /// Return true if the underlying value may access memory through arguement
+  /// Return true if the underlying value may access memory through argument
   /// pointers of the associated function, if any.
   bool mayAccessArgMem() const { return !isAssumed(NO_ARGUMENT_MEM); }
 
@@ -3469,19 +3469,19 @@ struct AAValueConstantRange
   static AAValueConstantRange &createForPosition(const IRPosition &IRP,
                                                  Attributor &A);
 
-  /// Return an assumed range for the assocaited value a program point \p CtxI.
+  /// Return an assumed range for the associated value a program point \p CtxI.
   /// If \p I is nullptr, simply return an assumed range.
   virtual ConstantRange
   getAssumedConstantRange(Attributor &A,
                           const Instruction *CtxI = nullptr) const = 0;
 
-  /// Return a known range for the assocaited value at a program point \p CtxI.
+  /// Return a known range for the associated value at a program point \p CtxI.
   /// If \p I is nullptr, simply return a known range.
   virtual ConstantRange
   getKnownConstantRange(Attributor &A,
                         const Instruction *CtxI = nullptr) const = 0;
 
-  /// Return an assumed constant for the assocaited value a program point \p
+  /// Return an assumed constant for the associated value a program point \p
   /// CtxI.
   Optional<ConstantInt *>
   getAssumedConstantInt(Attributor &A,

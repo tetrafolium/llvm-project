@@ -527,7 +527,7 @@ public:
   std::string str() const { return Data.str(); }
 
 private:
-  // FIXME: this is unneccesarily large (3 pointers). Pointer + length + owned
+  // FIXME: this is unnecessarily large (3 pointers). Pointer + length + owned
   // could be 2 pointers at most.
   std::unique_ptr<std::string> Owned;
   llvm::StringRef Data;

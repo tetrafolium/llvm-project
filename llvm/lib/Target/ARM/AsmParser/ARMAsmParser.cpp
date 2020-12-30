@@ -6949,7 +6949,7 @@ static void applyMnemonicAliases(StringRef &Mnemonic,
 // omitted. We don't have a way to do that in tablegen, so fix it up here.
 //
 // We have to be careful to not emit an invalid Rt2 here, because the rest of
-// the assembly parser could then generate confusing diagnostics refering to
+// the assembly parser could then generate confusing diagnostics referring to
 // it. If we do find anything that prevents us from doing the transformation we
 // bail out, and let the assembly parser report an error on the instruction as
 // it is written.
@@ -9116,7 +9116,7 @@ bool ARMAsmParser::processInstruction(MCInst &Inst,
     Inst = TmpInst;
     return true;
   }
-  // Alias for 'ldr{sb,h,sh}t Rt, [Rn] {, #imm}' for ommitted immediate.
+  // Alias for 'ldr{sb,h,sh}t Rt, [Rn] {, #imm}' for omitted immediate.
   case ARM::LDRSBTii:
   case ARM::LDRHTii:
   case ARM::LDRSHTii: {
@@ -11314,7 +11314,7 @@ ARMAsmParser::MatchInstruction(OperandVector &Operands, MCInst &Inst,
     extendImplicitITBlock(ITState.Cond);
     if (MatchInstructionImpl(Operands, Inst, nullptr, MatchingInlineAsm) ==
         Match_Success) {
-      // The match succeded, but we still have to check that the instruction is
+      // The match succeeded, but we still have to check that the instruction is
       // valid in this implicit IT block.
       const MCInstrDesc &MCID = MII.get(Inst.getOpcode());
       if (MCID.isPredicable()) {

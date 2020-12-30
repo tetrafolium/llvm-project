@@ -5317,7 +5317,7 @@ static bool isLowerSaturate(const SDValue LHS, const SDValue RHS,
 // pattern. This function tries to match one of these and will return true
 // if successful.
 //
-// USAT works similarily to SSAT but bounds on the interval [0, k] where k + 1
+// USAT works similarly to SSAT but bounds on the interval [0, k] where k + 1
 // is a power of 2.
 //
 // It returns true if the conversion can be done, false otherwise.
@@ -11699,7 +11699,7 @@ ARMTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
   case ARM::WIN__DBZCHK:
     return EmitLowered__dbzchk(MI, BB);
   case ARM::t2DoLoopStart:
-    // We are just here to set a register allocation hint, prefering lr for the
+    // We are just here to set a register allocation hint, preferring lr for the
     // input register to make it more likely to be movable and removable, later
     // in the pipeline.
     Register R = MI.getOperand(1).getReg();

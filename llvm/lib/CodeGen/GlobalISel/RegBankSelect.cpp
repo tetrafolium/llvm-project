@@ -355,7 +355,7 @@ void RegBankSelect::tryAvoidingSplit(
     return;
   }
 
-  // At this point, we need to repair a defintion of a terminator.
+  // At this point, we need to repair a definition of a terminator.
 
   // Technically we need to fix the def of MI on all outgoing
   // edges of MI to keep the repairing local. In other words, we
@@ -860,10 +860,10 @@ RegBankSelect::InstrInsertPoint::InstrInsertPoint(MachineInstr &Instr,
 void RegBankSelect::InstrInsertPoint::materialize() {
   if (isSplit()) {
     // Slice and return the beginning of the new block.
-    // If we need to split between the terminators, we theoritically
+    // If we need to split between the terminators, we theoretically
     // need to know where the first and second set of terminators end
     // to update the successors properly.
-    // Now, in pratice, we should have a maximum of 2 branch
+    // Now, in practice, we should have a maximum of 2 branch
     // instructions; one conditional and one unconditional. Therefore
     // we know how to update the successor by looking at the target of
     // the unconditional branch.

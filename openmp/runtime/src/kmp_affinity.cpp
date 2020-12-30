@@ -576,7 +576,7 @@ static int __kmp_affinity_create_hwloc_map(AddrUnsPair **address2os,
     // Hack to try and infer the machine topology using only the data
     // available from cpuid on the current thread, and __kmp_xproc.
     KMP_ASSERT(__kmp_affinity_type == affinity_none);
-    // hwloc only guarantees existance of PU object, so check PACKAGE and CORE
+    // hwloc only guarantees existence of PU object, so check PACKAGE and CORE
     hwloc_obj_t o = hwloc_get_obj_by_type(tp, HWLOC_OBJ_PACKAGE, 0);
     if (o != NULL)
       nCoresPerPkg = __kmp_hwloc_get_nobjs_under_obj(o, HWLOC_OBJ_CORE);

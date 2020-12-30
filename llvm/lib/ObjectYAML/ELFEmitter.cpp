@@ -173,7 +173,7 @@ template <class ELFT> class ELFState {
   typedef typename ELFT::Shdr Elf_Shdr;
   typedef typename ELFT::Sym Elf_Sym;
   typedef typename ELFT::Rel Elf_Rel;
-  typedef typename ELFT::Rela Elf_Rela;
+  typedef typename ELFT::Real Elf_Real;
   typedef typename ELFT::Relr Elf_Relr;
   typedef typename ELFT::Dyn Elf_Dyn;
   typedef typename ELFT::uint uintX_t;
@@ -1188,14 +1188,14 @@ void ELFState<ELFT>::writeSectionContent(
     Elf_Shdr &SHeader, const ELFYAML::RelocationSection &Section,
     ContiguousBlobAccumulator &CBA) {
   assert((Section.Type == llvm::ELF::SHT_REL ||
-          Section.Type == llvm::ELF::SHT_RELA) &&
-         "Section type is not SHT_REL nor SHT_RELA");
+          Section.Type == llvm::ELF::SHT_REAL) &&
+         "Section type is not SHT_REL nor SHT_REAL");
 
-  bool IsRela = Section.Type == llvm::ELF::SHT_RELA;
+  bool IsRela = Section.Type == llvm::ELF::SHT_REAL;
   if (Section.EntSize)
     SHeader.sh_entsize = *Section.EntSize;
   else
-    SHeader.sh_entsize = IsRela ? sizeof(Elf_Rela) : sizeof(Elf_Rel);
+    SHeader.sh_entsize = IsRela ? sizeof(Elf_Real) : sizeof(Elf_Rel);
 
   // For relocation section set link to .symtab by default.
   unsigned Link = 0;
@@ -1214,7 +1214,7 @@ void ELFState<ELFT>::writeSectionContent(
     unsigned SymIdx =
         Rel.Symbol ? toSymbolIndex(*Rel.Symbol, Section.Name, IsDynamic) : 0;
     if (IsRela) {
-      Elf_Rela REntry;
+      Elf_Real REntry;
       zero(REntry);
       REntry.r_offset = Rel.Offset;
       REntry.r_addend = Rel.Addend;
@@ -1229,7 +1229,7 @@ void ELFState<ELFT>::writeSectionContent(
     }
   }
 
-  SHeader.sh_size = (IsRela ? sizeof(Elf_Rela) : sizeof(Elf_Rel)) *
+  SHeader.sh_size = (IsRela ? sizeof(Elf_Real) : sizeof(Elf_Rel)) *
                     Section.Relocations->size();
 }
 

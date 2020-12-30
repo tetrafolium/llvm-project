@@ -41,7 +41,7 @@ struct COFFModuleDefinition {
 
 // mingw and wine def files do not mangle _ for x86 which
 // is a consequence of legacy binutils' dlltool functionality.
-// This MingwDef flag should be removed once mingw stops this pratice.
+// This MingwDef flag should be removed once mingw stops this practice.
 Expected<COFFModuleDefinition>
 parseCOFFModuleDefinition(MemoryBufferRef MB, COFF::MachineTypes Machine,
                           bool MingwDef = false);

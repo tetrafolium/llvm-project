@@ -8521,7 +8521,7 @@ SDValue DAGCombiner::visitSRA(SDNode *N) {
   // If truncate is free for the target sext(shl) is likely to result in better
   // code.
   if (N0.getOpcode() == ISD::SHL && N1C) {
-    // Get the two constanst of the shifts, CN0 = m, CN = n.
+    // Get the two constants of the shifts, CN0 = m, CN = n.
     const ConstantSDNode *N01C = isConstOrConstSplat(N0.getOperand(1));
     if (N01C) {
       LLVMContext &Ctx = *DAG.getContext();
@@ -17802,7 +17802,7 @@ SDValue DAGCombiner::visitLIFETIME_END(SDNode *N) {
 
 /// For the instruction sequence of store below, F and I values
 /// are bundled together as an i64 value before being stored into memory.
-/// Sometimes it is more efficent to generate separate stores for F and I,
+/// Sometimes it is more efficient to generate separate stores for F and I,
 /// which can remove the bitwise instructions or sink them to colder places.
 ///
 ///   (store (or (zext (bitcast F to i32) to i64),
@@ -21011,7 +21011,7 @@ SDValue DAGCombiner::visitSCALAR_TO_VECTOR(SDNode *N) {
       SmallVector<int, 8> NewMask(InVecT.getVectorNumElements(), -1);
       int Elt = C0->getZExtValue();
       NewMask[0] = Elt;
-      // If we have an implict truncate do truncate here as long as it's legal.
+      // If we have an implicit truncate do truncate here as long as it's legal.
       // if it's not legal, this should
       if (VT.getScalarType() != InVal.getValueType() &&
           InVal.getValueType().isScalarInteger() &&

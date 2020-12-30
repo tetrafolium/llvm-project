@@ -143,7 +143,7 @@ void DataSection::finalizeContents() {
 #endif
 
   assert((!config->isPic || activeCount <= 1) &&
-         "Currenly only a single data segment is supported in PIC mode");
+         "Currently only a single data segment is supported in PIC mode");
 
   writeUleb128(os, segmentCount, "data segment count");
   os.flush();

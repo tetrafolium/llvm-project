@@ -215,7 +215,7 @@ ParseRet tryParseLinearWithCompileTimeStep(StringRef &ParseString,
 }
 
 /// Looks into the <parameters> part of the mangled name in search
-/// for valid paramaters at the beginning of the string
+/// for valid parameters at the beginning of the string
 /// `ParseString`.
 ///
 /// On success, it removes the parsed parameter from `ParseString`,

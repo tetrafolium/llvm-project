@@ -408,7 +408,7 @@ public:
                                   ArrayRef<const Value *> Args,
                                   const Instruction *CxtI = nullptr) {
     // FIXME: A number of transformation tests seem to require these values
-    // which seems a little odd for how arbitary there are.
+    // which seems a little odd for how arbitrary there are.
     switch (Opcode) {
     default:
       break;

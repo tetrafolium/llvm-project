@@ -2694,7 +2694,7 @@ isl_schedule_node_delete(__isl_take isl_schedule_node *node) {
  * of the resulting expansion.
  * "group_universe" is the universe of "group".
  *
- * "sched" is the schedule for the group elements, in pratice
+ * "sched" is the schedule for the group elements, in practice
  * an identity mapping on "group_universe".
  * "dim" is the dimension of "sched".
  */

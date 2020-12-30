@@ -25,7 +25,7 @@
 # just so we can see new registers.
 #
 # This file implements the x86_64 registers for the user mode qemu on linux.
-# The only difference with the Linux file is the absense of orig_rax register.
+# The only difference with the Linux file is the absence of orig_rax register.
 #
 # USAGE
 #

@@ -34,7 +34,7 @@ class CallGraph;
 /// A pass that internalizes all functions and variables other than those that
 /// must be preserved according to \c MustPreserveGV.
 class InternalizePass : public PassInfoMixin<InternalizePass> {
-  /// Client supplied callback to control wheter a symbol must be preserved.
+  /// Client supplied callback to control whether a symbol must be preserved.
   const std::function<bool(const GlobalValue &)> MustPreserveGV;
   /// Set of symbols private to the compiler that this pass should not touch.
   StringSet<> AlwaysPreserved;

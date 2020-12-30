@@ -396,7 +396,7 @@ CallBase::BundleOpInfo &CallBase::getBundleOpInfoForOperand(unsigned OpIdx) {
          "The Idx isn't in the operand bundle");
 
   /// We need a decimal number below and to prevent using floating point numbers
-  /// we use an intergal value multiplied by this constant.
+  /// we use an integral value multiplied by this constant.
   constexpr unsigned NumberScaling = 1024;
 
   bundle_op_iterator Begin = bundle_op_info_begin();
@@ -521,7 +521,7 @@ CallInst *CallInst::CreateWithReplacedBundle(CallInst *CI, OperandBundleDef OpB,
 
 // Update profile weight for call instruction by scaling it using the ratio
 // of S/T. The meaning of "branch_weights" meta data for call instruction is
-// transfered to represent call count.
+// transferred to represent call count.
 void CallInst::updateProfWeight(uint64_t S, uint64_t T) {
   auto *ProfileData = getMetadata(LLVMContext::MD_prof);
   if (ProfileData == nullptr)

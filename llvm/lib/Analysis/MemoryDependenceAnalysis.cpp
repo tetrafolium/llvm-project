@@ -303,7 +303,7 @@ MemoryDependenceResults::getInvariantGroupPointerDependency(LoadInst *LI,
   LoadOperandsQueue.push_back(LoadOperand);
 
   Instruction *ClosestDependency = nullptr;
-  // Order of instructions in uses list is unpredictible. In order to always
+  // Order of instructions in uses list is unpredictable. In order to always
   // get the same result, we will look for the closest dominance.
   auto GetClosestDependency = [this](Instruction *Best, Instruction *Other) {
     assert(Other && "Must call it with not null instruction");

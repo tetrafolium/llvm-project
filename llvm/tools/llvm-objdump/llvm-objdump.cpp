@@ -2835,7 +2835,7 @@ static void dumpObject(ObjectFile *O, const Archive *A = nullptr,
   if (StartAddress.getNumOccurrences() || StopAddress.getNumOccurrences())
     checkForInvalidStartStopAddress(O, StartAddress, StopAddress);
 
-  // Note: the order here matches GNU objdump for compatability.
+  // Note: the order here matches GNU objdump for compatibility.
   StringRef ArchiveName = A ? A->getFileName() : "";
   if (ArchiveHeaders && !MachOOpt && C)
     printArchiveChild(ArchiveName, *C);

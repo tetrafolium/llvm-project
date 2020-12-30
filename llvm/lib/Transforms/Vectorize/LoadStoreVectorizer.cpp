@@ -365,7 +365,7 @@ bool Vectorizer::areConsecutivePointers(Value *PtrA, Value *PtrB,
 
   // The above check will not catch the cases where one of the pointers is
   // factorized but the other one is not, such as (C + (S * (A + B))) vs
-  // (AS + BS). Get the minus scev. That will allow re-combining the expresions
+  // (AS + BS). Get the minus scev. That will allow re-combining the expression
   // and getting the simplified difference.
   const SCEV *Dist = SE.getMinusSCEV(PtrSCEVB, PtrSCEVA);
   if (C == Dist)

@@ -20,7 +20,7 @@ import sys
 class Symbol:
 
   def __init__(self, name, namespace, headers):
-    # unqualifed symbol name, e.g. "move"
+    # unqualified symbol name, e.g. "move"
     self.name = name
     # namespace of the symbol (with trailing "::"), e.g. "std::", "" (global scope)
     # None for C symbols.

@@ -560,7 +560,7 @@ int ConvergingVLIWScheduler::pressureChange(const SUnit *SU, bool isBotUp) {
   for (auto &P : PD) {
     if (!P.isValid())
       continue;
-    // The pressure differences are computed bottom-up, so the comparision for
+    // The pressure differences are computed bottom-up, so the comparison for
     // an increase is positive in the bottom direction, but negative in the
     //  top-down direction.
     if (HighPressureSets[P.getPSet()])
@@ -909,7 +909,7 @@ SUnit *ConvergingVLIWScheduler::pickNodeBidrectional(bool &IsTopNode) {
   // increase pressure for one of the excess PSets, then schedule in that
   // direction first to provide more freedom in the other direction.
   if (BotResult == SingleExcess || BotResult == SingleCritical) {
-    LLVM_DEBUG(dbgs() << "Prefered Bottom Node\n");
+    LLVM_DEBUG(dbgs() << "Preferred Bottom Node\n");
     IsTopNode = false;
     return BotCand.SU;
   }
@@ -920,29 +920,29 @@ SUnit *ConvergingVLIWScheduler::pickNodeBidrectional(bool &IsTopNode) {
   assert(TopResult != NoCand && "failed to find the first candidate");
 
   if (TopResult == SingleExcess || TopResult == SingleCritical) {
-    LLVM_DEBUG(dbgs() << "Prefered Top Node\n");
+    LLVM_DEBUG(dbgs() << "Preferred Top Node\n");
     IsTopNode = true;
     return TopCand.SU;
   }
   // If either Q has a single candidate that minimizes pressure above the
   // original region's pressure pick it.
   if (BotResult == SingleMax) {
-    LLVM_DEBUG(dbgs() << "Prefered Bottom Node SingleMax\n");
+    LLVM_DEBUG(dbgs() << "Preferred Bottom Node SingleMax\n");
     IsTopNode = false;
     return BotCand.SU;
   }
   if (TopResult == SingleMax) {
-    LLVM_DEBUG(dbgs() << "Prefered Top Node SingleMax\n");
+    LLVM_DEBUG(dbgs() << "Preferred Top Node SingleMax\n");
     IsTopNode = true;
     return TopCand.SU;
   }
   if (TopCand.SCost > BotCand.SCost) {
-    LLVM_DEBUG(dbgs() << "Prefered Top Node Cost\n");
+    LLVM_DEBUG(dbgs() << "Preferred Top Node Cost\n");
     IsTopNode = true;
     return TopCand.SU;
   }
   // Otherwise prefer the bottom candidate in node order.
-  LLVM_DEBUG(dbgs() << "Prefered Bottom in Node order\n");
+  LLVM_DEBUG(dbgs() << "Preferred Bottom in Node order\n");
   IsTopNode = false;
   return BotCand.SU;
 }

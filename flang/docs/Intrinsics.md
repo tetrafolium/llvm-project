@@ -412,7 +412,7 @@ the dimension `DIM` removed.
 
 The optional `BACK` argument is a scalar LOGICAL value of any kind.
 When present and `.TRUE.`, it causes the function to return the index
-of the *last* occurence of the target or extreme value.
+of the *last* occurrence of the target or extreme value.
 
 For `FINDLOC`, `ARRAY` may have any of the five intrinsic types, and `VALUE`
 must a scalar value of a type for which `ARRAY==VALUE` or `ARRAY .EQV. VALUE`

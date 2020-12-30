@@ -7,7 +7,7 @@
  * Use of this software is governed by the MIT license
  *
  * Written by Sven Verdoolaege, INRIA Saclay - Ile-de-France,
- * Parc Club Orsay Universite, ZAC des vignes, 4 rue Jacques Monod,
+ * Parc Club Orsay Universities, ZAC des vignes, 4 rue Jacques Monod,
  * 91893 Orsay, France
  * and Ecole Normale Superieure, 45 rue d'Ulm, 75230 Paris, France
  * and Cerebras Systems, 175 S San Antonio Rd, Los Altos, CA, USA

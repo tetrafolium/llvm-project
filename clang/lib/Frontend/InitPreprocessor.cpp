@@ -1100,7 +1100,7 @@ static void InitializePredefinedMacros(const TargetInfo &TI,
     }
   }
 
-  // CUDA device path compilaton
+  // CUDA device path compilation
   if (LangOpts.CUDAIsDevice && !LangOpts.HIP) {
     // The CUDA_ARCH value is set for the GPU target specified in the NVPTX
     // backend's target defines.

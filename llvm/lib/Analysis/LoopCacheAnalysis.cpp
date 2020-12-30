@@ -144,7 +144,7 @@ IndexedReference::IndexedReference(Instruction &StoreOrLoadInst,
   IsValid = delinearize(LI);
   if (IsValid)
     LLVM_DEBUG(dbgs().indent(2)
-               << "Succesfully delinearized: " << *this << "\n");
+               << "Successfully delinearized: " << *this << "\n");
 }
 
 Optional<bool> IndexedReference::hasSpacialReuse(const IndexedReference &Other,
@@ -568,7 +568,7 @@ bool CacheCost::populateReferenceGroups(ReferenceGroupsTy &RefGroups) const {
         // access such as:
         //   for (i = N; i > 0; i--)
         //     A[i] = A[N - i];
-        // having the same cost calculation as a single dimention access pattern
+        // having the same cost calculation as a single dimension access pattern
         //   for (i = 0; i < N; i++)
         //     A[i] = A[i];
         // when in actuality, depending on the array size, the first example

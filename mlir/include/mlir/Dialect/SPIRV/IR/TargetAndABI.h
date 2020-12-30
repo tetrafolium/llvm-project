@@ -60,7 +60,7 @@ public:
 
   TargetEnvAttr getAttr() const { return targetAttr; }
 
-  /// Allows implicity converting to the underlying spirv::TargetEnvAttr.
+  /// Allows implicitly converting to the underlying spirv::TargetEnvAttr.
   operator TargetEnvAttr() const { return targetAttr; }
 
 private:

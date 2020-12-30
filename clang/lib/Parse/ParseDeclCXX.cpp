@@ -2167,7 +2167,7 @@ void Parser::HandleMemberFunctionDeclDelays(Declarator &DeclaratorInfo,
           FTI.Params[ParamIdx].Param,
           std::move(FTI.Params[ParamIdx].DefaultArgTokens)));
 
-    // Stash the exception-specification tokens in the late-pased method.
+    // Stash the exception-specification tokens in the late-passed method.
     if (FTI.getExceptionSpecType() == EST_Unparsed) {
       LateMethod->ExceptionSpecTokens = FTI.ExceptionSpecTokens;
       FTI.ExceptionSpecTokens = nullptr;

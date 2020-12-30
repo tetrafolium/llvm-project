@@ -2278,7 +2278,7 @@ bool TreePatternNode::NodeHasProperty(SDNP Property,
   }
 
   if (Property != SDNPHasChain) {
-    // The chain proprety is already present on the different intrinsic node
+    // The chain property is already present on the different intrinsic node
     // types (intrinsic_w_chain, intrinsic_void), and is not explicitly listed
     // on the intrinsic. Anything else is specific to the individual intrinsic.
     if (const CodeGenIntrinsic *Int = getIntrinsicInfo(CGP))

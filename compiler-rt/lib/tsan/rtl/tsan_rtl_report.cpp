@@ -49,7 +49,7 @@ void TsanCheckFailed(const char *file, int line, const char *cond, u64 v1,
   Die();
 }
 
-// Can be overriden by an application/test to intercept reports.
+// Can be overridden by an application/test to intercept reports.
 #ifdef TSAN_EXTERNAL_HOOKS
 bool OnReport(const ReportDesc *rep, bool suppressed);
 #else

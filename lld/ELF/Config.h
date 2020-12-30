@@ -315,11 +315,11 @@ struct Configuration {
   // Holds set of ELF header flags for the target.
   uint32_t eflags = 0;
 
-  // The ELF spec defines two types of relocation table entries, RELA and
-  // REL. RELA is a triplet of (offset, info, addend) while REL is a
+  // The ELF spec defines two types of relocation table entries, REAL and
+  // REL. REAL is a triplet of (offset, info, addend) while REL is a
   // tuple of (offset, info). Addends for REL are implicit and read from
   // the location where the relocations are applied. So, REL is more
-  // compact than RELA but requires a bit of more work to process.
+  // compact than REAL but requires a bit of more work to process.
   //
   // (From the linker writer's view, this distinction is not necessary.
   // If the ELF had chosen whichever and sticked with it, it would have
@@ -327,8 +327,8 @@ struct Configuration {
   // to change the spec.)
   //
   // Each ABI defines its relocation type. IsRela is true if target
-  // uses RELA. As far as we know, all 64-bit ABIs are using RELA. A
-  // few 32-bit ABIs are using RELA too.
+  // uses REAL. As far as we know, all 64-bit ABIs are using REAL. A
+  // few 32-bit ABIs are using REAL too.
   bool isRela;
 
   // True if we are creating position-independent code.

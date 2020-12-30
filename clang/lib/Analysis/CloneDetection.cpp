@@ -566,7 +566,7 @@ unsigned VariablePattern::countPatternDifferences(
 
   assert(Other.Occurences.size() == Occurences.size());
   for (unsigned i = 0; i < Occurences.size(); ++i) {
-    auto ThisOccurence = Occurences[i];
+    auto ThisOccurence = Occurrences[i];
     auto OtherOccurence = Other.Occurences[i];
     if (ThisOccurence.KindID == OtherOccurence.KindID)
       continue;

@@ -58,7 +58,7 @@ public:
 
   ObjFile *file;
   OutputSection *outputSec = nullptr;
-  // Offset withing the output section
+  // Offset within the output section
   int32_t outputOffset = 0;
 
   // Signals that the section is part of the output.  The garbage collector,

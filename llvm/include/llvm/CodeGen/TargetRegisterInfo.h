@@ -872,7 +872,7 @@ public:
 
   /// True if storage within the function requires the stack pointer to be
   /// aligned more than the normal calling convention calls for.
-  /// This cannot be overriden by the target, but canRealignStack can be
+  /// This cannot be overridden by the target, but canRealignStack can be
   /// overridden.
   bool needsStackRealignment(const MachineFunction &MF) const;
 
@@ -926,7 +926,7 @@ public:
     return false;
   }
 
-  /// This method must be overriden to eliminate abstract frame indices from
+  /// This method must be overridden to eliminate abstract frame indices from
   /// instructions which may use them. The instruction referenced by the
   /// iterator contains an MO_FrameIndex operand which must be eliminated by
   /// this method. This method may modify or replace the specified instruction,

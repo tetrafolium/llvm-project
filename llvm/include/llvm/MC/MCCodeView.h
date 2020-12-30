@@ -155,7 +155,7 @@ public:
                                unsigned IAFile, unsigned IALine,
                                unsigned IACol);
 
-  /// Retreive the function info if this is a valid function id, or nullptr.
+  /// Retrieve the function info if this is a valid function id, or nullptr.
   MCCVFunctionInfo *getCVFunctionInfo(unsigned FuncId);
 
   /// Saves the information from the currently parsed .cv_loc directive

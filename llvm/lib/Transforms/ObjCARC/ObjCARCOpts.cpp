@@ -2116,7 +2116,7 @@ void ObjCARCOpt::OptimizeWeakCalls(Function &F) {
       }
       case ARCInstKind::MoveWeak:
       case ARCInstKind::CopyWeak:
-        // TOOD: Grab the copied value.
+        // TODO: Grab the copied value.
         goto clobbered;
       case ARCInstKind::AutoreleasepoolPush:
       case ARCInstKind::None:

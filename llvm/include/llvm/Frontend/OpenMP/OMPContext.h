@@ -115,7 +115,7 @@ bool isValidTraitPropertyForTraitSetAndSelector(TraitProperty Property,
 
 /// Variant match information describes the required traits and how they are
 /// scored (via the ScoresMap). In addition, the required consturct nesting is
-/// decribed as well.
+/// described as well.
 struct VariantMatchInfo {
   /// Add the trait \p Property to the required trait set. \p RawString is the
   /// string we parsed and derived \p Property from. If \p Score is not null, it

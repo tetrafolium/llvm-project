@@ -159,7 +159,7 @@ private:
 
     /// Calculate the fixed size in bytes given a DWARFUnit.
     ///
-    /// \param U the DWARFUnit to use when determing the byte size.
+    /// \param U the DWARFUnit to use when determining the byte size.
     /// \returns the size in bytes for all attribute data in this abbreviation.
     /// The returned size does not include bytes for the  ULEB128 abbreviation
     /// code

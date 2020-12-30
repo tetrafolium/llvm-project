@@ -363,7 +363,7 @@ public:
 
   // Returns true if RC is a subclass.
   // RC is a sub-class of this class if it is a valid replacement for any
-  // instruction operand where a register of this classis required. It must
+  // instruction operand where a register of this classics required. It must
   // satisfy these conditions:
   //
   // 1. All RC registers are also in this.
@@ -555,7 +555,7 @@ class CodeGenRegBank {
   RCKeyMap Key2RC;
 
   // Remember each unique set of register units. Initially, this contains a
-  // unique set for each register class. Simliar sets are coalesced with
+  // unique set for each register class. Similar sets are coalesced with
   // pruneUnitSets and new supersets are inferred during computeRegUnitSets.
   std::vector<RegUnitSet> RegUnitSets;
 

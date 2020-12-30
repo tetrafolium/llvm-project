@@ -230,7 +230,7 @@ bool MVETailPredication::IsSafeActiveMask(IntrinsicInst *ActiveLaneMask,
     // Calculate 2 tripcount values and check that they are consistent with
     // each other:
     // i) The number of loop iterations extracted from the set.loop.iterations
-    //    intrinsic, multipled by the vector width:
+    //    intrinsic, multiplied by the vector width:
     uint64_t TC1 = TC->getZExtValue() * VectorWidth;
 
     // ii) TC1 has to be equal to TC + 1, with the + 1 to compensate for start

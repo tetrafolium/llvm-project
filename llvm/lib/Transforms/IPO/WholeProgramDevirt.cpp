@@ -142,7 +142,7 @@ static cl::opt<bool>
 
 /// Provide a way to force enable whole program visibility in tests.
 /// This is needed to support legacy tests that don't contain
-/// !vcall_visibility metadata (the mere presense of type tests
+/// !vcall_visibility metadata (the mere presence of type tests
 /// previously implied hidden visibility).
 cl::opt<bool>
     WholeProgramVisibility("whole-program-visibility", cl::init(false),
@@ -1958,7 +1958,7 @@ void DevirtModule::removeRedundantTypeTests() {
 
 bool DevirtModule::run() {
   // If only some of the modules were split, we cannot correctly perform
-  // this transformation. We already checked for the presense of type tests
+  // this transformation. We already checked for the presence of type tests
   // with partially split modules during the thin link, and would have emitted
   // an error if any were found, so here we can simply return.
   if ((ExportSummary && ExportSummary->partiallySplitLTOUnits()) ||

@@ -42,7 +42,7 @@ static cl::list<std::string>
                       cl::cat(GICombinerEmitterCat), cl::CommaSeparated);
 static cl::opt<bool> ShowExpansions(
     "gicombiner-show-expansions",
-    cl::desc("Use C++ comments to indicate occurence of code expansion"),
+    cl::desc("Use C++ comments to indicate occurrence of code expansion"),
     cl::cat(GICombinerEmitterCat));
 static cl::opt<bool> StopAfterParse(
     "gicombiner-stop-after-parse",

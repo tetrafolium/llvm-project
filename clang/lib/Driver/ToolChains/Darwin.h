@@ -434,7 +434,7 @@ public:
   /// Returns true if the minimum supported macOS version for the slice that's
   /// being built is less than the specified version. If there's no minimum
   /// supported macOS version, the deployment target version is compared to the
-  /// specifed version instead.
+  /// specified version instead.
   bool isMacosxVersionLT(unsigned V0, unsigned V1 = 0, unsigned V2 = 0) const {
     assert(isTargetMacOS() && getTriple().isMacOSX() &&
            "Unexpected call for non OS X target!");

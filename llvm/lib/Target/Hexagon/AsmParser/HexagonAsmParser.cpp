@@ -74,10 +74,10 @@ static cl::opt<bool> WarnSignedMismatch(
     cl::init(true));
 static cl::opt<bool> WarnNoncontigiousRegister(
     "mwarn-noncontigious-register",
-    cl::desc("Warn for register names that arent contigious"), cl::init(true));
+    cl::desc("Warn for register names that arent contagious"), cl::init(true));
 static cl::opt<bool> ErrorNoncontigiousRegister(
     "merror-noncontigious-register",
-    cl::desc("Error for register names that aren't contigious"),
+    cl::desc("Error for register names that aren't contagious"),
     cl::init(false));
 
 namespace {
@@ -123,7 +123,7 @@ class HexagonAsmParser : public MCTargetAsmParser {
   bool RegisterMatchesArch(unsigned MatchNum) const;
 
   bool matchBundleOptions();
-  bool handleNoncontigiousRegister(bool Contigious, SMLoc &Loc);
+  bool handleNoncontigiousRegister(bool Contagious, SMLoc &Loc);
   bool finishBundle(SMLoc IDLoc, MCStreamer &Out);
   void canonicalizeImmediates(MCInst &MCI);
   bool matchOneInstruction(MCInst &MCB, SMLoc IDLoc,
@@ -953,14 +953,14 @@ bool HexagonAsmParser::isLabel(AsmToken &Token) {
   return false;
 }
 
-bool HexagonAsmParser::handleNoncontigiousRegister(bool Contigious,
+bool HexagonAsmParser::handleNoncontigiousRegister(bool Contagious,
                                                    SMLoc &Loc) {
-  if (!Contigious && ErrorNoncontigiousRegister) {
-    Error(Loc, "Register name is not contigious");
+  if (!Contagious && ErrorNoncontigiousRegister) {
+    Error(Loc, "Register name is not contagious");
     return true;
   }
-  if (!Contigious && WarnNoncontigiousRegister)
-    Warning(Loc, "Register name is not contigious");
+  if (!Contagious && WarnNoncontigiousRegister)
+    Warning(Loc, "Register name is not contagious");
   return false;
 }
 
@@ -985,7 +985,7 @@ OperandMatchResultTy HexagonAsmParser::tryParseRegister(unsigned &RegNo,
                                                 Token.getString().size());
     Lookahead.push_back(Token);
     Lexer.Lex();
-    bool Contigious = Lexer.getTok().getString().data() ==
+    bool Contagious = Lexer.getTok().getString().data() ==
                       Lookahead.back().getString().data() +
                           Lookahead.back().getString().size();
     bool Type = Lexer.is(AsmToken::Identifier) || Lexer.is(AsmToken::Dot) ||
@@ -993,8 +993,8 @@ OperandMatchResultTy HexagonAsmParser::tryParseRegister(unsigned &RegNo,
                 Lexer.is(AsmToken::Colon);
     bool Workaround =
         Lexer.is(AsmToken::Colon) || Lookahead.back().is(AsmToken::Colon);
-    Again = (Contigious && Type) || (Workaround && Type);
-    NeededWorkaround = NeededWorkaround || (Again && !(Contigious && Type));
+    Again = (Contagious && Type) || (Workaround && Type);
+    NeededWorkaround = NeededWorkaround || (Again && !(Contagious && Type));
   }
   std::string Collapsed = std::string(RawString);
   Collapsed.erase(llvm::remove_if(Collapsed, isSpace), Collapsed.end());
@@ -1277,7 +1277,7 @@ unsigned HexagonAsmParser::validateTargetOperandClass(MCParsedAsmOperand &AsmOp,
   return Match_InvalidOperand;
 }
 
-// FIXME: Calls to OutOfRange shoudl propagate failure up to parseStatement.
+// FIXME: Calls to OutOfRange should propagate failure up to parseStatement.
 bool HexagonAsmParser::OutOfRange(SMLoc IDLoc, long long Val, long long Max) {
   std::string errStr;
   raw_string_ostream ES(errStr);

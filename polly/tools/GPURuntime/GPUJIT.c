@@ -251,7 +251,7 @@ static int initialDeviceAPIsCL() {
 
   // FIXME: We are now always selecting the Intel Beignet driver if it is
   // available on the system, instead of a possible NVIDIA or AMD OpenCL
-  // API. This selection should occurr based on the target architecture
+  // API. This selection should occur based on the target architecture
   // chosen when compiling.
   void *Handle =
       (HandleOpenCLBeignet != NULL ? HandleOpenCLBeignet : HandleOpenCL);
@@ -478,7 +478,7 @@ static PollyGPUFunction *getKernelCL(const char *BinaryBuffer,
 
   for (long i = 0; i < KERNEL_CACHE_SIZE; i++) {
     // We exploit here the property that all Polly-ACC kernels are allocated
-    // as global constants, hence a pointer comparision is sufficient to
+    // as global constants, hence a pointer comparison is sufficient to
     // determin equality.
     if (KernelCache[i] &&
         ((OpenCLKernel *)KernelCache[i]->Kernel)->BinaryString ==
@@ -1268,7 +1268,7 @@ static PollyGPUFunction *getKernelCUDA(const char *BinaryBuffer,
 
   for (long i = 0; i < KERNEL_CACHE_SIZE; i++) {
     // We exploit here the property that all Polly-ACC kernels are allocated
-    // as global constants, hence a pointer comparision is sufficient to
+    // as global constants, hence a pointer comparison is sufficient to
     // determin equality.
     if (KernelCache[i] &&
         ((CUDAKernel *)KernelCache[i]->Kernel)->BinaryString == BinaryBuffer) {

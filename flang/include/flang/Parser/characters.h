@@ -11,7 +11,7 @@
 
 // Define some character classification predicates and
 // conversions here to avoid dependences upon <cctype> and
-// also to accomodate Fortran tokenization.
+// also to accommodate Fortran tokenization.
 
 #include <cstddef>
 #include <optional>

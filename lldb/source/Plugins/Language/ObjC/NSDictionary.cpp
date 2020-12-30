@@ -758,7 +758,7 @@ lldb_private::formatters::NSCFDictionarySyntheticFrontEnd::GetChildAtIndex(
     // Iterate over inferior memory, reading key/value pointers by shifting each
     // cursor by test_index * m_ptr_size. Returns an empty ValueObject if a read
     // fails, otherwise, continue until the number of tries matches the number
-    // of childen.
+    // of children.
     while (tries < num_children) {
       key_at_idx = m_keys_ptr + (test_idx * m_ptr_size);
       val_at_idx = m_values_ptr + (test_idx * m_ptr_size);

@@ -1,6 +1,6 @@
 /*
   Name:     gmp_compat.c
-  Purpose:  Provide GMP compatiable routines for imath library
+  Purpose:  Provide GMP compatible routines for imath library
   Author:   David Peixotto
 
   Copyright (c) 2012 Qualcomm Innovation Center, Inc. All rights reserved.
@@ -370,7 +370,7 @@ int GMPQAPI(set_str)(mp_rat rop, char *s, int base) {
   /* Parse numerator */
   resN = mp_int_read_string(mp_rat_numer_ref(rop), base, str);
 
-  /* Parse denomenator if given or set to 1 if not */
+  /* Parse denominator if given or set to 1 if not */
   if (slash)
     resD = mp_int_read_string(mp_rat_denom_ref(rop), base, slash + 1);
   else
@@ -513,7 +513,7 @@ void GMPZAPI(mul_2exp)(mp_int rop, mp_int op1, unsigned long op2) {
     mode is the same as the ceiling rounding mode.  If q is greater than zero
     then we need to round q up by one because the truncated version was rounded
     down to zero. If q equals zero then check to see if the result of the
-    divison is positive. A positive result needs to increment q to one.
+    division is positive. A positive result needs to increment q to one.
 
     For floor rounding mode, if q is greater than 0 then the trucated rounding
     mode is the same as the floor rounding mode. If q is less than zero then we

@@ -160,7 +160,7 @@ bool BPFAdjustOptImpl::serializeICMPCrossBB(BasicBlock &BB) {
   //     ...
 
   // Check basic predecessors, if two of them (say B1, B2) are using
-  // icmp instructions to generate conditions and one is the predesessor
+  // icmp instructions to generate conditions and one is the predecessors
   // of another (e.g., B1 is the predecessor of B2). Add a passthrough
   // barrier after icmp inst of block B1.
   BasicBlock *B2 = BB.getSinglePredecessor();

@@ -141,7 +141,7 @@ static cl::opt<unsigned> JumpInstCost("jump-inst-cost",
 static cl::opt<bool>
     TailDupPlacement("tail-dup-placement",
                      cl::desc("Perform tail duplication during placement. "
-                              "Creates more fallthrough opportunites in "
+                              "Creates more fallthrough opportunities in "
                               "outline branches."),
                      cl::init(true), cl::Hidden);
 
@@ -1881,7 +1881,7 @@ bool MachineBlockPlacement::canMoveBottomBlockToTop(
   return true;
 }
 
-// Find out the possible fall through frequence to the top of a loop.
+// Find out the possible fall through frequencies to the top of a loop.
 BlockFrequency
 MachineBlockPlacement::TopFallThroughFreq(const MachineBasicBlock *Top,
                                           const BlockFilterSet &LoopBlockSet) {

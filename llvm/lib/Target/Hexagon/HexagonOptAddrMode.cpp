@@ -137,10 +137,10 @@ bool HexagonOptAddrMode::hasRepForm(MachineInstr &MI, unsigned TfrDefR) {
   }
 
   if (HII->getAddrMode(MI) == HexagonII::BaseRegOffset)
-    // Tranform to Absolute plus register offset.
+    // Transform to Absolute plus register offset.
     return (HII->changeAddrMode_rr_ur(MI) >= 0);
   else if (HII->getAddrMode(MI) == HexagonII::BaseImmOffset)
-    // Tranform to absolute addressing mode.
+    // Transform to absolute addressing mode.
     return (HII->changeAddrMode_io_abs(MI) >= 0);
 
   return false;
@@ -148,7 +148,7 @@ bool HexagonOptAddrMode::hasRepForm(MachineInstr &MI, unsigned TfrDefR) {
 
 // Check if addasl instruction can be removed. This is possible only
 // if it's feeding to only load/store instructions with base + register
-// offset as these instruction can be tranformed to use 'absolute plus
+// offset as these instruction can be transformed to use 'absolute plus
 // shifted register offset'.
 // ex:
 // Rs = ##foo

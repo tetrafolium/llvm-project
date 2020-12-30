@@ -161,7 +161,7 @@ public:
   /// Typically used to index TUs when headers are opened.
   void boostRelated(llvm::StringRef Path);
 
-  // Cause background threads to stop after ther current task, any remaining
+  // Cause background threads to stop after there current task, any remaining
   // tasks will be discarded.
   void stop() {
     Rebuilder.shutdown();

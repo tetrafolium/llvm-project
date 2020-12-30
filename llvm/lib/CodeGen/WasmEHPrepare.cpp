@@ -36,7 +36,7 @@
 // * Background: Direct personality function call
 // In WebAssembly EH, the VM is responsible for unwinding the stack once an
 // exception is thrown. After the stack is unwound, the control flow is
-// transfered to WebAssembly 'catch' instruction.
+// transferred to WebAssembly 'catch' instruction.
 //
 // Unwinding the stack is not done by libunwind but the VM, so the personality
 // function in libcxxabi cannot be called from libunwind during the unwinding

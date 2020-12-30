@@ -504,7 +504,7 @@ bool fromJSON(const llvm::json::Value &, ConfigurationSettings &,
 /// Clangd extension: parameters configurable at `initialize` time.
 /// LSP defines this type as `any`.
 struct InitializationOptions {
-  // What we can change throught the didChangeConfiguration request, we can
+  // What we can change thought the didChangeConfiguration request, we can
   // also set through the initialize request (initializationOptions field).
   ConfigurationSettings ConfigSettings;
 
@@ -1232,10 +1232,10 @@ struct ParameterInformation {
   /// The label of this parameter. Ignored when labelOffsets is set.
   std::string labelString;
 
-  /// Inclusive start and exclusive end offsets withing the containing signature
+  /// Inclusive start and exclusive end offsets within the containing signature
   /// label.
   /// Offsets are computed by lspLength(), which counts UTF-16 code units by
-  /// default but that can be overriden, see its documentation for details.
+  /// default but that can be overridden, see its documentation for details.
   llvm::Optional<std::pair<unsigned, unsigned>> labelOffsets;
 
   /// The documentation of this parameter. Optional.

@@ -24,7 +24,7 @@ class Value;
 /// the block that contains  \p Guard's successors, and the non-taken branch
 /// goes to a newly-created deopt block that contains a sole call of the
 /// deoptimize function \p DeoptIntrinsic.  If 'UseWC' is set, preserve the
-/// widenable nature of the guard by lowering to equivelent form.  If not set,
+/// widenable nature of the guard by lowering to equivalent form.  If not set,
 /// lower to a form without widenable semantics.
 void makeGuardControlFlowExplicit(Function *DeoptIntrinsic, CallInst *Guard,
                                   bool UseWC);

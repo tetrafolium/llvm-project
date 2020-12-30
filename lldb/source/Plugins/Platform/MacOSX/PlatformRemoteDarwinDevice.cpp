@@ -232,11 +232,11 @@ bool PlatformRemoteDarwinDevice::UpdateSDKDirectoryInfosIfNeeded() {
         }
       }
 
-      const char *addtional_platform_dirs = getenv("PLATFORM_SDK_DIRECTORY");
-      if (addtional_platform_dirs) {
+      const char *additional_platform_dirs = getenv("PLATFORM_SDK_DIRECTORY");
+      if (additional_platform_dirs) {
         SDKDirectoryInfoCollection env_var_sdk_directory_infos;
         FileSystem::Instance().EnumerateDirectory(
-            addtional_platform_dirs, find_directories, find_files, find_other,
+            additional_platform_dirs, find_directories, find_files, find_other,
             GetContainedFilesIntoVectorOfStringsCallback,
             &env_var_sdk_directory_infos);
         FileSpec sdk_symbols_symlink_fspec;

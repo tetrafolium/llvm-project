@@ -1097,7 +1097,7 @@ ProcessMessage ProcessMonitor::MonitorSIGTRAP(ProcessMonitor *monitor,
   case 0:
   case TRAP_TRACE:
 #ifdef TRAP_CAP
-  // Map TRAP_CAP to a trace trap in the absense of a more specific handler.
+  // Map TRAP_CAP to a trace trap in the absence of a more specific handler.
   case TRAP_CAP:
 #endif
     LLDB_LOGF(log,

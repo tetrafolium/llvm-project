@@ -963,7 +963,7 @@ bool AsmParser::Run(bool NoInitialTextSection, bool NoFinalize) {
   // Check to see that all assembler local symbols were actually defined.
   // Targets that don't do subsections via symbols may not want this, though,
   // so conservatively exclude them. Only do this if we're finalizing, though,
-  // as otherwise we won't necessarilly have seen everything yet.
+  // as otherwise we won't necessarily have seen everything yet.
   if (!NoFinalize) {
     if (MAI.hasSubsectionsViaSymbols()) {
       for (const auto &TableEntry : getContext().getSymbols()) {
@@ -3025,7 +3025,7 @@ bool AsmParser::parseDirectiveAscii(StringRef IDVal, bool ZeroTerminated) {
     if (checkForValidSection())
       return true;
     // Only support spaces as separators for .ascii directive for now. See the
-    // discusssion at https://reviews.llvm.org/D91460 for more details
+    // discussions at https://reviews.llvm.org/D91460 for more details
     do {
       if (parseEscapedString(Data))
         return true;

@@ -108,12 +108,12 @@ struct RetainedKnowledge {
   static RetainedKnowledge none() { return RetainedKnowledge{}; }
 };
 
-/// Retreive the information help by Assume on the operand at index Idx.
+/// Retrieve the information help by Assume on the operand at index Idx.
 /// Assume should be an llvm.assume and Idx should be in the operand bundle.
 RetainedKnowledge getKnowledgeFromOperandInAssume(CallInst &Assume,
                                                   unsigned Idx);
 
-/// Retreive the information help by the Use U of an llvm.assume. the use should
+/// Retrieve the information help by the Use U of an llvm.assume. the use should
 /// be in the operand bundle.
 inline RetainedKnowledge getKnowledgeFromUseInAssume(const Use *U) {
   return getKnowledgeFromOperandInAssume(*cast<CallInst>(U->getUser()),

@@ -109,7 +109,7 @@ Error ELFSectionSizer<ELFT>::visit(SymbolTableSection &Sec) {
 
 template <class ELFT>
 Error ELFSectionSizer<ELFT>::visit(RelocationSection &Sec) {
-  Sec.EntrySize = Sec.Type == SHT_REL ? sizeof(Elf_Rel) : sizeof(Elf_Rela);
+  Sec.EntrySize = Sec.Type == SHT_REL ? sizeof(Elf_Rel) : sizeof(Elf_Real);
   Sec.Size = Sec.Relocations.size() * Sec.EntrySize;
   // Align to the largest field in Elf_Rel(a).
   Sec.Align = ELFT::Is64Bits ? sizeof(Elf_Xword) : sizeof(Elf_Word);
@@ -962,7 +962,7 @@ template <class ELFT>
 static void setAddend(Elf_Rel_Impl<ELFT, false> &, uint64_t) {}
 
 template <class ELFT>
-static void setAddend(Elf_Rel_Impl<ELFT, true> &Rela, uint64_t Addend) {
+static void setAddend(Elf_Rel_Impl<ELFT, true> &Real, uint64_t Addend) {
   Rela.r_addend = Addend;
 }
 
@@ -983,7 +983,7 @@ Error ELFSectionWriter<ELFT>::visit(const RelocationSection &Sec) {
   if (Sec.Type == SHT_REL)
     writeRel(Sec.Relocations, reinterpret_cast<Elf_Rel *>(Buf));
   else
-    writeRel(Sec.Relocations, reinterpret_cast<Elf_Rela *>(Buf));
+    writeRel(Sec.Relocations, reinterpret_cast<Elf_Real *>(Buf));
   return Error::success();
 }
 
@@ -1608,7 +1608,7 @@ template <class ELFT>
 static void getAddend(uint64_t &, const Elf_Rel_Impl<ELFT, false> &) {}
 
 template <class ELFT>
-static void getAddend(uint64_t &ToSet, const Elf_Rel_Impl<ELFT, true> &Rela) {
+static void getAddend(uint64_t &ToSet, const Elf_Rel_Impl<ELFT, true> &Real) {
   ToSet = Rela.r_addend;
 }
 
@@ -1665,7 +1665,7 @@ template <class ELFT>
 Expected<SectionBase &> ELFBuilder<ELFT>::makeSection(const Elf_Shdr &Shdr) {
   switch (Shdr.sh_type) {
   case SHT_REL:
-  case SHT_RELA:
+  case SHT_REAL:
     if (Shdr.sh_flags & SHF_ALLOC) {
       if (Expected<ArrayRef<uint8_t>> Data = ElfFile.getSectionContents(Shdr))
         return Obj.addSection<DynamicRelocationSection>(*Data);
@@ -1856,7 +1856,7 @@ template <class ELFT> Error ELFBuilder<ELFT>::readSections(bool EnsureSymtab) {
         if (Error Err = initRelocations(RelSec, Obj.SymbolTable, *Rels))
           return Err;
       } else {
-        Expected<typename ELFFile<ELFT>::Elf_Rela_Range> Relas =
+        Expected<typename ELFFile<ELFT>::Elf_Real_Range> Relas =
             ElfFile.relas(*Shdr);
         if (!Relas)
           return Relas.takeError();
@@ -2034,7 +2034,7 @@ template <class ELFT> void ELFWriter<ELFT>::writePhdrs() {
 }
 
 template <class ELFT> void ELFWriter<ELFT>::writeShdrs() {
-  // This reference serves to write the dummy section header at the begining
+  // This reference serves to write the dummy section header at the beginning
   // of the file. It is not used for anything else
   Elf_Shdr &Shdr =
       *reinterpret_cast<Elf_Shdr *>(Buf.getBufferStart() + Obj.SHOff);
@@ -2671,7 +2671,7 @@ Error IHexWriter::finalize() {
       return Err;
 
   // We need space to write section records + StartAddress record
-  // (if start adress is not zero) + EndOfFile record.
+  // (if start address is not zero) + EndOfFile record.
   TotalSize = LengthCalc.getBufferOffset() +
               (Obj.Entry ? IHexRecord::getLineLength(4) : 0) +
               IHexRecord::getLineLength(0);

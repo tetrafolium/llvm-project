@@ -689,7 +689,7 @@ public:
     return true;
   }
 
-  /// Should we tranform the IR-optimal check for whether given truncation
+  /// Should we transform the IR-optimal check for whether given truncation
   /// down into KeptBits would be truncating or not:
   ///   (add %x, (1 << (KeptBits-1))) srccond (1 << KeptBits)
   /// Into it's more traditional form:
@@ -770,7 +770,7 @@ public:
   virtual EVT getSetCCResultType(const DataLayout &DL, LLVMContext &Context,
                                  EVT VT) const;
 
-  /// Return the ValueType for comparison libcalls. Comparions libcalls include
+  /// Return the ValueType for comparison libcalls. Comparison libcalls include
   /// floating point comparion calls, and Ordered/Unordered check calls on
   /// floating point numbers.
   virtual MVT::SimpleValueType getCmpLibcallReturnType() const;
@@ -1481,7 +1481,7 @@ public:
     return getNumRegisters(Context, VT);
   }
 
-  /// Certain targets have context senstive alignment requirements, where one
+  /// Certain targets have context sensitive alignment requirements, where one
   /// type has the alignment requirement of another type.
   virtual Align getABIAlignmentForCallingConv(Type *ArgTy,
                                               DataLayout DL) const {
@@ -4397,12 +4397,12 @@ public:
                               SelectionDAG &DAG) const;
 
   /// Method for building the DAG expansion of ISD::U(ADD|SUB)O. Expansion
-  /// always suceeds and populates the Result and Overflow arguments.
+  /// always succeeds and populates the Result and Overflow arguments.
   void expandUADDSUBO(SDNode *Node, SDValue &Result, SDValue &Overflow,
                       SelectionDAG &DAG) const;
 
   /// Method for building the DAG expansion of ISD::S(ADD|SUB)O. Expansion
-  /// always suceeds and populates the Result and Overflow arguments.
+  /// always succeeds and populates the Result and Overflow arguments.
   void expandSADDSUBO(SDNode *Node, SDValue &Result, SDValue &Overflow,
                       SelectionDAG &DAG) const;
 
@@ -4471,7 +4471,7 @@ public:
   // combiner can fold the new nodes.
   SDValue lowerCmpEqZeroToCtlzSrl(SDValue Op, SelectionDAG &DAG) const;
 
-  /// Give targets the chance to reduce the number of distinct addresing modes.
+  /// Give targets the chance to reduce the number of distinct addressing modes.
   ISD::MemIndexType getCanonicalIndexType(ISD::MemIndexType IndexType,
                                           EVT MemVT, SDValue Offsets) const;
 

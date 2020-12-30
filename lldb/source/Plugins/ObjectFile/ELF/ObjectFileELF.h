@@ -296,7 +296,7 @@ private:
   /// added.
   unsigned ParseTrampolineSymbols(lldb_private::Symtab *symbol_table,
                                   lldb::user_id_t start_id,
-                                  const ELFSectionHeaderInfo *rela_hdr,
+                                  const ELFSectionHeaderInfo *real_hdr,
                                   lldb::user_id_t section_id);
 
   void ParseUnwindSymbols(lldb_private::Symtab *symbol_table,
@@ -388,7 +388,7 @@ private:
   /// stored within that section.
   ///
   /// \returns either the decompressed object file stored within the
-  /// .gnu_debugdata section or \c nullptr if an error occured or if there's no
+  /// .gnu_debugdata section or \c nullptr if an error occurred or if there's no
   /// section with that name.
   std::shared_ptr<ObjectFileELF> GetGnuDebugDataObjectFile();
 };

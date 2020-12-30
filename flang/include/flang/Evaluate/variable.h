@@ -13,7 +13,7 @@
 // for use in expressions and assignment statements.  Both copy and move
 // semantics are supported.  The representation adheres closely to the
 // Fortran 2018 language standard (q.v.) and uses strong typing to ensure
-// that only admissable combinations can be constructed.
+// that only admissible combinations can be constructed.
 
 #include "call.h"
 #include "common.h"

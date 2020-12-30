@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// llvm-profgen generates SPGO profiles from perf script ouput.
+// llvm-profgen generates SPGO profiles from perf script output.
 //
 //===----------------------------------------------------------------------===//
 

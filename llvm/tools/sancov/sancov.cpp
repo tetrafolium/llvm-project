@@ -527,7 +527,7 @@ getCoveragePoints(const std::string &ObjectFile,
   std::set<std::string> CoveredFiles;
   if (ClSkipDeadFiles) {
     for (auto Addr : CoveredAddrs) {
-      // TODO: it would be neccessary to set proper section index here.
+      // TODO: it would be necessary to set proper section index here.
       // object::SectionedAddress::UndefSection works for only absolute
       // addresses.
       object::SectionedAddress ModuleAddress = {
@@ -549,7 +549,7 @@ getCoveragePoints(const std::string &ObjectFile,
   for (auto Addr : Addrs) {
     std::set<DILineInfo> Infos; // deduplicate debug info.
 
-    // TODO: it would be neccessary to set proper section index here.
+    // TODO: it would be necessary to set proper section index here.
     // object::SectionedAddress::UndefSection works for only absolute addresses.
     object::SectionedAddress ModuleAddress = {
         Addr, object::SectionedAddress::UndefSection};
@@ -878,7 +878,7 @@ symbolize(const RawCoverage &Data, const std::string ObjectFile) {
   auto Symbolizer(createSymbolizer());
 
   for (uint64_t Addr : *Data.Addrs) {
-    // TODO: it would be neccessary to set proper section index here.
+    // TODO: it would be necessary to set proper section index here.
     // object::SectionedAddress::UndefSection works for only absolute addresses.
     auto LineInfo = Symbolizer->symbolizeCode(
         ObjectFile, {Addr, object::SectionedAddress::UndefSection});

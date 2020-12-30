@@ -345,7 +345,7 @@ bool SystemZRegisterInfo::shouldCoalesce(
     return true;
 
   // Allow coalescing of a GR128 subreg COPY only if the live ranges are small
-  // and local to one MBB with not too much interferring registers. Otherwise
+  // and local to one MBB with not too much interfering registers. Otherwise
   // regalloc may run out of registers.
 
   unsigned WideOpNo = (getRegSizeInBits(*SrcRC) == 128 ? 1 : 0);

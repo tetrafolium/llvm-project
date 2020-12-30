@@ -382,7 +382,7 @@ class ExplodedGraph:
             # Also on Windows macros __FILE__ produces specific delimiters `\`
             # and a directory or file may starts with the letter `l`.
             # Find all `\l` (like `,\l`, `}\l`, `[\l`) except `\\l`,
-            # because the literal as a rule containes multiple `\` before `\l`.
+            # because the literal as a rule contains multiple `\` before `\l`.
             node_label = re.sub(r'(?<!\\)\\l', '', node_label)
             logging.debug(node_label)
             json_node = json.loads(node_label)
@@ -398,7 +398,7 @@ class ExplodedGraph:
 
 
 # A visitor that dumps the ExplodedGraph into a DOT file with fancy HTML-based
-# syntax highlighing.
+# syntax highlighting.
 class DotDumpVisitor:
     def __init__(self, do_diffs, dark_mode, gray_mode,
                  topo_mode, dump_dot_only):

@@ -65,7 +65,7 @@ buildCompilerInvocation(const ParseInputs &Inputs, clang::DiagnosticConsumer &D,
 
 /// Creates a compiler instance, configured so that:
 ///   - Contents of the parsed file are remapped to \p MainFile.
-///   - Preamble is overriden to use PCH passed to this function. It means the
+///   - Preamble is overridden to use PCH passed to this function. It means the
 ///     changes to the preamble headers or files included in the preamble are
 ///     not visible to this compiler instance.
 ///   - llvm::vfs::FileSystem is used for all underlying file accesses. The

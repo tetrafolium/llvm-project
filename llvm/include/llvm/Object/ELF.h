@@ -96,7 +96,7 @@ public:
   using Elf_Dyn = typename ELFT::Dyn;
   using Elf_Phdr = typename ELFT::Phdr;
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
   using Elf_Relr = typename ELFT::Relr;
   using Elf_Verdef = typename ELFT::Verdef;
   using Elf_Verdaux = typename ELFT::Verdaux;
@@ -112,7 +112,7 @@ public:
   using Elf_Shdr_Range = typename ELFT::ShdrRange;
   using Elf_Sym_Range = typename ELFT::SymRange;
   using Elf_Rel_Range = typename ELFT::RelRange;
-  using Elf_Rela_Range = typename ELFT::RelaRange;
+  using Elf_Real_Range = typename ELFT::RelaRange;
   using Elf_Relr_Range = typename ELFT::RelrRange;
   using Elf_Phdr_Range = typename ELFT::PhdrRange;
 
@@ -192,8 +192,8 @@ public:
     return getSectionContentsAsArray<Elf_Sym>(*Sec);
   }
 
-  Expected<Elf_Rela_Range> relas(const Elf_Shdr &Sec) const {
-    return getSectionContentsAsArray<Elf_Rela>(Sec);
+  Expected<Elf_Real_Range> relas(const Elf_Shdr &Sec) const {
+    return getSectionContentsAsArray<Elf_Real>(Sec);
   }
 
   Expected<Elf_Rel_Range> rels(const Elf_Shdr &Sec) const {
@@ -206,7 +206,7 @@ public:
 
   std::vector<Elf_Rel> decode_relrs(Elf_Relr_Range relrs) const;
 
-  Expected<std::vector<Elf_Rela>> android_relas(const Elf_Shdr &Sec) const;
+  Expected<std::vector<Elf_Real>> android_relas(const Elf_Shdr &Sec) const;
 
   /// Iterate over program header table.
   Expected<Elf_Phdr_Range> program_headers() const {

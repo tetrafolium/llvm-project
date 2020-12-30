@@ -1431,7 +1431,7 @@ static QualType ConvertDeclSpecToType(TypeProcessingState &state) {
     }
     break;
   }
-  case DeclSpec::TST_extint: {
+  case DeclSpec::TST_extinct: {
     if (!S.Context.getTargetInfo().hasExtIntType())
       S.Diag(DS.getTypeSpecTypeLoc(), diag::err_type_unsupported) << "_ExtInt";
     Result =
@@ -5431,7 +5431,7 @@ static TypeSourceInfo *GetFullTypeForDeclarator(TypeProcessingState &state,
         break;
       case DeclaratorChunk::Function: {
         const DeclaratorChunk::FunctionTypeInfo &FTI = DeclType.Fun;
-        // We supress the warning when there's no LParen location, as this
+        // We suppress the warning when there's no LParen location, as this
         // indicates the declaration was an implicit declaration, which gets
         // warned about separately via -Wimplicit-function-declaration.
         if (FTI.NumParams == 0 && !FTI.isVariadic &&

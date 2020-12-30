@@ -46,16 +46,16 @@ public:
     std::string m_completion;
     /// The description that should be displayed to the user alongside the
     /// completion text.
-    std::string m_descripton;
+    std::string m_description;
     CompletionMode m_mode;
 
   public:
     Completion(llvm::StringRef completion, llvm::StringRef description,
                CompletionMode mode)
-        : m_completion(completion.str()), m_descripton(description.str()),
+        : m_completion(completion.str()), m_description(description.str()),
           m_mode(mode) {}
     const std::string &GetCompletion() const { return m_completion; }
-    const std::string &GetDescription() const { return m_descripton; }
+    const std::string &GetDescription() const { return m_description; }
     CompletionMode GetMode() const { return m_mode; }
 
     /// Generates a string that uniquely identifies this completion result.

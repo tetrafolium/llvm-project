@@ -103,7 +103,7 @@ bool VirtualUnwinder::unwind(const HybridSample &Sample, uint64_t Repeat) {
   // Also do not attempt linear unwind for the leaf range as it's incomplete.
   bool IsLeaf = true;
 
-  // Now process the LBR samples in parrallel with stack sample
+  // Now process the LBR samples in parallel with stack sample
   // Note that we do not reverse the LBR entry order so we can
   // unwind the sample stack as we walk through LBR entries.
   while (State.hasNextLBR()) {
@@ -238,7 +238,7 @@ bool PerfReader::extractLBRStack(TraceStream &TraceIt,
   // The raw format of LBR stack is like:
   // 0x4005c8/0x4005dc/P/-/-/0 0x40062f/0x4005b0/P/-/-/0 ...
   //                           ... 0x4005c8/0x4005dc/P/-/-/0
-  // It's in FIFO order and seperated by whitespace.
+  // It's in FIFO order and separated by whitespace.
   SmallVector<StringRef, 32> Records;
   TraceIt.getCurrentLine().split(Records, " ");
 
@@ -281,7 +281,7 @@ bool PerfReader::extractLBRStack(TraceStream &TraceIt,
     }
     if (SrcIsInternal && !DstIsInternal) {
       // For transition to external code, group the Source with the next
-      // availabe transition target.
+      // available transition target.
       if (!PrevTrDst)
         continue;
       Dst = PrevTrDst;

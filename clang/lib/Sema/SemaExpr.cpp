@@ -1137,7 +1137,7 @@ static QualType handleIntToFloatConversion(Sema &S, ExprResult &FloatExpr,
   return result;
 }
 
-/// Handle arithmethic conversion with floating point types.  Helper
+/// Handle arithmetic conversion with floating point types.  Helper
 /// function of UsualArithmeticConversions()
 static QualType handleFloatConversion(Sema &S, ExprResult &LHS, ExprResult &RHS,
                                       QualType LHSType, QualType RHSType,
@@ -10054,7 +10054,7 @@ QualType Sema::CheckVectorOperands(ExprResult &LHS, ExprResult &RHS,
     QualType Scalar = LHSVecType ? RHSType : LHSType;
     QualType Vector = LHSVecType ? LHSType : RHSType;
     unsigned ScalarOrVector = LHSVecType && RHSVecType ? 1 : 0;
-    Diag(Loc, diag::err_typecheck_vector_not_convertable_implict_truncation)
+    Diag(Loc, diag::err_typecheck_vector_not_convertable_implicit_truncation)
         << ScalarOrVector << Scalar << Vector;
 
     return QualType();
@@ -10574,7 +10574,7 @@ QualType Sema::CheckAdditionOperands(ExprResult &LHS, ExprResult &RHS,
   if (isObjCPointer && checkArithmeticOnObjCPointer(*this, Loc, PExp))
     return QualType();
 
-  // Check array bounds for pointer arithemtic
+  // Check array bounds for pointer arithmetic
   CheckArrayAccess(PExp, IExp);
 
   if (CompLHSTy) {
@@ -10655,7 +10655,7 @@ QualType Sema::CheckSubtractionOperands(ExprResult &LHS, ExprResult &RHS,
       if (!checkArithmeticOpPointerOperand(*this, Loc, LHS.get()))
         return QualType();
 
-      // Check array bounds for pointer arithemtic
+      // Check array bounds for pointer arithmetic
       CheckArrayAccess(LHS.get(), RHS.get(), /*ArraySubscriptExpr*/ nullptr,
                        /*AllowOnePastEnd*/ true, /*IndexNegated*/ true);
 
@@ -16567,7 +16567,7 @@ HandleImmediateInvocations(Sema &SemaRef,
     llvm::SaveAndRestore<bool> DisableIITracking(
         SemaRef.RebuildingImmediateInvocation, true);
 
-    /// Prevent diagnostic during tree transfrom as they are duplicates
+    /// Prevent diagnostic during tree transform as they are duplicates
     Sema::TentativeAnalysisScope DisableDiag(SemaRef);
 
     for (auto It = Rec.ImmediateInvocationCandidates.rbegin();

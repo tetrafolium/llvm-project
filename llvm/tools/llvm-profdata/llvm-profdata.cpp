@@ -204,7 +204,7 @@ static void overlapInput(const std::string &BaseFilename,
                          raw_fd_ostream &OS, bool IsCS) {
   auto ReaderOrErr = InstrProfReader::create(TestFilename);
   if (Error E = ReaderOrErr.takeError()) {
-    // Skip the empty profiles by returning sliently.
+    // Skip the empty profiles by returning silently.
     instrprof_error IPE = InstrProfError::take(std::move(E));
     if (IPE != instrprof_error::empty_raw_profile)
       WC->Errors.emplace_back(make_error<InstrProfError>(IPE), TestFilename);
@@ -233,7 +233,7 @@ static void loadInput(const WeightedFile &Input, SymbolRemapper *Remapper,
 
   auto ReaderOrErr = InstrProfReader::create(Input.Filename);
   if (Error E = ReaderOrErr.takeError()) {
-    // Skip the empty profiles by returning sliently.
+    // Skip the empty profiles by returning silently.
     instrprof_error IPE = InstrProfError::take(std::move(E));
     if (IPE != instrprof_error::empty_raw_profile)
       WC->Errors.emplace_back(make_error<InstrProfError>(IPE), Filename);
@@ -713,7 +713,7 @@ mergeSampleProfile(const WeightedFileVector &Inputs, SymbolRemapper *Remapper,
     exitWithErrorCode(EC, OutputFilename);
 
   auto Writer = std::move(WriterOrErr.get());
-  // WriterList will have StringRef refering to string in Buffer.
+  // WriterList will have StringRef referring to string in Buffer.
   // Make sure Buffer lives as long as WriterList.
   auto Buffer = getInputFileBuf(ProfileSymbolListFile);
   handleExtBinaryWriter(*Writer, OutputFormat, Buffer.get(), WriterList,
@@ -1742,7 +1742,7 @@ void SampleOverlapAggregator::dumpFuncSimilarity(raw_fd_ostream &OS) const {
 }
 
 void SampleOverlapAggregator::dumpProgramSummary(raw_fd_ostream &OS) const {
-  OS << "Profile overlap infomation for base_profile: " << ProfOverlap.BaseName
+  OS << "Profile overlap information for base_profile: " << ProfOverlap.BaseName
      << " and test_profile: " << ProfOverlap.TestName << "\nProgram level:\n";
 
   OS << "  Whole program profile similarity: "

@@ -372,7 +372,7 @@ void SIScheduleBlock::initRegPressure(MachineBasicBlock::iterator BeginBlock,
   // able to correctly handle 5 vs 6, 2 vs 3.
   // (Note: This is not sufficient for RPTracker to not do mistakes for case 4)
   // The RPTracker's LiveOutRegs has 1, 3, (some correct or incorrect)4, 5, 7
-  // Comparing to LiveInRegs is not sufficient to differenciate 4 vs 5, 7
+  // Comparing to LiveInRegs is not sufficient to differentiate 4 vs 5, 7
   // The use of findDefBetween removes the case 4.
   for (const auto &RegMaskPair : RPTracker.getPressure().LiveOutRegs) {
     Register Reg = RegMaskPair.RegUnit;
@@ -709,7 +709,7 @@ void SIScheduleBlockCreator::colorHighLatenciesGroups() {
         bool HasSubGraph;
         std::vector<int> SubGraph;
         // By construction (topological order), if SU and
-        // DAG->SUnits[j] are linked, DAG->SUnits[j] is neccessary
+        // DAG->SUnits[j] are linked, DAG->SUnits[j] is necessary
         // in the parent graph of SU.
 #ifndef NDEBUG
         SubGraph = DAG->GetTopo()->GetSubGraph(SU, DAG->SUnits[j], HasSubGraph);
@@ -1144,7 +1144,7 @@ void SIScheduleBlockCreator::colorExports() {
         bool HasSubGraph;
         std::vector<int> SubGraph;
         // By construction (topological order), if SU and
-        // DAG->SUnits[j] are linked, DAG->SUnits[j] is neccessary
+        // DAG->SUnits[j] are linked, DAG->SUnits[j] is necessary
         // in the parent graph of SU.
 #ifndef NDEBUG
         SubGraph = DAG->GetTopo()->GetSubGraph(SU, DAG->SUnits[j], HasSubGraph);

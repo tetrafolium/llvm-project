@@ -6209,7 +6209,7 @@ NamedDecl *Sema::ActOnTypedefNameDecl(Scope *S, DeclContext *DC,
 /// declared.
 ///
 /// \returns true if PrevDecl is an out-of-scope previous declaration
-/// for a new delcaration with the same name.
+/// for a new declaration with the same name.
 static bool isOutOfScopePreviousDeclaration(NamedDecl *PrevDecl,
                                             DeclContext *DC,
                                             ASTContext &Context) {
@@ -17835,7 +17835,7 @@ static void CheckForDuplicateEnumValues(Sema &S, ArrayRef<Decl *> Elements,
       return;
     }
 
-    // Constants with initalizers are handled in the next loop.
+    // Constants with initializers are handled in the next loop.
     if (ECD->getInitExpr())
       continue;
 

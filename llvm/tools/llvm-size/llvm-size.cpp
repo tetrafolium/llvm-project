@@ -193,7 +193,7 @@ static bool considerForSize(ObjectFile *Obj, SectionRef Section) {
     return false;
   case ELF::SHT_STRTAB:
   case ELF::SHT_REL:
-  case ELF::SHT_RELA:
+  case ELF::SHT_REAL:
     return static_cast<ELFSectionRef>(Section).getFlags() & ELF::SHF_ALLOC;
   }
   return true;

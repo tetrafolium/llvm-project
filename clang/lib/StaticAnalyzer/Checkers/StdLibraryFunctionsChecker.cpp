@@ -309,7 +309,7 @@ class StdLibraryFunctionsChecker
           return SizeV;
         } else {
           llvm_unreachable("The constraint must be either a concrete value or "
-                           "encoded in an arguement.");
+                           "encoded in an argument.");
         }
       }();
 
@@ -770,7 +770,7 @@ bool StdLibraryFunctionsChecker::Signature::matches(
   // even in C++.
   // In case of any non-C99 languages, we don't want to match based on the
   // restrict qualifier because we cannot know if the given libc implementation
-  // qualifies the paramter type or not.
+  // qualifies the parameter type or not.
   auto RemoveRestrict = [&FD](QualType T) {
     if (!FD->getASTContext().getLangOpts().C99)
       T.removeLocalRestrict();

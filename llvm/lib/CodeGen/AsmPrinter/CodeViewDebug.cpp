@@ -2079,7 +2079,7 @@ static TypeRecordKind getRecordKind(const DICompositeType *Ty) {
 }
 
 /// Return ClassOptions that should be present on both the forward declaration
-/// and the defintion of a tag type.
+/// and the definition of a tag type.
 static ClassOptions getCommonClassOptions(const DICompositeType *Ty) {
   ClassOptions CO = ClassOptions::None;
 

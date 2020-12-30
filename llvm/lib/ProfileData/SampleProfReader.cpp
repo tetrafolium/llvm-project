@@ -441,7 +441,7 @@ ErrorOr<StringRef> SampleProfileReaderExtBinaryBase::readStringFromTable() {
     if (std::error_code EC = FID.getError())
       return EC;
     // Save the string converted from uint64_t in MD5StringBuf. All the
-    // references to the name are all StringRefs refering to the string
+    // references to the name are all StringRefs referring to the string
     // in MD5StringBuf.
     MD5StringBuf->push_back(std::to_string(*FID));
     SR = MD5StringBuf->back();

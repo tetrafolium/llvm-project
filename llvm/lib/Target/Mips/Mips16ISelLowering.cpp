@@ -316,7 +316,7 @@ Mips16TargetLowering::getMips16HelperFunctionStubNumber(ArgListTy &Args) const {
 // return type: float  sf_
 //              double df_
 //              single complex sc_
-//              double complext dc_
+//              double complexity dc_
 //              others  NO PREFIX
 //
 //

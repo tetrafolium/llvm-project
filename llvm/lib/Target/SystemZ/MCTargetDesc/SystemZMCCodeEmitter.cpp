@@ -90,7 +90,7 @@ private:
 
   // Operand OpNum of MI needs a PC-relative fixup of kind Kind at
   // Offset bytes from the start of MI.  Add the fixup to Fixups
-  // and return the in-place addend, which since we're a RELA target
+  // and return the in-place addend, which since we're a REAL target
   // is always 0.  If AllowTLS is true and optional operand OpNum + 1
   // is present, also emit a TLS call fixup for it.
   uint64_t getPCRelEncoding(const MCInst &MI, unsigned OpNum,

@@ -186,7 +186,7 @@ static bool isPossiblyEscaped(const VarDecl *VD, ExplodedNode *N) {
           return false;
       }
     }
-    // Check the usage of the pass-by-ref function calls and adress-of operator
+    // Check the usage of the pass-by-ref function calls and address-of operator
     // on VD and reference initialized by VD.
     ASTContext &ASTCtx =
         N->getLocationContext()->getAnalysisDeclContext()->getASTContext();

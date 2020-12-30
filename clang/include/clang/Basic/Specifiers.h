@@ -50,7 +50,7 @@ enum TypeSpecifierType {
   TST_char32, // C++11 char32_t
   TST_int,
   TST_int128,
-  TST_extint,  // Extended Int types.
+  TST_extinct,  // Extended Int types.
   TST_half,    // OpenCL half, ARM NEON __fp16
   TST_Float16, // C11 extension ISO/IEC TS 18661-3
   TST_Accum,   // ISO/IEC JTC1 SC22 WG14 N1169 Extension
@@ -305,7 +305,7 @@ enum class NullabilityKind : uint8_t {
   Unspecified,
   // Generally behaves like Nullable, except when used in a block parameter
   // that was imported into a swift async method. There, swift will assume
-  // that the parameter can get null even if no error occured. _Nullable
+  // that the parameter can get null even if no error occurred. _Nullable
   // parameters are assumed to only get null on error.
   NullableResult,
 };

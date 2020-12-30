@@ -2027,7 +2027,7 @@ Instruction *InstCombinerImpl::visitGetElementPtrInst(GetElementPtrInst &GEP) {
           // We have something like:
           //  %src = getelementptr <ty>, <ty>* %base, <ty> %idx
           //  %gep = getelementptr <ty>, <ty>* %src, <ty> %idx2
-          // If we just swap idx & idx2 then we could inadvertantly
+          // If we just swap idx & idx2 then we could inadvertently
           // change %src from a vector to a scalar, or vice versa.
           // Cases:
           //  1) %base a scalar & idx a scalar & idx2 a vector

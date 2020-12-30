@@ -1566,7 +1566,7 @@ static bool impliesEquivalanceIfFalse(CmpInst *Cmp) {
   if (Cmp->getPredicate() == CmpInst::Predicate::ICMP_NE)
     return true;
 
-  // Floating point comparisons can be equal, but not equivelent.  Cases:
+  // Floating point comparisons can be equal, but not equivalent.  Cases:
   // NaNs for unordered operators
   // +0.0 vs 0.0 for all operators
   if ((Cmp->getPredicate() == CmpInst::Predicate::FCMP_ONE &&
@@ -2112,7 +2112,7 @@ bool GVN::propagateEquality(Value *LHS, Value *RHS, const BasicBlockEdge &Root,
 
       // If "A == B" is known true, or "A != B" is known false, then replace
       // A with B everywhere in the scope.  For floating point operations, we
-      // have to be careful since equality does not always imply equivalance.
+      // have to be careful since equality does not always imply equivalence.
       if ((isKnownTrue && impliesEquivalanceIfTrue(Cmp)) ||
           (isKnownFalse && impliesEquivalanceIfFalse(Cmp)))
         Worklist.push_back(std::make_pair(Op0, Op1));

@@ -267,7 +267,7 @@ public:
 
   void EmitToStreamer(MCStreamer &S, const MCInst &Inst);
 
-  /// Emits inital debug location directive.
+  /// Emits initial debug location directive.
   void emitInitialRawDwarfLocDirective(const MachineFunction &MF);
 
   /// Return the current section we are emitting to.

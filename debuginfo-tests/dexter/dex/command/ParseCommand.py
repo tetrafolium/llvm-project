@@ -51,7 +51,7 @@ def _get_valid_commands():
 
 def _get_command_name(command_raw: str) -> str:
     """Return command name by splitting up DExTer command contained in
-    command_raw on the first opening paranthesis and further stripping
+    command_raw on the first opening parenthesis and further stripping
     any potential leading or trailing whitespace.
     """
     return command_raw.split('(', 1)[0].rstrip()

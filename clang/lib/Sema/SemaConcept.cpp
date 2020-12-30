@@ -220,7 +220,7 @@ static bool calculateConstraintSatisfaction(
             //   ...If substitution results in an invalid type or expression,
             //   the constraint is not satisfied.
             if (!Trap.hasErrorOccurred())
-              // A non-SFINAE error has occured as a result of this
+              // A non-SFINAE error has occurred as a result of this
               // substitution.
               return ExprError();
 

@@ -551,7 +551,7 @@ static LogicalResult processParallelLoop(
 /// need to be annotated, as well. Structurally, the transformation works by
 /// splicing all operations from nested `scf.parallel` operations into a single
 /// sequence. Indices mapped to hardware ids are substituted with those ids,
-/// wheras sequential mappings result in a sequential for-loop. To have more
+/// whereas sequential mappings result in a sequential for-loop. To have more
 /// flexibility when mapping code to hardware ids, the transform supports two
 /// affine maps. The first `map` is used to compute the actual index for
 /// substitution from the hardware id. The second `bound` is used to compute the

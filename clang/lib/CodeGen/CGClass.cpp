@@ -1709,7 +1709,7 @@ private:
     const ASTRecordLayout &Layout =
         Context.getASTRecordLayout(Dtor->getParent());
 
-    // It's a first trivia field so it should be at the begining of char,
+    // It's a first trivia field so it should be at the beginning of char,
     // still round up start offset just in case.
     CharUnits PoisonStart = Context.toCharUnitsFromBits(
         Layout.getFieldOffset(layoutStartOffset) + Context.getCharWidth() - 1);

@@ -4916,7 +4916,7 @@ emitLoadSRsrcFromVGPRLoop(const SIInstrInfo &TII, MachineRegisterInfo &MRI,
     else
       Cmp.addReg(VRsrc, VRsrcUndef, TRI->getSubRegFromChannel(Idx, 2));
 
-    // Combine the comparision results with AND.
+    // Combine the comparison results with AND.
     if (CondReg == AMDGPU::NoRegister) // First.
       CondReg = NewCondReg;
     else { // If not the first, we create an AND.
@@ -5950,7 +5950,7 @@ void SIInstrInfo::lowerScalarXnor(SetVectorType &Worklist,
     // Using the identity !(x ^ y) == (!x ^ y) == (x ^ !y), we can
     // invert either source and then perform the XOR. If either source is a
     // scalar register, then we can leave the inversion on the scalar unit to
-    // acheive a better distrubution of scalar and vector instructions.
+    // achieve a better distribution of scalar and vector instructions.
     bool Src0IsSGPR =
         Src0.isReg() && RI.isSGPRClass(MRI.getRegClass(Src0.getReg()));
     bool Src1IsSGPR =
@@ -6002,13 +6002,13 @@ void SIInstrInfo::splitScalarNotBinop(SetVectorType &Worklist,
   MachineOperand &Src1 = Inst.getOperand(2);
 
   Register NewDest = MRI.createVirtualRegister(&AMDGPU::SReg_32RegClass);
-  Register Interm = MRI.createVirtualRegister(&AMDGPU::SReg_32RegClass);
+  Register Interim = MRI.createVirtualRegister(&AMDGPU::SReg_32RegClass);
 
   MachineInstr &Op =
-      *BuildMI(MBB, MII, DL, get(Opcode), Interm).add(Src0).add(Src1);
+      *BuildMI(MBB, MII, DL, get(Opcode), Interim).add(Src0).add(Src1);
 
   MachineInstr &Not =
-      *BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B32), NewDest).addReg(Interm);
+      *BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B32), NewDest).addReg(Interim);
 
   Worklist.insert(&Op);
   Worklist.insert(&Not);
@@ -6030,13 +6030,13 @@ void SIInstrInfo::splitScalarBinOpN2(SetVectorType &Worklist,
   MachineOperand &Src1 = Inst.getOperand(2);
 
   Register NewDest = MRI.createVirtualRegister(&AMDGPU::SReg_32_XM0RegClass);
-  Register Interm = MRI.createVirtualRegister(&AMDGPU::SReg_32_XM0RegClass);
+  Register Interim = MRI.createVirtualRegister(&AMDGPU::SReg_32_XM0RegClass);
 
   MachineInstr &Not =
-      *BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B32), Interm).add(Src1);
+      *BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B32), Interim).add(Src1);
 
   MachineInstr &Op =
-      *BuildMI(MBB, MII, DL, get(Opcode), NewDest).add(Src0).addReg(Interm);
+      *BuildMI(MBB, MII, DL, get(Opcode), NewDest).add(Src0).addReg(Interim);
 
   Worklist.insert(&Not);
   Worklist.insert(&Op);
@@ -6254,7 +6254,7 @@ void SIInstrInfo::splitScalar64BitXnor(SetVectorType &Worklist,
 
   const TargetRegisterClass *DestRC = MRI.getRegClass(Dest.getReg());
 
-  Register Interm = MRI.createVirtualRegister(&AMDGPU::SReg_64RegClass);
+  Register Interim = MRI.createVirtualRegister(&AMDGPU::SReg_64RegClass);
 
   MachineOperand *Op0;
   MachineOperand *Op1;
@@ -6267,12 +6267,12 @@ void SIInstrInfo::splitScalar64BitXnor(SetVectorType &Worklist,
     Op1 = &Src0;
   }
 
-  BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B64), Interm).add(*Op0);
+  BuildMI(MBB, MII, DL, get(AMDGPU::S_NOT_B64), Interim).add(*Op0);
 
   Register NewDest = MRI.createVirtualRegister(DestRC);
 
   MachineInstr &Xor = *BuildMI(MBB, MII, DL, get(AMDGPU::S_XOR_B64), NewDest)
-                           .addReg(Interm)
+                           .addReg(Interim)
                            .add(*Op1);
 
   MRI.replaceRegWith(Dest.getReg(), NewDest);

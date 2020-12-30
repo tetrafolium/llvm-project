@@ -613,7 +613,7 @@ std::int64_t AccAttributeVisitor::GetAssociatedLoopLevelFromClauses(
 void AccAttributeVisitor::PrivatizeAssociatedLoopIndex(
     const parser::OpenACCLoopConstruct &x) {
   std::int64_t level{GetContext().associatedLoopLevel};
-  if (level <= 0) { // collpase value was negative or 0
+  if (level <= 0) { // collapse value was negative or 0
     return;
   }
   Symbol::Flag ivDSA{Symbol::Flag::AccPrivate};

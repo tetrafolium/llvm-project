@@ -149,7 +149,7 @@ public:
   /// the user rather than being put on a pipe or stored in a file.
   static bool FileDescriptorIsDisplayed(int fd);
 
-  /// This function determines if the given file descriptor is displayd and
+  /// This function determines if the given file descriptor is displayed and
   /// supports colors.
   static bool FileDescriptorHasColors(int fd);
 

@@ -519,7 +519,7 @@ evaluateDecisionForest(const SymbolQualitySignals &Quality,
   DecisionForestScores Scores;
   // Exponentiating DecisionForest prediction makes the score of each tree a
   // multiplciative boost (like NameMatch). This allows us to weigh the
-  // prediciton score and NameMatch appropriately.
+  // prediction score and NameMatch appropriately.
   Scores.ExcludingName = pow(Base, Evaluate(E));
   // NeedsFixIts is not part of the DecisionForest as generating training
   // data that needs fixits is not-feasible.

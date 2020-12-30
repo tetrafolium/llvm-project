@@ -21,7 +21,7 @@
 #include "tsan_report.h"
 #include "tsan_rtl.h"
 
-// May be overriden by front-end.
+// May be overridden by front-end.
 SANITIZER_WEAK_DEFAULT_IMPL
 void __sanitizer_malloc_hook(void *ptr, uptr size) {
   (void)ptr;

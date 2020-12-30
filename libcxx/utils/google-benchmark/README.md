@@ -432,7 +432,7 @@ Without `UseRealTime`, CPU time is used by default.
 Normally, the entire duration of the work loop (`for (auto _ : state) {}`)
 is measured. But sometimes, it is nessesary to do some work inside of
 that loop, every iteration, but without counting that time to the benchmark time.
-That is possible, althought it is not recommended, since it has high overhead.
+That is possible, although it is not recommended, since it has high overhead.
 
 ```c++
 static void BM_SetInsert_With_Timer_Control(benchmark::State& state) {

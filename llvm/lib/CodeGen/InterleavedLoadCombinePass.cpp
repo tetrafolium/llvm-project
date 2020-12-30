@@ -1159,7 +1159,7 @@ bool InterleavedLoadCombineImpl::combine(std::list<VectorInfo> &InterleavedLoad,
 
   // Test if all participating instruction will be dead after the
   // transformation. If intermediate results are used, no performance gain can
-  // be expected. Also sum the cost of the Instructions beeing left dead.
+  // be expected. Also sum the cost of the Instructions being left dead.
   for (auto &I : Is) {
     // Compute the old cost
     InstructionCost +=

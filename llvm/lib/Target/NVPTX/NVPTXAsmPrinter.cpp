@@ -890,7 +890,7 @@ bool NVPTXAsmPrinter::doFinalization(Module &M) {
     GlobalsEmitted = true;
   }
 
-  // XXX Temproarily remove global variables so that doFinalization() will not
+  // XXX Temporarily remove global variables so that doFinalization() will not
   // emit them again (global variables are emitted at beginning).
 
   Module::GlobalListType &global_list = M.getGlobalList();

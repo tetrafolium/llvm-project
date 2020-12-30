@@ -36,7 +36,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSystemZTarget() {
 
 // Determine whether we use the vector ABI.
 static bool UsesVectorABI(StringRef CPU, StringRef FS) {
-  // We use the vector ABI whenever the vector facility is avaiable.
+  // We use the vector ABI whenever the vector facility is available.
   // This is the case by default if CPU is z13 or later, and can be
   // overridden via "[+-]vector" feature string elements.
   bool VectorABI = true;

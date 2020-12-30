@@ -897,7 +897,7 @@ bool CodeGenRegisterClass::Key::operator<(
 
 // Returns true if RC is a strict subclass.
 // RC is a sub-class of this class if it is a valid replacement for any
-// instruction operand where a register of this classis required. It must
+// instruction operand where a register of this classics required. It must
 // satisfy these conditions:
 //
 // 1. All RC registers are also in this.
@@ -1620,7 +1620,7 @@ static void computeUberSets(std::vector<UberRegSet> &UberSets,
   assert(Registers.size() == Registers.back().EnumValue &&
          "register enum value mismatch");
 
-  // For simplicitly make the SetID the same as EnumValue.
+  // For simplicity make the SetID the same as EnumValue.
   IntEqClasses UberSetIDs(Registers.size() + 1);
   std::set<unsigned> AllocatableRegs;
   for (auto &RegClass : RegBank.getRegClasses()) {

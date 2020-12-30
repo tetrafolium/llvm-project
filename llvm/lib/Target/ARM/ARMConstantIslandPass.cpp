@@ -1366,7 +1366,7 @@ void ARMConstantIslands::createNewWater(unsigned CPUserIndex,
     // If the CP is referenced(ie, UserOffset) is in first four instructions
     // after IT, this recalculated BaseInsertOffset could be in the middle of
     // an IT block. If it is, change the BaseInsertOffset to just after the
-    // IT block. This still make the CP Entry is in range becuase of the
+    // IT block. This still make the CP Entry is in range because of the
     // following reasons.
     //   1. The initial BaseseInsertOffset calculated is (UserOffset +
     //   U.getMaxDisp() - UPad).
@@ -1431,7 +1431,7 @@ void ARMConstantIslands::createNewWater(unsigned CPUserIndex,
   // Avoid splitting a MOVW+MOVT pair with a relocation on Windows.
   // On Windows, this instruction pair is covered by one single
   // IMAGE_REL_ARM_MOV32T relocation which covers both instructions. If a
-  // constant island is injected inbetween them, the relocation will clobber
+  // constant island is injected between them, the relocation will clobber
   // the instruction and fail to update the MOVT instruction.
   // (These instructions are bundled up until right before the ConstantIslands
   // pass.)

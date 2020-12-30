@@ -564,7 +564,7 @@ DwarfInstructions<A, R>::evaluateExpression(pint_t expression, A &addressSpace,
       svalue = (sint_t)*sp;
       *sp = (pint_t)(svalue >> value);
       if (log)
-        fprintf(stderr, "shift left arithmetric\n");
+        fprintf(stderr, "shift left arithmetic\n");
       break;
 
     case DW_OP_xor:
@@ -799,7 +799,7 @@ DwarfInstructions<A, R>::evaluateExpression(pint_t expression, A &addressSpace,
 
     case DW_OP_xderef_size:
     case DW_OP_nop:
-    case DW_OP_push_object_addres:
+    case DW_OP_push_object_address:
     case DW_OP_call2:
     case DW_OP_call4:
     case DW_OP_call_ref:

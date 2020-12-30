@@ -548,7 +548,7 @@ static void fillOverallFunction(Module &M, OutlinableGroup &CurrentGroup,
   // Replace the call to the extracted function with the outlined function.
   CurrentOS->Call = replaceCalledFunction(M, *CurrentOS);
 
-  // We only delete the extracted funcitons at the end since we may need to
+  // We only delete the extracted functions at the end since we may need to
   // reference instructions contained in them for mapping purposes.
   FuncsToRemove.push_back(CurrentOS->ExtractedFunction);
 }
@@ -687,7 +687,7 @@ bool IROutliner::extractSection(OutlinableRegion &Region) {
 }
 
 unsigned IROutliner::doOutline(Module &M) {
-  // Find the possibile similarity sections.
+  // Find the possible similarity sections.
   IRSimilarityIdentifier &Identifier = getIRSI(M);
   SimilarityGroupList &SimilarityCandidates = *Identifier.getSimilarity();
 

@@ -198,7 +198,7 @@ void RocmInstallationDetector::detectDeviceLibrary() {
 
   auto &FS = D.getVFS();
   if (!LibDevicePath.empty()) {
-    // Maintain compatability with HIP flag/envvar pointing directly at the
+    // Maintain compatibility with HIP flag/envvar pointing directly at the
     // bitcode library directory. This points directly at the library path
     // instead of the rocm root installation.
     if (!FS.exists(LibDevicePath))

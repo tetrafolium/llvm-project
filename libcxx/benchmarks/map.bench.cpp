@@ -33,7 +33,7 @@ struct AllModes : EnumValuesAsTuple<AllModes, Mode, 2> {
 
 // The positions of the hints to pick:
 // - Begin picks the first item. The item cannot be put before this element.
-// - Thrid picks the third item. This is just an element with a valid entry
+// - Third picks the third item. This is just an element with a valid entry
 //   before and after it.
 // - Correct contains the correct hint.
 // - End contains a hint to the end of the map.

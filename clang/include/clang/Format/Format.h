@@ -2937,7 +2937,7 @@ bool getPredefinedStyle(StringRef Name, FormatStyle::LanguageKind Language,
 /// document, are retained in \p Style.
 ///
 /// If AllowUnknownOptions is true, no errors are emitted if unknown
-/// format options are occured.
+/// format options are occurred.
 std::error_code parseConfiguration(StringRef Text, FormatStyle *Style,
                                    bool AllowUnknownOptions = false);
 

@@ -56,7 +56,7 @@ IRBuilder<> *EscapeEnumerator::Next() {
     return nullptr;
 
   // Find all 'call' instructions that may throw.
-  // We cannot tranform calls with musttail tag.
+  // We cannot transform calls with musttail tag.
   SmallVector<Instruction *, 16> Calls;
   for (BasicBlock &BB : F)
     for (Instruction &II : BB)

@@ -197,7 +197,7 @@ ExtractionContext::insertDeclaration(llvm::StringRef VarName,
 //    FIXME: it would be nice to exclude these references, by micromanaging
 //    the computeReferencedDecls() calls around the binary operator tree.
 
-// Information extracted about a binary operator encounted in a SelectionTree.
+// Information extracted about a binary operator encountered in a SelectionTree.
 // It can represent either an overloaded or built-in operator.
 struct ParsedBinaryOperator {
   BinaryOperatorKind Kind;

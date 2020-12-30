@@ -31,7 +31,7 @@ class GsymReader;
 /// "Children" variable. All address ranges must be sorted and all address
 /// ranges of all children must be contained in the ranges of this function.
 /// Any clients that encode information will need to ensure the ranges are
-/// all contined correctly or lookups could fail. Add ranges in these objects
+/// all continued correctly or lookups could fail. Add ranges in these objects
 /// must be contained in the top level FunctionInfo address ranges as well.
 ///
 /// ENCODING

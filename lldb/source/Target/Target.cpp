@@ -3668,7 +3668,7 @@ TargetProperties::TargetProperties(Target *target)
     m_collection_sp = std::make_shared<TargetOptionValueProperties>(
         Target::GetGlobalProperties());
 
-    // Set callbacks to update launch_info whenever "settins set" updated any
+    // Set callbacks to update launch_info whenever "settings set" updated any
     // of these properties
     m_collection_sp->SetValueChangedCallback(
         ePropertyArg0, [this] { Arg0ValueChangedCallback(); });

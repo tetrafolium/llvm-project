@@ -133,7 +133,7 @@ void Parser::CheckForTemplateAndDigraph(Token &Next, ParsedType ObjectType,
 ///
 /// \param ObjectHadErrors if this unqualified-id occurs within a member access
 /// expression, indicates whether the original subexpressions had any errors.
-/// When true, diagnostics for missing 'template' keyword will be supressed.
+/// When true, diagnostics for missing 'template' keyword will be suppressed.
 ///
 /// \param EnteringContext whether we will be entering into the context of
 /// the nested-name-specifier after parsing it.
@@ -2751,7 +2751,7 @@ bool Parser::ParseUnqualifiedIdOperator(CXXScopeSpec &SS, bool EnteringContext,
 ///
 /// \param ObjectHadErrors if this unqualified-id occurs within a member access
 /// expression, indicates whether the original subexpressions had any errors.
-/// When true, diagnostics for missing 'template' keyword will be supressed.
+/// When true, diagnostics for missing 'template' keyword will be suppressed.
 ///
 /// \param EnteringContext whether we are entering the scope of the
 /// nested-name-specifier.

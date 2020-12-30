@@ -549,7 +549,7 @@ cplusplus.UninitializedObject</span><span class="lang">
 This checker reports uninitialized fields in objects created after a constructor
 call. It doesn't only find direct uninitialized fields, but rather makes a deep
 inspection of the object, analyzing all of it's fields subfields. <br>
-The checker regards inherited fields as direct fields, so one will recieve
+The checker regards inherited fields as direct fields, so one will receive
 warnings for uninitialized inherited data members as well. <br>
 <br>
 It has several options:
@@ -562,7 +562,7 @@ It has several options:
   </li>
   <li>
     "<code>NotesAsWarnings</code>" (boolean). If set to true, the checker will
-    emit a warning for each uninitalized field, as opposed to emitting one
+    emit a warning for each uninitialized field, as opposed to emitting one
     warning per constructor call, and listing the uninitialized fields that
     belongs to it in notes. Defaults to false. <br>
     <code>-analyzer-config cplusplus.UninitializedObject:NotesAsWarnings=true</code>.

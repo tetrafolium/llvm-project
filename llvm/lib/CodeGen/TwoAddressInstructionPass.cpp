@@ -969,7 +969,7 @@ bool TwoAddressInstructionPass::rescheduleKillAboveMI(
     }
   }
 
-  // Check if the reschedule will not break depedencies.
+  // Check if the reschedule will not break dependencies.
   unsigned NumVisited = 0;
   for (MachineInstr &OtherMI :
        make_range(mi, MachineBasicBlock::iterator(KillMI))) {

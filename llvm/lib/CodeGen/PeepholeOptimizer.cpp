@@ -111,7 +111,7 @@ static cl::opt<bool>
     DisablePeephole("disable-peephole", cl::Hidden, cl::init(false),
                     cl::desc("Disable the peephole optimizer"));
 
-/// Specifiy whether or not the value tracking looks through
+/// Specify whether or not the value tracking looks through
 /// complex instructions. When this is true, the value tracker
 /// bails on everything that is not a copy or a bitcast.
 static cl::opt<bool>

@@ -115,7 +115,7 @@ FunctionPass *createX86FixupBWInsts();
 /// to another, when profitable.
 FunctionPass *createX86DomainReassignmentPass();
 
-/// This pass replaces EVEX encoded of AVX-512 instructiosn by VEX
+/// This pass replaces EVEX encoded of AVX-512 instruction by VEX
 /// encoding when possible in order to reduce code size.
 FunctionPass *createX86EvexToVexInsts();
 

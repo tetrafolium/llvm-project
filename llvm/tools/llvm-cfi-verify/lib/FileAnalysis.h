@@ -97,7 +97,7 @@ public:
   // is no instruction at the provided address.
   const Instr *getInstruction(uint64_t Address) const;
 
-  // Returns the instruction at the provided adress, dying if the instruction is
+  // Returns the instruction at the provided address, dying if the instruction is
   // not found.
   const Instr &getInstructionOrDie(uint64_t Address) const;
 

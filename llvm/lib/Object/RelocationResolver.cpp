@@ -737,7 +737,7 @@ uint64_t resolveRelocation(RelocationResolver Resolver, const RelocationRef &R,
         return Elf64BEObj->getRelSection(R.getRawDataRefImpl())->sh_type;
       };
 
-      if (GetRelSectionType() == ELF::SHT_RELA)
+      if (GetRelSectionType() == ELF::SHT_REAL)
         Addend = getELFAddend(R);
     }
 

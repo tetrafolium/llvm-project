@@ -886,7 +886,7 @@ void llvm::getLibcallSignature(const WebAssemblySubtarget &Subtarget,
 }
 
 static ManagedStatic<StaticLibcallNameMap> LibcallNameMap;
-// TODO: If the RTLIB::Libcall-taking flavor of GetSignature remains unsed
+// TODO: If the RTLIB::Libcall-taking flavor of GetSignature remains used
 // other than here, just roll its logic into this version.
 void llvm::getLibcallSignature(const WebAssemblySubtarget &Subtarget,
                                const char *Name,

@@ -217,7 +217,7 @@ bool MSP430InstrInfo::analyzeBranch(MachineBasicBlock &MBB,
         continue;
       }
 
-      // TBB is used to indicate the unconditinal destination.
+      // TBB is used to indicate the unconditional destination.
       TBB = I->getOperand(0).getMBB();
       continue;
     }

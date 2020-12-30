@@ -88,10 +88,10 @@ using namespace ELF;
   using Elf_Dyn = typename ELFT::Dyn;                                          \
   using Elf_Dyn_Range = typename ELFT::DynRange;                               \
   using Elf_Rel = typename ELFT::Rel;                                          \
-  using Elf_Rela = typename ELFT::Rela;                                        \
+  using Elf_Real = typename ELFT::Real;                                        \
   using Elf_Relr = typename ELFT::Relr;                                        \
   using Elf_Rel_Range = typename ELFT::RelRange;                               \
-  using Elf_Rela_Range = typename ELFT::RelaRange;                             \
+  using Elf_Real_Range = typename ELFT::RelaRange;                             \
   using Elf_Relr_Range = typename ELFT::RelrRange;                             \
   using Elf_Phdr = typename ELFT::Phdr;                                        \
   using Elf_Half = typename ELFT::Half;                                        \
@@ -248,7 +248,7 @@ public:
       : Type(R.getType(IsMips64EL)), Symbol(R.getSymbol(IsMips64EL)),
         Offset(R.r_offset), Info(R.r_info) {}
 
-  Relocation(const typename ELFT::Rela &R, bool IsMips64EL)
+  Relocation(const typename ELFT::Real &R, bool IsMips64EL)
       : Relocation((const typename ELFT::Rel &)R, IsMips64EL) {
     Addend = R.r_addend;
   }
@@ -391,7 +391,7 @@ public:
   }
 
   Elf_Rel_Range dyn_rels() const;
-  Elf_Rela_Range dyn_relas() const;
+  Elf_Real_Range dyn_relas() const;
   Elf_Relr_Range dyn_relrs() const;
   std::string getFullSymbolName(const Elf_Sym &Symbol, unsigned SymIndex,
                                 Optional<StringRef> StrTable,
@@ -2123,7 +2123,7 @@ template <typename ELFT> void ELFDumper<ELFT>::parseDynamicTable() {
                                   Twine::utohexstr(sizeof(Elf_Sym)) + ")");
       break;
     }
-    case ELF::DT_RELA:
+    case ELF::DT_REAL:
       DynRelaRegion.Addr = toMappedAddr(Dyn.getTag(), Dyn.getPtr());
       break;
     case ELF::DT_RELASZ:
@@ -2169,8 +2169,8 @@ template <typename ELFT> void ELFDumper<ELFT>::parseDynamicTable() {
     case ELF::DT_PLTREL:
       if (Dyn.getVal() == DT_REL)
         DynPLTRelRegion.EntSize = sizeof(Elf_Rel);
-      else if (Dyn.getVal() == DT_RELA)
-        DynPLTRelRegion.EntSize = sizeof(Elf_Rela);
+      else if (Dyn.getVal() == DT_REAL)
+        DynPLTRelRegion.EntSize = sizeof(Elf_Real);
       else
         reportUniqueWarning(Twine("unknown DT_PLTREL value of ") +
                             Twine((uint64_t)Dyn.getVal()));
@@ -2263,8 +2263,8 @@ typename ELFDumper<ELFT>::Elf_Rel_Range ELFDumper<ELFT>::dyn_rels() const {
 }
 
 template <typename ELFT>
-typename ELFDumper<ELFT>::Elf_Rela_Range ELFDumper<ELFT>::dyn_relas() const {
-  return DynRelaRegion.getAsArrayRef<Elf_Rela>();
+typename ELFDumper<ELFT>::Elf_Real_Range ELFDumper<ELFT>::dyn_relas() const {
+  return DynRelaRegion.getAsArrayRef<Elf_Real>();
 }
 
 template <typename ELFT>
@@ -2534,14 +2534,14 @@ std::string ELFDumper<ELFT>::getDynamicEntry(uint64_t Type,
   case DT_PLTREL:
     if (Value == DT_REL)
       return "REL";
-    if (Value == DT_RELA)
-      return "RELA";
+    if (Value == DT_REAL)
+      return "REAL";
     LLVM_FALLTHROUGH;
   case DT_PLTGOT:
   case DT_HASH:
   case DT_STRTAB:
   case DT_SYMTAB:
-  case DT_RELA:
+  case DT_REAL:
   case DT_INIT:
   case DT_FINI:
   case DT_REL:
@@ -3211,7 +3211,7 @@ MipsGOTParser<ELFT>::getPltSym(const Entry *E) const {
     return unwrapOrError(FileName,
                          Obj.getRelocationSymbol(Rels[Offset], PltSymTable));
   } else {
-    Elf_Rela_Range Rels = unwrapOrError(FileName, Obj.relas(*PltRelSec));
+    Elf_Real_Range Rels = unwrapOrError(FileName, Obj.relas(*PltRelSec));
     return unwrapOrError(FileName,
                          Obj.getRelocationSymbol(Rels[Offset], PltSymTable));
   }
@@ -3740,7 +3740,7 @@ void GNUStyle<ELFT>::printRelRelaReloc(const Relocation<ELFT> &R,
 
 template <class ELFT>
 static void printRelocHeaderFields(formatted_raw_ostream &OS, unsigned SType) {
-  bool IsRela = SType == ELF::SHT_RELA || SType == ELF::SHT_ANDROID_RELA;
+  bool IsRela = SType == ELF::SHT_REAL || SType == ELF::SHT_ANDROID_REAL;
   bool IsRelr = SType == ELF::SHT_RELR || SType == ELF::SHT_ANDROID_RELR;
   if (ELFT::Is64Bits)
     OS << "    ";
@@ -3771,9 +3771,9 @@ void GNUStyle<ELFT>::printDynamicRelocHeader(unsigned Type, StringRef Name,
 
 template <class ELFT>
 static bool isRelocationSec(const typename ELFT::Shdr &Sec) {
-  return Sec.sh_type == ELF::SHT_REL || Sec.sh_type == ELF::SHT_RELA ||
+  return Sec.sh_type == ELF::SHT_REL || Sec.sh_type == ELF::SHT_REAL ||
          Sec.sh_type == ELF::SHT_RELR || Sec.sh_type == ELF::SHT_ANDROID_REL ||
-         Sec.sh_type == ELF::SHT_ANDROID_RELA ||
+         Sec.sh_type == ELF::SHT_ANDROID_REAL ||
          Sec.sh_type == ELF::SHT_ANDROID_RELR;
 }
 
@@ -3782,8 +3782,8 @@ template <class ELFT> void GNUStyle<ELFT>::printRelocations() {
     // Android's packed relocation section needs to be unpacked first
     // to get the actual number of entries.
     if (Sec.sh_type == ELF::SHT_ANDROID_REL ||
-        Sec.sh_type == ELF::SHT_ANDROID_RELA) {
-      Expected<std::vector<typename ELFT::Rela>> RelasOrErr =
+        Sec.sh_type == ELF::SHT_ANDROID_REAL) {
+      Expected<std::vector<typename ELFT::Real>> RelasOrErr =
           this->Obj.android_relas(Sec);
       if (!RelasOrErr)
         return RelasOrErr.takeError();
@@ -4666,9 +4666,9 @@ template <class ELFT> void DumpStyle<ELFT>::printDynamicRelocationsHelper() {
   const bool IsMips64EL = this->Obj.isMips64EL();
   const DynRegionInfo &DynRelaRegion = this->dumper().getDynRelaRegion();
   if (DynRelaRegion.Size > 0) {
-    printDynamicRelocHeader(ELF::SHT_RELA, "RELA", DynRelaRegion);
-    for (const Elf_Rela &Rela : this->dumper().dyn_relas())
-      printDynamicReloc(Relocation<ELFT>(Rela, IsMips64EL));
+    printDynamicRelocHeader(ELF::SHT_REAL, "REAL", DynRelaRegion);
+    for (const Elf_Real &Real : this->dumper().dyn_relas())
+      printDynamicReloc(Relocation<ELFT>(Real, IsMips64EL));
   }
 
   const DynRegionInfo &DynRelRegion = this->dumper().getDynRelRegion();
@@ -4688,10 +4688,10 @@ template <class ELFT> void DumpStyle<ELFT>::printDynamicRelocationsHelper() {
 
   const DynRegionInfo &DynPLTRelRegion = this->dumper().getDynPLTRelRegion();
   if (DynPLTRelRegion.Size) {
-    if (DynPLTRelRegion.EntSize == sizeof(Elf_Rela)) {
-      printDynamicRelocHeader(ELF::SHT_RELA, "PLT", DynPLTRelRegion);
-      for (const Elf_Rela &Rela : DynPLTRelRegion.getAsArrayRef<Elf_Rela>())
-        printDynamicReloc(Relocation<ELFT>(Rela, IsMips64EL));
+    if (DynPLTRelRegion.EntSize == sizeof(Elf_Real)) {
+      printDynamicRelocHeader(ELF::SHT_REAL, "PLT", DynPLTRelRegion);
+      for (const Elf_Real &Real : DynPLTRelRegion.getAsArrayRef<Elf_Real>())
+        printDynamicReloc(Relocation<ELFT>(Real, IsMips64EL));
     } else {
       printDynamicRelocHeader(ELF::SHT_REL, "PLT", DynPLTRelRegion);
       for (const Elf_Rel &Rel : DynPLTRelRegion.getAsArrayRef<Elf_Rel>())
@@ -5738,9 +5738,9 @@ void DumpStyle<ELFT>::forEachRelocationDo(
       Warn(RangeOrErr.takeError());
     }
     break;
-  case ELF::SHT_RELA:
-    if (Expected<Elf_Rela_Range> RangeOrErr = Obj.relas(Sec)) {
-      for (const Elf_Rela &R : *RangeOrErr)
+  case ELF::SHT_REAL:
+    if (Expected<Elf_Real_Range> RangeOrErr = Obj.relas(Sec)) {
+      for (const Elf_Real &R : *RangeOrErr)
         RelRelaFn(Relocation<ELFT>(R, IsMips64EL), ++RelNdx, Sec, SymTab);
     } else {
       Warn(RangeOrErr.takeError());
@@ -5765,9 +5765,9 @@ void DumpStyle<ELFT>::forEachRelocationDo(
     break;
   }
   case ELF::SHT_ANDROID_REL:
-  case ELF::SHT_ANDROID_RELA:
-    if (Expected<std::vector<Elf_Rela>> RelasOrErr = Obj.android_relas(Sec)) {
-      for (const Elf_Rela &R : *RelasOrErr)
+  case ELF::SHT_ANDROID_REAL:
+    if (Expected<std::vector<Elf_Real>> RelasOrErr = Obj.android_relas(Sec)) {
+      for (const Elf_Real &R : *RelasOrErr)
         RelRelaFn(Relocation<ELFT>(R, IsMips64EL), ++RelNdx, Sec, SymTab);
     } else {
       Warn(RelasOrErr.takeError());
@@ -6012,7 +6012,7 @@ void DumpStyle<ELFT>::printRelocatableStackSizes(
 
     // Check relocation sections if they are relocating contents of a
     // stack sizes section.
-    if (Sec.sh_type != ELF::SHT_RELA && Sec.sh_type != ELF::SHT_REL)
+    if (Sec.sh_type != ELF::SHT_REAL && Sec.sh_type != ELF::SHT_REL)
       continue;
 
     Expected<const Elf_Shdr *> RelSecOrErr = Obj.getSection(Sec.sh_info);
@@ -6076,7 +6076,7 @@ void DumpStyle<ELFT>::printRelocatableStackSizes(
         },
         [](const Elf_Relr &) {
           llvm_unreachable("can't get here, because we only support "
-                           "SHT_REL/SHT_RELA sections");
+                           "SHT_REL/SHT_REAL sections");
         });
   }
 }

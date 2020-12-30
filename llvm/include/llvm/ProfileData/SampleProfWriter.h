@@ -212,7 +212,7 @@ protected:
   std::error_code writeFuncOffsetTable();
   std::error_code writeProfileSymbolListSection();
 
-  // Specifiy the order of sections in section header table. Note
+  // Specify the order of sections in section header table. Note
   // the order of sections in SecHdrTable may be different that the
   // order in SectionHdrLayout. sample Reader will follow the order
   // in SectionHdrLayout to read each section.

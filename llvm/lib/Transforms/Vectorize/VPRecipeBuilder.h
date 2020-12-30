@@ -97,7 +97,7 @@ public:
       : OrigLoop(OrigLoop), TLI(TLI), Legal(Legal), CM(CM), PSE(PSE),
         Builder(Builder) {}
 
-  /// Check if a recipe can be create for \p I withing the given VF \p Range.
+  /// Check if a recipe can be create for \p I within the given VF \p Range.
   /// If a recipe can be created, return it. Otherwise return nullptr.
   VPRecipeBase *tryToCreateWidenRecipe(Instruction *Instr, VFRange &Range,
                                        VPlanPtr &Plan);

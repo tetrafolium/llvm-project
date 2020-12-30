@@ -58,7 +58,7 @@ Error AppleAcceleratorTable::extract() {
 
   // Check that we can read all the hashes and offsets from the
   // section (see SourceLevelDebugging.rst for the structure of the index).
-  // We need to substract one because we're checking for an *offset* which is
+  // We need to subtract one because we're checking for an *offset* which is
   // equal to the size for an empty table and hence pointer after the section.
   if (!AccelSection.isValidOffset(sizeof(Hdr) + Hdr.HeaderDataLength +
                                   Hdr.BucketCount * 4 + Hdr.HashCount * 8 - 1))

@@ -1058,8 +1058,8 @@ void LowerTypeTestsModule::importFunction(
   std::string Name = std::string(F->getName());
 
   if (F->isDeclarationForLinker() && isJumpTableCanonical) {
-    // Non-dso_local functions may be overriden at run time,
-    // don't short curcuit them
+    // Non-dso_local functions may be overridden at run time,
+    // don't short circuit them
     if (F->isDSOLocal()) {
       Function *RealF =
           Function::Create(F->getFunctionType(), GlobalValue::ExternalLinkage,
@@ -1802,7 +1802,7 @@ bool LowerTypeTestsModule::lower() {
   }
 
   // If only some of the modules were split, we cannot correctly perform
-  // this transformation. We already checked for the presense of type tests
+  // this transformation. We already checked for the presence of type tests
   // with partially split modules during the thin link, and would have emitted
   // an error if any were found, so here we can simply return.
   if ((ExportSummary && ExportSummary->partiallySplitLTOUnits()) ||

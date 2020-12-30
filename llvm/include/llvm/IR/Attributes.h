@@ -515,7 +515,7 @@ public:
     return removeAttributes(C, ArgNo + FirstArgIndex);
   }
 
-  /// Replace the type contained by attribute \p AttrKind at index \p ArgNo wih
+  /// Replace the type contained by attribute \p AttrKind at index \p ArgNo with
   /// \p ReplacementTy, preserving all other attributes.
   LLVM_NODISCARD AttributeList replaceAttributeType(LLVMContext &C,
                                                     unsigned ArgNo,

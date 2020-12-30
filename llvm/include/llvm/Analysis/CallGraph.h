@@ -339,7 +339,7 @@ public:
 ///
 /// This class exposes both the interface to the call graph container and the
 /// module pass which runs over a module of IR and produces the call graph. The
-/// call graph interface is entirelly a wrapper around a \c CallGraph object
+/// call graph interface is entirely a wrapper around a \c CallGraph object
 /// which is stored internally for each module.
 class CallGraphWrapperPass : public ModulePass {
   std::unique_ptr<CallGraph> G;

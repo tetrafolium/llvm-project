@@ -762,7 +762,7 @@ void Sema::checkFortifiedBuiltinMemoryFunction(FunctionDecl *FD,
 
   StringRef FunctionName = getASTContext().BuiltinInfo.getName(BuiltinID);
   // Skim off the details of whichever builtin was called to produce a better
-  // diagnostic, as it's unlikley that the user wrote the __builtin explicitly.
+  // diagnostic, as it's unlikely that the user wrote the __builtin explicitly.
   if (IsChkVariant) {
     FunctionName = FunctionName.drop_front(std::strlen("__builtin___"));
     FunctionName = FunctionName.drop_back(std::strlen("_chk"));
@@ -6235,7 +6235,7 @@ bool Sema::SemaBuiltinFPClassification(CallExpr *TheCall, unsigned NumArgs) {
     return false;
 
   // Usual Unary Conversions will convert half to float, which we want for
-  // machines that use fp16 conversion intrinsics. Else, we wnat to leave the
+  // machines that use fp16 conversion intrinsics. Else, we want to leave the
   // type how it is, but do normal L->Rvalue conversions.
   if (Context.getTargetInfo().useFP16ConversionIntrinsics())
     OrigArg = UsualUnaryConversions(OrigArg).get();
@@ -16170,7 +16170,7 @@ ExprResult Sema::SemaBuiltinMatrixColumnMajorLoad(CallExpr *TheCall,
     return CallResult;
   }
 
-  // Check row and column dimenions.
+  // Check row and column dimensions.
   llvm::Optional<unsigned> MaybeRows;
   if (RowsExpr)
     MaybeRows = getAndVerifyMatrixDimension(RowsExpr, "row", *this);

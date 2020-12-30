@@ -847,7 +847,7 @@ struct TailCallElim : public FunctionPass {
     auto *DT = DTWP ? &DTWP->getDomTree() : nullptr;
     auto *PDTWP = getAnalysisIfAvailable<PostDominatorTreeWrapperPass>();
     auto *PDT = PDTWP ? &PDTWP->getPostDomTree() : nullptr;
-    // There is no noticable performance difference here between Lazy and Eager
+    // There is no noticeable performance difference here between Lazy and Eager
     // UpdateStrategy based on some test results. It is feasible to switch the
     // UpdateStrategy to Lazy if we find it profitable later.
     DomTreeUpdater DTU(DT, PDT, DomTreeUpdater::UpdateStrategy::Eager);
@@ -881,7 +881,7 @@ PreservedAnalyses TailCallElimPass::run(Function &F,
   auto &ORE = AM.getResult<OptimizationRemarkEmitterAnalysis>(F);
   auto *DT = AM.getCachedResult<DominatorTreeAnalysis>(F);
   auto *PDT = AM.getCachedResult<PostDominatorTreeAnalysis>(F);
-  // There is no noticable performance difference here between Lazy and Eager
+  // There is no noticeable performance difference here between Lazy and Eager
   // UpdateStrategy based on some test results. It is feasible to switch the
   // UpdateStrategy to Lazy if we find it profitable later.
   DomTreeUpdater DTU(DT, PDT, DomTreeUpdater::UpdateStrategy::Eager);

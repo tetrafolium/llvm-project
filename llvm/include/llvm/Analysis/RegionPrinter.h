@@ -25,7 +25,7 @@ FunctionPass *createRegionPrinterPass();
 FunctionPass *createRegionOnlyPrinterPass();
 
 #ifndef NDEBUG
-/// Open a viewer to display the GraphViz vizualization of the analysis
+/// Open a viewer to display the GraphViz visualization of the analysis
 /// result.
 ///
 /// Practical to call in the debugger.
@@ -45,7 +45,7 @@ void viewRegion(llvm::RegionInfo *RI);
 /// @param F Function to analyze.
 void viewRegion(const llvm::Function *F);
 
-/// Open a viewer to display the GraphViz vizualization of the analysis
+/// Open a viewer to display the GraphViz visualization of the analysis
 /// result.
 ///
 /// Useful to call in the debugger.

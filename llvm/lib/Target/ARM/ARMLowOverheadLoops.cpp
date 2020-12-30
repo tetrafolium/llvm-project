@@ -1559,7 +1559,7 @@ void ARMLowOverheadLoops::ConvertVPTBlocks(LowOverheadLoop &LoLoop) {
         LoLoop.BlockMasksToRecompute.insert(VPST);
     } else if (Insts.front()->getOpcode() == ARM::MVE_VPST) {
       // If this block starts with a VPST then attempt to merge it with the
-      // preceeding un-merged VCMP into a VPT. This VCMP comes from a VPT
+      // preceding un-merged VCMP into a VPT. This VCMP comes from a VPT
       // block that no longer exists
       MachineInstr *VPST = Insts.front();
       auto Next = ++MachineBasicBlock::iterator(VPST);

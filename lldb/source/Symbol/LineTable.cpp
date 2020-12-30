@@ -93,7 +93,7 @@ void LineTable::AppendLineEntryToSequence(
     // of the prologue and one for the first instruction after the prologue. If
     // the size of the prologue is 0 instruction then the 2 line entry will
     // have the same file address. Removing it will remove our ability to
-    // properly detect the location of the end of prologe so we set the
+    // properly detect the location of the end of prologue so we set the
     // prologue_end flag to preserve this information (setting the prologue_end
     // flag for an entry what is after the prologue end don't have any effect)
     entry.is_prologue_end = entry.file_idx == entries.back().file_idx;

@@ -191,14 +191,14 @@ static std::string escapeString(StringRef Label) {
 //
 // If the record is an ENTER record it pushes the FuncID and TSC onto a
 // structure representing the call stack for that function.
-// If the record is an EXIT record it checks computes computes the ammount of
+// If the record is an EXIT record it checks computes computes the amount of
 // time the function took to complete and then stores that information in an
 // edge of the graph. If there is no matching ENTER record the function tries
 // to recover by assuming that there were EXIT records which were missed, for
 // example caused by tail call elimination and if the option is enabled then
 // then tries to recover from this.
 //
-// This funciton will also error if the records are out of order, as the trace
+// This function will also error if the records are out of order, as the trace
 // is expected to be sorted.
 //
 // The graph generated has an immaginary root for functions called by no-one at

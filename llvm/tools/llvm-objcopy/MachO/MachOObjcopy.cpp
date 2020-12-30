@@ -304,7 +304,7 @@ static Error addSection(StringRef SecName, StringRef Filename, Object &Obj) {
   return Error::success();
 }
 
-// isValidMachOCannonicalName returns success if Name is a MachO cannonical name
+// isValidMachOCannonicalName returns success if Name is a MachO canonical name
 // ("<segment>,<section>") and lengths of both segment and section names are
 // valid.
 static Error isValidMachOCannonicalName(StringRef Name) {

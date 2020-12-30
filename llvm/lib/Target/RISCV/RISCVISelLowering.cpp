@@ -613,7 +613,7 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return LowerINTRINSIC_W_CHAIN(Op, DAG);
   case ISD::BSWAP:
   case ISD::BITREVERSE: {
-    // Convert BSWAP/BITREVERSE to GREVI to enable GREVI combinining.
+    // Convert BSWAP/BITREVERSE to GREVI to enable GREVI combining.
     assert(Subtarget.hasStdExtZbp() && "Unexpected custom legalisation");
     MVT VT = Op.getSimpleValueType();
     SDLoc DL(Op);
@@ -1784,7 +1784,7 @@ unsigned RISCVTargetLowering::ComputeNumSignBitsForTargetNode(
     return 33;
   case RISCVISD::VMV_X_S:
     // The number of sign bits of the scalar result is computed by obtaining the
-    // element type of the input vector operand, substracting its width from the
+    // element type of the input vector operand, subtracting its width from the
     // XLEN, and then adding one (sign bit within the element type).
     return Subtarget.getXLen() - Op.getOperand(0).getScalarValueSizeInBits() +
            1;

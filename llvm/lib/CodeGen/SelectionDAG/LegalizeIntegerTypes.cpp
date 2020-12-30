@@ -532,7 +532,7 @@ SDValue DAGTypeLegalizer::PromoteIntRes_BITCAST(SDNode *N) {
 static EVT getShiftAmountTyForConstant(EVT VT, const TargetLowering &TLI,
                                        SelectionDAG &DAG) {
   EVT ShiftVT = TLI.getShiftAmountTy(VT, DAG.getDataLayout());
-  // If any possible shift value won't fit in the prefered type, just use
+  // If any possible shift value won't fit in the preferred type, just use
   // something safe. It will be legalized when the shift is expanded.
   if (!ShiftVT.isVector() &&
       ShiftVT.getSizeInBits() < Log2_32_Ceil(VT.getSizeInBits()))
@@ -3719,7 +3719,7 @@ void DAGTypeLegalizer::ExpandIntRes_MULFIX(SDNode *N, SDValue &Lo,
   //                             |NVTSize-|
   //
   // The resulting Lo and Hi would normally be in LL and LH after the shift. But
-  // to avoid unneccessary shifting of all 4 parts, we can adjust the shift
+  // to avoid unnecessary shifting of all 4 parts, we can adjust the shift
   // amount and get Lo and Hi using two funnel shifts. Or for the special case
   // when Scale is a multiple of NVTSize we can just pick the result without
   // shifting.

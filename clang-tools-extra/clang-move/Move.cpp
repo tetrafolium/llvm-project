@@ -432,7 +432,7 @@ createInsertedReplacements(const std::vector<std::string> &Includes,
       ++DeclIt;
     }
     // If the moved declaration is in same namespace CurrentNamespace, add
-    // a preceeding `\n' before the moved declaration.
+    // a preceding `\n' before the moved declaration.
     // FIXME: Don't add empty lines between using declarations.
     if (!IsInNewNamespace)
       NewCode += "\n";

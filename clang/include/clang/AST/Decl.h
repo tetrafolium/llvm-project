@@ -2120,7 +2120,7 @@ public:
   void setTrivialForCall(bool IT) { FunctionDeclBits.IsTrivialForCall = IT; }
 
   /// Whether this function is defaulted. Valid for e.g.
-  /// special member functions, defaulted comparisions (not methods!).
+  /// special member functions, defaulted comparisons (not methods!).
   bool isDefaulted() const { return FunctionDeclBits.IsDefaulted; }
   void setDefaulted(bool D = true) { FunctionDeclBits.IsDefaulted = D; }
 

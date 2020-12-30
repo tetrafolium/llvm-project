@@ -149,7 +149,7 @@ static size_t __kmp_round4k(size_t size) {
 /* Here, multipliers are like __kmp_convert_to_seconds, but floating-point
    values are allowed, and the return value is in milliseconds.  The default
    multiplier is milliseconds.  Returns INT_MAX only if the value specified
-   matches "infinit*".  Returns -1 if specified string is invalid. */
+   matches "infinite*".  Returns -1 if specified string is invalid. */
 int __kmp_convert_to_milliseconds(char const *data) {
   int ret, nvalues, factor;
   char mult, extra;
@@ -157,7 +157,7 @@ int __kmp_convert_to_milliseconds(char const *data) {
 
   if (data == NULL)
     return (-1);
-  if (__kmp_str_match("infinit", -1, data))
+  if (__kmp_str_match("infinite", -1, data))
     return (INT_MAX);
   value = (double)0.0;
   mult = '\0';
@@ -1520,7 +1520,7 @@ static void __kmp_stg_print_align_alloc(kmp_str_buf_t *buffer, char const *name,
 // -----------------------------------------------------------------------------
 // KMP_PLAIN_BARRIER, KMP_FORKJOIN_BARRIER, KMP_REDUCTION_BARRIER
 
-// TODO: Remove __kmp_barrier_branch_bit_env_name varibale, remove loops from
+// TODO: Remove __kmp_barrier_branch_bit_env_name variable, remove loops from
 // parse and print functions, pass required info through data argument.
 
 static void __kmp_stg_parse_barrier_branch_bit(char const *name,

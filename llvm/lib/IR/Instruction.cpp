@@ -832,9 +832,9 @@ Instruction *Instruction::clone() const {
   switch (getOpcode()) {
   default:
     llvm_unreachable("Unhandled Opcode.");
-#define HANDLE_INST(num, opc, clas)                                            \
+#define HANDLE_INST(num, opc, class)                                            \
   case Instruction::opc:                                                       \
-    New = cast<clas>(this)->cloneImpl();                                       \
+    New = cast<class>(this)->cloneImpl();                                       \
     break;
 #include "llvm/IR/Instruction.def"
 #undef HANDLE_INST

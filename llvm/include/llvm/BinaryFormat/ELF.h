@@ -843,7 +843,7 @@ enum : unsigned {
   SHT_PROGBITS = 1,       // Program-defined contents.
   SHT_SYMTAB = 2,         // Symbol table.
   SHT_STRTAB = 3,         // String table.
-  SHT_RELA = 4,           // Relocation entries; explicit addends.
+  SHT_REAL = 4,           // Relocation entries; explicit addends.
   SHT_HASH = 5,           // Symbol hash table.
   SHT_DYNAMIC = 6,        // Information for dynamic linking.
   SHT_NOTE = 7,           // Information about the file.
@@ -863,7 +863,7 @@ enum : unsigned {
   // Android packed relocation section types.
   // https://android.googlesource.com/platform/bionic/+/6f12bfece5dcc01325e0abba56a46b1bcf991c69/tools/relocation_packer/src/elf_file.cc#37
   SHT_ANDROID_REL = 0x60000001,
-  SHT_ANDROID_RELA = 0x60000002,
+  SHT_ANDROID_REAL = 0x60000002,
   SHT_LLVM_ODRTAB = 0x6fff4c00,             // LLVM ODR table.
   SHT_LLVM_LINKER_OPTIONS = 0x6fff4c01,     // LLVM Linker Options.
   SHT_LLVM_CALL_GRAPH_PROFILE = 0x6fff4c02, // LLVM Call Graph Profile.
@@ -1129,7 +1129,7 @@ struct Elf32_Rel {
 };
 
 // Relocation entry with explicit addend.
-struct Elf32_Rela {
+struct Elf32_Real {
   Elf32_Addr r_offset;  // Location (file byte offset, or program virtual addr)
   Elf32_Word r_info;    // Symbol table index and type of relocation to apply
   Elf32_Sword r_addend; // Compute value for relocatable field by adding this
@@ -1165,7 +1165,7 @@ struct Elf64_Rel {
 };
 
 // Relocation entry with explicit addend.
-struct Elf64_Rela {
+struct Elf64_Real {
   Elf64_Addr r_offset; // Location (file byte offset, or program virtual addr).
   Elf64_Xword r_info;  // Symbol table index and type of relocation to apply.
   Elf64_Sxword r_addend; // Compute value for relocatable field by adding this.

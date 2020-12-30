@@ -1166,7 +1166,7 @@ __parallel_stable_sort(_ExecutionPolicy&&, _RandomAccessIterator __xs, _RandomAc
         typedef typename std::iterator_traits<_RandomAccessIterator>::difference_type _DifferenceType;
         const _DifferenceType __n = __xe - __xs;
         if (__nsort == __n)
-            __nsort = 0; // 'partial_sort' becames 'sort'
+            __nsort = 0; // 'partial_sort' becomes 'sort'
 
         const _DifferenceType __sort_cut_off = _PSTL_STABLE_SORT_CUT_OFF;
         if (__n > __sort_cut_off)

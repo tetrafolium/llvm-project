@@ -541,7 +541,7 @@ bool LoopPredication::isLoopInvariantValue(const SCEV *S) {
   // The cost of doing so in the worst case is an extra fill from the stack  in
   // the loop to materialize the loop invariant test value instead of checking
   // against the original IV which is presumable in a register inside the loop.
-  // Such cases are presumably rare, and hint at missing oppurtunities for
+  // Such cases are presumably rare, and hint at missing opportunities for
   // other passes.
 
   if (SE->isLoopInvariant(S, L))

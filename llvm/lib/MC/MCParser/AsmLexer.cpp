@@ -213,7 +213,7 @@ AsmToken AsmLexer::LexSlash() {
 AsmToken AsmLexer::LexLineComment() {
   // Mark This as an end of statement with a body of the
   // comment. While it would be nicer to leave this two tokens,
-  // backwards compatability with TargetParsers makes keeping this in this form
+  // backwards compatibility with TargetParsers makes keeping this in this form
   // better.
   const char *CommentTextStart = CurPtr;
   int CurChar = getNextChar();

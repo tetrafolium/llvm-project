@@ -442,7 +442,7 @@ bool llvm::RemoveRedundantDbgInstrs(BasicBlock *BB) {
   //   (3) dbg.value V1, "x", DIExpression()
   //
   // The backward scan will remove (2), it is made obsolete by (3). After
-  // getting (2) out of the way, the foward scan will remove (3) since "x"
+  // getting (2) out of the way, the forward scan will remove (3) since "x"
   // already is described as having the value V1 at (1).
   MadeChanges |= removeRedundantDbgInstrsUsingBackwardScan(BB);
   MadeChanges |= removeRedundantDbgInstrsUsingForwardScan(BB);

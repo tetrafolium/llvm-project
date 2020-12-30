@@ -700,7 +700,7 @@ bool WinCOFFObjectWriter::isSymbolRefDifferenceFullyResolvedImpl(
   // relocations present. The /INCREMENTAL flag will cause these relocations to
   // point to thunks, and the /GUARD:CF flag assumes that it can use relocations
   // to approximate the set of all address taken functions. LLD's implementation
-  // of /GUARD:CF also relies on the existance of these relocations.
+  // of /GUARD:CF also relies on the existence of these relocations.
   uint16_t Type = cast<MCSymbolCOFF>(SymA).getType();
   if ((Type >> COFF::SCT_COMPLEX_TYPE_SHIFT) == COFF::IMAGE_SYM_DTYPE_FUNCTION)
     return false;
@@ -825,7 +825,7 @@ void WinCOFFObjectWriter::recordRelocation(MCAssembler &Asm,
     case COFF::IMAGE_REL_ARM_BLX23T:
       // IMAGE_REL_BRANCH20T, IMAGE_REL_ARM_BRANCH24T, IMAGE_REL_ARM_BLX23T all
       // perform a 4 byte adjustment to the relocation.  Relative branches are
-      // offset by 4 on ARM, however, because there is no RELA relocations, all
+      // offset by 4 on ARM, however, because there is no REAL relocations, all
       // branches are offset by 4.
       FixedValue = FixedValue + 4;
       break;

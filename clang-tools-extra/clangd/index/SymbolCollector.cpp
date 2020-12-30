@@ -815,7 +815,7 @@ static bool isErrorAboutInclude(llvm::StringRef Line) {
   Line = Line.ltrim();
   if (!Line.startswith("error"))
     return false;
-  return Line.contains_lower("includ"); // Matches "include" or "including".
+  return Line.contains_lower("include"); // Matches "include" or "including".
 }
 
 bool SymbolCollector::isDontIncludeMeHeader(llvm::StringRef Content) {

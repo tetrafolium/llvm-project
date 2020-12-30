@@ -53,7 +53,7 @@ GlobList::GlobList(StringRef Globs) {
 }
 
 bool GlobList::contains(StringRef S) const {
-  // Iterating the container backwards as the last match determins if S is in
+  // Iterating the container backwards as the last match determines if S is in
   // the list.
   for (const GlobListItem &Item : llvm::reverse(Items)) {
     if (Item.Regex.match(S))

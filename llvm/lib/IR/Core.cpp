@@ -1438,7 +1438,7 @@ static LLVMOpcode map_to_llvmopcode(int opcode) {
   switch (opcode) {
   default:
     llvm_unreachable("Unhandled Opcode.");
-#define HANDLE_INST(num, opc, clas)                                            \
+#define HANDLE_INST(num, opc, class)                                            \
   case num:                                                                    \
     return LLVM##opc;
 #include "llvm/IR/Instruction.def"
@@ -1448,7 +1448,7 @@ static LLVMOpcode map_to_llvmopcode(int opcode) {
 
 static int map_from_llvmopcode(LLVMOpcode code) {
   switch (code) {
-#define HANDLE_INST(num, opc, clas)                                            \
+#define HANDLE_INST(num, opc, class)                                            \
   case LLVM##opc:                                                              \
     return num;
 #include "llvm/IR/Instruction.def"

@@ -1041,7 +1041,7 @@ error:
  * can be rounded up to an integer value.
  *
  * If the tableau is bounded, i.e., if the recession cone
- * is zero-dimensional, then we just use inital_basis.
+ * is zero-dimensional, then we just use initial_basis.
  * Otherwise, we construct a basis whose first directions
  * correspond to equalities, followed by bounded directions,
  * i.e., equalities in the recession cone.

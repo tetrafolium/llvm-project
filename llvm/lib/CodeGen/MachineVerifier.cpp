@@ -1125,7 +1125,7 @@ void MachineVerifier::verifyPreISelGenericInstruction(const MachineInstr *MI) {
   case TargetOpcode::G_TRUNC:
   case TargetOpcode::G_FPEXT:
   case TargetOpcode::G_FPTRUNC: {
-    // Number of operands and presense of types is already checked (and
+    // Number of operands and presence of types is already checked (and
     // reported in case of any issues), so no need to report them again. As
     // we're trying to report as many issues as possible at once, however, the
     // instructions aren't guaranteed to have the right number of operands or

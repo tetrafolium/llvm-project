@@ -26,7 +26,7 @@
 // "FileDescriptorStackLoggingNoCompact"
 //
 //      With this environment variable set, all file descriptor create and
-//      delete operations will be permanantly maintained in the event map.
+//      delete operations will be permanently maintained in the event map.
 //      The default action is to compact the create/delete events by removing
 //      any previous file descriptor create events that are matched with a
 //      corresponding file descriptor delete event when the next valid file

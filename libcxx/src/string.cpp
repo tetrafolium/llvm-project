@@ -335,7 +335,7 @@ S i_to_string(const V v) {
   char buf[bufsize];
   const auto res = to_chars(buf, buf + bufsize, v);
   _LIBCPP_ASSERT(res.ec == errc(),
-                 "bufsize must be large enough to accomodate the value");
+                 "bufsize must be large enough to accommodate the value");
   return S(buf, res.ptr);
 }
 

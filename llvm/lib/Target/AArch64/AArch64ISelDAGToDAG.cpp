@@ -4843,7 +4843,7 @@ static EVT getPackedVectorTypeFromPredicateType(LLVMContext &Ctx, EVT PredVT,
 }
 
 /// Return the EVT of the data associated to a memory operation in \p
-/// Root. If such EVT cannot be retrived, it returns an invalid EVT.
+/// Root. If such EVT cannot be retrieved, it returns an invalid EVT.
 static EVT getMemVTFromNode(LLVMContext &Ctx, SDNode *Root) {
   if (isa<MemSDNode>(Root))
     return cast<MemSDNode>(Root)->getMemoryVT();

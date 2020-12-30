@@ -50,7 +50,7 @@ static inline T remquo(T x, T y, int &q) {
   // is evaluated.
   xbits.sign = ybits.sign = 0;
 
-  NormalFloat<T> normalx(xbits), normaly(ybits);
+  NormalFloat<T> normalx(xbits), normally(ybits);
   int exp = normalx.exponent - normaly.exponent;
   typename NormalFloat<T>::UIntType mx = normalx.mantissa,
                                     my = normaly.mantissa;
@@ -85,7 +85,7 @@ static inline T remquo(T x, T y, int &q) {
   // appropriately and some directed tests added.
   T nativeRemainder(remainder);
   T absy = T(ybits);
-  int cmp = remainder.mul2(1).cmp(normaly);
+  int cmp = remainder.mul2(1).cmp(normally);
   if (cmp > 0) {
     q = q + 1;
     if (x >= T(0.0))

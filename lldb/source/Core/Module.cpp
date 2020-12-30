@@ -1607,7 +1607,7 @@ void Module::RegisterXcodeSDK(llvm::StringRef sdk_name,
   if (!sdk_path)
     return;
   // If the SDK changed for a previously registered source path, update it.
-  // This could happend with -fdebug-prefix-map, otherwise it's unlikely.
+  // This could happened with -fdebug-prefix-map, otherwise it's unlikely.
   ConstString sysroot_cs(sysroot);
   if (!m_source_mappings.Replace(sysroot_cs, sdk_path, true))
     // In the general case, however, append it to the list.

@@ -344,9 +344,9 @@ template <class SymbolTy> void COFFWriter::writeSymbolStringTables() {
       std::copy(S.AuxFile.begin(), S.AuxFile.end(), Ptr);
       Ptr += S.Sym.NumberOfAuxSymbols * sizeof(SymbolTy);
     } else {
-      // For other auxillary symbols, write their opaque payload into one symbol
+      // For other auxiliary symbols, write their opaque payload into one symbol
       // table slot each. For big object files, the symbols are larger than the
-      // opaque auxillary symbol struct and we leave padding at the end of each
+      // opaque auxiliary symbol struct and we leave padding at the end of each
       // entry.
       for (const AuxSymbol &AuxSym : S.AuxData) {
         ArrayRef<uint8_t> Ref = AuxSym.getRef();

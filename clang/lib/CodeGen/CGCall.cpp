@@ -2507,7 +2507,7 @@ void CodeGenFunction::EmitFunctionProlog(const CGFunctionInfo &FI,
         // Aggregates and complex variables are accessed by reference. All we
         // need to do is realign the value, if requested. Also, if the address
         // may be aliased, copy it to ensure that the parameter variable is
-        // mutable and has a unique adress, as C requires.
+        // mutable and has a unique address, as C requires.
         Address V = ParamAddr;
         if (ArgI.getIndirectRealign() || ArgI.isIndirectAliased()) {
           Address AlignedTemp = CreateMemTemp(Ty, "coerce");

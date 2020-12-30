@@ -1023,7 +1023,7 @@ bool SymbolContextSpecifier::SymbolContextMatches(const SymbolContext &sc) {
 
   // Only compare targets if this specifier has one and it's not the Dummy
   // target.  Otherwise if a specifier gets made in the dummy target and
-  // copied over we'll artificially fail the comparision.
+  // copied over we'll artificially fail the comparison.
   if (m_target_sp && !m_target_sp->IsDummyTarget() &&
       m_target_sp != sc.target_sp)
     return false;

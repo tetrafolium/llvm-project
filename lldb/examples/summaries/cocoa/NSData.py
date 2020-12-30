@@ -24,7 +24,7 @@ statistics.add_metric('invalid_pointer')
 statistics.add_metric('unknown_class')
 statistics.add_metric('code_notrun')
 
-# despite the similary to synthetic children providers, these classes are not
+# despite the similarly to synthetic children providers, these classes are not
 # trying to provide anything but the length for an NSData, so they need not
 # obey the interface specification for synthetic children providers
 

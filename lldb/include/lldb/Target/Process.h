@@ -696,7 +696,7 @@ public:
   /// shared library load state.
   ///
   /// \return
-  ///    A status object indicating if the operation was sucessful or not.
+  ///    A status object indicating if the operation was successful or not.
   virtual llvm::Error LoadModules() {
     return llvm::make_error<llvm::StringError>("Not implemented.",
                                                llvm::inconvertibleErrorCode());
@@ -779,7 +779,7 @@ public:
   /// process starts and stops. Public stops are when clients will be notified
   /// that the process is stopped. These events typically trigger UI updates
   /// (thread stack frames to be displayed, variables to be displayed, and
-  /// more). This function can be overriden and allows process subclasses to
+  /// more). This function can be overridden and allows process subclasses to
   /// do something before the eBroadcastBitStateChanged event is sent to
   /// public clients.
   virtual void WillPublicStop() {}
@@ -882,8 +882,8 @@ public:
   /// \param[in] force_kill
   ///     Whether lldb should force a kill (instead of a detach) from
   ///     the inferior process.  Normally if lldb launched a binary and
-  ///     Destory is called, lldb kills it.  If lldb attached to a
-  ///     running process and Destory is called, lldb detaches.  If
+  ///     Destroy is called, lldb kills it.  If lldb attached to a
+  ///     running process and Destroy is called, lldb detaches.  If
   ///     this behavior needs to be over-ridden, this is the bool that
   ///     can be used.
   ///

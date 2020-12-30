@@ -458,7 +458,7 @@ public:
   /// Returns the opcode of this MachineInstr.
   unsigned getOpcode() const { return MCID->Opcode; }
 
-  /// Retuns the total number of operands.
+  /// Returns the total number of operands.
   unsigned getNumOperands() const { return NumOperands; }
 
   /// Returns the total number of operands which are debug locations.

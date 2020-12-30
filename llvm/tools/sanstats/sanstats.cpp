@@ -85,7 +85,7 @@ static const char *ReadModule(char SizeofPtr, const char *Begin,
     // As the instrumentation tracks the return address and not
     // the address of the call to `__sanitizer_stat_report` we
     // remove one from the address to get the correct DI.
-    // TODO: it would be neccessary to set proper section index here.
+    // TODO: it would be necessary to set proper section index here.
     // object::SectionedAddress::UndefSection works for only absolute addresses.
     if (Expected<DILineInfo> LineInfo = Symbolizer.symbolizeCode(
             Filename, {Addr - 1, object::SectionedAddress::UndefSection})) {

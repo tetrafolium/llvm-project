@@ -71,7 +71,7 @@ public:
 
 /// Create the legacy pass object for the simple loop unswitcher.
 ///
-/// See the documentaion for `SimpleLoopUnswitchPass` for details.
+/// See the documentation for `SimpleLoopUnswitchPass` for details.
 Pass *createSimpleLoopUnswitchLegacyPass(bool NonTrivial = false);
 
 } // end namespace llvm

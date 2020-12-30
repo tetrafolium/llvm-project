@@ -1135,7 +1135,7 @@ SVal SimpleSValBuilder::evalBinOpLN(ProgramStateRef state,
   if (rhs.isZeroConstant())
     return lhs;
 
-  // Perserve the null pointer so that it can be found by the DerefChecker.
+  // Preserve the null pointer so that it can be found by the DerefChecker.
   if (lhs.isZeroConstant())
     return lhs;
 

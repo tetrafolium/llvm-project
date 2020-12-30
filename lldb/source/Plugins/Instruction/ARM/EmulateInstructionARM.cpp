@@ -8387,7 +8387,7 @@ bool EmulateInstructionARM::EmulateLDRSHRegister(const uint32_t opcode,
 
 // SXTB extracts an 8-bit value from a register, sign-extends it to 32 bits, and
 // writes the result to the destination
-// register.  You can specifiy a rotation by 0, 8, 16, or 24 bits before
+// register.  You can specify a rotation by 0, 8, 16, or 24 bits before
 // extracting the 8-bit value.
 bool EmulateInstructionARM::EmulateSXTB(const uint32_t opcode,
                                         const ARMEncoding encoding) {

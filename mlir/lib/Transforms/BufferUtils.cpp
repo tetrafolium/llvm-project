@@ -27,7 +27,7 @@ using namespace mlir;
 // BufferPlacementAllocs
 //===----------------------------------------------------------------------===//
 
-/// Get the start operation to place the given alloc value withing the
+/// Get the start operation to place the given alloc value within the
 // specified placement block.
 Operation *BufferPlacementAllocs::getStartOperation(Value allocValue,
                                                     Block *placementBlock,

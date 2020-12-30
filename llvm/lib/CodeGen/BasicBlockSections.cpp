@@ -197,7 +197,7 @@ static bool getBBClusterInfoForFunction(
   auto R = FuncAliasMap.find(FuncName);
   StringRef AliasName = R == FuncAliasMap.end() ? FuncName : R->second;
 
-  // Find the assoicated cluster information.
+  // Find the associated cluster information.
   auto P = ProgramBBClusterInfo.find(AliasName);
   if (P == ProgramBBClusterInfo.end())
     return false;

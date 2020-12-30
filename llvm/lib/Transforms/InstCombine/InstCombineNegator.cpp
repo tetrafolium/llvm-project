@@ -462,7 +462,7 @@ LLVM_NODISCARD Value *Negator::negate(Value *V, unsigned Depth) {
 
 #ifndef NDEBUG
   // We did not find a cached result for negation of V. While there,
-  // let's temporairly cache a placeholder value, with the idea that if later
+  // let's temporarily cache a placeholder value, with the idea that if later
   // during negation we fetch it from cache, we'll know we're in a cycle.
   NegationsCache[V] = Placeholder;
 #endif

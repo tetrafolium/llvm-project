@@ -258,7 +258,7 @@ ompt_try_start_tool(unsigned int omp_version, const char *runtime_version) {
 #error Activation of OMPT is not supported on this platform.
 #endif
   if (ret) {
-    OMPT_VERBOSE_INIT_CONTINUED_PRINT("Sucess.\n");
+    OMPT_VERBOSE_INIT_CONTINUED_PRINT("Success.\n");
     OMPT_VERBOSE_INIT_PRINT(
         "Tool was started and is using the OMPT interface.\n");
     OMPT_VERBOSE_INIT_PRINT("----- END LOGGING OF TOOL REGISTRATION -----\n");
@@ -776,7 +776,7 @@ OMPT_API_ROUTINE int ompt_get_proc_id(void) {
 }
 
 /*****************************************************************************
- * compatability
+ * compatibility
  ****************************************************************************/
 
 /*

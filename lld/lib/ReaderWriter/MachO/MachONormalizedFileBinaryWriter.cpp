@@ -1347,7 +1347,7 @@ bool TrieNode::updateOffset(uint32_t &offset) {
     nodeSize += edge._subString.size() + 1 // String length.
                 + llvm::getULEB128Size(edge._child->_trieOffset); // Offset len.
   }
-  // On input, 'offset' is new prefered location for this node.
+  // On input, 'offset' is new preferred location for this node.
   bool result = (_trieOffset != offset);
   // Store new location in node object for use by parents.
   _trieOffset = offset;

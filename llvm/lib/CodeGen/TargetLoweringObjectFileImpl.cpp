@@ -696,7 +696,7 @@ MCSection *TargetLoweringObjectFileELF::getExplicitSectionGlobal(
             UniqueID = NextUniqueID++;
         }
       } else {
-        // We need to unique the section if the user has explicity
+        // We need to unique the section if the user has explicitly
         // assigned a non-mergeable symbol to a section name for
         // a generic mergeable section.
         if (getContext().isELFGenericMergeableSection(SectionName)) {
@@ -1549,7 +1549,7 @@ MCSection *TargetLoweringObjectFileCOFF::SelectSectionForGlobal(
           raw_svector_ostream(Name) << '$' << *Prefix;
 
       // Append "$symbol" to the section name *before* IR-level mangling is
-      // applied when targetting mingw. This is what GCC does, and the ld.bfd
+      // applied when targeting mingw. This is what GCC does, and the ld.bfd
       // COFF linker will not properly handle comdats otherwise.
       if (getTargetTriple().isWindowsGNUEnvironment())
         raw_svector_ostream(Name) << '$' << ComdatGV->getName();
@@ -1916,7 +1916,7 @@ static const Comdat *getWasmComdat(const GlobalValue *GV) {
 
 MCSection *TargetLoweringObjectFileWasm::getExplicitSectionGlobal(
     const GlobalObject *GO, SectionKind Kind, const TargetMachine &TM) const {
-  // We don't support explict section names for functions in the wasm object
+  // We don't support explicit section names for functions in the wasm object
   // format.  Each function has to be in its own unique section.
   if (isa<Function>(GO)) {
     return SelectSectionForGlobal(GO, Kind, TM);
@@ -2225,7 +2225,7 @@ bool TargetLoweringObjectFileXCOFF::shouldPutJumpTableInFunctionSection(
 MCSection *TargetLoweringObjectFileXCOFF::getSectionForConstant(
     const DataLayout &DL, SectionKind Kind, const Constant *C,
     Align &Alignment) const {
-  // TODO: Enable emiting constant pool to unique sections when we support it.
+  // TODO: Enable emitting constant pool to unique sections when we support it.
   return ReadOnlySection;
 }
 

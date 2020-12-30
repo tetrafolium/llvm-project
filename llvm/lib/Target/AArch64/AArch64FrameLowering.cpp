@@ -487,7 +487,7 @@ void AArch64FrameLowering::emitCalleeSavedFrameMoves(
     unsigned Reg = Info.getReg();
 
     // Not all unwinders may know about SVE registers, so assume the lowest
-    // common demoninator.
+    // common denominator.
     unsigned NewReg;
     if (static_cast<const AArch64RegisterInfo *>(TRI)->regNeedsCFI(Reg, NewReg))
       Reg = NewReg;
@@ -1627,7 +1627,7 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
           MBB, Pop, DL, TII, PrologueSaveSize, NeedsWinCFI, &HasWinCFI, false);
     else {
       // If not, make sure to emit an add after the last ldp.
-      // We're doing this by transfering the size to be restored from the
+      // We're doing this by transferring the size to be restored from the
       // adjustment *before* the CSR pops to the adjustment *after* the CSR
       // pops.
       AfterCSRPopSize += PrologueSaveSize;

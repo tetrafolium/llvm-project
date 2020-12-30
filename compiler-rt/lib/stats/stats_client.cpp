@@ -9,7 +9,7 @@
 // Sanitizer statistics gathering. Manages statistics for a module (executable
 // or DSO) and registers statistics with the process.
 //
-// This is linked into each individual modle and cannot directly use functions
+// This is linked into each individual model and cannot directly use functions
 // declared in sanitizer_common.
 //
 //===----------------------------------------------------------------------===//

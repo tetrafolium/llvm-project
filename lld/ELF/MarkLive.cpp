@@ -82,7 +82,7 @@ static uint64_t getAddend(InputSectionBase &sec,
 
 template <class ELFT>
 static uint64_t getAddend(InputSectionBase &sec,
-                          const typename ELFT::Rela &rel) {
+                          const typename ELFT::Real &rel) {
   return rel.r_addend;
 }
 
@@ -281,7 +281,7 @@ template <class ELFT> void MarkLive<ELFT>::mark() {
     InputSectionBase &sec = *queue.pop_back_val();
 
     if (sec.areRelocsRela) {
-      for (const typename ELFT::Rela &rel : sec.template relas<ELFT>())
+      for (const typename ELFT::Real &rel : sec.template relas<ELFT>())
         resolveReloc(sec, rel, false);
     } else {
       for (const typename ELFT::Rel &rel : sec.template rels<ELFT>())
@@ -347,7 +347,7 @@ template <class ELFT> void elf::markLive() {
   //
   // The -gc-sections option works only for SHF_ALLOC sections (sections that
   // are memory-mapped at runtime). So we can unconditionally make non-SHF_ALLOC
-  // sections alive except SHF_LINK_ORDER, SHT_REL/SHT_RELA sections, and
+  // sections alive except SHF_LINK_ORDER, SHT_REL/SHT_REAL sections, and
   // sections in a group.
   //
   // Usually, non-SHF_ALLOC sections are not removed even if they are
@@ -374,7 +374,7 @@ template <class ELFT> void elf::markLive() {
   for (InputSectionBase *sec : inputSections) {
     bool isAlloc = (sec->flags & SHF_ALLOC);
     bool isLinkOrder = (sec->flags & SHF_LINK_ORDER);
-    bool isRel = (sec->type == SHT_REL || sec->type == SHT_RELA);
+    bool isRel = (sec->type == SHT_REL || sec->type == SHT_REAL);
 
     if (!isAlloc && !isLinkOrder && !isRel && !sec->nextInSectionGroup) {
       sec->markLive();

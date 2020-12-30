@@ -7930,7 +7930,7 @@ static ExprResult attemptRecovery(Sema &SemaRef,
   const CXXScopeSpec *SS = Consumer.getSS();
   CXXScopeSpec NewSS;
 
-  // Use an approprate CXXScopeSpec for building the expr.
+  // Use an appropriate CXXScopeSpec for building the expr.
   if (auto *NNS = TC.getCorrectionSpecifier())
     NewSS.MakeTrivial(SemaRef.Context, NNS, TC.getCorrectionRange());
   else if (SS && !TC.WillReplaceSpecifier())

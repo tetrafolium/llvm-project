@@ -916,7 +916,7 @@ SDValue SelectionDAGBuilder::LowerAsSTATEPOINT(
       Record.payload.FI = cast<FrameIndexSDNode>(Loc)->getIndex();
     } else {
       Record.type = RecordType::NoRelocate;
-      // If we didn't relocate a value, we'll essentialy end up inserting an
+      // If we didn't relocate a value, we'll essentially end up inserting an
       // additional use of the original value when lowering the gc.relocate.
       // We need to make sure the value is available at the new use, which
       // might be in another block.

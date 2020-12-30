@@ -2296,7 +2296,7 @@ static bool hasExplicitMemberDefinition(CXXRecordDecl::method_iterator I,
 }
 
 static bool canUseCtorHoming(const CXXRecordDecl *RD) {
-  // Constructor homing can be used for classes that cannnot be constructed
+  // Constructor homing can be used for classes that cannot be constructed
   // without emitting code for one of their constructors. This is classes that
   // don't have trivial or constexpr constructors, or can be created from
   // aggregate initialization. Also skip lambda objects because they don't call

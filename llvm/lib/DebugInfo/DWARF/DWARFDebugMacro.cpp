@@ -114,7 +114,7 @@ Error DWARFDebugMacro::parseImpl(
     // be needed while retrieving macro from DW_MACRO_define_strx form.
     for (const auto &U : Units.getValue())
       if (auto CUDIE = U->getUnitDIE())
-        // Skip units which does not contibutes to macro section.
+        // Skip units which does not contributes to macro section.
         if (auto MacroOffset = toSectionOffset(CUDIE.find(DW_AT_macros)))
           MacroToUnits.try_emplace(*MacroOffset, U.get());
   }

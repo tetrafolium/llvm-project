@@ -131,7 +131,7 @@ void TypeReferenceTracker::markReferencedTypes() {
                                ? Ids->tryGetType(RefTI)
                                : Types.tryGetType(RefTI);
     if (!Rec)
-      continue; // FIXME: Report a reference to a non-existant type.
+      continue; // FIXME: Report a reference to a non-existent type.
 
     SmallVector<TiReference, 4> DepList;
     // FIXME: Check for failure.

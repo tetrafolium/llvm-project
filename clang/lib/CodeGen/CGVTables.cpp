@@ -982,7 +982,7 @@ void CodeGenVTables::GenerateRelativeVTableAlias(llvm::GlobalVariable *VTable,
   if (!VTable->hasComdat()) {
     // If this is in a comdat, then we shouldn't make the linkage private due to
     // an issue in lld where private symbols can be used as the key symbol when
-    // choosing the prevelant group. This leads to "relocation refers to a
+    // choosing the prevalent group. This leads to "relocation refers to a
     // symbol in a discarded section".
     VTable->setLinkage(llvm::GlobalValue::PrivateLinkage);
   } else {

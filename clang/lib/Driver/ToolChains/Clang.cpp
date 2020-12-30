@@ -2106,7 +2106,7 @@ void Clang::AddX86TargetArgs(const ArgList &Args,
 
   // Handle -mtune.
 
-  // Default to "generic" unless -march is present or targetting the PS4.
+  // Default to "generic" unless -march is present or targeting the PS4.
   std::string TuneCPU;
   if (!Args.hasArg(clang::driver::options::OPT_march_EQ) &&
       !getToolChain().getTriple().isPS4CPU())
@@ -2520,7 +2520,7 @@ static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
   bool SignedZeros = true;
   bool TrappingMath = false;        // Implemented via -ffp-exception-behavior
   bool TrappingMathPresent = false; // Is trapping-math in args, and not
-  // overriden by ffp-exception-behavior?
+  // overridden by ffp-exception-behavior?
   bool RoundingFPMath = false;
   bool RoundingMathPresent = false; // Is rounding-math in args?
   // -ffp-model values: strict, fast, precise

@@ -174,7 +174,7 @@ public:
   ///
   /// \param [in] Option - Prefix + Name of the flag which Values will be
   ///  changed. For example, "-analyzer-checker".
-  /// \param [in] Values - String of Values seperated by ",", such as
+  /// \param [in] Values - String of Values separated by ",", such as
   ///  "foo, bar..", where foo and bar is the argument which the Option flag
   ///  takes
   ///

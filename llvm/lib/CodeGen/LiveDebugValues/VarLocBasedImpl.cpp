@@ -38,7 +38,7 @@
 /// the location can be determined, rather than only having DBG_VALUEs in blocks
 /// where locations are specified due to an assignment or some optimization.
 /// Movements of values between registers and spill slots are annotated with
-/// DBG_VALUEs too to track variable values bewteen locations. All this allows
+/// DBG_VALUEs too to track variable values between locations. All this allows
 /// DbgEntityHistoryCalculator to focus on only the locations within individual
 /// blocks, facilitating testing and improving modularity.
 ///

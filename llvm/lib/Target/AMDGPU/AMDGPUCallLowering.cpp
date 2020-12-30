@@ -268,7 +268,7 @@ struct AMDGPUOutgoingArgHandler : public AMDGPUValueHandler {
 AMDGPUCallLowering::AMDGPUCallLowering(const AMDGPUTargetLowering &TLI)
     : CallLowering(&TLI) {}
 
-// FIXME: Compatability shim
+// FIXME: Compatibility shim
 static ISD::NodeType extOpcodeToISDExtOpcode(unsigned MIOpc) {
   switch (MIOpc) {
   case TargetOpcode::G_SEXT:

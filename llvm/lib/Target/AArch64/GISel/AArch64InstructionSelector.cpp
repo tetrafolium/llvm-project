@@ -5379,7 +5379,7 @@ AArch64InstructionSelector::selectAddrModeXRO(MachineOperand &Root,
     unsigned Scale = Log2_32(SizeInBytes);
     int64_t ImmOff = ValAndVReg->Value;
 
-    // Skip immediates that can be selected in the load/store addresing
+    // Skip immediates that can be selected in the load/store addressing
     // mode.
     if (ImmOff % SizeInBytes == 0 && ImmOff >= 0 && ImmOff < (0x1000 << Scale))
       return None;

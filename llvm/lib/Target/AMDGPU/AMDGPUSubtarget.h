@@ -218,7 +218,7 @@ public:
   uint64_t getExplicitKernArgSize(const Function &F, Align &MaxAlign) const;
   unsigned getKernArgSegmentSize(const Function &F, Align &MaxAlign) const;
 
-  /// \returns Corresponsing DWARF register number mapping flavour for the
+  /// \returns Corresponding DWARF register number mapping flavour for the
   /// \p WavefrontSize.
   AMDGPUDwarfFlavour getAMDGPUDwarfFlavour() const {
     return getWavefrontSize() == 32 ? AMDGPUDwarfFlavour::Wave32
@@ -728,7 +728,7 @@ public:
   }
 
   // Scratch is allocated in 256 dword per wave blocks for the entire
-  // wavefront. When viewed from the perspecive of an arbitrary workitem, this
+  // wavefront. When viewed from the perspective of an arbitrary workitem, this
   // is 4-byte aligned.
   //
   // Only 4-byte alignment is really needed to access anything. Transformations

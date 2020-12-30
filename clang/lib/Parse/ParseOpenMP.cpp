@@ -3706,7 +3706,7 @@ bool Parser::ParseOpenMPVarList(OpenMPDirectiveKind DKind,
         TPA.Revert();
       }
     } else {
-      // Parsing was unsuccessfull, revert and skip to the end of clause or
+      // Parsing was unsuccessful, revert and skip to the end of clause or
       // directive.
       TPA.Revert();
       SkipUntil(tok::comma, tok::r_paren, tok::annot_pragma_openmp_end,

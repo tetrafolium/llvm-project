@@ -73,7 +73,7 @@ private:
   bool isProfitableToTransform(const MachineInstr &MI) const;
 
   // transformInstruction - Perform the transformation of an instruction
-  // to its equivalant AdvSIMD scalar instruction. Update inputs and outputs
+  // to its equivalent AdvSIMD scalar instruction. Update inputs and outputs
   // to be the correct register class, minimizing cross-class copies.
   void transformInstruction(MachineInstr &MI);
 
@@ -282,7 +282,7 @@ static MachineInstr *insertCopy(const TargetInstrInfo *TII, MachineInstr &MI,
 }
 
 // transformInstruction - Perform the transformation of an instruction
-// to its equivalant AdvSIMD scalar instruction. Update inputs and outputs
+// to its equivalent AdvSIMD scalar instruction. Update inputs and outputs
 // to be the correct register class, minimizing cross-class copies.
 void AArch64AdvSIMDScalar::transformInstruction(MachineInstr &MI) {
   LLVM_DEBUG(dbgs() << "Scalar transform: " << MI);

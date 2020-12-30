@@ -81,7 +81,7 @@ public:
   /// member of the FileSpec is filled in.
   static FileSpec GetUserPluginDir();
 
-  /// Returns the proces temporary directory. This directory will be cleaned up
+  /// Returns the process temporary directory. This directory will be cleaned up
   /// when this process exits. Only the directory member of the FileSpec is
   /// filled in.
   static FileSpec GetProcessTempDir();

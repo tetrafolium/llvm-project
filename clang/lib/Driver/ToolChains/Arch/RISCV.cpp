@@ -172,7 +172,7 @@ static void getExtensionFeatures(const Driver &D, const ArgList &Args,
   if (Exts.empty())
     return;
 
-  // Multi-letter extensions are seperated by a single underscore
+  // Multi-letter extensions are separated by a single underscore
   // as described in RISC-V User-Level ISA V2.2.
   SmallVector<StringRef, 8> Split;
   Exts.split(Split, StringRef("_"));

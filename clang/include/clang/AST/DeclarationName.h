@@ -162,7 +162,7 @@ class DeclarationName {
   ///   at zero, and correspond to the numerical value of the first non-inline
   ///   enumeration values of NameKind minus an offset. This makes conversion
   ///   between DeclarationNameExtra::ExtraKind and NameKind possible with
-  ///   a single addition/substraction.
+  ///   a single addition/subtraction.
   ///
   /// * The enumeration values of Selector::IdentifierInfoFlag must correspond
   ///   to the relevant enumeration values of StoredNameKind.

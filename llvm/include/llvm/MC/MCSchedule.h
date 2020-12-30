@@ -199,7 +199,7 @@ struct MCExtraProcessorInfo {
 /// buffers, queues, and stages. Declaring that a given machine-independent
 /// abstract property corresponds to a specific physical property across all
 /// subtargets can't be done. Nonetheless, the abstract model is
-/// useful. Futhermore, subtargets typically extend this model with processor
+/// useful. Furthermore, subtargets typically extend this model with processor
 /// specific resources to model any hardware features that can be exploited by
 /// scheduling heuristics and aren't sufficiently represented in the abstract.
 ///

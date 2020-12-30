@@ -256,7 +256,7 @@ static void createRetBitCast(CallBase &CB, Type *RetTy, CastInst **RetBitCast) {
 ///     br %normal_dst
 ///
 /// An indirect musttail call is processed slightly differently in that:
-/// 1. No merge block needed for the orginal and the cloned callsite, since
+/// 1. No merge block needed for the original and the cloned callsite, since
 ///    either one ends the flow. No phi node is needed either.
 /// 2. The return statement following the original call site is duplicated too
 ///    and placed immediately after the cloned call site per the IR convention.

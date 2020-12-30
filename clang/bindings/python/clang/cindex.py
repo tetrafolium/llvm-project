@@ -2461,7 +2461,7 @@ class _CXUnsavedFile(Structure):
     _fields_ = [("name", c_char_p), ("contents", c_char_p), ('length', c_ulong)]
 
 # Functions calls through the python interface are rather slow. Fortunately,
-# for most symboles, we do not need to perform a function call. Their spelling
+# for most symbols, we do not need to perform a function call. Their spelling
 # never changes and is consequently provided by this spelling cache.
 SpellingCache = {
             # 0: CompletionChunk.Kind("Optional"),

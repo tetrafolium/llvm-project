@@ -181,7 +181,7 @@ ConstantRange Float2IntPass::validateRange(ConstantRange R) {
 //   - walkBackwards:  A breadth-first walk of the use-def graph starting from
 //                     the roots. Populate "SeenInsts" with interesting
 //                     instructions and poison values if they're obvious and
-//                     cheap to compute. Calculate the equivalance set structure
+//                     cheap to compute. Calculate the equivalence set structure
 //                     while we're here too.
 //   - walkForwards:  Iterate over SeenInsts in reverse order, so we visit
 //                     defs before their uses. Calculate the real range info.

@@ -161,7 +161,7 @@ static bool shouldGenerateNote(llvm::raw_string_ostream &os,
   return true;
 }
 
-/// Finds argument index of the out paramter in the call {@code S}
+/// Finds argument index of the out parameter in the call {@code S}
 /// corresponding to the symbol {@code Sym}.
 /// If none found, returns None.
 static Optional<unsigned> findArgIdxOfSymbol(ProgramStateRef CurrSt,

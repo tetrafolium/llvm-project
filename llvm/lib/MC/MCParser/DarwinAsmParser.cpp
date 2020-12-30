@@ -503,7 +503,7 @@ bool DarwinAsmParser::parseDirectiveAltEntry(StringRef, SMLoc) {
   MCSymbol *Sym = getContext().getOrCreateSymbol(Name);
 
   if (Sym->isDefined())
-    return TokError(".alt_entry must preceed symbol definition");
+    return TokError(".alt_entry must precede symbol definition");
 
   if (!getStreamer().emitSymbolAttribute(Sym, MCSA_AltEntry))
     return TokError("unable to emit symbol attribute");

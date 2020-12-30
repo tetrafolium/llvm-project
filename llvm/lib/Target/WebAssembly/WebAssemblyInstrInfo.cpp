@@ -46,7 +46,7 @@ bool WebAssemblyInstrInfo::isReallyTriviallyReMaterializable(
   case WebAssembly::CONST_F32:
   case WebAssembly::CONST_F64:
     // isReallyTriviallyReMaterializableGeneric misses these because of the
-    // ARGUMENTS implicit def, so we manualy override it here.
+    // ARGUMENTS implicit def, so we manually override it here.
     return true;
   default:
     return false;

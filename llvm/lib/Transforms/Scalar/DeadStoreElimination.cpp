@@ -591,7 +591,7 @@ static OverwriteResult isPartialOverwrite(const MemoryLocation &Later,
       // Continue erasing and adjusting our end in case other previous
       // intervals are also overlapped with the current store.
       //
-      // |--- ealier 1 ---|  |--- ealier 2 ---|
+      // |--- earlier 1 ---|  |--- earlier 2 ---|
       //     |------- later---------|
       //
       while (ILI != IM.end() && ILI->second <= LaterIntEnd) {
@@ -1548,7 +1548,7 @@ namespace {
 //   3. StartDef completely overwrites CurrentDef.
 // 4. Erase CurrentDef from the function and MemorySSA.
 
-// Returns true if \p I is an intrisnic that does not read or write memory.
+// Returns true if \p I is an intrinsic that does not read or write memory.
 bool isNoopIntrinsic(Instruction *I) {
   if (const IntrinsicInst *II = dyn_cast<IntrinsicInst>(I)) {
     switch (II->getIntrinsicID()) {
@@ -2146,7 +2146,7 @@ struct DSEState {
         continue;
       }
 
-      // A memory terminator kills all preceeding MemoryDefs and all succeeding
+      // A memory terminator kills all preceding MemoryDefs and all succeeding
       // MemoryAccesses. We do not have to check it's users.
       if (isMemTerminator(*CurrentLoc, EarlierMemInst, UseInst)) {
         LLVM_DEBUG(
@@ -2516,7 +2516,7 @@ bool eliminateDeadStoresMemorySSA(Function &F, AliasAnalysis &AA,
     if (SILocUnd)
       ToCheck.insert(KillingDef->getDefiningAccess());
 
-    bool Shortend = false;
+    bool Shortened = false;
     bool IsMemTerm = State.isMemTerminatorInst(SI);
     // Check if MemoryAccesses in the worklist are killed by KillingDef.
     for (unsigned I = 0; I < ToCheck.size(); I++) {
@@ -2590,7 +2590,7 @@ bool eliminateDeadStoresMemorySSA(Function &F, AliasAnalysis &AA,
           auto *Earlier = dyn_cast<StoreInst>(NI);
           auto *Later = dyn_cast<StoreInst>(SI);
           // We are re-using tryToMergePartialOverlappingStores, which requires
-          // Earlier to domiante Later.
+          // Earlier to dominate Later.
           // TODO: implement tryToMergeParialOverlappingStores using MemorySSA.
           if (Earlier && Later && DT.dominates(Earlier, Later)) {
             if (Constant *Merged = tryToMergePartialOverlappingStores(
@@ -2602,7 +2602,7 @@ bool eliminateDeadStoresMemorySSA(Function &F, AliasAnalysis &AA,
               ++NumModifiedStores;
               MadeChange = true;
 
-              Shortend = true;
+              Shortened = true;
               // Remove later store and remove any outstanding overlap intervals
               // for the updated store.
               State.deleteDeadInstruction(Later);
@@ -2625,7 +2625,7 @@ bool eliminateDeadStoresMemorySSA(Function &F, AliasAnalysis &AA,
     }
 
     // Check if the store is a no-op.
-    if (!Shortend && isRemovable(SI) &&
+    if (!Shortened && isRemovable(SI) &&
         State.storeIsNoop(KillingDef, SILoc, SILocUnd)) {
       LLVM_DEBUG(dbgs() << "DSE: Remove No-Op Store:\n  DEAD: " << *SI << '\n');
       State.deleteDeadInstruction(SI);

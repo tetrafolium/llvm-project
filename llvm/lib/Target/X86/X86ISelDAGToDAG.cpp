@@ -3629,7 +3629,7 @@ bool X86DAGToDAGISel::matchBitExtract(SDNode *Node) {
   }
 
   // Else, if we do *NOT* have BMI2, let's find out if the if the 'X' is
-  // *logically* shifted (potentially with one-use trunc inbetween),
+  // *logically* shifted (potentially with one-use trunc between),
   // and the truncation was the only use of the shift,
   // and if so look past one-use truncation.
   {

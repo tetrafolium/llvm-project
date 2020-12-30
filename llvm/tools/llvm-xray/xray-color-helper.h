@@ -48,7 +48,7 @@ class ColorHelper {
   ArrayRef<std::tuple<uint8_t, uint8_t, uint8_t>> BoundMap;
 
 public:
-  /// Enum of the availible Sequential Color Schemes
+  /// Enum of the available Sequential Color Schemes
   enum class SequentialScheme {
     // Schemes based on the ColorBrewer Color schemes of the same name from
     // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.
@@ -59,7 +59,7 @@ public:
 
   ColorHelper(SequentialScheme S);
 
-  /// Enum of the availible Diverging Color Schemes
+  /// Enum of the available Diverging Color Schemes
   enum class DivergingScheme {
     // Schemes based on the ColorBrewer Color schemes of the same name from
     // http://www.colorbrewer.org/ by Cynthis A Brewer Penn State University.

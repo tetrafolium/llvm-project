@@ -424,7 +424,7 @@ struct CapturedZoneInfo {
     DeclInformation(const Decl *TheDecl, ZoneRelative DeclaredIn,
                     unsigned DeclIndex)
         : TheDecl(TheDecl), DeclaredIn(DeclaredIn), DeclIndex(DeclIndex){};
-    // Marks the occurence of a reference for this declaration
+    // Marks the occurrence of a reference for this declaration
     void markOccurence(ZoneRelative ReferenceLoc);
   };
   // Maps Decls to their DeclInfo

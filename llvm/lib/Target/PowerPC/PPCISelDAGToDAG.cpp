@@ -244,7 +244,7 @@ public:
   /// SelectAddrIdx - Given the specified address, check to see if it can be
   /// represented as an indexed [r+r] operation.
   /// This is for xform instructions whose associated displacement form is D.
-  /// The last parameter \p 0 means associated D form has no requirment for 16
+  /// The last parameter \p 0 means associated D form has no requirement for 16
   /// bit signed displacement.
   /// Returns false if it can be represented by [r+imm], which are preferred.
   bool SelectAddrIdx(SDValue N, SDValue &Base, SDValue &Index) {
@@ -279,7 +279,7 @@ public:
 
   /// SelectAddrImm - Returns true if the address N can be represented by
   /// a base register plus a signed 16-bit displacement [r+imm].
-  /// The last parameter \p 0 means D form has no requirment for 16 bit signed
+  /// The last parameter \p 0 means D form has no requirement for 16 bit signed
   /// displacement.
   bool SelectAddrImm(SDValue N, SDValue &Disp, SDValue &Base) {
     return PPCLowering->SelectAddressRegImm(N, Disp, Base, *CurDAG, None);
@@ -2819,7 +2819,7 @@ SDValue IntegerCompareEliminator::addExtOrTrunc(SDValue NatWidthRes,
   }
 
   assert(Conv == ExtOrTruncConversion::Trunc &&
-         "Unknown convertion between 32 and 64 bit values.");
+         "Unknown conversion between 32 and 64 bit values.");
   // For reinterpreting 64-bit values as 32-bit values, we just need to
   // EXTRACT_SUBREG (i.e. extract the low word).
   SDValue SubRegIdx = CurDAG->getTargetConstant(PPC::sub_32, dl, MVT::i32);

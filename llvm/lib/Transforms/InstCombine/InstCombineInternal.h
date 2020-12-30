@@ -772,7 +772,7 @@ class Negator final {
   Negator &operator=(Negator &&) = delete;
 
 public:
-  /// Attempt to negate \p Root. Retuns nullptr if negation can't be performed,
+  /// Attempt to negate \p Root. Returns nullptr if negation can't be performed,
   /// otherwise returns negated value.
   LLVM_NODISCARD static Value *Negate(bool LHSIsZero, Value *Root,
                                       InstCombinerImpl &IC);

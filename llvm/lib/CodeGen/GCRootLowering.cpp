@@ -181,7 +181,7 @@ bool LowerIntrinsics::runOnFunction(Function &F) {
   return DoLowering(F, S);
 }
 
-/// Lower barriers out of existance (if the associated GCStrategy hasn't
+/// Lower barriers out of existence (if the associated GCStrategy hasn't
 /// already done so...), and insert initializing stores to roots as a defensive
 /// measure.  Given we're going to report all roots live at all safepoints, we
 /// need to be able to ensure each root has been initialized by the point the

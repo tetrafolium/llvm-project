@@ -1772,7 +1772,7 @@ SDValue NVPTXTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
     // so we don't need to worry about natural alignment or not.
     // See TargetLowering::LowerCallTo().
 
-    // Enforce minumum alignment of 4 to work around ptxas miscompile
+    // Enforce minimum alignment of 4 to work around ptxas miscompile
     // for sm_50+. See corresponding alignment adjustment in
     // emitFunctionParamList() for details.
     if (ArgAlign < Align(4))

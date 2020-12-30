@@ -782,7 +782,7 @@ VideoJS.player.extend({
     this.timeControl.appendChild(this.durationDisplay);
     this.activateElement(this.durationDisplay, "durationDisplay");
 
-    // Create the volumne control
+    // Create the volume control
     this.volumeControl = _V_.createElement("div", {
       className : "vjs-volume-control",
       innerHTML :

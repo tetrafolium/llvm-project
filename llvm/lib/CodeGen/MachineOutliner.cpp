@@ -111,7 +111,7 @@ struct InstructionMapper {
   /// The next available integer to assign to a \p MachineInstr that
   /// cannot be outlined.
   ///
-  /// Set to -3 for compatability with \p DenseMapInfo<unsigned>.
+  /// Set to -3 for compatibility with \p DenseMapInfo<unsigned>.
   unsigned IllegalInstrNumber = -3;
 
   /// The next available integer to assign to a \p MachineInstr that can

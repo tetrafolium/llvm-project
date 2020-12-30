@@ -188,7 +188,7 @@ static const Value *getPointerOperand(const Instruction *I,
 /// possible. If that fails, the remaining offset is adjusted byte-wise, hence
 /// through a cast to i8*.
 ///
-/// TODO: This could probably live somewhere more prominantly if it doesn't
+/// TODO: This could probably live somewhere more prominently if it doesn't
 ///       already exist.
 static Value *constructPointer(Type *ResTy, Value *Ptr, int64_t Offset,
                                IRBuilder<NoFolder> &IRB, const DataLayout &DL) {
@@ -3601,7 +3601,7 @@ struct AADereferenceableFloating : AADereferenceableImpl {
         } else if (OffsetSExt > 0) {
           // If something was stripped but there is circular reasoning we look
           // for the offset. If it is positive we basically decrease the
-          // dereferenceable bytes in a circluar loop now, which will simply
+          // dereferenceable bytes in a circular loop now, which will simply
           // drive them down to the known value in a very slow way which we
           // can accelerate.
           T.indicatePessimisticFixpoint();
@@ -5487,7 +5487,7 @@ struct AAPrivatizablePtrArgument final : public AAPrivatizablePtrImpl {
     return ChangeStatus::UNCHANGED;
   }
 
-  /// Given a type to private \p PrivType, collect the constituates (which are
+  /// Given a type to private \p PrivType, collect the constitutes (which are
   /// used) in \p ReplacementTypes.
   static void
   identifyReplacementTypes(Type *PrivType,
@@ -6178,7 +6178,7 @@ ChangeStatus AAMemoryBehaviorFloating::updateImpl(Attributor &A) {
   // Make sure the value is not captured (except through "return"), if
   // it is, any information derived would be irrelevant anyway as we cannot
   // check the potential aliases introduced by the capture. However, no need
-  // to fall back to anythign less optimistic than the function state.
+  // to fall back to anything less optimistic than the function state.
   const auto &ArgNoCaptureAA = A.getAAFor<AANoCapture>(
       *this, IRP, /* TrackDependence */ true, DepClassTy::OPTIONAL);
   if (!ArgNoCaptureAA.isAssumedNoCaptureMaybeReturned()) {
@@ -6368,7 +6368,7 @@ std::string AAMemoryLocation::getMemoryLocationsAsStr(
     S += "inaccessible,";
   if (0 == (MLK & AAMemoryLocation::NO_MALLOCED_MEM))
     S += "malloced,";
-  if (0 == (MLK & AAMemoryLocation::NO_UNKOWN_MEM))
+  if (0 == (MLK & AAMemoryLocation::NO_UNKNOWN_MEM))
     S += "unknown,";
   S.pop_back();
   return S;
@@ -6664,9 +6664,9 @@ void AAMemoryLocationImpl::categorizePtrValue(
       if (NoAliasAA.isAssumedNoAlias())
         MLK = NO_MALLOCED_MEM;
       else
-        MLK = NO_UNKOWN_MEM;
+        MLK = NO_UNKNOWN_MEM;
     } else {
-      MLK = NO_UNKOWN_MEM;
+      MLK = NO_UNKNOWN_MEM;
     }
 
     assert(MLK != NO_LOCATIONS && "No location specified!");
@@ -6684,7 +6684,7 @@ void AAMemoryLocationImpl::categorizePtrValue(
           /* MaxValues */ 32, StripGEPCB)) {
     LLVM_DEBUG(
         dbgs() << "[AAMemoryLocation] Pointer locations not categorized\n");
-    updateStateAndAccessesMap(State, NO_UNKOWN_MEM, &I, nullptr, Changed,
+    updateStateAndAccessesMap(State, NO_UNKNOWN_MEM, &I, nullptr, Changed,
                               getAccessKindFromInst(&I));
   } else {
     LLVM_DEBUG(
@@ -6799,7 +6799,7 @@ AAMemoryLocationImpl::categorizeAccessedLocations(Attributor &A, Instruction &I,
 
   LLVM_DEBUG(dbgs() << "[AAMemoryLocation] Failed to categorize instruction: "
                     << I << "\n");
-  updateStateAndAccessesMap(AccessedLocs, NO_UNKOWN_MEM, &I, nullptr, Changed,
+  updateStateAndAccessesMap(AccessedLocs, NO_UNKNOWN_MEM, &I, nullptr, Changed,
                             getAccessKindFromInst(&I));
   return AccessedLocs.getAssumed();
 }
@@ -7037,7 +7037,7 @@ struct AAValueConstantRangeImpl : AAValueConstantRange {
     // If multiple ranges are annotated in IR, we give up to annotate assumed
     // range for now.
 
-    // TODO:  If there exists a known range which containts assumed range, we
+    // TODO:  If there exists a known range which contains assumed range, we
     // can say assumed range is better.
     if (KnownRanges->getNumOperands() > 2)
       return false;

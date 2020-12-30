@@ -196,7 +196,7 @@ void X86TileConfig::tileConfig() {
       int64_t Imm;
       int ImmCount = 0;
       // All def must be the same value, otherwise it is invalid MIs.
-      // Immediate is prefered.
+      // Immediate is preferred.
       for (const MachineOperand &MO : MRI->def_operands(Pair.first)) {
         const auto *Inst = MO.getParent();
         if (Inst->isMoveImmediate()) {

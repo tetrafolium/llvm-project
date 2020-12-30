@@ -860,7 +860,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &MF) {
       MFI.setObjectOffset(i, -Offset); // Set the computed offset
     }
   } else if (MaxCSFrameIndex >= MinCSFrameIndex) {
-    // Be careful about underflow in comparisons agains MinCSFrameIndex.
+    // Be careful about underflow in comparisons against MinCSFrameIndex.
     for (unsigned i = MaxCSFrameIndex; i != MinCSFrameIndex - 1; --i) {
       if (MFI.getStackID(i) !=
           TargetStackID::Default) // Only allocate objects on the default stack.

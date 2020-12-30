@@ -1047,10 +1047,10 @@ public:
 // outputs of distinct nodes being merged violating the topological property.
 // Should a fused node have a successor which has yet to be selected, our
 // legality checks would be incorrect. To avoid this we mark all unselected
-// sucessor nodes, i.e. id != -1 as invalid for pruning by bit-negating (x =>
+// successor nodes, i.e. id != -1 as invalid for pruning by bit-negating (x =>
 // (-(x+1))) the ids and modify our pruning check to ignore negative Ids of M.
 // We use bit-negation to more clearly enforce that node id -1 can only be
-// achieved by selected nodes). As the conversion is reversable the original Id,
+// achieved by selected nodes). As the conversion is reversible the original Id,
 // topological pruning can still be leveraged when looking for unselected nodes.
 // This method is call internally in all ISel replacement calls.
 void SelectionDAGISel::EnforceNodeIdInvariant(SDNode *Node) {

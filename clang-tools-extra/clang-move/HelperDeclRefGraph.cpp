@@ -106,7 +106,7 @@ void HelperDeclRGBuilder::run(
   // Construct the graph by adding a directed edge from caller to callee.
   //
   // "dc" is the closest ancestor declaration of "func_ref" or "used_class", it
-  // might be not the targetted Caller Decl, we always use the outmost enclosing
+  // might be not the targeted Caller Decl, we always use the outmost enclosing
   // FunctionDecl/CXXRecordDecl of "dc". For example,
   //
   //   int MoveClass::F() { int a = helper(); return a; }

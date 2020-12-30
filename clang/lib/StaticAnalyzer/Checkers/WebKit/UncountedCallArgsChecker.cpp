@@ -124,7 +124,7 @@ public:
     // If an assignment is problematic we should warn about the sole existence
     // of object on LHS.
     if (auto *MemberOp = dyn_cast<CXXOperatorCallExpr>(CE)) {
-      // Note: assignemnt to built-in type isn't derived from CallExpr.
+      // Note: assignment to built-in type isn't derived from CallExpr.
       if (MemberOp->isAssignmentOp())
         return false;
     }

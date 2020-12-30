@@ -272,7 +272,7 @@ void ClangExpressionSourceCode::AddLocalVariableDecls(
 
     ConstString var_name = var_sp->GetName();
 
-    // We can check for .block_descriptor w/o checking for langauge since this
+    // We can check for .block_descriptor w/o checking for language since this
     // is not a valid identifier in either C or C++.
     if (!var_name || var_name == ".block_descriptor")
       continue;

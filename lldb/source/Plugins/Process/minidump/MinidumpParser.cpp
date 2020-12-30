@@ -355,7 +355,7 @@ std::vector<const minidump::Module *> MinidumpParser::GetFilteredModuleList() {
 
   // Create memory regions from the linux maps only. We do this to avoid issues
   // with breakpad generated minidumps where if someone has mmap'ed a shared
-  // library into memory to accesss its data in the object file, we can get a
+  // library into memory to access its data in the object file, we can get a
   // minidump with two mappings for a binary: one whose base image points to a
   // memory region that is read + execute and one that is read only.
   MemoryRegionInfos linux_regions;
@@ -378,7 +378,7 @@ std::vector<const minidump::Module *> MinidumpParser::GetFilteredModuleList() {
 
     MapType::iterator iter;
     bool inserted;
-    // See if we have inserted this module aready into filtered_modules. If we
+    // See if we have inserted this module already into filtered_modules. If we
     // haven't insert an entry into module_name_to_filtered_index with the
     // index where we will insert it if it isn't in the vector already.
     std::tie(iter, inserted) = module_name_to_filtered_index.try_emplace(

@@ -69,9 +69,9 @@ typedef uintptr_t tfhar_t;
 #define _TEXASRU_TRANSLATION_INVALIDATION_CONFLICT(TEXASRU)                    \
   _TEXASRU_EXTRACT_BITS(TEXASRU, 14, 1)
 
-#define _TEXASR_IMPLEMENTAION_SPECIFIC(TEXASR)                                 \
+#define _TEXASR_IMPLEMENTATION_SPECIFIC(TEXASR)                                 \
   _TEXASR_EXTRACT_BITS(TEXASR, 15, 1)
-#define _TEXASRU_IMPLEMENTAION_SPECIFIC(TEXASRU)                               \
+#define _TEXASRU_IMPLEMENTATION_SPECIFIC(TEXASRU)                               \
   _TEXASRU_EXTRACT_BITS(TEXASRU, 15, 1)
 
 #define _TEXASR_INSTRUCTION_FETCH_CONFLICT(TEXASR)                             \

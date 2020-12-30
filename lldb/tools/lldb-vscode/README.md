@@ -59,7 +59,7 @@ $ cd ~/.vscode/extensions/llvm-org.lldb-vscode-0.1.0/bin
 $ ln -s /path/to/a/built/lldb-vscode
 ```
 
-This is handy if you want to debug and develope the `lldb-vscode` executable when adding features or fixing bugs.
+This is handy if you want to debug and develop the `lldb-vscode` executable when adding features or fixing bugs.
 
 # Configurations
 

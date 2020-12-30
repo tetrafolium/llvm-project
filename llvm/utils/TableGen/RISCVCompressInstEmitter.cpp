@@ -398,17 +398,17 @@ void RISCVCompressInstEmitter::createInstOperandMapping(
 /// - Operands in Dag Input must be all used in Dag Output.
 ///   Register Operand type in Dag Input Type  must be contained in the
 ///   corresponding Source Instruction type.
-/// - Register Operand type in Dag Input must be the  same as in  Dag Ouput.
+/// - Register Operand type in Dag Input must be the  same as in  Dag Output.
 /// - Register Operand type in  Dag Output must be the same  as the
 ///   corresponding Destination Inst type.
-/// - Immediate Operand type in Dag Input must be the same as in Dag Ouput.
-/// - Immediate Operand type in Dag Ouput must be the same as the corresponding
+/// - Immediate Operand type in Dag Input must be the same as in Dag Output.
+/// - Immediate Operand type in Dag Output must be the same as the corresponding
 ///   Destination Instruction type.
 /// - Fixed register must be contained in the corresponding Source Instruction
 ///   type.
 /// - Fixed register must be contained in the corresponding Destination
 ///   Instruction type. Warning message printed under these conditions:
-/// - Fixed immediate in Dag Input or Dag Ouput cannot be checked at this time
+/// - Fixed immediate in Dag Input or Dag Output cannot be checked at this time
 ///   and generate warning.
 /// - Immediate operand type in Dag Input differs from the corresponding Source
 ///   Instruction type  and generate a warning.

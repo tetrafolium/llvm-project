@@ -182,7 +182,7 @@ void PPCELFStreamer::emitGOTToPCRelLabel(const MCInst &Inst) {
   emitLabel(LabelSym, Inst.getLoc());
 }
 
-// This funciton checks if the parameter Inst is part of the setup for a link
+// This function checks if the parameter Inst is part of the setup for a link
 // time GOT PC Relative optimization. For example in this situation:
 // <MCInst PLDpc <MCOperand Reg:282> <MCOperand Expr:(glob_double@got@pcrel)>
 //   <MCOperand Imm:0> <MCOperand Expr:(.Lpcrel@<<invalid>>)>>
@@ -194,7 +194,7 @@ void PPCELFStreamer::emitGOTToPCRelLabel(const MCInst &Inst) {
 // and has the flag MCSymbolRefExpr::VK_PPC_PCREL_OPT. After that we just look
 // at the opcode and in the case of PLDpc we will return true. For the load
 // (or store) this function will return false indicating it has found the second
-// instruciton in the pair.
+// instruction in the pair.
 Optional<bool> llvm::isPartOfGOTToPCRelPair(const MCInst &Inst,
                                             const MCSubtargetInfo &STI) {
   // Need at least two operands.

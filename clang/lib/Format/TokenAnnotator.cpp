@@ -443,7 +443,7 @@ private:
     if (AttrTok->is(tok::r_square))
       return false;
 
-    // Move along the tokens inbetween the '[' and ']' e.g. [STAThread].
+    // Move along the tokens between the '[' and ']' e.g. [STAThread].
     while (AttrTok && AttrTok->isNot(tok::r_square)) {
       AttrTok = AttrTok->Next;
     }

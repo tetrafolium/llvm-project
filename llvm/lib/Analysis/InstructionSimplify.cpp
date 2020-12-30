@@ -2447,7 +2447,7 @@ computePointerICmp(const DataLayout &DL, const TargetLibraryInfo *TLI,
   default:
     return nullptr;
 
-  // Equality comaprisons are easy to fold.
+  // Equality comparisons are easy to fold.
   case CmpInst::ICMP_EQ:
   case CmpInst::ICMP_NE:
     break;
@@ -5870,7 +5870,7 @@ Value *llvm::SimplifyInstruction(Instruction *I, const SimplifyQuery &SQ,
   case Instruction::Freeze:
     Result = SimplifyFreezeInst(I->getOperand(0), Q);
     break;
-#define HANDLE_CAST_INST(num, opc, clas) case Instruction::opc:
+#define HANDLE_CAST_INST(num, opc, class) case Instruction::opc:
 #include "llvm/IR/Instruction.def"
 #undef HANDLE_CAST_INST
     Result =

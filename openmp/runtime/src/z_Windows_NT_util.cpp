@@ -228,7 +228,7 @@ static void __kmp_win32_cond_wait(kmp_win32_cond_t *cv, kmp_win32_mutex_t *mx,
       __kmp_win32_mutex_unlock(&cv->waiters_count_lock_);
     } else if (res == WAIT_TIMEOUT || res == WAIT_FAILED) {
       // check if the flag and cv counters are in consistent state
-      // as MS sent us debug dump whith inconsistent state of data
+      // as MS sent us debug dump with inconsistent state of data
       __kmp_win32_mutex_lock(mx);
       typename C::flag_t old_f = flag->set_sleeping();
       if (!flag->done_check_val(old_f & ~KMP_BARRIER_SLEEP_STATE)) {

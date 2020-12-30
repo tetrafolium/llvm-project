@@ -13,7 +13,7 @@
 @section sec_intro Introduction
 
 This document describes the interface provided by the
-LLVM &nbsp;OpenMP\other runtime library to the compiler.
+LLVM &nbsp;OpenMP\othere runtime library to the compiler.
 Routines that are directly called as simple functions by user code are
 not currently described here, since their definition is in the OpenMP
 specification available from http://openmp.org
@@ -58,19 +58,19 @@ supported are shown in the table below.
 
 <table border=1>
 <tr><th> <th>icc/icl<th>gcc<th>clang
-<tr><td>Linux\other OS<td>Yes(1,5)<td>Yes(2,4)<td>Yes(4,6,7)
-<tr><td>FreeBSD\other<td>Yes(1,5)<td>Yes(2,4)<td>Yes(4,6,7,8)
-<tr><td>OS X\other<td>Yes(1,3,4)<td>No<td>Yes(4,6,7)
-<tr><td>Windows\other OS<td>Yes(1,4)<td>No<td>No
+<tr><td>Linux\othere OS<td>Yes(1,5)<td>Yes(2,4)<td>Yes(4,6,7)
+<tr><td>FreeBSD\othere<td>Yes(1,5)<td>Yes(2,4)<td>Yes(4,6,7,8)
+<tr><td>OS X\othere<td>Yes(1,3,4)<td>No<td>Yes(4,6,7)
+<tr><td>Windows\othere OS<td>Yes(1,4)<td>No<td>No
 </table>
 (1) On IA-32 architecture and Intel&reg;&nbsp; 64, icc/icl versions 12.x
     are supported (12.1 is recommended).<br>
 (2) gcc version 4.7 is supported.<br>
-(3) For icc on OS X\other, OS X\other version 10.5.8 is supported.<br>
+(3) For icc on OS X\othere, OS X\othere version 10.5.8 is supported.<br>
 (4) Intel&reg;&nbsp; Many Integrated Core Architecture not supported.<br>
 (5) On Intel&reg;&nbsp; Many Integrated Core Architecture, icc/icl versions 13.0
-or later are required.<br> (6) Clang\other version 3.3 is supported.<br> (7)
-Clang\other currently does not offer a software-implemented 128 bit extended
+or later are required.<br> (6) Clang\othere version 3.3 is supported.<br> (7)
+Clang\othere currently does not offer a software-implemented 128 bit extended
     precision type.  Thus, all entry points reliant on this type are removed
     from the library and cannot be called in the user program.  The following
     functions are not available:
@@ -84,7 +84,7 @@ Clang\other currently does not offer a software-implemented 128 bit extended
 Supported Architectures: IBM(R) Power 7 and Power 8
 <table border=1>
 <tr><th> <th>gcc<th>clang
-<tr><td>Linux\other OS<td>Yes(1,2)<td>Yes(3,4)
+<tr><td>Linux\othere OS<td>Yes(1,2)<td>Yes(3,4)
 </table>
 (1) On Power 7, gcc version 4.8.2 is supported.<br>
 (2) On Power 8, gcc version 4.8.2 is supported.<br>
@@ -132,7 +132,7 @@ name!
 
 @subsection SEC_SHAREDVARS Addressing shared variables
 
-In real uses of the OpenMP\other API there are normally references
+In real uses of the OpenMP\othere API there are normally references
 from the outlined code  to shared variables that are in scope in the containing
 function. Therefore the containing function must be able to address these
 variables. The runtime supports two alternate ways of doing this.
@@ -176,10 +176,10 @@ of the runtime either of these techniques is equivalent, since in either
 case it only has to pass a single argument to the outlined function to allow
 it to access shared variables.
 
-A scheme like this is how gcc\other generates outlined functions.
+A scheme like this is how gcc\othere generates outlined functions.
 
 @section SEC_INTERFACES Library Interfaces
-The library functions used for specific parts of the OpenMP\other language
+The library functions used for specific parts of the OpenMP\othere language
 implementation are documented in different modules.
 
  - @ref BASIC_TYPES fundamental types used by the runtime in many places

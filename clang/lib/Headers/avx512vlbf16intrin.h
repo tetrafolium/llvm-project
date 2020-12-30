@@ -416,7 +416,7 @@ static __inline__ __bfloat16 __DEFAULT_FN_ATTRS128 _mm_cvtness_sbh(float __A) {
 ///
 /// \param __A
 ///    A 128-bit vector of [8 x bfloat].
-/// \returns A 256-bit vector of [8 x float] come from convertion of __A
+/// \returns A 256-bit vector of [8 x float] come from conversion of __A
 static __inline__ __m256 __DEFAULT_FN_ATTRS256 _mm256_cvtpbh_ps(__m128bh __A) {
   return _mm256_castsi256_ps((__m256i)_mm256_slli_epi32(
       (__m256i)_mm256_cvtepi16_epi32((__m128i)__A), 16));
@@ -431,7 +431,7 @@ static __inline__ __m256 __DEFAULT_FN_ATTRS256 _mm256_cvtpbh_ps(__m128bh __A) {
 ///    bit is not set.
 /// \param __A
 ///    A 128-bit vector of [8 x bfloat].
-/// \returns A 256-bit vector of [8 x float] come from convertion of __A
+/// \returns A 256-bit vector of [8 x float] come from conversion of __A
 static __inline__ __m256 __DEFAULT_FN_ATTRS256
 _mm256_maskz_cvtpbh_ps(__mmask8 __U, __m128bh __A) {
   return _mm256_castsi256_ps((__m256i)_mm256_slli_epi32(
@@ -450,7 +450,7 @@ _mm256_maskz_cvtpbh_ps(__mmask8 __U, __m128bh __A) {
 ///    bit is not set.
 /// \param __A
 ///    A 128-bit vector of [8 x bfloat].
-/// \returns A 256-bit vector of [8 x float] come from convertion of __A
+/// \returns A 256-bit vector of [8 x float] come from conversion of __A
 static __inline__ __m256 __DEFAULT_FN_ATTRS256
 _mm256_mask_cvtpbh_ps(__m256 __S, __mmask8 __U, __m128bh __A) {
   return _mm256_castsi256_ps((__m256i)_mm256_mask_slli_epi32(

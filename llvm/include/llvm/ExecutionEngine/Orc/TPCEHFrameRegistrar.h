@@ -25,7 +25,7 @@ class TPCEHFrameRegistrar : public jitlink::EHFrameRegistrar {
 public:
   /// Create from a TargetProcessControl instance alone. This will use
   /// the TPC's lookupSymbols method to find the registration/deregistration
-  /// funciton addresses by name.
+  /// function addresses by name.
   static Expected<std::unique_ptr<TPCEHFrameRegistrar>>
   Create(TargetProcessControl &TPC);
 

@@ -277,7 +277,7 @@ public:
   PerfReader(cl::list<std::string> &BinaryFilenames);
 
   // Hybrid sample(call stack + LBRs) profile traces are seprated by double line
-  // break, search for that within the first 4k charactors to avoid going
+  // break, search for that within the first 4k characters to avoid going
   // through the whole file.
   static bool isHybridPerfScript(StringRef FileName) {
     auto BufOrError = MemoryBuffer::getFileOrSTDIN(FileName, 4000);

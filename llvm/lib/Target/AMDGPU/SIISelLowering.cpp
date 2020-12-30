@@ -1486,7 +1486,7 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
     // buffer instruction if unaligned.
     if (IsFast) {
       // Accesses can really be issued as 1-byte aligned or 4-byte aligned, so
-      // 2-byte alignment is worse than 1 unless doing a 2-byte accesss.
+      // 2-byte alignment is worse than 1 unless doing a 2-byte access.
       *IsFast = (AddrSpace == AMDGPUAS::CONSTANT_ADDRESS ||
                  AddrSpace == AMDGPUAS::CONSTANT_ADDRESS_32BIT)
                     ? Alignment >= Align(4)
@@ -8016,7 +8016,7 @@ SDValue SITargetLowering::LowerLOAD(SDValue Op, SelectionDAG &DAG) const {
 
   MachineFunction &MF = DAG.getMachineFunction();
   SIMachineFunctionInfo *MFI = MF.getInfo<SIMachineFunctionInfo>();
-  // If there is a possibilty that flat instruction access scratch memory
+  // If there is a possibility that flat instruction access scratch memory
   // then we need to use the same legalization rules we use for private.
   if (AS == AMDGPUAS::FLAT_ADDRESS &&
       !Subtarget->hasMultiDwordFlatScratchAddressing())
@@ -8541,7 +8541,7 @@ SDValue SITargetLowering::LowerSTORE(SDValue Op, SelectionDAG &DAG) const {
 
   MachineFunction &MF = DAG.getMachineFunction();
   SIMachineFunctionInfo *MFI = MF.getInfo<SIMachineFunctionInfo>();
-  // If there is a possibilty that flat instruction access scratch memory
+  // If there is a possibility that flat instruction access scratch memory
   // then we need to use the same legalization rules we use for private.
   if (AS == AMDGPUAS::FLAT_ADDRESS &&
       !Subtarget->hasMultiDwordFlatScratchAddressing())

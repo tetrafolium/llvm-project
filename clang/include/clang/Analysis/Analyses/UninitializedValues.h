@@ -110,7 +110,7 @@ public:
   virtual void handleUseOfUninitVariable(const VarDecl *vd,
                                          const UninitUse &use) {}
 
-  /// Called when the uninitialized variable is used as const refernce argument.
+  /// Called when the uninitialized variable is used as const references argument.
   virtual void handleConstRefUseOfUninitVariable(const VarDecl *vd,
                                                  const UninitUse &use) {}
 

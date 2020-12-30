@@ -45,7 +45,7 @@ class Value;
 /// probabilities of each "edge" in the function's CFG where such an edge is
 /// defined by a pair (PredBlock and an index in the successors). The
 /// probability of an edge from one block is always relative to the
-/// probabilities of other edges from the block. The probabilites of all edges
+/// probabilities of other edges from the block. The probabilities of all edges
 /// from a block sum to exactly one (100%).
 /// We use a pair (PredBlock and an index in the successors) to uniquely
 /// identify an edge, since we can have multiple edges from Src to Dst.

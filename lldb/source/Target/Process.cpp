@@ -4494,7 +4494,7 @@ size_t Process::GetSTDOUT(char *buf, size_t buf_size, Status &error) {
 }
 
 size_t Process::GetSTDERR(char *buf, size_t buf_size, Status &error) {
-  std::lock_guard<std::recursive_mutex> gaurd(m_stdio_communication_mutex);
+  std::lock_guard<std::recursive_mutex> guard(m_stdio_communication_mutex);
   size_t bytes_available = m_stderr_data.size();
   if (bytes_available > 0) {
     Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_PROCESS));

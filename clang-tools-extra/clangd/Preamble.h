@@ -108,7 +108,7 @@ public:
                               const ParseInputs &Modified,
                               const PreambleData &Baseline);
   /// Adjusts CI (which compiles the modified inputs) to be used with the
-  /// baseline preamble. This is done by inserting an artifical include to the
+  /// baseline preamble. This is done by inserting an artificial include to the
   /// \p CI that contains new directives calculated in create.
   void apply(CompilerInvocation &CI) const;
 

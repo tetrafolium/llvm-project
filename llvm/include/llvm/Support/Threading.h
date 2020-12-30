@@ -223,7 +223,7 @@ inline ThreadPoolStrategy hardware_concurrency(unsigned ThreadCount = 0) {
 
 /// Returns an optimal thread strategy to execute specified amount of tasks.
 /// This strategy should prevent us from creating too many threads if we
-/// occasionaly have an unexpectedly small amount of tasks.
+/// occasionally have an unexpectedly small amount of tasks.
 inline ThreadPoolStrategy optimal_concurrency(unsigned TaskCount = 0) {
   ThreadPoolStrategy S;
   S.Limit = true;

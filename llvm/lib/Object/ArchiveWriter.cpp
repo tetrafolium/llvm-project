@@ -140,7 +140,7 @@ static bool isBSDLike(object::Archive::Kind Kind) {
   case object::Archive::K_COFF:
     break;
   }
-  llvm_unreachable("not supported for writting");
+  llvm_unreachable("not supported for writing");
 }
 
 template <class T>
@@ -205,7 +205,7 @@ static bool is64BitKind(object::Archive::Kind Kind) {
   case object::Archive::K_GNU64:
     return true;
   }
-  llvm_unreachable("not supported for writting");
+  llvm_unreachable("not supported for writing");
 }
 
 static void

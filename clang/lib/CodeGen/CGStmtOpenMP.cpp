@@ -5422,7 +5422,7 @@ void CodeGenFunction::EmitOMPAtomicDirective(const OMPAtomicDirective &S) {
   }
   OpenMPClauseKind Kind = OMPC_unknown;
   for (const OMPClause *C : S.clauses()) {
-    // Find first clause (skip seq_cst|acq_rel|aqcuire|release|relaxed clause,
+    // Find first clause (skip seq_cst|acq_rel|acquire|release|relaxed clause,
     // if it is first).
     if (C->getClauseKind() != OMPC_seq_cst &&
         C->getClauseKind() != OMPC_acq_rel &&

@@ -322,7 +322,7 @@ private:
 
   // Returns the costs associated with function outlining:
   // - The first value is the non-weighted runtime cost for making the call
-  //   to the outlined function, including the addtional  setup cost in the
+  //   to the outlined function, including the additional  setup cost in the
   //    outlined function itself;
   // - The second value is the estimated size of the new call sequence in
   //   basic block Cloner.OutliningCallBB;

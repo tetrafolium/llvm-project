@@ -50,7 +50,7 @@ THREADLOCAL char cur_thread_placeholder[sizeof(ThreadState)] ALIGNED(64);
 static char ctx_placeholder[sizeof(Context)] ALIGNED(64);
 Context *ctx;
 
-// Can be overriden by a front-end.
+// Can be overridden by a front-end.
 #ifdef TSAN_EXTERNAL_HOOKS
 bool OnFinalize(bool failed);
 void OnInitialize();
@@ -277,7 +277,7 @@ void MapShadow(uptr addr, uptr size) {
                                  "meta shadow"))
       Die();
   } else {
-    // Mapping continous heap.
+    // Mapping continuous heap.
     // Windows wants 64K alignment.
     meta_begin = RoundDownTo(meta_begin, 64 << 10);
     meta_end = RoundUpTo(meta_end, 64 << 10);

@@ -149,7 +149,7 @@ cl::opt<bool>
 cl::opt<bool> FlattenedProfileUsed(
     "flattened-profile-used", cl::init(false), cl::Hidden,
     cl::desc("Indicate the sample profile being used is flattened, i.e., "
-             "no inline hierachy exists in the profile. "));
+             "no inline hierarchy exists in the profile. "));
 
 cl::opt<bool> EnableOrderFileInstrumentation(
     "enable-order-file-instrumentation", cl::init(false), cl::Hidden,
@@ -855,7 +855,7 @@ void PassManagerBuilder::populateModulePassManager(
                                ForgetAllSCEVInLoopUnroll));
 
   if (!DisableUnrollLoops) {
-    // LoopUnroll may generate some redundency to cleanup.
+    // LoopUnroll may generate some redundancy to cleanup.
     MPM.add(createInstructionCombiningPass());
 
     // Runtime unrolling will introduce runtime check in loop prologue. If the

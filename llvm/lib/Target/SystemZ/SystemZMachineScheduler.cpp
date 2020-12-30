@@ -178,7 +178,7 @@ SUnit *SystemZPostRASchedStrategy::pickNode(bool &IsTopNode) {
     // SU is the next candidate to be compared against current Best.
     Candidate c(SU, *HazardRec);
 
-    // Remeber which SU is the best candidate.
+    // Remember which SU is the best candidate.
     if (Best.SU == nullptr || c < Best) {
       Best = c;
       LLVM_DEBUG(dbgs() << "** Best so far: ";);

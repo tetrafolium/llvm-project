@@ -692,7 +692,7 @@ computeUnlikelySuccessors(const BasicBlock *BB, Loop *L,
   // block which can be determined to make the condition false.
   //
   // FIXME: We currently consider unlikely blocks to be half as likely as other
-  // blocks, but if we consider the example above the likelyhood is actually
+  // blocks, but if we consider the example above the likelihood is actually
   // 1/MAX. We could therefore be more precise in how unlikely we consider
   // blocks to be, but it would require more careful examination of the form
   // of the comparison expression.

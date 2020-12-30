@@ -86,7 +86,7 @@ void Enumerate(const Record *R, StringRef N,
 
 void ClangOpcodesEmitter::run(raw_ostream &OS) {
   for (auto *Opcode : Records.getAllDerivedDefinitions(Root.getName())) {
-    // The name is the record name, unless overriden.
+    // The name is the record name, unless overridden.
     StringRef N = Opcode->getValueAsString("Name");
     if (N.empty())
       N = Opcode->getName();

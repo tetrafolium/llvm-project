@@ -122,7 +122,7 @@ public:
   bool shouldTrackPressure() const override { return false; }
 
   // Process scheduling regions top-down so that scheduler states can be
-  // transferrred over scheduling boundaries.
+  // transferred over scheduling boundaries.
   bool doMBBSchedRegionsTopDown() const override { return true; }
 
   void initialize(ScheduleDAGMI *dag) override;

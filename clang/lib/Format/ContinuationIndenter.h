@@ -341,7 +341,7 @@ struct ParenState {
   /// a chained conditional expression (e.g. else-if)
   bool IsChainedConditional : 1;
 
-  /// \brief true if there conditionnal was wrapped on the first operator (the
+  /// \brief true if there conditional was wrapped on the first operator (the
   /// question mark)
   bool IsWrappedConditional : 1;
 

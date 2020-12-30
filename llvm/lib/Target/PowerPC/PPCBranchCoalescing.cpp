@@ -733,7 +733,7 @@ bool PPCBranchCoalescing::runOnMachineFunction(MachineFunction &MF) {
   CoalescingCandidateInfo Cand1, Cand2;
   // Walk over blocks and find candidates to merge
   // Continue trying to merge with the first candidate found, as long as merging
-  // is successfull.
+  // is successful.
   for (MachineBasicBlock &MBB : MF) {
     bool MergedCandidates = false;
     do {

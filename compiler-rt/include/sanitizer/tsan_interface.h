@@ -141,7 +141,7 @@ void __tsan_external_write(void *addr, void *caller_pc, void *tag);
 //     and freed by __tsan_destroy_fiber.
 //   - TSAN context of current fiber or thread can be obtained
 //     by calling __tsan_get_current_fiber.
-//   - __tsan_switch_to_fiber should be called immediatly before switch
+//   - __tsan_switch_to_fiber should be called immediately before switch
 //     to fiber, such as call of swapcontext.
 //   - Fiber name can be set by __tsan_set_fiber_name.
 void *__tsan_get_current_fiber(void);

@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// Split input into multipe parts separated by regex '^(.|//)--- ' and extract
+// Split input into multiple parts separated by regex '^(.|//)--- ' and extract
 // the specified part.
 //
 //===----------------------------------------------------------------------===//

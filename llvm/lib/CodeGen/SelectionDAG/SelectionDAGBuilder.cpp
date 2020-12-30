@@ -1639,7 +1639,7 @@ void SelectionDAGBuilder::visitCleanupPad(const CleanupPadInst &CPI) {
   }
 }
 
-// For wasm, there's alwyas a single catch pad attached to a catchswitch, and
+// For wasm, there's always a single catch pad attached to a catchswitch, and
 // the control flow always stops at the single catch pad, as it does for a
 // cleanup pad. In case the exception caught is not of the types the catch pad
 // catches, it will be rethrown by a rethrow.

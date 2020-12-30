@@ -771,7 +771,7 @@ static bool needsLFTR(Loop *L, BasicBlock *ExitingBB) {
 }
 
 /// Return true if undefined behavior would provable be executed on the path to
-/// OnPathTo if Root produced a posion result.  Note that this doesn't say
+/// OnPathTo if Root produced a poison result.  Note that this doesn't say
 /// anything about whether OnPathTo is actually executed or whether Root is
 /// actually poison.  This can be used to assess whether a new use of Root can
 /// be added at a location which is control equivalent with OnPathTo (such as
@@ -1636,7 +1636,7 @@ bool IndVarSimplify::predicateLoopExits(Loop *L, SCEVExpander &Rewriter) {
   // If we have any exits which can't be predicated themselves, than we can't
   // predicate any exit which isn't guaranteed to execute before it.  Consider
   // two exits (a) and (b) which would both exit on the same iteration.  If we
-  // can predicate (b), but not (a), and (a) preceeds (b) along some path, then
+  // can predicate (b), but not (a), and (a) precedes (b) along some path, then
   // we could convert a loop from exiting through (a) to one exiting through
   // (b).  Note that this problem exists only for exits with the same exit
   // count, and we could be more aggressive when exit counts are known inequal.

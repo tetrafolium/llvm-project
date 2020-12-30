@@ -58,7 +58,7 @@ def xcode_format_count(X):
     logger = lldb.formatters.Logger.Logger()
     return xcode_format_time(time.localtime(X))
 
-# despite the similary to synthetic children providers, these classes are not
+# despite the similarly to synthetic children providers, these classes are not
 # trying to provide anything but the summary for NSDate, so they need not
 # obey the interface specification for synthetic children providers
 

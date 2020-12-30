@@ -28,7 +28,7 @@ template <class ELFT> class ELFDumper {
   typedef typename ELFT::Shdr Elf_Shdr;
   typedef typename ELFT::Word Elf_Word;
   typedef typename ELFT::Rel Elf_Rel;
-  typedef typename ELFT::Rela Elf_Rela;
+  typedef typename ELFT::Real Elf_Real;
   using Elf_Relr = typename ELFT::Relr;
   using Elf_Nhdr = typename ELFT::Nhdr;
   using Elf_Note = typename ELFT::Note;
@@ -551,7 +551,7 @@ ELFDumper<ELFT>::dumpSections() {
     case ELF::SHT_SYMTAB_SHNDX:
       return [this](const Elf_Shdr *S) { return dumpSymtabShndxSection(S); };
     case ELF::SHT_REL:
-    case ELF::SHT_RELA:
+    case ELF::SHT_REAL:
       return [this](const Elf_Shdr *S) { return dumpRelocSection(S); };
     case ELF::SHT_RELR:
       return [this](const Elf_Shdr *S) { return dumpRelrSection(S); };
@@ -733,8 +733,8 @@ static unsigned getDefaultShEntSize(ELFYAML::ELF_SHT SecType,
   switch (SecType) {
   case ELF::SHT_REL:
     return sizeof(typename ELFT::Rel);
-  case ELF::SHT_RELA:
-    return sizeof(typename ELFT::Rela);
+  case ELF::SHT_REAL:
+    return sizeof(typename ELFT::Real);
   case ELF::SHT_RELR:
     return sizeof(typename ELFT::Relr);
   case ELF::SHT_DYNAMIC:
@@ -1088,7 +1088,7 @@ ELFDumper<ELFT>::dumpRelocSection(const Elf_Shdr *Shdr) {
     auto Rels = Obj.relas(*Shdr);
     if (!Rels)
       return Rels.takeError();
-    for (const Elf_Rela &Rel : *Rels) {
+    for (const Elf_Real &Rel : *Rels) {
       ELFYAML::Relocation R;
       if (Error E = dumpRelocation(&Rel, *SymTabOrErr, R))
         return std::move(E);

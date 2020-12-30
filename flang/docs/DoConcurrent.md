@@ -226,7 +226,7 @@ to reference `T`, and so explicit localization just confirms the
 worst-case assumptions about interprocedural data flow
 within an iteration that a compiler must make anyway.
 
-Second, the specifiers allow arbitary variables to be localized,
+Second, the specifiers allow arbitrary variables to be localized,
 not just scalars.
 One may localize a million-element array of derived type
 with allocatable components to be created in each iteration,

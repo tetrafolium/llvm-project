@@ -61,7 +61,7 @@ public:
   virtual bool areRelocationsResolved() const = 0;
 
   /// Checks that there are valid relocations against a .debug_info
-  /// section. Reset current relocation pointer if neccessary.
+  /// section. Reset current relocation pointer if necessary.
   virtual bool hasValidRelocs(bool ResetRelocsPtr = true) = 0;
 
   /// Checks that the specified DIE has a DW_AT_Location attribute

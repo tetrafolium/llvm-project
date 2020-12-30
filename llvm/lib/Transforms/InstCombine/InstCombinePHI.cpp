@@ -1442,7 +1442,7 @@ Instruction *InstCombinerImpl::visitPHINode(PHINode &PN) {
     if (&IdenticalPN == &PN)
       continue;
     // Note that even though we've just canonicalized this PHI, due to the
-    // worklist visitation order, there are no guarantess that *every* PHI
+    // worklist visitation order, there are no guarantees that *every* PHI
     // has been canonicalized, so we can't just compare operands ranges.
     if (!PN.isIdenticalToWhenDefined(&IdenticalPN))
       continue;

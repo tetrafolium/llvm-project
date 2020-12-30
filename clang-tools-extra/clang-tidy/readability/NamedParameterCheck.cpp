@@ -31,7 +31,7 @@ void NamedParameterCheck::check(const MatchFinder::MatchResult &Result) {
     return;
 
   // Ignore declarations without a definition if we're not dealing with an
-  // overriden method.
+  // overridden method.
   const FunctionDecl *Definition = nullptr;
   if ((!Function->isDefined(Definition) || Function->isDefaulted() ||
        Function->isDeleted()) &&

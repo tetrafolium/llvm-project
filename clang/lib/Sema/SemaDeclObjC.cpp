@@ -1904,7 +1904,7 @@ Decl *Sema::ActOnStartCategoryImplementation(
       CDecl->setInvalidDecl();
     } else {
       CatIDecl->setImplementation(CDecl);
-      // Warn on implementating category of deprecated class under
+      // Warn on implementation category of deprecated class under
       // -Wdeprecated-implementations flag.
       DiagnoseObjCImplementedDeprecations(*this, CatIDecl,
                                           CDecl->getLocation());
@@ -2028,7 +2028,7 @@ Decl *Sema::ActOnStartClassImplementation(SourceLocation AtClassImplLoc,
   } else { // add it to the list.
     IDecl->setImplementation(IMPDecl);
     PushOnScopeChains(IMPDecl, TUScope);
-    // Warn on implementating deprecated class under
+    // Warn on implementation deprecated class under
     // -Wdeprecated-implementations flag.
     DiagnoseObjCImplementedDeprecations(*this, IDecl, IMPDecl->getLocation());
   }
@@ -4765,7 +4765,7 @@ Decl *Sema::ActOnMethodDeclaration(
     // If this method overrides a previous @synthesize declaration,
     // register it with the property.  Linear search through all
     // properties here, because the autosynthesized stub hasn't been
-    // made visible yet, so it can be overriden by a later
+    // made visible yet, so it can be overridden by a later
     // user-specified implementation.
     for (ObjCPropertyImplDecl *PropertyImpl : ImpDecl->property_impls()) {
       if (auto *Setter = PropertyImpl->getSetterMethodDecl())

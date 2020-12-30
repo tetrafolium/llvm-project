@@ -147,7 +147,7 @@ public:
   bool run();
 
   /// Perform the CFG preparation
-  /// This step will remove every unconditionnal/dead jump instructions and make
+  /// This step will remove every unconditional/dead jump instructions and make
   /// sure all loops have an exit block
   bool prepare();
 

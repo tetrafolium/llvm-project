@@ -8,7 +8,7 @@
  * Use of this software is governed by the MIT license
  *
  * Written by Sven Verdoolaege, INRIA Saclay - Ile-de-France,
- * Parc Club Orsay Universite, ZAC des vignes, 4 rue Jacques Monod,
+ * Parc Club Orsay Universities, ZAC des vignes, 4 rue Jacques Monod,
  * 91893 Orsay, France
  * and Ecole Normale Superieure, 45 rue d'Ulm, 75230 Paris, France
  * and Centre de Recherche Inria de Paris, 2 rue Simone Iff - Voie DQ12,
@@ -316,7 +316,7 @@ static int is_multi_edge_type(struct isl_sched_edge *edge) {
  * n_edge is the number of edges
  * edge is the list of edges
  * max_edge contains the maximal number of edges of each type;
- *	in particular, it contains the number of edges in the inital graph.
+ *	in particular, it contains the number of edges in the initial graph.
  * edge_table contains pointers into the edge array, hashed on the source
  *	and sink spaces; there is one such table for each type;
  *	a given edge may be referenced from more than one table

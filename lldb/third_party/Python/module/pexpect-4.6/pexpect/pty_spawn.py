@@ -767,7 +767,7 @@ class spawn(SpawnBase):
         finally:
             tty.tcsetattr(self.STDIN_FILENO, tty.TCSAFLUSH, mode)
 
-    def __interact_writen(self, fd, data):
+    def __interact_written(self, fd, data):
         '''This is used by the interact() method.
         '''
 
@@ -821,10 +821,10 @@ class spawn(SpawnBase):
                     data = data[:i]
                     if data:
                         self._log(data, 'send')
-                    self.__interact_writen(self.child_fd, data)
+                    self.__interact_written(self.child_fd, data)
                     break
                 self._log(data, 'send')
-                self.__interact_writen(self.child_fd, data)
+                self.__interact_written(self.child_fd, data)
 
 
 def spawnu(*args, **kwargs):

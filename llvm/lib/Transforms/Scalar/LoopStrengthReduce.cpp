@@ -143,7 +143,7 @@ static cl::opt<bool> EnablePhiElim("enable-lsr-phielim", cl::Hidden,
                                    cl::init(true),
                                    cl::desc("Enable LSR phi elimination"));
 
-// The flag adds instruction count to solutions cost comparision.
+// The flag adds instruction count to solutions cost comparison.
 static cl::opt<bool>
     InsnsCost("lsr-insns-cost", cl::Hidden, cl::init(true),
               cl::desc("Add instruction count to a LSR cost model"));
@@ -3886,7 +3886,7 @@ void LSRInstance::GenerateConstantOffsetsImpl(
 void LSRInstance::GenerateConstantOffsets(LSRUse &LU, unsigned LUIdx,
                                           Formula Base) {
   // TODO: For now, just add the min and max offset, because it usually isn't
-  // worthwhile looking at everything inbetween.
+  // worthwhile looking at everything between.
   SmallVector<int64_t, 2> Worklist;
   Worklist.push_back(LU.MinOffset);
   if (LU.MaxOffset != LU.MinOffset)
@@ -4720,7 +4720,7 @@ void LSRInstance::NarrowSearchSpaceByFilterFormulaWithSameScaledReg() {
   });
 }
 
-/// If we are over the complexity limit, filter out any post-inc prefering
+/// If we are over the complexity limit, filter out any post-inc preferring
 /// variables to only post-inc values.
 void LSRInstance::NarrowSearchSpaceByFilterPostInc() {
   if (!TTI.shouldFavorPostInc())
@@ -4798,7 +4798,7 @@ void LSRInstance::NarrowSearchSpaceByFilterPostInc() {
 /// Now count registers number mathematical expectation for each formula:
 /// Note that for each use we exclude probability if not selecting for the use.
 /// For example for Use1 probability for reg(a) would be just 1 * 1 (excluding
-/// probabilty 1/3 of not selecting for Use1).
+/// probability 1/3 of not selecting for Use1).
 /// Use1:
 ///  reg(a) + reg({0,+,1})          1 + 1/3       -- to be deleted
 ///  reg(a) + reg({-1,+,1}) + 1     1 + 4/9       -- to be deleted
@@ -4816,7 +4816,7 @@ void LSRInstance::NarrowSearchSpaceByDeletingCostlyFormulas() {
   // Ok, we have too many of formulae on our hands to conveniently handle.
   // Use a rough heuristic to thin out the list.
 
-  // Set of Regs wich will be 100% used in final solution.
+  // Set of Regs which will be 100% used in final solution.
   // Used in each formula of a solution (in example above this is reg(c)).
   // We can skip them in calculations.
   SmallPtrSet<const SCEV *, 4> UniqRegs;

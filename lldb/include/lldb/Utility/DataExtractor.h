@@ -197,7 +197,7 @@ public:
 
   /// Extract an arbitrary number of bytes in the specified byte order.
   ///
-  /// Attemps to extract \a length bytes starting at \a offset bytes into this
+  /// Attempts to extract \a length bytes starting at \a offset bytes into this
   /// data in the requested byte order (\a dst_byte_order) and place the
   /// results in \a dst. \a dst must be at least \a length bytes long.
   ///

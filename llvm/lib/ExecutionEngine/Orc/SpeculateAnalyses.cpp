@@ -157,7 +157,7 @@ void SequenceBBQuery::traverseToEntryBlock(const BasicBlock *AtBB,
       return;
     Itr->second.Upward = false;
   } else {
-    // Create hint for newly discoverd blocks.
+    // Create hint for newly discovered blocks.
     WalkDirection BlockHint;
     BlockHint.Upward = false;
     // FIXME: Expensive Check
@@ -200,7 +200,7 @@ void SequenceBBQuery::traverseToExitBlock(const BasicBlock *AtBB,
       return;
     Itr->second.Downward = false;
   } else {
-    // Create hint for newly discoverd blocks.
+    // Create hint for newly discovered blocks.
     WalkDirection BlockHint;
     BlockHint.Downward = false;
     // FIXME: Expensive Check

@@ -604,7 +604,7 @@ void SwingSchedulerDAG::schedule() {
   Pass.ORE->emit([&]() {
     return MachineOptimizationRemark(DEBUG_TYPE, "schedule", Loop.getStartLoc(),
                                      Loop.getHeader())
-           << "Pipelined succesfully!";
+           << "Pipelined successfully!";
   });
 
   // Generate the schedule as a ModuloSchedule.
@@ -1755,7 +1755,7 @@ void SwingSchedulerDAG::checkNodeSets(NodeSetType &NodeSets) {
 }
 
 /// Add the nodes that do not belong to a recurrence set into groups
-/// based upon connected componenets.
+/// based upon connected components.
 void SwingSchedulerDAG::groupRemainingNodes(NodeSetType &NodeSets) {
   SetVector<SUnit *> NodesAdded;
   SmallPtrSet<SUnit *, 8> Visited;

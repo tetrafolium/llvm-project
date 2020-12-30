@@ -129,7 +129,7 @@ The runtime routine `CharacterAssign()` takes care of
 truncating, padding, or replicating the value(s) assigned to the left-hand
 side, as well as reallocating an nonconforming or deferred-length allocatable
 left-hand side.  It takes the descriptors of the left- and right-hand sides of
-a `CHARACTER` assignemnt as its arguments.
+a `CHARACTER` assignment as its arguments.
 
 When the left-hand side of a `CHARACTER` assignment is a deferred-length
 allocatable and the right-hand side is a temporary, use of the runtime's

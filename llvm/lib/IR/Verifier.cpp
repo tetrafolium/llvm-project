@@ -689,7 +689,7 @@ void Verifier::visitGlobalVariable(const GlobalVariable &GV) {
       if (GV.hasInitializer()) {
         const Constant *Init = GV.getInitializer();
         const ConstantArray *InitArray = dyn_cast<ConstantArray>(Init);
-        Assert(InitArray, "wrong initalizer for intrinsic global variable",
+        Assert(InitArray, "wrong initializer for intrinsic global variable",
                Init);
         for (Value *Op : InitArray->operands()) {
           Value *V = Op->stripPointerCasts();
@@ -3841,7 +3841,7 @@ void Verifier::visitEHPadPredecessors(Instruction &I) {
   if (auto *CPI = dyn_cast<CatchPadInst>(&I)) {
     if (!pred_empty(BB))
       Assert(BB->getUniquePredecessor() == CPI->getCatchSwitch()->getParent(),
-             "Block containg CatchPadInst must be jumped to "
+             "Block containing CatchPadInst must be jumped to "
              "only by its catchswitch.",
              CPI);
     Assert(BB != CPI->getCatchSwitch()->getUnwindDest(),

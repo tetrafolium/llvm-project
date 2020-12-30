@@ -787,12 +787,12 @@ MCSectionELF *ELFWriter::createRelocationSection(MCContext &Ctx,
     return nullptr;
 
   const StringRef SectionName = Sec.getName();
-  std::string RelaSectionName = hasRelocationAddend() ? ".rela" : ".rel";
+  std::string RelaSectionName = hasRelocationAddend() ? ".real" : ".rel";
   RelaSectionName += SectionName;
 
   unsigned EntrySize;
   if (hasRelocationAddend())
-    EntrySize = is64Bit() ? sizeof(ELF::Elf64_Rela) : sizeof(ELF::Elf32_Rela);
+    EntrySize = is64Bit() ? sizeof(ELF::Elf64_Real) : sizeof(ELF::Elf32_Real);
   else
     EntrySize = is64Bit() ? sizeof(ELF::Elf64_Rel) : sizeof(ELF::Elf32_Rel);
 
@@ -801,7 +801,7 @@ MCSectionELF *ELFWriter::createRelocationSection(MCContext &Ctx,
     Flags = ELF::SHF_GROUP;
 
   MCSectionELF *RelaSection = Ctx.createELFRelSection(
-      RelaSectionName, hasRelocationAddend() ? ELF::SHT_RELA : ELF::SHT_REL,
+      RelaSectionName, hasRelocationAddend() ? ELF::SHT_REAL : ELF::SHT_REL,
       Flags, EntrySize, Sec.getGroup(), &Sec);
   RelaSection->setAlignment(is64Bit() ? Align(8) : Align(4));
   return RelaSection;
@@ -941,7 +941,7 @@ void ELFWriter::writeRelocations(const MCAssembler &Asm,
         write(OWriter.TargetObjectWriter->getRType2(Entry.Type));
         write(OWriter.TargetObjectWriter->getRType(Entry.Type));
       } else {
-        struct ELF::Elf64_Rela ERE64;
+        struct ELF::Elf64_Real ERE64;
         ERE64.setSymbolAndType(Index, Entry.Type);
         write(ERE64.r_info);
       }
@@ -950,7 +950,7 @@ void ELFWriter::writeRelocations(const MCAssembler &Asm,
     } else {
       write(uint32_t(Entry.Offset));
 
-      struct ELF::Elf32_Rela ERE32;
+      struct ELF::Elf32_Real ERE32;
       ERE32.setSymbolAndType(Index, Entry.Type);
       write(ERE32.r_info);
 
@@ -1000,7 +1000,7 @@ void ELFWriter::writeSection(const SectionIndexMapTy &SectionIndexMap,
     llvm_unreachable("SHT_DYNAMIC in a relocatable object");
 
   case ELF::SHT_REL:
-  case ELF::SHT_RELA: {
+  case ELF::SHT_REAL: {
     sh_link = SymbolTableIndex;
     assert(sh_link && ".symtab not found");
     const MCSection *InfoSection = Section.getLinkedToSection();

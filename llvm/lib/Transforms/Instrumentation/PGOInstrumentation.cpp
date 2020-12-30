@@ -261,13 +261,13 @@ static cl::opt<bool> PGOVerifyHotBFI(
     cl::desc("Print out the non-match BFI count if a hot raw profile count "
              "becomes non-hot, or a cold raw profile count becomes hot. "
              "The print is enabled under -Rpass-analysis=pgo, or "
-             "internal option -pass-remakrs-analysis=pgo."));
+             "internal option -pass-remarks-analysis=pgo."));
 
 static cl::opt<bool> PGOVerifyBFI(
     "pgo-verify-bfi", cl::init(false), cl::Hidden,
     cl::desc("Print out mismatched BFI counts after setting profile metadata "
              "The print is enabled under -Rpass-analysis=pgo, or "
-             "internal option -pass-remakrs-analysis=pgo."));
+             "internal option -pass-remarks-analysis=pgo."));
 
 static cl::opt<unsigned> PGOVerifyBFIRatio(
     "pgo-verify-bfi-ratio", cl::init(5), cl::Hidden,

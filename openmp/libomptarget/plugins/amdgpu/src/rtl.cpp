@@ -1344,7 +1344,7 @@ __tgt_target_table *__tgt_rtl_load_binary_locked(int32_t device_id,
     int16_t WGSizeVal = RTLDeviceInfoTy::Default_WG_Size;
 
     // get Kernel Descriptor if present.
-    // Keep struct in sync wih getTgtAttributeStructQTy in CGOpenMPRuntime.cpp
+    // Keep struct in sync with getTgtAttributeStructQTy in CGOpenMPRuntime.cpp
     struct KernDescValType {
       uint16_t Version;
       uint16_t TSize;

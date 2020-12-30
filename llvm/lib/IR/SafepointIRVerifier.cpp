@@ -14,7 +14,7 @@
 // safepoint semenatics.
 //
 // In its current form, this verify checks a property which is sufficient, but
-// not neccessary for correctness.  There are some cases where an unrelocated
+// not necessary for correctness.  There are some cases where an unrelocated
 // pointer can be used after the safepoint.  Consider this example:
 //
 //    a = ...
@@ -775,7 +775,7 @@ void GCPtrTracker::transferBlock(const BasicBlock *BB, BasicBlockState &BBS,
     AvailableOut = std::move(Temp);
   }
 
-  LLVM_DEBUG(dbgs() << "Transfered block " << BB->getName() << " from ";
+  LLVM_DEBUG(dbgs() << "Transferred block " << BB->getName() << " from ";
              PrintValueSet(dbgs(), AvailableIn.begin(), AvailableIn.end());
              dbgs() << " to ";
              PrintValueSet(dbgs(), AvailableOut.begin(), AvailableOut.end());

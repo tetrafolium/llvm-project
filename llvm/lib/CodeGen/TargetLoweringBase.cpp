@@ -2230,7 +2230,7 @@ static int getOpRefinementSteps(bool IsSqrt, EVT VT, StringRef Override) {
     // Split the string for further processing.
     Override = Override.substr(0, RefPos);
     assert(Override != "none" &&
-           "Disabled reciprocals, but specifed refinement steps?");
+           "Disabled reciprocals, but specified refinement steps?");
 
     // If this is a general override, return the specified number of steps.
     if (Override == "all" || Override == "default")

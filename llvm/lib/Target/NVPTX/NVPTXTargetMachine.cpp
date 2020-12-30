@@ -228,7 +228,7 @@ void NVPTXPassConfig::addAddressSpaceInferencePasses() {
 void NVPTXPassConfig::addStraightLineScalarOptimizationPasses() {
   addPass(createSeparateConstOffsetFromGEPPass());
   addPass(createSpeculativeExecutionPass());
-  // ReassociateGEPs exposes more opportunites for SLSR. See
+  // ReassociateGEPs exposes more opportunities for SLSR. See
   // the example in reassociate-geps-and-slsr.ll.
   addPass(createStraightLineStrengthReducePass());
   // SeparateConstOffsetFromGEP and SLSR creates common expressions which GVN or

@@ -137,7 +137,7 @@ static bool hasLiveDefs(const MachineInstr &MI, const TargetRegisterInfo *TRI) {
     return false;
 
   // No GPR64 dead Def, so all those GPR32 live Def can't have alias, therefore
-  // must be truely live, safe to return true.
+  // must be truly live, safe to return true.
   if (GPR64DeadDefs.empty())
     return true;
 

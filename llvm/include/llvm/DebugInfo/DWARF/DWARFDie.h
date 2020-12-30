@@ -227,7 +227,7 @@ public:
   /// non-contiguous address ranges from the DW_AT_ranges attribute for this DIE
   /// and all children.
   ///
-  /// \param Ranges the addres range vector to fill in.
+  /// \param Ranges the address range vector to fill in.
   void collectChildrenAddressRanges(DWARFAddressRangesVector &Ranges) const;
 
   bool addressRangeContainsAddress(const uint64_t Address) const;
@@ -242,7 +242,7 @@ public:
   const char *getSubroutineName(DINameKind Kind) const;
 
   /// Return the DIE name resolving DW_AT_specification or DW_AT_abstract_origin
-  /// references if necessary. For the LinkageName case it additionaly searches
+  /// references if necessary. For the LinkageName case it additionally searches
   /// for ShortName if LinkageName is not found.
   /// Returns null if no name is found.
   const char *getName(DINameKind Kind) const;

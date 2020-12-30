@@ -125,7 +125,7 @@ public:
   ///
   /// Note that the number of bits in Mask may not be equivalent to the sum of
   /// explicit and implicit operands in MI. Operands that don't have a
-  /// corresponding bit in Mask are assumed "not independente".
+  /// corresponding bit in Mask are assumed "not independence".
   ///
   /// The only exception is for when Mask is all zeroes. That means: explicit
   /// input operands of MI are independent.

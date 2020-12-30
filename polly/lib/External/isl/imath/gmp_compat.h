@@ -1,6 +1,6 @@
 /*
   Name:     gmp_compat.h
-  Purpose:  Provide GMP compatiable routines for imath library
+  Purpose:  Provide GMP compatible routines for imath library
   Author:   David Peixotto
 
   Copyright (c) 2012 Qualcomm Innovation Center, Inc. All rights reserved.
@@ -169,7 +169,7 @@ char *GMPZAPI(get_str)(char *str, int radix, mp_int op);
 
 /* gmp: mpq_get_str */
 /* gmp: If str is NULL then allocate space using the default allocator. */
-/* gmp: If value is a whole number do not print denomenator. */
+/* gmp: If value is a whole number do not print denominator. */
 /* TODO: Need to handle 0 values better. GMP prints 0/4 instead of 0.*/
 char *GMPQAPI(get_str)(char *str, int radix, mp_rat op);
 

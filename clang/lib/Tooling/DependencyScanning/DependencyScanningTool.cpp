@@ -78,7 +78,7 @@ llvm::Expected<std::string> DependencyScanningTool::getDependencyFile(
 
   // We expect a single command here because if a source file occurs multiple
   // times in the original CDB, then `computeDependencies` would run the
-  // `DependencyScanningAction` once for every time the input occured in the
+  // `DependencyScanningAction` once for every time the input occurred in the
   // CDB. Instead we split up the CDB into single command chunks to avoid this
   // behavior.
   assert(Compilations.getAllCompileCommands().size() == 1 &&
@@ -153,7 +153,7 @@ DependencyScanningTool::getFullDependencies(
 
   // We expect a single command here because if a source file occurs multiple
   // times in the original CDB, then `computeDependencies` would run the
-  // `DependencyScanningAction` once for every time the input occured in the
+  // `DependencyScanningAction` once for every time the input occurred in the
   // CDB. Instead we split up the CDB into single command chunks to avoid this
   // behavior.
   assert(Compilations.getAllCompileCommands().size() == 1 &&

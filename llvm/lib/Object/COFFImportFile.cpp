@@ -157,7 +157,7 @@ public:
   // structure to import symbols from the DLL.
   NewArchiveMember createImportDescriptor(std::vector<uint8_t> &Buffer);
 
-  // Creates a NULL import descriptor.  This is a small object file whcih
+  // Creates a NULL import descriptor.  This is a small object file which
   // contains a NULL import descriptor.  It is used to terminate the imports
   // from a specific DLL.
   NewArchiveMember createNullImportDescriptor(std::vector<uint8_t> &Buffer);

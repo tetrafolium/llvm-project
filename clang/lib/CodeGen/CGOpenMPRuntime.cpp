@@ -3204,7 +3204,7 @@ void CGOpenMPRuntime::createOffloadEntriesAndInfoMetadata() {
             dyn_cast<OffloadEntriesInfoManagerTy::OffloadEntryInfoTargetRegion>(
                 std::get<0>(E))) {
       if (!CE->getID() || !CE->getAddress()) {
-        // Do not blame the entry if the parent funtion is not emitted.
+        // Do not blame the entry if the parent function is not emitted.
         StringRef FnName = ParentFunctions[CE->getOrder()];
         if (!CGM.GetGlobalValue(FnName))
           continue;

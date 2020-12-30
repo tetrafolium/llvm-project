@@ -79,7 +79,7 @@ struct GCOVOptions {
 ModulePass *
 createGCOVProfilerPass(const GCOVOptions &Options = GCOVOptions::getDefault());
 
-// PGO Instrumention. Parameter IsCS indicates if this is the context senstive
+// PGO Instrumention. Parameter IsCS indicates if this is the context sensitive
 // instrumentation.
 ModulePass *createPGOInstrumentationGenLegacyPass(bool IsCS = false);
 ModulePass *
@@ -139,7 +139,7 @@ struct InstrProfOptions {
 };
 
 /// Insert frontend instrumentation based profiling. Parameter IsCS indicates if
-// this is the context senstive instrumentation.
+// this is the context sensitive instrumentation.
 ModulePass *createInstrProfilingLegacyPass(
     const InstrProfOptions &Options = InstrProfOptions(), bool IsCS = false);
 

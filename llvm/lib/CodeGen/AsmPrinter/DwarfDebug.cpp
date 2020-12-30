@@ -315,7 +315,7 @@ static AccelTableKind computeAccelTableKind(unsigned DwarfVersion,
   if (GenerateTypeUnits)
     return AccelTableKind::None;
 
-  // Accelerator tables get emitted if targetting DWARF v5 or LLDB.  DWARF v5
+  // Accelerator tables get emitted if targeting DWARF v5 or LLDB.  DWARF v5
   // always implies debug_names. For lower standard versions we use apple
   // accelerator tables on apple platforms and debug_names elsewhere.
   if (DwarfVersion >= 5)

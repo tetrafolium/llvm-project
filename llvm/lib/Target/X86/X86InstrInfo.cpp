@@ -3320,7 +3320,7 @@ unsigned X86::getSwappedVPCOMImm(unsigned Imm) {
 
 /// Get the VCMP immediate if the operands are swapped.
 unsigned X86::getSwappedVCMPImm(unsigned Imm) {
-  // Only need the lower 2 bits to distinquish.
+  // Only need the lower 2 bits to distinguish.
   switch (Imm & 0x3) {
   default:
     llvm_unreachable("Unreachable!");

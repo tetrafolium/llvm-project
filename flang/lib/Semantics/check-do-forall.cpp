@@ -906,7 +906,7 @@ void DoForallChecker::CheckDoConcurrentExit(
 
 // Check nesting violations for a CYCLE or EXIT statement.  Loop up the
 // nesting levels looking for a construct that matches the CYCLE or EXIT
-// statment.  At every construct, check for a violation.  If we find a match
+// statement.  At every construct, check for a violation.  If we find a match
 // without finding a violation, the check is complete.
 void DoForallChecker::CheckNesting(
     StmtType stmtType, const parser::Name *stmtName) const {

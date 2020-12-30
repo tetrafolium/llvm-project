@@ -5429,7 +5429,7 @@ static bool isIndirectCall(const SDValue &Callee, SelectionDAG &DAG,
     return false;
 
   // Darwin, and 32-bit ELF can use a BLA. The descriptor based ABIs can not
-  // becuase the immediate function pointer points to a descriptor instead of
+  // because the immediate function pointer points to a descriptor instead of
   // a function entry point. The ELFv2 ABI cannot use a BLA because the function
   // pointer immediate points to the global entry point, while the BLA would
   // need to jump to the local entry point (see rL211174).
@@ -5455,7 +5455,7 @@ static unsigned getCallOpcode(PPCTargetLowering::CallFlags CFlags,
 
   // This is a call through a function pointer.
   if (CFlags.IsIndirect) {
-    // AIX and the 64-bit ELF ABIs need to maintain the TOC pointer accross
+    // AIX and the 64-bit ELF ABIs need to maintain the TOC pointer across
     // indirect calls. The save of the caller's TOC pointer to the stack will be
     // inserted into the DAG as part of call lowering. The restore of the TOC
     // pointer is modeled by using a pseudo instruction for the call opcode that
@@ -5472,7 +5472,7 @@ static unsigned getCallOpcode(PPCTargetLowering::CallFlags CFlags,
     return PPCISD::CALL_NOTOC;
   }
 
-  // The ABIs that maintain a TOC pointer accross calls need to have a nop
+  // The ABIs that maintain a TOC pointer across calls need to have a nop
   // immediately following the call instruction if the caller and callee may
   // have different TOC bases. At link time if the linker determines the calls
   // may not share a TOC base, the call is redirected to a trampoline inserted
@@ -7482,7 +7482,7 @@ SDValue PPCTargetLowering::LowerFormalArguments_AIX(
         // register, we can simply store the entire register into the stack
         // slot.
         SDValue CopyFrom = DAG.getCopyFromReg(Chain, dl, VReg, LocVT);
-        // The store to the fixedstack object is needed becuase accessing a
+        // The store to the fixedstack object is needed because accessing a
         // field of the ByVal will use a gep and load. Ideally we will optimize
         // to extracting the value from the register directly, and elide the
         // stores when the arguments address is not taken, but that will need to

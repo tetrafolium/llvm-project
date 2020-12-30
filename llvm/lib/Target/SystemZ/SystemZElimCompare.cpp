@@ -369,7 +369,7 @@ static bool isAddWithImmediate(unsigned Opcode) {
 
 // The CC users in CCUsers are testing the result of a comparison of some
 // value X against zero and we know that any CC value produced by MI would
-// also reflect the value of X.  ConvOpc may be used to pass the transfomed
+// also reflect the value of X.  ConvOpc may be used to pass the transformed
 // opcode MI will have if this succeeds.  Try to adjust CCUsers so that they
 // test the result of MI directly, returning true on success.  Leave
 // everything unchanged on failure.

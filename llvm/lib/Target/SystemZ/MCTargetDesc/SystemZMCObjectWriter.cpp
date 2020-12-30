@@ -178,7 +178,7 @@ unsigned SystemZObjectWriter::getRelocType(MCContext &Ctx,
     llvm_unreachable("Only PC-relative GOT accesses are supported for now");
 
   case MCSymbolRefExpr::VK_PLT:
-    assert(IsPCRel && "@PLT shouldt be PC-relative");
+    assert(IsPCRel && "@PLT shouldnt be PC-relative");
     return getPLTReloc(Kind);
 
   default:

@@ -338,8 +338,8 @@ CharSourceRange tooling::getAssociatedRange(const Decl &Decl,
       getEntityEndLoc(SM, Decl.getEndLoc(), getTerminators(Decl), LangOpts));
   Range.setTokenRange(false);
 
-  // Expand to include preceeding associated comments. We ignore any comments
-  // that are not preceeding the decl, since we've already skipped trailing
+  // Expand to include preceding associated comments. We ignore any comments
+  // that are not preceding the decl, since we've already skipped trailing
   // comments with getEntityEndLoc.
   if (const RawComment *Comment =
           Decl.getASTContext().getRawCommentForDeclNoCache(&Decl))

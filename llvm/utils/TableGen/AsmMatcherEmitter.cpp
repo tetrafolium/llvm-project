@@ -333,7 +333,7 @@ public:
     }
 
     if (Kind == Token || isUserClass()) {
-      // Related tokens and user classes get sorted by depth in the inheritence
+      // Related tokens and user classes get sorted by depth in the inheritance
       // tree (so that subclasses are before their parents).
       if (isRelatedTo(RHS)) {
         if (getTreeDepth() > RHS.getTreeDepth())

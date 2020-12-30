@@ -2036,7 +2036,7 @@ bool MipsAsmParser::processInstruction(MCInst &Inst, SMLoc IDLoc,
   // Warn on division by zero. We're checking here as all instructions get
   // processed here, not just the macros that need expansion.
   //
-  // The MIPS backend models most of the divison instructions and macros as
+  // The MIPS backend models most of the division instructions and macros as
   // three operand instructions. The pre-R6 divide instructions however have
   // two operands and explicitly define HI/LO as part of the instruction,
   // not in the operands.
@@ -6597,7 +6597,7 @@ OperandMatchResultTy MipsAsmParser::parseMemOperand(OperandVector &Operands) {
       }
       MCBinaryExpr::Opcode Opcode;
       // GAS and LLVM treat comparison operators different. GAS will generate -1
-      // or 0, while LLVM will generate 0 or 1. Since a comparsion operator is
+      // or 0, while LLVM will generate 0 or 1. Since a comparison operator is
       // highly unlikely to be found in a memory offset expression, we don't
       // handle them.
       switch (Tok.getKind()) {

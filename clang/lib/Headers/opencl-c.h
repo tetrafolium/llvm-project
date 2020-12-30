@@ -18061,12 +18061,12 @@ intel_sub_group_avc_sic_payload_t __ovld intel_sub_group_avc_sic_configure_skc(
     ulong motion_vectors, uchar bidirectional_weight, uchar skip_sad_adjustment,
     intel_sub_group_avc_sic_payload_t payload);
 intel_sub_group_avc_sic_payload_t __ovld intel_sub_group_avc_sic_configure_ipe(
-    uchar luma_intra_partition_mask, uchar intra_neighbour_availabilty,
+    uchar luma_intra_partition_mask, uchar intra_neighbour_availability,
     uchar left_edge_luma_pixels, uchar upper_left_corner_luma_pixel,
     uchar upper_edge_luma_pixels, uchar upper_right_edge_luma_pixels,
     uchar intra_sad_adjustment, intel_sub_group_avc_sic_payload_t payload);
 intel_sub_group_avc_sic_payload_t __ovld intel_sub_group_avc_sic_configure_ipe(
-    uchar luma_intra_partition_mask, uchar intra_neighbour_availabilty,
+    uchar luma_intra_partition_mask, uchar intra_neighbour_availability,
     uchar left_edge_luma_pixels, uchar upper_left_corner_luma_pixel,
     uchar upper_edge_luma_pixels, uchar upper_right_edge_luma_pixels,
     ushort left_edge_chroma_pixels, ushort upper_left_corner_chroma_pixel,

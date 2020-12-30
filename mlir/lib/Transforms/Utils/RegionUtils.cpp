@@ -517,7 +517,7 @@ LogicalResult BlockMergeCluster::addToCluster(BlockEquivalenceData &blockData) {
     // If the lhs or rhs has external uses, the blocks cannot be merged as the
     // merged version of this operation will not be either the lhs or rhs
     // alone (thus semantically incorrect), but some mix dependening on which
-    // block preceeded this.
+    // block preceded this.
     // TODO allow merging of operations when one block does not dominate the
     // other
     if (rhsIt->isUsedOutsideOfBlock(mergeBlock) ||

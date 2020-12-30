@@ -1005,7 +1005,7 @@ class ChildVisitingFormatter(BasicFormatter):
 
 
 class RecursiveDecentFormatter(BasicFormatter):
-    """The recursive decent formatter prints the value and the decendents.
+    """The recursive decent formatter prints the value and the descendants.
 
     The constructor takes two keyword args: indent_level, which defaults to 0,
     and indent_child, which defaults to 2.  The current indentation level is

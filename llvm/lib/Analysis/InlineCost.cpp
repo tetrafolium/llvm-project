@@ -1744,7 +1744,7 @@ bool CallAnalyzer::visitStore(StoreInst &I) {
   // The store can potentially clobber loads and prevent repeated loads from
   // being eliminated.
   // FIXME:
-  // 1. We can probably keep an initial set of eliminatable loads substracted
+  // 1. We can probably keep an initial set of eliminatable loads subtracted
   // from the cost even when we finally see a store. We just need to disable
   // *further* accumulation of elimination savings.
   // 2. We should probably at some point thread MemorySSA for the callee into

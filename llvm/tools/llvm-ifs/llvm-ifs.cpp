@@ -327,7 +327,7 @@ static int writeElfStub(const Triple &T, const std::vector<IFSSymbol> &Symbols,
 
   std::string YamlStr = std::string(OS.str());
 
-  // Only or debugging. Not an offical format.
+  // Only or debugging. Not an official format.
   LLVM_DEBUG({
     if (ForceFormat == "ELFOBJYAML") {
       Out << YamlStr;

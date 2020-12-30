@@ -55,7 +55,7 @@ static inline bool is_equal(const std::type_info* x, const std::type_info* y,
   // for strcmp.
   if (!use_strcmp)
     return *x == *y;
-  // Still allow pointer equality to short circut.
+  // Still allow pointer equality to short circuit.
   return x == y || strcmp(x->name(), y->name()) == 0;
 }
 

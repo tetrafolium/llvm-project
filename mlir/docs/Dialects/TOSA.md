@@ -24,7 +24,7 @@ expressivenes goals at the *tensor level of abstraction* :
 This is driven by the top-down perspective, needing to express as much of
 multiple high level frameworks fully in TOSA, as possible. This was originally
 done from an operator frequency analysis done upon dozens of high level
-networks in different frameworks, to select the most frequently occuring ones
+networks in different frameworks, to select the most frequently occurring ones
 and establish a common set of tensor-level operators that could express them.
 
 TOSA categorizes its operator set into classes and attempts to address major

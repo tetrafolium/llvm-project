@@ -356,7 +356,7 @@ const Stmt *ExprMutationAnalyzer::findDirectMutation(const Expr *Exp) {
   const auto AsNonConstRefReturn =
       returnStmt(hasReturnValue(canResolveToExpr(equalsNode(Exp))));
 
-  // It is used as a non-const-reference for initalizing a range-for loop.
+  // It is used as a non-const-reference for initializing a range-for loop.
   const auto AsNonConstRefRangeInit = cxxForRangeStmt(
       hasRangeInit(declRefExpr(allOf(canResolveToExpr(equalsNode(Exp)),
                                      hasType(nonConstReferenceType())))));

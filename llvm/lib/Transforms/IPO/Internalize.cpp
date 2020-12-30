@@ -247,7 +247,7 @@ PreservedAnalyses InternalizePass::run(Module &M, ModuleAnalysisManager &AM) {
 
 namespace {
 class InternalizeLegacyPass : public ModulePass {
-  // Client supplied callback to control wheter a symbol must be preserved.
+  // Client supplied callback to control whether a symbol must be preserved.
   std::function<bool(const GlobalValue &)> MustPreserveGV;
 
 public:

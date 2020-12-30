@@ -3107,7 +3107,7 @@ static bool isSameEntity(NamedDecl *X, NamedDecl *Y) {
     if (!C.hasSameType(XT, YT)) {
       // We can get functions with different types on the redecl chain in C++17
       // if they have differing exception specifications and at least one of
-      // the excpetion specs is unresolved.
+      // the exception specs is unresolved.
       auto *XFPT = XT->getAs<FunctionProtoType>();
       auto *YFPT = YT->getAs<FunctionProtoType>();
       if (C.getLangOpts().CPlusPlus17 && XFPT && YFPT &&

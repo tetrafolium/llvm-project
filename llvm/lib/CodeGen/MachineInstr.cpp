@@ -393,7 +393,7 @@ void MachineInstr::cloneMemRefs(MachineFunction &MF, const MachineInstr &MI) {
     return;
 
   assert(&MF == MI.getMF() &&
-         "Invalid machine functions when cloning memory refrences!");
+         "Invalid machine functions when cloning memory references!");
   // See if we can just steal the extra info already allocated for the
   // instruction. We can do this whenever the pre- and post-instruction symbols
   // are the same (including null).

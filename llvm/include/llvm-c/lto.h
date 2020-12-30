@@ -559,7 +559,7 @@ typedef struct LLVMOpaqueLTOInput *lto_input_t;
 
 /**
  * Creates an LTO input file from a buffer. The path
- * argument is used for diagnotics as this function
+ * argument is used for diagnostic as this function
  * otherwise does not know which file the given buffer
  * is associated with.
  *

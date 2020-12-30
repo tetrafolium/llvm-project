@@ -135,7 +135,7 @@ public:
   /// \param[in] func_file_addr
   ///     The file address of the function containing this location list. This
   ///     address will be used to relocate the location list on the fly (in
-  ///     conjuction with the func_load_addr arguments).
+  ///     conjunction with the func_load_addr arguments).
   void SetLocationListAddresses(lldb::addr_t cu_file_addr,
                                 lldb::addr_t func_file_addr);
 

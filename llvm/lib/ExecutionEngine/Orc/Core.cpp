@@ -299,7 +299,7 @@ void ReExportsMaterializationUnit::materialize(
     }
   }
 
-  // The OnResolveInfo struct will hold the aliases and responsibilty for each
+  // The OnResolveInfo struct will hold the aliases and responsibility for each
   // query in the list.
   struct OnResolveInfo {
     OnResolveInfo(std::unique_ptr<MaterializationResponsibility> R,
@@ -1501,7 +1501,7 @@ void JITDylib::transferTracker(ResourceTracker &DstRT, ResourceTracker &SrcRT) {
       KV.second = &DstRT;
   }
 
-  // If we're transfering to the default tracker we just need to delete the
+  // If we're transferring to the default tracker we just need to delete the
   // tracked symbols for the source tracker.
   if (&DstRT == DefaultTracker.get()) {
     TrackerSymbols.erase(&SrcRT);
@@ -2025,7 +2025,7 @@ void ExecutionSession::transferResourceTracker(ResourceTracker &DstRT,
                                                ResourceTracker &SrcRT) {
   LLVM_DEBUG({
     dbgs() << "In " << SrcRT.getJITDylib().getName()
-           << " transfering resources from tracker "
+           << " transferring resources from tracker "
            << formatv("{0:x}", SrcRT.getKeyUnsafe()) << " to tracker "
            << formatv("{0:x}", DstRT.getKeyUnsafe()) << "\n";
   });
@@ -2361,7 +2361,7 @@ void ExecutionSession::OL_completeLookup(
 
             // Otherwise this is a match.
 
-            // If this symbol is already in the requried state then notify the
+            // If this symbol is already in the required state then notify the
             // query, remove the symbol and continue.
             if (SymI->second.getState() >= Q->getRequiredState()) {
               LLVM_DEBUG(dbgs()
@@ -2590,7 +2590,7 @@ void ExecutionSession::OL_completeLookupFlags(
       return make_error<SymbolsNotFound>(IPLS->LookupSet.getSymbolNames());
     }
 
-    LLVM_DEBUG(dbgs() << "Succeded, result = " << Result << "\n");
+    LLVM_DEBUG(dbgs() << "Succeeded, result = " << Result << "\n");
     return Result;
   });
 

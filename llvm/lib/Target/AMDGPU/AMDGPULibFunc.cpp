@@ -870,7 +870,7 @@ namespace {
 // substitution candidates from the grammar, but are explicitly excluded:
 // 1. <builtin-type> other than vendor extended types ..."
 
-// For the purpose of functions the following productions make sence for the
+// For the purpose of functions the following productions make sense for the
 // substitution:
 //  <type> ::= <builtin-type>
 //    ::= <class-enum-type>

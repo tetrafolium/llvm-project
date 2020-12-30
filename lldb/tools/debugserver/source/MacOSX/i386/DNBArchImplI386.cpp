@@ -758,7 +758,7 @@ void DNBArchImplI386::SetWatchpoint(DBG &debug_state, uint32_t hw_index,
                                     bool write) {
   // Set both dr7 (debug control register) and dri (debug address register).
 
-  // dr7{7-0} encodes the local/gloabl enable bits:
+  // dr7{7-0} encodes the local/global enable bits:
   //  global enable --. .-- local enable
   //                  | |
   //                  v v
@@ -807,7 +807,7 @@ void DNBArchImplI386::SetHardwareBreakpoint(DBG &debug_state, uint32_t hw_index,
                                             nub_addr_t addr, nub_size_t size) {
   // Set both dr7 (debug control register) and dri (debug address register).
 
-  // dr7{7-0} encodes the local/gloabl enable bits:
+  // dr7{7-0} encodes the local/global enable bits:
   //  global enable --. .-- local enable
   //                  | |
   //                  v v

@@ -280,7 +280,7 @@ opt<bool> EnableIndex{
     cat(Features),
     desc("Enable index-based features. By default, clangd maintains an index "
          "built from symbols in opened files. Global index support needs to "
-         "enabled separatedly"),
+         "enabled separately"),
     init(true),
     Hidden,
 };

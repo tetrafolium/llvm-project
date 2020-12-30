@@ -2011,7 +2011,7 @@ Value *LibCallSimplifier::optimizeLog(CallInst *Log, IRBuilderBase &B) {
 Value *LibCallSimplifier::optimizeSqrt(CallInst *CI, IRBuilderBase &B) {
   Function *Callee = CI->getCalledFunction();
   Value *Ret = nullptr;
-  // TODO: Once we have a way (other than checking for the existince of the
+  // TODO: Once we have a way (other than checking for the existence of the
   // libcall) to tell whether our target can lower @llvm.sqrt, relax the
   // condition below.
   if (TLI->has(LibFunc_sqrtf) && (Callee->getName() == "sqrt" ||

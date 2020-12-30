@@ -21,7 +21,7 @@ int LLVM_LIBC_ENTRYPOINT(sigfillset)(sigset_t *set) {
     return -1;
   }
   auto *sigset = reinterpret_cast<__llvm_libc::Sigset *>(set);
-  *sigset = __llvm_libc::Sigset::fullset();
+  *sigset = __llvm_libc::Sigset::fullest();
   return 0;
 }
 

@@ -30,7 +30,7 @@
 
 /* The type to represent integers optimized for small values. It is either a
  * pointer to an mp_int ( = mpz_t*; big representation) or an int32_t (small
- * represenation) with a discriminator at the least significant bit. In big
+ * representation) with a discriminator at the least significant bit. In big
  * representation it will be always zero because of heap alignment. It is set
  * to 1 for small representation and use the 32 most significant bits for the
  * int32_t.

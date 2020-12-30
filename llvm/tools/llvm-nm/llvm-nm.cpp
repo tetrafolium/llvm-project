@@ -1350,7 +1350,7 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
           S.TypeChar = '\0';
           S.Name = Entry.name();
           // There is no symbol in the nlist symbol table for this so we set
-          // Sym effectivly to null and the rest of code in here must test for
+          // Sym effectively to null and the rest of code in here must test for
           // it and not do things like Sym.getFlags() for it.
           S.Sym = BasicSymbolRef();
           S.SymFlags = SymbolRef::SF_Global;
@@ -1448,7 +1448,7 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
             else
               U.Name = Entry.otherName();
             // Again there is no symbol in the nlist symbol table for this so
-            // we set Sym effectivly to null and the rest of code in here must
+            // we set Sym effectively to null and the rest of code in here must
             // test for it and not do things like Sym.getFlags() for it.
             U.Sym = BasicSymbolRef();
             U.SymFlags = SymbolRef::SF_Global | SymbolRef::SF_Undefined;
@@ -1510,7 +1510,7 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
           B.Size = 0;
           B.TypeChar = 'U';
           // There is no symbol in the nlist symbol table for this so we set
-          // Sym effectivly to null and the rest of code in here must test for
+          // Sym effectively to null and the rest of code in here must test for
           // it and not do things like Sym.getFlags() for it.
           B.Sym = BasicSymbolRef();
           B.SymFlags = SymbolRef::SF_Global | SymbolRef::SF_Undefined;
@@ -1569,14 +1569,14 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
           L.Size = 0;
           L.TypeChar = 'U';
           // There is no symbol in the nlist symbol table for this so we set
-          // Sym effectivly to null and the rest of code in here must test for
+          // Sym effectively to null and the rest of code in here must test for
           // it and not do things like Sym.getFlags() for it.
           L.Sym = BasicSymbolRef();
           L.SymFlags = SymbolRef::SF_Global | SymbolRef::SF_Undefined;
           L.NType = MachO::N_EXT | MachO::N_UNDF;
           L.NSect = 0;
           // The REFERENCE_FLAG_UNDEFINED_LAZY is no longer used but here it
-          // makes sence since we are creating this from a lazy bind entry.
+          // makes sense since we are creating this from a lazy bind entry.
           L.NDesc = MachO::REFERENCE_FLAG_UNDEFINED_LAZY;
           MachO::SET_LIBRARY_ORDINAL(L.NDesc, Entry.ordinal());
           L.IndirectName = StringRef();
@@ -1631,7 +1631,7 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
           W.Size = 0;
           W.TypeChar = 'U';
           // There is no symbol in the nlist symbol table for this so we set
-          // Sym effectivly to null and the rest of code in here must test for
+          // Sym effectively to null and the rest of code in here must test for
           // it and not do things like Sym.getFlags() for it.
           W.Sym = BasicSymbolRef();
           W.SymFlags = SymbolRef::SF_Global | SymbolRef::SF_Undefined;
@@ -1706,7 +1706,7 @@ static void dumpSymbolNamesFromObject(SymbolicFile &Obj, bool printName,
           F.Address = FoundFns[f] + BaseSegmentAddress;
           F.Size = 0;
           // There is no symbol in the nlist symbol table for this so we set
-          // Sym effectivly to null and the rest of code in here must test for
+          // Sym effectively to null and the rest of code in here must test for
           // it and not do things like Sym.getFlags() for it.
           F.Sym = BasicSymbolRef();
           F.SymFlags = 0;

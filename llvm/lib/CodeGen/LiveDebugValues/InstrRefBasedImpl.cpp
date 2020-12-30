@@ -958,7 +958,7 @@ public:
   std::vector<ValueIDNum> VarLocs;
 
   /// Map from LocIdxes to which DebugVariables are based that location.
-  /// Mantained while stepping through the block. Not accurate if
+  /// Maintained while stepping through the block. Not accurate if
   /// VarLocs[Idx] != MTracker->LocIdxToIDNum[Idx].
   std::map<LocIdx, SmallSet<DebugVariable, 4>> ActiveMLocs;
 
@@ -1493,13 +1493,13 @@ private:
   /// TransferTracker class over the function to produce live-in and transfer
   /// DBG_VALUEs, then inserts them. Groups of DBG_VALUEs are inserted in the
   /// order given by AllVarsNumbering -- this could be any stable order, but
-  /// right now "order of appearence in function, when explored in RPO", so
-  /// that we can compare explictly against VarLocBasedImpl.
+  /// right now "order of appearance in function, when explored in RPO", so
+  /// that we can compare explicitly against VarLocBasedImpl.
   void emitLocations(MachineFunction &MF, LiveInsT SavedLiveIns,
                      ValueIDNum **MInLocs,
                      DenseMap<DebugVariable, unsigned> &AllVarsNumbering);
 
-  /// Boilerplate computation of some initial sets, artifical blocks and
+  /// Boilerplate computation of some initial sets, artificial blocks and
   /// RPOT block ordering.
   void initialSetup(MachineFunction &MF);
 
@@ -2699,7 +2699,7 @@ std::tuple<bool, bool> InstrRefBasedLDV::vlocJoin(
       Agreed,       // All preds agree on the variable value.
       PropDisagree, // All preds agree, but the value kind is Proposed in some.
       BEDisagree,   // Only back-edges disagree on variable value.
-      PHINeeded,    // Non-back-edge predecessors have conflicing values.
+      PHINeeded,    // Non-back-edge predecessors have conflicting values.
       NoSolution    // Conflicting Value metadata makes solution impossible.
     } OurState = Unset;
 

@@ -1210,7 +1210,7 @@ static int getInstructionID(struct InternalInstruction *insn,
 
   if (insn->mode != MODE_64BIT &&
       insn->vectorExtensionType != TYPE_NO_VEX_XOP) {
-    // The tables can't distinquish between cases where the W-bit is used to
+    // The tables can't distinguish between cases where the W-bit is used to
     // select register size and cases where its a required part of the opcode.
     if ((insn->vectorExtensionType == TYPE_EVEX &&
          wFromEVEX3of4(insn->vectorExtensionPrefix[2])) ||

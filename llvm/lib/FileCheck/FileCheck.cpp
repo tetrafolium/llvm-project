@@ -698,7 +698,7 @@ Pattern::parseCallExpr(StringRef &Expr, StringRef FuncName,
     if (Expr.startswith(","))
       return ErrorDiagnostic::get(SM, Expr, "missing argument");
 
-    // Parse the argument, which is an arbitary expression.
+    // Parse the argument, which is an arbitrary expression.
     StringRef OuterBinOpExpr = Expr;
     Expected<std::unique_ptr<ExpressionAST>> Arg = parseNumericOperand(
         Expr, AllowedOperand::Any, /*MaybeInvalidConstraint=*/false, LineNumber,
@@ -755,7 +755,7 @@ Expected<std::unique_ptr<Expression>> Pattern::parseNumericSubstitutionBlock(
   ExpressionFormat ExplicitFormat = ExpressionFormat();
   unsigned Precision = 0;
 
-  // Parse format specifier (NOTE: ',' is also an argument seperator).
+  // Parse format specifier (NOTE: ',' is also an argument separator).
   size_t FormatSpecEnd = Expr.find(',');
   size_t FunctionStart = Expr.find('(');
   if (FormatSpecEnd != StringRef::npos && FormatSpecEnd < FunctionStart) {

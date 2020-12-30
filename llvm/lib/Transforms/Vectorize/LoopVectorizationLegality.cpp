@@ -716,7 +716,7 @@ bool LoopVectorizationLegality::canVectorizeInstrs() {
           !(CI->getCalledFunction() && TLI &&
             (!VFDatabase::getMappings(*CI).empty() ||
              isTLIScalarize(*TLI, *CI)))) {
-        // If the call is a recognized math libary call, it is likely that
+        // If the call is a recognized math library call, it is likely that
         // we can vectorize it given loosened floating-point constraints.
         LibFunc Func;
         bool IsMathLibCall =

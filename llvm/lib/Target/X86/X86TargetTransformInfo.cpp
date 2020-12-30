@@ -225,7 +225,7 @@ int X86TTIImpl::getArithmeticInstrCost(unsigned Opcode, Type *Ty,
 
   if (ST->isSLM()) {
     if (Args.size() == 2 && ISD == ISD::MUL && LT.second == MVT::v4i32) {
-      // Check if the operands can be shrinked into a smaller datatype.
+      // Check if the operands can be shrunk into a smaller datatype.
       bool Op1Signed = false;
       unsigned Op1MinSize = BaseT::minRequiredElementSize(Args[0], Op1Signed);
       bool Op2Signed = false;

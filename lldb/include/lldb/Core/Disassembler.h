@@ -170,7 +170,7 @@ public:
 
   bool Emulate(const ArchSpec &arch, uint32_t evaluate_options, void *baton,
                EmulateInstruction::ReadMemoryCallback read_mem_callback,
-               EmulateInstruction::WriteMemoryCallback write_mem_calback,
+               EmulateInstruction::WriteMemoryCallback write_mem_callback,
                EmulateInstruction::ReadRegisterCallback read_reg_callback,
                EmulateInstruction::WriteRegisterCallback write_reg_callback);
 

@@ -349,7 +349,7 @@ bool Declarator::isDeclarationOfFunction() const {
   case TST_half:
   case TST_int:
   case TST_int128:
-  case TST_extint:
+  case TST_extinct:
   case TST_struct:
   case TST_interface:
   case TST_union:
@@ -558,7 +558,7 @@ const char *DeclSpec::getSpecifierName(DeclSpec::TST T,
     return "int";
   case DeclSpec::TST_int128:
     return "__int128";
-  case DeclSpec::TST_extint:
+  case DeclSpec::TST_extinct:
     return "_ExtInt";
   case DeclSpec::TST_half:
     return "half";
@@ -969,7 +969,7 @@ bool DeclSpec::SetExtIntType(SourceLocation KWLoc, Expr *BitsExpr,
     return true;
   }
 
-  TypeSpecType = TST_extint;
+  TypeSpecType = TST_extinct;
   ExprRep = BitsExpr;
   TSTLoc = KWLoc;
   TSTNameLoc = KWLoc;
@@ -1281,7 +1281,7 @@ void DeclSpec::Finish(Sema &S, const PrintingPolicy &Policy) {
       TypeSpecType = TST_int; // unsigned -> unsigned int, signed -> signed int.
     else if (TypeSpecType != TST_int && TypeSpecType != TST_int128 &&
              TypeSpecType != TST_char && TypeSpecType != TST_wchar &&
-             !IsFixedPointType && TypeSpecType != TST_extint) {
+             !IsFixedPointType && TypeSpecType != TST_extinct) {
       S.Diag(TSSLoc, diag::err_invalid_sign_spec)
           << getSpecifierName((TST)TypeSpecType, Policy);
       // signed double -> double.
@@ -1329,7 +1329,7 @@ void DeclSpec::Finish(Sema &S, const PrintingPolicy &Policy) {
           S.getLocForEndOfToken(getTypeSpecComplexLoc()), " double");
       TypeSpecType = TST_double; // _Complex -> _Complex double.
     } else if (TypeSpecType == TST_int || TypeSpecType == TST_char ||
-               TypeSpecType == TST_extint) {
+               TypeSpecType == TST_extinct) {
       // Note that this intentionally doesn't include _Complex _Bool.
       if (!S.getLangOpts().CPlusPlus)
         S.Diag(TSTLoc, diag::ext_integer_complex);

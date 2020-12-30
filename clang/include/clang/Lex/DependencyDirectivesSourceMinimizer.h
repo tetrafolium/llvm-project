@@ -55,7 +55,7 @@ enum TokenKind {
 
 /// Represents a simplified token that's lexed as part of the source
 /// minimization. It's used to track the location of various preprocessor
-/// directives that could potentially have an effect on the depedencies.
+/// directives that could potentially have an effect on the dependencies.
 struct Token {
   /// The kind of token.
   TokenKind K = pp_none;

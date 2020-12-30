@@ -468,7 +468,7 @@ public:
     /// Verify invariants about the SCC.
     ///
     /// This will attempt to validate all of the basic invariants within an
-    /// SCC, but not that it is a strongly connected componet per-se. Primarily
+    /// SCC, but not that it is a strongly connected components per-se. Primarily
     /// useful while building and updating the graph to check that basic
     /// properties are in place rather than having inexplicable crashes later.
     void verify();

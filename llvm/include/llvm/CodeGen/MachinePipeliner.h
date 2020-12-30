@@ -17,7 +17,7 @@
 //
 // "Swing Modulo Scheduling: A Lifetime-Sensitive Approach", by J. Llosa,
 // A. Gonzalez, E. Ayguade, and M. Valero. In PACT '96 Proceedings of the 1996
-// Conference on Parallel Architectures and Compilation Techiniques.
+// Conference on Parallel Architectures and Compilation Techniques.
 //
 // "Lifetime-Sensitive Modulo Scheduling in a Production Environment", by J.
 // Llosa, E. Ayguade, A. Gonzalez, M. Valero, and J. Eckhardt. In IEEE

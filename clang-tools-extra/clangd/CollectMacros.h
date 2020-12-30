@@ -26,7 +26,7 @@ struct MainFileMacros {
   // Instead of storing SourceLocation, we have to store the token range because
   // SourceManager from preamble is not available when we build the AST.
   llvm::DenseMap<SymbolID, std::vector<Range>> MacroRefs;
-  // Somtimes it is not possible to compute the SymbolID for the Macro, e.g. a
+  // Sometimes it is not possible to compute the SymbolID for the Macro, e.g. a
   // reference to an undefined macro. Store them separately, e.g. for semantic
   // highlighting.
   std::vector<Range> UnknownMacros;

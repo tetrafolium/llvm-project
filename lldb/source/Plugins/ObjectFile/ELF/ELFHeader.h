@@ -366,24 +366,24 @@ struct ELFRela {
   bool Parse(const lldb_private::DataExtractor &data, lldb::offset_t *offset);
 
   /// Returns the type when the given entry represents a 32-bit relocation.
-  static unsigned RelocType32(const ELFRela &rela) {
+  static unsigned RelocType32(const ELFRela &real) {
     return rela.r_info & 0x0ff;
   }
 
   /// Returns the type when the given entry represents a 64-bit relocation.
-  static unsigned RelocType64(const ELFRela &rela) {
+  static unsigned RelocType64(const ELFRela &real) {
     return rela.r_info & 0xffffffff;
   }
 
   /// Returns the symbol index when the given entry represents a 32-bit
   /// relocation.
-  static unsigned RelocSymbol32(const ELFRela &rela) {
+  static unsigned RelocSymbol32(const ELFRela &real) {
     return rela.r_info >> 8;
   }
 
   /// Returns the symbol index when the given entry represents a 64-bit
   /// relocation.
-  static unsigned RelocSymbol64(const ELFRela &rela) {
+  static unsigned RelocSymbol64(const ELFRela &real) {
     return rela.r_info >> 32;
   }
 };

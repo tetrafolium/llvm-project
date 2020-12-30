@@ -549,7 +549,7 @@ static Optional<APInt> calculateOffsetDiff(const APInt &V1, const APInt &V2) {
 // have only 8 uses in range, so choosing 2 as a base is more optimal. Thus, in
 // selecting the base constant the range of the offsets is a very important
 // factor too that we take into account here. This algorithm calculates a total
-// costs for selecting a constant as the base and substract the costs if
+// costs for selecting a constant as the base and subtract the costs if
 // immediates are out of range. It has quadratic complexity, so we call this
 // function only when we're optimising for size and there are less than 100
 // constants, we fall back to the straightforward algorithm otherwise

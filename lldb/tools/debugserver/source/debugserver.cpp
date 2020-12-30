@@ -693,7 +693,7 @@ static void PortWasBoundCallbackUnixSocket(const void *baton, in_port_t port) {
       exit(1);
     }
 
-    //::printf ("connect () sucess!!\n");
+    //::printf ("connect () success!!\n");
 
     // We were able to connect to the socket, now write our PID so whomever
     // launched us will know this process's ID
@@ -708,7 +708,7 @@ static void PortWasBoundCallbackUnixSocket(const void *baton, in_port_t port) {
       exit(1);
     }
 
-    //::printf ("send () sucess!!\n");
+    //::printf ("send () success!!\n");
 
     // We are done with the socket
     close(s);

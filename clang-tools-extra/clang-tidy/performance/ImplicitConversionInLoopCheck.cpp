@@ -21,7 +21,7 @@ namespace tidy {
 namespace performance {
 
 // Checks if the stmt is a ImplicitCastExpr with a CastKind that is not a NoOp.
-// The subtelty is that in some cases (user defined conversions), we can
+// The subtlety is that in some cases (user defined conversions), we can
 // get to ImplicitCastExpr inside each other, with the outer one a NoOp. In this
 // case we skip the first cast expr.
 static bool IsNonTrivialImplicitCast(const Stmt *ST) {

@@ -223,7 +223,7 @@ enum {
   DW_OP_deref_size = 0x94,  // 1-byte size of data retrieved
   DW_OP_xderef_size = 0x95, // 1-byte size of data retrieved
   DW_OP_nop = 0x96,
-  DW_OP_push_object_addres = 0x97,
+  DW_OP_push_object_address = 0x97,
   DW_OP_call2 = 0x98,    // 2-byte offset of DIE
   DW_OP_call4 = 0x99,    // 4-byte offset of DIE
   DW_OP_call_ref = 0x9A, // 4- or 8-byte offset of DIE

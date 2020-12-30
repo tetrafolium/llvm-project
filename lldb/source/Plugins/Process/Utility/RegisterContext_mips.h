@@ -359,7 +359,7 @@ struct MSA_linux_mips {
   MSAReg w30;
   MSAReg w31;
   uint32_t fcsr;    /* FPU control status register */
-  uint32_t fir;     /* FPU implementaion revision */
+  uint32_t fir;     /* FPU implementation revision */
   uint32_t mcsr;    /* MSA control status register */
   uint32_t mir;     /* MSA implementation revision */
   uint32_t config5; /* Config5 register */

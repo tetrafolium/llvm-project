@@ -44,7 +44,7 @@ static bool areSwitchBranchesIdentical(const SwitchBranch LHS,
   for (size_t i = 0, Size = LHS.size(); i < Size; i++) {
     // NOTE: We strip goto labels and annotations in addition to stripping
     // the `case X:` or `default:` labels, but it is very unlikely that this
-    // would casue false positives in real-world code.
+    // would cause false positives in real-world code.
     if (!areStatementsIdentical(LHS[i]->stripLabelLikeStatements(),
                                 RHS[i]->stripLabelLikeStatements(), Context)) {
       return false;

@@ -1852,7 +1852,7 @@ public:
       if (!ORE.allowExtraAnalysis(DEBUG_TYPE))
         return;
 
-      // Map matrix operations to their containting subprograms, by traversing
+      // Map matrix operations to their containing subprograms, by traversing
       // the inlinedAt chain. If the function does not have a DISubprogram, we
       // only map them to the containing function.
       MapVector<DISubprogram *, SmallVector<Value *, 8>> Subprog2Exprs;

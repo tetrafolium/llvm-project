@@ -596,7 +596,7 @@ llvm::Optional<HoverInfo> getThisExprHoverContents(const CXXThisExpr *CTE,
   QualType OriginThisType = CTE->getType()->getPointeeType();
   QualType ClassType = declaredType(OriginThisType->getAsTagDecl());
   // For partial specialization class, origin `this` pointee type will be
-  // parsed as `InjectedClassNameType`, which will ouput template arguments
+  // parsed as `InjectedClassNameType`, which will output template arguments
   // like "type-parameter-0-0". So we retrieve user written class type in this
   // case.
   QualType PrettyThisType = ASTCtx.getPointerType(

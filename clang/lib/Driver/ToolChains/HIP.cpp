@@ -294,7 +294,7 @@ void HIPToolChain::addClangTargetOptions(
 
   addDirectoryList(DriverArgs, LibraryPaths, "", "HIP_DEVICE_LIB_PATH");
 
-  // Maintain compatability with --hip-device-lib.
+  // Maintain compatibility with --hip-device-lib.
   auto BCLibs = DriverArgs.getAllArgValues(options::OPT_hip_device_lib_EQ);
   if (!BCLibs.empty()) {
     for (auto Lib : BCLibs)

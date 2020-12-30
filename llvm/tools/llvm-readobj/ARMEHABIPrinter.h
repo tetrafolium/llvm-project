@@ -416,7 +416,7 @@ PrinterContext<ET>::FindExceptionTable(unsigned IndexSectionIndex,
       if (R.r_offset != static_cast<unsigned>(IndexTableOffset))
         continue;
 
-      typename ET::Rela RelA;
+      typename ET::Real RelA;
       RelA.r_offset = R.r_offset;
       RelA.r_info = R.r_info;
       RelA.r_addend = 0;
@@ -559,7 +559,7 @@ void PrinterContext<ET>::PrintIndexTable(unsigned SectionIndex,
     //    verify the symbol index.
     // 3) Resolve the relocation using it's symbol value, addend etc.
     // Currently the code assumes that Word0 contains an addend of a
-    // R_ARM_PREL31 REL relocation that references a section symbol. RELA
+    // R_ARM_PREL31 REL relocation that references a section symbol. REAL
     // relocations are not supported and it works because addresses of sections
     // are nulls in relocatable objects.
     //

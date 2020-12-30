@@ -165,7 +165,7 @@ struct FusionCandidate {
   bool Valid;
   /// Guard branch of the loop, if it exists
   BranchInst *GuardBranch;
-  /// Peeling Paramaters of the Loop.
+  /// Peeling Parameters of the Loop.
   TTI::PeelingPreferences PP;
   /// Can you Peel this Loop?
   bool AbleToPeel;
@@ -814,7 +814,7 @@ private:
         DTU.flush();
       }
       LLVM_DEBUG(
-          dbgs() << "Sucessfully peeled " << FC0.PP.PeelCount
+          dbgs() << "Successfully peeled " << FC0.PP.PeelCount
                  << " iterations from the first loop.\n"
                     "Both Loops have the same number of iterations now.\n");
     }

@@ -1095,7 +1095,7 @@ static bool simplifyTerminatorLeadingToRet(Instruction *InitialInst) {
       if (BR && BR->isConditional() && CondCmp == BR->getCondition()) {
         // If the case number of suspended switch instruction is reduced to
         // 1, then it is simplified to CmpInst in llvm::ConstantFoldTerminator.
-        // And the comparsion looks like : %cond = icmp eq i8 %V, constant.
+        // And the comparison looks like : %cond = icmp eq i8 %V, constant.
         ConstantInt *CondConst = dyn_cast<ConstantInt>(CondCmp->getOperand(1));
         if (CondConst && CondCmp->getPredicate() == CmpInst::ICMP_EQ) {
           Value *V = CondCmp->getOperand(0);

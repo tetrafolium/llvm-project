@@ -2285,7 +2285,7 @@ PathSensitiveBugReport::getInterestingnessKind(SVal V) const {
   if (!SKind)
     return RKind;
 
-  // If either is marked with throrough tracking, return that, we wouldn't like
+  // If either is marked with thorough tracking, return that, we wouldn't like
   // to downplay a note's importance by 'only' mentioning it as a condition.
   switch (*RKind) {
   case bugreporter::TrackingKind::Thorough:

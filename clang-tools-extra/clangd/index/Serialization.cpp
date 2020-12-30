@@ -520,8 +520,8 @@ llvm::Expected<IndexFileIn> readRIFF(llvm::StringRef Data) {
       return error("malformed or truncated refs");
     Result.Refs = std::move(Refs).build();
   }
-  if (Chunks.count("rela")) {
-    Reader RelationsReader(Chunks.lookup("rela"));
+  if (Chunks.count("real")) {
+    Reader RelationsReader(Chunks.lookup("real"));
     RelationSlab::Builder Relations;
     while (!RelationsReader.eof())
       Relations.insert(readRelation(RelationsReader));
@@ -641,7 +641,7 @@ void writeRIFF(const IndexFileOut &Data, llvm::raw_ostream &OS) {
       for (const auto &Relation : Relations)
         writeRelation(Relation, RelationOS);
     }
-    RIFF.Chunks.push_back({riff::fourCC("rela"), RelationSection});
+    RIFF.Chunks.push_back({riff::fourCC("real"), RelationSection});
   }
 
   std::string SrcsSection;

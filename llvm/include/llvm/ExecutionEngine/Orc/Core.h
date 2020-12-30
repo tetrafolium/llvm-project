@@ -928,7 +928,7 @@ public:
   /// Create a resource tracker for this JITDylib.
   ResourceTrackerSP createResourceTracker();
 
-  /// Adds a definition generator to this JITDylib and returns a referenece to
+  /// Adds a definition generator to this JITDylib and returns a reference to
   /// it.
   ///
   /// When JITDylibs are searched during lookup, if no existing definition of
@@ -1027,7 +1027,7 @@ public:
   /// only once.
   static std::vector<JITDylibSP> getDFSLinkOrder(ArrayRef<JITDylibSP> JDs);
 
-  /// Returns the given JITDylibs and all of their transitive dependensies in
+  /// Returns the given JITDylibs and all of their transitive dependencies in
   /// reverse DFS order (based on linkage relationships). Each JITDylib will
   /// appear only once.
   static std::vector<JITDylibSP>

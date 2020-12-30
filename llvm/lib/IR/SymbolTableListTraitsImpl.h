@@ -88,7 +88,7 @@ void SymbolTableListTraits<ValueSubClass>::removeNodeFromList(
 template <typename ValueSubClass>
 void SymbolTableListTraits<ValueSubClass>::transferNodesFromList(
     SymbolTableListTraits &L2, iterator first, iterator last) {
-  // Transfering nodes, even within the same BB, invalidates the ordering. The
+  // Transferring nodes, even within the same BB, invalidates the ordering. The
   // list that we removed the nodes from still has a valid ordering.
   ItemParentClass *NewIP = getListOwner();
   invalidateParentIListOrdering(NewIP);

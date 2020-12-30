@@ -239,7 +239,7 @@ public:
   using Elf_Shdr = typename ELFT::Shdr;
   using Elf_Ehdr = typename ELFT::Ehdr;
   using Elf_Rel = typename ELFT::Rel;
-  using Elf_Rela = typename ELFT::Rela;
+  using Elf_Real = typename ELFT::Real;
   using Elf_Dyn = typename ELFT::Dyn;
 
   SectionRef toSectionRef(const Elf_Shdr *Sec) const {
@@ -406,7 +406,7 @@ public:
                                               bool InitContent = true);
 
   const Elf_Rel *getRel(DataRefImpl Rel) const;
-  const Elf_Rela *getRela(DataRefImpl Rela) const;
+  const Elf_Real *getRela(DataRefImpl Real) const;
 
   Expected<const Elf_Sym *> getSymbol(DataRefImpl Sym) const {
     return EF.template getEntry<Elf_Sym>(Sym.d.a, Sym.d.b);
@@ -885,7 +885,7 @@ ELFObjectFile<ELFT>::dynamic_relocation_sections() const {
     Elf_Dyn *Dynamic =
         reinterpret_cast<Elf_Dyn *>((uintptr_t)base() + Sec.sh_offset);
     for (; Dynamic->d_tag != ELF::DT_NULL; Dynamic++) {
-      if (Dynamic->d_tag == ELF::DT_REL || Dynamic->d_tag == ELF::DT_RELA ||
+      if (Dynamic->d_tag == ELF::DT_REL || Dynamic->d_tag == ELF::DT_REAL ||
           Dynamic->d_tag == ELF::DT_JMPREL) {
         Offsets.push_back(Dynamic->d_un.d_val);
       }
@@ -941,7 +941,7 @@ relocation_iterator
 ELFObjectFile<ELFT>::section_rel_end(DataRefImpl Sec) const {
   const Elf_Shdr *S = reinterpret_cast<const Elf_Shdr *>(Sec.p);
   relocation_iterator Begin = section_rel_begin(Sec);
-  if (S->sh_type != ELF::SHT_RELA && S->sh_type != ELF::SHT_REL)
+  if (S->sh_type != ELF::SHT_REAL && S->sh_type != ELF::SHT_REL)
     return Begin;
   DataRefImpl RelData = Begin->getRawDataRefImpl();
   const Elf_Shdr *RelSec = getRelSection(RelData);
@@ -963,7 +963,7 @@ ELFObjectFile<ELFT>::getRelocatedSection(DataRefImpl Sec) const {
 
   const Elf_Shdr *EShdr = getSection(Sec);
   uintX_t Type = EShdr->sh_type;
-  if (Type != ELF::SHT_REL && Type != ELF::SHT_RELA)
+  if (Type != ELF::SHT_REL && Type != ELF::SHT_REAL)
     return section_end();
 
   Expected<const Elf_Shdr *> SecOrErr = EF.getSection(EShdr->sh_info);
@@ -1030,8 +1030,8 @@ void ELFObjectFile<ELFT>::getRelocationTypeName(
 template <class ELFT>
 Expected<int64_t>
 ELFObjectFile<ELFT>::getRelocationAddend(DataRefImpl Rel) const {
-  if (getRelSection(Rel)->sh_type != ELF::SHT_RELA)
-    return createError("Section is not SHT_RELA");
+  if (getRelSection(Rel)->sh_type != ELF::SHT_REAL)
+    return createError("Section is not SHT_REAL");
   return (int64_t)getRela(Rel)->r_addend;
 }
 
@@ -1046,10 +1046,10 @@ ELFObjectFile<ELFT>::getRel(DataRefImpl Rel) const {
 }
 
 template <class ELFT>
-const typename ELFObjectFile<ELFT>::Elf_Rela *
-ELFObjectFile<ELFT>::getRela(DataRefImpl Rela) const {
-  assert(getRelSection(Rela)->sh_type == ELF::SHT_RELA);
-  auto Ret = EF.template getEntry<Elf_Rela>(Rela.d.a, Rela.d.b);
+const typename ELFObjectFile<ELFT>::Elf_Real *
+ELFObjectFile<ELFT>::getRela(DataRefImpl Real) const {
+  assert(getRelSection(Real)->sh_type == ELF::SHT_REAL);
+  auto Ret = EF.template getEntry<Elf_Real>(Rela.d.a, Rela.d.b);
   if (!Ret)
     report_fatal_error(errorToErrorCode(Ret.takeError()).message());
   return *Ret;

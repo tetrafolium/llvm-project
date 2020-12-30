@@ -25,8 +25,8 @@
 // code duplication.
 //
 //===----------------------------------------------------------------------===//
-#ifndef SANITIZER_LOCAL_ADDRES_SPACE_VIEW_H
-#define SANITIZER_LOCAL_ADDRES_SPACE_VIEW_H
+#ifndef SANITIZER_LOCAL_ADDRESS_SPACE_VIEW_H
+#define SANITIZER_LOCAL_ADDRESS_SPACE_VIEW_H
 
 namespace __sanitizer {
 struct LocalAddressSpaceView {

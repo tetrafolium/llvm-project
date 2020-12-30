@@ -1244,7 +1244,7 @@ static bool ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args, InputKind IK,
         llvm::remarks::parseHotnessThresholdOption(arg->getValue());
 
     if (!ResultOrErr) {
-      Diags.Report(diag::err_drv_invalid_diagnotics_hotness_threshold)
+      Diags.Report(diag::err_drv_invalid_diagnostic_hotness_threshold)
           << "-fdiagnostics-hotness-threshold=";
     } else {
       Opts.DiagnosticsHotnessThreshold = *ResultOrErr;
@@ -2448,7 +2448,7 @@ static void ParseLangArgs(LangOptions &Opts, ArgList &Args, InputKind IK,
     else
       Opts.setDLLExportVisibility(DefaultVisibility);
 
-    // Translate defintions without an explict DLL storage class to hidden
+    // Translate defintions without an explicit DLL storage class to hidden
     // visibility, by default.
     if (Arg *O = Args.getLastArg(OPT_fvisibility_nodllstorageclass_EQ))
       Opts.setNoDLLStorageClassVisibility(parseVisibility(O, Args, Diags));
@@ -3115,7 +3115,7 @@ bool CompilerInvocation::CreateFromArgs(CompilerInvocation &Res,
     if (Res.getFrontendOpts().ProgramAction == frontend::RewriteObjC)
       LangOpts.ObjCExceptions = 1;
     if (T.isOSDarwin() && DashX.isPreprocessed()) {
-      // Supress the darwin-specific 'stdlibcxx-not-found' diagnostic for
+      // Suppress the darwin-specific 'stdlibcxx-not-found' diagnostic for
       // preprocessed input as we don't expect it to be used with -std=libc++
       // anyway.
       Res.getDiagnosticOpts().Warnings.push_back("no-stdlibcxx-not-found");

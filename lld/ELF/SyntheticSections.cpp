@@ -1298,10 +1298,10 @@ static std::function<uint64_t()> addRelaSz(RelocationBaseSection *relaDyn) {
   };
 }
 
-// A Linker script may assign the RELA relocation sections to the same
+// A Linker script may assign the REAL relocation sections to the same
 // output section. When this occurs we cannot just use the OutputSection
 // Size. Moreover the [DT_JMPREL, DT_JMPREL + DT_PLTRELSZ) is permitted to
-// overlap with the [DT_RELA, DT_RELA + DT_RELASZ).
+// overlap with the [DT_REAL, DT_REAL + DT_RELASZ).
 static uint64_t addPltRelSz() {
   size_t size = in.relaPlt->getSize();
   if (in.relaIplt->getParent() == in.relaPlt->getParent() &&
@@ -1396,7 +1396,7 @@ template <class ELFT> void DynamicSection<ELFT>::finalizeContents() {
 
     bool isRela = config->isRela;
     addInt(isRela ? DT_RELAENT : DT_RELENT,
-           isRela ? sizeof(Elf_Rela) : sizeof(Elf_Rel));
+           isRela ? sizeof(Elf_Real) : sizeof(Elf_Rel));
 
     // MIPS dynamic loader does not support RELCOUNT tag.
     // The problem is in the tight relation between dynamic
@@ -1442,7 +1442,7 @@ template <class ELFT> void DynamicSection<ELFT>::finalizeContents() {
       addInSec(DT_PLTGOT, in.gotPlt);
       break;
     }
-    addInt(DT_PLTREL, config->isRela ? DT_RELA : DT_REL);
+    addInt(DT_PLTREL, config->isRela ? DT_REAL : DT_REL);
   }
 
   if (config->emachine == EM_AARCH64) {
@@ -1629,7 +1629,7 @@ RelrBaseSection::RelrBaseSection()
 
 template <class ELFT>
 static void encodeDynamicReloc(SymbolTableBaseSection *symTab,
-                               typename ELFT::Rela *p,
+                               typename ELFT::Real *p,
                                const DynamicReloc &rel) {
   if (config->isRela)
     p->r_addend = rel.computeAddend();
@@ -1639,11 +1639,11 @@ static void encodeDynamicReloc(SymbolTableBaseSection *symTab,
 
 template <class ELFT>
 RelocationSection<ELFT>::RelocationSection(StringRef name, bool sort)
-    : RelocationBaseSection(name, config->isRela ? SHT_RELA : SHT_REL,
-                            config->isRela ? DT_RELA : DT_REL,
+    : RelocationBaseSection(name, config->isRela ? SHT_REAL : SHT_REL,
+                            config->isRela ? DT_REAL : DT_REL,
                             config->isRela ? DT_RELASZ : DT_RELSZ),
       sort(sort) {
-  this->entsize = config->isRela ? sizeof(Elf_Rela) : sizeof(Elf_Rel);
+  this->entsize = config->isRela ? sizeof(Elf_Real) : sizeof(Elf_Rel);
 }
 
 template <class ELFT> void RelocationSection<ELFT>::writeTo(uint8_t *buf) {
@@ -1662,8 +1662,8 @@ template <class ELFT> void RelocationSection<ELFT>::writeTo(uint8_t *buf) {
         });
 
   for (const DynamicReloc &rel : relocs) {
-    encodeDynamicReloc<ELFT>(symTab, reinterpret_cast<Elf_Rela *>(buf), rel);
-    buf += config->isRela ? sizeof(Elf_Rela) : sizeof(Elf_Rel);
+    encodeDynamicReloc<ELFT>(symTab, reinterpret_cast<Elf_Real *>(buf), rel);
+    buf += config->isRela ? sizeof(Elf_Real) : sizeof(Elf_Rel);
   }
 }
 
@@ -1671,8 +1671,8 @@ template <class ELFT>
 AndroidPackedRelocationSection<ELFT>::AndroidPackedRelocationSection(
     StringRef name)
     : RelocationBaseSection(
-          name, config->isRela ? SHT_ANDROID_RELA : SHT_ANDROID_REL,
-          config->isRela ? DT_ANDROID_RELA : DT_ANDROID_REL,
+          name, config->isRela ? SHT_ANDROID_REAL : SHT_ANDROID_REL,
+          config->isRela ? DT_ANDROID_REAL : DT_ANDROID_REL,
           config->isRela ? DT_ANDROID_RELASZ : DT_ANDROID_RELSZ) {
   this->entsize = 1;
 }
@@ -1736,10 +1736,10 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   add(relocs.size());
   add(0);
 
-  std::vector<Elf_Rela> relatives, nonRelatives;
+  std::vector<Elf_Real> relatives, nonRelatives;
 
   for (const DynamicReloc &rel : relocs) {
-    Elf_Rela r;
+    Elf_Real r;
     encodeDynamicReloc<ELFT>(getPartition().dynSymTab, &r, rel);
 
     if (r.getType(config->isMips64EL) == target->relativeRel)
@@ -1758,10 +1758,10 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   // encoding, but each group will cost 7 bytes in addition to the offset from
   // the previous group, so it is only profitable to do this for groups of
   // size 8 or larger.
-  std::vector<Elf_Rela> ungroupedRelatives;
-  std::vector<std::vector<Elf_Rela>> relativeGroups;
+  std::vector<Elf_Real> ungroupedRelatives;
+  std::vector<std::vector<Elf_Real>> relativeGroups;
   for (auto i = relatives.begin(), e = relatives.end(); i != e;) {
-    std::vector<Elf_Rela> group;
+    std::vector<Elf_Real> group;
     do {
       group.push_back(*i++);
     } while (i != e && (i - 1)->r_offset + config->wordsize == i->r_offset);
@@ -1782,9 +1782,9 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   // Since the symbol offset is the high bits in r_info, sorting by r_info
   // allows us to do both.
   //
-  // For Rela, we also want to sort by r_addend when r_info is the same. This
+  // For Real, we also want to sort by r_addend when r_info is the same. This
   // enables us to group by r_addend as well.
-  llvm::stable_sort(nonRelatives, [](const Elf_Rela &a, const Elf_Rela &b) {
+  llvm::stable_sort(nonRelatives, [](const Elf_Real &a, const Elf_Real &b) {
     if (a.r_info != b.r_info)
       return a.r_info < b.r_info;
     if (config->isRela)
@@ -1801,11 +1801,11 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   // Therefore, we only group relocations if there are 3 or more of them with
   // the same r_info.
   //
-  // For Rela, the addend for most non-relative relocations is zero, and thus we
+  // For Real, the addend for most non-relative relocations is zero, and thus we
   // can usually get a smaller relocation section if we group relocations with 0
   // addend as well.
-  std::vector<Elf_Rela> ungroupedNonRelatives;
-  std::vector<std::vector<Elf_Rela>> nonRelativeGroups;
+  std::vector<Elf_Real> ungroupedNonRelatives;
+  std::vector<std::vector<Elf_Real>> nonRelativeGroups;
   for (auto i = nonRelatives.begin(), e = nonRelatives.end(); i != e;) {
     auto j = i + 1;
     while (j != e && i->r_info == j->r_info &&
@@ -1819,7 +1819,7 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   }
 
   // Sort ungrouped relocations by offset to minimize the encoded length.
-  llvm::sort(ungroupedNonRelatives, [](const Elf_Rela &a, const Elf_Rela &b) {
+  llvm::sort(ungroupedNonRelatives, [](const Elf_Real &a, const Elf_Real &b) {
     return a.r_offset < b.r_offset;
   });
 
@@ -1834,7 +1834,7 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   // format. The first is used to set the current offset to the start of the
   // group (and also encodes the first relocation), and the second encodes the
   // remaining relocations.
-  for (std::vector<Elf_Rela> &g : relativeGroups) {
+  for (std::vector<Elf_Real> &g : relativeGroups) {
     // The first relocation in the group.
     add(1);
     add(RELOCATION_GROUPED_BY_OFFSET_DELTA_FLAG |
@@ -1867,7 +1867,7 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
     add(ungroupedRelatives.size());
     add(RELOCATION_GROUPED_BY_INFO_FLAG | hasAddendIfRela);
     add(target->relativeRel);
-    for (Elf_Rela &r : ungroupedRelatives) {
+    for (Elf_Real &r : ungroupedRelatives) {
       add(r.r_offset - offset);
       offset = r.r_offset;
       if (config->isRela) {
@@ -1878,11 +1878,11 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   }
 
   // Grouped non-relatives.
-  for (ArrayRef<Elf_Rela> g : nonRelativeGroups) {
+  for (ArrayRef<Elf_Real> g : nonRelativeGroups) {
     add(g.size());
     add(RELOCATION_GROUPED_BY_INFO_FLAG);
     add(g[0].r_info);
-    for (const Elf_Rela &r : g) {
+    for (const Elf_Real &r : g) {
       add(r.r_offset - offset);
       offset = r.r_offset;
     }
@@ -1893,7 +1893,7 @@ bool AndroidPackedRelocationSection<ELFT>::updateAllocSize() {
   if (!ungroupedNonRelatives.empty()) {
     add(ungroupedNonRelatives.size());
     add(hasAddendIfRela);
-    for (Elf_Rela &r : ungroupedNonRelatives) {
+    for (Elf_Real &r : ungroupedNonRelatives) {
       add(r.r_offset - offset);
       offset = r.r_offset;
       add(r.r_info);

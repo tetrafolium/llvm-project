@@ -777,7 +777,7 @@ const XCOFFCsectAuxEnt32 *XCOFFSymbolRef::getXCOFFCsectAuxEnt32() const {
          "32-bit interface called on 64-bit object file.");
   assert(hasCsectAuxEnt() && "No Csect Auxiliary Entry is found.");
 
-  // In XCOFF32, the csect auxilliary entry is always the last auxiliary
+  // In XCOFF32, the csect auxiliary entry is always the last auxiliary
   // entry for the symbol.
   uintptr_t AuxAddr = getWithOffset(
       SymEntDataRef.p, XCOFF::SymbolTableEntrySize * getNumberOfAuxEntries());
@@ -832,7 +832,7 @@ bool XCOFFSymbolRef::isFunction() const {
   return (OwningObjectPtr->getSectionFlags(SI.get()) & XCOFF::STYP_TEXT);
 }
 
-// Explictly instantiate template classes.
+// Explicitly instantiate template classes.
 template struct XCOFFSectionHeader<XCOFFSectionHeader32>;
 template struct XCOFFSectionHeader<XCOFFSectionHeader64>;
 

@@ -60,7 +60,7 @@ template <class ELFT> class DyldELFObject : public ELFObjectFile<ELFT> {
   typedef Elf_Shdr_Impl<ELFT> Elf_Shdr;
   typedef Elf_Sym_Impl<ELFT> Elf_Sym;
   typedef Elf_Rel_Impl<ELFT, false> Elf_Rel;
-  typedef Elf_Rel_Impl<ELFT, true> Elf_Rela;
+  typedef Elf_Rel_Impl<ELFT, true> Elf_Real;
 
   typedef Elf_Ehdr_Impl<ELFT> Elf_Ehdr;
 

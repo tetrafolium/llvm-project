@@ -606,7 +606,7 @@ void X86RegisterInfo::adjustStackMapLiveOutMask(uint32_t *Mask) const {
   // because the calling convention defines the EFLAGS register as NOT
   // preserved.
   //
-  // Unfortunatelly the EFLAGS show up as live-out after branch folding. Adding
+  // Unfortunately the EFLAGS show up as live-out after branch folding. Adding
   // an assert to track this and clear the register afterwards to avoid
   // unnecessary crashes during release builds.
   assert(!(Mask[X86::EFLAGS / 32] & (1U << (X86::EFLAGS % 32))) &&

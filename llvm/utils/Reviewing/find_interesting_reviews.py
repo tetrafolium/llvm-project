@@ -459,18 +459,18 @@ reAuthorMail = re.compile("^author-mail <([^>]*)>.*$")
 
 
 def parse_blame_output_line_porcelain(blame_output_lines):
-    email2nr_occurences = {}
+    email2nr_occurrences = {}
     if blame_output_lines is None:
-        return email2nr_occurences
+        return email2nr_occurrences
     for line in blame_output_lines:
         m = reAuthorMail.match(line)
         if m:
             author_email_address = m.group(1)
-            if author_email_address not in email2nr_occurences:
-                email2nr_occurences[author_email_address] = 1
+            if author_email_address not in email2nr_occurrences:
+                email2nr_occurrences[author_email_address] = 1
             else:
-                email2nr_occurences[author_email_address] += 1
-    return email2nr_occurences
+                email2nr_occurrences[author_email_address] += 1
+    return email2nr_occurrences
 
 
 class BlameOutputCache:
@@ -544,16 +544,16 @@ def find_reviewers_for_diff_heuristic(diff):
         for hunk in change.hunks:
             for start_line, end_line in hunk.actual_lines_changed_offset:
                 # Collect git blame results for authors in those ranges.
-                for reviewer, nr_occurences in \
+                for reviewer, nr_occurrences in \
                         blameOutputCache.get_parsed_git_blame_for(
                             git_repo, base_revision, path, start_line, end_line
                         ).items():
                     if reviewer not in reviewers2nr_lines_touched:
                         reviewers2nr_lines_touched[reviewer] = 0
-                    reviewers2nr_lines_touched[reviewer] += nr_occurences
+                    reviewers2nr_lines_touched[reviewer] += nr_occurrences
         # Compute heuristic 2: don't look at context, just at files touched.
         # Collect git blame results for authors in those ranges.
-        for reviewer, nr_occurences in \
+        for reviewer, nr_occurrences in \
                 blameOutputCache.get_parsed_git_blame_for(
                     git_repo, base_revision, path).items():
             if reviewer not in reviewers2nr_files_touched:

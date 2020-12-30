@@ -323,7 +323,7 @@ public:
   /// Restart the current loop.
   ///
   /// Loop passes should call this method to indicate the current loop has been
-  /// sufficiently changed that it should be re-visited from the begining of
+  /// sufficiently changed that it should be re-visited from the beginning of
   /// the loop pass pipeline rather than continuing.
   void revisitCurrentLoop() {
     // Tell the currently in-flight pipeline to stop running.
@@ -391,7 +391,7 @@ Optional<PreservedAnalyses> LoopPassManager::runSinglePass(
 /// The adaptor comes with two modes: the loop mode and the loop-nest mode, and
 /// the worklist updater lived inside will be in the same mode as the adaptor
 /// (refer to the documentation of \c LPMUpdater for more detailed explanation).
-/// Specifically, in loop mode, all loops in the funciton will be pushed into
+/// Specifically, in loop mode, all loops in the function will be pushed into
 /// the worklist and processed by \p Pass, while only top-level loops are
 /// processed in loop-nest mode. Please refer to the various specializations of
 /// \fn createLoopFunctionToLoopPassAdaptor to see when loop mode and loop-nest

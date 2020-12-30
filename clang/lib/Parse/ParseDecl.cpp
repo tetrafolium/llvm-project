@@ -162,7 +162,7 @@ void Parser::ParseGNUAttributes(ParsedAttributes &attrs, SourceLocation *endLoc,
     }
     // Parse the attribute-list. e.g. __attribute__(( weak, alias("__f") ))
     do {
-      // Eat preceeding commas to allow __attribute__((,,,foo))
+      // Eat preceding commas to allow __attribute__((,,,foo))
       while (TryConsumeToken(tok::comma))
         ;
 
@@ -3394,7 +3394,7 @@ void Parser::ParseDeclarationSpecifiers(DeclSpec &DS,
 
       if (TemplateId->Kind == TNK_Concept_template) {
         // If we've already diagnosed that this type-constraint has invalid
-        // arguemnts, drop it and just form 'auto' or 'decltype(auto)'.
+        // arguments, drop it and just form 'auto' or 'decltype(auto)'.
         if (TemplateId->hasInvalidArgs())
           TemplateId = nullptr;
 

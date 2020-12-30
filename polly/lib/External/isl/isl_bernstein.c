@@ -9,7 +9,7 @@
  * Universiteit Leiden, Niels Bohrweg 1, 2333 CA Leiden, The Netherlands
  * and K.U.Leuven, Departement Computerwetenschappen, Celestijnenlaan 200A,
  * B-3001 Leuven, Belgium
- * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universite,
+ * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universities,
  * ZAC des vignes, 4 rue Jacques Monod, 91893 Orsay, France
  */
 

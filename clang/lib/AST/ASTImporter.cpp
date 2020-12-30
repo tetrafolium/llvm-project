@@ -1738,7 +1738,7 @@ Error ASTNodeImporter::ImportDeclContext(DeclContext *FromDC,
         RecordDecl *FromRecordDecl = nullptr;
         RecordDecl *ToRecordDecl = nullptr;
         // If we have a field that is an ArrayType we need to check if the array
-        // element is a RecordDecl and if so we need to import the defintion.
+        // element is a RecordDecl and if so we need to import the definition.
         if (FieldFrom->getType()->isArrayType()) {
           // getBaseElementTypeUnsafe(...) handles multi-dimensonal arrays for
           // us.

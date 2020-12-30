@@ -239,7 +239,7 @@ clang::DirectoryWatcher::create(
     // We need to start watching the directory before we start scanning in order
     // to not miss any event. By dispatching this on the same serial Queue as
     // the FSEvents will be handled we manage to start watching BEFORE the
-    // inital scan and handling events ONLY AFTER the scan finishes.
+    // initial scan and handling events ONLY AFTER the scan finishes.
     FSEventStreamSetDispatchQueue(EventStream, Queue);
     FSEventStreamStart(EventStream);
     Receiver(getAsFileEvents(scanDirectory(CopiedPath)), /*IsInitial=*/true);

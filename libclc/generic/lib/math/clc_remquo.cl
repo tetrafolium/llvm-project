@@ -93,7 +93,7 @@ _CLC_DEF _CLC_OVERLOAD float __clc_remquo(float x, float y,
 
   return xr;
 }
-// remquo singature is special, we don't have macro for this
+// remquo signature is special, we don't have macro for this
 #define __VEC_REMQUO(TYPE, VEC_SIZE, HALF_VEC_SIZE)                            \
   _CLC_DEF _CLC_OVERLOAD TYPE##VEC_SIZE __clc_remquo(                          \
       TYPE##VEC_SIZE x, TYPE##VEC_SIZE y, __private int##VEC_SIZE *quo) {      \

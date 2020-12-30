@@ -159,7 +159,7 @@ void OpenMPIRBuilder::finalize() {
     assert(OutlinedFn->getReturnType()->isVoidTy() &&
            "OpenMP outlined functions should not return a value!");
 
-    // For compability with the clang CG we move the outlined function after the
+    // For compatibility with the clang CG we move the outlined function after the
     // one with the parallel region.
     OutlinedFn->removeFromParent();
     M.getFunctionList().insertAfter(OuterFn->getIterator(), OutlinedFn);

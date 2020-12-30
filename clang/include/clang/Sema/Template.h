@@ -433,7 +433,7 @@ public:
     NumArgsInPartiallySubstitutedPack = 0;
   }
 
-  /// Retrieve the partially-substitued template parameter pack.
+  /// Retrieve the partially-substitute template parameter pack.
   ///
   /// If there is no partially-substituted parameter pack, returns NULL.
   NamedDecl *

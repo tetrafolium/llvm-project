@@ -26,7 +26,7 @@ using namespace llvm::support::endian;
 namespace llvm {
 
 // This relocation type is used for handling long branch instruction
-// throught the Stub.
+// thought the Stub.
 enum InternalRelocationType : unsigned {
   INTERNAL_REL_ARM64_LONG_BRANCH26 = 0x111,
 };
@@ -70,7 +70,7 @@ private:
   SmallVector<SID, 2> RegisteredEHFrameSections;
   uint64_t ImageBase;
 
-  // Fake an __ImageBase pointer by returning the section with the lowest adress
+  // Fake an __ImageBase pointer by returning the section with the lowest address
   uint64_t getImageBase() {
     if (!ImageBase) {
       ImageBase = std::numeric_limits<uint64_t>::max();

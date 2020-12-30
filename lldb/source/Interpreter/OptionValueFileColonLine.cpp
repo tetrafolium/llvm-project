@@ -106,7 +106,7 @@ Status OptionValueFileColonLine::SetValueFromString(llvm::StringRef value,
         }
       } else {
         // There were three pieces, and we've got the line number.  So now
-        // we just need to check the column number which was the last peice.
+        // we just need to check the column number which was the last piece.
         if (!llvm::to_integer(last_piece, m_column_number)) {
           error.SetErrorStringWithFormat("Bad column value '%s' in: '%s'",
                                          last_piece.str().c_str(),

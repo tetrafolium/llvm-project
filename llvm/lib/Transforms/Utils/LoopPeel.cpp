@@ -268,7 +268,7 @@ static unsigned countToEliminateCompares(Loop &L, unsigned MaxPeelCount,
       continue; // If not, give up.
 
     // However, for equality comparisons, that isn't always sufficient to
-    // eliminate the comparsion in loop body, we may need to peel one more
+    // eliminate the comparison in loop body, we may need to peel one more
     // iteration. See if that makes !Pred become unknown again.
     if (ICmpInst::isEquality(Pred) &&
         !SE.isKnownPredicate(ICmpInst::getInversePredicate(Pred), NextIterVal,
@@ -634,7 +634,7 @@ TargetTransformInfo::PeelingPreferences llvm::gatherPeelingPreferences(
       PP.AllowLoopNestsPeeling = UnrollAllowLoopNestsPeeling;
   }
 
-  // User specifed values provided by argument.
+  // User specified values provided by argument.
   if (UserAllowPeeling.hasValue())
     PP.AllowPeeling = *UserAllowPeeling;
   if (UserAllowProfileBasedPeeling.hasValue())

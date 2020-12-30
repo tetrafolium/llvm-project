@@ -146,7 +146,7 @@ static inline int enableExcept(int excepts) {
   internal::writeMXCSR(mxcsr);
 
   // Since the x87 exceptions and SSE exceptions are independent of each,
-  // it doesn't make much sence to report both in the return value. Most
+  // it doesn't make much sense to report both in the return value. Most
   // often, the standard floating point functions deal with FPU operations
   // so we will retrun only the old x87 exceptions.
   return internal::exceptionStatusToMacro(oldExcepts);
@@ -204,7 +204,7 @@ static inline int raiseExcept(int excepts) {
   // of the "Intel 64 and IA-32 Architectures Software Developer's
   // Manual, Vol 1".
 
-  // FPU status word is read for each exception seperately as the
+  // FPU status word is read for each exception separately as the
   // exception handler can potentially write to it (typically to clear
   // the corresponding exception flag). By reading it separately, we
   // ensure that the writes by the exception handler are maintained

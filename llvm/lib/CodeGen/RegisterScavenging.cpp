@@ -413,7 +413,7 @@ static std::pair<MCPhysReg, MachineBasicBlock::iterator> findSurvivorBackwards(
         break;
 
       // Keep searching when we find a vreg since the spilled register will
-      // be usefull for this other vreg as well later.
+      // be useful for this other vreg as well later.
       bool FoundVReg = false;
       for (const MachineOperand &MO : MI.operands()) {
         if (MO.isReg() && Register::isVirtualRegister(MO.getReg())) {

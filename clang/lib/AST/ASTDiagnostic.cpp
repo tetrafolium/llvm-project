@@ -507,7 +507,7 @@ class TemplateDiff {
   QualType FromTemplateType;
 
   /// ToTemplateType - The type that FromType is compared to.  Only in tree
-  /// printing will this type be outputed.
+  /// printing will this type be outputted.
   QualType ToTemplateType;
 
   /// OS - The stream used to construct the output strings.

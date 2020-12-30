@@ -77,7 +77,7 @@ template <class ELFT> LLDDwarfObj<ELFT>::LLDDwarfObj(ObjFile<ELFT> *obj) {
 namespace {
 template <class RelTy> struct LLDRelocationResolver {
   // In the ELF ABIs, S sepresents the value of the symbol in the relocation
-  // entry. For Rela, the addend is stored as part of the relocation entry and
+  // entry. For Real, the addend is stored as part of the relocation entry and
   // is provided by the `findAux` method.
   // In resolve() methods, the `type` and `offset` arguments would always be 0,
   // because we don't set an owning object for the `RelocationRef` instance that

@@ -53,7 +53,7 @@ std::string CompletionResult::Completion::GetUniqueKey() const {
   result.append(m_completion);
   result.append(std::to_string(static_cast<int>(m_mode)));
   result.append(":");
-  result.append(m_descripton);
+  result.append(m_description);
   return result;
 }
 

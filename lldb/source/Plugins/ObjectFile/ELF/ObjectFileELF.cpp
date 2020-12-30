@@ -95,7 +95,7 @@ public:
   /// Constructs an ELFRelocation entry with a personality as given by @p
   /// type.
   ///
-  /// \param type Either DT_REL or DT_RELA.  Any other value is invalid.
+  /// \param type Either DT_REL or DT_REAL.  Any other value is invalid.
   ELFRelocation(unsigned type);
 
   ~ELFRelocation();
@@ -127,7 +127,7 @@ private:
 ELFRelocation::ELFRelocation(unsigned type) {
   if (type == DT_REL || type == SHT_REL)
     reloc = new ELFRel();
-  else if (type == DT_RELA || type == SHT_RELA)
+  else if (type == DT_REAL || type == SHT_REAL)
     reloc = new ELFRela();
   else {
     assert(false && "unexpected relocation type");
@@ -1619,7 +1619,7 @@ SectionType ObjectFileELF::GetSectionType(const ELFSectionHeaderInfo &H) const {
     return eSectionTypeELFSymbolTable;
   case SHT_DYNSYM:
     return eSectionTypeELFDynamicSymbols;
-  case SHT_RELA:
+  case SHT_REAL:
   case SHT_REL:
     return eSectionTypeELFRelocationEntries;
   case SHT_DYNAMIC:
@@ -2189,7 +2189,7 @@ unsigned ObjectFileELF::ParseSymbols(Symtab *symtab, user_id_t start_id,
       // section for it so the address range covered by the symbol is also
       // covered by the module (represented through the section list). It is
       // needed so module lookup for the addresses covered by this symbol will
-      // be successfull. This case happens for absolute symbols.
+      // be successful. This case happens for absolute symbols.
       ConstString fake_section_name(std::string(".absolute.") + symbol_name);
       symbol_section_sp =
           std::make_shared<Section>(module_sp, this, SHN_ABS, fake_section_name,
@@ -2370,7 +2370,7 @@ unsigned ObjectFileELF::PLTRelocationType() {
   // DT_PLTREL
   //  This member specifies the type of relocation entry to which the
   //  procedure linkage table refers. The d_val member holds DT_REL or
-  //  DT_RELA, as appropriate. All relocations in a procedure linkage table
+  //  DT_REAL, as appropriate. All relocations in a procedure linkage table
   //  must use the same relocation.
   const ELFDynamic *symbol = FindDynamicSymbol(DT_PLTREL);
 
@@ -2486,7 +2486,7 @@ unsigned
 ObjectFileELF::ParseTrampolineSymbols(Symtab *symbol_table, user_id_t start_id,
                                       const ELFSectionHeaderInfo *rel_hdr,
                                       user_id_t rel_id) {
-  assert(rel_hdr->sh_type == SHT_RELA || rel_hdr->sh_type == SHT_REL);
+  assert(rel_hdr->sh_type == SHT_REAL || rel_hdr->sh_type == SHT_REL);
 
   // The link field points to the associated symbol table.
   user_id_t symtab_id = rel_hdr->sh_link;
@@ -2649,7 +2649,7 @@ unsigned ObjectFileELF::ApplyRelocations(
 unsigned ObjectFileELF::RelocateDebugSections(const ELFSectionHeader *rel_hdr,
                                               user_id_t rel_id,
                                               lldb_private::Symtab *thetab) {
-  assert(rel_hdr->sh_type == SHT_RELA || rel_hdr->sh_type == SHT_REL);
+  assert(rel_hdr->sh_type == SHT_REAL || rel_hdr->sh_type == SHT_REL);
 
   // Parse in the section list if needed.
   SectionList *section_list = GetSectionList();
@@ -2856,11 +2856,11 @@ void ObjectFileELF::RelocateSection(lldb_private::Section *section) {
 
   // Relocation section names to look for
   std::string needle = std::string(".rel") + section_name;
-  std::string needlea = std::string(".rela") + section_name;
+  std::string needlea = std::string(".real") + section_name;
 
   for (SectionHeaderCollIter I = m_section_headers.begin();
        I != m_section_headers.end(); ++I) {
-    if (I->sh_type == SHT_RELA || I->sh_type == SHT_REL) {
+    if (I->sh_type == SHT_REAL || I->sh_type == SHT_REL) {
       const char *hay_name = I->section_name.GetCString();
       if (hay_name == nullptr)
         continue;
@@ -2882,7 +2882,7 @@ void ObjectFileELF::ParseUnwindSymbols(Symtab *symbol_table,
 
   // First we save the new symbols into a separate list and add them to the
   // symbol table after we collected all symbols we want to add. This is
-  // neccessary because adding a new symbol invalidates the internal index of
+  // necessary because adding a new symbol invalidates the internal index of
   // the symtab what causing the next lookup to be slow because it have to
   // recalculate the index first.
   std::vector<Symbol> new_symbols;
@@ -3145,7 +3145,7 @@ void ObjectFileELF::DumpELFSectionHeader_sh_type(Stream *s, elf_word sh_type) {
     CASE_AND_STREAM(s, SHT_PROGBITS, kStrWidth);
     CASE_AND_STREAM(s, SHT_SYMTAB, kStrWidth);
     CASE_AND_STREAM(s, SHT_STRTAB, kStrWidth);
-    CASE_AND_STREAM(s, SHT_RELA, kStrWidth);
+    CASE_AND_STREAM(s, SHT_REAL, kStrWidth);
     CASE_AND_STREAM(s, SHT_HASH, kStrWidth);
     CASE_AND_STREAM(s, SHT_DYNAMIC, kStrWidth);
     CASE_AND_STREAM(s, SHT_NOTE, kStrWidth);

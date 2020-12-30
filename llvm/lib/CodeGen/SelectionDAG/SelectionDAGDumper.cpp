@@ -971,8 +971,8 @@ void SDNode::print_details(raw_ostream &OS, const SelectionDAG *G) const {
       OS << " " << offset;
     if (unsigned int TF = GADN->getTargetFlags())
       OS << " [TF=" << TF << ']';
-  } else if (const FrameIndexSDNode *FIDN = dyn_cast<FrameIndexSDNode>(this)) {
-    OS << "<" << FIDN->getIndex() << ">";
+  } else if (const FrameIndexSDNode *FIND = dyn_cast<FrameIndexSDNode>(this)) {
+    OS << "<" << FIND->getIndex() << ">";
   } else if (const JumpTableSDNode *JTDN = dyn_cast<JumpTableSDNode>(this)) {
     OS << "<" << JTDN->getIndex() << ">";
     if (unsigned int TF = JTDN->getTargetFlags())

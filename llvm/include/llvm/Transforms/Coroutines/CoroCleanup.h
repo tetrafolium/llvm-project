@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 //
 // \file
-// This file delcares a pass that lowers all remaining coroutine intrinsics.
+// This file declares a pass that lowers all remaining coroutine intrinsics.
 //
 //===----------------------------------------------------------------------===//
 

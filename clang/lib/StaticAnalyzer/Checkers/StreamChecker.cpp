@@ -339,7 +339,7 @@ private:
   void reportFEofWarning(CheckerContext &C, ProgramStateRef State) const;
 
   /// Emit resource leak warnings for the given symbols.
-  /// Createn a non-fatal error node for these, and returns it (if any warnings
+  /// Creatine a non-fatal error node for these, and returns it (if any warnings
   /// were generated). Return value is non-null.
   ExplodedNode *reportLeaks(const SmallVector<SymbolRef, 2> &LeakedSyms,
                             CheckerContext &C, ExplodedNode *Pred) const;

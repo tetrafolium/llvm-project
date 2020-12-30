@@ -317,7 +317,7 @@ public:
   /// The IncrementNSSW flag has identical semantics with SCEV::FlagNSW.
   ///
   /// Note that the IncrementNUSW flag is not commutative: if base + inc
-  /// has IncrementNUSW, then inc + base doesn't neccessarily have this
+  /// has IncrementNUSW, then inc + base doesn't necessarily have this
   /// property. The reason for this is that this is used for sign/zero
   /// extending affine AddRec SCEV expressions when a SCEVWrapPredicate is
   /// assumed. A {base,+,inc} expression is already non-commutative with
@@ -756,7 +756,7 @@ public:
 
   /// Return the number of times the backedge executes before the given exit
   /// would be taken; if not exactly computable, return SCEVCouldNotCompute.
-  /// For a single exit loop, this value is equivelent to the result of
+  /// For a single exit loop, this value is equivalent to the result of
   /// getBackedgeTakenCount.  The loop is guaranteed to exit (via *some* exit)
   /// before the backedge is executed (ExitCount + 1) times.  Note that there
   /// is no guarantee about *which* exit is taken on the exiting iteration.

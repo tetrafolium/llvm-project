@@ -8,7 +8,7 @@
  *
  * Written by Sven Verdoolaege, K.U.Leuven, Departement
  * Computerwetenschappen, Celestijnenlaan 200A, B-3001 Leuven, Belgium
- * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universite,
+ * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universities,
  * ZAC des vignes, 4 rue Jacques Monod, 91893 Orsay, France
  * and Ecole Normale Superieure, 45 rue d’Ulm, 75230 Paris, France
  * and Cerebras Systems, 175 S San Antonio Rd, Los Altos, CA, USA
@@ -3935,7 +3935,7 @@ read_union_pw_aff_with_dom(__isl_keep isl_stream *s, __isl_take isl_set *dom,
 
 /* Read an isl_union_pw_aff from "s".
  *
- * First check if there are any paramters, then read in the opening brace
+ * First check if there are any parameters, then read in the opening brace
  * and use read_union_pw_aff_with_dom to read in the body of
  * the isl_union_pw_aff.  Finally, read the closing brace.
  */

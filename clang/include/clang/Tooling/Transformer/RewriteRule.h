@@ -157,7 +157,7 @@ namespace detail {
 /// Helper function to construct an \c EditGenerator. Overloaded for common
 /// cases so that user doesn't need to specify which factory function to
 /// use. This pattern gives benefits similar to implicit constructors, while
-/// maintaing a higher degree of explicitness.
+/// maintaining a higher degree of explicitness.
 inline EditGenerator injectEdits(ASTEdit E) { return edit(std::move(E)); }
 inline EditGenerator injectEdits(EditGenerator G) { return G; }
 } // namespace detail

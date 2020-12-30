@@ -672,7 +672,7 @@ public:
   /// \p IsLegacyLineExpr indicates whether \p Expr should be a legacy @LINE
   /// expression and \p Context points to the class instance holding the live
   /// string and numeric variables. \returns a pointer to the class instance
-  /// representing the expression whose value must be substitued, or an error
+  /// representing the expression whose value must be substitute, or an error
   /// holding a diagnostic against \p SM if parsing fails. If substitution was
   /// successful, sets \p DefinedNumericVariable to point to the class
   /// representing the numeric variable defined in this numeric substitution

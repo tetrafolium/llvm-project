@@ -233,7 +233,7 @@ void GIMatchTreeBuilder::runStep() {
                dbgs() << "\n");
 #endif // ifndef NDEBUG
 
-  // Check for unreachable rules. Rules are unreachable if they are preceeded by
+  // Check for unreachable rules. Rules are unreachable if they are preceded by
   // a fully tested rule.
   // Note: This is only true for the current algorithm, if we allow the
   //       algorithm to compare equally valid rules then they will become

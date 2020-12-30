@@ -339,7 +339,7 @@ void ScriptParser::readAsNeeded() {
 }
 
 void ScriptParser::readEntry() {
-  // -e <symbol> takes predecence over ENTRY(<symbol>).
+  // -e <symbol> takes precedence over ENTRY(<symbol>).
   expect("(");
   StringRef tok = next();
   if (config->entry.empty())
@@ -389,7 +389,7 @@ void ScriptParser::readInput() {
 }
 
 void ScriptParser::readOutput() {
-  // -o <file> takes predecence over OUTPUT(<file>).
+  // -o <file> takes precedence over OUTPUT(<file>).
   expect("(");
   StringRef tok = next();
   if (config->outputFile.empty())

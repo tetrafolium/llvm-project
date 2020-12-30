@@ -73,7 +73,7 @@
 // clk_ - variable size vector clock, low kClkBits hold timestamp,
 //   the remaining bits hold "acquired" flag (the actual value is thread's
 //   reused counter);
-//   if acquried == thr->reused_, then the respective thread has already
+//   if acquired == thr->reused_, then the respective thread has already
 //   acquired this clock (except possibly for dirty elements).
 // dirty_ - holds up to two indeces in the vector clock that other threads
 //   need to acquire regardless of "acquired" flag value;

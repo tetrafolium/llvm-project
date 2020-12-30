@@ -403,7 +403,7 @@ template <class ELFT> void InputSection::copyShtGroup(uint8_t *buf) {
 }
 
 InputSectionBase *InputSection::getRelocatedSection() const {
-  if (!file || (type != SHT_RELA && type != SHT_REL))
+  if (!file || (type != SHT_REAL && type != SHT_REL))
     return nullptr;
   ArrayRef<InputSectionBase *> sections = file->getSections();
   return sections[info];
@@ -421,7 +421,7 @@ void InputSection::copyRelocations(uint8_t *buf, ArrayRef<RelTy> rels) {
     const ObjFile<ELFT> *file = getFile<ELFT>();
     Symbol &sym = file->getRelocTargetSym(rel);
 
-    auto *p = reinterpret_cast<typename ELFT::Rela *>(buf);
+    auto *p = reinterpret_cast<typename ELFT::Real *>(buf);
     buf += sizeof(RelTy);
 
     if (RelTy::IsRela)
@@ -436,7 +436,7 @@ void InputSection::copyRelocations(uint8_t *buf, ArrayRef<RelTy> rels) {
     if (sym.type == STT_SECTION) {
       // We combine multiple section symbols into only one per
       // section. This means we have to update the addend. That is
-      // trivial for Elf_Rela, but for Elf_Rel we have to write to the
+      // trivial for Elf_Real, but for Elf_Rel we have to write to the
       // section data. We do that by adding to the Relocation vector.
 
       // .eh_frame is horribly special and can reference discarded sections. To
@@ -913,7 +913,7 @@ void InputSection::relocateNonAlloc(uint8_t *buf, ArrayRef<RelTy> rels) {
       // at runtime, the notion of PC-relative doesn't make sense here. So,
       // this is a usage error. However, GNU linkers historically accept such
       // relocations without any errors and relocate them as if they were at
-      // address 0. For bug-compatibilty, we accept them with warnings. We
+      // address 0. For bug-compatibility, we accept them with warnings. We
       // know Steel Bank Common Lisp as of 2018 have this bug.
       warn(msg);
       target->relocateNoSym(
@@ -1230,8 +1230,8 @@ template <class ELFT> void InputSection::writeTo(uint8_t *buf) {
 
   // If -r or --emit-relocs is given, then an InputSection
   // may be a relocation section.
-  if (type == SHT_RELA) {
-    copyRelocations<ELFT>(buf + outSecOff, getDataAs<typename ELFT::Rela>());
+  if (type == SHT_REAL) {
+    copyRelocations<ELFT>(buf + outSecOff, getDataAs<typename ELFT::Real>());
     return;
   }
   if (type == SHT_REL) {

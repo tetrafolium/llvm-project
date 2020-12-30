@@ -925,7 +925,7 @@ public:
   /// Gets the address of a block which requires no captures.
   llvm::Constant *GetAddrOfGlobalBlock(const BlockExpr *BE, StringRef Name);
 
-  /// Returns the address of a block which requires no caputres, or null if
+  /// Returns the address of a block which requires no captures, or null if
   /// we've yet to emit the block for BE.
   llvm::Constant *getAddrOfGlobalBlockIfEmitted(const BlockExpr *BE) {
     return EmittedGlobalBlocks.lookup(BE);

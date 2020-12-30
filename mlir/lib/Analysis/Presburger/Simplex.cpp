@@ -74,7 +74,7 @@ unsigned Simplex::addRow(ArrayRef<int64_t> coeffs) {
          "Incorrect number of coefficients!");
 
   ++nRow;
-  // If the tableau is not big enough to accomodate the extra row, we extend it.
+  // If the tableau is not big enough to accommodate the extra row, we extend it.
   if (nRow >= tableau.getNumRows())
     tableau.resizeVertically(nRow);
   rowUnknown.push_back(~con.size());
@@ -503,7 +503,7 @@ bool Simplex::isMarkedRedundant(unsigned constraintIndex) const {
 ///
 /// This is done by moving the unknown to the end of the block of redundant
 /// rows (namely, to row nRedundant) and incrementing nRedundant to
-/// accomodate the new redundant row.
+/// accommodate the new redundant row.
 void Simplex::markRowRedundant(Unknown &u) {
   assert(u.orientation == Orientation::Row &&
          "Unknown should be in row position!");

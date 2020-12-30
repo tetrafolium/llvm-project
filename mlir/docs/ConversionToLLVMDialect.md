@@ -126,7 +126,7 @@ memref<1x? x vector<4xf32>> -> !llvm.struct<(ptr<vec<4 x float>>,
 
 Ranked memrefs with static shape and default layout can be converted into an
 LLVM dialect pointer to their element type. Only the default alignment is
-supported in such cases, e.g. the `alloc` operation cannot have an alignemnt
+supported in such cases, e.g. the `alloc` operation cannot have an alignment
 attribute.
 
 Examples:

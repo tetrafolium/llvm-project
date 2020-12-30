@@ -646,7 +646,7 @@ void ObjFile<ELFT>::initializeSections(bool ignoreComdats) {
     case SHT_SYMTAB:
     case SHT_STRTAB:
     case SHT_REL:
-    case SHT_RELA:
+    case SHT_REAL:
     case SHT_NULL:
       break;
     default:
@@ -666,7 +666,7 @@ void ObjFile<ELFT>::initializeSections(bool ignoreComdats) {
       continue;
     const Elf_Shdr &sec = objSections[i];
 
-    if (sec.sh_type == SHT_REL || sec.sh_type == SHT_RELA)
+    if (sec.sh_type == SHT_REL || sec.sh_type == SHT_REAL)
       this->sections[i] = createInputSection(sec);
 
     // A SHF_LINK_ORDER section with sh_link=0 is handled as if it did not have
@@ -944,7 +944,7 @@ InputSectionBase *ObjFile<ELFT>::createInputSection(const Elf_Shdr &sec) {
     }
     return &InputSection::discarded;
   }
-  case SHT_RELA:
+  case SHT_REAL:
   case SHT_REL: {
     // Find a relocation target section and associate this section with that.
     // Target may have been discarded if it is in a different section group
@@ -969,8 +969,8 @@ InputSectionBase *ObjFile<ELFT>::createInputSection(const Elf_Shdr &sec) {
       fatal(toString(this) +
             ": multiple relocation sections to one section are not supported");
 
-    if (sec.sh_type == SHT_RELA) {
-      ArrayRef<Elf_Rela> rels = CHECK(getObj().relas(sec), this);
+    if (sec.sh_type == SHT_REAL) {
+      ArrayRef<Elf_Real> rels = CHECK(getObj().relas(sec), this);
       target->firstRelocation = rels.begin();
       target->numRelocations = rels.size();
       target->areRelocsRela = true;
@@ -1237,7 +1237,7 @@ void ArchiveFile::fetch(const Archive::Symbol &sym) {
 }
 
 // The handling of tentative definitions (COMMON symbols) in archives is murky.
-// A tentative defintion will be promoted to a global definition if there are no
+// A tentative definition will be promoted to a global definition if there are no
 // non-tentative definitions to dominate it. When we hold a tentative definition
 // to a symbol and are inspecting archive memebers for inclusion there are 2
 // ways we can proceed:
@@ -1249,13 +1249,13 @@ void ArchiveFile::fetch(const Archive::Symbol &sym) {
 //    other undefined symbol. This is the behavior Gold uses.
 //
 // 2) Consider the tentative definition as still undefined (ie the promotion to
-//    a real definiton happens only after all symbol resolution is done).
+//    a real definition happens only after all symbol resolution is done).
 //    The linker searches archive memebers for global or weak definitions to
 //    replace the tentative definition with. This is the behavior used by
 //    GNU ld.
 //
 //  The second behavior is inherited from SysVR4, which based it on the FORTRAN
-//  COMMON BLOCK model. This behavior is needed for proper initalizations in old
+//  COMMON BLOCK model. This behavior is needed for proper initializations in old
 //  (pre F90) FORTRAN code that is packaged into an archive.
 //
 //  The following functions search archive members for defintions to replace

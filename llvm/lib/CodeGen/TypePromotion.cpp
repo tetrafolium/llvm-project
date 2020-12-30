@@ -717,7 +717,7 @@ void IRPromoter::Mutate() {
   // Insert trunc instructions for use by calls, stores etc...
   TruncateSinks();
 
-  // Finally, remove unecessary zexts and truncs, delete old instructions and
+  // Finally, remove unnecessary zexts and truncs, delete old instructions and
   // clear the data structures.
   Cleanup();
 

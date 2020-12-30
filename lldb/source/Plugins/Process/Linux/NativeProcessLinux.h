@@ -197,7 +197,7 @@ private:
   // sets up a
   // deferred delegate notification, which will fire once threads report as
   // stopped. The
-  // triggerring_tid will be set as the current thread (main stop reason).
+  // triggering_tid will be set as the current thread (main stop reason).
   void StopRunningThreads(lldb::tid_t triggering_tid);
 
   // Notify the delegate if all threads have stopped.
@@ -248,7 +248,7 @@ private:
   // same process user id.
   llvm::DenseSet<lldb::tid_t> m_pt_traced_thread_group;
 
-  lldb::user_id_t m_pt_proces_trace_id = LLDB_INVALID_UID;
+  lldb::user_id_t m_pt_process_trace_id = LLDB_INVALID_UID;
   TraceOptions m_pt_process_trace_config;
 };
 

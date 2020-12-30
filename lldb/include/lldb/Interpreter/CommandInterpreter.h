@@ -77,7 +77,7 @@ public:
   ///    silently.
   /// \param[in] echo_comments
   ///    If \b true, echo command even if it is a pure comment line. If
-  ///    \b false, print no ouput in this case. This setting has an effect only
+  ///    \b false, print no output in this case. This setting has an effect only
   ///    if echo_commands is \b true.
   /// \param[in] print_results
   ///    If \b true and the command succeeds, print the results of the command

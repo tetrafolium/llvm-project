@@ -230,7 +230,7 @@ class MCStreamer {
 
   /// Is the assembler allowed to insert padding automatically?  For
   /// correctness reasons, we sometimes need to ensure instructions aren't
-  /// seperated in unexpected ways.  At the moment, this feature is only
+  /// separated in unexpected ways.  At the moment, this feature is only
   /// useable from an integrated assembler, but assembly syntax is under
   /// discussion for future inclusion.
   bool AllowAutoPadding = false;
@@ -287,7 +287,7 @@ public:
   /// textual assembly, this should do nothing to avoid polluting our output.
   virtual MCSymbol *emitCFILabel();
 
-  /// Retreive the current frame info if one is available and it is not yet
+  /// Retrieve the current frame info if one is available and it is not yet
   /// closed. Otherwise, issue an error and return null.
   WinEH::FrameInfo *EnsureValidWinFrameInfo(SMLoc Loc);
 

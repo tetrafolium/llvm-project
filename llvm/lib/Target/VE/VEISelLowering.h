@@ -25,7 +25,7 @@ enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
   CALL,        // A call instruction.
-  GETFUNPLT,   // Load function address through %plt insturction.
+  GETFUNPLT,   // Load function address through %plt instruction.
   GETTLSADDR,  // Load address for TLS access.
   GETSTACKTOP, // Retrieve address of stack top (first address of
   // locals and temporaries).

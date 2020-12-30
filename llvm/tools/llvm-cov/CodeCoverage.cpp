@@ -701,7 +701,7 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
       break;
     }
 
-    // If path-equivalence was given and is a comma seperated pair then set
+    // If path-equivalence was given and is a comma separated pair then set
     // PathRemapping.
     auto EquivPair = StringRef(PathRemap).split(',');
     if (!(EquivPair.first.empty() && EquivPair.second.empty()))

@@ -408,7 +408,7 @@ void TargetLowering::softenSetCCOperands(SelectionDAG &DAG, EVT VT,
     }
   }
 
-  // Use the target specific return value for comparions lib calls.
+  // Use the target specific return value for comparison lib calls.
   EVT RetVT = getCmpLibcallReturnType();
   SDValue Ops[2] = {NewLHS, NewRHS};
   TargetLowering::MakeLibCallOptions CallOptions;
@@ -4803,7 +4803,7 @@ TargetLowering::getSingleConstraintMatchWeight(AsmOperandInfo &info,
     if (isa<ConstantInt>(CallOperandVal))
       weight = CW_Constant;
     break;
-  case 's': // non-explicit intregal immediate.
+  case 's': // non-explicit integral immediate.
     if (isa<GlobalValue>(CallOperandVal))
       weight = CW_Constant;
     break;

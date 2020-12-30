@@ -1096,7 +1096,7 @@ static SDValue performMADD_MSUBCombine(SDNode *ROOTNode, SelectionDAG &CurDAG,
   if (ROOTNode->getValueType(0).isVector())
     return SDValue();
 
-  // For MIPS64, madd / msub instructions are inefficent to use with 64 bit
+  // For MIPS64, madd / msub instructions are inefficient to use with 64 bit
   // arithmetic. E.g.
   // (add (mul a b) c) =>
   //   let res = (madd (mthi (drotr c 32))x(mtlo c) a b) in
@@ -3530,7 +3530,7 @@ SDValue MipsTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
     } else if (auto *N = dyn_cast<GlobalAddressSDNode>(Callee)) {
       bool UseLongCalls = Subtarget.useLongCalls();
       // If the function has long-call/far/near attribute
-      // it overrides command line switch pased to the backend.
+      // it overrides command line switch passed to the backend.
       if (auto *F = dyn_cast<Function>(N->getGlobal())) {
         if (F->hasFnAttribute("long-call"))
           UseLongCalls = true;
@@ -4889,7 +4889,7 @@ MachineBasicBlock *MipsTargetLowering::emitLDR_W(MachineInstr &MI,
   MachineBasicBlock::iterator I(MI);
 
   if (Subtarget.hasMips32r6() || Subtarget.hasMips64r6()) {
-    // Mips release 6 can load from adress that is not naturally-aligned.
+    // Mips release 6 can load from address that is not naturally-aligned.
     Register Temp = MRI.createVirtualRegister(&Mips::GPR32RegClass);
     BuildMI(*BB, I, DL, TII->get(Mips::LW))
         .addDef(Temp)
@@ -4935,7 +4935,7 @@ MachineBasicBlock *MipsTargetLowering::emitLDR_D(MachineInstr &MI,
   MachineBasicBlock::iterator I(MI);
 
   if (Subtarget.hasMips32r6() || Subtarget.hasMips64r6()) {
-    // Mips release 6 can load from adress that is not naturally-aligned.
+    // Mips release 6 can load from address that is not naturally-aligned.
     if (Subtarget.isGP64bit()) {
       Register Temp = MRI.createVirtualRegister(&Mips::GPR64RegClass);
       BuildMI(*BB, I, DL, TII->get(Mips::LD))
@@ -5019,7 +5019,7 @@ MachineBasicBlock *MipsTargetLowering::emitSTR_W(MachineInstr &MI,
   MachineBasicBlock::iterator I(MI);
 
   if (Subtarget.hasMips32r6() || Subtarget.hasMips64r6()) {
-    // Mips release 6 can store to adress that is not naturally-aligned.
+    // Mips release 6 can store to address that is not naturally-aligned.
     Register BitcastW = MRI.createVirtualRegister(&Mips::MSA128WRegClass);
     Register Tmp = MRI.createVirtualRegister(&Mips::GPR32RegClass);
     BuildMI(*BB, I, DL, TII->get(Mips::COPY)).addDef(BitcastW).addUse(StoreVal);
@@ -5069,7 +5069,7 @@ MachineBasicBlock *MipsTargetLowering::emitSTR_D(MachineInstr &MI,
   MachineBasicBlock::iterator I(MI);
 
   if (Subtarget.hasMips32r6() || Subtarget.hasMips64r6()) {
-    // Mips release 6 can store to adress that is not naturally-aligned.
+    // Mips release 6 can store to address that is not naturally-aligned.
     if (Subtarget.isGP64bit()) {
       Register BitcastD = MRI.createVirtualRegister(&Mips::MSA128DRegClass);
       Register Lo = MRI.createVirtualRegister(&Mips::GPR64RegClass);

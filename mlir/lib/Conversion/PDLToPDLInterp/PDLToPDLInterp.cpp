@@ -541,7 +541,7 @@ void PatternLowering::generateRewriter(
     pdl::ReplaceOp replaceOp, DenseMap<Value, Value> &rewriteValues,
     function_ref<Value(Value)> mapRewriteValue) {
   // If the replacement was another operation, get its results. `pdl` allows
-  // for using an operation for simplicitly, but the interpreter isn't as
+  // for using an operation for simplicity, but the interpreter isn't as
   // user facing.
   ValueRange origOperands;
   if (Value replOp = replaceOp.replOperation())

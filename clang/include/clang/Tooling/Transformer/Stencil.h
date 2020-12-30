@@ -48,7 +48,7 @@ using Stencil = std::shared_ptr<StencilInterface>;
 namespace detail {
 /// Convenience function to construct a \c Stencil. Overloaded for common cases
 /// so that user doesn't need to specify which factory function to use. This
-/// pattern gives benefits similar to implicit constructors, while maintaing a
+/// pattern gives benefits similar to implicit constructors, while maintaining a
 /// higher degree of explicitness.
 Stencil makeStencil(llvm::StringRef Text);
 Stencil makeStencil(RangeSelector Selector);

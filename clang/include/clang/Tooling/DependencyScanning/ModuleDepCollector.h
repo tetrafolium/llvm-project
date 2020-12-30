@@ -85,7 +85,7 @@ struct ModuleDeps {
   ///                      flags and for the `-o` flag. It needs to return a
   ///                      path for where the PCM for the given module is to
   ///                      be located.
-  /// \param LookupModuleDeps this fucntion is called to collect the full
+  /// \param LookupModuleDeps this function is called to collect the full
   ///                         transitive set of dependencies for this
   ///                         compilation.
   std::vector<std::string> getFullCommandLine(

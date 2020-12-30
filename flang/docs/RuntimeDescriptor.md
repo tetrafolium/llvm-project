@@ -294,7 +294,7 @@ Assumed-shape and assumed-size dummy argument arrays need not convey
 lower bounds.
 
 So there are examples of dimensions with
- * extent only (== upper bound): `CONTIGUOUS` assumed-shape, explict shape and multidimensional assumed-size with constant lower bound
+ * extent only (== upper bound): `CONTIGUOUS` assumed-shape, explicit shape and multidimensional assumed-size with constant lower bound
  * lower bound and either extent or upper bound: `ALLOCATABLE`, `CONTIGUOUS` `POINTER`, general explicit-shape and multidimensional assumed-size
  * extent (== upper bound) and stride: general (non-`CONTIGUOUS`) assumed-shape
  * lower bound, stride, and either extent or upper bound: general (non-`CONTIGUOUS`) `POINTER`, assumed-rank

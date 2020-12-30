@@ -1168,7 +1168,7 @@ StmtResult Sema::ActOnFinishSwitchStmt(SourceLocation SwitchLoc, Stmt *Switch,
     // Check to see if switch is over an Enum and handles all of its
     // values.  We only issue a warning if there is not 'default:', but
     // we still do the analysis to preserve this information in the AST
-    // (which can be used by flow-based analyes).
+    // (which can be used by flow-based analyse).
     //
     const EnumType *ET = CondTypeBeforePromotion->getAs<EnumType>();
 

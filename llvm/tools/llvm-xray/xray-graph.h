@@ -31,7 +31,7 @@
 namespace llvm {
 namespace xray {
 
-/// A class encapsulating the logic related to analyzing XRay traces, producting
+/// A class encapsulating the logic related to analyzing XRay traces, production
 /// Graphs from them and then exporting those graphs for review.
 class GraphRenderer {
 public:
@@ -96,7 +96,7 @@ public:
   /// FIXME: Perhaps we can Build this into LatencyAccountant? or vise versa?
   PerThreadFunctionStackMap PerThreadFunctionStack;
 
-  /// Usefull object for getting human readable Symbol Names.
+  /// Useful object for getting human readable Symbol Names.
   FuncIdConversionHelper FuncIdHelper;
   bool DeduceSiblingCalls = false;
   TimestampT CurrentMaxTSC = 0;

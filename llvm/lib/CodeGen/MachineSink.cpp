@@ -701,9 +701,9 @@ bool MachineSinking::isProfitableToSinkTo(Register Reg, MachineInstr &MI,
     } else {
       MachineInstr *DefMI = MRI->getVRegDef(Reg);
       // DefMI is defined outside of loop. There should be no live range
-      // impact for this operand. Defination outside of loop means:
-      // 1: defination is outside of loop.
-      // 2: defination is in this loop, but it is a PHI in the loop header.
+      // impact for this operand. Definition outside of loop means:
+      // 1: definition is outside of loop.
+      // 2: definition is in this loop, but it is a PHI in the loop header.
       if (LI->getLoopFor(DefMI->getParent()) != ML ||
           (DefMI->isPHI() && LI->isLoopHeader(DefMI->getParent())))
         continue;
@@ -1270,7 +1270,7 @@ void MachineSinking::SalvageUnsunkDebugUsersOfCopy(
 // used in the current block and the COPY is live-in to a single successor
 // (i.e., doesn't require the COPY to be duplicated).  This avoids executing the
 // copy on paths where their results aren't needed.  This also exposes
-// additional opportunites for dead copy elimination and shrink wrapping.
+// additional opportunities for dead copy elimination and shrink wrapping.
 //
 // These copies were either not handled by or are inserted after the MachineSink
 // pass. As an example of the former case, the MachineSink pass cannot sink

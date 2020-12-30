@@ -428,7 +428,7 @@ void InferPedantic::compute(VecOrSet DiagsInPedantic,
 
   // Compute the set of groups that are directly in -Wpedantic.  We
   // march through the groups to ensure the results are emitted
-  /// in a deterministc order.
+  /// in a deterministic order.
   for (unsigned i = 0, ei = DiagGroups.size(); i != ei; ++i) {
     Record *Group = DiagGroups[i];
     if (!groupInPedantic(Group))

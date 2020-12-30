@@ -344,7 +344,7 @@ def main():
         help="Compare benchmark runs.")
     bench_compare_parser.add_argument("--old", action="store", required=True,
                                       help="Benchmark reference results to "
-                                      "compare agains.")
+                                      "compare against.")
     bench_compare_parser.add_argument("--new", action="store", required=True,
                                       help="New benchmark results to check.")
     bench_compare_parser.add_argument("-o", "--output",

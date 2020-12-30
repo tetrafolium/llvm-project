@@ -655,7 +655,7 @@ private:
   getGlobalVariableForwardDeclaration(const VarDecl *VD);
 
   /// Return a global variable that represents one of the collection of global
-  /// variables created for an anonmyous union.
+  /// variables created for an anonymous union.
   ///
   /// Recursively collect all of the member fields of a global
   /// anonymous decl and create static variables for them. The first

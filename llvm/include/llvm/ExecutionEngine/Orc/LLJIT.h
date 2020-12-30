@@ -265,7 +265,7 @@ public:
   unsigned NumCompileThreads = 0;
   TargetProcessControl *TPC = nullptr;
 
-  /// Called prior to JIT class construcion to fix up defaults.
+  /// Called prior to JIT class construction to fix up defaults.
   Error prepareForConstruction();
 };
 

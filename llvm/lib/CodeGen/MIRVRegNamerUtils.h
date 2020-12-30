@@ -56,7 +56,7 @@ class VRegRenamer {
   /// Handle immediates, registers (physical and virtual) explicitly,
   /// and return a common value for the other cases.
   /// Instruction will be named in the following scheme
-  /// bb<block_no>_hash_<collission_count>.
+  /// bb<block_no>_hash_<collisions_count>.
   std::string getInstructionOpcodeHash(MachineInstr &MI);
 
   /// For all the VRegs that are candidates for renaming,

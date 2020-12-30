@@ -1539,7 +1539,7 @@ Expected<PythonFile> PythonFile::FromFile(File &file, const char *mode) {
   // particular order is not safe.
   //
   // The tradeoff here is that if a python 2 program wants to make sure this
-  // file gets flushed, they'll have to do it explicitly or wait untill the
+  // file gets flushed, they'll have to do it explicitly or wait until the
   // original lldb File itself gets flushed.
   file_obj = PyFile_FromFile(file.GetStream(), py2_const_cast(""),
                              py2_const_cast(mode), [](FILE *) { return 0; });

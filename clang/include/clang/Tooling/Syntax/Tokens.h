@@ -299,7 +299,7 @@ public:
   ///     int B;
   ///     FOO;
   /// macroExpansions() returns {"FOO2", "FOO"} (from line 3 and 5
-  /// respecitvely).
+  /// respectively).
   std::vector<const syntax::Token *> macroExpansions(FileID FID) const;
 
   const SourceManager &sourceManager() const { return *SourceMgr; }

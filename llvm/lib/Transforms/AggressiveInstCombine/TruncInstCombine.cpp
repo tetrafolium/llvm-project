@@ -45,7 +45,7 @@ STATISTIC(NumInstrsReduced,
           "Number of instructions whose bit width was reduced");
 
 /// Given an instruction and a container, it fills all the relevant operands of
-/// that instruction, with respect to the Trunc expression dag optimizaton.
+/// that instruction, with respect to the Trunc expression dag optimization.
 static void getRelevantOperands(Instruction *I, SmallVectorImpl<Value *> &Ops) {
   unsigned Opc = I->getOpcode();
   switch (Opc) {
@@ -53,7 +53,7 @@ static void getRelevantOperands(Instruction *I, SmallVectorImpl<Value *> &Ops) {
   case Instruction::ZExt:
   case Instruction::SExt:
     // These CastInst are considered leaves of the evaluated expression, thus,
-    // their operands are not relevent.
+    // their operands are not relevant.
     break;
   case Instruction::Add:
   case Instruction::Sub:

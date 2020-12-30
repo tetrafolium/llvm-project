@@ -2115,7 +2115,7 @@ bool ARMBaseInstrInfo::isProfitableToIfCvt(
       // discount it from PredCost.
       PredCost -= 1 * ScalingUpFactor;
     }
-    // The total cost is the cost of each path scaled by their probabilites
+    // The total cost is the cost of each path scaled by their probabilities
     unsigned TUnpredCost = Probability.scale(TUnpredCycles * ScalingUpFactor);
     unsigned FUnpredCost =
         Probability.getCompl().scale(FUnpredCycles * ScalingUpFactor);

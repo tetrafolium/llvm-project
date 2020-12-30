@@ -1876,7 +1876,7 @@ struct SubCFOpLowering : public ConvertOpToLLVMPattern<SubCFOp> {
     auto structType = typeConverter->convertType(op.getType());
     auto result = ComplexStructBuilder::undef(rewriter, loc, structType);
 
-    // Emit IR to substract complex numbers.
+    // Emit IR to subtract complex numbers.
     Value real =
         rewriter.create<LLVM::FSubOp>(loc, arg.lhs.real(), arg.rhs.real());
     Value imag =

@@ -430,7 +430,7 @@ void MCAsmLayout::layoutFragment(MCFragment *F) {
   // The fragment's offset will point to after the padding, and its computed
   // size won't include the padding.
   //
-  // When the -mc-relax-all flag is used, we optimize bundling by writting the
+  // When the -mc-relax-all flag is used, we optimize bundling by writing the
   // padding directly into fragments when the instructions are emitted inside
   // the streamer. When the fragment is larger than the bundle size, we need to
   // ensure that it's bundle aligned. This means that if we end up with

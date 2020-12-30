@@ -323,7 +323,7 @@ public:
 
 } // end namespace stubs
 
-/// Miscelaneous RPC functions for dealing with remotes.
+/// Miscellaneous RPC functions for dealing with remotes.
 namespace utils {
 
 /// GetRemoteInfo result is (Triple, PointerSize, PageSize, TrampolineSize,

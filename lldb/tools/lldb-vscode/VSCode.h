@@ -182,7 +182,7 @@ struct VSCode {
   ///   The response of the IDE. It might be undefined if there was an error.
   ///
   /// \return
-  ///   A \a PacketStatus object indicating the sucess or failure of the
+  ///   A \a PacketStatus object indicating the success or failure of the
   ///   request.
   PacketStatus SendReverseRequest(llvm::json::Object request,
                                   llvm::json::Object &response);

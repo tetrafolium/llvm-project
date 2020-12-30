@@ -68,7 +68,7 @@ Expected<NativeObjectCache> lto::localCache(StringRef CacheDirectoryPath,
       report_fatal_error(Twine("Failed to open cache file ") + EntryPath +
                          ": " + EC.message() + "\n");
 
-    // This native object stream is responsible for commiting the resulting
+    // This native object stream is responsible for committing the resulting
     // file to the cache and calling AddBuffer to add it to the link.
     struct CacheStream : NativeObjectStream {
       AddBufferFn AddBuffer;

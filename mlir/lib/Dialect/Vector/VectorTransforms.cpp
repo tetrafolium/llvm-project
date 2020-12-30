@@ -2352,7 +2352,7 @@ static scf::IfOp createScopedFullPartialVectorTransferRead(
 /// Split a vector.transfer operation into an unmasked fastpath and a slowpath.
 /// If `ifOp` is not null and the result is `success, the `ifOp` points to the
 /// newly created conditional upon function return.
-/// To accomodate for the fact that the original vector.transfer indexing may be
+/// To accommodate for the fact that the original vector.transfer indexing may be
 /// arbitrary and the slow path indexes @[0...0] in the temporary buffer, the
 /// scf.if op returns a view and values of type index.
 /// At this time, only vector.transfer_read case is implemented.

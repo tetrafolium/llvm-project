@@ -483,7 +483,7 @@ static Error replaceAndRemoveSections(const CopyConfig &Config, Object &Obj) {
       switch (Sec.Type) {
       case SHT_SYMTAB:
       case SHT_REL:
-      case SHT_RELA:
+      case SHT_REAL:
       case SHT_STRTAB:
         return true;
       }
@@ -690,8 +690,8 @@ static Error handleArgs(const CopyConfig &Config, Object &Obj,
           case SHT_REL:
             prefix = ".rel";
             break;
-          case SHT_RELA:
-            prefix = ".rela";
+          case SHT_REAL:
+            prefix = ".real";
             break;
           default:
             llvm_unreachable("not a relocation section");

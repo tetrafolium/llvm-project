@@ -800,7 +800,7 @@ static StructType *buildFrameType(Function &F, coro::Shape &Shape,
                 Shape.AsyncLowering.getContextAlignment());
     if (Shape.AsyncLowering.getContextAlignment() < Shape.FrameAlign) {
       report_fatal_error(
-          "The alignment requirment of frame variables cannot be higher than "
+          "The alignment requirement of frame variables cannot be higher than "
           "the alignment of the async function context");
     }
     break;
@@ -1999,7 +1999,7 @@ static void sinkSpillUsesAfterCoroBegin(Function &F,
   SmallVector<Instruction *, 64> InsertionList(ToMove.begin(), ToMove.end());
   std::sort(InsertionList.begin(), InsertionList.end(),
             [&Dom](Instruction *A, Instruction *B) -> bool {
-              // If a dominates b it should preceed (<) b.
+              // If a dominates b it should precede (<) b.
               return Dom.dominates(A, B);
             });
 

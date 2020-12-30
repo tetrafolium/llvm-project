@@ -1553,7 +1553,7 @@ std::vector<Fix> ClangdLSPServer::getFixes(llvm::StringRef File,
 }
 
 // A completion request is sent when the user types '>' or ':', but we only
-// want to trigger on '->' and '::'. We check the preceeding text to make
+// want to trigger on '->' and '::'. We check the preceding text to make
 // sure it matches what we expected.
 // Running the lexer here would be more robust (e.g. we can detect comments
 // and avoid triggering completion there), but we choose to err on the side

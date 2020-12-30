@@ -1212,7 +1212,7 @@ bool MipsSEDAGToDAGISel::trySelect(SDNode *Node) {
       // the 16 bit chunk is zero.
       //
       // For optimization purposes we always synthesize the splat value as
-      // an i32 value, then if we're targetting MIPS64, use SUBREG_TO_REG
+      // an i32 value, then if we're targeting MIPS64, use SUBREG_TO_REG
       // just before combining the values with dinsu to produce an i64. This
       // enables SelectionDAG to aggressively share components of splat values
       // where possible.

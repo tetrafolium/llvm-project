@@ -1204,13 +1204,13 @@ INTERCEPTOR(int, fork, void) {
 // NetBSD ships with openpty(3) in -lutil, that needs to be prebuilt explicitly
 // with MSan.
 #if SANITIZER_LINUX
-INTERCEPTOR(int, openpty, int *aparent, int *aworker, char *name,
+INTERCEPTOR(int, openpty, int *apparent, int *aworker, char *name,
             const void *termp, const void *winp) {
   ENSURE_MSAN_INITED();
   InterceptorScope interceptor_scope;
-  int res = REAL(openpty)(aparent, aworker, name, termp, winp);
+  int res = REAL(openpty)(apparent, aworker, name, termp, winp);
   if (!res) {
-    __msan_unpoison(aparent, sizeof(*aparent));
+    __msan_unpoison(apparent, sizeof(*apparent));
     __msan_unpoison(aworker, sizeof(*aworker));
   }
   return res;
@@ -1223,13 +1223,13 @@ INTERCEPTOR(int, openpty, int *aparent, int *aworker, char *name,
 // NetBSD ships with forkpty(3) in -lutil, that needs to be prebuilt explicitly
 // with MSan.
 #if SANITIZER_LINUX
-INTERCEPTOR(int, forkpty, int *aparent, char *name, const void *termp,
+INTERCEPTOR(int, forkpty, int *apparent, char *name, const void *termp,
             const void *winp) {
   ENSURE_MSAN_INITED();
   InterceptorScope interceptor_scope;
-  int res = REAL(forkpty)(aparent, name, termp, winp);
+  int res = REAL(forkpty)(apparent, name, termp, winp);
   if (res != -1)
-    __msan_unpoison(aparent, sizeof(*aparent));
+    __msan_unpoison(apparent, sizeof(*apparent));
   return res;
 }
 #define MSAN_MAYBE_INTERCEPT_FORKPTY INTERCEPT_FUNCTION(forkpty)

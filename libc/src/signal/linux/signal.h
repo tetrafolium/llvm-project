@@ -23,7 +23,7 @@ namespace __llvm_libc {
 struct Sigset {
   sigset_t nativeSigset;
 
-  constexpr static Sigset fullset() { return {-1UL}; }
+  constexpr static Sigset fullest() { return {-1UL}; }
   constexpr static Sigset emptySet() { return {0}; }
 
   constexpr void addset(int signal) { nativeSigset |= (1L << (signal - 1)); }
@@ -33,7 +33,7 @@ struct Sigset {
   operator sigset_t() const { return nativeSigset; }
 };
 
-constexpr static Sigset all = Sigset::fullset();
+constexpr static Sigset all = Sigset::fullest();
 
 static inline int block_all_signals(Sigset &set) {
   sigset_t nativeSigset = all;

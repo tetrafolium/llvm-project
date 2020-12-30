@@ -886,7 +886,7 @@ void PseudoRelocTableChunk::writeTo(uint8_t *buf) const {
 // desired base address, it loads it to somewhere else, and add <actual
 // base address> - <desired base address> to each offset that is
 // specified by the .reloc section. In ELF terms, .reloc sections
-// contain relative relocations in REL format (as opposed to RELA.)
+// contain relative relocations in REL format (as opposed to REAL.)
 //
 // This already significantly reduces the size of relocations compared
 // to ELF .rel.dyn, but Windows does more to reduce it (probably because

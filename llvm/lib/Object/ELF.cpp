@@ -251,7 +251,7 @@ StringRef llvm::object::getELFSectionTypeName(uint32_t Machine, unsigned Type) {
     STRINGIFY_ENUM_CASE(ELF, SHT_PROGBITS);
     STRINGIFY_ENUM_CASE(ELF, SHT_SYMTAB);
     STRINGIFY_ENUM_CASE(ELF, SHT_STRTAB);
-    STRINGIFY_ENUM_CASE(ELF, SHT_RELA);
+    STRINGIFY_ENUM_CASE(ELF, SHT_REAL);
     STRINGIFY_ENUM_CASE(ELF, SHT_HASH);
     STRINGIFY_ENUM_CASE(ELF, SHT_DYNAMIC);
     STRINGIFY_ENUM_CASE(ELF, SHT_NOTE);
@@ -266,7 +266,7 @@ StringRef llvm::object::getELFSectionTypeName(uint32_t Machine, unsigned Type) {
     STRINGIFY_ENUM_CASE(ELF, SHT_SYMTAB_SHNDX);
     STRINGIFY_ENUM_CASE(ELF, SHT_RELR);
     STRINGIFY_ENUM_CASE(ELF, SHT_ANDROID_REL);
-    STRINGIFY_ENUM_CASE(ELF, SHT_ANDROID_RELA);
+    STRINGIFY_ENUM_CASE(ELF, SHT_ANDROID_REAL);
     STRINGIFY_ENUM_CASE(ELF, SHT_ANDROID_RELR);
     STRINGIFY_ENUM_CASE(ELF, SHT_LLVM_ODRTAB);
     STRINGIFY_ENUM_CASE(ELF, SHT_LLVM_LINKER_OPTIONS);
@@ -366,7 +366,7 @@ ELFFile<ELFT>::decode_relrs(Elf_Relr_Range relrs) const {
 }
 
 template <class ELFT>
-Expected<std::vector<typename ELFT::Rela>>
+Expected<std::vector<typename ELFT::Real>>
 ELFFile<ELFT>::android_relas(const Elf_Shdr &Sec) const {
   // This function reads relocations in Android's packed relocation format,
   // which is based on SLEB128 and delta encoding.
@@ -397,7 +397,7 @@ ELFFile<ELFT>::android_relas(const Elf_Shdr &Sec) const {
   if (ErrStr)
     return createError(ErrStr);
 
-  std::vector<Elf_Rela> Relocs;
+  std::vector<Elf_Real> Relocs;
   Relocs.reserve(NumRelocs);
   while (NumRelocs) {
     uint64_t NumRelocsInGroup = ReadSLEB();
@@ -427,7 +427,7 @@ ELFFile<ELFT>::android_relas(const Elf_Shdr &Sec) const {
       Addend = 0;
 
     for (uint64_t I = 0; I != NumRelocsInGroup; ++I) {
-      Elf_Rela R;
+      Elf_Real R;
       Offset += GroupedByOffsetDelta ? GroupOffsetDelta : ReadSLEB();
       R.r_offset = Offset;
       R.r_info = GroupedByInfo ? GroupRInfo : ReadSLEB();

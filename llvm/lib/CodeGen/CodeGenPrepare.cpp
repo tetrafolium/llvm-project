@@ -4958,7 +4958,7 @@ bool CodeGenPrepare::optimizeMemoryInst(Instruction *MemoryInst, Value *Addr,
     // In case of success after this loop we ensure that traversing through
     // Phi nodes ends up with all cases to compute address of the form
     //    BaseGV + Base + Scale * Index + Offset
-    // where Scale and Offset are constans and BaseGV, Base and Index
+    // where Scale and Offset are constants and BaseGV, Base and Index
     // are exactly the same Values in all cases.
     // It means that BaseGV, Scale and Offset dominate our memory instruction
     // and have the same value as they had in address computation represented

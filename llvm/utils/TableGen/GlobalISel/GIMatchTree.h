@@ -501,7 +501,7 @@ public:
   /// partitions.
   BitVector getPossibleLeavesForPartition(unsigned Idx) {
     const auto &I = Partitions.find(Idx);
-    assert(I != Partitions.end() && "Requested non-existant partition");
+    assert(I != Partitions.end() && "Requested non-existent partition");
     return I->second;
   }
 

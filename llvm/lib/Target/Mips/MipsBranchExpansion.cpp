@@ -21,7 +21,7 @@
 /// case it is necessary to check again if there is some branch that needs
 /// expansion. On the other hand, expanding some branch may cause a control
 /// transfer instruction to appear in the forbidden slot, which is a hazard that
-/// should be fixed. This pass alternates between this two tasks untill no
+/// should be fixed. This pass alternates between this two tasks until no
 /// changes are made. Only then we can be sure that all branches are expanded
 /// properly, and no hazard situations exist.
 ///

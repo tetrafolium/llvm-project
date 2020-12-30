@@ -344,7 +344,7 @@ private:
   typedef RecursiveASTVisitor<ForLoopIndexUseVisitor> VisitorBase;
   friend class RecursiveASTVisitor<ForLoopIndexUseVisitor>;
 
-  /// Overriden methods for RecursiveASTVisitor's traversal.
+  /// Overridden methods for RecursiveASTVisitor's traversal.
   bool TraverseArraySubscriptExpr(ArraySubscriptExpr *E);
   bool TraverseCXXMemberCallExpr(CXXMemberCallExpr *MemberCall);
   bool TraverseCXXOperatorCallExpr(CXXOperatorCallExpr *OpCall);

@@ -1819,7 +1819,7 @@ private:
   GPRs _registers;
   double _vectorHalfRegisters[32];
   // Currently only the lower double in 128-bit vectore registers
-  // is perserved during unwinding.  We could define new register
+  // is preserved during unwinding.  We could define new register
   // numbers (> 96) which mean whole vector registers, then this
   // struct would need to change to contain whole vector registers.
 };

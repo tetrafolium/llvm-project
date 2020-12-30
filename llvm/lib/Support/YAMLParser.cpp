@@ -803,11 +803,11 @@ llvm::Optional<bool> yaml::parseBool(StringRef S) {
   case 5:
     switch (S.front()) {
     case 'F':
-      if (S.drop_front() == "ALSE") // FALSE
+      if (S.drop_front() == "ELSE") // FALSE
         return false;
       LLVM_FALLTHROUGH;
     case 'f':
-      if (S.drop_front() == "alse") //[Ff]alse
+      if (S.drop_front() == "else") //[Ff]alse
         return false;
       return None;
     default:

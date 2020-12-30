@@ -2906,7 +2906,7 @@ static int compute_separate_domain(struct isl_codegen_domains *domains,
  * This possibly larger domain is removed from class_domain by
  * compute_atomic_domain.  It is computed first so that the extended domain
  * would not overlap with any domains computed before.
- * Similary, the unrolled domains may have some constraints removed and
+ * Similarly, the unrolled domains may have some constraints removed and
  * may therefore also be larger than specified by the user.
  *
  * If anything is left after handling separate, unroll and atomic,

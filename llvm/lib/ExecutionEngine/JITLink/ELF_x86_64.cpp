@@ -153,7 +153,7 @@ static Error optimizeELF_x86_64_GOTAndStubs(LinkGraph &G) {
               const_cast<char *>(B->getContent().data()));
           BlockData[E.getOffset() - 2] = 0x8d;
           LLVM_DEBUG({
-            dbgs() << "  Replaced GOT load wih LEA:\n    ";
+            dbgs() << "  Replaced GOT load with LEA:\n    ";
             printEdge(dbgs(), *B, E, getELFX86RelocationKindName(E.getKind()));
             dbgs() << "\n";
           });
@@ -363,7 +363,7 @@ private:
     // TODO a partern is forming of iterate some sections but only give me
     // ones I am interested, i should abstract that concept some where
     for (auto &SecRef : sections) {
-      if (SecRef.sh_type != ELF::SHT_RELA && SecRef.sh_type != ELF::SHT_REL)
+      if (SecRef.sh_type != ELF::SHT_REAL && SecRef.sh_type != ELF::SHT_REL)
         continue;
       // TODO can the elf obj file do this for me?
       if (SecRef.sh_type == ELF::SHT_REL)
@@ -396,7 +396,7 @@ private:
       if (!Relocations)
         return Relocations.takeError();
 
-      for (const auto &Rela : *Relocations) {
+      for (const auto &Real : *Relocations) {
         auto Type = Rela.getType(false);
 
         LLVM_DEBUG({
@@ -404,7 +404,7 @@ private:
                  << "Name: " << Obj.getRelocationTypeName(Type) << "\n";
         });
         auto SymbolIndex = Rela.getSymbol(false);
-        auto Symbol = Obj.getRelocationSymbol(Rela, &SymTab);
+        auto Symbol = Obj.getRelocationSymbol(Real, &SymTab);
         if (!Symbol)
           return Symbol.takeError();
 

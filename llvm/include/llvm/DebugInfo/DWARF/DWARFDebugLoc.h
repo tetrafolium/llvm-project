@@ -58,7 +58,7 @@ public:
       function_ref<bool(const DWARFLocationEntry &)> Callback) const = 0;
 
   /// Dump the location list at the given \p Offset. The function returns true
-  /// iff it has successfully reched the end of the list. This means that one
+  /// iff it has successfully reached the end of the list. This means that one
   /// can attempt to parse another list after the current one (\p Offset will be
   /// updated to point past the end of the current list).
   bool dumpLocationList(uint64_t *Offset, raw_ostream &OS,

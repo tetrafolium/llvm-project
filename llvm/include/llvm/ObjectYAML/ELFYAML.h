@@ -341,7 +341,7 @@ struct HashSection : Section {
 struct GnuHashHeader {
   // The number of hash buckets.
   // Not used when dumping the object, but can be used to override
-  // the real number of buckets when emiting an object from a YAML document.
+  // the real number of buckets when emitting an object from a YAML document.
   Optional<llvm::yaml::Hex32> NBuckets;
 
   // Index of the first symbol in the dynamic symbol table
@@ -350,7 +350,7 @@ struct GnuHashHeader {
 
   // The number of words in the Bloom filter.
   // Not used when dumping the object, but can be used to override the real
-  // number of words in the Bloom filter when emiting an object from a YAML
+  // number of words in the Bloom filter when emitting an object from a YAML
   // document.
   Optional<llvm::yaml::Hex32> MaskWords;
 

@@ -1379,7 +1379,7 @@ void request_initialize(const llvm::json::Object &request) {
     filters.emplace_back(CreateExceptionBreakpointFilter(exc_bp));
   }
   body.try_emplace("exceptionBreakpointFilters", std::move(filters));
-  // The debug adapter supports launching a debugee in intergrated VSCode
+  // The debug adapter supports launching a debugee in integrated VSCode
   // terminal.
   body.try_emplace("supportsRunInTerminalRequest", true);
   // The debug adapter supports stepping back via the stepBack and
@@ -2166,7 +2166,7 @@ void request_setFunctionBreakpoints(const llvm::json::Object &request) {
       g_vsc.target.BreakpointDelete(pair.second.bp.GetID());
       remove_names.push_back(pair.first());
     } else {
-      // Update the existing breakpoint as any setting withing the function
+      // Update the existing breakpoint as any setting within the function
       // breakpoint might have changed.
       pair.second.UpdateBreakpoint(request_pos->second);
       // Remove this breakpoint from the request breakpoints since we have
@@ -2688,7 +2688,7 @@ void request_setVariable(const llvm::json::Object &request) {
     }
   } else {
     // We have a named item within an actual variable so we need to find it
-    // withing the container variable by name.
+    // within the container variable by name.
     const int64_t var_idx = VARREF_TO_VARIDX(variablesReference);
     lldb::SBValue container = g_vsc.variables.GetValueAtIndex(var_idx);
     variable = container.GetChildMemberWithName(name.data());
@@ -2759,7 +2759,7 @@ void request_setVariable(const llvm::json::Object &request) {
 //       "type": "string",
 //       "enum": [ "indexed", "named" ],
 //       "description": "Optional filter to limit the child variables to either
-//       named or indexed. If ommited, both types are fetched."
+//       named or indexed. If omitted, both types are fetched."
 //     },
 //     "start": {
 //       "type": "integer",

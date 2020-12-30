@@ -293,7 +293,7 @@ Error DWARFDebugLoclists::visitLocationList(
     case dwarf::DW_LLE_startx_length:
       E.Value0 = Data.getULEB128(C);
       // Pre-DWARF 5 has different interpretation of the length field. We have
-      // to support both pre- and standartized styles for the compatibility.
+      // to support both pre- and standardized styles for the compatibility.
       if (Version < 5)
         E.Value1 = Data.getU32(C);
       else

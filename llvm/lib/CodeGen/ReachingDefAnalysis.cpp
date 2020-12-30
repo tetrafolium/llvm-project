@@ -255,7 +255,7 @@ void ReachingDefAnalysis::traverse() {
 
 int ReachingDefAnalysis::getReachingDef(MachineInstr *MI,
                                         MCRegister PhysReg) const {
-  assert(InstIds.count(MI) && "Unexpected machine instuction.");
+  assert(InstIds.count(MI) && "Unexpected machine instruction.");
   int InstId = InstIds.lookup(MI);
   int DefRes = ReachingDefDefaultVal;
   unsigned MBBNumber = MI->getParent()->getNumber();
@@ -312,7 +312,7 @@ MachineInstr *ReachingDefAnalysis::getInstFromId(MachineBasicBlock *MBB,
 
 int ReachingDefAnalysis::getClearance(MachineInstr *MI,
                                       MCRegister PhysReg) const {
-  assert(InstIds.count(MI) && "Unexpected machine instuction.");
+  assert(InstIds.count(MI) && "Unexpected machine instruction.");
   return InstIds.lookup(MI) - getReachingDef(MI, PhysReg);
 }
 

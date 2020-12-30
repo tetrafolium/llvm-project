@@ -58,7 +58,7 @@ public:
   /// Represents an allocation created by the memory manager.
   ///
   /// An allocation object is responsible for allocating and owning jit-linker
-  /// working and target memory, and for transfering from working to target
+  /// working and target memory, and for transferring from working to target
   /// memory.
   ///
   class Allocation {

@@ -2267,7 +2267,7 @@ bool isKnownNonZero(const Value *V, const APInt &DemandedElts, unsigned Depth,
     if (isa<AllocaInst>(V) && Q.DL.getAllocaAddrSpace() == 0)
       return true;
 
-    // A byval, inalloca may not be null in a non-default addres space. A
+    // A byval, inalloca may not be null in a non-default address space. A
     // nonnull argument is assumed never 0.
     if (const Argument *A = dyn_cast<Argument>(V)) {
       if (((A->hasPassPointeeByValueCopyAttr() &&
@@ -5280,7 +5280,7 @@ static bool isKnownNonZero(const Value *V) {
 
 /// Match clamp pattern for float types without care about NaNs or signed zeros.
 /// Given non-min/max outer cmp/select from the clamp pattern this
-/// function recognizes if it can be substitued by a "canonical" min/max
+/// function recognizes if it can be substitute by a "canonical" min/max
 /// pattern.
 static SelectPatternResult matchFastFloatClamp(CmpInst::Predicate Pred,
                                                Value *CmpLHS, Value *CmpRHS,

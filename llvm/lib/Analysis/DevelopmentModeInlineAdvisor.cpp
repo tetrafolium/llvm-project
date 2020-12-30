@@ -113,7 +113,7 @@ private:
   std::unique_ptr<Logger> L;
   std::vector<bool> Effects;
   /// There's at least one output. We'll set this to a different value if MUTR
-  /// is avaliable.
+  /// is available.
   size_t OutputCount = 1;
   /// Set these 2 clearly OOB, to make sure we set them later.
   size_t DefaultDecisionPos = std::numeric_limits<size_t>::max();

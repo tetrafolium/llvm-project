@@ -827,7 +827,7 @@ void RegPressureTracker::recede(const RegisterOperands &RegOpers,
         }
       }
 
-      // Discover live outs if this may be the first occurance of this register.
+      // Discover live outs if this may be the first occurrence of this register.
       if (RequireIntervals) {
         LaneBitmask LiveOut = getLiveThroughAt(Reg, SlotIdx);
         if (LiveOut.any())

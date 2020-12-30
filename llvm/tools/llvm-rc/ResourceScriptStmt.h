@@ -781,7 +781,7 @@ public:
 
 class VersionInfoResource : public RCResource {
 public:
-  // A class listing fixed VERSIONINFO statements (occuring before main BEGIN).
+  // A class listing fixed VERSIONINFO statements (occurring before main BEGIN).
   // If any of these is not specified, it is assumed by the original tool to
   // be equal to 0.
   class VersionInfoFixed {

@@ -83,7 +83,7 @@ SampleProfileWriterExtBinaryBase::markSectionStart(SecType Type,
   assert(LayoutIdx < SectionHdrLayout.size() && "LayoutIdx out of range");
   const auto &Entry = SectionHdrLayout[LayoutIdx];
   assert(Entry.Type == Type && "Unexpected section type");
-  // Use LocalBuf as a temporary output for writting data.
+  // Use LocalBuf as a temporary output for writing data.
   if (hasSecFlag(Entry, SecCommonFlags::SecFlagCompress))
     LocalBufStream.swap(OutputStream);
   return SectionStart;

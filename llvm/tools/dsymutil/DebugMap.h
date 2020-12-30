@@ -14,7 +14,7 @@
 /// atoms used in these object files.
 /// The DebugMap is an input to the DwarfLinker class that will
 /// extract the Dwarf debug information from the referenced object
-/// files and link their usefull debug info together.
+/// files and link their useful debug info together.
 //
 //===----------------------------------------------------------------------===//
 

@@ -76,7 +76,7 @@ static bool fuseInstructionPair(ScheduleDAGInstrs &DAG, SUnit &FirstSU,
     return false;
 
   // TODO - If we want to chain more than two instructions, we need to create
-  // artifical edges to make dependencies from the FirstSU also dependent
+  // artificial edges to make dependencies from the FirstSU also dependent
   // on other chained instructions, and other chained instructions also
   // dependent on the dependencies of the SecondSU, to prevent them from being
   // scheduled into these chained instructions.

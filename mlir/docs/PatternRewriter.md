@@ -30,7 +30,7 @@ initialization time, e.g. allowing the benefit to be derived from domain
 specific information (like the target architecture). This limitation allows for
 performing pattern fusion and compiling patterns into an efficient state
 machine, and
-[Thier, Ertl, and Krall](https://dl.acm.org/citation.cfm?id=3179501) have shown
+[Their, Ertl, and Krall](https://dl.acm.org/citation.cfm?id=3179501) have shown
 that match predicates eliminate the need for dynamically computed costs in
 almost all cases: you can simply instantiate the same pattern one time for each
 possible cost and use the predicate to guard the match.

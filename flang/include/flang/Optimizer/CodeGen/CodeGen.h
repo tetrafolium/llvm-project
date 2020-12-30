@@ -17,7 +17,7 @@ namespace fir {
 
 struct NameUniquer;
 
-/// Prerequiste pass for code gen. Perform intermediate rewrites to perform
+/// Prerequisite pass for code gen. Perform intermediate rewrites to perform
 /// the code gen (to LLVM-IR dialect) conversion.
 std::unique_ptr<mlir::Pass> createFirCodeGenRewritePass();
 

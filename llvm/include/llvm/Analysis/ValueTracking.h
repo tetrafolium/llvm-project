@@ -134,7 +134,7 @@ bool isKnownNonZero(const Value *V, const DataLayout &DL, unsigned Depth = 0,
                     bool UseInstrInfo = true);
 
 /// Return true if the two given values are negation.
-/// Currently can recoginze Value pair:
+/// Currently can recognize Value pair:
 /// 1: <X, Y> if X = sub (0, Y) or Y = sub (0, X)
 /// 2: <X, Y> if X = sub (A, B) and Y = sub (B, A)
 bool isKnownNegation(const Value *X, const Value *Y, bool NeedNSW = false);
@@ -405,7 +405,7 @@ bool getUnderlyingObjectsForCodeGen(const Value *V,
                                     SmallVectorImpl<Value *> &Objects);
 
 /// Returns unique alloca where the value comes from, or nullptr.
-/// If OffsetZero is true check that V points to the begining of the alloca.
+/// If OffsetZero is true check that V points to the beginning of the alloca.
 AllocaInst *findAllocaForValue(Value *V, bool OffsetZero = false);
 inline const AllocaInst *findAllocaForValue(const Value *V,
                                             bool OffsetZero = false) {
@@ -553,7 +553,7 @@ ConstantRange computeConstantRange(const Value *V, bool UseInstrInfo = true,
 bool isGuaranteedToTransferExecutionToSuccessor(const Instruction *I);
 
 /// Returns true if this block does not contain a potential implicit exit.
-/// This is equivelent to saying that all instructions within the basic block
+/// This is equivalent to saying that all instructions within the basic block
 /// are guaranteed to transfer execution to their successor within the basic
 /// block. This has the same assumptions w.r.t. undefined behavior as the
 /// instruction variant of this function.

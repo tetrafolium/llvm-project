@@ -2656,7 +2656,7 @@ const APInt *SelectionDAG::getValidMaximumShiftAmountConstant(
 KnownBits SelectionDAG::computeKnownBits(SDValue Op, unsigned Depth) const {
   EVT VT = Op.getValueType();
 
-  // TOOD: Until we have a plan for how to represent demanded elements for
+  // TODO: Until we have a plan for how to represent demanded elements for
   // scalable vectors, we can just bail out for now.
   if (Op.getValueType().isScalableVector()) {
     unsigned BitWidth = Op.getScalarValueSizeInBits();
@@ -2678,7 +2678,7 @@ KnownBits SelectionDAG::computeKnownBits(SDValue Op, const APInt &DemandedElts,
 
   KnownBits Known(BitWidth); // Don't know anything.
 
-  // TOOD: Until we have a plan for how to represent demanded elements for
+  // TODO: Until we have a plan for how to represent demanded elements for
   // scalable vectors, we can just bail out for now.
   if (Op.getValueType().isScalableVector())
     return Known;

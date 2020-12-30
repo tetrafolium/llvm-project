@@ -251,7 +251,7 @@ static void addResumeFunction(ModuleOp module) {
 // Function targeted for coroutine transformation has two additional blocks at
 // the end: coroutine cleanup and coroutine suspension.
 //
-// async.await op lowering additionaly creates a resume block for each
+// async.await op lowering additionally creates a resume block for each
 // operation to enable non-blocking waiting via coroutine suspension.
 namespace {
 struct CoroMachinery {

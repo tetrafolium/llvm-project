@@ -12,7 +12,7 @@ class FindTool(object):
         self.name = name
 
     def resolve(self, config, dirs):
-        # Check for a user explicitely overriding a tool.  This allows:
+        # Check for a user explicitly overriding a tool.  This allows:
         #     llvm-lit -D llc="llc -enable-misched -verify-machineinstrs"
         command = config.lit_config.params.get(self.name)
         if command is None:

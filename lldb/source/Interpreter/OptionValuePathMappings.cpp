@@ -62,10 +62,10 @@ Status OptionValuePathMappings::SetValueFromString(llvm::StringRef value,
       } else {
         bool changed = false;
         for (size_t i = 1; i < argc; idx++, i += 2) {
-          const char *orginal_path = args.GetArgumentAtIndex(i);
+          const char *original_path = args.GetArgumentAtIndex(i);
           const char *replace_path = args.GetArgumentAtIndex(i + 1);
           if (VerifyPathExists(replace_path)) {
-            ConstString a(orginal_path);
+            ConstString a(original_path);
             ConstString b(replace_path);
             if (!m_path_mappings.Replace(a, b, idx, m_notify_changes))
               m_path_mappings.Append(a, b, m_notify_changes);
@@ -102,10 +102,10 @@ Status OptionValuePathMappings::SetValueFromString(llvm::StringRef value,
     } else {
       bool changed = false;
       for (size_t i = 0; i < argc; i += 2) {
-        const char *orginal_path = args.GetArgumentAtIndex(i);
+        const char *original_path = args.GetArgumentAtIndex(i);
         const char *replace_path = args.GetArgumentAtIndex(i + 1);
         if (VerifyPathExists(replace_path)) {
-          ConstString a(orginal_path);
+          ConstString a(original_path);
           ConstString b(replace_path);
           m_path_mappings.Append(a, b, m_notify_changes);
           m_value_was_set = true;
@@ -140,10 +140,10 @@ Status OptionValuePathMappings::SetValueFromString(llvm::StringRef value,
         if (op == eVarSetOperationInsertAfter)
           ++idx;
         for (size_t i = 1; i < argc; i += 2) {
-          const char *orginal_path = args.GetArgumentAtIndex(i);
+          const char *original_path = args.GetArgumentAtIndex(i);
           const char *replace_path = args.GetArgumentAtIndex(i + 1);
           if (VerifyPathExists(replace_path)) {
-            ConstString a(orginal_path);
+            ConstString a(original_path);
             ConstString b(replace_path);
             m_path_mappings.Insert(a, b, idx, m_notify_changes);
             changed = true;

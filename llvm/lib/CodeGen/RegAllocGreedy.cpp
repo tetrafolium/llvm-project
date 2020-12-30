@@ -1036,7 +1036,7 @@ MCRegister RAGreedy::getCheapestEvicteeWeight(const AllocationOrder &Order,
   return BestEvicteePhys;
 }
 
-/// evictInterference - Evict any interferring registers that prevent VirtReg
+/// evictInterference - Evict any interfering registers that prevent VirtReg
 /// from being assigned to Physreg. This assumes that canEvictInterference
 /// returned true.
 void RAGreedy::evictInterference(LiveInterval &VirtReg, MCRegister PhysReg,
@@ -1536,7 +1536,7 @@ bool RAGreedy::splitCanCauseLocalSpill(unsigned VirtRegToSplit,
                                        const AllocationOrder &Order) {
   Cand.Intf.moveToBlock(BBNumber);
 
-  // Check if the local interval will find a non interfereing assignment.
+  // Check if the local interval will find a non interfering assignment.
   for (auto PhysReg : Order.getOrder()) {
     if (!Matrix->checkInterference(Cand.Intf.first().getPrevIndex(),
                                    Cand.Intf.last(), PhysReg))
@@ -1585,7 +1585,7 @@ BlockFrequency RAGreedy::calcGlobalSplitCost(GlobalSplitCandidate &Cand,
 
     Cand.Intf.moveToBlock(BC.Number);
     // Check wheather a local interval is going to be created during the region
-    // split. Calculate adavanced spilt cost (cost of local intervals) if option
+    // split. Calculate advanced spilt cost (cost of local intervals) if option
     // is enabled.
     if (EnableAdvancedRASplitCost && Cand.Intf.hasInterference() && BI.LiveIn &&
         BI.LiveOut && RegIn && RegOut) {
@@ -1831,7 +1831,7 @@ MCRegister RAGreedy::tryRegionSplit(LiveInterval &VirtReg,
 
   // Split candidates with compact regions can cause a bad eviction sequence.
   // See splitCanCauseEvictionChain for detailed description of scenarios.
-  // To avoid it, we need to comapre the cost with the spill cost and not the
+  // To avoid it, we need to compare the cost with the spill cost and not the
   // current max frequency.
   if (HasCompact && (BestCost > SpillCost) && (BestCand != NoCand) &&
       CanCauseEvictionChain) {

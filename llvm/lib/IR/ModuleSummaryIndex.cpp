@@ -282,7 +282,7 @@ bool ModuleSummaryIndex::canImportGlobalVar(GlobalValueSummary *S,
     // We don't analyze GV references during attribute propagation, so
     // GV with non-trivial initializer can be marked either read or
     // write-only.
-    // Importing definiton of readonly GV with non-trivial initializer
+    // Importing definition of readonly GV with non-trivial initializer
     // allows us doing some extra optimizations (like converting indirect
     // calls to direct).
     // Definition of writeonly GV with non-trivial initializer should also

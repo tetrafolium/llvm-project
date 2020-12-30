@@ -2046,7 +2046,7 @@ void DarwinClang::AddClangCXXStdlibIncludeArgs(
     // 1. Alongside the compiler in         <install>/include/c++/v1
     // 2. In a SDK (or a custom sysroot) in <sysroot>/usr/include/c++/v1
     //
-    // The precendence of paths is as listed above, i.e. we take the first path
+    // The precedence of paths is as listed above, i.e. we take the first path
     // that exists. Also note that we never include libc++ twice -- we take the
     // first path that exists and don't send the other paths to CC1 (otherwise
     // include_next could break).

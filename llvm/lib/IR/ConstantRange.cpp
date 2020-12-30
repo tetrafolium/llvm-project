@@ -752,7 +752,7 @@ ConstantRange ConstantRange::truncate(uint32_t DstTySize) const {
 
   // Chop off the most significant bits that are past the destination bitwidth.
   if (LowerDiv.getActiveBits() > DstTySize) {
-    // Mask to just the signficant bits and subtract from LowerDiv/UpperDiv.
+    // Mask to just the significant bits and subtract from LowerDiv/UpperDiv.
     APInt Adjust = LowerDiv & APInt::getBitsSetFrom(getBitWidth(), DstTySize);
     LowerDiv -= Adjust;
     UpperDiv -= Adjust;
@@ -763,7 +763,7 @@ ConstantRange ConstantRange::truncate(uint32_t DstTySize) const {
     return ConstantRange(LowerDiv.trunc(DstTySize), UpperDiv.trunc(DstTySize))
         .unionWith(Union);
 
-  // The truncated value wraps around. Check if we can do better than fullset.
+  // The truncated value wraps around. Check if we can do better than fullest.
   if (UpperDivWidth == DstTySize + 1) {
     // Clear the MSB so that UpperDiv wraps around.
     UpperDiv.clearBit(DstTySize);

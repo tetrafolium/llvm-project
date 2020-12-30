@@ -8,7 +8,7 @@
  *
  * Written by Sven Verdoolaege, K.U.Leuven, Departement
  * Computerwetenschappen, Celestijnenlaan 200A, B-3001 Leuven, Belgium
- * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universite,
+ * and INRIA Saclay - Ile-de-France, Parc Club Orsay Universities,
  * ZAC des vignes, 4 rue Jacques Monod, 91893 Orsay, France
  * and Ecole Normale Superieure, 45 rue d’Ulm, 75230 Paris, France
  * and Cerebras Systems, 175 S San Antonio Rd, Los Altos, CA, USA

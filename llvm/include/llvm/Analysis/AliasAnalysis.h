@@ -795,7 +795,7 @@ private:
 };
 
 /// This class is a wrapper over an AAResults, and it is intended to be used
-/// only when there are no IR changes inbetween queries. BatchAAResults is
+/// only when there are no IR changes between queries. BatchAAResults is
 /// reusing the same `AAQueryInfo` to preserve the state across queries,
 /// esentially making AA work in "batch mode". The internal state cannot be
 /// cleared, so to go "out-of-batch-mode", the user must either use AAResults,

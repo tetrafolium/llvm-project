@@ -55,7 +55,7 @@ void StaticAccessedThroughInstanceCheck::check(
 
   const Expr *BaseExpr = MemberExpression->getBase();
 
-  // Do not warn for overlaoded -> operators.
+  // Do not warn for overloaded -> operators.
   if (isa<CXXOperatorCallExpr>(BaseExpr))
     return;
 

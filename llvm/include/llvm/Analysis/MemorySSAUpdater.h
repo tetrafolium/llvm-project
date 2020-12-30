@@ -11,7 +11,7 @@
 // deletion, and moves.  It performs phi insertion where necessary, and
 // automatically updates the MemorySSA IR to be correct.
 // While updating loads or removing instructions is often easy enough to not
-// need this, updating stores should generally not be attemped outside this
+// need this, updating stores should generally not be attempted outside this
 // API.
 //
 // Basic API usage:

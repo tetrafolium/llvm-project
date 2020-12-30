@@ -6,7 +6,7 @@
  * Use of this software is governed by the MIT license
  *
  * Written by Sven Verdoolaege, INRIA Saclay - Ile-de-France,
- * Parc Club Orsay Universite, ZAC des vignes, 4 rue Jacques Monod,
+ * Parc Club Orsay Universities, ZAC des vignes, 4 rue Jacques Monod,
  * 91893 Orsay, France
  * and Ecole Normale Superieure, 45 rue d’Ulm, 75230 Paris, France
  */
@@ -3368,7 +3368,7 @@ add_copies_group_private(struct ppcg_kernel *kernel,
  * this synchronization if we are at the outer level since then there
  * won't be a next load.
  * In the case of a write, we need to make sure there is some synchronization
- * after the core computation such taht we can put the write from shared
+ * after the core computation such that we can put the write from shared
  * memory to global memory after that synchronization.
  * Unless we are at the outer level, we also need a synchronization node
  * after the write to ensure the data is saved to global memory
@@ -4902,7 +4902,7 @@ static isl_stat update_may_persist_at(__isl_keep isl_schedule_node *node,
   return isl_stat_ok;
 }
 
-/* Determine the set of array elements that may need to be perserved
+/* Determine the set of array elements that may need to be preserved
  * by a kernel constructed from the subtree at "node".
  * This includes the set of array elements that may need to be preserved
  * by the entire scop (prog->may_persist) and the elements for which

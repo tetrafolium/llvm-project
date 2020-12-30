@@ -739,7 +739,7 @@ void CommandInterpreter::LoadCommandDictionary() {
       new CommandObjectRegexCommand(
           *this, "gdb-remote",
           "Connect to a process via remote GDB server.  "
-          "If no host is specifed, localhost is assumed.",
+          "If no host is specified, localhost is assumed.",
           "gdb-remote [<hostname>:]<portnum>", 2, 0, false));
   if (connect_gdb_remote_cmd_up) {
     if (connect_gdb_remote_cmd_up->AddRegexCommand(

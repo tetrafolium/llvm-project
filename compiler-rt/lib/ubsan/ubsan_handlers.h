@@ -149,7 +149,7 @@ struct ImplicitConversionData {
   /* ImplicitConversionCheckKind */ unsigned char Kind;
 };
 
-/// \brief Implict conversion that changed the value.
+/// \brief Implicit conversion that changed the value.
 RECOVERABLE(implicit_conversion, ImplicitConversionData *Data, ValueHandle Src,
             ValueHandle Dst)
 

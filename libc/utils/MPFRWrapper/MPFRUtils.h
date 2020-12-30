@@ -36,14 +36,14 @@ enum class Operation : int {
   EndUnaryOperationsSingleOutput,
 
   // Operations which take a single floating point nubmer as input
-  // but produce two outputs. The first ouput is a floating point
+  // but produce two outputs. The first output is a floating point
   // number of the same type as the input. The second output is of type
   // 'int'.
   BeginUnaryOperationsTwoOutputs,
   Frexp, // Floating point output, the first output, is the fractional part.
   EndUnaryOperationsTwoOutputs,
 
-  // Operations wich take two floating point nubmers of the same type as
+  // Operations which take two floating point numbers of the same type as
   // input and produce a single floating point number of the same type as
   // output.
   BeginBinaryOperationsSingleOutput,
@@ -174,7 +174,7 @@ private:
 
   template <typename T>
   static bool match(const TernaryInput<T> &in, T out, double tolerance) {
-    // TODO: Implement the comparision function and error reporter.
+    // TODO: Implement the comparison function and error reporter.
   }
 
   template <typename T>
@@ -203,7 +203,7 @@ private:
 
 } // namespace internal
 
-// Return true if the input and ouput types for the operation op are valid
+// Return true if the input and output types for the operation op are valid
 // types.
 template <Operation op, typename InputType, typename OutputType>
 constexpr bool isValidOperation() {

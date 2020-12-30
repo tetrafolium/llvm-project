@@ -368,7 +368,7 @@ int X86FrameLowering::mergeSPUpdates(MachineBasicBlock &MBB,
   MachineBasicBlock::iterator PI = doMergeWithPrevious ? std::prev(MBBI) : MBBI;
 
   PI = skipDebugInstructionsBackward(PI, MBB.begin());
-  // It is assumed that ADD/SUB/LEA instruction is succeded by one CFI
+  // It is assumed that ADD/SUB/LEA instruction is succeeded by one CFI
   // instruction, and that there are no DBG_VALUE or other instructions between
   // ADD/SUB/LEA and its corresponding CFI instruction.
   /* TODO: Add support for the case where there are multiple CFI instructions

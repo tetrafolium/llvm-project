@@ -206,7 +206,7 @@ private:
   };
 
   // Returns true if and only if the values are different
-  // Does apple to apple comparision, in case of TypeSpec or DerivedTypeSpec
+  // Does apple to apple comparison, in case of TypeSpec or DerivedTypeSpec
   // checks for kinds as well.
   static bool TypesAreDifferent(const TypeCase &x, const TypeCase &y) {
     if (x.IsDefault()) { // C1164

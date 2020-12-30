@@ -43,7 +43,7 @@ enum class ReturnType {
 /// +-------------------+-+-+-+-----+-+---+---------------------+---+
 ///
 /// Flag : 2-bit field with the following meanings:
-///   - 00 = packed unwind data not used; reamining bits point to .xdata record
+///   - 00 = packed unwind data not used; remaining bits point to .xdata record
 ///   - 01 = packed unwind data
 ///   - 10 = packed unwind data, function assumed to have no prologue; useful
 ///          for function fragments that are discontiguous with the start of the

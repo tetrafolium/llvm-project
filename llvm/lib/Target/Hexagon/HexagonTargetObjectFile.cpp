@@ -354,7 +354,7 @@ MCSection *HexagonTargetObjectFile::selectSmallSectionForGlobal(
     // declaration and add it to the section name string.
     // Note. It does not track the actual usage of the value, only its de-
     // claration. Also, compiler adds explicit pad fields to some struct
-    // declarations - they are currently counted towards smallest addres-
+    // declarations - they are currently counted towards smallest address-
     // sable entity.
     if (NoSmallDataSorting) {
       TRACE(" default sbss\n");

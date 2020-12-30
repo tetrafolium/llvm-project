@@ -597,11 +597,11 @@ class TextCrashLogParser:
             matched_pair = re.search("(.+)\((.+)\)", version_string)
             if matched_pair:
                 self.crashlog.process_version = matched_pair.group(1)
-                self.crashlog.process_compatability_version = matched_pair.group(
+                self.crashlog.process_compatibility_version = matched_pair.group(
                     2)
             else:
                 self.crashlog.process = version_string
-                self.crashlog.process_compatability_version = version_string
+                self.crashlog.process_compatibility_version = version_string
         elif self.parent_process_regex.search(line):
             parent_process_match = self.parent_process_regex.search(
                 line)

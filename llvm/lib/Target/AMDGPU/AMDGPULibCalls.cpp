@@ -68,7 +68,7 @@ private:
 
   bool useNativeFunc(const StringRef F) const;
 
-  // Return a pointer (pointer expr) to the function if function defintion with
+  // Return a pointer (pointer expr) to the function if function definition with
   // "FuncName" exists. It may create a new function prototype in pre-link mode.
   FunctionCallee getFunction(Module *M, const FuncInfo &fInfo);
 
@@ -1064,9 +1064,9 @@ bool AMDGPULibCalls::fold_pow(CallInst *CI, IRBuilder<> &B,
     unsigned size = nTy->getScalarSizeInBits();
     opr_n = CI->getArgOperand(1);
     if (opr_n->getType()->isIntegerTy())
-      opr_n = B.CreateZExtOrBitCast(opr_n, nTy, "__ytou");
+      opr_n = B.CreateZExtOrBitCast(opr_n, nTy, "__you");
     else
-      opr_n = B.CreateFPToSI(opr1, nTy, "__ytou");
+      opr_n = B.CreateFPToSI(opr1, nTy, "__you");
 
     Value *sign = B.CreateShl(opr_n, size - 1, "__yeven");
     sign = B.CreateAnd(B.CreateBitCast(opr0, nTy), sign, "__pow_sign");

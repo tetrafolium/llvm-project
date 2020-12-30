@@ -934,7 +934,7 @@ static cl::opt<RegisterRegAlloc::FunctionPassCtor, false,
 /// with nontrivial configuration or multiple passes are broken out below in
 /// add%Stage routines.
 ///
-/// Any TargetPassConfig::addXX routine may be overriden by the Target. The
+/// Any TargetPassConfig::addXX routine may be overridden by the Target. The
 /// addPre/Post methods with empty header implementations allow injecting
 /// target-specific fixups just before or after major stages. Additionally,
 /// targets have the flexibility to change pass order within a stage by
@@ -1209,7 +1209,7 @@ bool TargetPassConfig::addRegAssignmentOptimized() {
 }
 
 /// Return true if the default global register allocator is in use and
-/// has not be overriden on the command line with '-regalloc=...'
+/// has not be overridden on the command line with '-regalloc=...'
 bool TargetPassConfig::usingDefaultRegAlloc() const {
   return RegAlloc.getNumOccurrences() == 0;
 }

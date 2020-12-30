@@ -300,7 +300,7 @@ std::vector<DILocal> SymbolizableObjectFile::symbolizeFrame(
   return DebugInfoContext->getLocalsForAddress(ModuleOffset);
 }
 
-/// Search for the first occurence of specified Address in ObjectFile.
+/// Search for the first occurrence of specified Address in ObjectFile.
 uint64_t SymbolizableObjectFile::getModuleSectionIndexForAddress(
     uint64_t Address) const {
 

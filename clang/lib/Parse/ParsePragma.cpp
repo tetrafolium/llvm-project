@@ -2649,7 +2649,7 @@ void PragmaFloatControlHandler::HandlePragma(Preprocessor &PP,
     return;
   }
 
-  // Note: there is no accomodation for PP callback for this pragma.
+  // Note: there is no accommodation for PP callback for this pragma.
 
   // Enter the annotation.
   auto TokenArray = std::make_unique<Token[]>(1);

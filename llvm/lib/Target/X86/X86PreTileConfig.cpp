@@ -116,7 +116,7 @@ static Register buildConfigMI(MachineBasicBlock::iterator MI, int FrameIdx,
         .addReg(Zmm);
   }
 
-  // build psuedo ldtilecfg
+  // build pseudo ldtilecfg
   Register VReg = MRI->createVirtualRegister(&X86::TILECFGRegClass);
 
   addFrameReference(

@@ -166,7 +166,7 @@ BCEAtom visitICmpLoadOperand(Value *const Val, BaseIdentifier &BaseId) {
   if (!isDereferenceablePointer(GEP, LoadI->getType(), DL)) {
     LLVM_DEBUG(dbgs() << "not dereferenceable\n");
     // We need to make sure that we can do comparison in any order, so we
-    // require memory to be unconditionnally dereferencable.
+    // require memory to be unconditionally dereferencable.
     return {};
   }
   APInt Offset = APInt(DL.getPointerTypeSizeInBits(GEP->getType()), 0);
@@ -879,7 +879,7 @@ static bool runImpl(Function &F, const TargetLibraryInfo &TLI,
   if (!TTI.enableMemCmpExpansion(F.hasOptSize(), true))
     return false;
 
-  // If we don't have memcmp avaiable we can't emit calls to it.
+  // If we don't have memcmp available we can't emit calls to it.
   if (!TLI.has(LibFunc_memcmp))
     return false;
 

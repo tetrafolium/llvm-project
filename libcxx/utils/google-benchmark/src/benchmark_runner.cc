@@ -326,7 +326,7 @@ class BenchmarkRunner {
       memory_manager->Stop(&memory_result);
     }
 
-    // Ok, now actualy report.
+    // Ok, now actually report.
     BenchmarkReporter::Run report = CreateRunReport(
         b, i.results, memory_iterations, memory_result, i.seconds);
 

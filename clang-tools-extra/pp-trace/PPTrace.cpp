@@ -8,7 +8,7 @@
 //
 // This file implements pp-trace, a tool for displaying a textual trace
 // of the Clang preprocessor activity.  It's based on a derivation of the
-// PPCallbacks class, that once registerd with Clang, receives callback calls
+// PPCallbacks class, that once registered with Clang, receives callback calls
 // to its virtual members, and outputs the information passed to the callbacks
 // in a high-level YAML format.
 //

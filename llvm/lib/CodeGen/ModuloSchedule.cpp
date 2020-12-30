@@ -1046,7 +1046,7 @@ void ModuloScheduleExpander::updateInstruction(MachineInstr *NewMI,
       int DefStageNum = Schedule.getStage(Def);
       unsigned StageNum = CurStageNum;
       if (DefStageNum != -1 && (int)InstrStageNum > DefStageNum) {
-        // Compute the difference in stages between the defintion and the use.
+        // Compute the difference in stages between the definition and the use.
         unsigned StageDiff = (InstrStageNum - DefStageNum);
         // Make an adjustment to get the last definition.
         StageNum -= StageDiff;
@@ -1746,7 +1746,7 @@ void PeelingModuloScheduleExpander::peelPrologAndEpilogs() {
   MachineBasicBlock *ExitingBB = CreateLCSSAExitingBlock();
   EliminateDeadPhis(ExitingBB, MRI, LIS, /*KeepSingleSrcPhi=*/true);
   // Push out the epilogs, again in reverse order.
-  // We can't assume anything about the minumum loop trip count at this point,
+  // We can't assume anything about the minimum loop trip count at this point,
   // so emit a fairly complex epilog.
 
   // We first peel number of stages minus one epilogue. Then we remove dead

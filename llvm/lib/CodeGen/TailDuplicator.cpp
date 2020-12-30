@@ -574,7 +574,7 @@ bool TailDuplicator::shouldTailDuplicate(bool IsSimple,
   // If the block to be duplicated ends in an unanalyzable fallthrough, don't
   // duplicate it.
   // A similar check is necessary in MachineBlockPlacement to make sure pairs of
-  // blocks with unanalyzable fallthrough get layed out contiguously.
+  // blocks with unanalyzable fallthrough get laid out contiguously.
   MachineBasicBlock *PredTBB = nullptr, *PredFBB = nullptr;
   SmallVector<MachineOperand, 4> PredCond;
   if (TII->analyzeBranch(TailBB, PredTBB, PredFBB, PredCond) &&

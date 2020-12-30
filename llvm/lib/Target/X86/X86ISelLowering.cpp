@@ -4153,7 +4153,7 @@ SDValue X86TargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
     // ELF / PIC requires GOT in the EBX register before function calls via PLT
     // GOT pointer (except regcall).
     if (!isTailCall) {
-      // Indirect call with RegCall calling convertion may use up all the
+      // Indirect call with RegCall calling conversion may use up all the
       // general registers, so it is not suitable to bind EBX reister for
       // GOT address, just let register allocator handle it.
       if (CallConv != CallingConv::X86_RegCall)
@@ -28095,7 +28095,7 @@ static SDValue LowerShift(SDValue Op, const X86Subtarget &Subtarget,
   // It's worth extending once and using the vXi16/vXi32 shifts for smaller
   // types, but without AVX512 the extra overheads to get from vXi8 to vXi32
   // make the existing SSE solution better.
-  // NOTE: We honor prefered vector width before promoting to 512-bits.
+  // NOTE: We honor preferred vector width before promoting to 512-bits.
   if ((Subtarget.hasInt256() && VT == MVT::v8i16) ||
       (Subtarget.canExtendTo512DQ() && VT == MVT::v16i16) ||
       (Subtarget.canExtendTo512DQ() && VT == MVT::v16i8) ||
@@ -38746,7 +38746,7 @@ bool X86TargetLowering::SimplifyDemandedBitsForTargetNode(
       unsigned VecBitWidth = VecVT.getScalarSizeInBits();
 
       // If we demand no bits from the vector then we must have demanded
-      // bits from the implict zext - simplify to zero.
+      // bits from the implicit zext - simplify to zero.
       APInt DemandedVecBits = OriginalDemandedBits.trunc(VecBitWidth);
       if (DemandedVecBits == 0)
         return TLO.CombineTo(Op, TLO.DAG.getConstant(0, SDLoc(Op), VT));
@@ -42375,7 +42375,7 @@ static bool canReduceVMulWidth(SDNode *N, SelectionDAG &DAG, ShrinkMode &Mode) {
 }
 
 /// When the operands of vector mul are extended from smaller size values,
-/// like i8 and i16, the type of mul may be shrinked to generate more
+/// like i8 and i16, the type of mul may be shrunk to generate more
 /// efficient code. Two typical patterns are handled:
 /// Pattern1:
 ///     %2 = sext/zext <N x i8> %1 to <N x i32>
@@ -45830,7 +45830,7 @@ static SDValue combineTruncatedArithmetic(SDNode *N, SelectionDAG &DAG,
       return true;
 
     // See if this is a single use constant which can be constant folded.
-    // NOTE: We don't peek throught bitcasts here because there is currently
+    // NOTE: We don't peek thought bitcasts here because there is currently
     // no support for constant folding truncate+bitcast+vector_of_constants. So
     // we'll just send up with a truncate on both operands which will
     // get turned back into (truncate (binop)) causing an infinite loop.

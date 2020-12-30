@@ -158,7 +158,7 @@ public:
   ///   perform tag resolution.
   StringRef getRawTag() const { return Tag; }
 
-  /// Get the verbatium tag for a given Node. This performs tag resoluton
+  /// Get the verbatim tag for a given Node. This performs tag resoluton
   ///   and substitution.
   std::string getVerbatimTag() const;
 

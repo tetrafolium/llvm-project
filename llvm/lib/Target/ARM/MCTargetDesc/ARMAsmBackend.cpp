@@ -839,7 +839,7 @@ unsigned ARMAsmBackend::adjustFixupValue(const MCAssembler &Asm,
   }
   case ARM::fixup_bfcsel_else_target: {
     // If this is a fixup of a branch future's else target then it should be a
-    // constant MCExpr representing the distance between the branch targetted
+    // constant MCExpr representing the distance between the branch targeted
     // and the instruction after that same branch.
     Value = Target.getConstant();
 
@@ -1148,7 +1148,7 @@ uint32_t ARMAsmBackendDarwin::generateCompactUnwindEncoding(
       // Directive not convertable to compact unwind, bail out.
       DEBUG_WITH_TYPE("compact-unwind",
                       llvm::dbgs()
-                          << "CFI directive not compatiable with comact "
+                          << "CFI directive not compatible with comact "
                              "unwind encoding, opcode="
                           << Inst.getOperation() << "\n");
       return CU::UNWIND_ARM_MODE_DWARF;

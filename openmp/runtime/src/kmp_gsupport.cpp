@@ -1782,7 +1782,7 @@ void __GOMP_taskloop(void (*func)(void *), void *data,
 }
 
 // 4 byte version of GOMP_doacross_post
-// This verison needs to create a temporary array which converts 4 byte
+// This version needs to create a temporary array which converts 4 byte
 // integers into 8 byte integers
 template <typename T, bool need_conversion = (sizeof(long) == 4)>
 void __kmp_GOMP_doacross_post(T *count);

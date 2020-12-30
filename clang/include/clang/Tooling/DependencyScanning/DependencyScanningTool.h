@@ -47,21 +47,21 @@ struct FullDependencies {
   /// determined that the differences are benign for this compilation.
   std::vector<ClangModuleDep> ClangModuleDeps;
 
-  /// A partial addtional set of command line arguments that can be used to
+  /// A partial additional set of command line arguments that can be used to
   /// build this translation unit.
   ///
   /// Call \c getFullAdditionalCommandLine() to get a command line suitable for
   /// appending to the original command line to pass to clang.
   std::vector<std::string> AdditionalNonPathCommandLine;
 
-  /// Gets the full addtional command line suitable for appending to the
+  /// Gets the full additional command line suitable for appending to the
   /// original command line to pass to clang.
   ///
   /// \param LookupPCMPath this function is called to fill in `-fmodule-file=`
   ///                      flags and for the `-o` flag. It needs to return a
   ///                      path for where the PCM for the given module is to
   ///                      be located.
-  /// \param LookupModuleDeps this fucntion is called to collect the full
+  /// \param LookupModuleDeps this function is called to collect the full
   ///                         transitive set of dependencies for this
   ///                         compilation.
   std::vector<std::string> getAdditionalCommandLine(

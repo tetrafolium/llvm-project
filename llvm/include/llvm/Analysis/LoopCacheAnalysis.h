@@ -117,7 +117,7 @@ private:
   /// recurrence).
   bool isSimpleAddRecurrence(const SCEV &Subscript, const Loop &L) const;
 
-  /// Return true if the given reference \p Other is definetely aliased with
+  /// Return true if the given reference \p Other is definitely aliased with
   /// the indexed reference represented by this class.
   bool isAliased(const IndexedReference &Other, AAResults &AA) const;
 

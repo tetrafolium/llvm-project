@@ -1602,7 +1602,7 @@ void AggExprEmitter::VisitInitListExpr(InitListExpr *E) {
   assert(E->getType()->isRecordType() && "Only support structs/unions here!");
 
   // Do struct initialization; this code just sets each individual member
-  // to the approprate value.  This makes bitfield support automatic;
+  // to the appropriate value.  This makes bitfield support automatic;
   // the disadvantage is that the generated code is more difficult for
   // the optimizer, especially with bitfields.
   unsigned NumInitElements = E->getNumInits();

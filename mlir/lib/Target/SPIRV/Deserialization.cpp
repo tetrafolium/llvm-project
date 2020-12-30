@@ -1305,7 +1305,7 @@ LogicalResult Deserializer::processArrayType(ArrayRef<uint32_t> operands) {
   }
 
   unsigned count = 0;
-  // TODO: The count can also come frome a specialization constant.
+  // TODO: The count can also come from a specialization constant.
   auto countInfo = getConstant(operands[2]);
   if (!countInfo) {
     return emitError(unknownLoc, "OpTypeArray count <id> ")

@@ -419,7 +419,7 @@ bool PPCLoopInstrFormPrep::prepareBaseForDispFormChain(Bucket &BucketChain,
     return false;
 
   // If the first value is most profitable, no needed to adjust BucketChain
-  // elements as they are substracted the first value when collecting.
+  // elements as they are subtracted the first value when collecting.
   if (MaxCountRemainder == 0)
     return true;
 

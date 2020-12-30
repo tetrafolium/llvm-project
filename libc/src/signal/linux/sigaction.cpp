@@ -15,7 +15,7 @@
 
 namespace __llvm_libc {
 
-// TOOD: Some architectures will have their signal trampoline functions in the
+// TODO: Some architectures will have their signal trampoline functions in the
 // vdso, use those when available.
 
 extern "C" void __restore_rt();

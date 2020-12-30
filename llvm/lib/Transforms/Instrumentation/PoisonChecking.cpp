@@ -227,7 +227,7 @@ static Value *getPoisonFor(DenseMap<Value *, Value *> &ValToPoison, Value *V) {
   if (isa<Constant>(V)) {
     return ConstantInt::getFalse(V->getContext());
   }
-  // Return false for unknwon values - this implements a non-strict mode where
+  // Return false for unknown values - this implements a non-strict mode where
   // unhandled IR constructs are simply considered to never produce poison.  At
   // some point in the future, we probably want a "strict mode" for testing if
   // nothing else.
@@ -342,7 +342,7 @@ PreservedAnalyses PoisonCheckingPass::run(Function &F,
      any element overflowing should produce poison for the entire result, but
      the LangRef does not state.
    - Floating point binary ops w/fmf flags other than (nnan, noinfs).  It seems
-     strange that only certian flags should be documented as producing poison.
+     strange that only certain flags should be documented as producing poison.
 
    Cases of clear poison semantics not yet implemented:
    - Exact flags on ashr/lshr produce poison

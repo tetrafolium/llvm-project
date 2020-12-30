@@ -63,7 +63,7 @@ InlineInfo::getInlineStack(uint64_t Addr) const {
 /// Skip an InlineInfo object in the specified data at the specified offset.
 ///
 /// Used during the InlineInfo::lookup() call to quickly skip child InlineInfo
-/// objects where the addres ranges isn't contained in the InlineInfo object
+/// objects where the address ranges isn't contained in the InlineInfo object
 /// or its children. This avoids allocations by not appending child InlineInfo
 /// objects to the InlineInfo::Children array.
 ///
@@ -231,7 +231,7 @@ llvm::Expected<InlineInfo> InlineInfo::decode(DataExtractor &Data,
 }
 
 llvm::Error InlineInfo::encode(FileWriter &O, uint64_t BaseAddr) const {
-  // Users must verify the InlineInfo is valid prior to calling this funtion.
+  // Users must verify the InlineInfo is valid prior to calling this function.
   // We don't want to emit any InlineInfo objects if they are not valid since
   // it will waste space in the GSYM file.
   if (!isValid())

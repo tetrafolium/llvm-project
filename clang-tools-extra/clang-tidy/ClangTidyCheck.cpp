@@ -112,7 +112,7 @@ static llvm::Expected<bool> getAsBool(StringRef Value,
 
   if (llvm::Optional<bool> Parsed = llvm::yaml::parseBool(Value))
     return *Parsed;
-  // To maintain backwards compatability, we support parsing numbers as
+  // To maintain backwards compatibility, we support parsing numbers as
   // booleans, even though its not supported in YAML.
   long long Number;
   if (!Value.getAsInteger(10, Number))

@@ -4670,7 +4670,7 @@ static void handleLifetimeCategoryAttr(Sema &S, Decl *D, const ParsedAttr &AL) {
   }
 
   // To check if earlier decl attributes do not conflict the newly parsed ones
-  // we always add (and check) the attribute to the cannonical decl.
+  // we always add (and check) the attribute to the canonical decl.
   D = D->getCanonicalDecl();
   if (AL.getKind() == ParsedAttr::AT_Owner) {
     if (checkAttrMutualExclusion<PointerAttr>(S, D, AL))
@@ -7382,7 +7382,7 @@ static void handleObjCExternallyRetainedAttr(Sema &S, Decl *D,
   }
 
   // If D is a function-like declaration (method, block, or function), then we
-  // make every parameter psuedo-strong.
+  // make every parameter pseudo-strong.
   unsigned NumParams =
       hasFunctionProto(D) ? getFunctionOrMethodNumParams(D) : 0;
   for (unsigned I = 0; I != NumParams; ++I) {

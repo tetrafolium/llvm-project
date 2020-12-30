@@ -10,7 +10,7 @@
 // interesting property) and then efficiently answers queries of the types:
 // 1. Are there any special instructions in the block of interest?
 // 2. Return first of the special instructions in the given block;
-// 3. Check if the given instruction is preceeded by the first special
+// 3. Check if the given instruction is preceded by the first special
 //    instruction in the same block.
 // The class provides caching that allows to answer these queries quickly. The
 // user must make sure that the cached data is invalidated properly whenever

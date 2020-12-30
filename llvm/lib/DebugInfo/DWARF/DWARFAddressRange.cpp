@@ -17,17 +17,17 @@ void DWARFAddressRange::dump(raw_ostream &OS, uint32_t AddressSize,
                              DIDumpOptions DumpOpts,
                              const DWARFObject *Obj) const {
 
-    OS << (DumpOpts.DisplayRawContents ? " " : "[");
-    DWARFFormValue::dumpAddress(OS, AddressSize, LowPC);
-    OS << ", ";
-    DWARFFormValue::dumpAddress(OS, AddressSize, HighPC);
-    OS << (DumpOpts.DisplayRawContents ? "" : ")");
+  OS << (DumpOpts.DisplayRawContents ? " " : "[");
+  DWARFFormValue::dumpAddress(OS, AddressSize, LowPC);
+  OS << ", ";
+  DWARFFormValue::dumpAddress(OS, AddressSize, HighPC);
+  OS << (DumpOpts.DisplayRawContents ? "" : ")");
 
-    if (Obj)
-        DWARFFormValue::dumpAddressSection(*Obj, OS, DumpOpts, SectionIndex);
+  if (Obj)
+    DWARFFormValue::dumpAddressSection(*Obj, OS, DumpOpts, SectionIndex);
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, const DWARFAddressRange &R) {
-    R.dump(OS, /* AddressSize */ 8);
-    return OS;
+  R.dump(OS, /* AddressSize */ 8);
+  return OS;
 }

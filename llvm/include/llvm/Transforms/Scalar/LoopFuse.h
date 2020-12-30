@@ -22,7 +22,7 @@ class Function;
 
 class LoopFusePass : public PassInfoMixin<LoopFusePass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

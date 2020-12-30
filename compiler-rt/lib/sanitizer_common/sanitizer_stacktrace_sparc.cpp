@@ -27,57 +27,58 @@ namespace __sanitizer {
 
 void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
                                     uptr stack_bottom, u32 max_depth) {
-    // TODO(yln): add arg sanity check for stack_top/stack_bottom
-    CHECK_GE(max_depth, 2);
-    const uptr kPageSize = GetPageSizeCached();
+  // TODO(yln): add arg sanity check for stack_top/stack_bottom
+  CHECK_GE(max_depth, 2);
+  const uptr kPageSize = GetPageSizeCached();
 #if defined(__GNUC__)
-    // __builtin_return_address returns the address of the call instruction
-    // on the SPARC and not the return address, so we need to compensate.
-    trace_buffer[0] = GetNextInstructionPc(pc);
+  // __builtin_return_address returns the address of the call instruction
+  // on the SPARC and not the return address, so we need to compensate.
+  trace_buffer[0] = GetNextInstructionPc(pc);
 #else
-    trace_buffer[0] = pc;
+  trace_buffer[0] = pc;
 #endif
-    size = 1;
-    if (stack_top < 4096) return;  // Sanity check for stack top.
-    // Flush register windows to memory
+  size = 1;
+  if (stack_top < 4096)
+    return;  // Sanity check for stack top.
+             // Flush register windows to memory
 #if defined(__sparc_v9__) || defined(__sparcv9__) || defined(__sparcv9)
-    asm volatile("flushw" ::: "memory");
+  asm volatile("flushw" ::: "memory");
 #else
-    asm volatile("ta 3" ::: "memory");
+  asm volatile("ta 3" ::: "memory");
 #endif
-    // On the SPARC, the return address is not in the frame, it is in a
-    // register.  There is no way to access it off of the current frame
-    // pointer, but it can be accessed off the previous frame pointer by
-    // reading the value from the register window save area.
-    uptr prev_bp = GET_CURRENT_FRAME();
-    uptr next_bp = prev_bp;
-    unsigned int i = 0;
-    while (next_bp != bp && IsAligned(next_bp, sizeof(uhwptr)) && i++ < 8) {
-        prev_bp = next_bp;
-        next_bp = (uptr)((uhwptr *)next_bp)[14] + STACK_BIAS;
+  // On the SPARC, the return address is not in the frame, it is in a
+  // register.  There is no way to access it off of the current frame
+  // pointer, but it can be accessed off the previous frame pointer by
+  // reading the value from the register window save area.
+  uptr prev_bp = GET_CURRENT_FRAME();
+  uptr next_bp = prev_bp;
+  unsigned int i = 0;
+  while (next_bp != bp && IsAligned(next_bp, sizeof(uhwptr)) && i++ < 8) {
+    prev_bp = next_bp;
+    next_bp = (uptr)((uhwptr *)next_bp)[14] + STACK_BIAS;
+  }
+  if (next_bp == bp)
+    bp = prev_bp;
+  // Lowest possible address that makes sense as the next frame pointer.
+  // Goes up as we walk the stack.
+  uptr bottom = stack_bottom;
+  // Avoid infinite loop when frame == frame[0] by using frame > prev_frame.
+  while (IsValidFrame(bp, stack_top, bottom) && IsAligned(bp, sizeof(uhwptr)) &&
+         size < max_depth) {
+    uhwptr pc1 = ((uhwptr *)bp)[15];
+    // Let's assume that any pointer in the 0th page is invalid and
+    // stop unwinding here.  If we're adding support for a platform
+    // where this isn't true, we need to reconsider this check.
+    if (pc1 < kPageSize)
+      break;
+    if (pc1 != pc) {
+      // %o7 contains the address of the call instruction and not the
+      // return address, so we need to compensate.
+      trace_buffer[size++] = GetNextInstructionPc((uptr)pc1);
     }
-    if (next_bp == bp)
-        bp = prev_bp;
-    // Lowest possible address that makes sense as the next frame pointer.
-    // Goes up as we walk the stack.
-    uptr bottom = stack_bottom;
-    // Avoid infinite loop when frame == frame[0] by using frame > prev_frame.
-    while (IsValidFrame(bp, stack_top, bottom) && IsAligned(bp, sizeof(uhwptr)) &&
-            size < max_depth) {
-        uhwptr pc1 = ((uhwptr *)bp)[15];
-        // Let's assume that any pointer in the 0th page is invalid and
-        // stop unwinding here.  If we're adding support for a platform
-        // where this isn't true, we need to reconsider this check.
-        if (pc1 < kPageSize)
-            break;
-        if (pc1 != pc) {
-            // %o7 contains the address of the call instruction and not the
-            // return address, so we need to compensate.
-            trace_buffer[size++] = GetNextInstructionPc((uptr)pc1);
-        }
-        bottom = bp;
-        bp = (uptr)((uhwptr *)bp)[14] + STACK_BIAS;
-    }
+    bottom = bp;
+    bp = (uptr)((uhwptr *)bp)[14] + STACK_BIAS;
+  }
 }
 
 }  // namespace __sanitizer

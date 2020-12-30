@@ -26,20 +26,20 @@ static cl::opt<bool, true> EnableARCOptimizations(
     cl::location(EnableARCOpts), cl::init(true), cl::Hidden);
 
 bool llvm::objcarc::IsPotentialRetainableObjPtr(const Value *Op,
-        AAResults &AA) {
-    // First make the rudimentary check.
-    if (!IsPotentialRetainableObjPtr(Op))
-        return false;
+                                                AAResults &AA) {
+  // First make the rudimentary check.
+  if (!IsPotentialRetainableObjPtr(Op))
+    return false;
 
-    // Objects in constant memory are not reference-counted.
-    if (AA.pointsToConstantMemory(Op))
-        return false;
+  // Objects in constant memory are not reference-counted.
+  if (AA.pointsToConstantMemory(Op))
+    return false;
 
-    // Pointers in constant memory are not pointing to reference-counted objects.
-    if (const LoadInst *LI = dyn_cast<LoadInst>(Op))
-        if (AA.pointsToConstantMemory(LI->getPointerOperand()))
-            return false;
+  // Pointers in constant memory are not pointing to reference-counted objects.
+  if (const LoadInst *LI = dyn_cast<LoadInst>(Op))
+    if (AA.pointsToConstantMemory(LI->getPointerOperand()))
+      return false;
 
-    // Otherwise assume the worst.
-    return true;
+  // Otherwise assume the worst.
+  return true;
 }

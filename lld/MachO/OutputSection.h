@@ -24,58 +24,50 @@ class OutputSegment;
 // linker with the same segment / section name.
 class OutputSection {
 public:
-    enum Kind {
-        MergedKind,
-        SyntheticKind,
-    };
+  enum Kind {
+    MergedKind,
+    SyntheticKind,
+  };
 
-    OutputSection(Kind kind, StringRef name) : name(name), sectionKind(kind) {}
-    virtual ~OutputSection() = default;
-    Kind kind() const {
-        return sectionKind;
-    }
+  OutputSection(Kind kind, StringRef name) : name(name), sectionKind(kind) {}
+  virtual ~OutputSection() = default;
+  Kind kind() const { return sectionKind; }
 
-    // These accessors will only be valid after finalizing the section.
-    uint64_t getSegmentOffset() const;
+  // These accessors will only be valid after finalizing the section.
+  uint64_t getSegmentOffset() const;
 
-    // How much space the section occupies in the address space.
-    virtual uint64_t getSize() const = 0;
-    // How much space the section occupies in the file. Most sections are copied
-    // as-is so their file size is the same as their address space size.
-    virtual uint64_t getFileSize() const {
-        return getSize();
-    }
+  // How much space the section occupies in the address space.
+  virtual uint64_t getSize() const = 0;
+  // How much space the section occupies in the file. Most sections are copied
+  // as-is so their file size is the same as their address space size.
+  virtual uint64_t getFileSize() const { return getSize(); }
 
-    // Hidden sections omit header content, but body content may still be present.
-    virtual bool isHidden() const {
-        return false;
-    }
-    // Unneeded sections are omitted entirely (header and body).
-    virtual bool isNeeded() const {
-        return true;
-    }
+  // Hidden sections omit header content, but body content may still be present.
+  virtual bool isHidden() const { return false; }
+  // Unneeded sections are omitted entirely (header and body).
+  virtual bool isNeeded() const { return true; }
 
-    // Specifically finalizes addresses and section size, not content.
-    virtual void finalize() {
-        // TODO investigate refactoring synthetic section finalization logic into
-        // overrides of this function.
-    }
+  // Specifically finalizes addresses and section size, not content.
+  virtual void finalize() {
+    // TODO investigate refactoring synthetic section finalization logic into
+    // overrides of this function.
+  }
 
-    virtual void writeTo(uint8_t *buf) const = 0;
+  virtual void writeTo(uint8_t *buf) const = 0;
 
-    StringRef name;
-    OutputSegment *parent = nullptr;
+  StringRef name;
+  OutputSegment *parent = nullptr;
 
-    uint32_t index = 0;
-    uint64_t addr = 0;
-    uint64_t fileOff = 0;
-    uint32_t align = 1;
-    uint32_t flags = 0;
-    uint32_t reserved1 = 0;
-    uint32_t reserved2 = 0;
+  uint32_t index = 0;
+  uint64_t addr = 0;
+  uint64_t fileOff = 0;
+  uint32_t align = 1;
+  uint32_t flags = 0;
+  uint32_t reserved1 = 0;
+  uint32_t reserved2 = 0;
 
 private:
-    Kind sectionKind;
+  Kind sectionKind;
 };
 
 } // namespace macho

@@ -25,22 +25,22 @@ namespace mpi {
 /// http://clang.llvm.org/extra/clang-tidy/checks/mpi-type-mismatch.html
 class TypeMismatchCheck : public ClangTidyCheck {
 public:
-    TypeMismatchCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
+  TypeMismatchCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
 
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    /// Check if the buffer type MPI datatype pairs match.
-    ///
-    /// \param BufferTypes buffer types
-    /// \param BufferExprs buffer arguments as expressions
-    /// \param MPIDatatypes MPI datatype
-    /// \param LO language options
-    void checkArguments(ArrayRef<const Type *> BufferTypes,
-                        ArrayRef<const Expr *> BufferExprs,
-                        ArrayRef<StringRef> MPIDatatypes, const LangOptions &LO);
+  /// Check if the buffer type MPI datatype pairs match.
+  ///
+  /// \param BufferTypes buffer types
+  /// \param BufferExprs buffer arguments as expressions
+  /// \param MPIDatatypes MPI datatype
+  /// \param LO language options
+  void checkArguments(ArrayRef<const Type *> BufferTypes,
+                      ArrayRef<const Expr *> BufferExprs,
+                      ArrayRef<StringRef> MPIDatatypes, const LangOptions &LO);
 };
 
 } // namespace mpi

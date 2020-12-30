@@ -28,17 +28,17 @@ namespace misc {
 /// be `std::unique_ptr<Foo>*`.
 class UniqueptrResetReleaseCheck : public ClangTidyCheck {
 public:
-    UniqueptrResetReleaseCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
+  UniqueptrResetReleaseCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
 
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        // Only register the matchers for C++11; the functionality currently does
-        // not
-        // provide any benefit to other languages, despite being benign.
-        return LangOpts.CPlusPlus11;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    // Only register the matchers for C++11; the functionality currently does
+    // not
+    // provide any benefit to other languages, despite being benign.
+    return LangOpts.CPlusPlus11;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace misc

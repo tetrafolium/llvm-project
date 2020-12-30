@@ -9,53 +9,53 @@
 #include "AuxVector.h"
 
 AuxVector::AuxVector(const lldb_private::DataExtractor &data) {
-    ParseAuxv(data);
+  ParseAuxv(data);
 }
 
 void AuxVector::ParseAuxv(const lldb_private::DataExtractor &data) {
-    lldb::offset_t offset = 0;
-    const size_t value_type_size = data.GetAddressByteSize() * 2;
-    while (data.ValidOffsetForDataOfSize(offset, value_type_size)) {
-        // We're not reading an address but an int that could be 32 or 64 bit
-        // depending on the address size, which is what GetAddress does.
-        const uint64_t type = data.GetAddress(&offset);
-        const uint64_t value = data.GetAddress(&offset);
-        if (type == AUXV_AT_NULL)
-            break;
-        if (type == AUXV_AT_IGNORE)
-            continue;
+  lldb::offset_t offset = 0;
+  const size_t value_type_size = data.GetAddressByteSize() * 2;
+  while (data.ValidOffsetForDataOfSize(offset, value_type_size)) {
+    // We're not reading an address but an int that could be 32 or 64 bit
+    // depending on the address size, which is what GetAddress does.
+    const uint64_t type = data.GetAddress(&offset);
+    const uint64_t value = data.GetAddress(&offset);
+    if (type == AUXV_AT_NULL)
+      break;
+    if (type == AUXV_AT_IGNORE)
+      continue;
 
-        m_auxv_entries[type] = value;
-    }
+    m_auxv_entries[type] = value;
+  }
 }
 
 llvm::Optional<uint64_t>
 AuxVector::GetAuxValue(enum EntryType entry_type) const {
-    auto it = m_auxv_entries.find(static_cast<uint64_t>(entry_type));
-    if (it != m_auxv_entries.end())
-        return it->second;
-    return llvm::None;
+  auto it = m_auxv_entries.find(static_cast<uint64_t>(entry_type));
+  if (it != m_auxv_entries.end())
+    return it->second;
+  return llvm::None;
 }
 
 void AuxVector::DumpToLog(lldb_private::Log *log) const {
-    if (!log)
-        return;
+  if (!log)
+    return;
 
-    log->PutCString("AuxVector: ");
-    for (auto entry : m_auxv_entries) {
-        LLDB_LOGF(log, "   %s [%" PRIu64 "]: %" PRIx64,
-                  GetEntryName(static_cast<EntryType>(entry.first)), entry.first,
-                  entry.second);
-    }
+  log->PutCString("AuxVector: ");
+  for (auto entry : m_auxv_entries) {
+    LLDB_LOGF(log, "   %s [%" PRIu64 "]: %" PRIx64,
+              GetEntryName(static_cast<EntryType>(entry.first)), entry.first,
+              entry.second);
+  }
 }
 
 const char *AuxVector::GetEntryName(EntryType type) const {
-    const char *name = "AT_???";
+  const char *name = "AT_???";
 
 #define ENTRY_NAME(_type)                                                      \
   _type:                                                                       \
   name = &#_type[5]
-    switch (type) {
+  switch (type) {
     case ENTRY_NAME(AUXV_AT_NULL);
         break;
     case ENTRY_NAME(AUXV_AT_IGNORE);

@@ -26,19 +26,19 @@
 using namespace llvm;
 
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
-    if (!RM.hasValue())
-        return Reloc::Static;
-    return *RM;
+  if (!RM.hasValue())
+    return Reloc::Static;
+  return *RM;
 }
 
 static CodeModel::Model
 getEffectiveXCoreCodeModel(Optional<CodeModel::Model> CM) {
-    if (CM) {
-        if (*CM != CodeModel::Small && *CM != CodeModel::Large)
-            report_fatal_error("Target only supports CodeModel Small or Large");
-        return *CM;
-    }
-    return CodeModel::Small;
+  if (CM) {
+    if (*CM != CodeModel::Small && *CM != CodeModel::Large)
+      report_fatal_error("Target only supports CodeModel Small or Large");
+    return *CM;
+  }
+  return CodeModel::Small;
 }
 
 /// Create an ILP32 architecture model
@@ -55,7 +55,7 @@ XCoreTargetMachine::XCoreTargetMachine(const Target &T, const Triple &TT,
           getEffectiveXCoreCodeModel(CM), OL),
       TLOF(std::make_unique<XCoreTargetObjectFile>()),
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
-    initAsmInfo();
+  initAsmInfo();
 }
 
 XCoreTargetMachine::~XCoreTargetMachine() = default;
@@ -65,51 +65,51 @@ namespace {
 /// XCore Code Generator Pass Configuration Options.
 class XCorePassConfig : public TargetPassConfig {
 public:
-    XCorePassConfig(XCoreTargetMachine &TM, PassManagerBase &PM)
-        : TargetPassConfig(TM, PM) {}
+  XCorePassConfig(XCoreTargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
 
-    XCoreTargetMachine &getXCoreTargetMachine() const {
-        return getTM<XCoreTargetMachine>();
-    }
+  XCoreTargetMachine &getXCoreTargetMachine() const {
+    return getTM<XCoreTargetMachine>();
+  }
 
-    void addIRPasses() override;
-    bool addPreISel() override;
-    bool addInstSelector() override;
-    void addPreEmitPass() override;
+  void addIRPasses() override;
+  bool addPreISel() override;
+  bool addInstSelector() override;
+  void addPreEmitPass() override;
 };
 
 } // end anonymous namespace
 
 TargetPassConfig *XCoreTargetMachine::createPassConfig(PassManagerBase &PM) {
-    return new XCorePassConfig(*this, PM);
+  return new XCorePassConfig(*this, PM);
 }
 
 void XCorePassConfig::addIRPasses() {
-    addPass(createAtomicExpandPass());
+  addPass(createAtomicExpandPass());
 
-    TargetPassConfig::addIRPasses();
+  TargetPassConfig::addIRPasses();
 }
 
 bool XCorePassConfig::addPreISel() {
-    addPass(createXCoreLowerThreadLocalPass());
-    return false;
+  addPass(createXCoreLowerThreadLocalPass());
+  return false;
 }
 
 bool XCorePassConfig::addInstSelector() {
-    addPass(createXCoreISelDag(getXCoreTargetMachine(), getOptLevel()));
-    return false;
+  addPass(createXCoreISelDag(getXCoreTargetMachine(), getOptLevel()));
+  return false;
 }
 
 void XCorePassConfig::addPreEmitPass() {
-    addPass(createXCoreFrameToArgsOffsetEliminationPass(), false);
+  addPass(createXCoreFrameToArgsOffsetEliminationPass(), false);
 }
 
 // Force static initialization.
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeXCoreTarget() {
-    RegisterTargetMachine<XCoreTargetMachine> X(getTheXCoreTarget());
+  RegisterTargetMachine<XCoreTargetMachine> X(getTheXCoreTarget());
 }
 
 TargetTransformInfo
 XCoreTargetMachine::getTargetTransformInfo(const Function &F) {
-    return TargetTransformInfo(XCoreTTIImpl(this, F));
+  return TargetTransformInfo(XCoreTTIImpl(this, F));
 }

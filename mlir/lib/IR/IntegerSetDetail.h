@@ -20,15 +20,15 @@ namespace mlir {
 namespace detail {
 
 struct IntegerSetStorage {
-    unsigned dimCount;
-    unsigned symbolCount;
+  unsigned dimCount;
+  unsigned symbolCount;
 
-    /// Array of affine constraints: a constraint is either an equality
-    /// (affine_expr == 0) or an inequality (affine_expr >= 0).
-    ArrayRef<AffineExpr> constraints;
+  /// Array of affine constraints: a constraint is either an equality
+  /// (affine_expr == 0) or an inequality (affine_expr >= 0).
+  ArrayRef<AffineExpr> constraints;
 
-    // Bits to check whether a constraint is an equality or an inequality.
-    ArrayRef<bool> eqFlags;
+  // Bits to check whether a constraint is an equality or an inequality.
+  ArrayRef<bool> eqFlags;
 };
 
 } // end namespace detail

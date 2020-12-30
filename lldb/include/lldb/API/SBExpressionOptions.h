@@ -17,101 +17,101 @@ namespace lldb {
 
 class LLDB_API SBExpressionOptions {
 public:
-    SBExpressionOptions();
+  SBExpressionOptions();
 
-    SBExpressionOptions(const lldb::SBExpressionOptions &rhs);
+  SBExpressionOptions(const lldb::SBExpressionOptions &rhs);
 
-    ~SBExpressionOptions();
+  ~SBExpressionOptions();
 
-    const SBExpressionOptions &operator=(const lldb::SBExpressionOptions &rhs);
+  const SBExpressionOptions &operator=(const lldb::SBExpressionOptions &rhs);
 
-    bool GetCoerceResultToId() const;
+  bool GetCoerceResultToId() const;
 
-    void SetCoerceResultToId(bool coerce = true);
+  void SetCoerceResultToId(bool coerce = true);
 
-    bool GetUnwindOnError() const;
+  bool GetUnwindOnError() const;
 
-    void SetUnwindOnError(bool unwind = true);
+  void SetUnwindOnError(bool unwind = true);
 
-    bool GetIgnoreBreakpoints() const;
+  bool GetIgnoreBreakpoints() const;
 
-    void SetIgnoreBreakpoints(bool ignore = true);
+  void SetIgnoreBreakpoints(bool ignore = true);
 
-    lldb::DynamicValueType GetFetchDynamicValue() const;
+  lldb::DynamicValueType GetFetchDynamicValue() const;
 
-    void SetFetchDynamicValue(
-        lldb::DynamicValueType dynamic = lldb::eDynamicCanRunTarget);
+  void SetFetchDynamicValue(
+      lldb::DynamicValueType dynamic = lldb::eDynamicCanRunTarget);
 
-    uint32_t GetTimeoutInMicroSeconds() const;
+  uint32_t GetTimeoutInMicroSeconds() const;
 
-    // Set the timeout for the expression, 0 means wait forever.
-    void SetTimeoutInMicroSeconds(uint32_t timeout = 0);
+  // Set the timeout for the expression, 0 means wait forever.
+  void SetTimeoutInMicroSeconds(uint32_t timeout = 0);
 
-    uint32_t GetOneThreadTimeoutInMicroSeconds() const;
+  uint32_t GetOneThreadTimeoutInMicroSeconds() const;
 
-    // Set the timeout for running on one thread, 0 means use the default
-    // behavior. If you set this higher than the overall timeout, you'll get an
-    // error when you try to run the expression.
-    void SetOneThreadTimeoutInMicroSeconds(uint32_t timeout = 0);
+  // Set the timeout for running on one thread, 0 means use the default
+  // behavior. If you set this higher than the overall timeout, you'll get an
+  // error when you try to run the expression.
+  void SetOneThreadTimeoutInMicroSeconds(uint32_t timeout = 0);
 
-    bool GetTryAllThreads() const;
+  bool GetTryAllThreads() const;
 
-    void SetTryAllThreads(bool run_others = true);
+  void SetTryAllThreads(bool run_others = true);
 
-    bool GetStopOthers() const;
+  bool GetStopOthers() const;
 
-    void SetStopOthers(bool stop_others = true);
+  void SetStopOthers(bool stop_others = true);
 
-    bool GetTrapExceptions() const;
+  bool GetTrapExceptions() const;
 
-    void SetTrapExceptions(bool trap_exceptions = true);
+  void SetTrapExceptions(bool trap_exceptions = true);
 
-    void SetLanguage(lldb::LanguageType language);
+  void SetLanguage(lldb::LanguageType language);
 
-    void SetCancelCallback(lldb::ExpressionCancelCallback callback, void *baton);
+  void SetCancelCallback(lldb::ExpressionCancelCallback callback, void *baton);
 
-    bool GetGenerateDebugInfo();
+  bool GetGenerateDebugInfo();
 
-    void SetGenerateDebugInfo(bool b = true);
+  void SetGenerateDebugInfo(bool b = true);
 
-    bool GetSuppressPersistentResult();
+  bool GetSuppressPersistentResult();
 
-    void SetSuppressPersistentResult(bool b = false);
+  void SetSuppressPersistentResult(bool b = false);
 
-    const char *GetPrefix() const;
+  const char *GetPrefix() const;
 
-    void SetPrefix(const char *prefix);
+  void SetPrefix(const char *prefix);
 
-    void SetAutoApplyFixIts(bool b = true);
+  void SetAutoApplyFixIts(bool b = true);
 
-    bool GetAutoApplyFixIts();
+  bool GetAutoApplyFixIts();
 
-    void SetRetriesWithFixIts(uint64_t retries);
+  void SetRetriesWithFixIts(uint64_t retries);
 
-    uint64_t GetRetriesWithFixIts();
+  uint64_t GetRetriesWithFixIts();
 
-    bool GetTopLevel();
+  bool GetTopLevel();
 
-    void SetTopLevel(bool b = true);
+  void SetTopLevel(bool b = true);
 
-    // Gets whether we will JIT an expression if it cannot be interpreted
-    bool GetAllowJIT();
+  // Gets whether we will JIT an expression if it cannot be interpreted
+  bool GetAllowJIT();
 
-    // Sets whether we will JIT an expression if it cannot be interpreted
-    void SetAllowJIT(bool allow);
+  // Sets whether we will JIT an expression if it cannot be interpreted
+  void SetAllowJIT(bool allow);
 
 protected:
-    lldb_private::EvaluateExpressionOptions *get() const;
+  lldb_private::EvaluateExpressionOptions *get() const;
 
-    lldb_private::EvaluateExpressionOptions &ref() const;
+  lldb_private::EvaluateExpressionOptions &ref() const;
 
-    friend class SBFrame;
-    friend class SBValue;
-    friend class SBTarget;
+  friend class SBFrame;
+  friend class SBValue;
+  friend class SBTarget;
 
 private:
-    // This auto_pointer is made in the constructor and is always valid.
-    mutable std::unique_ptr<lldb_private::EvaluateExpressionOptions> m_opaque_up;
+  // This auto_pointer is made in the constructor and is always valid.
+  mutable std::unique_ptr<lldb_private::EvaluateExpressionOptions> m_opaque_up;
 };
 
 } // namespace lldb

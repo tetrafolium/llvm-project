@@ -21,34 +21,28 @@ namespace sys {
 namespace fs {
 
 class UniqueID {
-    uint64_t Device;
-    uint64_t File;
+  uint64_t Device;
+  uint64_t File;
 
 public:
-    UniqueID() = default;
-    UniqueID(uint64_t Device, uint64_t File) : Device(Device), File(File) {}
+  UniqueID() = default;
+  UniqueID(uint64_t Device, uint64_t File) : Device(Device), File(File) {}
 
-    bool operator==(const UniqueID &Other) const {
-        return Device == Other.Device && File == Other.File;
-    }
-    bool operator!=(const UniqueID &Other) const {
-        return !(*this == Other);
-    }
-    bool operator<(const UniqueID &Other) const {
-        /// Don't use std::tie since it bloats the compile time of this header.
-        if (Device < Other.Device)
-            return true;
-        if (Other.Device < Device)
-            return false;
-        return File < Other.File;
-    }
+  bool operator==(const UniqueID &Other) const {
+    return Device == Other.Device && File == Other.File;
+  }
+  bool operator!=(const UniqueID &Other) const { return !(*this == Other); }
+  bool operator<(const UniqueID &Other) const {
+    /// Don't use std::tie since it bloats the compile time of this header.
+    if (Device < Other.Device)
+      return true;
+    if (Other.Device < Device)
+      return false;
+    return File < Other.File;
+  }
 
-    uint64_t getDevice() const {
-        return Device;
-    }
-    uint64_t getFile() const {
-        return File;
-    }
+  uint64_t getDevice() const { return Device; }
+  uint64_t getFile() const { return File; }
 };
 
 } // end namespace fs

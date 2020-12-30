@@ -21,7 +21,7 @@ namespace mlir {
 /// A callable is either a symbol, or an SSA value, that is referenced by a
 /// call-like operation. This represents the destination of the call.
 struct CallInterfaceCallable : public PointerUnion<SymbolRefAttr, Value> {
-    using PointerUnion<SymbolRefAttr, Value>::PointerUnion;
+  using PointerUnion<SymbolRefAttr, Value>::PointerUnion;
 };
 } // end namespace mlir
 

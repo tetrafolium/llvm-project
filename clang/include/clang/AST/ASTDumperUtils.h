@@ -18,17 +18,14 @@
 namespace clang {
 
 /// Used to specify the format for printing AST dump information.
-enum ASTDumpOutputFormat {
-    ADOF_Default,
-    ADOF_JSON
-};
+enum ASTDumpOutputFormat { ADOF_Default, ADOF_JSON };
 
 // Colors used for various parts of the AST dump
 // Do not use bold yellow for any text.  It is hard to read on white screens.
 
 struct TerminalColor {
-    llvm::raw_ostream::Colors Color;
-    bool Bold;
+  llvm::raw_ostream::Colors Color;
+  bool Bold;
 };
 
 // Red           - CastColor
@@ -70,8 +67,7 @@ static const TerminalColor NullColor = {llvm::raw_ostream::BLUE, false};
 
 // Undeserialized entities
 static const TerminalColor UndeserializedColor = {llvm::raw_ostream::GREEN,
-                                                  true
-                                                 };
+                                                  true};
 
 // CastKind from CastExpr's
 static const TerminalColor CastColor = {llvm::raw_ostream::RED, false};
@@ -85,19 +81,19 @@ static const TerminalColor DeclNameColor = {llvm::raw_ostream::CYAN, true};
 static const TerminalColor IndentColor = {llvm::raw_ostream::BLUE, false};
 
 class ColorScope {
-    llvm::raw_ostream &OS;
-    const bool ShowColors;
+  llvm::raw_ostream &OS;
+  const bool ShowColors;
 
 public:
-    ColorScope(llvm::raw_ostream &OS, bool ShowColors, TerminalColor Color)
-        : OS(OS), ShowColors(ShowColors) {
-        if (ShowColors)
-            OS.changeColor(Color.Color, Color.Bold);
-    }
-    ~ColorScope() {
-        if (ShowColors)
-            OS.resetColor();
-    }
+  ColorScope(llvm::raw_ostream &OS, bool ShowColors, TerminalColor Color)
+      : OS(OS), ShowColors(ShowColors) {
+    if (ShowColors)
+      OS.changeColor(Color.Color, Color.Bold);
+  }
+  ~ColorScope() {
+    if (ShowColors)
+      OS.resetColor();
+  }
 };
 
 } // namespace clang

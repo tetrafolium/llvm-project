@@ -15,28 +15,26 @@
 #include "llvm-c-test.h"
 
 int llvm_add_named_metadata_operand(void) {
-    LLVMModuleRef m = LLVMModuleCreateWithName("Mod");
-    LLVMValueRef values[] = { LLVMConstInt(LLVMInt32Type(), 0, 0) };
+  LLVMModuleRef m = LLVMModuleCreateWithName("Mod");
+  LLVMValueRef values[] = {LLVMConstInt(LLVMInt32Type(), 0, 0)};
 
-    // This used to trigger an assertion
-    LLVMAddNamedMetadataOperand(m, "name", LLVMMDNode(values, 1));
+  // This used to trigger an assertion
+  LLVMAddNamedMetadataOperand(m, "name", LLVMMDNode(values, 1));
 
-    LLVMDisposeModule(m);
+  LLVMDisposeModule(m);
 
-    return 0;
+  return 0;
 }
 
 int llvm_set_metadata(void) {
-    LLVMBuilderRef b = LLVMCreateBuilder();
-    LLVMValueRef values[] = { LLVMConstInt(LLVMInt32Type(), 0, 0) };
+  LLVMBuilderRef b = LLVMCreateBuilder();
+  LLVMValueRef values[] = {LLVMConstInt(LLVMInt32Type(), 0, 0)};
 
-    // This used to trigger an assertion
-    LLVMSetMetadata(
-        LLVMBuildRetVoid(b),
-        LLVMGetMDKindID("kind", 4),
-        LLVMMDNode(values, 1));
+  // This used to trigger an assertion
+  LLVMSetMetadata(LLVMBuildRetVoid(b), LLVMGetMDKindID("kind", 4),
+                  LLVMMDNode(values, 1));
 
-    LLVMDisposeBuilder(b);
+  LLVMDisposeBuilder(b);
 
-    return 0;
+  return 0;
 }

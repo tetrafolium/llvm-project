@@ -24,10 +24,10 @@ namespace llvm_libc {
 class RestrictSystemLibcHeadersCheck
     : public portability::RestrictSystemIncludesCheck {
 public:
-    RestrictSystemLibcHeadersCheck(StringRef Name, ClangTidyContext *Context)
-        : portability::RestrictSystemIncludesCheck(Name, Context, "-*") {}
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
+  RestrictSystemLibcHeadersCheck(StringRef Name, ClangTidyContext *Context)
+      : portability::RestrictSystemIncludesCheck(Name, Context, "-*") {}
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
 };
 
 } // namespace llvm_libc

@@ -140,7 +140,7 @@ bool getXRayOmitFunctionIndex();
 /// Create this object with static storage to register codegen-related command
 /// line options.
 struct RegisterCodeGenFlags {
-    RegisterCodeGenFlags();
+  RegisterCodeGenFlags();
 };
 
 llvm::BasicBlockSection getBBSectionsMode(llvm::TargetOptions &Options);

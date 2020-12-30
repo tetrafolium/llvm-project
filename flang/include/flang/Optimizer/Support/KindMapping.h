@@ -42,46 +42,44 @@ namespace fir {
 /// extended.
 class KindMapping {
 public:
-    using KindTy = unsigned;
-    using Bitsize = unsigned;
-    using LLVMTypeID = llvm::Type::TypeID;
-    using MatchResult = mlir::ParseResult;
+  using KindTy = unsigned;
+  using Bitsize = unsigned;
+  using LLVMTypeID = llvm::Type::TypeID;
+  using MatchResult = mlir::ParseResult;
 
-    explicit KindMapping(mlir::MLIRContext *context);
-    explicit KindMapping(mlir::MLIRContext *context, llvm::StringRef map);
+  explicit KindMapping(mlir::MLIRContext *context);
+  explicit KindMapping(mlir::MLIRContext *context, llvm::StringRef map);
 
-    /// Get the size in bits of !fir.char<kind>
-    Bitsize getCharacterBitsize(KindTy kind) const;
+  /// Get the size in bits of !fir.char<kind>
+  Bitsize getCharacterBitsize(KindTy kind) const;
 
-    /// Get the size in bits of !fir.int<kind>
-    Bitsize getIntegerBitsize(KindTy kind) const;
+  /// Get the size in bits of !fir.int<kind>
+  Bitsize getIntegerBitsize(KindTy kind) const;
 
-    /// Get the size in bits of !fir.logical<kind>
-    Bitsize getLogicalBitsize(KindTy kind) const;
+  /// Get the size in bits of !fir.logical<kind>
+  Bitsize getLogicalBitsize(KindTy kind) const;
 
-    /// Get the size in bits of !fir.real<kind>
-    Bitsize getRealBitsize(KindTy kind) const;
+  /// Get the size in bits of !fir.real<kind>
+  Bitsize getRealBitsize(KindTy kind) const;
 
-    /// Get the LLVM Type::TypeID of !fir.real<kind>
-    LLVMTypeID getRealTypeID(KindTy kind) const;
+  /// Get the LLVM Type::TypeID of !fir.real<kind>
+  LLVMTypeID getRealTypeID(KindTy kind) const;
 
-    /// Get the LLVM Type::TypeID of !fir.complex<kind>
-    LLVMTypeID getComplexTypeID(KindTy kind) const;
+  /// Get the LLVM Type::TypeID of !fir.complex<kind>
+  LLVMTypeID getComplexTypeID(KindTy kind) const;
 
-    mlir::MLIRContext *getContext() const {
-        return context;
-    }
+  mlir::MLIRContext *getContext() const { return context; }
 
-    /// Get the float semantics of !fir.real<kind>
-    const llvm::fltSemantics &getFloatSemantics(KindTy kind) const;
+  /// Get the float semantics of !fir.real<kind>
+  const llvm::fltSemantics &getFloatSemantics(KindTy kind) const;
 
 private:
-    MatchResult badMapString(const llvm::Twine &ptr);
-    MatchResult parse(llvm::StringRef kindMap);
+  MatchResult badMapString(const llvm::Twine &ptr);
+  MatchResult parse(llvm::StringRef kindMap);
 
-    mlir::MLIRContext *context;
-    llvm::DenseMap<std::pair<char, KindTy>, Bitsize> intMap;
-    llvm::DenseMap<std::pair<char, KindTy>, LLVMTypeID> floatMap;
+  mlir::MLIRContext *context;
+  llvm::DenseMap<std::pair<char, KindTy>, Bitsize> intMap;
+  llvm::DenseMap<std::pair<char, KindTy>, LLVMTypeID> floatMap;
 };
 
 } // namespace fir

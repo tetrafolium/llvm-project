@@ -28,27 +28,27 @@
 
 namespace llvm {
 struct MergedLoadStoreMotionOptions {
-    bool SplitFooterBB;
-    MergedLoadStoreMotionOptions(bool SplitFooterBB = false)
-        : SplitFooterBB(SplitFooterBB) {}
+  bool SplitFooterBB;
+  MergedLoadStoreMotionOptions(bool SplitFooterBB = false)
+      : SplitFooterBB(SplitFooterBB) {}
 
-    MergedLoadStoreMotionOptions &splitFooterBB(bool SFBB) {
-        SplitFooterBB = SFBB;
-        return *this;
-    }
+  MergedLoadStoreMotionOptions &splitFooterBB(bool SFBB) {
+    SplitFooterBB = SFBB;
+    return *this;
+  }
 };
 
 class MergedLoadStoreMotionPass
     : public PassInfoMixin<MergedLoadStoreMotionPass> {
-    MergedLoadStoreMotionOptions Options;
+  MergedLoadStoreMotionOptions Options;
 
 public:
-    MergedLoadStoreMotionPass()
-        : MergedLoadStoreMotionPass(MergedLoadStoreMotionOptions()) {}
-    MergedLoadStoreMotionPass(const MergedLoadStoreMotionOptions &PassOptions)
-        : Options(PassOptions) {}
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  MergedLoadStoreMotionPass()
+      : MergedLoadStoreMotionPass(MergedLoadStoreMotionOptions()) {}
+  MergedLoadStoreMotionPass(const MergedLoadStoreMotionOptions &PassOptions)
+      : Options(PassOptions) {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
-}
+} // namespace llvm
 
 #endif // LLVM_TRANSFORMS_SCALAR_MERGEDLOADSTOREMOTION_H

@@ -28,98 +28,96 @@ namespace lldb_private {
 namespace npdb {
 
 enum class PdbSymUidKind : uint8_t {
-    Compiland,
-    CompilandSym,
-    PublicSym,
-    GlobalSym,
-    Type,
-    FieldListMember
+  Compiland,
+  CompilandSym,
+  PublicSym,
+  GlobalSym,
+  Type,
+  FieldListMember
 };
 
 struct PdbCompilandId {
-    // 0-based index of module in PDB
-    uint16_t modi;
+  // 0-based index of module in PDB
+  uint16_t modi;
 };
 
 struct PdbCompilandSymId {
-    PdbCompilandSymId() = default;
-    PdbCompilandSymId(uint16_t modi, uint32_t offset)
-        : modi(modi), offset(offset) {}
-    // 0-based index of module in PDB
-    uint16_t modi = 0;
+  PdbCompilandSymId() = default;
+  PdbCompilandSymId(uint16_t modi, uint32_t offset)
+      : modi(modi), offset(offset) {}
+  // 0-based index of module in PDB
+  uint16_t modi = 0;
 
-    // Offset of symbol's record in module stream.  This is
-    // offset by 4 from the CVSymbolArray's notion of offset
-    // due to the debug magic at the beginning of the stream.
-    uint32_t offset = 0;
+  // Offset of symbol's record in module stream.  This is
+  // offset by 4 from the CVSymbolArray's notion of offset
+  // due to the debug magic at the beginning of the stream.
+  uint32_t offset = 0;
 };
 
 struct PdbGlobalSymId {
-    PdbGlobalSymId() = default;
-    PdbGlobalSymId(uint32_t offset, bool is_public)
-        : offset(offset), is_public(is_public) {}
+  PdbGlobalSymId() = default;
+  PdbGlobalSymId(uint32_t offset, bool is_public)
+      : offset(offset), is_public(is_public) {}
 
-    // Offset of symbol's record in globals or publics stream.
-    uint32_t offset = 0;
+  // Offset of symbol's record in globals or publics stream.
+  uint32_t offset = 0;
 
-    // True if this symbol is in the public stream, false if it's in the globals
-    // stream.
-    bool is_public = false;
+  // True if this symbol is in the public stream, false if it's in the globals
+  // stream.
+  bool is_public = false;
 };
 
 struct PdbTypeSymId {
-    PdbTypeSymId() = default;
-    PdbTypeSymId(llvm::codeview::TypeIndex index, bool is_ipi = false)
-        : index(index), is_ipi(is_ipi) {}
+  PdbTypeSymId() = default;
+  PdbTypeSymId(llvm::codeview::TypeIndex index, bool is_ipi = false)
+      : index(index), is_ipi(is_ipi) {}
 
-    // The index of the of the type in the TPI or IPI stream.
-    llvm::codeview::TypeIndex index;
+  // The index of the of the type in the TPI or IPI stream.
+  llvm::codeview::TypeIndex index;
 
-    // True if this symbol comes from the IPI stream, false if it's from the TPI
-    // stream.
-    bool is_ipi = false;
+  // True if this symbol comes from the IPI stream, false if it's from the TPI
+  // stream.
+  bool is_ipi = false;
 };
 
 struct PdbFieldListMemberId {
-    // The TypeIndex of the LF_FIELDLIST record.
-    llvm::codeview::TypeIndex index;
+  // The TypeIndex of the LF_FIELDLIST record.
+  llvm::codeview::TypeIndex index;
 
-    // The offset from the beginning of the LF_FIELDLIST record to this record.
-    uint16_t offset = 0;
+  // The offset from the beginning of the LF_FIELDLIST record to this record.
+  uint16_t offset = 0;
 };
 
 class PdbSymUid {
-    uint64_t m_repr = 0;
+  uint64_t m_repr = 0;
 
 public:
-    PdbSymUid() = default;
-    PdbSymUid(uint64_t repr) : m_repr(repr) {}
-    PdbSymUid(const PdbCompilandId &cid);
-    PdbSymUid(const PdbCompilandSymId &csid);
-    PdbSymUid(const PdbGlobalSymId &gsid);
-    PdbSymUid(const PdbTypeSymId &tsid);
-    PdbSymUid(const PdbFieldListMemberId &flmid);
+  PdbSymUid() = default;
+  PdbSymUid(uint64_t repr) : m_repr(repr) {}
+  PdbSymUid(const PdbCompilandId &cid);
+  PdbSymUid(const PdbCompilandSymId &csid);
+  PdbSymUid(const PdbGlobalSymId &gsid);
+  PdbSymUid(const PdbTypeSymId &tsid);
+  PdbSymUid(const PdbFieldListMemberId &flmid);
 
-    uint64_t toOpaqueId() const {
-        return m_repr;
-    }
+  uint64_t toOpaqueId() const { return m_repr; }
 
-    PdbSymUidKind kind() const;
+  PdbSymUidKind kind() const;
 
-    PdbCompilandId asCompiland() const;
-    PdbCompilandSymId asCompilandSym() const;
-    PdbGlobalSymId asGlobalSym() const;
-    PdbTypeSymId asTypeSym() const;
-    PdbFieldListMemberId asFieldListMember() const;
+  PdbCompilandId asCompiland() const;
+  PdbCompilandSymId asCompilandSym() const;
+  PdbGlobalSymId asGlobalSym() const;
+  PdbTypeSymId asTypeSym() const;
+  PdbFieldListMemberId asFieldListMember() const;
 };
 
 template <typename T> uint64_t toOpaqueUid(const T &cid) {
-    return PdbSymUid(cid).toOpaqueId();
+  return PdbSymUid(cid).toOpaqueId();
 }
 
 struct SymbolAndUid {
-    llvm::codeview::CVSymbol sym;
-    PdbSymUid uid;
+  llvm::codeview::CVSymbol sym;
+  PdbSymUid uid;
 };
 } // namespace npdb
 } // namespace lldb_private

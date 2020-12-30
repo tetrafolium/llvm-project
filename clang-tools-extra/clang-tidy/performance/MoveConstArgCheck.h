@@ -23,19 +23,19 @@ namespace performance {
 //      types as their objects are not moved but copied. Enabled by default.
 class MoveConstArgCheck : public ClangTidyCheck {
 public:
-    MoveConstArgCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          CheckTriviallyCopyableMove(
-              Options.get("CheckTriviallyCopyableMove", true)) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  MoveConstArgCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        CheckTriviallyCopyableMove(
+            Options.get("CheckTriviallyCopyableMove", true)) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const bool CheckTriviallyCopyableMove;
+  const bool CheckTriviallyCopyableMove;
 };
 
 } // namespace performance

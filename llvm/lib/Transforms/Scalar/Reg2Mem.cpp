@@ -42,88 +42,89 @@ STATISTIC(NumRegsDemoted, "Number of registers demoted");
 STATISTIC(NumPhisDemoted, "Number of phi-nodes demoted");
 
 static bool valueEscapes(const Instruction &Inst) {
-    const BasicBlock *BB = Inst.getParent();
-    for (const User *U : Inst.users()) {
-        const Instruction *UI = cast<Instruction>(U);
-        if (UI->getParent() != BB || isa<PHINode>(UI))
-            return true;
-    }
-    return false;
+  const BasicBlock *BB = Inst.getParent();
+  for (const User *U : Inst.users()) {
+    const Instruction *UI = cast<Instruction>(U);
+    if (UI->getParent() != BB || isa<PHINode>(UI))
+      return true;
+  }
+  return false;
 }
 
 static bool runPass(Function &F) {
-    // Insert all new allocas into entry block.
-    BasicBlock *BBEntry = &F.getEntryBlock();
-    assert(pred_empty(BBEntry) &&
-           "Entry block to function must not have predecessors!");
+  // Insert all new allocas into entry block.
+  BasicBlock *BBEntry = &F.getEntryBlock();
+  assert(pred_empty(BBEntry) &&
+         "Entry block to function must not have predecessors!");
 
-    // Find first non-alloca instruction and create insertion point. This is
-    // safe if block is well-formed: it always have terminator, otherwise
-    // we'll get and assertion.
-    BasicBlock::iterator I = BBEntry->begin();
-    while (isa<AllocaInst>(I)) ++I;
+  // Find first non-alloca instruction and create insertion point. This is
+  // safe if block is well-formed: it always have terminator, otherwise
+  // we'll get and assertion.
+  BasicBlock::iterator I = BBEntry->begin();
+  while (isa<AllocaInst>(I))
+    ++I;
 
-    CastInst *AllocaInsertionPoint = new BitCastInst(
-        Constant::getNullValue(Type::getInt32Ty(F.getContext())),
-        Type::getInt32Ty(F.getContext()), "reg2mem alloca point", &*I);
+  CastInst *AllocaInsertionPoint = new BitCastInst(
+      Constant::getNullValue(Type::getInt32Ty(F.getContext())),
+      Type::getInt32Ty(F.getContext()), "reg2mem alloca point", &*I);
 
-    // Find the escaped instructions. But don't create stack slots for
-    // allocas in entry block.
-    std::list<Instruction*> WorkList;
-    for (Instruction &I : instructions(F))
-        if (!(isa<AllocaInst>(I) && I.getParent() == BBEntry) && valueEscapes(I))
-            WorkList.push_front(&I);
+  // Find the escaped instructions. But don't create stack slots for
+  // allocas in entry block.
+  std::list<Instruction *> WorkList;
+  for (Instruction &I : instructions(F))
+    if (!(isa<AllocaInst>(I) && I.getParent() == BBEntry) && valueEscapes(I))
+      WorkList.push_front(&I);
 
-    // Demote escaped instructions
-    NumRegsDemoted += WorkList.size();
-    for (Instruction *I : WorkList)
-        DemoteRegToStack(*I, false, AllocaInsertionPoint);
+  // Demote escaped instructions
+  NumRegsDemoted += WorkList.size();
+  for (Instruction *I : WorkList)
+    DemoteRegToStack(*I, false, AllocaInsertionPoint);
 
-    WorkList.clear();
+  WorkList.clear();
 
-    // Find all phi's
-    for (BasicBlock &BB : F)
-        for (auto &Phi : BB.phis())
-            WorkList.push_front(&Phi);
+  // Find all phi's
+  for (BasicBlock &BB : F)
+    for (auto &Phi : BB.phis())
+      WorkList.push_front(&Phi);
 
-    // Demote phi nodes
-    NumPhisDemoted += WorkList.size();
-    for (Instruction *I : WorkList)
-        DemotePHIToStack(cast<PHINode>(I), AllocaInsertionPoint);
+  // Demote phi nodes
+  NumPhisDemoted += WorkList.size();
+  for (Instruction *I : WorkList)
+    DemotePHIToStack(cast<PHINode>(I), AllocaInsertionPoint);
 
-    return true;
+  return true;
 }
 
 PreservedAnalyses RegToMemPass::run(Function &F, FunctionAnalysisManager &AM) {
-    auto *DT = &AM.getResult<DominatorTreeAnalysis>(F);
-    auto *LI = &AM.getResult<LoopAnalysis>(F);
-    unsigned N = SplitAllCriticalEdges(F, CriticalEdgeSplittingOptions(DT, LI));
-    bool Changed = runPass(F);
-    if (N == 0 && !Changed)
-        return PreservedAnalyses::all();
-    PreservedAnalyses PA;
-    PA.preserve<DominatorTreeAnalysis>();
-    PA.preserve<LoopAnalysis>();
-    return PA;
+  auto *DT = &AM.getResult<DominatorTreeAnalysis>(F);
+  auto *LI = &AM.getResult<LoopAnalysis>(F);
+  unsigned N = SplitAllCriticalEdges(F, CriticalEdgeSplittingOptions(DT, LI));
+  bool Changed = runPass(F);
+  if (N == 0 && !Changed)
+    return PreservedAnalyses::all();
+  PreservedAnalyses PA;
+  PA.preserve<DominatorTreeAnalysis>();
+  PA.preserve<LoopAnalysis>();
+  return PA;
 }
 
 namespace {
 struct RegToMemLegacy : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    RegToMemLegacy() : FunctionPass(ID) {
-        initializeRegToMemLegacyPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  RegToMemLegacy() : FunctionPass(ID) {
+    initializeRegToMemLegacyPass(*PassRegistry::getPassRegistry());
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequiredID(BreakCriticalEdgesID);
-        AU.addPreservedID(BreakCriticalEdgesID);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequiredID(BreakCriticalEdgesID);
+    AU.addPreservedID(BreakCriticalEdgesID);
+  }
 
-    bool runOnFunction(Function &F) override {
-        if (F.isDeclaration() || skipFunction(F))
-            return false;
-        return runPass(F);
-    }
+  bool runOnFunction(Function &F) override {
+    if (F.isDeclaration() || skipFunction(F))
+      return false;
+    return runPass(F);
+  }
 };
 } // namespace
 
@@ -137,5 +138,5 @@ INITIALIZE_PASS_END(RegToMemLegacy, "reg2mem",
 // createDemoteRegisterToMemory - Provide an entry point to create this pass.
 char &llvm::DemoteRegisterToMemoryID = RegToMemLegacy::ID;
 FunctionPass *llvm::createDemoteRegisterToMemoryPass() {
-    return new RegToMemLegacy();
+  return new RegToMemLegacy();
 }

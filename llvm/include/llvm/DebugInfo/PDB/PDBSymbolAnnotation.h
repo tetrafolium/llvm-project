@@ -17,19 +17,19 @@ class raw_ostream;
 namespace pdb {
 
 class PDBSymbolAnnotation : public PDBSymbol {
-    DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::Annotation)
+  DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::Annotation)
 
 public:
-    void dump(PDBSymDumper &Dumper) const override;
+  void dump(PDBSymDumper &Dumper) const override;
 
-    FORWARD_SYMBOL_METHOD(getAddressOffset)
-    FORWARD_SYMBOL_METHOD(getAddressSection)
-    FORWARD_SYMBOL_METHOD(getDataKind)
-    FORWARD_SYMBOL_METHOD(getRelativeVirtualAddress)
-    // FORWARD_SYMBOL_METHOD(getValue)
-    FORWARD_SYMBOL_METHOD(getVirtualAddress)
+  FORWARD_SYMBOL_METHOD(getAddressOffset)
+  FORWARD_SYMBOL_METHOD(getAddressSection)
+  FORWARD_SYMBOL_METHOD(getDataKind)
+  FORWARD_SYMBOL_METHOD(getRelativeVirtualAddress)
+  // FORWARD_SYMBOL_METHOD(getValue)
+  FORWARD_SYMBOL_METHOD(getVirtualAddress)
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif // LLVM_DEBUGINFO_PDB_PDBSYMBOLANNOTATION_H

@@ -1,4 +1,5 @@
-//===-- FindAllSymbolsAction.cpp - find all symbols action --------*- C++ -*-===//
+//===-- FindAllSymbolsAction.cpp - find all symbols action --------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -20,16 +21,16 @@ FindAllSymbolsAction::FindAllSymbolsAction(
     const HeaderMapCollector::RegexHeaderMap *RegexHeaderMap)
     : Reporter(Reporter), Collector(RegexHeaderMap), Handler(&Collector),
       Matcher(Reporter, &Collector) {
-    Matcher.registerMatchers(&MatchFinder);
+  Matcher.registerMatchers(&MatchFinder);
 }
 
 std::unique_ptr<ASTConsumer>
 FindAllSymbolsAction::CreateASTConsumer(CompilerInstance &Compiler,
                                         StringRef InFile) {
-    Compiler.getPreprocessor().addCommentHandler(&Handler);
-    Compiler.getPreprocessor().addPPCallbacks(std::make_unique<FindAllMacros>(
-                Reporter, &Compiler.getSourceManager(), &Collector));
-    return MatchFinder.newASTConsumer();
+  Compiler.getPreprocessor().addCommentHandler(&Handler);
+  Compiler.getPreprocessor().addPPCallbacks(std::make_unique<FindAllMacros>(
+      Reporter, &Compiler.getSourceManager(), &Collector));
+  return MatchFinder.newASTConsumer();
 }
 
 } // namespace find_all_symbols

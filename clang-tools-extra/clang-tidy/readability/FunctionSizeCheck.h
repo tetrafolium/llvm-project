@@ -36,19 +36,19 @@ namespace readability {
 ///     declarations. The default is `-1` (ignore the number of variables).
 class FunctionSizeCheck : public ClangTidyCheck {
 public:
-    FunctionSizeCheck(StringRef Name, ClangTidyContext *Context);
+  FunctionSizeCheck(StringRef Name, ClangTidyContext *Context);
 
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const unsigned LineThreshold;
-    const unsigned StatementThreshold;
-    const unsigned BranchThreshold;
-    const unsigned ParameterThreshold;
-    const unsigned NestingThreshold;
-    const unsigned VariableThreshold;
+  const unsigned LineThreshold;
+  const unsigned StatementThreshold;
+  const unsigned BranchThreshold;
+  const unsigned ParameterThreshold;
+  const unsigned NestingThreshold;
+  const unsigned VariableThreshold;
 };
 
 } // namespace readability

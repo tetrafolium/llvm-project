@@ -18,14 +18,14 @@ namespace boost {
 
 class BoostModule : public ClangTidyModule {
 public:
-    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-        CheckFactories.registerCheck<UseToStringCheck>("boost-use-to-string");
-    }
+  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<UseToStringCheck>("boost-use-to-string");
+  }
 };
 
 // Register the BoostModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<BoostModule> X("boost-module",
-        "Add boost checks.");
+                                                   "Add boost checks.");
 
 } // namespace boost
 

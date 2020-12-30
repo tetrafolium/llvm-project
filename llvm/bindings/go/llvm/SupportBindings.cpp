@@ -16,10 +16,10 @@
 #include <string.h>
 
 void LLVMLoadLibraryPermanently2(const char *Filename, char **ErrMsg) {
-    std::string ErrMsgStr;
-    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename, &ErrMsgStr)) {
-        *ErrMsg = static_cast<char *>(malloc(ErrMsgStr.size() + 1));
-        memcpy(static_cast<void *>(*ErrMsg),
-               static_cast<const void *>(ErrMsgStr.c_str()), ErrMsgStr.size() + 1);
-    }
+  std::string ErrMsgStr;
+  if (llvm::sys::DynamicLibrary::LoadLibraryPermanently(Filename, &ErrMsgStr)) {
+    *ErrMsg = static_cast<char *>(malloc(ErrMsgStr.size() + 1));
+    memcpy(static_cast<void *>(*ErrMsg),
+           static_cast<const void *>(ErrMsgStr.c_str()), ErrMsgStr.size() + 1);
+  }
 }

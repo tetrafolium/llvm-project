@@ -18,16 +18,16 @@ class LinePrinter;
 
 class ExternalSymbolDumper : public PDBSymDumper {
 public:
-    ExternalSymbolDumper(LinePrinter &P);
+  ExternalSymbolDumper(LinePrinter &P);
 
-    void start(const PDBSymbolExe &Symbol);
+  void start(const PDBSymbolExe &Symbol);
 
-    void dump(const PDBSymbolPublicSymbol &Symbol) override;
+  void dump(const PDBSymbolPublicSymbol &Symbol) override;
 
 private:
-    LinePrinter &Printer;
+  LinePrinter &Printer;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

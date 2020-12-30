@@ -26,28 +26,28 @@ CommandObjectGUI::~CommandObjectGUI() {}
 
 bool CommandObjectGUI::DoExecute(Args &args, CommandReturnObject &result) {
 #if LLDB_ENABLE_CURSES
-    if (args.GetArgumentCount() == 0) {
-        Debugger &debugger = GetDebugger();
+  if (args.GetArgumentCount() == 0) {
+    Debugger &debugger = GetDebugger();
 
-        File &input = debugger.GetInputFile();
-        File &output = debugger.GetOutputFile();
-        if (input.GetStream() && output.GetStream() && input.GetIsRealTerminal() &&
-                input.GetIsInteractive()) {
-            IOHandlerSP io_handler_sp(new IOHandlerCursesGUI(debugger));
-            if (io_handler_sp)
-                debugger.RunIOHandlerAsync(io_handler_sp);
-            result.SetStatus(eReturnStatusSuccessFinishResult);
-        } else {
-            result.AppendError("the gui command requires an interactive terminal.");
-            result.SetStatus(eReturnStatusFailed);
-        }
+    File &input = debugger.GetInputFile();
+    File &output = debugger.GetOutputFile();
+    if (input.GetStream() && output.GetStream() && input.GetIsRealTerminal() &&
+        input.GetIsInteractive()) {
+      IOHandlerSP io_handler_sp(new IOHandlerCursesGUI(debugger));
+      if (io_handler_sp)
+        debugger.RunIOHandlerAsync(io_handler_sp);
+      result.SetStatus(eReturnStatusSuccessFinishResult);
     } else {
-        result.AppendError("the gui command takes no arguments.");
-        result.SetStatus(eReturnStatusFailed);
+      result.AppendError("the gui command requires an interactive terminal.");
+      result.SetStatus(eReturnStatusFailed);
     }
-    return true;
+  } else {
+    result.AppendError("the gui command takes no arguments.");
+    result.SetStatus(eReturnStatusFailed);
+  }
+  return true;
 #else
-    result.AppendError("lldb was not built with gui support");
-    return false;
+  result.AppendError("lldb was not built with gui support");
+  return false;
 #endif
 }

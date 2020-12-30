@@ -17,55 +17,41 @@
 namespace llvm {
 
 class SparcMachineFunctionInfo : public MachineFunctionInfo {
-    virtual void anchor();
+  virtual void anchor();
+
 private:
-    Register GlobalBaseReg;
+  Register GlobalBaseReg;
 
-    /// VarArgsFrameOffset - Frame offset to start of varargs area.
-    int VarArgsFrameOffset;
+  /// VarArgsFrameOffset - Frame offset to start of varargs area.
+  int VarArgsFrameOffset;
 
-    /// SRetReturnReg - Holds the virtual register into which the sret
-    /// argument is passed.
-    Register SRetReturnReg;
+  /// SRetReturnReg - Holds the virtual register into which the sret
+  /// argument is passed.
+  Register SRetReturnReg;
 
-    /// IsLeafProc - True if the function is a leaf procedure.
-    bool IsLeafProc;
+  /// IsLeafProc - True if the function is a leaf procedure.
+  bool IsLeafProc;
+
 public:
-    SparcMachineFunctionInfo()
-        : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-          IsLeafProc(false) {}
-    explicit SparcMachineFunctionInfo(MachineFunction &MF)
-        : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-          IsLeafProc(false) {}
+  SparcMachineFunctionInfo()
+      : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
+        IsLeafProc(false) {}
+  explicit SparcMachineFunctionInfo(MachineFunction &MF)
+      : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
+        IsLeafProc(false) {}
 
-    Register getGlobalBaseReg() const {
-        return GlobalBaseReg;
-    }
-    void setGlobalBaseReg(Register Reg) {
-        GlobalBaseReg = Reg;
-    }
+  Register getGlobalBaseReg() const { return GlobalBaseReg; }
+  void setGlobalBaseReg(Register Reg) { GlobalBaseReg = Reg; }
 
-    int getVarArgsFrameOffset() const {
-        return VarArgsFrameOffset;
-    }
-    void setVarArgsFrameOffset(int Offset) {
-        VarArgsFrameOffset = Offset;
-    }
+  int getVarArgsFrameOffset() const { return VarArgsFrameOffset; }
+  void setVarArgsFrameOffset(int Offset) { VarArgsFrameOffset = Offset; }
 
-    Register getSRetReturnReg() const {
-        return SRetReturnReg;
-    }
-    void setSRetReturnReg(Register Reg) {
-        SRetReturnReg = Reg;
-    }
+  Register getSRetReturnReg() const { return SRetReturnReg; }
+  void setSRetReturnReg(Register Reg) { SRetReturnReg = Reg; }
 
-    void setLeafProc(bool rhs) {
-        IsLeafProc = rhs;
-    }
-    bool isLeafProc() const {
-        return IsLeafProc;
-    }
+  void setLeafProc(bool rhs) { IsLeafProc = rhs; }
+  bool isLeafProc() const { return IsLeafProc; }
 };
-}
+} // namespace llvm
 
 #endif

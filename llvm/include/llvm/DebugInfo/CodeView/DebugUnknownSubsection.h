@@ -17,17 +17,15 @@ namespace codeview {
 
 class DebugUnknownSubsectionRef final : public DebugSubsectionRef {
 public:
-    DebugUnknownSubsectionRef(DebugSubsectionKind Kind, BinaryStreamRef Data)
-        : DebugSubsectionRef(Kind), Data(Data) {}
+  DebugUnknownSubsectionRef(DebugSubsectionKind Kind, BinaryStreamRef Data)
+      : DebugSubsectionRef(Kind), Data(Data) {}
 
-    BinaryStreamRef getData() const {
-        return Data;
-    }
+  BinaryStreamRef getData() const { return Data; }
 
 private:
-    BinaryStreamRef Data;
+  BinaryStreamRef Data;
 };
-}
-}
+} // namespace codeview
+} // namespace llvm
 
 #endif

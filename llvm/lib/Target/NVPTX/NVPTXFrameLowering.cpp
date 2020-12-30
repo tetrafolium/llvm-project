@@ -27,51 +27,49 @@ using namespace llvm;
 NVPTXFrameLowering::NVPTXFrameLowering()
     : TargetFrameLowering(TargetFrameLowering::StackGrowsUp, Align(8), 0) {}
 
-bool NVPTXFrameLowering::hasFP(const MachineFunction &MF) const {
-    return true;
-}
+bool NVPTXFrameLowering::hasFP(const MachineFunction &MF) const { return true; }
 
 void NVPTXFrameLowering::emitPrologue(MachineFunction &MF,
                                       MachineBasicBlock &MBB) const {
-    if (MF.getFrameInfo().hasStackObjects()) {
-        assert(&MF.front() == &MBB && "Shrink-wrapping not yet supported");
-        MachineInstr *MI = &MBB.front();
-        MachineRegisterInfo &MR = MF.getRegInfo();
+  if (MF.getFrameInfo().hasStackObjects()) {
+    assert(&MF.front() == &MBB && "Shrink-wrapping not yet supported");
+    MachineInstr *MI = &MBB.front();
+    MachineRegisterInfo &MR = MF.getRegInfo();
 
-        // This instruction really occurs before first instruction
-        // in the BB, so giving it no debug location.
-        DebugLoc dl = DebugLoc();
+    // This instruction really occurs before first instruction
+    // in the BB, so giving it no debug location.
+    DebugLoc dl = DebugLoc();
 
-        // Emits
-        //   mov %SPL, %depot;
-        //   cvta.local %SP, %SPL;
-        // for local address accesses in MF.
-        bool Is64Bit =
-            static_cast<const NVPTXTargetMachine &>(MF.getTarget()).is64Bit();
-        unsigned CvtaLocalOpcode =
-            (Is64Bit ? NVPTX::cvta_local_yes_64 : NVPTX::cvta_local_yes);
-        unsigned MovDepotOpcode =
-            (Is64Bit ? NVPTX::MOV_DEPOT_ADDR_64 : NVPTX::MOV_DEPOT_ADDR);
-        if (!MR.use_empty(NVPTX::VRFrame)) {
-            // If %SP is not used, do not bother emitting "cvta.local %SP, %SPL".
-            MI = BuildMI(MBB, MI, dl,
-                         MF.getSubtarget().getInstrInfo()->get(CvtaLocalOpcode),
-                         NVPTX::VRFrame)
-                 .addReg(NVPTX::VRFrameLocal);
-        }
-        BuildMI(MBB, MI, dl, MF.getSubtarget().getInstrInfo()->get(MovDepotOpcode),
-                NVPTX::VRFrameLocal)
-        .addImm(MF.getFunctionNumber());
+    // Emits
+    //   mov %SPL, %depot;
+    //   cvta.local %SP, %SPL;
+    // for local address accesses in MF.
+    bool Is64Bit =
+        static_cast<const NVPTXTargetMachine &>(MF.getTarget()).is64Bit();
+    unsigned CvtaLocalOpcode =
+        (Is64Bit ? NVPTX::cvta_local_yes_64 : NVPTX::cvta_local_yes);
+    unsigned MovDepotOpcode =
+        (Is64Bit ? NVPTX::MOV_DEPOT_ADDR_64 : NVPTX::MOV_DEPOT_ADDR);
+    if (!MR.use_empty(NVPTX::VRFrame)) {
+      // If %SP is not used, do not bother emitting "cvta.local %SP, %SPL".
+      MI = BuildMI(MBB, MI, dl,
+                   MF.getSubtarget().getInstrInfo()->get(CvtaLocalOpcode),
+                   NVPTX::VRFrame)
+               .addReg(NVPTX::VRFrameLocal);
     }
+    BuildMI(MBB, MI, dl, MF.getSubtarget().getInstrInfo()->get(MovDepotOpcode),
+            NVPTX::VRFrameLocal)
+        .addImm(MF.getFunctionNumber());
+  }
 }
 
 StackOffset
 NVPTXFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
-        Register &FrameReg) const {
-    const MachineFrameInfo &MFI = MF.getFrameInfo();
-    FrameReg = NVPTX::VRDepot;
-    return StackOffset::getFixed(MFI.getObjectOffset(FI) -
-                                 getOffsetOfLocalArea());
+                                           Register &FrameReg) const {
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  FrameReg = NVPTX::VRDepot;
+  return StackOffset::getFixed(MFI.getObjectOffset(FI) -
+                               getOffsetOfLocalArea());
 }
 
 void NVPTXFrameLowering::emitEpilogue(MachineFunction &MF,
@@ -82,12 +80,12 @@ void NVPTXFrameLowering::emitEpilogue(MachineFunction &MF,
 MachineBasicBlock::iterator NVPTXFrameLowering::eliminateCallFramePseudoInstr(
     MachineFunction &MF, MachineBasicBlock &MBB,
     MachineBasicBlock::iterator I) const {
-    // Simply discard ADJCALLSTACKDOWN,
-    // ADJCALLSTACKUP instructions.
-    return MBB.erase(I);
+  // Simply discard ADJCALLSTACKDOWN,
+  // ADJCALLSTACKUP instructions.
+  return MBB.erase(I);
 }
 
 TargetFrameLowering::DwarfFrameBase
 NVPTXFrameLowering::getDwarfFrameBase(const MachineFunction &MF) const {
-    return {DwarfFrameBase::CFA, {0}};
+  return {DwarfFrameBase::CFA, {0}};
 }

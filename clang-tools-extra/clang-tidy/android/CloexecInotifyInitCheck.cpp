@@ -17,15 +17,15 @@ namespace tidy {
 namespace android {
 
 void CloexecInotifyInitCheck::registerMatchers(MatchFinder *Finder) {
-    registerMatchersImpl(
-        Finder, functionDecl(returns(isInteger()), hasName("inotify_init")));
+  registerMatchersImpl(
+      Finder, functionDecl(returns(isInteger()), hasName("inotify_init")));
 }
 
 void CloexecInotifyInitCheck::check(const MatchFinder::MatchResult &Result) {
-    replaceFunc(Result, /*WarningMsg=*/
-                "prefer inotify_init() to inotify_init1() "
-                "because inotify_init1() allows IN_CLOEXEC",
-                /*FixMsg=*/"inotify_init1(IN_CLOEXEC)");
+  replaceFunc(Result, /*WarningMsg=*/
+              "prefer inotify_init() to inotify_init1() "
+              "because inotify_init1() allows IN_CLOEXEC",
+              /*FixMsg=*/"inotify_init1(IN_CLOEXEC)");
 }
 
 } // namespace android

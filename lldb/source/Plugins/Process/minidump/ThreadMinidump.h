@@ -13,30 +13,29 @@
 
 #include "lldb/Target/Thread.h"
 
-
 namespace lldb_private {
 
 namespace minidump {
 
 class ThreadMinidump : public Thread {
 public:
-    ThreadMinidump(Process &process, const minidump::Thread &td,
-                   llvm::ArrayRef<uint8_t> gpregset_data);
+  ThreadMinidump(Process &process, const minidump::Thread &td,
+                 llvm::ArrayRef<uint8_t> gpregset_data);
 
-    ~ThreadMinidump() override;
+  ~ThreadMinidump() override;
 
-    void RefreshStateAfterStop() override;
+  void RefreshStateAfterStop() override;
 
-    lldb::RegisterContextSP GetRegisterContext() override;
+  lldb::RegisterContextSP GetRegisterContext() override;
 
-    lldb::RegisterContextSP
-    CreateRegisterContextForFrame(StackFrame *frame) override;
+  lldb::RegisterContextSP
+  CreateRegisterContextForFrame(StackFrame *frame) override;
 
 protected:
-    lldb::RegisterContextSP m_thread_reg_ctx_sp;
-    llvm::ArrayRef<uint8_t> m_gpregset_data;
+  lldb::RegisterContextSP m_thread_reg_ctx_sp;
+  llvm::ArrayRef<uint8_t> m_gpregset_data;
 
-    bool CalculateStopInfo() override;
+  bool CalculateStopInfo() override;
 };
 
 } // namespace minidump

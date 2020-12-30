@@ -26,8 +26,8 @@ class VPBlockBase;
 /// instantiation of LoopBase.
 class VPLoop : public LoopBase<VPBlockBase, VPLoop> {
 private:
-    friend class LoopInfoBase<VPBlockBase, VPLoop>;
-    explicit VPLoop(VPBlockBase *VPB) : LoopBase<VPBlockBase, VPLoop>(VPB) {}
+  friend class LoopInfoBase<VPBlockBase, VPLoop>;
+  explicit VPLoop(VPBlockBase *VPB) : LoopBase<VPBlockBase, VPLoop>(VPB) {}
 };
 
 /// VPLoopInfo provides analysis of natural loop for VPBlockBase-based

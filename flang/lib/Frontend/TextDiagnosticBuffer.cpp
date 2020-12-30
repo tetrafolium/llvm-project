@@ -21,54 +21,54 @@ using namespace Fortran::frontend;
 /// reported.
 void TextDiagnosticBuffer::HandleDiagnostic(
     clang::DiagnosticsEngine::Level level, const clang::Diagnostic &info) {
-    // Default implementation (warnings_/errors count).
-    DiagnosticConsumer::HandleDiagnostic(level, info);
+  // Default implementation (warnings_/errors count).
+  DiagnosticConsumer::HandleDiagnostic(level, info);
 
-    llvm::SmallString<100> buf;
-    info.FormatDiagnostic(buf);
-    switch (level) {
-    default:
-        llvm_unreachable("Diagnostic not handled during diagnostic buffering!");
-    case clang::DiagnosticsEngine::Note:
-        all_.emplace_back(level, notes_.size());
-        notes_.emplace_back(info.getLocation(), std::string(buf.str()));
-        break;
-    case clang::DiagnosticsEngine::Warning:
-        all_.emplace_back(level, warnings_.size());
-        warnings_.emplace_back(info.getLocation(), std::string(buf.str()));
-        break;
-    case clang::DiagnosticsEngine::Remark:
-        all_.emplace_back(level, remarks_.size());
-        remarks_.emplace_back(info.getLocation(), std::string(buf.str()));
-        break;
-    case clang::DiagnosticsEngine::Error:
-    case clang::DiagnosticsEngine::Fatal:
-        all_.emplace_back(level, errors_.size());
-        errors_.emplace_back(info.getLocation(), std::string(buf.str()));
-        break;
-    }
+  llvm::SmallString<100> buf;
+  info.FormatDiagnostic(buf);
+  switch (level) {
+  default:
+    llvm_unreachable("Diagnostic not handled during diagnostic buffering!");
+  case clang::DiagnosticsEngine::Note:
+    all_.emplace_back(level, notes_.size());
+    notes_.emplace_back(info.getLocation(), std::string(buf.str()));
+    break;
+  case clang::DiagnosticsEngine::Warning:
+    all_.emplace_back(level, warnings_.size());
+    warnings_.emplace_back(info.getLocation(), std::string(buf.str()));
+    break;
+  case clang::DiagnosticsEngine::Remark:
+    all_.emplace_back(level, remarks_.size());
+    remarks_.emplace_back(info.getLocation(), std::string(buf.str()));
+    break;
+  case clang::DiagnosticsEngine::Error:
+  case clang::DiagnosticsEngine::Fatal:
+    all_.emplace_back(level, errors_.size());
+    errors_.emplace_back(info.getLocation(), std::string(buf.str()));
+    break;
+  }
 }
 
 void TextDiagnosticBuffer::FlushDiagnostics(
     clang::DiagnosticsEngine &Diags) const {
-    for (const auto &i : all_) {
-        auto Diag = Diags.Report(Diags.getCustomDiagID(i.first, "%0"));
-        switch (i.first) {
-        default:
-            llvm_unreachable("Diagnostic not handled during diagnostic flushing!");
-        case clang::DiagnosticsEngine::Note:
-            Diag << notes_[i.second].second;
-            break;
-        case clang::DiagnosticsEngine::Warning:
-            Diag << warnings_[i.second].second;
-            break;
-        case clang::DiagnosticsEngine::Remark:
-            Diag << remarks_[i.second].second;
-            break;
-        case clang::DiagnosticsEngine::Error:
-        case clang::DiagnosticsEngine::Fatal:
-            Diag << errors_[i.second].second;
-            break;
-        }
+  for (const auto &i : all_) {
+    auto Diag = Diags.Report(Diags.getCustomDiagID(i.first, "%0"));
+    switch (i.first) {
+    default:
+      llvm_unreachable("Diagnostic not handled during diagnostic flushing!");
+    case clang::DiagnosticsEngine::Note:
+      Diag << notes_[i.second].second;
+      break;
+    case clang::DiagnosticsEngine::Warning:
+      Diag << warnings_[i.second].second;
+      break;
+    case clang::DiagnosticsEngine::Remark:
+      Diag << remarks_[i.second].second;
+      break;
+    case clang::DiagnosticsEngine::Error:
+    case clang::DiagnosticsEngine::Fatal:
+      Diag << errors_[i.second].second;
+      break;
     }
+  }
 }

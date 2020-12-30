@@ -25,20 +25,18 @@ namespace lld {
 ///
 class ArchiveLibraryFile : public File {
 public:
-    static bool classof(const File *f) {
-        return f->kind() == kindArchiveLibrary;
-    }
+  static bool classof(const File *f) { return f->kind() == kindArchiveLibrary; }
 
-    /// Check if any member of the archive contains an Atom with the
-    /// specified name and return the File object for that member, or nullptr.
-    virtual File *find(StringRef name) = 0;
+  /// Check if any member of the archive contains an Atom with the
+  /// specified name and return the File object for that member, or nullptr.
+  virtual File *find(StringRef name) = 0;
 
-    virtual std::error_code
-    parseAllMembers(std::vector<std::unique_ptr<File>> &result) = 0;
+  virtual std::error_code
+  parseAllMembers(std::vector<std::unique_ptr<File>> &result) = 0;
 
 protected:
-    /// only subclasses of ArchiveLibraryFile can be instantiated
-    ArchiveLibraryFile(StringRef path) : File(path, kindArchiveLibrary) {}
+  /// only subclasses of ArchiveLibraryFile can be instantiated
+  ArchiveLibraryFile(StringRef path) : File(path, kindArchiveLibrary) {}
 };
 
 } // namespace lld

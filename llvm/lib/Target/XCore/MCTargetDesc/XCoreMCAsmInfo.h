@@ -19,10 +19,10 @@ namespace llvm {
 class Triple;
 
 class XCoreMCAsmInfo : public MCAsmInfoELF {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit XCoreMCAsmInfo(const Triple &TT);
+  explicit XCoreMCAsmInfo(const Triple &TT);
 };
 
 } // namespace llvm

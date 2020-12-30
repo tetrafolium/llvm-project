@@ -607,75 +607,75 @@ kmp_atomic_lock_t __kmp_atomic_lock_32c;
 #if (KMP_ARCH_X86) && KMP_HAVE_QUAD
 
 static inline Quad_a4_t operator+(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q + rhs.q;
+  return lhs.q + rhs.q;
 }
 static inline Quad_a4_t operator-(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q - rhs.q;
+  return lhs.q - rhs.q;
 }
 static inline Quad_a4_t operator*(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q * rhs.q;
+  return lhs.q * rhs.q;
 }
 static inline Quad_a4_t operator/(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q / rhs.q;
+  return lhs.q / rhs.q;
 }
 static inline bool operator<(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q < rhs.q;
+  return lhs.q < rhs.q;
 }
 static inline bool operator>(Quad_a4_t &lhs, Quad_a4_t &rhs) {
-    return lhs.q > rhs.q;
+  return lhs.q > rhs.q;
 }
 
 static inline Quad_a16_t operator+(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q + rhs.q;
+  return lhs.q + rhs.q;
 }
 static inline Quad_a16_t operator-(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q - rhs.q;
+  return lhs.q - rhs.q;
 }
 static inline Quad_a16_t operator*(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q * rhs.q;
+  return lhs.q * rhs.q;
 }
 static inline Quad_a16_t operator/(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q / rhs.q;
+  return lhs.q / rhs.q;
 }
 static inline bool operator<(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q < rhs.q;
+  return lhs.q < rhs.q;
 }
 static inline bool operator>(Quad_a16_t &lhs, Quad_a16_t &rhs) {
-    return lhs.q > rhs.q;
+  return lhs.q > rhs.q;
 }
 
 static inline kmp_cmplx128_a4_t operator+(kmp_cmplx128_a4_t &lhs,
-        kmp_cmplx128_a4_t &rhs) {
-    return lhs.q + rhs.q;
+                                          kmp_cmplx128_a4_t &rhs) {
+  return lhs.q + rhs.q;
 }
 static inline kmp_cmplx128_a4_t operator-(kmp_cmplx128_a4_t &lhs,
-        kmp_cmplx128_a4_t &rhs) {
-    return lhs.q - rhs.q;
+                                          kmp_cmplx128_a4_t &rhs) {
+  return lhs.q - rhs.q;
 }
 static inline kmp_cmplx128_a4_t operator*(kmp_cmplx128_a4_t &lhs,
-        kmp_cmplx128_a4_t &rhs) {
-    return lhs.q * rhs.q;
+                                          kmp_cmplx128_a4_t &rhs) {
+  return lhs.q * rhs.q;
 }
 static inline kmp_cmplx128_a4_t operator/(kmp_cmplx128_a4_t &lhs,
-        kmp_cmplx128_a4_t &rhs) {
-    return lhs.q / rhs.q;
+                                          kmp_cmplx128_a4_t &rhs) {
+  return lhs.q / rhs.q;
 }
 
 static inline kmp_cmplx128_a16_t operator+(kmp_cmplx128_a16_t &lhs,
-        kmp_cmplx128_a16_t &rhs) {
-    return lhs.q + rhs.q;
+                                           kmp_cmplx128_a16_t &rhs) {
+  return lhs.q + rhs.q;
 }
 static inline kmp_cmplx128_a16_t operator-(kmp_cmplx128_a16_t &lhs,
-        kmp_cmplx128_a16_t &rhs) {
-    return lhs.q - rhs.q;
+                                           kmp_cmplx128_a16_t &rhs) {
+  return lhs.q - rhs.q;
 }
 static inline kmp_cmplx128_a16_t operator*(kmp_cmplx128_a16_t &lhs,
-        kmp_cmplx128_a16_t &rhs) {
-    return lhs.q * rhs.q;
+                                           kmp_cmplx128_a16_t &rhs) {
+  return lhs.q * rhs.q;
 }
 static inline kmp_cmplx128_a16_t operator/(kmp_cmplx128_a16_t &lhs,
-        kmp_cmplx128_a16_t &rhs) {
-    return lhs.q / rhs.q;
+                                           kmp_cmplx128_a16_t &rhs) {
+  return lhs.q / rhs.q;
 }
 
 #endif // (KMP_ARCH_X86) && KMP_HAVE_QUAD
@@ -3363,294 +3363,294 @@ ATOMIC_CRITICAL_SWP(cmplx16_a16, kmp_cmplx128_a16_t, 32c,
 
 void __kmpc_atomic_1(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                      void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
-    if (
+  if (
 #if KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-        FALSE /* must use lock */
+      FALSE /* must use lock */
 #else
-        TRUE
+      TRUE
 #endif // KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-    ) {
-        kmp_int8 old_value, new_value;
+  ) {
+    kmp_int8 old_value, new_value;
 
-        old_value = *(kmp_int8 *)lhs;
-        (*f)(&new_value, &old_value, rhs);
+    old_value = *(kmp_int8 *)lhs;
+    (*f)(&new_value, &old_value, rhs);
 
-        /* TODO: Should this be acquire or release? */
-        while (!KMP_COMPARE_AND_STORE_ACQ8((kmp_int8 *)lhs, *(kmp_int8 *)&old_value,
-                                           *(kmp_int8 *)&new_value)) {
-            KMP_CPU_PAUSE();
+    /* TODO: Should this be acquire or release? */
+    while (!KMP_COMPARE_AND_STORE_ACQ8((kmp_int8 *)lhs, *(kmp_int8 *)&old_value,
+                                       *(kmp_int8 *)&new_value)) {
+      KMP_CPU_PAUSE();
 
-            old_value = *(kmp_int8 *)lhs;
-            (*f)(&new_value, &old_value, rhs);
-        }
-
-        return;
-    } else {
-// All 1-byte data is of integer data type.
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock_1i, gtid);
-
-        (*f)(lhs, lhs, rhs);
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_release_atomic_lock(&__kmp_atomic_lock_1i, gtid);
+      old_value = *(kmp_int8 *)lhs;
+      (*f)(&new_value, &old_value, rhs);
     }
+
+    return;
+  } else {
+    // All 1-byte data is of integer data type.
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock_1i, gtid);
+
+    (*f)(lhs, lhs, rhs);
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_release_atomic_lock(&__kmp_atomic_lock_1i, gtid);
+  }
 }
 
 void __kmpc_atomic_2(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                      void (*f)(void *, void *, void *)) {
-    if (
+  if (
 #if KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-        FALSE /* must use lock */
+      FALSE /* must use lock */
 #elif KMP_ARCH_X86 || KMP_ARCH_X86_64
-        TRUE /* no alignment problems */
+      TRUE /* no alignment problems */
 #else
-        !((kmp_uintptr_t)lhs & 0x1) /* make sure address is 2-byte aligned */
+      !((kmp_uintptr_t)lhs & 0x1) /* make sure address is 2-byte aligned */
 #endif // KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-    ) {
-        kmp_int16 old_value, new_value;
+  ) {
+    kmp_int16 old_value, new_value;
 
-        old_value = *(kmp_int16 *)lhs;
-        (*f)(&new_value, &old_value, rhs);
+    old_value = *(kmp_int16 *)lhs;
+    (*f)(&new_value, &old_value, rhs);
 
-        /* TODO: Should this be acquire or release? */
-        while (!KMP_COMPARE_AND_STORE_ACQ16(
-                    (kmp_int16 *)lhs, *(kmp_int16 *)&old_value, *(kmp_int16 *)&new_value)) {
-            KMP_CPU_PAUSE();
+    /* TODO: Should this be acquire or release? */
+    while (!KMP_COMPARE_AND_STORE_ACQ16(
+        (kmp_int16 *)lhs, *(kmp_int16 *)&old_value, *(kmp_int16 *)&new_value)) {
+      KMP_CPU_PAUSE();
 
-            old_value = *(kmp_int16 *)lhs;
-            (*f)(&new_value, &old_value, rhs);
-        }
-
-        return;
-    } else {
-// All 2-byte data is of integer data type.
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock_2i, gtid);
-
-        (*f)(lhs, lhs, rhs);
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_release_atomic_lock(&__kmp_atomic_lock_2i, gtid);
+      old_value = *(kmp_int16 *)lhs;
+      (*f)(&new_value, &old_value, rhs);
     }
+
+    return;
+  } else {
+    // All 2-byte data is of integer data type.
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock_2i, gtid);
+
+    (*f)(lhs, lhs, rhs);
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_release_atomic_lock(&__kmp_atomic_lock_2i, gtid);
+  }
 }
 
 void __kmpc_atomic_4(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                      void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
-    if (
+  if (
 // FIXME: On IA-32 architecture, gcc uses cmpxchg only for 4-byte ints.
 // Gomp compatibility is broken if this routine is called for floats.
 #if KMP_ARCH_X86 || KMP_ARCH_X86_64
-        TRUE /* no alignment problems */
+      TRUE /* no alignment problems */
 #else
-        !((kmp_uintptr_t)lhs & 0x3) /* make sure address is 4-byte aligned */
+      !((kmp_uintptr_t)lhs & 0x3) /* make sure address is 4-byte aligned */
 #endif // KMP_ARCH_X86 || KMP_ARCH_X86_64
-    ) {
-        kmp_int32 old_value, new_value;
+  ) {
+    kmp_int32 old_value, new_value;
 
-        old_value = *(kmp_int32 *)lhs;
-        (*f)(&new_value, &old_value, rhs);
+    old_value = *(kmp_int32 *)lhs;
+    (*f)(&new_value, &old_value, rhs);
 
-        /* TODO: Should this be acquire or release? */
-        while (!KMP_COMPARE_AND_STORE_ACQ32(
-                    (kmp_int32 *)lhs, *(kmp_int32 *)&old_value, *(kmp_int32 *)&new_value)) {
-            KMP_CPU_PAUSE();
+    /* TODO: Should this be acquire or release? */
+    while (!KMP_COMPARE_AND_STORE_ACQ32(
+        (kmp_int32 *)lhs, *(kmp_int32 *)&old_value, *(kmp_int32 *)&new_value)) {
+      KMP_CPU_PAUSE();
 
-            old_value = *(kmp_int32 *)lhs;
-            (*f)(&new_value, &old_value, rhs);
-        }
-
-        return;
-    } else {
-// Use __kmp_atomic_lock_4i for all 4-byte data,
-// even if it isn't of integer data type.
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock_4i, gtid);
-
-        (*f)(lhs, lhs, rhs);
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_release_atomic_lock(&__kmp_atomic_lock_4i, gtid);
+      old_value = *(kmp_int32 *)lhs;
+      (*f)(&new_value, &old_value, rhs);
     }
+
+    return;
+  } else {
+    // Use __kmp_atomic_lock_4i for all 4-byte data,
+    // even if it isn't of integer data type.
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock_4i, gtid);
+
+    (*f)(lhs, lhs, rhs);
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_release_atomic_lock(&__kmp_atomic_lock_4i, gtid);
+  }
 }
 
 void __kmpc_atomic_8(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                      void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
-    if (
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
+  if (
 
 #if KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-        FALSE /* must use lock */
+      FALSE /* must use lock */
 #elif KMP_ARCH_X86 || KMP_ARCH_X86_64
-        TRUE /* no alignment problems */
+      TRUE /* no alignment problems */
 #else
-        !((kmp_uintptr_t)lhs & 0x7) /* make sure address is 8-byte aligned */
+      !((kmp_uintptr_t)lhs & 0x7) /* make sure address is 8-byte aligned */
 #endif // KMP_ARCH_X86 && defined(KMP_GOMP_COMPAT)
-    ) {
-        kmp_int64 old_value, new_value;
+  ) {
+    kmp_int64 old_value, new_value;
 
-        old_value = *(kmp_int64 *)lhs;
-        (*f)(&new_value, &old_value, rhs);
-        /* TODO: Should this be acquire or release? */
-        while (!KMP_COMPARE_AND_STORE_ACQ64(
-                    (kmp_int64 *)lhs, *(kmp_int64 *)&old_value, *(kmp_int64 *)&new_value)) {
-            KMP_CPU_PAUSE();
+    old_value = *(kmp_int64 *)lhs;
+    (*f)(&new_value, &old_value, rhs);
+    /* TODO: Should this be acquire or release? */
+    while (!KMP_COMPARE_AND_STORE_ACQ64(
+        (kmp_int64 *)lhs, *(kmp_int64 *)&old_value, *(kmp_int64 *)&new_value)) {
+      KMP_CPU_PAUSE();
 
-            old_value = *(kmp_int64 *)lhs;
-            (*f)(&new_value, &old_value, rhs);
-        }
-
-        return;
-    } else {
-// Use __kmp_atomic_lock_8i for all 8-byte data,
-// even if it isn't of integer data type.
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_acquire_atomic_lock(&__kmp_atomic_lock_8i, gtid);
-
-        (*f)(lhs, lhs, rhs);
-
-#ifdef KMP_GOMP_COMPAT
-        if (__kmp_atomic_mode == 2) {
-            __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-        } else
-#endif /* KMP_GOMP_COMPAT */
-            __kmp_release_atomic_lock(&__kmp_atomic_lock_8i, gtid);
+      old_value = *(kmp_int64 *)lhs;
+      (*f)(&new_value, &old_value, rhs);
     }
+
+    return;
+  } else {
+    // Use __kmp_atomic_lock_8i for all 8-byte data,
+    // even if it isn't of integer data type.
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_acquire_atomic_lock(&__kmp_atomic_lock_8i, gtid);
+
+    (*f)(lhs, lhs, rhs);
+
+#ifdef KMP_GOMP_COMPAT
+    if (__kmp_atomic_mode == 2) {
+      __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+    } else
+#endif /* KMP_GOMP_COMPAT */
+      __kmp_release_atomic_lock(&__kmp_atomic_lock_8i, gtid);
+  }
 }
 
 void __kmpc_atomic_10(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                       void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock_10r, gtid);
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock_10r, gtid);
 
-    (*f)(lhs, lhs, rhs);
+  (*f)(lhs, lhs, rhs);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_release_atomic_lock(&__kmp_atomic_lock_10r, gtid);
+    __kmp_release_atomic_lock(&__kmp_atomic_lock_10r, gtid);
 }
 
 void __kmpc_atomic_16(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                       void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock_16c, gtid);
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock_16c, gtid);
 
-    (*f)(lhs, lhs, rhs);
+  (*f)(lhs, lhs, rhs);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_release_atomic_lock(&__kmp_atomic_lock_16c, gtid);
+    __kmp_release_atomic_lock(&__kmp_atomic_lock_16c, gtid);
 }
 
 void __kmpc_atomic_20(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                       void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock_20c, gtid);
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock_20c, gtid);
 
-    (*f)(lhs, lhs, rhs);
+  (*f)(lhs, lhs, rhs);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_release_atomic_lock(&__kmp_atomic_lock_20c, gtid);
+    __kmp_release_atomic_lock(&__kmp_atomic_lock_20c, gtid);
 }
 
 void __kmpc_atomic_32(ident_t *id_ref, int gtid, void *lhs, void *rhs,
                       void (*f)(void *, void *, void *)) {
-    KMP_DEBUG_ASSERT(__kmp_init_serial);
+  KMP_DEBUG_ASSERT(__kmp_init_serial);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_acquire_atomic_lock(&__kmp_atomic_lock_32c, gtid);
+    __kmp_acquire_atomic_lock(&__kmp_atomic_lock_32c, gtid);
 
-    (*f)(lhs, lhs, rhs);
+  (*f)(lhs, lhs, rhs);
 
 #ifdef KMP_GOMP_COMPAT
-    if (__kmp_atomic_mode == 2) {
-        __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
-    } else
+  if (__kmp_atomic_mode == 2) {
+    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+  } else
 #endif /* KMP_GOMP_COMPAT */
-        __kmp_release_atomic_lock(&__kmp_atomic_lock_32c, gtid);
+    __kmp_release_atomic_lock(&__kmp_atomic_lock_32c, gtid);
 }
 
 // AC: same two routines as GOMP_atomic_start/end, but will be called by our
 // compiler; duplicated in order to not use 3-party names in pure Intel code
 // TODO: consider adding GTID parameter after consultation with Ernesto/Xinmin.
 void __kmpc_atomic_start(void) {
-    int gtid = __kmp_entry_gtid();
-    KA_TRACE(20, ("__kmpc_atomic_start: T#%d\n", gtid));
-    __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
+  int gtid = __kmp_entry_gtid();
+  KA_TRACE(20, ("__kmpc_atomic_start: T#%d\n", gtid));
+  __kmp_acquire_atomic_lock(&__kmp_atomic_lock, gtid);
 }
 
 void __kmpc_atomic_end(void) {
-    int gtid = __kmp_get_gtid();
-    KA_TRACE(20, ("__kmpc_atomic_end: T#%d\n", gtid));
-    __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
+  int gtid = __kmp_get_gtid();
+  KA_TRACE(20, ("__kmpc_atomic_end: T#%d\n", gtid));
+  __kmp_release_atomic_lock(&__kmp_atomic_lock, gtid);
 }
 
 /*!

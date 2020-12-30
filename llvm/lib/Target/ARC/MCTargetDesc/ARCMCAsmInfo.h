@@ -20,10 +20,10 @@ namespace llvm {
 class Triple;
 
 class ARCMCAsmInfo : public MCAsmInfoELF {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit ARCMCAsmInfo(const Triple &TT);
+  explicit ARCMCAsmInfo(const Triple &TT);
 };
 
 } // end namespace llvm

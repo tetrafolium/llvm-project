@@ -18,25 +18,24 @@ class ProgramState;
 class ProgramStateManager;
 void ProgramStateRetain(const ProgramState *state);
 void ProgramStateRelease(const ProgramState *state);
-}
-}
+} // namespace ento
+} // namespace clang
 
 namespace llvm {
 template <> struct IntrusiveRefCntPtrInfo<const clang::ento::ProgramState> {
-    static void retain(const clang::ento::ProgramState *state) {
-        clang::ento::ProgramStateRetain(state);
-    }
-    static void release(const clang::ento::ProgramState *state) {
-        clang::ento::ProgramStateRelease(state);
-    }
+  static void retain(const clang::ento::ProgramState *state) {
+    clang::ento::ProgramStateRetain(state);
+  }
+  static void release(const clang::ento::ProgramState *state) {
+    clang::ento::ProgramStateRelease(state);
+  }
 };
-}
+} // namespace llvm
 
 namespace clang {
 namespace ento {
 typedef IntrusiveRefCntPtr<const ProgramState> ProgramStateRef;
 }
-}
+} // namespace clang
 
 #endif
-

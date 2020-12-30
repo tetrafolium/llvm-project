@@ -48,60 +48,54 @@ class TargetInstrInfo;
 
 class DFAPacketizer {
 private:
-    const InstrItineraryData *InstrItins;
-    Automaton<uint64_t> A;
-    /// For every itinerary, an "action" to apply to the automaton. This removes
-    /// the redundancy in actions between itinerary classes.
-    ArrayRef<unsigned> ItinActions;
+  const InstrItineraryData *InstrItins;
+  Automaton<uint64_t> A;
+  /// For every itinerary, an "action" to apply to the automaton. This removes
+  /// the redundancy in actions between itinerary classes.
+  ArrayRef<unsigned> ItinActions;
 
 public:
-    DFAPacketizer(const InstrItineraryData *InstrItins, Automaton<uint64_t> a,
-                  ArrayRef<unsigned> ItinActions)
-        : InstrItins(InstrItins), A(std::move(a)), ItinActions(ItinActions) {
-        // Start off with resource tracking disabled.
-        A.enableTranscription(false);
-    }
+  DFAPacketizer(const InstrItineraryData *InstrItins, Automaton<uint64_t> a,
+                ArrayRef<unsigned> ItinActions)
+      : InstrItins(InstrItins), A(std::move(a)), ItinActions(ItinActions) {
+    // Start off with resource tracking disabled.
+    A.enableTranscription(false);
+  }
 
-    // Reset the current state to make all resources available.
-    void clearResources() {
-        A.reset();
-    }
+  // Reset the current state to make all resources available.
+  void clearResources() { A.reset(); }
 
-    // Set whether this packetizer should track not just whether instructions
-    // can be packetized, but also which functional units each instruction ends up
-    // using after packetization.
-    void setTrackResources(bool Track) {
-        A.enableTranscription(Track);
-    }
+  // Set whether this packetizer should track not just whether instructions
+  // can be packetized, but also which functional units each instruction ends up
+  // using after packetization.
+  void setTrackResources(bool Track) { A.enableTranscription(Track); }
 
-    // Check if the resources occupied by a MCInstrDesc are available in
-    // the current state.
-    bool canReserveResources(const MCInstrDesc *MID);
+  // Check if the resources occupied by a MCInstrDesc are available in
+  // the current state.
+  bool canReserveResources(const MCInstrDesc *MID);
 
-    // Reserve the resources occupied by a MCInstrDesc and change the current
-    // state to reflect that change.
-    void reserveResources(const MCInstrDesc *MID);
+  // Reserve the resources occupied by a MCInstrDesc and change the current
+  // state to reflect that change.
+  void reserveResources(const MCInstrDesc *MID);
 
-    // Check if the resources occupied by a machine instruction are available
-    // in the current state.
-    bool canReserveResources(MachineInstr &MI);
+  // Check if the resources occupied by a machine instruction are available
+  // in the current state.
+  bool canReserveResources(MachineInstr &MI);
 
-    // Reserve the resources occupied by a machine instruction and change the
-    // current state to reflect that change.
-    void reserveResources(MachineInstr &MI);
+  // Reserve the resources occupied by a machine instruction and change the
+  // current state to reflect that change.
+  void reserveResources(MachineInstr &MI);
 
-    // Return the resources used by the InstIdx'th instruction added to this
-    // packet. The resources are returned as a bitvector of functional units.
-    //
-    // Note that a bundle may be packed in multiple valid ways. This function
-    // returns one arbitary valid packing.
-    //
-    // Requires setTrackResources(true) to have been called.
-    unsigned getUsedResources(unsigned InstIdx);
+  // Return the resources used by the InstIdx'th instruction added to this
+  // packet. The resources are returned as a bitvector of functional units.
+  //
+  // Note that a bundle may be packed in multiple valid ways. This function
+  // returns one arbitary valid packing.
+  //
+  // Requires setTrackResources(true) to have been called.
+  unsigned getUsedResources(unsigned InstIdx);
 
-    const InstrItineraryData *getInstrItins() const {
-        return InstrItins;
-    }
+  const InstrItineraryData *getInstrItins() const { return InstrItins; }
 };
 
 // VLIWPacketizerList implements a simple VLIW packetizer using DFA. The
@@ -113,94 +107,87 @@ public:
 // found, a target API call is made to prune the dependence.
 class VLIWPacketizerList {
 protected:
-    MachineFunction &MF;
-    const TargetInstrInfo *TII;
-    AAResults *AA;
+  MachineFunction &MF;
+  const TargetInstrInfo *TII;
+  AAResults *AA;
 
-    // The VLIW Scheduler.
-    DefaultVLIWScheduler *VLIWScheduler;
-    // Vector of instructions assigned to the current packet.
-    std::vector<MachineInstr*> CurrentPacketMIs;
-    // DFA resource tracker.
-    DFAPacketizer *ResourceTracker;
-    // Map: MI -> SU.
-    std::map<MachineInstr*, SUnit*> MIToSUnit;
+  // The VLIW Scheduler.
+  DefaultVLIWScheduler *VLIWScheduler;
+  // Vector of instructions assigned to the current packet.
+  std::vector<MachineInstr *> CurrentPacketMIs;
+  // DFA resource tracker.
+  DFAPacketizer *ResourceTracker;
+  // Map: MI -> SU.
+  std::map<MachineInstr *, SUnit *> MIToSUnit;
 
 public:
-    // The AAResults parameter can be nullptr.
-    VLIWPacketizerList(MachineFunction &MF, MachineLoopInfo &MLI,
-                       AAResults *AA);
+  // The AAResults parameter can be nullptr.
+  VLIWPacketizerList(MachineFunction &MF, MachineLoopInfo &MLI, AAResults *AA);
 
-    virtual ~VLIWPacketizerList();
+  virtual ~VLIWPacketizerList();
 
-    // Implement this API in the backend to bundle instructions.
-    void PacketizeMIs(MachineBasicBlock *MBB,
-                      MachineBasicBlock::iterator BeginItr,
-                      MachineBasicBlock::iterator EndItr);
+  // Implement this API in the backend to bundle instructions.
+  void PacketizeMIs(MachineBasicBlock *MBB,
+                    MachineBasicBlock::iterator BeginItr,
+                    MachineBasicBlock::iterator EndItr);
 
-    // Return the ResourceTracker.
-    DFAPacketizer *getResourceTracker() {
-        return ResourceTracker;
-    }
+  // Return the ResourceTracker.
+  DFAPacketizer *getResourceTracker() { return ResourceTracker; }
 
-    // addToPacket - Add MI to the current packet.
-    virtual MachineBasicBlock::iterator addToPacket(MachineInstr &MI) {
-        CurrentPacketMIs.push_back(&MI);
-        ResourceTracker->reserveResources(MI);
-        return MI;
-    }
+  // addToPacket - Add MI to the current packet.
+  virtual MachineBasicBlock::iterator addToPacket(MachineInstr &MI) {
+    CurrentPacketMIs.push_back(&MI);
+    ResourceTracker->reserveResources(MI);
+    return MI;
+  }
 
-    // End the current packet and reset the state of the packetizer.
-    // Overriding this function allows the target-specific packetizer
-    // to perform custom finalization.
-    virtual void endPacket(MachineBasicBlock *MBB,
-                           MachineBasicBlock::iterator MI);
+  // End the current packet and reset the state of the packetizer.
+  // Overriding this function allows the target-specific packetizer
+  // to perform custom finalization.
+  virtual void endPacket(MachineBasicBlock *MBB,
+                         MachineBasicBlock::iterator MI);
 
-    // Perform initialization before packetizing an instruction. This
-    // function is supposed to be overrided by the target dependent packetizer.
-    virtual void initPacketizerState() {}
+  // Perform initialization before packetizing an instruction. This
+  // function is supposed to be overrided by the target dependent packetizer.
+  virtual void initPacketizerState() {}
 
-    // Check if the given instruction I should be ignored by the packetizer.
-    virtual bool ignorePseudoInstruction(const MachineInstr &I,
-                                         const MachineBasicBlock *MBB) {
-        return false;
-    }
+  // Check if the given instruction I should be ignored by the packetizer.
+  virtual bool ignorePseudoInstruction(const MachineInstr &I,
+                                       const MachineBasicBlock *MBB) {
+    return false;
+  }
 
-    // Return true if instruction MI can not be packetized with any other
-    // instruction, which means that MI itself is a packet.
-    virtual bool isSoloInstruction(const MachineInstr &MI) {
-        return true;
-    }
+  // Return true if instruction MI can not be packetized with any other
+  // instruction, which means that MI itself is a packet.
+  virtual bool isSoloInstruction(const MachineInstr &MI) { return true; }
 
-    // Check if the packetizer should try to add the given instruction to
-    // the current packet. One reasons for which it may not be desirable
-    // to include an instruction in the current packet could be that it
-    // would cause a stall.
-    // If this function returns "false", the current packet will be ended,
-    // and the instruction will be added to the next packet.
-    virtual bool shouldAddToPacket(const MachineInstr &MI) {
-        return true;
-    }
+  // Check if the packetizer should try to add the given instruction to
+  // the current packet. One reasons for which it may not be desirable
+  // to include an instruction in the current packet could be that it
+  // would cause a stall.
+  // If this function returns "false", the current packet will be ended,
+  // and the instruction will be added to the next packet.
+  virtual bool shouldAddToPacket(const MachineInstr &MI) { return true; }
 
-    // Check if it is legal to packetize SUI and SUJ together.
-    virtual bool isLegalToPacketizeTogether(SUnit *SUI, SUnit *SUJ) {
-        return false;
-    }
+  // Check if it is legal to packetize SUI and SUJ together.
+  virtual bool isLegalToPacketizeTogether(SUnit *SUI, SUnit *SUJ) {
+    return false;
+  }
 
-    // Check if it is legal to prune dependece between SUI and SUJ.
-    virtual bool isLegalToPruneDependencies(SUnit *SUI, SUnit *SUJ) {
-        return false;
-    }
+  // Check if it is legal to prune dependece between SUI and SUJ.
+  virtual bool isLegalToPruneDependencies(SUnit *SUI, SUnit *SUJ) {
+    return false;
+  }
 
-    // Add a DAG mutation to be done before the packetization begins.
-    void addMutation(std::unique_ptr<ScheduleDAGMutation> Mutation);
+  // Add a DAG mutation to be done before the packetization begins.
+  void addMutation(std::unique_ptr<ScheduleDAGMutation> Mutation);
 
-    bool alias(const MachineInstr &MI1, const MachineInstr &MI2,
-               bool UseTBAA = true) const;
+  bool alias(const MachineInstr &MI1, const MachineInstr &MI2,
+             bool UseTBAA = true) const;
 
 private:
-    bool alias(const MachineMemOperand &Op1, const MachineMemOperand &Op2,
-               bool UseTBAA = true) const;
+  bool alias(const MachineMemOperand &Op1, const MachineMemOperand &Op2,
+             bool UseTBAA = true) const;
 };
 
 } // end namespace llvm

@@ -20,7 +20,7 @@ enum {
 #define DRIVERSTART
 #include "clang/Basic/DiagnosticDriverKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_DRIVER_DIAGNOSTICS
+  NUM_BUILTIN_DRIVER_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

@@ -25,8 +25,6 @@ static constexpr Log::Category g_categories[] = {
 Log::Channel ProcessPOSIXLog::g_channel(g_categories, POSIX_LOG_DEFAULT);
 
 void ProcessPOSIXLog::Initialize() {
-    static llvm::once_flag g_once_flag;
-    llvm::call_once(g_once_flag, []() {
-        Log::Register("posix", g_channel);
-    });
+  static llvm::once_flag g_once_flag;
+  llvm::call_once(g_once_flag, []() { Log::Register("posix", g_channel); });
 }

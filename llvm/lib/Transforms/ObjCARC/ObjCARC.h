@@ -35,56 +35,56 @@ namespace objcarc {
 /// argument value.
 ///
 static inline void EraseInstruction(Instruction *CI) {
-    Value *OldArg = cast<CallInst>(CI)->getArgOperand(0);
+  Value *OldArg = cast<CallInst>(CI)->getArgOperand(0);
 
-    bool Unused = CI->use_empty();
+  bool Unused = CI->use_empty();
 
-    if (!Unused) {
-        // Replace the return value with the argument.
-        assert((IsForwarding(GetBasicARCInstKind(CI)) ||
-                (IsNoopOnNull(GetBasicARCInstKind(CI)) &&
-                 IsNullOrUndef(OldArg->stripPointerCasts()))) &&
-               "Can't delete non-forwarding instruction with users!");
-        CI->replaceAllUsesWith(OldArg);
-    }
+  if (!Unused) {
+    // Replace the return value with the argument.
+    assert((IsForwarding(GetBasicARCInstKind(CI)) ||
+            (IsNoopOnNull(GetBasicARCInstKind(CI)) &&
+             IsNullOrUndef(OldArg->stripPointerCasts()))) &&
+           "Can't delete non-forwarding instruction with users!");
+    CI->replaceAllUsesWith(OldArg);
+  }
 
-    CI->eraseFromParent();
+  CI->eraseFromParent();
 
-    if (Unused)
-        RecursivelyDeleteTriviallyDeadInstructions(OldArg);
+  if (Unused)
+    RecursivelyDeleteTriviallyDeadInstructions(OldArg);
 }
 
 /// If Inst is a ReturnRV and its operand is a call or invoke, return the
 /// operand. Otherwise return null.
 static inline const Instruction *getreturnRVOperand(const Instruction &Inst,
-        ARCInstKind Class) {
-    if (Class != ARCInstKind::RetainRV)
-        return nullptr;
+                                                    ARCInstKind Class) {
+  if (Class != ARCInstKind::RetainRV)
+    return nullptr;
 
-    const auto *Opnd = Inst.getOperand(0)->stripPointerCasts();
-    if (const auto *C = dyn_cast<CallInst>(Opnd))
-        return C;
-    return dyn_cast<InvokeInst>(Opnd);
+  const auto *Opnd = Inst.getOperand(0)->stripPointerCasts();
+  if (const auto *C = dyn_cast<CallInst>(Opnd))
+    return C;
+  return dyn_cast<InvokeInst>(Opnd);
 }
 
 /// Return the list of PHI nodes that are equivalent to PN.
-template<class PHINodeTy, class VectorTy>
+template <class PHINodeTy, class VectorTy>
 void getEquivalentPHIs(PHINodeTy &PN, VectorTy &PHIList) {
-    auto *BB = PN.getParent();
-    for (auto &P : BB->phis()) {
-        if (&P == &PN) // Do not add PN to the list.
-            continue;
-        unsigned I = 0, E = PN.getNumIncomingValues();
-        for (; I < E; ++I) {
-            auto *BB = PN.getIncomingBlock(I);
-            auto *PNOpnd = PN.getIncomingValue(I)->stripPointerCasts();
-            auto *POpnd = P.getIncomingValueForBlock(BB)->stripPointerCasts();
-            if (PNOpnd != POpnd)
-                break;
-        }
-        if (I == E)
-            PHIList.push_back(&P);
+  auto *BB = PN.getParent();
+  for (auto &P : BB->phis()) {
+    if (&P == &PN) // Do not add PN to the list.
+      continue;
+    unsigned I = 0, E = PN.getNumIncomingValues();
+    for (; I < E; ++I) {
+      auto *BB = PN.getIncomingBlock(I);
+      auto *PNOpnd = PN.getIncomingValue(I)->stripPointerCasts();
+      auto *POpnd = P.getIncomingValueForBlock(BB)->stripPointerCasts();
+      if (PNOpnd != POpnd)
+        break;
     }
+    if (I == E)
+      PHIList.push_back(&P);
+  }
 }
 
 } // end namespace objcarc

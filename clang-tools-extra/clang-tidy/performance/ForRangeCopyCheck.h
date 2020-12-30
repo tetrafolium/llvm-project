@@ -21,28 +21,28 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-for-range-copy.html
 class ForRangeCopyCheck : public ClangTidyCheck {
 public:
-    ForRangeCopyCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  ForRangeCopyCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    // Checks if the loop variable is a const value and expensive to copy. If so
-    // suggests it be converted to a const reference.
-    bool handleConstValueCopy(const VarDecl &LoopVar, ASTContext &Context);
+  // Checks if the loop variable is a const value and expensive to copy. If so
+  // suggests it be converted to a const reference.
+  bool handleConstValueCopy(const VarDecl &LoopVar, ASTContext &Context);
 
-    // Checks if the loop variable is a non-const value and whether only
-    // const methods are invoked on it or whether it is only used as a const
-    // reference argument. If so it suggests it be made a const reference.
-    bool handleCopyIsOnlyConstReferenced(const VarDecl &LoopVar,
-                                         const CXXForRangeStmt &ForRange,
-                                         ASTContext &Context);
+  // Checks if the loop variable is a non-const value and whether only
+  // const methods are invoked on it or whether it is only used as a const
+  // reference argument. If so it suggests it be made a const reference.
+  bool handleCopyIsOnlyConstReferenced(const VarDecl &LoopVar,
+                                       const CXXForRangeStmt &ForRange,
+                                       ASTContext &Context);
 
-    const bool WarnOnAllAutoCopies;
-    const std::vector<std::string> AllowedTypes;
+  const bool WarnOnAllAutoCopies;
+  const std::vector<std::string> AllowedTypes;
 };
 
 } // namespace performance

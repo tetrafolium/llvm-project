@@ -20,42 +20,38 @@ namespace mlir {
 /// deallocs.
 class BufferAliasAnalysis {
 public:
-    using ValueSetT = SmallPtrSet<Value, 16>;
-    using ValueMapT = llvm::DenseMap<Value, ValueSetT>;
+  using ValueSetT = SmallPtrSet<Value, 16>;
+  using ValueMapT = llvm::DenseMap<Value, ValueSetT>;
 
 public:
-    /// Constructs a new alias analysis using the op provided.
-    BufferAliasAnalysis(Operation *op);
+  /// Constructs a new alias analysis using the op provided.
+  BufferAliasAnalysis(Operation *op);
 
-    /// Find all immediate aliases this value could potentially have.
-    ValueMapT::const_iterator find(Value value) const {
-        return aliases.find(value);
-    }
+  /// Find all immediate aliases this value could potentially have.
+  ValueMapT::const_iterator find(Value value) const {
+    return aliases.find(value);
+  }
 
-    /// Returns the begin iterator to iterate over all aliases.
-    ValueMapT::const_iterator begin() const {
-        return aliases.begin();
-    }
+  /// Returns the begin iterator to iterate over all aliases.
+  ValueMapT::const_iterator begin() const { return aliases.begin(); }
 
-    /// Returns the end iterator that can be used in combination with find.
-    ValueMapT::const_iterator end() const {
-        return aliases.end();
-    }
+  /// Returns the end iterator that can be used in combination with find.
+  ValueMapT::const_iterator end() const { return aliases.end(); }
 
-    /// Find all immediate and indirect aliases this value could potentially
-    /// have. Note that the resulting set will also contain the value provided as
-    /// it is an alias of itself.
-    ValueSetT resolve(Value value) const;
+  /// Find all immediate and indirect aliases this value could potentially
+  /// have. Note that the resulting set will also contain the value provided as
+  /// it is an alias of itself.
+  ValueSetT resolve(Value value) const;
 
-    /// Removes the given values from all alias sets.
-    void remove(const SmallPtrSetImpl<Value> &aliasValues);
+  /// Removes the given values from all alias sets.
+  void remove(const SmallPtrSetImpl<Value> &aliasValues);
 
 private:
-    /// This function constructs a mapping from values to its immediate aliases.
-    void build(Operation *op);
+  /// This function constructs a mapping from values to its immediate aliases.
+  void build(Operation *op);
 
-    /// Maps values to all immediate aliases this value can have.
-    ValueMapT aliases;
+  /// Maps values to all immediate aliases this value can have.
+  ValueMapT aliases;
 };
 
 } // namespace mlir

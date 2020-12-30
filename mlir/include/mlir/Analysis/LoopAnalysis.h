@@ -58,7 +58,7 @@ uint64_t getLargestDivisorOfTripCount(AffineForOp forOp);
 /// Emits a note if it encounters a chain of affine.apply and conservatively
 ///  those cases.
 DenseSet<Value, DenseMapInfo<Value>>
-                                  getInvariantAccesses(Value iv, ArrayRef<Value> indices);
+getInvariantAccesses(Value iv, ArrayRef<Value> indices);
 
 using VectorizableLoopFun = std::function<bool(AffineForOp)>;
 

@@ -14,9 +14,8 @@
 #include "sanitizer_common/sanitizer_platform.h"
 #if SANITIZER_WINDOWS
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include <stdlib.h>
+#include <windows.h>
 
 #include "asan_interceptors.h"
 #include "asan_internal.h"
@@ -32,74 +31,74 @@
 using namespace __asan;
 
 extern "C" {
-    SANITIZER_INTERFACE_ATTRIBUTE
-    int __asan_should_detect_stack_use_after_return() {
-        __asan_init();
-        return __asan_option_detect_stack_use_after_return;
-    }
+SANITIZER_INTERFACE_ATTRIBUTE
+int __asan_should_detect_stack_use_after_return() {
+  __asan_init();
+  return __asan_option_detect_stack_use_after_return;
+}
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    uptr __asan_get_shadow_memory_dynamic_address() {
-        __asan_init();
-        return __asan_shadow_memory_dynamic_address;
-    }
+SANITIZER_INTERFACE_ATTRIBUTE
+uptr __asan_get_shadow_memory_dynamic_address() {
+  __asan_init();
+  return __asan_shadow_memory_dynamic_address;
+}
 }  // extern "C"
 
 // ---------------------- Windows-specific interceptors ---------------- {{{
 static LPTOP_LEVEL_EXCEPTION_FILTER default_seh_handler;
 static LPTOP_LEVEL_EXCEPTION_FILTER user_seh_handler;
 
-extern "C" SANITIZER_INTERFACE_ATTRIBUTE
-long __asan_unhandled_exception_filter(EXCEPTION_POINTERS *info) {
-    EXCEPTION_RECORD *exception_record = info->ExceptionRecord;
-    CONTEXT *context = info->ContextRecord;
+extern "C" SANITIZER_INTERFACE_ATTRIBUTE long __asan_unhandled_exception_filter(
+    EXCEPTION_POINTERS *info) {
+  EXCEPTION_RECORD *exception_record = info->ExceptionRecord;
+  CONTEXT *context = info->ContextRecord;
 
-    // FIXME: Handle EXCEPTION_STACK_OVERFLOW here.
+  // FIXME: Handle EXCEPTION_STACK_OVERFLOW here.
 
-    SignalContext sig(exception_record, context);
-    ReportDeadlySignal(sig);
-    UNREACHABLE("returned from reporting deadly signal");
+  SignalContext sig(exception_record, context);
+  ReportDeadlySignal(sig);
+  UNREACHABLE("returned from reporting deadly signal");
 }
 
 // Wrapper SEH Handler. If the exception should be handled by asan, we call
 // __asan_unhandled_exception_filter, otherwise, we execute the user provided
 // exception handler or the default.
 static long WINAPI SEHHandler(EXCEPTION_POINTERS *info) {
-    DWORD exception_code = info->ExceptionRecord->ExceptionCode;
-    if (__sanitizer::IsHandledDeadlyException(exception_code))
-        return __asan_unhandled_exception_filter(info);
-    if (user_seh_handler)
-        return user_seh_handler(info);
-    // Bubble out to the default exception filter.
-    if (default_seh_handler)
-        return default_seh_handler(info);
-    return EXCEPTION_CONTINUE_SEARCH;
+  DWORD exception_code = info->ExceptionRecord->ExceptionCode;
+  if (__sanitizer::IsHandledDeadlyException(exception_code))
+    return __asan_unhandled_exception_filter(info);
+  if (user_seh_handler)
+    return user_seh_handler(info);
+  // Bubble out to the default exception filter.
+  if (default_seh_handler)
+    return default_seh_handler(info);
+  return EXCEPTION_CONTINUE_SEARCH;
 }
 
 INTERCEPTOR_WINAPI(LPTOP_LEVEL_EXCEPTION_FILTER, SetUnhandledExceptionFilter,
                    LPTOP_LEVEL_EXCEPTION_FILTER ExceptionFilter) {
-    CHECK(REAL(SetUnhandledExceptionFilter));
-    if (ExceptionFilter == &SEHHandler)
-        return REAL(SetUnhandledExceptionFilter)(ExceptionFilter);
-    // We record the user provided exception handler to be called for all the
-    // exceptions unhandled by asan.
-    Swap(ExceptionFilter, user_seh_handler);
-    return ExceptionFilter;
+  CHECK(REAL(SetUnhandledExceptionFilter));
+  if (ExceptionFilter == &SEHHandler)
+    return REAL(SetUnhandledExceptionFilter)(ExceptionFilter);
+  // We record the user provided exception handler to be called for all the
+  // exceptions unhandled by asan.
+  Swap(ExceptionFilter, user_seh_handler);
+  return ExceptionFilter;
 }
 
 INTERCEPTOR_WINAPI(void, RtlRaiseException, EXCEPTION_RECORD *ExceptionRecord) {
-    CHECK(REAL(RtlRaiseException));
-    // This is a noreturn function, unless it's one of the exceptions raised to
-    // communicate with the debugger, such as the one from OutputDebugString.
-    if (ExceptionRecord->ExceptionCode != DBG_PRINTEXCEPTION_C)
-        __asan_handle_no_return();
-    REAL(RtlRaiseException)(ExceptionRecord);
+  CHECK(REAL(RtlRaiseException));
+  // This is a noreturn function, unless it's one of the exceptions raised to
+  // communicate with the debugger, such as the one from OutputDebugString.
+  if (ExceptionRecord->ExceptionCode != DBG_PRINTEXCEPTION_C)
+    __asan_handle_no_return();
+  REAL(RtlRaiseException)(ExceptionRecord);
 }
 
 INTERCEPTOR_WINAPI(void, RaiseException, void *a, void *b, void *c, void *d) {
-    CHECK(REAL(RaiseException));
-    __asan_handle_no_return();
-    REAL(RaiseException)(a, b, c, d);
+  CHECK(REAL(RaiseException));
+  __asan_handle_no_return();
+  REAL(RaiseException)(a, b, c, d);
 }
 
 #ifdef _WIN64
@@ -107,17 +106,17 @@ INTERCEPTOR_WINAPI(void, RaiseException, void *a, void *b, void *c, void *d) {
 INTERCEPTOR_WINAPI(EXCEPTION_DISPOSITION, __C_specific_handler,
                    _EXCEPTION_RECORD *a, void *b, _CONTEXT *c,
                    _DISPATCHER_CONTEXT *d) {
-    CHECK(REAL(__C_specific_handler));
-    __asan_handle_no_return();
-    return REAL(__C_specific_handler)(a, b, c, d);
+  CHECK(REAL(__C_specific_handler));
+  __asan_handle_no_return();
+  return REAL(__C_specific_handler)(a, b, c, d);
 }
 
 #else
 
 INTERCEPTOR(int, _except_handler3, void *a, void *b, void *c, void *d) {
-    CHECK(REAL(_except_handler3));
-    __asan_handle_no_return();
-    return REAL(_except_handler3)(a, b, c, d);
+  CHECK(REAL(_except_handler3));
+  __asan_handle_no_return();
+  return REAL(_except_handler3)(a, b, c, d);
 }
 
 #if ASAN_DYNAMIC
@@ -125,33 +124,33 @@ INTERCEPTOR(int, _except_handler3, void *a, void *b, void *c, void *d) {
 #define _except_handler4 _except_handler4_common
 #endif
 INTERCEPTOR(int, _except_handler4, void *a, void *b, void *c, void *d) {
-    CHECK(REAL(_except_handler4));
-    __asan_handle_no_return();
-    return REAL(_except_handler4)(a, b, c, d);
+  CHECK(REAL(_except_handler4));
+  __asan_handle_no_return();
+  return REAL(_except_handler4)(a, b, c, d);
 }
 #endif
 
 static thread_return_t THREAD_CALLING_CONV asan_thread_start(void *arg) {
-    AsanThread *t = (AsanThread *)arg;
-    SetCurrentThread(t);
-    return t->ThreadStart(GetTid(), /* signal_thread_is_registered */ nullptr);
+  AsanThread *t = (AsanThread *)arg;
+  SetCurrentThread(t);
+  return t->ThreadStart(GetTid(), /* signal_thread_is_registered */ nullptr);
 }
 
 INTERCEPTOR_WINAPI(HANDLE, CreateThread, LPSECURITY_ATTRIBUTES security,
                    SIZE_T stack_size, LPTHREAD_START_ROUTINE start_routine,
                    void *arg, DWORD thr_flags, DWORD *tid) {
-    // Strict init-order checking is thread-hostile.
-    if (flags()->strict_init_order)
-        StopInitOrderChecking();
-    GET_STACK_TRACE_THREAD;
-    // FIXME: The CreateThread interceptor is not the same as a pthread_create
-    // one.  This is a bandaid fix for PR22025.
-    bool detached = false;  // FIXME: how can we determine it on Windows?
-    u32 current_tid = GetCurrentTidOrInvalid();
-    AsanThread *t =
-        AsanThread::Create(start_routine, arg, current_tid, &stack, detached);
-    return REAL(CreateThread)(security, stack_size, asan_thread_start, t,
-                              thr_flags, tid);
+  // Strict init-order checking is thread-hostile.
+  if (flags()->strict_init_order)
+    StopInitOrderChecking();
+  GET_STACK_TRACE_THREAD;
+  // FIXME: The CreateThread interceptor is not the same as a pthread_create
+  // one.  This is a bandaid fix for PR22025.
+  bool detached = false;  // FIXME: how can we determine it on Windows?
+  u32 current_tid = GetCurrentTidOrInvalid();
+  AsanThread *t =
+      AsanThread::Create(start_routine, arg, current_tid, &stack, detached);
+  return REAL(CreateThread)(security, stack_size, asan_thread_start, t,
+                            thr_flags, tid);
 }
 
 // }}}
@@ -159,42 +158,42 @@ INTERCEPTOR_WINAPI(HANDLE, CreateThread, LPSECURITY_ATTRIBUTES security,
 namespace __asan {
 
 void InitializePlatformInterceptors() {
-    // The interceptors were not designed to be removable, so we have to keep this
-    // module alive for the life of the process.
-    HMODULE pinned;
-    CHECK(GetModuleHandleExW(
-              GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,
-              (LPCWSTR)&InitializePlatformInterceptors, &pinned));
+  // The interceptors were not designed to be removable, so we have to keep this
+  // module alive for the life of the process.
+  HMODULE pinned;
+  CHECK(GetModuleHandleExW(
+      GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_PIN,
+      (LPCWSTR)&InitializePlatformInterceptors, &pinned));
 
-    ASAN_INTERCEPT_FUNC(CreateThread);
-    ASAN_INTERCEPT_FUNC(SetUnhandledExceptionFilter);
+  ASAN_INTERCEPT_FUNC(CreateThread);
+  ASAN_INTERCEPT_FUNC(SetUnhandledExceptionFilter);
 
 #ifdef _WIN64
-    ASAN_INTERCEPT_FUNC(__C_specific_handler);
+  ASAN_INTERCEPT_FUNC(__C_specific_handler);
 #else
-    ASAN_INTERCEPT_FUNC(_except_handler3);
-    ASAN_INTERCEPT_FUNC(_except_handler4);
+  ASAN_INTERCEPT_FUNC(_except_handler3);
+  ASAN_INTERCEPT_FUNC(_except_handler4);
 #endif
 
-    // Try to intercept kernel32!RaiseException, and if that fails, intercept
-    // ntdll!RtlRaiseException instead.
-    if (!::__interception::OverrideFunction("RaiseException",
-                                            (uptr)WRAP(RaiseException),
-                                            (uptr *)&REAL(RaiseException))) {
-        CHECK(::__interception::OverrideFunction("RtlRaiseException",
-                (uptr)WRAP(RtlRaiseException),
-                (uptr *)&REAL(RtlRaiseException)));
-    }
+  // Try to intercept kernel32!RaiseException, and if that fails, intercept
+  // ntdll!RtlRaiseException instead.
+  if (!::__interception::OverrideFunction("RaiseException",
+                                          (uptr)WRAP(RaiseException),
+                                          (uptr *)&REAL(RaiseException))) {
+    CHECK(::__interception::OverrideFunction("RtlRaiseException",
+                                             (uptr)WRAP(RtlRaiseException),
+                                             (uptr *)&REAL(RtlRaiseException)));
+  }
 }
 
 void AsanApplyToGlobals(globals_op_fptr op, const void *needle) {
-    UNIMPLEMENTED();
+  UNIMPLEMENTED();
 }
 
 void FlushUnneededASanShadowMemory(uptr p, uptr size) {
-    // Since asan's mapping is compacting, the shadow chunk may be
-    // not page-aligned, so we only flush the page-aligned portion.
-    ReleaseMemoryPagesToOS(MemToShadow(p), MemToShadow(p + size));
+  // Since asan's mapping is compacting, the shadow chunk may be
+  // not page-aligned, so we only flush the page-aligned portion.
+  ReleaseMemoryPagesToOS(MemToShadow(p), MemToShadow(p + size));
 }
 
 // ---------------------- TSD ---------------- {{{
@@ -206,44 +205,42 @@ static __declspec(thread) void *fake_tsd = 0;
 // "[This structure may be altered in future versions of Windows. Applications
 // should use the alternate functions listed in this topic.]"
 typedef struct _TEB {
-    PVOID Reserved1[12];
-    // PVOID ThreadLocalStoragePointer; is here, at the last field in Reserved1.
-    PVOID ProcessEnvironmentBlock;
-    PVOID Reserved2[399];
-    BYTE Reserved3[1952];
-    PVOID TlsSlots[64];
-    BYTE Reserved4[8];
-    PVOID Reserved5[26];
-    PVOID ReservedForOle;
-    PVOID Reserved6[4];
-    PVOID TlsExpansionSlots;
+  PVOID Reserved1[12];
+  // PVOID ThreadLocalStoragePointer; is here, at the last field in Reserved1.
+  PVOID ProcessEnvironmentBlock;
+  PVOID Reserved2[399];
+  BYTE Reserved3[1952];
+  PVOID TlsSlots[64];
+  BYTE Reserved4[8];
+  PVOID Reserved5[26];
+  PVOID ReservedForOle;
+  PVOID Reserved6[4];
+  PVOID TlsExpansionSlots;
 } TEB, *PTEB;
 
 constexpr size_t TEB_RESERVED_FIELDS_THREAD_LOCAL_STORAGE_OFFSET = 11;
 BOOL IsTlsInitialized() {
-    PTEB teb = (PTEB)NtCurrentTeb();
-    return teb->Reserved1[TEB_RESERVED_FIELDS_THREAD_LOCAL_STORAGE_OFFSET] !=
-           nullptr;
+  PTEB teb = (PTEB)NtCurrentTeb();
+  return teb->Reserved1[TEB_RESERVED_FIELDS_THREAD_LOCAL_STORAGE_OFFSET] !=
+         nullptr;
 }
 
 void AsanTSDInit(void (*destructor)(void *tsd)) {
-    // FIXME: we're ignoring the destructor for now.
-    tsd_key_inited = true;
+  // FIXME: we're ignoring the destructor for now.
+  tsd_key_inited = true;
 }
 
 void *AsanTSDGet() {
-    CHECK(tsd_key_inited);
-    return IsTlsInitialized() ? fake_tsd : nullptr;
+  CHECK(tsd_key_inited);
+  return IsTlsInitialized() ? fake_tsd : nullptr;
 }
 
 void AsanTSDSet(void *tsd) {
-    CHECK(tsd_key_inited);
-    fake_tsd = tsd;
+  CHECK(tsd_key_inited);
+  fake_tsd = tsd;
 }
 
-void PlatformTSDDtor(void *tsd) {
-    AsanThread::TSDDtor(tsd);
-}
+void PlatformTSDDtor(void *tsd) { AsanThread::TSDDtor(tsd); }
 // }}}
 
 // ---------------------- Various stuff ---------------- {{{
@@ -251,12 +248,12 @@ void *AsanDoesNotSupportStaticLinkage() {
 #if defined(_DEBUG)
 #error Please build the runtime with a non-debug CRT: /MD or /MT
 #endif
-    return 0;
+  return 0;
 }
 
 uptr FindDynamicShadowStart() {
-    return MapDynamicShadow(MemToShadowSize(kHighMemEnd), SHADOW_SCALE,
-                            /*min_shadow_base_alignment*/ 0, kHighMemEnd);
+  return MapDynamicShadow(MemToShadowSize(kHighMemEnd), SHADOW_SCALE,
+                          /*min_shadow_base_alignment*/ 0, kHighMemEnd);
 }
 
 void AsanCheckDynamicRTPrereqs() {}
@@ -264,68 +261,64 @@ void AsanCheckDynamicRTPrereqs() {}
 void AsanCheckIncompatibleRT() {}
 
 void ReadContextStack(void *context, uptr *stack, uptr *ssize) {
-    UNIMPLEMENTED();
+  UNIMPLEMENTED();
 }
 
-void AsanOnDeadlySignal(int, void *siginfo, void *context) {
-    UNIMPLEMENTED();
-}
+void AsanOnDeadlySignal(int, void *siginfo, void *context) { UNIMPLEMENTED(); }
 
-bool PlatformUnpoisonStacks() {
-    return false;
-}
+bool PlatformUnpoisonStacks() { return false; }
 
 #if SANITIZER_WINDOWS64
 // Exception handler for dealing with shadow memory.
 static LONG CALLBACK
 ShadowExceptionHandler(PEXCEPTION_POINTERS exception_pointers) {
-    uptr page_size = GetPageSizeCached();
-    // Only handle access violations.
-    if (exception_pointers->ExceptionRecord->ExceptionCode !=
-            EXCEPTION_ACCESS_VIOLATION ||
-            exception_pointers->ExceptionRecord->NumberParameters < 2) {
-        __asan_handle_no_return();
-        return EXCEPTION_CONTINUE_SEARCH;
-    }
+  uptr page_size = GetPageSizeCached();
+  // Only handle access violations.
+  if (exception_pointers->ExceptionRecord->ExceptionCode !=
+          EXCEPTION_ACCESS_VIOLATION ||
+      exception_pointers->ExceptionRecord->NumberParameters < 2) {
+    __asan_handle_no_return();
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
 
-    // Only handle access violations that land within the shadow memory.
-    uptr addr =
-        (uptr)(exception_pointers->ExceptionRecord->ExceptionInformation[1]);
+  // Only handle access violations that land within the shadow memory.
+  uptr addr =
+      (uptr)(exception_pointers->ExceptionRecord->ExceptionInformation[1]);
 
-    // Check valid shadow range.
-    if (!AddrIsInShadow(addr)) {
-        __asan_handle_no_return();
-        return EXCEPTION_CONTINUE_SEARCH;
-    }
+  // Check valid shadow range.
+  if (!AddrIsInShadow(addr)) {
+    __asan_handle_no_return();
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
 
-    // This is an access violation while trying to read from the shadow. Commit
-    // the relevant page and let execution continue.
+  // This is an access violation while trying to read from the shadow. Commit
+  // the relevant page and let execution continue.
 
-    // Determine the address of the page that is being accessed.
-    uptr page = RoundDownTo(addr, page_size);
+  // Determine the address of the page that is being accessed.
+  uptr page = RoundDownTo(addr, page_size);
 
-    // Commit the page.
-    uptr result =
-        (uptr)::VirtualAlloc((LPVOID)page, page_size, MEM_COMMIT, PAGE_READWRITE);
-    if (result != page)
-        return EXCEPTION_CONTINUE_SEARCH;
+  // Commit the page.
+  uptr result =
+      (uptr)::VirtualAlloc((LPVOID)page, page_size, MEM_COMMIT, PAGE_READWRITE);
+  if (result != page)
+    return EXCEPTION_CONTINUE_SEARCH;
 
-    // The page mapping succeeded, so continue execution as usual.
-    return EXCEPTION_CONTINUE_EXECUTION;
+  // The page mapping succeeded, so continue execution as usual.
+  return EXCEPTION_CONTINUE_EXECUTION;
 }
 
 #endif
 
 void InitializePlatformExceptionHandlers() {
 #if SANITIZER_WINDOWS64
-    // On Win64, we map memory on demand with access violation handler.
-    // Install our exception handler.
-    CHECK(AddVectoredExceptionHandler(TRUE, &ShadowExceptionHandler));
+  // On Win64, we map memory on demand with access violation handler.
+  // Install our exception handler.
+  CHECK(AddVectoredExceptionHandler(TRUE, &ShadowExceptionHandler));
 #endif
 }
 
 bool IsSystemHeapAddress(uptr addr) {
-    return ::HeapValidate(GetProcessHeap(), 0, (void *)addr) != FALSE;
+  return ::HeapValidate(GetProcessHeap(), 0, (void *)addr) != FALSE;
 }
 
 // We want to install our own exception handler (EH) to print helpful reports
@@ -345,19 +338,19 @@ bool IsSystemHeapAddress(uptr addr) {
 // will be called for each instrumented module.  This ensures that at least one
 // __asan_set_seh_filter call happens after the .exe module CRT is initialized.
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE int __asan_set_seh_filter() {
-    // We should only store the previous handler if it's not our own handler in
-    // order to avoid loops in the EH chain.
-    auto prev_seh_handler = SetUnhandledExceptionFilter(SEHHandler);
-    if (prev_seh_handler != &SEHHandler)
-        default_seh_handler = prev_seh_handler;
-    return 0;
+  // We should only store the previous handler if it's not our own handler in
+  // order to avoid loops in the EH chain.
+  auto prev_seh_handler = SetUnhandledExceptionFilter(SEHHandler);
+  if (prev_seh_handler != &SEHHandler)
+    default_seh_handler = prev_seh_handler;
+  return 0;
 }
 
 bool HandleDlopenInit() {
-    // Not supported on this platform.
-    static_assert(!SANITIZER_SUPPORTS_INIT_FOR_DLOPEN,
-                  "Expected SANITIZER_SUPPORTS_INIT_FOR_DLOPEN to be false");
-    return false;
+  // Not supported on this platform.
+  static_assert(!SANITIZER_SUPPORTS_INIT_FOR_DLOPEN,
+                "Expected SANITIZER_SUPPORTS_INIT_FOR_DLOPEN to be false");
+  return false;
 }
 
 #if !ASAN_DYNAMIC
@@ -378,8 +371,8 @@ __declspec(allocate(".CRT$XCAB")) int (*__intercept_seh)() =
 // which run before the CRT. Users also add code to .CRT$XLC, so it's important
 // to run our initializers first.
 static void NTAPI asan_thread_init(void *module, DWORD reason, void *reserved) {
-    if (reason == DLL_PROCESS_ATTACH)
-        __asan_init();
+  if (reason == DLL_PROCESS_ATTACH)
+    __asan_init();
 }
 
 #pragma section(".CRT$XLAB", long, read)
@@ -388,12 +381,12 @@ __declspec(allocate(".CRT$XLAB")) void(NTAPI *__asan_tls_init)(
 #endif
 
 static void NTAPI asan_thread_exit(void *module, DWORD reason, void *reserved) {
-    if (reason == DLL_THREAD_DETACH) {
-        // Unpoison the thread's stack because the memory may be re-used.
-        NT_TIB *tib = (NT_TIB *)NtCurrentTeb();
-        uptr stackSize = (uptr)tib->StackBase - (uptr)tib->StackLimit;
-        __asan_unpoison_memory_region(tib->StackLimit, stackSize);
-    }
+  if (reason == DLL_THREAD_DETACH) {
+    // Unpoison the thread's stack because the memory may be re-used.
+    NT_TIB *tib = (NT_TIB *)NtCurrentTeb();
+    uptr stackSize = (uptr)tib->StackBase - (uptr)tib->StackLimit;
+    __asan_unpoison_memory_region(tib->StackLimit, stackSize);
+  }
 }
 
 #pragma section(".CRT$XLY", long, read)

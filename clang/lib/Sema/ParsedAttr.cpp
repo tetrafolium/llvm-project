@@ -30,77 +30,78 @@ LLVM_INSTANTIATE_REGISTRY(ParsedAttrInfoRegistry)
 
 IdentifierLoc *IdentifierLoc::create(ASTContext &Ctx, SourceLocation Loc,
                                      IdentifierInfo *Ident) {
-    IdentifierLoc *Result = new (Ctx) IdentifierLoc;
-    Result->Loc = Loc;
-    Result->Ident = Ident;
-    return Result;
+  IdentifierLoc *Result = new (Ctx) IdentifierLoc;
+  Result->Loc = Loc;
+  Result->Ident = Ident;
+  return Result;
 }
 
 size_t ParsedAttr::allocated_size() const {
-    if (IsAvailability) return AttributeFactory::AvailabilityAllocSize;
-    else if (IsTypeTagForDatatype)
-        return AttributeFactory::TypeTagForDatatypeAllocSize;
-    else if (IsProperty)
-        return AttributeFactory::PropertyAllocSize;
-    else if (HasParsedType)
-        return totalSizeToAlloc<ArgsUnion, detail::AvailabilityData,
-               detail::TypeTagForDatatypeData, ParsedType,
-               detail::PropertyData>(0, 0, 0, 1, 0);
+  if (IsAvailability)
+    return AttributeFactory::AvailabilityAllocSize;
+  else if (IsTypeTagForDatatype)
+    return AttributeFactory::TypeTagForDatatypeAllocSize;
+  else if (IsProperty)
+    return AttributeFactory::PropertyAllocSize;
+  else if (HasParsedType)
     return totalSizeToAlloc<ArgsUnion, detail::AvailabilityData,
-           detail::TypeTagForDatatypeData, ParsedType,
-           detail::PropertyData>(NumArgs, 0, 0, 0, 0);
+                            detail::TypeTagForDatatypeData, ParsedType,
+                            detail::PropertyData>(0, 0, 0, 1, 0);
+  return totalSizeToAlloc<ArgsUnion, detail::AvailabilityData,
+                          detail::TypeTagForDatatypeData, ParsedType,
+                          detail::PropertyData>(NumArgs, 0, 0, 0, 0);
 }
 
 AttributeFactory::AttributeFactory() {
-    // Go ahead and configure all the inline capacity.  This is just a memset.
-    FreeLists.resize(InlineFreeListsCapacity);
+  // Go ahead and configure all the inline capacity.  This is just a memset.
+  FreeLists.resize(InlineFreeListsCapacity);
 }
 AttributeFactory::~AttributeFactory() = default;
 
 static size_t getFreeListIndexForSize(size_t size) {
-    assert(size >= sizeof(ParsedAttr));
-    assert((size % sizeof(void*)) == 0);
-    return ((size - sizeof(ParsedAttr)) / sizeof(void *));
+  assert(size >= sizeof(ParsedAttr));
+  assert((size % sizeof(void *)) == 0);
+  return ((size - sizeof(ParsedAttr)) / sizeof(void *));
 }
 
 void *AttributeFactory::allocate(size_t size) {
-    // Check for a previously reclaimed attribute.
-    size_t index = getFreeListIndexForSize(size);
-    if (index < FreeLists.size() && !FreeLists[index].empty()) {
-        ParsedAttr *attr = FreeLists[index].back();
-        FreeLists[index].pop_back();
-        return attr;
-    }
+  // Check for a previously reclaimed attribute.
+  size_t index = getFreeListIndexForSize(size);
+  if (index < FreeLists.size() && !FreeLists[index].empty()) {
+    ParsedAttr *attr = FreeLists[index].back();
+    FreeLists[index].pop_back();
+    return attr;
+  }
 
-    // Otherwise, allocate something new.
-    return Alloc.Allocate(size, alignof(AttributeFactory));
+  // Otherwise, allocate something new.
+  return Alloc.Allocate(size, alignof(AttributeFactory));
 }
 
 void AttributeFactory::deallocate(ParsedAttr *Attr) {
-    size_t size = Attr->allocated_size();
-    size_t freeListIndex = getFreeListIndexForSize(size);
+  size_t size = Attr->allocated_size();
+  size_t freeListIndex = getFreeListIndexForSize(size);
 
-    // Expand FreeLists to the appropriate size, if required.
-    if (freeListIndex >= FreeLists.size())
-        FreeLists.resize(freeListIndex + 1);
+  // Expand FreeLists to the appropriate size, if required.
+  if (freeListIndex >= FreeLists.size())
+    FreeLists.resize(freeListIndex + 1);
 
 #ifndef NDEBUG
-    // In debug mode, zero out the attribute to help find memory overwriting.
-    memset(Attr, 0, size);
+  // In debug mode, zero out the attribute to help find memory overwriting.
+  memset(Attr, 0, size);
 #endif
 
-    // Add 'Attr' to the appropriate free-list.
-    FreeLists[freeListIndex].push_back(Attr);
+  // Add 'Attr' to the appropriate free-list.
+  FreeLists[freeListIndex].push_back(Attr);
 }
 
 void AttributeFactory::reclaimPool(AttributePool &cur) {
-    for (ParsedAttr *AL : cur.Attrs)
-        deallocate(AL);
+  for (ParsedAttr *AL : cur.Attrs)
+    deallocate(AL);
 }
 
 void AttributePool::takePool(AttributePool &pool) {
-    Attrs.insert(Attrs.end(), pool.Attrs.begin(), pool.Attrs.end());
-    pool.Attrs.clear();
+  Attrs.insert(Attrs.end(), pool.Attrs.begin(), pool.Attrs.end());
+  pool.Attrs.clear();
 }
 
 namespace {
@@ -110,105 +111,95 @@ namespace {
 } // namespace
 
 const ParsedAttrInfo &ParsedAttrInfo::get(const AttributeCommonInfo &A) {
-    // If we have a ParsedAttrInfo for this ParsedAttr then return that.
-    if ((size_t)A.getParsedKind() < llvm::array_lengthof(AttrInfoMap))
-        return *AttrInfoMap[A.getParsedKind()];
+  // If we have a ParsedAttrInfo for this ParsedAttr then return that.
+  if ((size_t)A.getParsedKind() < llvm::array_lengthof(AttrInfoMap))
+    return *AttrInfoMap[A.getParsedKind()];
 
-    // If this is an ignored attribute then return an appropriate ParsedAttrInfo.
-    static const ParsedAttrInfo IgnoredParsedAttrInfo(
-        AttributeCommonInfo::IgnoredAttribute);
-    if (A.getParsedKind() == AttributeCommonInfo::IgnoredAttribute)
-        return IgnoredParsedAttrInfo;
+  // If this is an ignored attribute then return an appropriate ParsedAttrInfo.
+  static const ParsedAttrInfo IgnoredParsedAttrInfo(
+      AttributeCommonInfo::IgnoredAttribute);
+  if (A.getParsedKind() == AttributeCommonInfo::IgnoredAttribute)
+    return IgnoredParsedAttrInfo;
 
-    // Otherwise this may be an attribute defined by a plugin. First instantiate
-    // all plugin attributes if we haven't already done so.
-    static llvm::ManagedStatic<std::list<std::unique_ptr<ParsedAttrInfo>>>
-    PluginAttrInstances;
-    if (PluginAttrInstances->empty())
-        for (auto It : ParsedAttrInfoRegistry::entries())
-            PluginAttrInstances->emplace_back(It.instantiate());
+  // Otherwise this may be an attribute defined by a plugin. First instantiate
+  // all plugin attributes if we haven't already done so.
+  static llvm::ManagedStatic<std::list<std::unique_ptr<ParsedAttrInfo>>>
+      PluginAttrInstances;
+  if (PluginAttrInstances->empty())
+    for (auto It : ParsedAttrInfoRegistry::entries())
+      PluginAttrInstances->emplace_back(It.instantiate());
 
-    // Search for a ParsedAttrInfo whose name and syntax match.
-    std::string FullName = A.getNormalizedFullName();
-    AttributeCommonInfo::Syntax SyntaxUsed = A.getSyntax();
-    if (SyntaxUsed == AttributeCommonInfo::AS_ContextSensitiveKeyword)
-        SyntaxUsed = AttributeCommonInfo::AS_Keyword;
+  // Search for a ParsedAttrInfo whose name and syntax match.
+  std::string FullName = A.getNormalizedFullName();
+  AttributeCommonInfo::Syntax SyntaxUsed = A.getSyntax();
+  if (SyntaxUsed == AttributeCommonInfo::AS_ContextSensitiveKeyword)
+    SyntaxUsed = AttributeCommonInfo::AS_Keyword;
 
-    for (auto &Ptr : *PluginAttrInstances)
-        for (auto &S : Ptr->Spellings)
-            if (S.Syntax == SyntaxUsed && S.NormalizedFullName == FullName)
-                return *Ptr;
+  for (auto &Ptr : *PluginAttrInstances)
+    for (auto &S : Ptr->Spellings)
+      if (S.Syntax == SyntaxUsed && S.NormalizedFullName == FullName)
+        return *Ptr;
 
-    // If we failed to find a match then return a default ParsedAttrInfo.
-    static const ParsedAttrInfo DefaultParsedAttrInfo(
-        AttributeCommonInfo::UnknownAttribute);
-    return DefaultParsedAttrInfo;
+  // If we failed to find a match then return a default ParsedAttrInfo.
+  static const ParsedAttrInfo DefaultParsedAttrInfo(
+      AttributeCommonInfo::UnknownAttribute);
+  return DefaultParsedAttrInfo;
 }
 
-unsigned ParsedAttr::getMinArgs() const {
-    return getInfo().NumArgs;
-}
+unsigned ParsedAttr::getMinArgs() const { return getInfo().NumArgs; }
 
 unsigned ParsedAttr::getMaxArgs() const {
-    return getMinArgs() + getInfo().OptArgs;
+  return getMinArgs() + getInfo().OptArgs;
 }
 
-bool ParsedAttr::hasCustomParsing() const {
-    return getInfo().HasCustomParsing;
-}
+bool ParsedAttr::hasCustomParsing() const { return getInfo().HasCustomParsing; }
 
 bool ParsedAttr::diagnoseAppertainsTo(Sema &S, const Decl *D) const {
-    return getInfo().diagAppertainsToDecl(S, *this, D);
+  return getInfo().diagAppertainsToDecl(S, *this, D);
 }
 
 bool ParsedAttr::appliesToDecl(const Decl *D,
                                attr::SubjectMatchRule MatchRule) const {
-    return checkAttributeMatchRuleAppliesTo(D, MatchRule);
+  return checkAttributeMatchRuleAppliesTo(D, MatchRule);
 }
 
 void ParsedAttr::getMatchRules(
     const LangOptions &LangOpts,
     SmallVectorImpl<std::pair<attr::SubjectMatchRule, bool>> &MatchRules)
-const {
-    return getInfo().getPragmaAttributeMatchRules(MatchRules, LangOpts);
+    const {
+  return getInfo().getPragmaAttributeMatchRules(MatchRules, LangOpts);
 }
 
 bool ParsedAttr::diagnoseLangOpts(Sema &S) const {
-    return getInfo().diagLangOpts(S, *this);
+  return getInfo().diagLangOpts(S, *this);
 }
 
 bool ParsedAttr::isTargetSpecificAttr() const {
-    return getInfo().IsTargetSpecific;
+  return getInfo().IsTargetSpecific;
 }
 
-bool ParsedAttr::isTypeAttr() const {
-    return getInfo().IsType;
-}
+bool ParsedAttr::isTypeAttr() const { return getInfo().IsType; }
 
-bool ParsedAttr::isStmtAttr() const {
-    return getInfo().IsStmt;
-}
+bool ParsedAttr::isStmtAttr() const { return getInfo().IsStmt; }
 
 bool ParsedAttr::existsInTarget(const TargetInfo &Target) const {
-    return getInfo().existsInTarget(Target);
+  return getInfo().existsInTarget(Target);
 }
 
-bool ParsedAttr::isKnownToGCC() const {
-    return getInfo().IsKnownToGCC;
-}
+bool ParsedAttr::isKnownToGCC() const { return getInfo().IsKnownToGCC; }
 
 bool ParsedAttr::isSupportedByPragmaAttribute() const {
-    return getInfo().IsSupportedByPragmaAttribute;
+  return getInfo().IsSupportedByPragmaAttribute;
 }
 
 unsigned ParsedAttr::getSemanticSpelling() const {
-    return getInfo().spellingIndexToSemanticSpelling(*this);
+  return getInfo().spellingIndexToSemanticSpelling(*this);
 }
 
 bool ParsedAttr::hasVariadicArg() const {
-    // If the attribute has the maximum number of optional arguments, we will
-    // claim that as being variadic. If we someday get an attribute that
-    // legitimately bumps up against that maximum, we can use another bit to track
-    // whether it's truly variadic or not.
-    return getInfo().OptArgs == 15;
+  // If the attribute has the maximum number of optional arguments, we will
+  // claim that as being variadic. If we someday get an attribute that
+  // legitimately bumps up against that maximum, we can use another bit to track
+  // whether it's truly variadic or not.
+  return getInfo().OptArgs == 15;
 }

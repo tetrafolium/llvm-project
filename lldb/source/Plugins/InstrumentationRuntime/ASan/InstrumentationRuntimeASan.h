@@ -18,51 +18,47 @@ namespace lldb_private {
 
 class InstrumentationRuntimeASan : public lldb_private::InstrumentationRuntime {
 public:
-    ~InstrumentationRuntimeASan() override;
+  ~InstrumentationRuntimeASan() override;
 
-    static lldb::InstrumentationRuntimeSP
-    CreateInstance(const lldb::ProcessSP &process_sp);
+  static lldb::InstrumentationRuntimeSP
+  CreateInstance(const lldb::ProcessSP &process_sp);
 
-    static void Initialize();
+  static void Initialize();
 
-    static void Terminate();
+  static void Terminate();
 
-    static lldb_private::ConstString GetPluginNameStatic();
+  static lldb_private::ConstString GetPluginNameStatic();
 
-    static lldb::InstrumentationRuntimeType GetTypeStatic();
+  static lldb::InstrumentationRuntimeType GetTypeStatic();
 
-    lldb_private::ConstString GetPluginName() override {
-        return GetPluginNameStatic();
-    }
+  lldb_private::ConstString GetPluginName() override {
+    return GetPluginNameStatic();
+  }
 
-    virtual lldb::InstrumentationRuntimeType GetType() {
-        return GetTypeStatic();
-    }
+  virtual lldb::InstrumentationRuntimeType GetType() { return GetTypeStatic(); }
 
-    uint32_t GetPluginVersion() override {
-        return 1;
-    }
+  uint32_t GetPluginVersion() override { return 1; }
 
 private:
-    InstrumentationRuntimeASan(const lldb::ProcessSP &process_sp)
-        : lldb_private::InstrumentationRuntime(process_sp) {}
+  InstrumentationRuntimeASan(const lldb::ProcessSP &process_sp)
+      : lldb_private::InstrumentationRuntime(process_sp) {}
 
-    const RegularExpression &GetPatternForRuntimeLibrary() override;
+  const RegularExpression &GetPatternForRuntimeLibrary() override;
 
-    bool CheckIfRuntimeIsValid(const lldb::ModuleSP module_sp) override;
+  bool CheckIfRuntimeIsValid(const lldb::ModuleSP module_sp) override;
 
-    void Activate() override;
+  void Activate() override;
 
-    void Deactivate();
+  void Deactivate();
 
-    static bool NotifyBreakpointHit(void *baton,
-                                    StoppointCallbackContext *context,
-                                    lldb::user_id_t break_id,
-                                    lldb::user_id_t break_loc_id);
+  static bool NotifyBreakpointHit(void *baton,
+                                  StoppointCallbackContext *context,
+                                  lldb::user_id_t break_id,
+                                  lldb::user_id_t break_loc_id);
 
-    StructuredData::ObjectSP RetrieveReportData();
+  StructuredData::ObjectSP RetrieveReportData();
 
-    std::string FormatDescription(StructuredData::ObjectSP report);
+  std::string FormatDescription(StructuredData::ObjectSP report);
 };
 
 } // namespace lldb_private

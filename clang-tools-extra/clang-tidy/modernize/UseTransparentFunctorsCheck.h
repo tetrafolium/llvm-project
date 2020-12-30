@@ -21,15 +21,16 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-use-transparent-functors.html
 class UseTransparentFunctorsCheck : public ClangTidyCheck {
 public:
-    UseTransparentFunctorsCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus14;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  UseTransparentFunctorsCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus14;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+
 private:
-    const bool SafeMode;
+  const bool SafeMode;
 };
 
 } // namespace modernize

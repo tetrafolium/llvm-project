@@ -17,19 +17,19 @@ namespace modernize {
 
 class UseNullptrCheck : public ClangTidyCheck {
 public:
-    UseNullptrCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        // FIXME this should be CPlusCplus11 but that causes test cases to
-        // erroneously fail.
-        return LangOpts.CPlusPlus;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  UseNullptrCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    // FIXME this should be CPlusCplus11 but that causes test cases to
+    // erroneously fail.
+    return LangOpts.CPlusPlus;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const std::string NullMacrosStr;
-    SmallVector<StringRef, 1> NullMacros;
+  const std::string NullMacrosStr;
+  SmallVector<StringRef, 1> NullMacros;
 };
 
 } // namespace modernize

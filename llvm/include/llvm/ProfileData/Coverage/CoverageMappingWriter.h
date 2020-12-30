@@ -27,31 +27,31 @@ namespace coverage {
 /// Writer of the filenames section for the instrumentation
 /// based code coverage.
 class CoverageFilenamesSectionWriter {
-    ArrayRef<StringRef> Filenames;
+  ArrayRef<StringRef> Filenames;
 
 public:
-    CoverageFilenamesSectionWriter(ArrayRef<StringRef> Filenames);
+  CoverageFilenamesSectionWriter(ArrayRef<StringRef> Filenames);
 
-    /// Write encoded filenames to the given output stream. If \p Compress is
-    /// true, attempt to compress the filenames.
-    void write(raw_ostream &OS, bool Compress = true);
+  /// Write encoded filenames to the given output stream. If \p Compress is
+  /// true, attempt to compress the filenames.
+  void write(raw_ostream &OS, bool Compress = true);
 };
 
 /// Writer for instrumentation based coverage mapping data.
 class CoverageMappingWriter {
-    ArrayRef<unsigned> VirtualFileMapping;
-    ArrayRef<CounterExpression> Expressions;
-    MutableArrayRef<CounterMappingRegion> MappingRegions;
+  ArrayRef<unsigned> VirtualFileMapping;
+  ArrayRef<CounterExpression> Expressions;
+  MutableArrayRef<CounterMappingRegion> MappingRegions;
 
 public:
-    CoverageMappingWriter(ArrayRef<unsigned> VirtualFileMapping,
-                          ArrayRef<CounterExpression> Expressions,
-                          MutableArrayRef<CounterMappingRegion> MappingRegions)
-        : VirtualFileMapping(VirtualFileMapping), Expressions(Expressions),
-          MappingRegions(MappingRegions) {}
+  CoverageMappingWriter(ArrayRef<unsigned> VirtualFileMapping,
+                        ArrayRef<CounterExpression> Expressions,
+                        MutableArrayRef<CounterMappingRegion> MappingRegions)
+      : VirtualFileMapping(VirtualFileMapping), Expressions(Expressions),
+        MappingRegions(MappingRegions) {}
 
-    /// Write encoded coverage mapping data to the given output stream.
-    void write(raw_ostream &OS);
+  /// Write encoded coverage mapping data to the given output stream.
+  void write(raw_ostream &OS);
 };
 
 } // end namespace coverage

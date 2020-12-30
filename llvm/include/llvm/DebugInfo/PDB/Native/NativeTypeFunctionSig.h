@@ -23,48 +23,48 @@ class NativeTypeUDT;
 
 class NativeTypeFunctionSig : public NativeRawSymbol {
 protected:
-    void initialize() override;
+  void initialize() override;
 
 public:
-    NativeTypeFunctionSig(NativeSession &Session, SymIndexId Id,
-                          codeview::TypeIndex TI, codeview::ProcedureRecord Proc);
+  NativeTypeFunctionSig(NativeSession &Session, SymIndexId Id,
+                        codeview::TypeIndex TI, codeview::ProcedureRecord Proc);
 
-    NativeTypeFunctionSig(NativeSession &Session, SymIndexId Id,
-                          codeview::TypeIndex TI,
-                          codeview::MemberFunctionRecord MemberFunc);
+  NativeTypeFunctionSig(NativeSession &Session, SymIndexId Id,
+                        codeview::TypeIndex TI,
+                        codeview::MemberFunctionRecord MemberFunc);
 
-    ~NativeTypeFunctionSig() override;
+  ~NativeTypeFunctionSig() override;
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    std::unique_ptr<IPDBEnumSymbols>
-    findChildren(PDB_SymType Type) const override;
+  std::unique_ptr<IPDBEnumSymbols>
+  findChildren(PDB_SymType Type) const override;
 
-    SymIndexId getClassParentId() const override;
-    PDB_CallingConv getCallingConvention() const override;
-    uint32_t getCount() const override;
-    SymIndexId getTypeId() const override;
-    int32_t getThisAdjust() const override;
-    bool hasConstructor() const override;
-    bool isConstType() const override;
-    bool isConstructorVirtualBase() const override;
-    bool isCxxReturnUdt() const override;
-    bool isUnalignedType() const override;
-    bool isVolatileType() const override;
+  SymIndexId getClassParentId() const override;
+  PDB_CallingConv getCallingConvention() const override;
+  uint32_t getCount() const override;
+  SymIndexId getTypeId() const override;
+  int32_t getThisAdjust() const override;
+  bool hasConstructor() const override;
+  bool isConstType() const override;
+  bool isConstructorVirtualBase() const override;
+  bool isCxxReturnUdt() const override;
+  bool isUnalignedType() const override;
+  bool isVolatileType() const override;
 
 private:
-    void initializeArgList(codeview::TypeIndex ArgListTI);
+  void initializeArgList(codeview::TypeIndex ArgListTI);
 
-    union {
-        codeview::MemberFunctionRecord MemberFunc;
-        codeview::ProcedureRecord Proc;
-    };
+  union {
+    codeview::MemberFunctionRecord MemberFunc;
+    codeview::ProcedureRecord Proc;
+  };
 
-    SymIndexId ClassParentId = 0;
-    codeview::TypeIndex Index;
-    codeview::ArgListRecord ArgList;
-    bool IsMemberFunction = false;
+  SymIndexId ClassParentId = 0;
+  codeview::TypeIndex Index;
+  codeview::ArgListRecord ArgList;
+  bool IsMemberFunction = false;
 };
 
 } // namespace pdb

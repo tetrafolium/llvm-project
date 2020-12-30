@@ -35,7 +35,7 @@ namespace ilist_detail {
 
 /// Helper trait for recording whether an option is specified explicitly.
 template <bool IsExplicit> struct explicitness {
-    static const bool is_explicit = IsExplicit;
+  static const bool is_explicit = IsExplicit;
 };
 typedef explicitness<true> is_explicit;
 typedef explicitness<false> is_implicit;
@@ -73,7 +73,7 @@ struct extract_sentinel_tracking<> : std::false_type, is_implicit {};
 #endif
 template <bool EnableSentinelTracking>
 struct is_valid_option<ilist_sentinel_tracking<EnableSentinelTracking>>
-            : std::true_type {};
+    : std::true_type {};
 
 /// Extract custom tag option.
 ///
@@ -82,13 +82,11 @@ struct is_valid_option<ilist_sentinel_tracking<EnableSentinelTracking>>
 template <class... Options> struct extract_tag;
 template <class Tag, class... Options>
 struct extract_tag<ilist_tag<Tag>, Options...> {
-    typedef Tag type;
+  typedef Tag type;
 };
 template <class Option1, class... Options>
 struct extract_tag<Option1, Options...> : extract_tag<Options...> {};
-template <> struct extract_tag<> {
-    typedef void type;
-};
+template <> struct extract_tag<> { typedef void type; };
 template <class Tag> struct is_valid_option<ilist_tag<Tag>> : std::true_type {};
 
 /// Check whether options are valid.
@@ -99,7 +97,7 @@ template <> struct check_options<> : std::true_type {};
 template <class Option1, class... Options>
 struct check_options<Option1, Options...>
     : std::integral_constant<bool, is_valid_option<Option1>::value &&
-      check_options<Options...>::value> {};
+                                       check_options<Options...>::value> {};
 
 /// Traits for options for \a ilist_node.
 ///
@@ -107,24 +105,24 @@ struct check_options<Option1, Options...>
 template <class T, bool EnableSentinelTracking, bool IsSentinelTrackingExplicit,
           class TagT>
 struct node_options {
-    typedef T value_type;
-    typedef T *pointer;
-    typedef T &reference;
-    typedef const T *const_pointer;
-    typedef const T &const_reference;
+  typedef T value_type;
+  typedef T *pointer;
+  typedef T &reference;
+  typedef const T *const_pointer;
+  typedef const T &const_reference;
 
-    static const bool enable_sentinel_tracking = EnableSentinelTracking;
-    static const bool is_sentinel_tracking_explicit = IsSentinelTrackingExplicit;
-    typedef TagT tag;
-    typedef ilist_node_base<enable_sentinel_tracking> node_base_type;
-    typedef ilist_base<enable_sentinel_tracking> list_base_type;
+  static const bool enable_sentinel_tracking = EnableSentinelTracking;
+  static const bool is_sentinel_tracking_explicit = IsSentinelTrackingExplicit;
+  typedef TagT tag;
+  typedef ilist_node_base<enable_sentinel_tracking> node_base_type;
+  typedef ilist_base<enable_sentinel_tracking> list_base_type;
 };
 
 template <class T, class... Options> struct compute_node_options {
-    typedef node_options<T, extract_sentinel_tracking<Options...>::value,
-            extract_sentinel_tracking<Options...>::is_explicit,
-            typename extract_tag<Options...>::type>
-            type;
+  typedef node_options<T, extract_sentinel_tracking<Options...>::value,
+                       extract_sentinel_tracking<Options...>::is_explicit,
+                       typename extract_tag<Options...>::type>
+      type;
 };
 
 } // end namespace ilist_detail

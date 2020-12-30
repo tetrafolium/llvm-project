@@ -30,46 +30,46 @@ StringRef getText(CharSourceRange Range, const ASTContext &Context);
 
 /// Returns the token CharSourceRange corresponding to \p Range.
 inline CharSourceRange getSourceRange(const SourceRange &Range) {
-    return CharSourceRange::getTokenRange(Range);
+  return CharSourceRange::getTokenRange(Range);
 }
 
 /// Returns the CharSourceRange of the token at Location \p Loc.
 inline CharSourceRange getSourceRange(const SourceLocation &Loc) {
-    return CharSourceRange::getTokenRange(Loc, Loc);
+  return CharSourceRange::getTokenRange(Loc, Loc);
 }
 
 /// Returns the CharSourceRange of an given Node. \p Node is typically a
 ///        'Stmt', 'Expr' or a 'Decl'.
 template <typename T> CharSourceRange getSourceRange(const T &Node) {
-    return CharSourceRange::getTokenRange(Node.getSourceRange());
+  return CharSourceRange::getTokenRange(Node.getSourceRange());
 }
 } // end namespace internal
 
 /// Returns a textual representation of \p Node.
 template <typename T>
 StringRef getText(const T &Node, const ASTContext &Context) {
-    return internal::getText(internal::getSourceRange(Node), Context);
+  return internal::getText(internal::getSourceRange(Node), Context);
 }
 
 // Returns a FixItHint to remove \p Node.
 // TODO: Add support for related syntactical elements (i.e. comments, ...).
 template <typename T> FixItHint createRemoval(const T &Node) {
-    return FixItHint::CreateRemoval(internal::getSourceRange(Node));
+  return FixItHint::CreateRemoval(internal::getSourceRange(Node));
 }
 
 // Returns a FixItHint to replace \p Destination by \p Source.
 template <typename D, typename S>
 FixItHint createReplacement(const D &Destination, const S &Source,
                             const ASTContext &Context) {
-    return FixItHint::CreateReplacement(internal::getSourceRange(Destination),
-                                        getText(Source, Context));
+  return FixItHint::CreateReplacement(internal::getSourceRange(Destination),
+                                      getText(Source, Context));
 }
 
 // Returns a FixItHint to replace \p Destination by \p Source.
 template <typename D>
 FixItHint createReplacement(const D &Destination, StringRef Source) {
-    return FixItHint::CreateReplacement(internal::getSourceRange(Destination),
-                                        Source);
+  return FixItHint::CreateReplacement(internal::getSourceRange(Destination),
+                                      Source);
 }
 
 } // end namespace fixit

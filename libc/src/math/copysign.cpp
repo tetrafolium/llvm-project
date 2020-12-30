@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 double LLVM_LIBC_ENTRYPOINT(copysign)(double x, double y) {
-    return fputil::copysign(x, y);
+  return fputil::copysign(x, y);
 }
 
 } // namespace __llvm_libc

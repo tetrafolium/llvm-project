@@ -91,19 +91,19 @@ char const *__kmp_i18n_catgets(kmp_i18n_id_t id);
 */
 
 enum kmp_msg_type {
-    kmp_mt_dummy = 0, // Special type for internal purposes.
-    kmp_mt_mesg =
-        4, // Primary OpenMP message, could be information, warning, or fatal.
-    kmp_mt_hint = 5, // Hint to the user.
-    kmp_mt_syserr = -1 // System error message.
+  kmp_mt_dummy = 0, // Special type for internal purposes.
+  kmp_mt_mesg =
+      4, // Primary OpenMP message, could be information, warning, or fatal.
+  kmp_mt_hint = 5, // Hint to the user.
+  kmp_mt_syserr = -1 // System error message.
 }; // enum kmp_msg_type
 typedef enum kmp_msg_type kmp_msg_type_t;
 
 struct kmp_msg {
-    kmp_msg_type_t type;
-    int num;
-    char *str;
-    int len;
+  kmp_msg_type_t type;
+  int num;
+  char *str;
+  int len;
 }; // struct kmp_message
 typedef struct kmp_msg kmp_msg_t;
 
@@ -126,9 +126,9 @@ kmp_msg_t __kmp_msg_error_mesg(char const *mesg);
 
 // Message severity.
 enum kmp_msg_severity {
-    kmp_ms_inform, // Just information for the user.
-    kmp_ms_warning, // Non-fatal error, execution continues.
-    kmp_ms_fatal // Fatal error, program aborts.
+  kmp_ms_inform, // Just information for the user.
+  kmp_ms_warning, // Non-fatal error, execution continues.
+  kmp_ms_fatal // Fatal error, program aborts.
 }; // enum kmp_msg_severity
 typedef enum kmp_msg_severity kmp_msg_severity_t;
 

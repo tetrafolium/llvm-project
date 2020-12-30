@@ -28,23 +28,23 @@ static const int kAsanStackUseAfterScopeMagic = 0xf8;
 
 // Input/output data struct for ComputeASanStackFrameLayout.
 struct ASanStackVariableDescription {
-    const char *Name;    // Name of the variable that will be displayed by asan
-    // if a stack-related bug is reported.
-    uint64_t Size;       // Size of the variable in bytes.
-    size_t LifetimeSize; // Size in bytes to use for lifetime analysis check.
-    // Will be rounded up to Granularity.
-    size_t Alignment;    // Alignment of the variable (power of 2).
-    AllocaInst *AI;      // The actual AllocaInst.
-    size_t Offset;       // Offset from the beginning of the frame;
-    // set by ComputeASanStackFrameLayout.
-    unsigned Line;       // Line number.
+  const char *Name; // Name of the variable that will be displayed by asan
+  // if a stack-related bug is reported.
+  uint64_t Size;       // Size of the variable in bytes.
+  size_t LifetimeSize; // Size in bytes to use for lifetime analysis check.
+  // Will be rounded up to Granularity.
+  size_t Alignment; // Alignment of the variable (power of 2).
+  AllocaInst *AI;   // The actual AllocaInst.
+  size_t Offset;    // Offset from the beginning of the frame;
+  // set by ComputeASanStackFrameLayout.
+  unsigned Line; // Line number.
 };
 
 // Output data struct for ComputeASanStackFrameLayout.
 struct ASanStackFrameLayout {
-    size_t Granularity;     // Shadow granularity.
-    size_t FrameAlignment;  // Alignment for the entire frame.
-    size_t FrameSize;       // Size of the frame in bytes.
+  size_t Granularity;    // Shadow granularity.
+  size_t FrameAlignment; // Alignment for the entire frame.
+  size_t FrameSize;      // Size of the frame in bytes.
 };
 
 ASanStackFrameLayout ComputeASanStackFrameLayout(
@@ -75,6 +75,6 @@ SmallVector<uint8_t, 64> GetShadowBytesAfterScope(
     const SmallVectorImpl<ASanStackVariableDescription> &Vars,
     const ASanStackFrameLayout &Layout);
 
-} // llvm namespace
+} // namespace llvm
 
-#endif  // LLVM_TRANSFORMS_UTILS_ASANSTACKFRAMELAYOUT_H
+#endif // LLVM_TRANSFORMS_UTILS_ASANSTACKFRAMELAYOUT_H

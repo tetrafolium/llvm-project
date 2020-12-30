@@ -24,24 +24,25 @@ public:
   return static_cast<ImplClass *>(this)->visit##NAME(                          \
       static_cast<PTR(CLASS)>(C), std::forward<ParamTys>(P)...)
 
-    RetTy visit(PTR(Comment) C, ParamTys... P) {
-        if (!C)
-            return RetTy();
+  RetTy visit(PTR(Comment) C, ParamTys... P) {
+    if (!C)
+      return RetTy();
 
-        switch (C->getCommentKind()) {
-        default:
-            llvm_unreachable("Unknown comment kind!");
+    switch (C->getCommentKind()) {
+    default:
+      llvm_unreachable("Unknown comment kind!");
 #define ABSTRACT_COMMENT(COMMENT)
-#define COMMENT(CLASS, PARENT) \
-    case Comment::CLASS##Kind: DISPATCH(CLASS, CLASS);
+#define COMMENT(CLASS, PARENT)                                                 \
+  case Comment::CLASS##Kind:                                                   \
+    DISPATCH(CLASS, CLASS);
 #include "clang/AST/CommentNodes.inc"
 #undef ABSTRACT_COMMENT
 #undef COMMENT
-        }
     }
+  }
 
-    // If the derived class does not implement a certain Visit* method, fall back
-    // on Visit* method for the superclass.
+  // If the derived class does not implement a certain Visit* method, fall back
+  // on Visit* method for the superclass.
 #define ABSTRACT_COMMENT(COMMENT) COMMENT
 #define COMMENT(CLASS, PARENT)                                                 \
   RetTy visit##CLASS(PTR(CLASS) C, ParamTys... P) { DISPATCH(PARENT, PARENT); }
@@ -49,9 +50,7 @@ public:
 #undef ABSTRACT_COMMENT
 #undef COMMENT
 
-    RetTy visitComment(PTR(Comment) C, ParamTys... P) {
-        return RetTy();
-    }
+  RetTy visitComment(PTR(Comment) C, ParamTys... P) { return RetTy(); }
 
 #undef PTR
 #undef DISPATCH
@@ -59,12 +58,12 @@ public:
 
 template <typename ImplClass, typename RetTy = void, class... ParamTys>
 class CommentVisitor : public CommentVisitorBase<std::add_pointer, ImplClass,
-    RetTy, ParamTys...> {};
+                                                 RetTy, ParamTys...> {};
 
 template <typename ImplClass, typename RetTy = void, class... ParamTys>
 class ConstCommentVisitor
     : public CommentVisitorBase<llvm::make_const_ptr, ImplClass, RetTy,
-      ParamTys...> {};
+                                ParamTys...> {};
 
 } // namespace comments
 } // namespace clang

@@ -25,26 +25,26 @@ using namespace llvm;
 
 namespace {
 struct FEntryInserter : public MachineFunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    FEntryInserter() : MachineFunctionPass(ID) {
-        initializeFEntryInserterPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  FEntryInserter() : MachineFunctionPass(ID) {
+    initializeFEntryInserterPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &F) override;
+  bool runOnMachineFunction(MachineFunction &F) override;
 };
-}
+} // namespace
 
 bool FEntryInserter::runOnMachineFunction(MachineFunction &MF) {
-    const std::string FEntryName = std::string(
-                                       MF.getFunction().getFnAttribute("fentry-call").getValueAsString());
-    if (FEntryName != "true")
-        return false;
+  const std::string FEntryName = std::string(
+      MF.getFunction().getFnAttribute("fentry-call").getValueAsString());
+  if (FEntryName != "true")
+    return false;
 
-    auto &FirstMBB = *MF.begin();
-    auto *TII = MF.getSubtarget().getInstrInfo();
-    BuildMI(FirstMBB, FirstMBB.begin(), DebugLoc(),
-            TII->get(TargetOpcode::FENTRY_CALL));
-    return true;
+  auto &FirstMBB = *MF.begin();
+  auto *TII = MF.getSubtarget().getInstrInfo();
+  BuildMI(FirstMBB, FirstMBB.begin(), DebugLoc(),
+          TII->get(TargetOpcode::FENTRY_CALL));
+  return true;
 }
 
 char FEntryInserter::ID = 0;

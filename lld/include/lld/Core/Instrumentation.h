@@ -18,7 +18,7 @@
 #include <utility>
 
 #ifdef LLD_HAS_VTUNE
-# include <ittnotify.h>
+#include <ittnotify.h>
 #endif
 
 namespace lld {
@@ -28,17 +28,13 @@ namespace lld {
 /// Domains last for the lifetime of the application and cannot be destroyed.
 /// Multiple Domains created with the same name represent the same domain.
 class Domain {
-    __itt_domain *_domain;
+  __itt_domain *_domain;
 
 public:
-    explicit Domain(const char *name) : _domain(__itt_domain_createA(name)) {}
+  explicit Domain(const char *name) : _domain(__itt_domain_createA(name)) {}
 
-    operator __itt_domain *() const {
-        return _domain;
-    }
-    __itt_domain *operator->() const {
-        return _domain;
-    }
+  operator __itt_domain *() const { return _domain; }
+  __itt_domain *operator->() const { return _domain; }
 };
 
 /// A global reference to a string constant.
@@ -49,14 +45,12 @@ public:
 /// Prefer reusing a single StringHandle over passing a ntbs when the same
 /// string will be used often.
 class StringHandle {
-    __itt_string_handle *_handle;
+  __itt_string_handle *_handle;
 
 public:
-    StringHandle(const char *name) : _handle(__itt_string_handle_createA(name)) {}
+  StringHandle(const char *name) : _handle(__itt_string_handle_createA(name)) {}
 
-    operator __itt_string_handle *() const {
-        return _handle;
-    }
+  operator __itt_string_handle *() const { return _handle; }
 };
 
 /// A task on a single thread. Nests within other tasks.
@@ -67,72 +61,68 @@ public:
 /// SBRM is used to ensure task starts and ends are balanced. The lifetime of
 /// a task is either the lifetime of this object, or until end is called.
 class ScopedTask {
-    __itt_domain *_domain;
+  __itt_domain *_domain;
 
-    ScopedTask(const ScopedTask &) = delete;
-    ScopedTask &operator=(const ScopedTask &) = delete;
+  ScopedTask(const ScopedTask &) = delete;
+  ScopedTask &operator=(const ScopedTask &) = delete;
 
 public:
-    /// Create a task in Domain \p d named \p s.
-    ScopedTask(const Domain &d, const StringHandle &s) : _domain(d) {
-        __itt_task_begin(d, __itt_null, __itt_null, s);
-    }
+  /// Create a task in Domain \p d named \p s.
+  ScopedTask(const Domain &d, const StringHandle &s) : _domain(d) {
+    __itt_task_begin(d, __itt_null, __itt_null, s);
+  }
 
-    ScopedTask(ScopedTask &&other) {
-        *this = std::move(other);
-    }
+  ScopedTask(ScopedTask &&other) { *this = std::move(other); }
 
-    ScopedTask &operator=(ScopedTask &&other) {
-        _domain = other._domain;
-        other._domain = nullptr;
-        return *this;
-    }
+  ScopedTask &operator=(ScopedTask &&other) {
+    _domain = other._domain;
+    other._domain = nullptr;
+    return *this;
+  }
 
-    /// Prematurely end this task.
-    void end() {
-        if (_domain)
-            __itt_task_end(_domain);
-        _domain = nullptr;
-    }
+  /// Prematurely end this task.
+  void end() {
+    if (_domain)
+      __itt_task_end(_domain);
+    _domain = nullptr;
+  }
 
-    ~ScopedTask() {
-        end();
-    }
+  ~ScopedTask() { end(); }
 };
 
 /// A specific point in time. Allows metadata to be associated.
 class Marker {
 public:
-    Marker(const Domain &d, const StringHandle &s) {
-        __itt_marker(d, __itt_null, s, __itt_scope_global);
-    }
+  Marker(const Domain &d, const StringHandle &s) {
+    __itt_marker(d, __itt_null, s, __itt_scope_global);
+  }
 };
 #else
 class Domain {
 public:
-    Domain(const char *name) {}
+  Domain(const char *name) {}
 };
 
 class StringHandle {
 public:
-    StringHandle(const char *name) {}
+  StringHandle(const char *name) {}
 };
 
 class ScopedTask {
 public:
-    ScopedTask(const Domain &d, const StringHandle &s) {}
-    void end() {}
+  ScopedTask(const Domain &d, const StringHandle &s) {}
+  void end() {}
 };
 
 class Marker {
 public:
-    Marker(const Domain &d, const StringHandle &s) {}
+  Marker(const Domain &d, const StringHandle &s) {}
 };
 #endif
 
 inline const Domain &getDefaultDomain() {
-    static Domain domain("org.llvm.lld");
-    return domain;
+  static Domain domain("org.llvm.lld");
+  return domain;
 }
 } // end namespace lld.
 

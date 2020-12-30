@@ -142,17 +142,17 @@ long _InterlockedAddLargeStatistic(__int64 volatile *_Addend, long _Value);
 unsigned char _interlockedbittestandreset(long volatile *, long);
 unsigned char _interlockedbittestandset(long volatile *, long);
 void *_InterlockedCompareExchangePointer_HLEAcquire(void *volatile *, void *,
-        void *);
+                                                    void *);
 void *_InterlockedCompareExchangePointer_HLERelease(void *volatile *, void *,
-        void *);
+                                                    void *);
 long _InterlockedExchangeAdd_HLEAcquire(long volatile *, long);
 long _InterlockedExchangeAdd_HLERelease(long volatile *, long);
 __int64 _InterlockedExchangeAdd64_HLEAcquire(__int64 volatile *, __int64);
 __int64 _InterlockedExchangeAdd64_HLERelease(__int64 volatile *, __int64);
 void __attribute__((__deprecated__(
-                        "use other intrinsics or C++11 atomics instead"))) _ReadBarrier(void);
+    "use other intrinsics or C++11 atomics instead"))) _ReadBarrier(void);
 void __attribute__((__deprecated__(
-                        "use other intrinsics or C++11 atomics instead"))) _ReadWriteBarrier(void);
+    "use other intrinsics or C++11 atomics instead"))) _ReadWriteBarrier(void);
 unsigned int _rorx_u32(unsigned int, const unsigned int);
 int _sarx_i32(int, unsigned int);
 #if __STDC_HOSTED__
@@ -164,7 +164,7 @@ void _Store_HLERelease(long volatile *, long);
 void _Store64_HLERelease(__int64 volatile *, __int64);
 void _StorePointer_HLERelease(void *volatile *, void *);
 void __attribute__((__deprecated__(
-                        "use other intrinsics or C++11 atomics instead"))) _WriteBarrier(void);
+    "use other intrinsics or C++11 atomics instead"))) _WriteBarrier(void);
 unsigned __int32 xbegin(void);
 void _xend(void);
 
@@ -215,15 +215,15 @@ unsigned char _interlockedbittestandset64(__int64 volatile *, __int64);
 long _InterlockedCompareExchange_np(long volatile *_Destination, long _Exchange,
                                     long _Comparand);
 unsigned char _InterlockedCompareExchange128_np(__int64 volatile *_Destination,
-        __int64 _ExchangeHigh,
-        __int64 _ExchangeLow,
-        __int64 *_ComparandResult);
+                                                __int64 _ExchangeHigh,
+                                                __int64 _ExchangeLow,
+                                                __int64 *_ComparandResult);
 short _InterlockedCompareExchange16_np(short volatile *_Destination,
                                        short _Exchange, short _Comparand);
 __int64 _InterlockedCompareExchange64_np(__int64 volatile *_Destination,
-        __int64 _Exchange, __int64 _Comparand);
+                                         __int64 _Exchange, __int64 _Comparand);
 void *_InterlockedCompareExchangePointer_np(void *volatile *_Destination,
-        void *_Exchange, void *_Comparand);
+                                            void *_Exchange, void *_Comparand);
 long _InterlockedOr_np(long volatile *_Value, long _Mask);
 short _InterlockedOr16_np(short volatile *_Value, short _Mask);
 __int64 _InterlockedOr64_np(__int64 volatile *_Value, __int64 _Mask);
@@ -238,10 +238,9 @@ unsigned __int64 _shlx_u64(unsigned __int64, unsigned int);
 unsigned __int64 _shrx_u64(unsigned __int64, unsigned int);
 __int64 __mulh(__int64, __int64);
 unsigned __int64 __umulh(unsigned __int64, unsigned __int64);
-__int64 _mul128(__int64, __int64, __int64*);
-unsigned __int64 _umul128(unsigned __int64,
-                          unsigned __int64,
-                          unsigned __int64*);
+__int64 _mul128(__int64, __int64, __int64 *);
+unsigned __int64 _umul128(unsigned __int64, unsigned __int64,
+                          unsigned __int64 *);
 
 #endif /* __x86_64__ */
 
@@ -252,7 +251,8 @@ unsigned char _BitScanReverse64(unsigned long *_Index, unsigned __int64 _Mask);
 
 #endif
 
-#if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || defined(__aarch64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(__arm__) ||            \
+    defined(__aarch64__)
 __int64 _InterlockedDecrement64(__int64 volatile *_Addend);
 __int64 _InterlockedExchange64(__int64 volatile *_Target, __int64 _Value);
 __int64 _InterlockedExchangeAdd64(__int64 volatile *_Addend, __int64 _Value);
@@ -277,9 +277,11 @@ short _InterlockedExchangeAdd16_rel(short volatile *_Addend, short _Value);
 long _InterlockedExchangeAdd_acq(long volatile *_Addend, long _Value);
 long _InterlockedExchangeAdd_nf(long volatile *_Addend, long _Value);
 long _InterlockedExchangeAdd_rel(long volatile *_Addend, long _Value);
-__int64 _InterlockedExchangeAdd64_acq(__int64 volatile *_Addend, __int64 _Value);
+__int64 _InterlockedExchangeAdd64_acq(__int64 volatile *_Addend,
+                                      __int64 _Value);
 __int64 _InterlockedExchangeAdd64_nf(__int64 volatile *_Addend, __int64 _Value);
-__int64 _InterlockedExchangeAdd64_rel(__int64 volatile *_Addend, __int64 _Value);
+__int64 _InterlockedExchangeAdd64_rel(__int64 volatile *_Addend,
+                                      __int64 _Value);
 #endif
 /*----------------------------------------------------------------------------*\
 |* Interlocked Increment
@@ -331,17 +333,17 @@ __int64 _InterlockedAnd64_rel(__int64 volatile *_Value, __int64 _Mask);
 \*----------------------------------------------------------------------------*/
 #if defined(__arm__) || defined(__aarch64__)
 unsigned char _interlockedbittestandset_acq(long volatile *_BitBase,
-        long _BitPos);
+                                            long _BitPos);
 unsigned char _interlockedbittestandset_nf(long volatile *_BitBase,
-        long _BitPos);
+                                           long _BitPos);
 unsigned char _interlockedbittestandset_rel(long volatile *_BitBase,
-        long _BitPos);
+                                            long _BitPos);
 unsigned char _interlockedbittestandreset_acq(long volatile *_BitBase,
-        long _BitPos);
+                                              long _BitPos);
 unsigned char _interlockedbittestandreset_nf(long volatile *_BitBase,
-        long _BitPos);
+                                             long _BitPos);
 unsigned char _interlockedbittestandreset_rel(long volatile *_BitBase,
-        long _BitPos);
+                                              long _BitPos);
 #endif
 /*----------------------------------------------------------------------------*\
 |* Interlocked Or
@@ -412,36 +414,38 @@ short _InterlockedCompareExchange16_rel(short volatile *_Destination,
                                         short _Exchange, short _Comparand);
 long _InterlockedCompareExchange_acq(long volatile *_Destination,
                                      long _Exchange, long _Comparand);
-long _InterlockedCompareExchange_nf(long volatile *_Destination,
-                                    long _Exchange, long _Comparand);
+long _InterlockedCompareExchange_nf(long volatile *_Destination, long _Exchange,
+                                    long _Comparand);
 long _InterlockedCompareExchange_rel(long volatile *_Destination,
                                      long _Exchange, long _Comparand);
 __int64 _InterlockedCompareExchange64_acq(__int64 volatile *_Destination,
-        __int64 _Exchange, __int64 _Comparand);
+                                          __int64 _Exchange,
+                                          __int64 _Comparand);
 __int64 _InterlockedCompareExchange64_nf(__int64 volatile *_Destination,
-        __int64 _Exchange, __int64 _Comparand);
+                                         __int64 _Exchange, __int64 _Comparand);
 __int64 _InterlockedCompareExchange64_rel(__int64 volatile *_Destination,
-        __int64 _Exchange, __int64 _Comparand);
+                                          __int64 _Exchange,
+                                          __int64 _Comparand);
 #endif
 #if defined(__x86_64__) || defined(__aarch64__)
 unsigned char _InterlockedCompareExchange128(__int64 volatile *_Destination,
-        __int64 _ExchangeHigh,
-        __int64 _ExchangeLow,
-        __int64 *_ComparandResult);
+                                             __int64 _ExchangeHigh,
+                                             __int64 _ExchangeLow,
+                                             __int64 *_ComparandResult);
 #endif
 #if defined(__aarch64__)
 unsigned char _InterlockedCompareExchange128_acq(__int64 volatile *_Destination,
-        __int64 _ExchangeHigh,
-        __int64 _ExchangeLow,
-        __int64 *_ComparandResult);
+                                                 __int64 _ExchangeHigh,
+                                                 __int64 _ExchangeLow,
+                                                 __int64 *_ComparandResult);
 unsigned char _InterlockedCompareExchange128_nf(__int64 volatile *_Destination,
-        __int64 _ExchangeHigh,
-        __int64 _ExchangeLow,
-        __int64 *_ComparandResult);
+                                                __int64 _ExchangeHigh,
+                                                __int64 _ExchangeLow,
+                                                __int64 *_ComparandResult);
 unsigned char _InterlockedCompareExchange128_rel(__int64 volatile *_Destination,
-        __int64 _ExchangeHigh,
-        __int64 _ExchangeLow,
-        __int64 *_ComparandResult);
+                                                 __int64 _ExchangeHigh,
+                                                 __int64 _ExchangeLow,
+                                                 __int64 *_ComparandResult);
 #endif
 
 /*----------------------------------------------------------------------------*\
@@ -449,57 +453,61 @@ unsigned char _InterlockedCompareExchange128_rel(__int64 volatile *_Destination,
 \*----------------------------------------------------------------------------*/
 #if defined(__i386__) || defined(__x86_64__)
 static __inline__ void __DEFAULT_FN_ATTRS __movsb(unsigned char *__dst,
-        unsigned char const *__src,
-        size_t __n) {
-    __asm__ __volatile__("rep movsb" : "+D"(__dst), "+S"(__src), "+c"(__n)
-                         : : "memory");
+                                                  unsigned char const *__src,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep movsb"
+                       : "+D"(__dst), "+S"(__src), "+c"(__n)
+                       :
+                       : "memory");
 }
 static __inline__ void __DEFAULT_FN_ATTRS __movsd(unsigned long *__dst,
-        unsigned long const *__src,
-        size_t __n) {
-    __asm__ __volatile__("rep movsl"
-                         : "+D"(__dst), "+S"(__src), "+c"(__n)
-                         :
-                         : "memory");
+                                                  unsigned long const *__src,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep movsl"
+                       : "+D"(__dst), "+S"(__src), "+c"(__n)
+                       :
+                       : "memory");
 }
 static __inline__ void __DEFAULT_FN_ATTRS __movsw(unsigned short *__dst,
-        unsigned short const *__src,
-        size_t __n) {
-    __asm__ __volatile__("rep movsw"
-                         : "+D"(__dst), "+S"(__src), "+c"(__n)
-                         :
-                         : "memory");
+                                                  unsigned short const *__src,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep movsw"
+                       : "+D"(__dst), "+S"(__src), "+c"(__n)
+                       :
+                       : "memory");
 }
 static __inline__ void __DEFAULT_FN_ATTRS __stosd(unsigned long *__dst,
-        unsigned long __x,
-        size_t __n) {
-    __asm__ __volatile__("rep stosl"
-                         : "+D"(__dst), "+c"(__n)
-                         : "a"(__x)
-                         : "memory");
+                                                  unsigned long __x,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep stosl"
+                       : "+D"(__dst), "+c"(__n)
+                       : "a"(__x)
+                       : "memory");
 }
 static __inline__ void __DEFAULT_FN_ATTRS __stosw(unsigned short *__dst,
-        unsigned short __x,
-        size_t __n) {
-    __asm__ __volatile__("rep stosw"
-                         : "+D"(__dst), "+c"(__n)
-                         : "a"(__x)
-                         : "memory");
+                                                  unsigned short __x,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep stosw"
+                       : "+D"(__dst), "+c"(__n)
+                       : "a"(__x)
+                       : "memory");
 }
 #endif
 #ifdef __x86_64__
 static __inline__ void __DEFAULT_FN_ATTRS __movsq(
     unsigned long long *__dst, unsigned long long const *__src, size_t __n) {
-    __asm__ __volatile__("rep movsq"
-                         : "+D"(__dst), "+S"(__src), "+c"(__n)
-                         :
-                         : "memory");
+  __asm__ __volatile__("rep movsq"
+                       : "+D"(__dst), "+S"(__src), "+c"(__n)
+                       :
+                       : "memory");
 }
 static __inline__ void __DEFAULT_FN_ATTRS __stosq(unsigned __int64 *__dst,
-        unsigned __int64 __x,
-        size_t __n) {
-    __asm__ __volatile__("rep stosq" : "+D"(__dst), "+c"(__n) : "a"(__x)
-                         : "memory");
+                                                  unsigned __int64 __x,
+                                                  size_t __n) {
+  __asm__ __volatile__("rep stosq"
+                       : "+D"(__dst), "+c"(__n)
+                       : "a"(__x)
+                       : "memory");
 }
 #endif
 
@@ -508,24 +516,24 @@ static __inline__ void __DEFAULT_FN_ATTRS __stosq(unsigned __int64 *__dst,
 \*----------------------------------------------------------------------------*/
 #if defined(__i386__) || defined(__x86_64__)
 static __inline__ void __DEFAULT_FN_ATTRS __cpuid(int __info[4], int __level) {
-    __asm__("cpuid"
-            : "=a"(__info[0]), "=b"(__info[1]), "=c"(__info[2]), "=d"(__info[3])
-            : "a"(__level), "c"(0));
+  __asm__("cpuid"
+          : "=a"(__info[0]), "=b"(__info[1]), "=c"(__info[2]), "=d"(__info[3])
+          : "a"(__level), "c"(0));
 }
 static __inline__ void __DEFAULT_FN_ATTRS __cpuidex(int __info[4], int __level,
-        int __ecx) {
-    __asm__("cpuid"
-            : "=a"(__info[0]), "=b"(__info[1]), "=c"(__info[2]), "=d"(__info[3])
-            : "a"(__level), "c"(__ecx));
+                                                    int __ecx) {
+  __asm__("cpuid"
+          : "=a"(__info[0]), "=b"(__info[1]), "=c"(__info[2]), "=d"(__info[3])
+          : "a"(__level), "c"(__ecx));
 }
 static __inline__ void __DEFAULT_FN_ATTRS __halt(void) {
-    __asm__ volatile("hlt");
+  __asm__ volatile("hlt");
 }
 #endif
 
 #if defined(__i386__) || defined(__x86_64__) || defined(__aarch64__)
 static __inline__ void __DEFAULT_FN_ATTRS __nop(void) {
-    __asm__ volatile("nop");
+  __asm__ volatile("nop");
 }
 #endif
 
@@ -539,7 +547,7 @@ __int64 _ReadStatusReg(int);
 void _WriteStatusReg(int, __int64);
 
 unsigned short __cdecl _byteswap_ushort(unsigned short val);
-unsigned long __cdecl _byteswap_ulong (unsigned long val);
+unsigned long __cdecl _byteswap_ulong(unsigned long val);
 unsigned __int64 __cdecl _byteswap_uint64(unsigned __int64 val);
 #endif
 
@@ -549,28 +557,28 @@ unsigned __int64 __cdecl _byteswap_uint64(unsigned __int64 val);
 #if defined(__i386__) || defined(__x86_64__)
 static __inline__ unsigned __int64 __DEFAULT_FN_ATTRS
 __readmsr(unsigned long __register) {
-    // Loads the contents of a 64-bit model specific register (MSR) specified in
-    // the ECX register into registers EDX:EAX. The EDX register is loaded with
-    // the high-order 32 bits of the MSR and the EAX register is loaded with the
-    // low-order 32 bits. If less than 64 bits are implemented in the MSR being
-    // read, the values returned to EDX:EAX in unimplemented bit locations are
-    // undefined.
-    unsigned long __edx;
-    unsigned long __eax;
-    __asm__ ("rdmsr" : "=d"(__edx), "=a"(__eax) : "c"(__register));
-    return (((unsigned __int64)__edx) << 32) | (unsigned __int64)__eax;
+  // Loads the contents of a 64-bit model specific register (MSR) specified in
+  // the ECX register into registers EDX:EAX. The EDX register is loaded with
+  // the high-order 32 bits of the MSR and the EAX register is loaded with the
+  // low-order 32 bits. If less than 64 bits are implemented in the MSR being
+  // read, the values returned to EDX:EAX in unimplemented bit locations are
+  // undefined.
+  unsigned long __edx;
+  unsigned long __eax;
+  __asm__("rdmsr" : "=d"(__edx), "=a"(__eax) : "c"(__register));
+  return (((unsigned __int64)__edx) << 32) | (unsigned __int64)__eax;
 }
 #endif
 
 static __inline__ unsigned __LPTRINT_TYPE__ __DEFAULT_FN_ATTRS __readcr3(void) {
-    unsigned __LPTRINT_TYPE__ __cr3_val;
-    __asm__ __volatile__ ("mov %%cr3, %0" : "=r"(__cr3_val) : : "memory");
-    return __cr3_val;
+  unsigned __LPTRINT_TYPE__ __cr3_val;
+  __asm__ __volatile__("mov %%cr3, %0" : "=r"(__cr3_val) : : "memory");
+  return __cr3_val;
 }
 
 static __inline__ void __DEFAULT_FN_ATTRS
 __writecr3(unsigned __INTPTR_TYPE__ __cr3_val) {
-    __asm__ ("mov %0, %%cr3" : : "r"(__cr3_val) : "memory");
+  __asm__("mov %0, %%cr3" : : "r"(__cr3_val) : "memory");
 }
 
 #ifdef __cplusplus

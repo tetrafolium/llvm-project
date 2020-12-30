@@ -15,45 +15,45 @@ namespace lldb {
 
 class LLDB_API SBTraceOptions {
 public:
-    SBTraceOptions();
+  SBTraceOptions();
 
-    lldb::TraceType getType() const;
+  lldb::TraceType getType() const;
 
-    uint64_t getTraceBufferSize() const;
+  uint64_t getTraceBufferSize() const;
 
-    /// The trace parameters consist of any custom parameters
-    /// apart from the generic parameters such as
-    /// TraceType, trace_buffer_size and meta_data_buffer_size.
-    /// The returned parameters would be formatted as a JSON Dictionary.
-    lldb::SBStructuredData getTraceParams(lldb::SBError &error);
+  /// The trace parameters consist of any custom parameters
+  /// apart from the generic parameters such as
+  /// TraceType, trace_buffer_size and meta_data_buffer_size.
+  /// The returned parameters would be formatted as a JSON Dictionary.
+  lldb::SBStructuredData getTraceParams(lldb::SBError &error);
 
-    uint64_t getMetaDataBufferSize() const;
+  uint64_t getMetaDataBufferSize() const;
 
-    /// SBStructuredData is meant to hold any custom parameters
-    /// apart from meta buffer size and trace size. They should
-    /// be formatted as a JSON Dictionary.
-    void setTraceParams(lldb::SBStructuredData &params);
+  /// SBStructuredData is meant to hold any custom parameters
+  /// apart from meta buffer size and trace size. They should
+  /// be formatted as a JSON Dictionary.
+  void setTraceParams(lldb::SBStructuredData &params);
 
-    void setType(lldb::TraceType type);
+  void setType(lldb::TraceType type);
 
-    void setTraceBufferSize(uint64_t size);
+  void setTraceBufferSize(uint64_t size);
 
-    void setMetaDataBufferSize(uint64_t size);
+  void setMetaDataBufferSize(uint64_t size);
 
-    void setThreadID(lldb::tid_t thread_id);
+  void setThreadID(lldb::tid_t thread_id);
 
-    lldb::tid_t getThreadID();
+  lldb::tid_t getThreadID();
 
-    explicit operator bool() const;
+  explicit operator bool() const;
 
-    bool IsValid();
+  bool IsValid();
 
 protected:
-    friend class SBProcess;
-    friend class SBTrace;
+  friend class SBProcess;
+  friend class SBTrace;
 
-    lldb::TraceOptionsSP m_traceoptions_sp;
+  lldb::TraceOptionsSP m_traceoptions_sp;
 };
-}
+} // namespace lldb
 
 #endif // LLDB_API_SBTRACEOPTIONS_H

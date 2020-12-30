@@ -22,16 +22,14 @@
 
 namespace lldb_private {
 class ProcessWindowsLog {
-    static Log::Channel g_channel;
+  static Log::Channel g_channel;
 
 public:
-    static void Initialize();
-    static void Terminate();
+  static void Initialize();
+  static void Terminate();
 
-    static Log *GetLogIfAny(uint32_t mask) {
-        return g_channel.GetLogIfAny(mask);
-    }
+  static Log *GetLogIfAny(uint32_t mask) { return g_channel.GetLogIfAny(mask); }
 };
-}
+} // namespace lldb_private
 
 #endif // liblldb_ProcessWindowsLog_h_

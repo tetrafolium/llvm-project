@@ -38,7 +38,7 @@
 #include <stdlib.h>
 
 #pragma omp begin declare variant match(                                       \
-device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
+    device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
 
 #define __CUDA__
 #define __OPENMP_NVPTX__

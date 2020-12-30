@@ -23,22 +23,22 @@ class Target;
 class Triple;
 
 struct AArch64MCAsmInfoDarwin : public MCAsmInfoDarwin {
-    explicit AArch64MCAsmInfoDarwin(bool IsILP32);
-    const MCExpr *
-    getExprForPersonalitySymbol(const MCSymbol *Sym, unsigned Encoding,
-                                MCStreamer &Streamer) const override;
+  explicit AArch64MCAsmInfoDarwin(bool IsILP32);
+  const MCExpr *
+  getExprForPersonalitySymbol(const MCSymbol *Sym, unsigned Encoding,
+                              MCStreamer &Streamer) const override;
 };
 
 struct AArch64MCAsmInfoELF : public MCAsmInfoELF {
-    explicit AArch64MCAsmInfoELF(const Triple &T);
+  explicit AArch64MCAsmInfoELF(const Triple &T);
 };
 
 struct AArch64MCAsmInfoMicrosoftCOFF : public MCAsmInfoMicrosoft {
-    explicit AArch64MCAsmInfoMicrosoftCOFF();
+  explicit AArch64MCAsmInfoMicrosoftCOFF();
 };
 
 struct AArch64MCAsmInfoGNUCOFF : public MCAsmInfoGNUCOFF {
-    explicit AArch64MCAsmInfoGNUCOFF();
+  explicit AArch64MCAsmInfoGNUCOFF();
 };
 
 } // namespace llvm

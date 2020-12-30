@@ -30,7 +30,7 @@ using namespace mlir;
 //===----------------------------------------------------------------------===//
 
 ArrayRef<spirv::Extension> spirv::getImpliedExtensions(spirv::Version version) {
-    // Note: the following lists are from "Appendix A: Changes" of the spec.
+  // Note: the following lists are from "Appendix A: Changes" of the spec.
 
 #define V_1_3_IMPLIED_EXTS                                                     \
   Extension::SPV_KHR_shader_draw_parameters, Extension::SPV_KHR_16bit_storage, \
@@ -51,25 +51,24 @@ ArrayRef<spirv::Extension> spirv::getImpliedExtensions(spirv::Version version) {
       Extension::SPV_KHR_physical_storage_buffer,                              \
       Extension::SPV_KHR_vulkan_memory_model
 
-    switch (version) {
-    default:
-        return {};
-    case Version::V_1_3: {
-        // The following manual ArrayRef constructor call is to satisfy GCC 5.
-        static const Extension exts[] = {V_1_3_IMPLIED_EXTS};
-        return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
-    }
-    case Version::V_1_4: {
-        static const Extension exts[] = {V_1_3_IMPLIED_EXTS, V_1_4_IMPLIED_EXTS};
-        return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
-    }
-    case Version::V_1_5: {
-        static const Extension exts[] = {V_1_3_IMPLIED_EXTS, V_1_4_IMPLIED_EXTS,
-                                         V_1_5_IMPLIED_EXTS
-                                        };
-        return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
-    }
-    }
+  switch (version) {
+  default:
+    return {};
+  case Version::V_1_3: {
+    // The following manual ArrayRef constructor call is to satisfy GCC 5.
+    static const Extension exts[] = {V_1_3_IMPLIED_EXTS};
+    return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
+  }
+  case Version::V_1_4: {
+    static const Extension exts[] = {V_1_3_IMPLIED_EXTS, V_1_4_IMPLIED_EXTS};
+    return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
+  }
+  case Version::V_1_5: {
+    static const Extension exts[] = {V_1_3_IMPLIED_EXTS, V_1_4_IMPLIED_EXTS,
+                                     V_1_5_IMPLIED_EXTS};
+    return ArrayRef<spirv::Extension>(exts, llvm::array_lengthof(exts));
+  }
+  }
 
 #undef V_1_5_IMPLIED_EXTS
 #undef V_1_4_IMPLIED_EXTS
@@ -81,15 +80,15 @@ ArrayRef<spirv::Extension> spirv::getImpliedExtensions(spirv::Version version) {
 
 SmallVector<spirv::Capability, 0>
 spirv::getRecursiveImpliedCapabilities(spirv::Capability cap) {
-    ArrayRef<spirv::Capability> directCaps = getDirectImpliedCapabilities(cap);
-    llvm::SetVector<spirv::Capability, SmallVector<spirv::Capability, 0>> allCaps(
-                directCaps.begin(), directCaps.end());
+  ArrayRef<spirv::Capability> directCaps = getDirectImpliedCapabilities(cap);
+  llvm::SetVector<spirv::Capability, SmallVector<spirv::Capability, 0>> allCaps(
+      directCaps.begin(), directCaps.end());
 
-    // TODO: This is insufficient; find a better way to handle this
-    // (e.g., using static lists) if this turns out to be a bottleneck.
-    for (unsigned i = 0; i < allCaps.size(); ++i)
-        for (Capability c : getDirectImpliedCapabilities(allCaps[i]))
-            allCaps.insert(c);
+  // TODO: This is insufficient; find a better way to handle this
+  // (e.g., using static lists) if this turns out to be a bottleneck.
+  for (unsigned i = 0; i < allCaps.size(); ++i)
+    for (Capability c : getDirectImpliedCapabilities(allCaps[i]))
+      allCaps.insert(c);
 
-    return allCaps.takeVector();
+  return allCaps.takeVector();
 }

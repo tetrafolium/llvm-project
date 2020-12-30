@@ -20,66 +20,66 @@ class SBBroadcaster;
 
 class LLDB_API SBEvent {
 public:
-    SBEvent();
+  SBEvent();
 
-    SBEvent(const lldb::SBEvent &rhs);
+  SBEvent(const lldb::SBEvent &rhs);
 
-    // Make an event that contains a C string.
-    SBEvent(uint32_t event, const char *cstr, uint32_t cstr_len);
+  // Make an event that contains a C string.
+  SBEvent(uint32_t event, const char *cstr, uint32_t cstr_len);
 
-    SBEvent(lldb::EventSP &event_sp);
+  SBEvent(lldb::EventSP &event_sp);
 
-    SBEvent(lldb_private::Event *event_sp);
+  SBEvent(lldb_private::Event *event_sp);
 
-    ~SBEvent();
+  ~SBEvent();
 
-    const SBEvent &operator=(const lldb::SBEvent &rhs);
+  const SBEvent &operator=(const lldb::SBEvent &rhs);
 
-    explicit operator bool() const;
+  explicit operator bool() const;
 
-    bool IsValid() const;
+  bool IsValid() const;
 
-    const char *GetDataFlavor();
+  const char *GetDataFlavor();
 
-    uint32_t GetType() const;
+  uint32_t GetType() const;
 
-    lldb::SBBroadcaster GetBroadcaster() const;
+  lldb::SBBroadcaster GetBroadcaster() const;
 
-    const char *GetBroadcasterClass() const;
+  const char *GetBroadcasterClass() const;
 
-    bool BroadcasterMatchesPtr(const lldb::SBBroadcaster *broadcaster);
+  bool BroadcasterMatchesPtr(const lldb::SBBroadcaster *broadcaster);
 
-    bool BroadcasterMatchesRef(const lldb::SBBroadcaster &broadcaster);
+  bool BroadcasterMatchesRef(const lldb::SBBroadcaster &broadcaster);
 
-    void Clear();
+  void Clear();
 
-    static const char *GetCStringFromEvent(const lldb::SBEvent &event);
+  static const char *GetCStringFromEvent(const lldb::SBEvent &event);
 
-    bool GetDescription(lldb::SBStream &description);
+  bool GetDescription(lldb::SBStream &description);
 
-    bool GetDescription(lldb::SBStream &description) const;
+  bool GetDescription(lldb::SBStream &description) const;
 
 protected:
-    friend class SBListener;
-    friend class SBBroadcaster;
-    friend class SBBreakpoint;
-    friend class SBDebugger;
-    friend class SBProcess;
-    friend class SBTarget;
-    friend class SBThread;
-    friend class SBWatchpoint;
+  friend class SBListener;
+  friend class SBBroadcaster;
+  friend class SBBreakpoint;
+  friend class SBDebugger;
+  friend class SBProcess;
+  friend class SBTarget;
+  friend class SBThread;
+  friend class SBWatchpoint;
 
-    lldb::EventSP &GetSP() const;
+  lldb::EventSP &GetSP() const;
 
-    void reset(lldb::EventSP &event_sp);
+  void reset(lldb::EventSP &event_sp);
 
-    void reset(lldb_private::Event *event);
+  void reset(lldb_private::Event *event);
 
-    lldb_private::Event *get() const;
+  lldb_private::Event *get() const;
 
 private:
-    mutable lldb::EventSP m_event_sp;
-    mutable lldb_private::Event *m_opaque_ptr;
+  mutable lldb::EventSP m_event_sp;
+  mutable lldb_private::Event *m_opaque_ptr;
 };
 
 } // namespace lldb

@@ -13,11 +13,11 @@
 
 namespace llvm {
 class MemDerefPrinterPass : public PassInfoMixin<MemDerefPrinterPass> {
-    raw_ostream &OS;
+  raw_ostream &OS;
 
 public:
-    MemDerefPrinterPass(raw_ostream &OS) : OS(OS) {}
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  MemDerefPrinterPass(raw_ostream &OS) : OS(OS) {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 

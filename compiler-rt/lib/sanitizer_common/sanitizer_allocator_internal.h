@@ -23,20 +23,20 @@ namespace __sanitizer {
 typedef CompactSizeClassMap InternalSizeClassMap;
 
 struct AP32 {
-    static const uptr kSpaceBeg = 0;
-    static const u64 kSpaceSize = SANITIZER_MMAP_RANGE_SIZE;
-    static const uptr kMetadataSize = 0;
-    typedef InternalSizeClassMap SizeClassMap;
-    static const uptr kRegionSizeLog = 20;
-    using AddressSpaceView = LocalAddressSpaceView;
-    typedef NoOpMapUnmapCallback MapUnmapCallback;
-    static const uptr kFlags = 0;
+  static const uptr kSpaceBeg = 0;
+  static const u64 kSpaceSize = SANITIZER_MMAP_RANGE_SIZE;
+  static const uptr kMetadataSize = 0;
+  typedef InternalSizeClassMap SizeClassMap;
+  static const uptr kRegionSizeLog = 20;
+  using AddressSpaceView = LocalAddressSpaceView;
+  typedef NoOpMapUnmapCallback MapUnmapCallback;
+  static const uptr kFlags = 0;
 };
 typedef SizeClassAllocator32<AP32> PrimaryInternalAllocator;
 
 typedef CombinedAllocator<PrimaryInternalAllocator,
-        LargeMmapAllocatorPtrArrayStatic>
-        InternalAllocator;
+                          LargeMmapAllocatorPtrArrayStatic>
+    InternalAllocator;
 typedef InternalAllocator::AllocatorCache InternalAllocatorCache;
 
 void *InternalAlloc(uptr size, InternalAllocatorCache *cache = nullptr,
@@ -50,6 +50,6 @@ void *InternalCalloc(uptr count, uptr size,
 void InternalFree(void *p, InternalAllocatorCache *cache = nullptr);
 InternalAllocator *internal_allocator();
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
-#endif // SANITIZER_ALLOCATOR_INTERNAL_H
+#endif  // SANITIZER_ALLOCATOR_INTERNAL_H

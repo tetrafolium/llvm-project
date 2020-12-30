@@ -20,6 +20,4 @@ FileEntry::FileEntry() : UniqueID(0, 0) {}
 
 FileEntry::~FileEntry() = default;
 
-void FileEntry::closeFile() const {
-    File.reset();
-}
+void FileEntry::closeFile() const { File.reset(); }

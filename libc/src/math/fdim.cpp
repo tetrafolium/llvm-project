@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 double LLVM_LIBC_ENTRYPOINT(fdim)(double x, double y) {
-    return fputil::fdim(x, y);
+  return fputil::fdim(x, y);
 }
 
 } // namespace __llvm_libc

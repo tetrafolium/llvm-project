@@ -32,95 +32,93 @@ class Value;
 /// enabled in the LLVM context.
 class OptimizationRemarkEmitter {
 public:
-    OptimizationRemarkEmitter(const Function *F, BlockFrequencyInfo *BFI)
-        : F(F), BFI(BFI) {}
+  OptimizationRemarkEmitter(const Function *F, BlockFrequencyInfo *BFI)
+      : F(F), BFI(BFI) {}
 
-    /// This variant can be used to generate ORE on demand (without the
-    /// analysis pass).
-    ///
-    /// Note that this ctor has a very different cost depending on whether
-    /// F->getContext().getDiagnosticsHotnessRequested() is on or not.  If it's off
-    /// the operation is free.
-    ///
-    /// Whereas if DiagnosticsHotnessRequested is on, it is fairly expensive
-    /// operation since BFI and all its required analyses are computed.  This is
-    /// for example useful for CGSCC passes that can't use function analyses
-    /// passes in the old PM.
-    OptimizationRemarkEmitter(const Function *F);
+  /// This variant can be used to generate ORE on demand (without the
+  /// analysis pass).
+  ///
+  /// Note that this ctor has a very different cost depending on whether
+  /// F->getContext().getDiagnosticsHotnessRequested() is on or not.  If it's
+  /// off the operation is free.
+  ///
+  /// Whereas if DiagnosticsHotnessRequested is on, it is fairly expensive
+  /// operation since BFI and all its required analyses are computed.  This is
+  /// for example useful for CGSCC passes that can't use function analyses
+  /// passes in the old PM.
+  OptimizationRemarkEmitter(const Function *F);
 
-    OptimizationRemarkEmitter(OptimizationRemarkEmitter &&Arg)
-        : F(Arg.F), BFI(Arg.BFI) {}
+  OptimizationRemarkEmitter(OptimizationRemarkEmitter &&Arg)
+      : F(Arg.F), BFI(Arg.BFI) {}
 
-    OptimizationRemarkEmitter &operator=(OptimizationRemarkEmitter &&RHS) {
-        F = RHS.F;
-        BFI = RHS.BFI;
-        return *this;
+  OptimizationRemarkEmitter &operator=(OptimizationRemarkEmitter &&RHS) {
+    F = RHS.F;
+    BFI = RHS.BFI;
+    return *this;
+  }
+
+  /// Handle invalidation events in the new pass manager.
+  bool invalidate(Function &F, const PreservedAnalyses &PA,
+                  FunctionAnalysisManager::Invalidator &Inv);
+
+  /// Output the remark via the diagnostic handler and to the
+  /// optimization record file.
+  void emit(DiagnosticInfoOptimizationBase &OptDiag);
+
+  /// Take a lambda that returns a remark which will be emitted.  Second
+  /// argument is only used to restrict this to functions.
+  template <typename T>
+  void emit(T RemarkBuilder, decltype(RemarkBuilder()) * = nullptr) {
+    // Avoid building the remark unless we know there are at least *some*
+    // remarks enabled. We can't currently check whether remarks are requested
+    // for the calling pass since that requires actually building the remark.
+
+    if (F->getContext().getLLVMRemarkStreamer() ||
+        F->getContext().getDiagHandlerPtr()->isAnyRemarkEnabled()) {
+      auto R = RemarkBuilder();
+      emit((DiagnosticInfoOptimizationBase &)R);
     }
+  }
 
-    /// Handle invalidation events in the new pass manager.
-    bool invalidate(Function &F, const PreservedAnalyses &PA,
-                    FunctionAnalysisManager::Invalidator &Inv);
-
-    /// Output the remark via the diagnostic handler and to the
-    /// optimization record file.
-    void emit(DiagnosticInfoOptimizationBase &OptDiag);
-
-    /// Take a lambda that returns a remark which will be emitted.  Second
-    /// argument is only used to restrict this to functions.
-    template <typename T>
-    void emit(T RemarkBuilder, decltype(RemarkBuilder()) * = nullptr) {
-        // Avoid building the remark unless we know there are at least *some*
-        // remarks enabled. We can't currently check whether remarks are requested
-        // for the calling pass since that requires actually building the remark.
-
-        if (F->getContext().getLLVMRemarkStreamer() ||
-                F->getContext().getDiagHandlerPtr()->isAnyRemarkEnabled()) {
-            auto R = RemarkBuilder();
-            emit((DiagnosticInfoOptimizationBase &)R);
-        }
-    }
-
-    /// Whether we allow for extra compile-time budget to perform more
-    /// analysis to produce fewer false positives.
-    ///
-    /// This is useful when reporting missed optimizations.  In this case we can
-    /// use the extra analysis (1) to filter trivial false positives or (2) to
-    /// provide more context so that non-trivial false positives can be quickly
-    /// detected by the user.
-    bool allowExtraAnalysis(StringRef PassName) const {
-        return OptimizationRemarkEmitter::allowExtraAnalysis(*F, PassName);
-    }
-    static bool allowExtraAnalysis(const Function &F, StringRef PassName) {
-        return allowExtraAnalysis(F.getContext(), PassName);
-    }
-    static bool allowExtraAnalysis(LLVMContext &Ctx, StringRef PassName) {
-        return Ctx.getLLVMRemarkStreamer() ||
-               Ctx.getDiagHandlerPtr()->isAnyRemarkEnabled(PassName);
-    }
+  /// Whether we allow for extra compile-time budget to perform more
+  /// analysis to produce fewer false positives.
+  ///
+  /// This is useful when reporting missed optimizations.  In this case we can
+  /// use the extra analysis (1) to filter trivial false positives or (2) to
+  /// provide more context so that non-trivial false positives can be quickly
+  /// detected by the user.
+  bool allowExtraAnalysis(StringRef PassName) const {
+    return OptimizationRemarkEmitter::allowExtraAnalysis(*F, PassName);
+  }
+  static bool allowExtraAnalysis(const Function &F, StringRef PassName) {
+    return allowExtraAnalysis(F.getContext(), PassName);
+  }
+  static bool allowExtraAnalysis(LLVMContext &Ctx, StringRef PassName) {
+    return Ctx.getLLVMRemarkStreamer() ||
+           Ctx.getDiagHandlerPtr()->isAnyRemarkEnabled(PassName);
+  }
 
 private:
-    const Function *F;
+  const Function *F;
 
-    BlockFrequencyInfo *BFI;
+  BlockFrequencyInfo *BFI;
 
-    /// If we generate BFI on demand, we need to free it when ORE is freed.
-    std::unique_ptr<BlockFrequencyInfo> OwnedBFI;
+  /// If we generate BFI on demand, we need to free it when ORE is freed.
+  std::unique_ptr<BlockFrequencyInfo> OwnedBFI;
 
-    /// Compute hotness from IR value (currently assumed to be a block) if PGO is
-    /// available.
-    Optional<uint64_t> computeHotness(const Value *V);
+  /// Compute hotness from IR value (currently assumed to be a block) if PGO is
+  /// available.
+  Optional<uint64_t> computeHotness(const Value *V);
 
-    /// Similar but use value from \p OptDiag and update hotness there.
-    void computeHotness(DiagnosticInfoIROptimization &OptDiag);
+  /// Similar but use value from \p OptDiag and update hotness there.
+  void computeHotness(DiagnosticInfoIROptimization &OptDiag);
 
-    /// Only allow verbose messages if we know we're filtering by hotness
-    /// (BFI is only set in this case).
-    bool shouldEmitVerbose() {
-        return BFI != nullptr;
-    }
+  /// Only allow verbose messages if we know we're filtering by hotness
+  /// (BFI is only set in this case).
+  bool shouldEmitVerbose() { return BFI != nullptr; }
 
-    OptimizationRemarkEmitter(const OptimizationRemarkEmitter &) = delete;
-    void operator=(const OptimizationRemarkEmitter &) = delete;
+  OptimizationRemarkEmitter(const OptimizationRemarkEmitter &) = delete;
+  void operator=(const OptimizationRemarkEmitter &) = delete;
 };
 
 /// Add a small namespace to avoid name clashes with the classes used in
@@ -130,7 +128,7 @@ namespace ore {
 using NV = DiagnosticInfoOptimizationBase::Argument;
 using setIsVerbose = DiagnosticInfoOptimizationBase::setIsVerbose;
 using setExtraArgs = DiagnosticInfoOptimizationBase::setExtraArgs;
-}
+} // namespace ore
 
 /// OptimizationRemarkEmitter legacy analysis pass
 ///
@@ -138,34 +136,34 @@ using setExtraArgs = DiagnosticInfoOptimizationBase::setExtraArgs;
 /// passes.  It's holding onto BFI, so if the pass does not preserve BFI, BFI
 /// could be freed.
 class OptimizationRemarkEmitterWrapperPass : public FunctionPass {
-    std::unique_ptr<OptimizationRemarkEmitter> ORE;
+  std::unique_ptr<OptimizationRemarkEmitter> ORE;
 
 public:
-    OptimizationRemarkEmitterWrapperPass();
+  OptimizationRemarkEmitterWrapperPass();
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    OptimizationRemarkEmitter &getORE() {
-        assert(ORE && "pass not run yet");
-        return *ORE;
-    }
+  OptimizationRemarkEmitter &getORE() {
+    assert(ORE && "pass not run yet");
+    return *ORE;
+  }
 
-    static char ID;
+  static char ID;
 };
 
 class OptimizationRemarkEmitterAnalysis
     : public AnalysisInfoMixin<OptimizationRemarkEmitterAnalysis> {
-    friend AnalysisInfoMixin<OptimizationRemarkEmitterAnalysis>;
-    static AnalysisKey Key;
+  friend AnalysisInfoMixin<OptimizationRemarkEmitterAnalysis>;
+  static AnalysisKey Key;
 
 public:
-    /// Provide the result typedef for this analysis pass.
-    typedef OptimizationRemarkEmitter Result;
+  /// Provide the result typedef for this analysis pass.
+  typedef OptimizationRemarkEmitter Result;
 
-    /// Run the analysis pass over a function and produce BFI.
-    Result run(Function &F, FunctionAnalysisManager &AM);
+  /// Run the analysis pass over a function and produce BFI.
+  Result run(Function &F, FunctionAnalysisManager &AM);
 };
-}
+} // namespace llvm
 #endif // LLVM_IR_OPTIMIZATIONDIAGNOSTICINFO_H

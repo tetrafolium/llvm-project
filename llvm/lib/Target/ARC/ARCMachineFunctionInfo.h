@@ -21,41 +21,37 @@ namespace llvm {
 /// ARCFunctionInfo - This class is derived from MachineFunction private
 /// ARC target-specific information for each MachineFunction.
 class ARCFunctionInfo : public MachineFunctionInfo {
-    virtual void anchor();
-    bool ReturnStackOffsetSet;
-    int VarArgsFrameIndex;
-    unsigned ReturnStackOffset;
+  virtual void anchor();
+  bool ReturnStackOffsetSet;
+  int VarArgsFrameIndex;
+  unsigned ReturnStackOffset;
 
 public:
-    ARCFunctionInfo()
-        : ReturnStackOffsetSet(false), VarArgsFrameIndex(0),
-          ReturnStackOffset(-1U), MaxCallStackReq(0) {}
+  ARCFunctionInfo()
+      : ReturnStackOffsetSet(false), VarArgsFrameIndex(0),
+        ReturnStackOffset(-1U), MaxCallStackReq(0) {}
 
-    explicit ARCFunctionInfo(MachineFunction &MF)
-        : ReturnStackOffsetSet(false), VarArgsFrameIndex(0),
-          ReturnStackOffset(-1U), MaxCallStackReq(0) {}
+  explicit ARCFunctionInfo(MachineFunction &MF)
+      : ReturnStackOffsetSet(false), VarArgsFrameIndex(0),
+        ReturnStackOffset(-1U), MaxCallStackReq(0) {}
 
-    ~ARCFunctionInfo() {}
+  ~ARCFunctionInfo() {}
 
-    void setVarArgsFrameIndex(int off) {
-        VarArgsFrameIndex = off;
-    }
-    int getVarArgsFrameIndex() const {
-        return VarArgsFrameIndex;
-    }
+  void setVarArgsFrameIndex(int off) { VarArgsFrameIndex = off; }
+  int getVarArgsFrameIndex() const { return VarArgsFrameIndex; }
 
-    void setReturnStackOffset(unsigned value) {
-        assert(!ReturnStackOffsetSet && "Return stack offset set twice");
-        ReturnStackOffset = value;
-        ReturnStackOffsetSet = true;
-    }
+  void setReturnStackOffset(unsigned value) {
+    assert(!ReturnStackOffsetSet && "Return stack offset set twice");
+    ReturnStackOffset = value;
+    ReturnStackOffsetSet = true;
+  }
 
-    unsigned getReturnStackOffset() const {
-        assert(ReturnStackOffsetSet && "Return stack offset not set");
-        return ReturnStackOffset;
-    }
+  unsigned getReturnStackOffset() const {
+    assert(ReturnStackOffsetSet && "Return stack offset not set");
+    return ReturnStackOffset;
+  }
 
-    unsigned MaxCallStackReq;
+  unsigned MaxCallStackReq;
 };
 
 } // end namespace llvm

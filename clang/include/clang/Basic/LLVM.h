@@ -28,17 +28,16 @@ namespace llvm {
 class StringRef;
 class Twine;
 class VersionTuple;
-template<typename T> class ArrayRef;
-template<typename T> class MutableArrayRef;
-template<typename T> class OwningArrayRef;
-template<unsigned InternalLen> class SmallString;
-template<typename T, unsigned N> class SmallVector;
-template<typename T> class SmallVectorImpl;
-template<typename T> class Optional;
+template <typename T> class ArrayRef;
+template <typename T> class MutableArrayRef;
+template <typename T> class OwningArrayRef;
+template <unsigned InternalLen> class SmallString;
+template <typename T, unsigned N> class SmallVector;
+template <typename T> class SmallVectorImpl;
+template <typename T> class Optional;
 template <class T> class Expected;
 
-template<typename T>
-struct SaveAndRestore;
+template <typename T> struct SaveAndRestore;
 
 // Reference counting.
 template <typename T> class IntrusiveRefCntPtr;
@@ -48,17 +47,16 @@ template <class Derived> class RefCountedBase;
 class raw_ostream;
 class raw_pwrite_stream;
 // TODO: DenseMap, ...
-}
-
+} // namespace llvm
 
 namespace clang {
 // Casting operators.
-using llvm::isa;
-using llvm::isa_and_nonnull;
 using llvm::cast;
+using llvm::cast_or_null;
 using llvm::dyn_cast;
 using llvm::dyn_cast_or_null;
-using llvm::cast_or_null;
+using llvm::isa;
+using llvm::isa_and_nonnull;
 
 // ADT's.
 using llvm::ArrayRef;

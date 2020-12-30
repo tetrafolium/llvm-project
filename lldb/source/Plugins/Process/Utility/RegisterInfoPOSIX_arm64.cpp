@@ -54,13 +54,11 @@
    sizeof(RegisterInfoPOSIX_arm64::EXC))
 
 #define DEFINE_DBG(reg, i)                                                     \
-  #reg, NULL,                                                                  \
-      sizeof(((RegisterInfoPOSIX_arm64::DBG *) NULL)->reg[i]),                 \
-              DBG_OFFSET_NAME(reg[i]), lldb::eEncodingUint, lldb::eFormatHex,  \
-                              {LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,       \
-                               LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,       \
-                               dbg_##reg##i },                                 \
-                               NULL, NULL, NULL, 0
+#reg, NULL, sizeof(((RegisterInfoPOSIX_arm64::DBG *)NULL)->reg[i]),          \
+      DBG_OFFSET_NAME(reg[i]), lldb::eEncodingUint, lldb::eFormatHex,          \
+      {LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,          \
+       LLDB_INVALID_REGNUM, dbg_##reg##i },                                    \
+       NULL, NULL, NULL, 0
 #define REG_CONTEXT_SIZE                                                       \
   (sizeof(RegisterInfoPOSIX_arm64::GPR) +                                      \
    sizeof(RegisterInfoPOSIX_arm64::FPU) +                                      \
@@ -74,22 +72,22 @@
 
 static const lldb_private::RegisterInfo *
 GetRegisterInfoPtr(const lldb_private::ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::aarch64:
-    case llvm::Triple::aarch64_32:
-        return g_register_infos_arm64_le;
-    default:
-        assert(false && "Unhandled target architecture.");
-        return nullptr;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::aarch64:
+  case llvm::Triple::aarch64_32:
+    return g_register_infos_arm64_le;
+  default:
+    assert(false && "Unhandled target architecture.");
+    return nullptr;
+  }
 }
 
 // Number of register sets provided by this context.
 enum {
-    k_num_gpr_registers = gpr_w28 - gpr_x0 + 1,
-    k_num_fpr_registers = fpu_fpcr - fpu_v0 + 1,
-    k_num_sve_registers = sve_ffr - sve_vg + 1,
-    k_num_register_sets = 3
+  k_num_gpr_registers = gpr_w28 - gpr_x0 + 1,
+  k_num_fpr_registers = fpu_fpcr - fpu_v0 + 1,
+  k_num_sve_registers = sve_ffr - sve_vg + 1,
+  k_num_register_sets = 3
 };
 
 // ARM64 general purpose registers.
@@ -109,8 +107,7 @@ static const uint32_t g_gpr_regnums_arm64[] = {
     gpr_w14, gpr_w15,  gpr_w16, gpr_w17,
     gpr_w18, gpr_w19,  gpr_w20, gpr_w21,
     gpr_w22, gpr_w23,  gpr_w24, gpr_w25,
-    gpr_w26, gpr_w27,  gpr_w28, LLDB_INVALID_REGNUM
-};
+    gpr_w26, gpr_w27,  gpr_w28, LLDB_INVALID_REGNUM};
 
 static_assert(((sizeof g_gpr_regnums_arm64 / sizeof g_gpr_regnums_arm64[0]) -
                1) == k_num_gpr_registers,
@@ -150,8 +147,7 @@ static const uint32_t g_fpu_regnums_arm64[] = {
     fpu_d23,  fpu_d24,  fpu_d25,
     fpu_d26,  fpu_d27,  fpu_d28,
     fpu_d29,  fpu_d30,  fpu_d31,
-    fpu_fpsr, fpu_fpcr, LLDB_INVALID_REGNUM
-};
+    fpu_fpsr, fpu_fpcr, LLDB_INVALID_REGNUM};
 static_assert(((sizeof g_fpu_regnums_arm64 / sizeof g_fpu_regnums_arm64[0]) -
                1) == k_num_fpr_registers,
               "g_fpu_regnums_arm64 has wrong number of register infos");
@@ -174,190 +170,174 @@ static const uint32_t g_sve_regnums_arm64[] = {
     sve_p6,  sve_p7,  sve_p8,
     sve_p9,  sve_p10, sve_p11,
     sve_p12, sve_p13, sve_p14,
-    sve_p15, sve_ffr, LLDB_INVALID_REGNUM
-};
+    sve_p15, sve_ffr, LLDB_INVALID_REGNUM};
 static_assert(((sizeof g_sve_regnums_arm64 / sizeof g_sve_regnums_arm64[0]) -
                1) == k_num_sve_registers,
               "g_sve_regnums_arm64 has wrong number of register infos");
 
 // Register sets for ARM64.
 static const lldb_private::RegisterSet g_reg_sets_arm64[k_num_register_sets] = {
-    {   "General Purpose Registers", "gpr", k_num_gpr_registers,
-        g_gpr_regnums_arm64
-    },
-    {   "Floating Point Registers", "fpu", k_num_fpr_registers,
-        g_fpu_regnums_arm64
-    },
-    {   "Scalable Vector Extension Registers", "sve", k_num_sve_registers,
-        g_sve_regnums_arm64
-    }
-};
+    {"General Purpose Registers", "gpr", k_num_gpr_registers,
+     g_gpr_regnums_arm64},
+    {"Floating Point Registers", "fpu", k_num_fpr_registers,
+     g_fpu_regnums_arm64},
+    {"Scalable Vector Extension Registers", "sve", k_num_sve_registers,
+     g_sve_regnums_arm64}};
 
 static uint32_t
 GetRegisterInfoCount(const lldb_private::ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::aarch64:
-    case llvm::Triple::aarch64_32:
-        return static_cast<uint32_t>(sizeof(g_register_infos_arm64_le) /
-                                     sizeof(g_register_infos_arm64_le[0]));
-    default:
-        assert(false && "Unhandled target architecture.");
-        return 0;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::aarch64:
+  case llvm::Triple::aarch64_32:
+    return static_cast<uint32_t>(sizeof(g_register_infos_arm64_le) /
+                                 sizeof(g_register_infos_arm64_le[0]));
+  default:
+    assert(false && "Unhandled target architecture.");
+    return 0;
+  }
 }
 
 RegisterInfoPOSIX_arm64::RegisterInfoPOSIX_arm64(
     const lldb_private::ArchSpec &target_arch)
     : lldb_private::RegisterInfoAndSetInterface(target_arch),
       m_register_info_p(GetRegisterInfoPtr(target_arch)),
-      m_register_info_count(GetRegisterInfoCount(target_arch)) {
-}
+      m_register_info_count(GetRegisterInfoCount(target_arch)) {}
 
 uint32_t RegisterInfoPOSIX_arm64::GetRegisterCount() const {
-    if (IsSVEEnabled())
-        return k_num_gpr_registers + k_num_fpr_registers + k_num_sve_registers;
+  if (IsSVEEnabled())
+    return k_num_gpr_registers + k_num_fpr_registers + k_num_sve_registers;
 
-    return k_num_gpr_registers + k_num_fpr_registers;
+  return k_num_gpr_registers + k_num_fpr_registers;
 }
 
 size_t RegisterInfoPOSIX_arm64::GetGPRSize() const {
-    return sizeof(struct RegisterInfoPOSIX_arm64::GPR);
+  return sizeof(struct RegisterInfoPOSIX_arm64::GPR);
 }
 
 size_t RegisterInfoPOSIX_arm64::GetFPRSize() const {
-    return sizeof(struct RegisterInfoPOSIX_arm64::FPU);
+  return sizeof(struct RegisterInfoPOSIX_arm64::FPU);
 }
 
 const lldb_private::RegisterInfo *
 RegisterInfoPOSIX_arm64::GetRegisterInfo() const {
-    return m_register_info_p;
+  return m_register_info_p;
 }
 
 size_t RegisterInfoPOSIX_arm64::GetRegisterSetCount() const {
-    if (IsSVEEnabled())
-        return k_num_register_sets;
-    return k_num_register_sets - 1;
+  if (IsSVEEnabled())
+    return k_num_register_sets;
+  return k_num_register_sets - 1;
 }
 
 size_t RegisterInfoPOSIX_arm64::GetRegisterSetFromRegisterIndex(
     uint32_t reg_index) const {
-    if (reg_index <= gpr_w28)
-        return GPRegSet;
-    if (reg_index <= fpu_fpcr)
-        return FPRegSet;
-    if (reg_index <= sve_ffr)
-        return SVERegSet;
-    return LLDB_INVALID_REGNUM;
+  if (reg_index <= gpr_w28)
+    return GPRegSet;
+  if (reg_index <= fpu_fpcr)
+    return FPRegSet;
+  if (reg_index <= sve_ffr)
+    return SVERegSet;
+  return LLDB_INVALID_REGNUM;
 }
 
 const lldb_private::RegisterSet *
 RegisterInfoPOSIX_arm64::GetRegisterSet(size_t set_index) const {
-    if (set_index < GetRegisterSetCount())
-        return &g_reg_sets_arm64[set_index];
-    return nullptr;
+  if (set_index < GetRegisterSetCount())
+    return &g_reg_sets_arm64[set_index];
+  return nullptr;
 }
 
 uint32_t
 RegisterInfoPOSIX_arm64::ConfigureVectorRegisterInfos(uint32_t sve_vq) {
-    // sve_vq contains SVE Quad vector length in context of AArch64 SVE.
-    // SVE register infos if enabled cannot be disabled by selecting sve_vq = 0.
-    // Also if an invalid or previously set vector length is passed to this
-    // function then it will exit immediately with previously set vector length.
-    if (!VectorSizeIsValid(sve_vq) || m_vector_reg_vq == sve_vq)
-        return m_vector_reg_vq;
-
-    // We cannot enable AArch64 only mode if SVE was enabled.
-    if (sve_vq == eVectorQuadwordAArch64 &&
-            m_vector_reg_vq > eVectorQuadwordAArch64)
-        sve_vq = eVectorQuadwordAArch64SVE;
-
-    m_vector_reg_vq = sve_vq;
-
-    if (sve_vq == eVectorQuadwordAArch64) {
-        m_register_info_count =
-            static_cast<uint32_t>(sizeof(g_register_infos_arm64_le) /
-                                  sizeof(g_register_infos_arm64_le[0]));
-        m_register_info_p = g_register_infos_arm64_le;
-
-        return m_vector_reg_vq;
-    }
-
-    m_register_info_count =
-        static_cast<uint32_t>(sizeof(g_register_infos_arm64_sve_le) /
-                              sizeof(g_register_infos_arm64_sve_le[0]));
-
-    std::vector<lldb_private::RegisterInfo> &reg_info_ref =
-        m_per_vq_reg_infos[sve_vq];
-
-    if (reg_info_ref.empty()) {
-        reg_info_ref = llvm::makeArrayRef(g_register_infos_arm64_sve_le,
-                                          m_register_info_count);
-
-        uint32_t offset = SVE_REGS_DEFAULT_OFFSET_LINUX;
-
-        reg_info_ref[fpu_fpsr].byte_offset = offset;
-        reg_info_ref[fpu_fpcr].byte_offset = offset + 4;
-        reg_info_ref[sve_vg].byte_offset = offset + 8;
-        offset += 16;
-
-        // Update Z registers size and offset
-        uint32_t s_reg_base = fpu_s0;
-        uint32_t d_reg_base = fpu_d0;
-        uint32_t v_reg_base = fpu_v0;
-        uint32_t z_reg_base = sve_z0;
-
-        for (uint32_t index = 0; index < 32; index++) {
-            reg_info_ref[s_reg_base + index].byte_offset = offset;
-            reg_info_ref[d_reg_base + index].byte_offset = offset;
-            reg_info_ref[v_reg_base + index].byte_offset = offset;
-            reg_info_ref[z_reg_base + index].byte_offset = offset;
-
-            reg_info_ref[z_reg_base + index].byte_size = sve_vq * SVE_QUAD_WORD_BYTES;
-            offset += reg_info_ref[z_reg_base + index].byte_size;
-        }
-
-        // Update P registers and FFR size and offset
-        for (uint32_t it = sve_p0; it <= sve_ffr; it++) {
-            reg_info_ref[it].byte_offset = offset;
-            reg_info_ref[it].byte_size = sve_vq * SVE_QUAD_WORD_BYTES / 8;
-            offset += reg_info_ref[it].byte_size;
-        }
-
-        m_per_vq_reg_infos[sve_vq] = reg_info_ref;
-    }
-
-    m_register_info_p = reg_info_ref.data();
+  // sve_vq contains SVE Quad vector length in context of AArch64 SVE.
+  // SVE register infos if enabled cannot be disabled by selecting sve_vq = 0.
+  // Also if an invalid or previously set vector length is passed to this
+  // function then it will exit immediately with previously set vector length.
+  if (!VectorSizeIsValid(sve_vq) || m_vector_reg_vq == sve_vq)
     return m_vector_reg_vq;
+
+  // We cannot enable AArch64 only mode if SVE was enabled.
+  if (sve_vq == eVectorQuadwordAArch64 &&
+      m_vector_reg_vq > eVectorQuadwordAArch64)
+    sve_vq = eVectorQuadwordAArch64SVE;
+
+  m_vector_reg_vq = sve_vq;
+
+  if (sve_vq == eVectorQuadwordAArch64) {
+    m_register_info_count =
+        static_cast<uint32_t>(sizeof(g_register_infos_arm64_le) /
+                              sizeof(g_register_infos_arm64_le[0]));
+    m_register_info_p = g_register_infos_arm64_le;
+
+    return m_vector_reg_vq;
+  }
+
+  m_register_info_count =
+      static_cast<uint32_t>(sizeof(g_register_infos_arm64_sve_le) /
+                            sizeof(g_register_infos_arm64_sve_le[0]));
+
+  std::vector<lldb_private::RegisterInfo> &reg_info_ref =
+      m_per_vq_reg_infos[sve_vq];
+
+  if (reg_info_ref.empty()) {
+    reg_info_ref = llvm::makeArrayRef(g_register_infos_arm64_sve_le,
+                                      m_register_info_count);
+
+    uint32_t offset = SVE_REGS_DEFAULT_OFFSET_LINUX;
+
+    reg_info_ref[fpu_fpsr].byte_offset = offset;
+    reg_info_ref[fpu_fpcr].byte_offset = offset + 4;
+    reg_info_ref[sve_vg].byte_offset = offset + 8;
+    offset += 16;
+
+    // Update Z registers size and offset
+    uint32_t s_reg_base = fpu_s0;
+    uint32_t d_reg_base = fpu_d0;
+    uint32_t v_reg_base = fpu_v0;
+    uint32_t z_reg_base = sve_z0;
+
+    for (uint32_t index = 0; index < 32; index++) {
+      reg_info_ref[s_reg_base + index].byte_offset = offset;
+      reg_info_ref[d_reg_base + index].byte_offset = offset;
+      reg_info_ref[v_reg_base + index].byte_offset = offset;
+      reg_info_ref[z_reg_base + index].byte_offset = offset;
+
+      reg_info_ref[z_reg_base + index].byte_size = sve_vq * SVE_QUAD_WORD_BYTES;
+      offset += reg_info_ref[z_reg_base + index].byte_size;
+    }
+
+    // Update P registers and FFR size and offset
+    for (uint32_t it = sve_p0; it <= sve_ffr; it++) {
+      reg_info_ref[it].byte_offset = offset;
+      reg_info_ref[it].byte_size = sve_vq * SVE_QUAD_WORD_BYTES / 8;
+      offset += reg_info_ref[it].byte_size;
+    }
+
+    m_per_vq_reg_infos[sve_vq] = reg_info_ref;
+  }
+
+  m_register_info_p = reg_info_ref.data();
+  return m_vector_reg_vq;
 }
 
 bool RegisterInfoPOSIX_arm64::IsSVEZReg(unsigned reg) const {
-    return (sve_z0 <= reg && reg <= sve_z31);
+  return (sve_z0 <= reg && reg <= sve_z31);
 }
 
 bool RegisterInfoPOSIX_arm64::IsSVEPReg(unsigned reg) const {
-    return (sve_p0 <= reg && reg <= sve_p15);
+  return (sve_p0 <= reg && reg <= sve_p15);
 }
 
 bool RegisterInfoPOSIX_arm64::IsSVERegVG(unsigned reg) const {
-    return sve_vg == reg;
+  return sve_vg == reg;
 }
 
-uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEZ0() const {
-    return sve_z0;
-}
+uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEZ0() const { return sve_z0; }
 
-uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEFFR() const {
-    return sve_ffr;
-}
+uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEFFR() const { return sve_ffr; }
 
-uint32_t RegisterInfoPOSIX_arm64::GetRegNumFPCR() const {
-    return fpu_fpcr;
-}
+uint32_t RegisterInfoPOSIX_arm64::GetRegNumFPCR() const { return fpu_fpcr; }
 
-uint32_t RegisterInfoPOSIX_arm64::GetRegNumFPSR() const {
-    return fpu_fpsr;
-}
+uint32_t RegisterInfoPOSIX_arm64::GetRegNumFPSR() const { return fpu_fpsr; }
 
-uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEVG() const {
-    return sve_vg;
-}
+uint32_t RegisterInfoPOSIX_arm64::GetRegNumSVEVG() const { return sve_vg; }

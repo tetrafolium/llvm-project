@@ -18,25 +18,28 @@ namespace fuchsia {
 
 namespace {
 AST_MATCHER(CXXRecordDecl, hasDirectVirtualBaseClass) {
-    if (!Node.hasDefinition()) return false;
-    if (!Node.getNumVBases()) return false;
-    for (const CXXBaseSpecifier &Base : Node.bases())
-        if (Base.isVirtual()) return true;
+  if (!Node.hasDefinition())
     return false;
+  if (!Node.getNumVBases())
+    return false;
+  for (const CXXBaseSpecifier &Base : Node.bases())
+    if (Base.isVirtual())
+      return true;
+  return false;
 }
 } // namespace
 
 void VirtualInheritanceCheck::registerMatchers(MatchFinder *Finder) {
-    // Defining classes using direct virtual inheritance is disallowed.
-    Finder->addMatcher(cxxRecordDecl(hasDirectVirtualBaseClass()).bind("decl"),
-                       this);
+  // Defining classes using direct virtual inheritance is disallowed.
+  Finder->addMatcher(cxxRecordDecl(hasDirectVirtualBaseClass()).bind("decl"),
+                     this);
 }
 
 void VirtualInheritanceCheck::check(const MatchFinder::MatchResult &Result) {
-    if (const auto *D = Result.Nodes.getNodeAs<CXXRecordDecl>("decl"))
-        diag(D->getBeginLoc(), "direct virtual inheritance is disallowed");
+  if (const auto *D = Result.Nodes.getNodeAs<CXXRecordDecl>("decl"))
+    diag(D->getBeginLoc(), "direct virtual inheritance is disallowed");
 }
 
-}  // namespace fuchsia
-}  // namespace tidy
-}  // namespace clang
+} // namespace fuchsia
+} // namespace tidy
+} // namespace clang

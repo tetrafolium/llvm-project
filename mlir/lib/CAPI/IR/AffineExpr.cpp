@@ -18,38 +18,38 @@
 using namespace mlir;
 
 MlirContext mlirAffineExprGetContext(MlirAffineExpr affineExpr) {
-    return wrap(unwrap(affineExpr).getContext());
+  return wrap(unwrap(affineExpr).getContext());
 }
 
 void mlirAffineExprPrint(MlirAffineExpr affineExpr, MlirStringCallback callback,
                          void *userData) {
-    mlir::detail::CallbackOstream stream(callback, userData);
-    unwrap(affineExpr).print(stream);
+  mlir::detail::CallbackOstream stream(callback, userData);
+  unwrap(affineExpr).print(stream);
 }
 
 void mlirAffineExprDump(MlirAffineExpr affineExpr) {
-    unwrap(affineExpr).dump();
+  unwrap(affineExpr).dump();
 }
 
 bool mlirAffineExprIsSymbolicOrConstant(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).isSymbolicOrConstant();
+  return unwrap(affineExpr).isSymbolicOrConstant();
 }
 
 bool mlirAffineExprIsPureAffine(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).isPureAffine();
+  return unwrap(affineExpr).isPureAffine();
 }
 
 int64_t mlirAffineExprGetLargestKnownDivisor(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getLargestKnownDivisor();
+  return unwrap(affineExpr).getLargestKnownDivisor();
 }
 
 bool mlirAffineExprIsMultipleOf(MlirAffineExpr affineExpr, int64_t factor) {
-    return unwrap(affineExpr).isMultipleOf(factor);
+  return unwrap(affineExpr).isMultipleOf(factor);
 }
 
 bool mlirAffineExprIsFunctionOfDim(MlirAffineExpr affineExpr,
                                    intptr_t position) {
-    return unwrap(affineExpr).isFunctionOfDim(position);
+  return unwrap(affineExpr).isFunctionOfDim(position);
 }
 
 //===----------------------------------------------------------------------===//
@@ -57,11 +57,11 @@ bool mlirAffineExprIsFunctionOfDim(MlirAffineExpr affineExpr,
 //===----------------------------------------------------------------------===//
 
 MlirAffineExpr mlirAffineDimExprGet(MlirContext ctx, intptr_t position) {
-    return wrap(getAffineDimExpr(position, unwrap(ctx)));
+  return wrap(getAffineDimExpr(position, unwrap(ctx)));
 }
 
 intptr_t mlirAffineDimExprGetPosition(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).cast<AffineDimExpr>().getPosition();
+  return unwrap(affineExpr).cast<AffineDimExpr>().getPosition();
 }
 
 //===----------------------------------------------------------------------===//
@@ -69,11 +69,11 @@ intptr_t mlirAffineDimExprGetPosition(MlirAffineExpr affineExpr) {
 //===----------------------------------------------------------------------===//
 
 MlirAffineExpr mlirAffineSymbolExprGet(MlirContext ctx, intptr_t position) {
-    return wrap(getAffineSymbolExpr(position, unwrap(ctx)));
+  return wrap(getAffineSymbolExpr(position, unwrap(ctx)));
 }
 
 intptr_t mlirAffineSymbolExprGetPosition(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).cast<AffineSymbolExpr>().getPosition();
+  return unwrap(affineExpr).cast<AffineSymbolExpr>().getPosition();
 }
 
 //===----------------------------------------------------------------------===//
@@ -81,11 +81,11 @@ intptr_t mlirAffineSymbolExprGetPosition(MlirAffineExpr affineExpr) {
 //===----------------------------------------------------------------------===//
 
 MlirAffineExpr mlirAffineConstantExprGet(MlirContext ctx, int64_t constant) {
-    return wrap(getAffineConstantExpr(constant, unwrap(ctx)));
+  return wrap(getAffineConstantExpr(constant, unwrap(ctx)));
 }
 
 int64_t mlirAffineConstantExprGetValue(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).cast<AffineConstantExpr>().getValue();
+  return unwrap(affineExpr).cast<AffineConstantExpr>().getValue();
 }
 
 //===----------------------------------------------------------------------===//
@@ -93,12 +93,12 @@ int64_t mlirAffineConstantExprGetValue(MlirAffineExpr affineExpr) {
 //===----------------------------------------------------------------------===//
 
 bool mlirAffineExprIsAAdd(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Add;
+  return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Add;
 }
 
 MlirAffineExpr mlirAffineAddExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
-    return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Add, unwrap(lhs),
-                                      unwrap(rhs)));
+  return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Add, unwrap(lhs),
+                                    unwrap(rhs)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -106,12 +106,12 @@ MlirAffineExpr mlirAffineAddExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
 //===----------------------------------------------------------------------===//
 
 bool mlirAffineExprIsAMul(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Mul;
+  return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Mul;
 }
 
 MlirAffineExpr mlirAffineMulExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
-    return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Mul, unwrap(lhs),
-                                      unwrap(rhs)));
+  return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Mul, unwrap(lhs),
+                                    unwrap(rhs)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -119,12 +119,12 @@ MlirAffineExpr mlirAffineMulExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
 //===----------------------------------------------------------------------===//
 
 bool mlirAffineExprIsAMod(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Mod;
+  return unwrap(affineExpr).getKind() == mlir::AffineExprKind::Mod;
 }
 
 MlirAffineExpr mlirAffineModExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
-    return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Mod, unwrap(lhs),
-                                      unwrap(rhs)));
+  return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::Mod, unwrap(lhs),
+                                    unwrap(rhs)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -132,13 +132,13 @@ MlirAffineExpr mlirAffineModExprGet(MlirAffineExpr lhs, MlirAffineExpr rhs) {
 //===----------------------------------------------------------------------===//
 
 bool mlirAffineExprIsAFloorDiv(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getKind() == mlir::AffineExprKind::FloorDiv;
+  return unwrap(affineExpr).getKind() == mlir::AffineExprKind::FloorDiv;
 }
 
 MlirAffineExpr mlirAffineFloorDivExprGet(MlirAffineExpr lhs,
-        MlirAffineExpr rhs) {
-    return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::FloorDiv, unwrap(lhs),
-                                      unwrap(rhs)));
+                                         MlirAffineExpr rhs) {
+  return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::FloorDiv, unwrap(lhs),
+                                    unwrap(rhs)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -146,13 +146,13 @@ MlirAffineExpr mlirAffineFloorDivExprGet(MlirAffineExpr lhs,
 //===----------------------------------------------------------------------===//
 
 bool mlirAffineExprIsACeilDiv(MlirAffineExpr affineExpr) {
-    return unwrap(affineExpr).getKind() == mlir::AffineExprKind::CeilDiv;
+  return unwrap(affineExpr).getKind() == mlir::AffineExprKind::CeilDiv;
 }
 
 MlirAffineExpr mlirAffineCeilDivExprGet(MlirAffineExpr lhs,
                                         MlirAffineExpr rhs) {
-    return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::CeilDiv, unwrap(lhs),
-                                      unwrap(rhs)));
+  return wrap(getAffineBinaryOpExpr(mlir::AffineExprKind::CeilDiv, unwrap(lhs),
+                                    unwrap(rhs)));
 }
 
 //===----------------------------------------------------------------------===//
@@ -160,9 +160,9 @@ MlirAffineExpr mlirAffineCeilDivExprGet(MlirAffineExpr lhs,
 //===----------------------------------------------------------------------===//
 
 MlirAffineExpr mlirAffineBinaryOpExprGetLHS(MlirAffineExpr affineExpr) {
-    return wrap(unwrap(affineExpr).cast<AffineBinaryOpExpr>().getLHS());
+  return wrap(unwrap(affineExpr).cast<AffineBinaryOpExpr>().getLHS());
 }
 
 MlirAffineExpr mlirAffineBinaryOpExprGetRHS(MlirAffineExpr affineExpr) {
-    return wrap(unwrap(affineExpr).cast<AffineBinaryOpExpr>().getRHS());
+  return wrap(unwrap(affineExpr).cast<AffineBinaryOpExpr>().getRHS());
 }

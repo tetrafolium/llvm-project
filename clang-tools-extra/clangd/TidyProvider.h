@@ -26,7 +26,7 @@ using TidyProvider =
 /// A factory to modify a \ref tidy::ClangTidyOptions that doesn't hold any
 /// state.
 using TidyProviderRef = llvm::function_ref<void(tidy::ClangTidyOptions &,
-                        /*Filename=*/llvm::StringRef)>;
+                                                /*Filename=*/llvm::StringRef)>;
 
 TidyProvider combine(std::vector<TidyProvider> Providers);
 
@@ -55,7 +55,7 @@ TidyProvider provideClangTidyFiles(ThreadsafeFS &);
 TidyProviderRef provideClangdConfig();
 
 tidy::ClangTidyOptions getTidyOptionsForFile(TidyProviderRef Provider,
-        llvm::StringRef Filename);
+                                             llvm::StringRef Filename);
 
 /// Returns if \p Check is a registered clang-tidy check
 /// \pre \p must not be empty, must not contain '*' or ',' or start with '-'.

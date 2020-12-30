@@ -22,21 +22,21 @@
 // emitted instructions are valid on the target host.
 
 #if defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32)
-# ifdef __SSE4_2__
-#  include <smmintrin.h>
-#  define CRC32_INTRINSIC FIRST_32_SECOND_64(_mm_crc32_u32, _mm_crc32_u64)
-# endif
-# ifdef __ARM_FEATURE_CRC32
-#  include <arm_acle.h>
-#  define CRC32_INTRINSIC FIRST_32_SECOND_64(__crc32cw, __crc32cd)
-# endif
-#endif  // defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32)
+#ifdef __SSE4_2__
+#include <smmintrin.h>
+#define CRC32_INTRINSIC FIRST_32_SECOND_64(_mm_crc32_u32, _mm_crc32_u64)
+#endif
+#ifdef __ARM_FEATURE_CRC32
+#include <arm_acle.h>
+#define CRC32_INTRINSIC FIRST_32_SECOND_64(__crc32cw, __crc32cd)
+#endif
+#endif // defined(__SSE4_2__) || defined(__ARM_FEATURE_CRC32)
 
 namespace __scudo {
 
 enum : u8 {
-    CRC32Software = 0,
-    CRC32Hardware = 1,
+  CRC32Software = 0,
+  CRC32Hardware = 1,
 };
 
 static const u32 CRC32Table[] = {
@@ -82,19 +82,18 @@ static const u32 CRC32Table[] = {
     0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
     0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
     0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
-    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-};
+    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
 inline u32 computeSoftwareCRC32(u32 Crc, uptr Data) {
-    for (uptr i = 0; i < sizeof(Data); i++) {
-        Crc = CRC32Table[(Crc ^ Data) & 0xff] ^ (Crc >> 8);
-        Data >>= 8;
-    }
-    return Crc;
+  for (uptr i = 0; i < sizeof(Data); i++) {
+    Crc = CRC32Table[(Crc ^ Data) & 0xff] ^ (Crc >> 8);
+    Data >>= 8;
+  }
+  return Crc;
 }
 
 SANITIZER_WEAK_ATTRIBUTE u32 computeHardwareCRC32(u32 Crc, uptr Data);
 
-}  // namespace __scudo
+} // namespace __scudo
 
-#endif  // SCUDO_CRC32_H_
+#endif // SCUDO_CRC32_H_

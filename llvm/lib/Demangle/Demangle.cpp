@@ -14,23 +14,23 @@
 #include <cstdlib>
 
 static bool isItaniumEncoding(const std::string &MangledName) {
-    size_t Pos = MangledName.find_first_not_of('_');
-    // A valid Itanium encoding requires 1-4 leading underscores, followed by 'Z'.
-    return Pos > 0 && Pos <= 4 && MangledName[Pos] == 'Z';
+  size_t Pos = MangledName.find_first_not_of('_');
+  // A valid Itanium encoding requires 1-4 leading underscores, followed by 'Z'.
+  return Pos > 0 && Pos <= 4 && MangledName[Pos] == 'Z';
 }
 
 std::string llvm::demangle(const std::string &MangledName) {
-    char *Demangled;
-    if (isItaniumEncoding(MangledName))
-        Demangled = itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
-    else
-        Demangled = microsoftDemangle(MangledName.c_str(), nullptr, nullptr,
-                                      nullptr, nullptr);
+  char *Demangled;
+  if (isItaniumEncoding(MangledName))
+    Demangled = itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
+  else
+    Demangled = microsoftDemangle(MangledName.c_str(), nullptr, nullptr,
+                                  nullptr, nullptr);
 
-    if (!Demangled)
-        return MangledName;
+  if (!Demangled)
+    return MangledName;
 
-    std::string Ret = Demangled;
-    std::free(Demangled);
-    return Ret;
+  std::string Ret = Demangled;
+  std::free(Demangled);
+  return Ret;
 }

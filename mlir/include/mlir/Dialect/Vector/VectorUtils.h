@@ -55,13 +55,13 @@ SmallVector<int64_t, 4> delinearize(ArrayRef<int64_t> strides,
 /// returns the element-space offsets for each dimension.
 SmallVector<int64_t, 4>
 computeElementOffsetsFromVectorSliceOffsets(ArrayRef<int64_t> sizes,
-        ArrayRef<int64_t> vectorOffsets);
+                                            ArrayRef<int64_t> vectorOffsets);
 
 /// Given the shape, sizes, and element-space offsets of a vector, returns
 /// the slize sizes for each dimension.
 SmallVector<int64_t, 4> computeSliceSizes(ArrayRef<int64_t> shape,
-        ArrayRef<int64_t> sizes,
-        ArrayRef<int64_t> elementOffsets);
+                                          ArrayRef<int64_t> sizes,
+                                          ArrayRef<int64_t> elementOffsets);
 
 /// Computes and returns the multi-dimensional ratio of `superShape` to
 /// `subShape`. This is calculated by performing a traversal from minor to major
@@ -76,14 +76,14 @@ SmallVector<int64_t, 4> computeSliceSizes(ArrayRef<int64_t> shape,
 ///   - shapeRatio({3, 4, 4, 8}, {2, 5, 2}) returns None
 ///   - shapeRatio({1, 2, 10, 32}, {2, 5, 2}) returns {1, 1, 2, 16}
 Optional<SmallVector<int64_t, 4>> shapeRatio(ArrayRef<int64_t> superShape,
-                               ArrayRef<int64_t> subShape);
+                                             ArrayRef<int64_t> subShape);
 
 /// Computes and returns the multi-dimensional ratio of the shapes of
 /// `superVector` to `subVector`. If integral division is not possible, returns
 /// None.
 /// Assumes and enforces that the VectorTypes have the same elemental type.
 Optional<SmallVector<int64_t, 4>> shapeRatio(VectorType superVectorType,
-                               VectorType subVectorType);
+                                             VectorType subVectorType);
 
 /// Constructs a permutation map of invariant memref indices to vector
 /// dimension.

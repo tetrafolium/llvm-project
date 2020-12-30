@@ -51,55 +51,53 @@ using namespace llvm;
 #include "R600GenRegisterInfo.inc"
 
 static MCInstrInfo *createAMDGPUMCInstrInfo() {
-    MCInstrInfo *X = new MCInstrInfo();
-    InitAMDGPUMCInstrInfo(X);
-    return X;
+  MCInstrInfo *X = new MCInstrInfo();
+  InitAMDGPUMCInstrInfo(X);
+  return X;
 }
 
 static MCRegisterInfo *createAMDGPUMCRegisterInfo(const Triple &TT) {
-    MCRegisterInfo *X = new MCRegisterInfo();
-    if (TT.getArch() == Triple::r600)
-        InitR600MCRegisterInfo(X, 0);
-    else
-        InitAMDGPUMCRegisterInfo(X, AMDGPU::PC_REG);
-    return X;
+  MCRegisterInfo *X = new MCRegisterInfo();
+  if (TT.getArch() == Triple::r600)
+    InitR600MCRegisterInfo(X, 0);
+  else
+    InitAMDGPUMCRegisterInfo(X, AMDGPU::PC_REG);
+  return X;
 }
 
 MCRegisterInfo *llvm::createGCNMCRegisterInfo(AMDGPUDwarfFlavour DwarfFlavour) {
-    MCRegisterInfo *X = new MCRegisterInfo();
-    InitAMDGPUMCRegisterInfo(X, AMDGPU::PC_REG, DwarfFlavour);
-    return X;
+  MCRegisterInfo *X = new MCRegisterInfo();
+  InitAMDGPUMCRegisterInfo(X, AMDGPU::PC_REG, DwarfFlavour);
+  return X;
 }
 
 static MCSubtargetInfo *
 createAMDGPUMCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
-    if (TT.getArch() == Triple::r600)
-        return createR600MCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
-    return createAMDGPUMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+  if (TT.getArch() == Triple::r600)
+    return createR600MCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
+  return createAMDGPUMCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
 static MCInstPrinter *createAMDGPUMCInstPrinter(const Triple &T,
-        unsigned SyntaxVariant,
-        const MCAsmInfo &MAI,
-        const MCInstrInfo &MII,
-        const MCRegisterInfo &MRI) {
-    if (T.getArch() == Triple::r600)
-        return new R600InstPrinter(MAI, MII, MRI);
-    else
-        return new AMDGPUInstPrinter(MAI, MII, MRI);
+                                                unsigned SyntaxVariant,
+                                                const MCAsmInfo &MAI,
+                                                const MCInstrInfo &MII,
+                                                const MCRegisterInfo &MRI) {
+  if (T.getArch() == Triple::r600)
+    return new R600InstPrinter(MAI, MII, MRI);
+  else
+    return new AMDGPUInstPrinter(MAI, MII, MRI);
 }
 
-static MCTargetStreamer *createAMDGPUAsmTargetStreamer(MCStreamer &S,
-        formatted_raw_ostream &OS,
-        MCInstPrinter *InstPrint,
-        bool isVerboseAsm) {
-    return new AMDGPUTargetAsmStreamer(S, OS);
+static MCTargetStreamer *
+createAMDGPUAsmTargetStreamer(MCStreamer &S, formatted_raw_ostream &OS,
+                              MCInstPrinter *InstPrint, bool isVerboseAsm) {
+  return new AMDGPUTargetAsmStreamer(S, OS);
 }
 
-static MCTargetStreamer * createAMDGPUObjectTargetStreamer(
-    MCStreamer &S,
-    const MCSubtargetInfo &STI) {
-    return new AMDGPUTargetELFStreamer(S, STI);
+static MCTargetStreamer *
+createAMDGPUObjectTargetStreamer(MCStreamer &S, const MCSubtargetInfo &STI) {
+  return new AMDGPUTargetELFStreamer(S, STI);
 }
 
 static MCStreamer *createMCStreamer(const Triple &T, MCContext &Context,
@@ -107,68 +105,68 @@ static MCStreamer *createMCStreamer(const Triple &T, MCContext &Context,
                                     std::unique_ptr<MCObjectWriter> &&OW,
                                     std::unique_ptr<MCCodeEmitter> &&Emitter,
                                     bool RelaxAll) {
-    return createAMDGPUELFStreamer(T, Context, std::move(MAB), std::move(OW),
-                                   std::move(Emitter), RelaxAll);
+  return createAMDGPUELFStreamer(T, Context, std::move(MAB), std::move(OW),
+                                 std::move(Emitter), RelaxAll);
 }
 
 namespace {
 
 class AMDGPUMCInstrAnalysis : public MCInstrAnalysis {
 public:
-    explicit AMDGPUMCInstrAnalysis(const MCInstrInfo *Info)
-        : MCInstrAnalysis(Info) {}
+  explicit AMDGPUMCInstrAnalysis(const MCInstrInfo *Info)
+      : MCInstrAnalysis(Info) {}
 
-    bool evaluateBranch(const MCInst &Inst, uint64_t Addr, uint64_t Size,
-                        uint64_t &Target) const override {
-        if (Inst.getNumOperands() == 0 || !Inst.getOperand(0).isImm() ||
-                Info->get(Inst.getOpcode()).OpInfo[0].OperandType !=
-                MCOI::OPERAND_PCREL)
-            return false;
+  bool evaluateBranch(const MCInst &Inst, uint64_t Addr, uint64_t Size,
+                      uint64_t &Target) const override {
+    if (Inst.getNumOperands() == 0 || !Inst.getOperand(0).isImm() ||
+        Info->get(Inst.getOpcode()).OpInfo[0].OperandType !=
+            MCOI::OPERAND_PCREL)
+      return false;
 
-        int64_t Imm = Inst.getOperand(0).getImm();
-        // Our branches take a simm16, but we need two extra bits to account for
-        // the factor of 4.
-        APInt SignedOffset(18, Imm * 4, true);
-        Target = (SignedOffset.sext(64) + Addr + Size).getZExtValue();
-        return true;
-    }
+    int64_t Imm = Inst.getOperand(0).getImm();
+    // Our branches take a simm16, but we need two extra bits to account for
+    // the factor of 4.
+    APInt SignedOffset(18, Imm * 4, true);
+    Target = (SignedOffset.sext(64) + Addr + Size).getZExtValue();
+    return true;
+  }
 };
 
 } // end anonymous namespace
 
 static MCInstrAnalysis *createAMDGPUMCInstrAnalysis(const MCInstrInfo *Info) {
-    return new AMDGPUMCInstrAnalysis(Info);
+  return new AMDGPUMCInstrAnalysis(Info);
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeAMDGPUTargetMC() {
 
-    TargetRegistry::RegisterMCInstrInfo(getTheGCNTarget(), createAMDGPUMCInstrInfo);
-    TargetRegistry::RegisterMCInstrInfo(getTheAMDGPUTarget(), createR600MCInstrInfo);
-    for (Target *T : {
-                &getTheAMDGPUTarget(), &getTheGCNTarget()
-            }) {
-        RegisterMCAsmInfo<AMDGPUMCAsmInfo> X(*T);
+  TargetRegistry::RegisterMCInstrInfo(getTheGCNTarget(),
+                                      createAMDGPUMCInstrInfo);
+  TargetRegistry::RegisterMCInstrInfo(getTheAMDGPUTarget(),
+                                      createR600MCInstrInfo);
+  for (Target *T : {&getTheAMDGPUTarget(), &getTheGCNTarget()}) {
+    RegisterMCAsmInfo<AMDGPUMCAsmInfo> X(*T);
 
-        TargetRegistry::RegisterMCRegInfo(*T, createAMDGPUMCRegisterInfo);
-        TargetRegistry::RegisterMCSubtargetInfo(*T, createAMDGPUMCSubtargetInfo);
-        TargetRegistry::RegisterMCInstPrinter(*T, createAMDGPUMCInstPrinter);
-        TargetRegistry::RegisterMCInstrAnalysis(*T, createAMDGPUMCInstrAnalysis);
-        TargetRegistry::RegisterMCAsmBackend(*T, createAMDGPUAsmBackend);
-        TargetRegistry::RegisterELFStreamer(*T, createMCStreamer);
-    }
+    TargetRegistry::RegisterMCRegInfo(*T, createAMDGPUMCRegisterInfo);
+    TargetRegistry::RegisterMCSubtargetInfo(*T, createAMDGPUMCSubtargetInfo);
+    TargetRegistry::RegisterMCInstPrinter(*T, createAMDGPUMCInstPrinter);
+    TargetRegistry::RegisterMCInstrAnalysis(*T, createAMDGPUMCInstrAnalysis);
+    TargetRegistry::RegisterMCAsmBackend(*T, createAMDGPUAsmBackend);
+    TargetRegistry::RegisterELFStreamer(*T, createMCStreamer);
+  }
 
-    // R600 specific registration
-    TargetRegistry::RegisterMCCodeEmitter(getTheAMDGPUTarget(),
-                                          createR600MCCodeEmitter);
-    TargetRegistry::RegisterObjectTargetStreamer(
-        getTheAMDGPUTarget(), createAMDGPUObjectTargetStreamer);
+  // R600 specific registration
+  TargetRegistry::RegisterMCCodeEmitter(getTheAMDGPUTarget(),
+                                        createR600MCCodeEmitter);
+  TargetRegistry::RegisterObjectTargetStreamer(
+      getTheAMDGPUTarget(), createAMDGPUObjectTargetStreamer);
 
-    // GCN specific registration
-    TargetRegistry::RegisterMCCodeEmitter(getTheGCNTarget(),
-                                          createSIMCCodeEmitter);
+  // GCN specific registration
+  TargetRegistry::RegisterMCCodeEmitter(getTheGCNTarget(),
+                                        createSIMCCodeEmitter);
 
-    TargetRegistry::RegisterAsmTargetStreamer(getTheGCNTarget(),
-            createAMDGPUAsmTargetStreamer);
-    TargetRegistry::RegisterObjectTargetStreamer(
-        getTheGCNTarget(), createAMDGPUObjectTargetStreamer);
+  TargetRegistry::RegisterAsmTargetStreamer(getTheGCNTarget(),
+                                            createAMDGPUAsmTargetStreamer);
+  TargetRegistry::RegisterObjectTargetStreamer(
+      getTheGCNTarget(), createAMDGPUObjectTargetStreamer);
 }

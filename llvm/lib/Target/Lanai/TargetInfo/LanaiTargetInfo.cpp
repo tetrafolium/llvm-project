@@ -12,11 +12,11 @@
 using namespace llvm;
 
 Target &llvm::getTheLanaiTarget() {
-    static Target TheLanaiTarget;
-    return TheLanaiTarget;
+  static Target TheLanaiTarget;
+  return TheLanaiTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeLanaiTargetInfo() {
-    RegisterTarget<Triple::lanai> X(getTheLanaiTarget(), "lanai", "Lanai",
-                                    "Lanai");
+  RegisterTarget<Triple::lanai> X(getTheLanaiTarget(), "lanai", "Lanai",
+                                  "Lanai");
 }

@@ -85,7 +85,7 @@ __isl_give isl_val *isl_valFromAPInt(isl_ctx *Ctx, const llvm::APInt Int,
 /// @return The isl::val corresponding to @p Int.
 inline isl::val valFromAPInt(isl_ctx *Ctx, const llvm::APInt Int,
                              bool IsSigned) {
-    return isl::manage(isl_valFromAPInt(Ctx, Int, IsSigned));
+  return isl::manage(isl_valFromAPInt(Ctx, Int, IsSigned));
 }
 
 /// Translate isl_val to llvm::APInt.
@@ -145,7 +145,7 @@ llvm::APInt APIntFromVal(__isl_take isl_val *Val);
 ///
 /// @return The APInt value corresponding to @p Val.
 inline llvm::APInt APIntFromVal(isl::val V) {
-    return APIntFromVal(V.release());
+  return APIntFromVal(V.release());
 }
 
 /// Get c++ string from Isl objects.
@@ -166,56 +166,56 @@ std::string stringFromIslObj(__isl_keep isl_space *space);
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_union_map *Map) {
-    OS << polly::stringFromIslObj(Map);
-    return OS;
+  OS << polly::stringFromIslObj(Map);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_map *Map) {
-    OS << polly::stringFromIslObj(Map);
-    return OS;
+  OS << polly::stringFromIslObj(Map);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_set *Set) {
-    OS << polly::stringFromIslObj(Set);
-    return OS;
+  OS << polly::stringFromIslObj(Set);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_pw_aff *Map) {
-    OS << polly::stringFromIslObj(Map);
-    return OS;
+  OS << polly::stringFromIslObj(Map);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_pw_multi_aff *PMA) {
-    OS << polly::stringFromIslObj(PMA);
-    return OS;
+  OS << polly::stringFromIslObj(PMA);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_multi_aff *MA) {
-    OS << polly::stringFromIslObj(MA);
-    return OS;
+  OS << polly::stringFromIslObj(MA);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_union_pw_multi_aff *UPMA) {
-    OS << polly::stringFromIslObj(UPMA);
-    return OS;
+  OS << polly::stringFromIslObj(UPMA);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_schedule *Schedule) {
-    OS << polly::stringFromIslObj(Schedule);
-    return OS;
+  OS << polly::stringFromIslObj(Schedule);
+  return OS;
 }
 
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS,
                                      __isl_keep isl_space *Space) {
-    OS << polly::stringFromIslObj(Space);
-    return OS;
+  OS << polly::stringFromIslObj(Space);
+  return OS;
 }
 
 /// Combine Prefix, Val (or Number) and Suffix to an isl-compatible name.
@@ -263,8 +263,8 @@ std::string getIslCompatibleName(const std::string &Prefix,
 inline llvm::DiagnosticInfoOptimizationBase &
 operator<<(llvm::DiagnosticInfoOptimizationBase &OS,
            const isl::union_map &Obj) {
-    OS << Obj.to_str();
-    return OS;
+  OS << Obj.to_str();
+  return OS;
 }
 
 /// Scope guard for code that allows arbitrary isl function to return an error
@@ -278,58 +278,58 @@ operator<<(llvm::DiagnosticInfoOptimizationBase &OS,
 /// IslMaxOperationsGuard defines the number of allowed base operations for some
 /// code, IslQuotaScope defines where it is allowed to return an error result.
 class IslQuotaScope {
-    isl_ctx *IslCtx;
-    int OldOnError;
+  isl_ctx *IslCtx;
+  int OldOnError;
 
 public:
-    IslQuotaScope() : IslCtx(nullptr) {}
-    IslQuotaScope(const IslQuotaScope &) = delete;
-    IslQuotaScope(IslQuotaScope &&Other)
-        : IslCtx(Other.IslCtx), OldOnError(Other.OldOnError) {
-        Other.IslCtx = nullptr;
-    }
-    const IslQuotaScope &operator=(IslQuotaScope &&Other) {
-        std::swap(this->IslCtx, Other.IslCtx);
-        std::swap(this->OldOnError, Other.OldOnError);
-        return *this;
-    }
+  IslQuotaScope() : IslCtx(nullptr) {}
+  IslQuotaScope(const IslQuotaScope &) = delete;
+  IslQuotaScope(IslQuotaScope &&Other)
+      : IslCtx(Other.IslCtx), OldOnError(Other.OldOnError) {
+    Other.IslCtx = nullptr;
+  }
+  const IslQuotaScope &operator=(IslQuotaScope &&Other) {
+    std::swap(this->IslCtx, Other.IslCtx);
+    std::swap(this->OldOnError, Other.OldOnError);
+    return *this;
+  }
 
-    /// Enter a quota-aware scope.
-    ///
-    /// Should not be used directly. Use IslMaxOperationsGuard::enter() instead.
-    explicit IslQuotaScope(isl_ctx *IslCtx, unsigned long LocalMaxOps)
-        : IslCtx(IslCtx) {
-        assert(IslCtx);
-        assert(isl_ctx_get_max_operations(IslCtx) == 0 && "Incorrect nesting");
-        if (LocalMaxOps == 0) {
-            this->IslCtx = nullptr;
-            return;
-        }
-
-        OldOnError = isl_options_get_on_error(IslCtx);
-        isl_options_set_on_error(IslCtx, ISL_ON_ERROR_CONTINUE);
-        isl_ctx_reset_error(IslCtx);
-        isl_ctx_set_max_operations(IslCtx, LocalMaxOps);
+  /// Enter a quota-aware scope.
+  ///
+  /// Should not be used directly. Use IslMaxOperationsGuard::enter() instead.
+  explicit IslQuotaScope(isl_ctx *IslCtx, unsigned long LocalMaxOps)
+      : IslCtx(IslCtx) {
+    assert(IslCtx);
+    assert(isl_ctx_get_max_operations(IslCtx) == 0 && "Incorrect nesting");
+    if (LocalMaxOps == 0) {
+      this->IslCtx = nullptr;
+      return;
     }
 
-    ~IslQuotaScope() {
-        if (!IslCtx)
-            return;
+    OldOnError = isl_options_get_on_error(IslCtx);
+    isl_options_set_on_error(IslCtx, ISL_ON_ERROR_CONTINUE);
+    isl_ctx_reset_error(IslCtx);
+    isl_ctx_set_max_operations(IslCtx, LocalMaxOps);
+  }
 
-        assert(isl_ctx_get_max_operations(IslCtx) > 0 && "Incorrect nesting");
-        assert(isl_options_get_on_error(IslCtx) == ISL_ON_ERROR_CONTINUE &&
-               "Incorrect nesting");
-        isl_ctx_set_max_operations(IslCtx, 0);
-        isl_options_set_on_error(IslCtx, OldOnError);
-    }
+  ~IslQuotaScope() {
+    if (!IslCtx)
+      return;
 
-    /// Return whether the current quota has exceeded.
-    bool hasQuotaExceeded() const {
-        if (!IslCtx)
-            return false;
+    assert(isl_ctx_get_max_operations(IslCtx) > 0 && "Incorrect nesting");
+    assert(isl_options_get_on_error(IslCtx) == ISL_ON_ERROR_CONTINUE &&
+           "Incorrect nesting");
+    isl_ctx_set_max_operations(IslCtx, 0);
+    isl_options_set_on_error(IslCtx, OldOnError);
+  }
 
-        return isl_ctx_last_error(IslCtx) == isl_error_quota;
-    }
+  /// Return whether the current quota has exceeded.
+  bool hasQuotaExceeded() const {
+    if (!IslCtx)
+      return false;
+
+    return isl_ctx_last_error(IslCtx) == isl_error_quota;
+  }
 };
 
 /// Scoped limit of ISL operations.
@@ -346,69 +346,69 @@ public:
 /// while currently a no operations-limit is active.
 class IslMaxOperationsGuard {
 private:
-    /// The ISL context to set the operations limit.
-    ///
-    /// If set to nullptr, there is no need for any action at the end of the
-    /// scope.
-    isl_ctx *IslCtx;
+  /// The ISL context to set the operations limit.
+  ///
+  /// If set to nullptr, there is no need for any action at the end of the
+  /// scope.
+  isl_ctx *IslCtx;
 
-    /// Maximum number of operations for the scope.
-    unsigned long LocalMaxOps;
+  /// Maximum number of operations for the scope.
+  unsigned long LocalMaxOps;
 
-    /// When AutoEnter is enabled, holds the IslQuotaScope object.
-    IslQuotaScope TopLevelScope;
+  /// When AutoEnter is enabled, holds the IslQuotaScope object.
+  IslQuotaScope TopLevelScope;
 
 public:
-    /// Enter a max operations scope.
-    ///
-    /// @param IslCtx      The ISL context to set the operations limit for.
-    /// @param LocalMaxOps Maximum number of operations allowed in the
-    ///                    scope. If set to zero, no operations limit is enforced.
-    /// @param AutoEnter   If true, automatically enters an IslQuotaScope such
-    ///                    that isl operations may return quota errors
-    ///                    immediately. If false, only starts the operations
-    ///                    counter, but isl does not return quota errors before
-    ///                    calling enter().
-    IslMaxOperationsGuard(isl_ctx *IslCtx, unsigned long LocalMaxOps,
-                          bool AutoEnter = true)
-        : IslCtx(IslCtx), LocalMaxOps(LocalMaxOps) {
-        assert(IslCtx);
-        assert(isl_ctx_get_max_operations(IslCtx) == 0 &&
-               "Nested max operations not supported");
+  /// Enter a max operations scope.
+  ///
+  /// @param IslCtx      The ISL context to set the operations limit for.
+  /// @param LocalMaxOps Maximum number of operations allowed in the
+  ///                    scope. If set to zero, no operations limit is enforced.
+  /// @param AutoEnter   If true, automatically enters an IslQuotaScope such
+  ///                    that isl operations may return quota errors
+  ///                    immediately. If false, only starts the operations
+  ///                    counter, but isl does not return quota errors before
+  ///                    calling enter().
+  IslMaxOperationsGuard(isl_ctx *IslCtx, unsigned long LocalMaxOps,
+                        bool AutoEnter = true)
+      : IslCtx(IslCtx), LocalMaxOps(LocalMaxOps) {
+    assert(IslCtx);
+    assert(isl_ctx_get_max_operations(IslCtx) == 0 &&
+           "Nested max operations not supported");
 
-        // Users of this guard may check whether the last error was isl_error_quota.
-        // Reset the last error such that a previous out-of-quota error is not
-        // mistaken to have occurred in the in this quota, even if the max number of
-        // operations is set to infinite (LocalMaxOps == 0).
-        isl_ctx_reset_error(IslCtx);
+    // Users of this guard may check whether the last error was isl_error_quota.
+    // Reset the last error such that a previous out-of-quota error is not
+    // mistaken to have occurred in the in this quota, even if the max number of
+    // operations is set to infinite (LocalMaxOps == 0).
+    isl_ctx_reset_error(IslCtx);
 
-        if (LocalMaxOps == 0) {
-            // No limit on operations; also disable restoring on_error/max_operations.
-            this->IslCtx = nullptr;
-            return;
-        }
-
-        isl_ctx_reset_operations(IslCtx);
-        TopLevelScope = enter(AutoEnter);
+    if (LocalMaxOps == 0) {
+      // No limit on operations; also disable restoring on_error/max_operations.
+      this->IslCtx = nullptr;
+      return;
     }
 
-    /// Enter a scope that can handle out-of-quota errors.
-    ///
-    /// @param AllowReturnNull Whether the scoped code can handle out-of-quota
-    ///                        errors. If false, returns a dummy scope object that
-    ///                        does nothing.
-    IslQuotaScope enter(bool AllowReturnNull = true) {
-        return AllowReturnNull && IslCtx ? IslQuotaScope(IslCtx, LocalMaxOps)
-               : IslQuotaScope();
-    }
+    isl_ctx_reset_operations(IslCtx);
+    TopLevelScope = enter(AutoEnter);
+  }
 
-    /// Return whether the current quota has exceeded.
-    bool hasQuotaExceeded() const {
-        if (!IslCtx)
-            return false;
+  /// Enter a scope that can handle out-of-quota errors.
+  ///
+  /// @param AllowReturnNull Whether the scoped code can handle out-of-quota
+  ///                        errors. If false, returns a dummy scope object that
+  ///                        does nothing.
+  IslQuotaScope enter(bool AllowReturnNull = true) {
+    return AllowReturnNull && IslCtx ? IslQuotaScope(IslCtx, LocalMaxOps)
+                                     : IslQuotaScope();
+  }
 
-        return isl_ctx_last_error(IslCtx) == isl_error_quota;
-    }
+  /// Return whether the current quota has exceeded.
+  bool hasQuotaExceeded() const {
+    if (!IslCtx)
+      return false;
+
+    return isl_ctx_last_error(IslCtx) == isl_error_quota;
+  }
 };
 } // end namespace polly
 

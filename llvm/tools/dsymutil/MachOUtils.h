@@ -25,16 +25,16 @@ struct LinkOptions;
 namespace MachOUtils {
 
 struct ArchAndFile {
-    std::string Arch;
-    std::unique_ptr<llvm::sys::fs::TempFile> File;
+  std::string Arch;
+  std::unique_ptr<llvm::sys::fs::TempFile> File;
 
-    llvm::Error createTempFile();
-    llvm::StringRef path() const;
+  llvm::Error createTempFile();
+  llvm::StringRef path() const;
 
-    ArchAndFile(StringRef Arch) : Arch(std::string(Arch)) {}
-    ArchAndFile(ArchAndFile &&A) = default;
-    ArchAndFile &operator=(ArchAndFile &&A) = default;
-    ~ArchAndFile();
+  ArchAndFile(StringRef Arch) : Arch(std::string(Arch)) {}
+  ArchAndFile(ArchAndFile &&A) = default;
+  ArchAndFile &operator=(ArchAndFile &&A) = default;
+  ~ArchAndFile();
 };
 
 bool generateUniversalBinary(SmallVectorImpl<ArchAndFile> &ArchFiles,

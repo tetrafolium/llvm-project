@@ -20,28 +20,28 @@ namespace llvm {
 namespace XCOFFYAML {
 
 struct FileHeader {
-    llvm::yaml::Hex16 Magic;
-    uint16_t NumberOfSections;
-    int32_t TimeStamp;
-    llvm::yaml::Hex32 SymbolTableOffset; // File offset to symbol table.
-    int32_t NumberOfSymTableEntries;
-    uint16_t AuxHeaderSize;
-    llvm::yaml::Hex16 Flags;
+  llvm::yaml::Hex16 Magic;
+  uint16_t NumberOfSections;
+  int32_t TimeStamp;
+  llvm::yaml::Hex32 SymbolTableOffset; // File offset to symbol table.
+  int32_t NumberOfSymTableEntries;
+  uint16_t AuxHeaderSize;
+  llvm::yaml::Hex16 Flags;
 };
 
 struct Symbol {
-    StringRef SymbolName;
-    llvm::yaml::Hex32 Value; // Symbol value; storage class-dependent.
-    StringRef SectionName;
-    llvm::yaml::Hex16 Type;
-    XCOFF::StorageClass StorageClass;
-    uint8_t NumberOfAuxEntries; // Number of auxiliary entries
+  StringRef SymbolName;
+  llvm::yaml::Hex32 Value; // Symbol value; storage class-dependent.
+  StringRef SectionName;
+  llvm::yaml::Hex16 Type;
+  XCOFF::StorageClass StorageClass;
+  uint8_t NumberOfAuxEntries; // Number of auxiliary entries
 };
 
 struct Object {
-    FileHeader Header;
-    std::vector<Symbol> Symbols;
-    Object();
+  FileHeader Header;
+  std::vector<Symbol> Symbols;
+  Object();
 };
 } // namespace XCOFFYAML
 } // namespace llvm
@@ -50,19 +50,19 @@ namespace llvm {
 namespace yaml {
 
 template <> struct ScalarEnumerationTraits<XCOFF::StorageClass> {
-    static void enumeration(IO &IO, XCOFF::StorageClass &Value);
+  static void enumeration(IO &IO, XCOFF::StorageClass &Value);
 };
 
 template <> struct MappingTraits<XCOFFYAML::FileHeader> {
-    static void mapping(IO &IO, XCOFFYAML::FileHeader &H);
+  static void mapping(IO &IO, XCOFFYAML::FileHeader &H);
 };
 
 template <> struct MappingTraits<XCOFFYAML::Object> {
-    static void mapping(IO &IO, XCOFFYAML::Object &Obj);
+  static void mapping(IO &IO, XCOFFYAML::Object &Obj);
 };
 
 template <> struct MappingTraits<XCOFFYAML::Symbol> {
-    static void mapping(IO &IO, XCOFFYAML::Symbol &S);
+  static void mapping(IO &IO, XCOFFYAML::Symbol &S);
 };
 
 } // namespace yaml

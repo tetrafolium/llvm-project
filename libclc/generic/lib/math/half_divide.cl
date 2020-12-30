@@ -1,6 +1,6 @@
 #include <clc/clc.h>
 
-#define divide(x,y) (x/y)
+#define divide(x, y) (x / y)
 
 #define __CLC_FUNC divide
 #define __CLC_BODY <half_binary.inc>

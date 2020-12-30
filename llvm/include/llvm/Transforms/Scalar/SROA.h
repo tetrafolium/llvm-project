@@ -42,7 +42,7 @@ class AllocaSlices;
 class Partition;
 class SROALegacyPass;
 
-} // end namespace sroa
+} // namespace LLVM_LIBRARY_VISIBILITY
 
 /// An optimization pass providing Scalar Replacement of Aggregates.
 ///
@@ -63,74 +63,74 @@ class SROALegacyPass;
 ///    this form. By doing so, it will enable promotion of vector aggregates to
 ///    SSA vector values.
 class SROA : public PassInfoMixin<SROA> {
-    LLVMContext *C = nullptr;
-    DominatorTree *DT = nullptr;
-    AssumptionCache *AC = nullptr;
+  LLVMContext *C = nullptr;
+  DominatorTree *DT = nullptr;
+  AssumptionCache *AC = nullptr;
 
-    /// Worklist of alloca instructions to simplify.
-    ///
-    /// Each alloca in the function is added to this. Each new alloca formed gets
-    /// added to it as well to recursively simplify unless that alloca can be
-    /// directly promoted. Finally, each time we rewrite a use of an alloca other
-    /// the one being actively rewritten, we add it back onto the list if not
-    /// already present to ensure it is re-visited.
-    SetVector<AllocaInst *, SmallVector<AllocaInst *, 16>> Worklist;
+  /// Worklist of alloca instructions to simplify.
+  ///
+  /// Each alloca in the function is added to this. Each new alloca formed gets
+  /// added to it as well to recursively simplify unless that alloca can be
+  /// directly promoted. Finally, each time we rewrite a use of an alloca other
+  /// the one being actively rewritten, we add it back onto the list if not
+  /// already present to ensure it is re-visited.
+  SetVector<AllocaInst *, SmallVector<AllocaInst *, 16>> Worklist;
 
-    /// A collection of instructions to delete.
-    /// We try to batch deletions to simplify code and make things a bit more
-    /// efficient. We also make sure there is no dangling pointers.
-    SmallVector<WeakVH, 8> DeadInsts;
+  /// A collection of instructions to delete.
+  /// We try to batch deletions to simplify code and make things a bit more
+  /// efficient. We also make sure there is no dangling pointers.
+  SmallVector<WeakVH, 8> DeadInsts;
 
-    /// Post-promotion worklist.
-    ///
-    /// Sometimes we discover an alloca which has a high probability of becoming
-    /// viable for SROA after a round of promotion takes place. In those cases,
-    /// the alloca is enqueued here for re-processing.
-    ///
-    /// Note that we have to be very careful to clear allocas out of this list in
-    /// the event they are deleted.
-    SetVector<AllocaInst *, SmallVector<AllocaInst *, 16>> PostPromotionWorklist;
+  /// Post-promotion worklist.
+  ///
+  /// Sometimes we discover an alloca which has a high probability of becoming
+  /// viable for SROA after a round of promotion takes place. In those cases,
+  /// the alloca is enqueued here for re-processing.
+  ///
+  /// Note that we have to be very careful to clear allocas out of this list in
+  /// the event they are deleted.
+  SetVector<AllocaInst *, SmallVector<AllocaInst *, 16>> PostPromotionWorklist;
 
-    /// A collection of alloca instructions we can directly promote.
-    std::vector<AllocaInst *> PromotableAllocas;
+  /// A collection of alloca instructions we can directly promote.
+  std::vector<AllocaInst *> PromotableAllocas;
 
-    /// A worklist of PHIs to speculate prior to promoting allocas.
-    ///
-    /// All of these PHIs have been checked for the safety of speculation and by
-    /// being speculated will allow promoting allocas currently in the promotable
-    /// queue.
-    SetVector<PHINode *, SmallVector<PHINode *, 2>> SpeculatablePHIs;
+  /// A worklist of PHIs to speculate prior to promoting allocas.
+  ///
+  /// All of these PHIs have been checked for the safety of speculation and by
+  /// being speculated will allow promoting allocas currently in the promotable
+  /// queue.
+  SetVector<PHINode *, SmallVector<PHINode *, 2>> SpeculatablePHIs;
 
-    /// A worklist of select instructions to speculate prior to promoting
-    /// allocas.
-    ///
-    /// All of these select instructions have been checked for the safety of
-    /// speculation and by being speculated will allow promoting allocas
-    /// currently in the promotable queue.
-    SetVector<SelectInst *, SmallVector<SelectInst *, 2>> SpeculatableSelects;
+  /// A worklist of select instructions to speculate prior to promoting
+  /// allocas.
+  ///
+  /// All of these select instructions have been checked for the safety of
+  /// speculation and by being speculated will allow promoting allocas
+  /// currently in the promotable queue.
+  SetVector<SelectInst *, SmallVector<SelectInst *, 2>> SpeculatableSelects;
 
 public:
-    SROA() = default;
+  SROA() = default;
 
-    /// Run the pass over the function.
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  /// Run the pass over the function.
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
 private:
-    friend class sroa::AllocaSliceRewriter;
-    friend class sroa::SROALegacyPass;
+  friend class sroa::AllocaSliceRewriter;
+  friend class sroa::SROALegacyPass;
 
-    /// Helper used by both the public run method and by the legacy pass.
-    PreservedAnalyses runImpl(Function &F, DominatorTree &RunDT,
-                              AssumptionCache &RunAC);
+  /// Helper used by both the public run method and by the legacy pass.
+  PreservedAnalyses runImpl(Function &F, DominatorTree &RunDT,
+                            AssumptionCache &RunAC);
 
-    bool presplitLoadsAndStores(AllocaInst &AI, sroa::AllocaSlices &AS);
-    AllocaInst *rewritePartition(AllocaInst &AI, sroa::AllocaSlices &AS,
-                                 sroa::Partition &P);
-    bool splitAlloca(AllocaInst &AI, sroa::AllocaSlices &AS);
-    bool runOnAlloca(AllocaInst &AI);
-    void clobberUse(Use &U);
-    bool deleteDeadInstructions(SmallPtrSetImpl<AllocaInst *> &DeletedAllocas);
-    bool promoteAllocas(Function &F);
+  bool presplitLoadsAndStores(AllocaInst &AI, sroa::AllocaSlices &AS);
+  AllocaInst *rewritePartition(AllocaInst &AI, sroa::AllocaSlices &AS,
+                               sroa::Partition &P);
+  bool splitAlloca(AllocaInst &AI, sroa::AllocaSlices &AS);
+  bool runOnAlloca(AllocaInst &AI);
+  void clobberUse(Use &U);
+  bool deleteDeadInstructions(SmallPtrSetImpl<AllocaInst *> &DeletedAllocas);
+  bool promoteAllocas(Function &F);
 };
 
 } // end namespace llvm

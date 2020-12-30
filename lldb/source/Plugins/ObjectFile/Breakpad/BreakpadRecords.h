@@ -20,90 +20,88 @@ namespace breakpad {
 
 class Record {
 public:
-    enum Kind { Module, Info, File, Func, Line, Public, StackCFI, StackWin };
+  enum Kind { Module, Info, File, Func, Line, Public, StackCFI, StackWin };
 
-    /// Attempt to guess the kind of the record present in the argument without
-    /// doing a full parse. The returned kind will always be correct for valid
-    /// records, but the full parse can still fail in case of corrupted input.
-    static llvm::Optional<Kind> classify(llvm::StringRef Line);
+  /// Attempt to guess the kind of the record present in the argument without
+  /// doing a full parse. The returned kind will always be correct for valid
+  /// records, but the full parse can still fail in case of corrupted input.
+  static llvm::Optional<Kind> classify(llvm::StringRef Line);
 
 protected:
-    Record(Kind K) : TheKind(K) {}
+  Record(Kind K) : TheKind(K) {}
 
-    ~Record() = default;
+  ~Record() = default;
 
 public:
-    Kind getKind() {
-        return TheKind;
-    }
+  Kind getKind() { return TheKind; }
 
 private:
-    Kind TheKind;
+  Kind TheKind;
 };
 
 llvm::StringRef toString(Record::Kind K);
 inline llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, Record::Kind K) {
-    OS << toString(K);
-    return OS;
+  OS << toString(K);
+  return OS;
 }
 
 class ModuleRecord : public Record {
 public:
-    static llvm::Optional<ModuleRecord> parse(llvm::StringRef Line);
-    ModuleRecord(llvm::Triple::OSType OS, llvm::Triple::ArchType Arch, UUID ID)
-        : Record(Module), OS(OS), Arch(Arch), ID(std::move(ID)) {}
+  static llvm::Optional<ModuleRecord> parse(llvm::StringRef Line);
+  ModuleRecord(llvm::Triple::OSType OS, llvm::Triple::ArchType Arch, UUID ID)
+      : Record(Module), OS(OS), Arch(Arch), ID(std::move(ID)) {}
 
-    llvm::Triple::OSType OS;
-    llvm::Triple::ArchType Arch;
-    UUID ID;
+  llvm::Triple::OSType OS;
+  llvm::Triple::ArchType Arch;
+  UUID ID;
 };
 
 inline bool operator==(const ModuleRecord &L, const ModuleRecord &R) {
-    return L.OS == R.OS && L.Arch == R.Arch && L.ID == R.ID;
+  return L.OS == R.OS && L.Arch == R.Arch && L.ID == R.ID;
 }
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const ModuleRecord &R);
 
 class InfoRecord : public Record {
 public:
-    static llvm::Optional<InfoRecord> parse(llvm::StringRef Line);
-    InfoRecord(UUID ID) : Record(Info), ID(std::move(ID)) {}
+  static llvm::Optional<InfoRecord> parse(llvm::StringRef Line);
+  InfoRecord(UUID ID) : Record(Info), ID(std::move(ID)) {}
 
-    UUID ID;
+  UUID ID;
 };
 
 inline bool operator==(const InfoRecord &L, const InfoRecord &R) {
-    return L.ID == R.ID;
+  return L.ID == R.ID;
 }
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const InfoRecord &R);
 
 class FileRecord : public Record {
 public:
-    static llvm::Optional<FileRecord> parse(llvm::StringRef Line);
-    FileRecord(size_t Number, llvm::StringRef Name)
-        : Record(File), Number(Number), Name(Name) {}
+  static llvm::Optional<FileRecord> parse(llvm::StringRef Line);
+  FileRecord(size_t Number, llvm::StringRef Name)
+      : Record(File), Number(Number), Name(Name) {}
 
-    size_t Number;
-    llvm::StringRef Name;
+  size_t Number;
+  llvm::StringRef Name;
 };
 
 inline bool operator==(const FileRecord &L, const FileRecord &R) {
-    return L.Number == R.Number && L.Name == R.Name;
+  return L.Number == R.Number && L.Name == R.Name;
 }
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const FileRecord &R);
 
 class FuncRecord : public Record {
 public:
-    static llvm::Optional<FuncRecord> parse(llvm::StringRef Line);
-    FuncRecord(bool Multiple, lldb::addr_t Address, lldb::addr_t Size,
-               lldb::addr_t ParamSize, llvm::StringRef Name)
-        : Record(Module), Multiple(Multiple), Address(Address), Size(Size),
-          ParamSize(ParamSize), Name(Name) {}
+  static llvm::Optional<FuncRecord> parse(llvm::StringRef Line);
+  FuncRecord(bool Multiple, lldb::addr_t Address, lldb::addr_t Size,
+             lldb::addr_t ParamSize, llvm::StringRef Name)
+      : Record(Module), Multiple(Multiple), Address(Address), Size(Size),
+        ParamSize(ParamSize), Name(Name) {}
 
-    bool Multiple;
-    lldb::addr_t Address;
-    lldb::addr_t Size;
-    lldb::addr_t ParamSize;
-    llvm::StringRef Name;
+  bool Multiple;
+  lldb::addr_t Address;
+  lldb::addr_t Size;
+  lldb::addr_t ParamSize;
+  llvm::StringRef Name;
 };
 
 bool operator==(const FuncRecord &L, const FuncRecord &R);
@@ -111,16 +109,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const FuncRecord &R);
 
 class LineRecord : public Record {
 public:
-    static llvm::Optional<LineRecord> parse(llvm::StringRef Line);
-    LineRecord(lldb::addr_t Address, lldb::addr_t Size, uint32_t LineNum,
-               size_t FileNum)
-        : Record(Line), Address(Address), Size(Size), LineNum(LineNum),
-          FileNum(FileNum) {}
+  static llvm::Optional<LineRecord> parse(llvm::StringRef Line);
+  LineRecord(lldb::addr_t Address, lldb::addr_t Size, uint32_t LineNum,
+             size_t FileNum)
+      : Record(Line), Address(Address), Size(Size), LineNum(LineNum),
+        FileNum(FileNum) {}
 
-    lldb::addr_t Address;
-    lldb::addr_t Size;
-    uint32_t LineNum;
-    size_t FileNum;
+  lldb::addr_t Address;
+  lldb::addr_t Size;
+  uint32_t LineNum;
+  size_t FileNum;
 };
 
 bool operator==(const LineRecord &L, const LineRecord &R);
@@ -128,16 +126,16 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const LineRecord &R);
 
 class PublicRecord : public Record {
 public:
-    static llvm::Optional<PublicRecord> parse(llvm::StringRef Line);
-    PublicRecord(bool Multiple, lldb::addr_t Address, lldb::addr_t ParamSize,
-                 llvm::StringRef Name)
-        : Record(Module), Multiple(Multiple), Address(Address),
-          ParamSize(ParamSize), Name(Name) {}
+  static llvm::Optional<PublicRecord> parse(llvm::StringRef Line);
+  PublicRecord(bool Multiple, lldb::addr_t Address, lldb::addr_t ParamSize,
+               llvm::StringRef Name)
+      : Record(Module), Multiple(Multiple), Address(Address),
+        ParamSize(ParamSize), Name(Name) {}
 
-    bool Multiple;
-    lldb::addr_t Address;
-    lldb::addr_t ParamSize;
-    llvm::StringRef Name;
+  bool Multiple;
+  lldb::addr_t Address;
+  lldb::addr_t ParamSize;
+  llvm::StringRef Name;
 };
 
 bool operator==(const PublicRecord &L, const PublicRecord &R);
@@ -145,15 +143,15 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const PublicRecord &R);
 
 class StackCFIRecord : public Record {
 public:
-    static llvm::Optional<StackCFIRecord> parse(llvm::StringRef Line);
-    StackCFIRecord(lldb::addr_t Address, llvm::Optional<lldb::addr_t> Size,
-                   llvm::StringRef UnwindRules)
-        : Record(StackCFI), Address(Address), Size(Size),
-          UnwindRules(UnwindRules) {}
+  static llvm::Optional<StackCFIRecord> parse(llvm::StringRef Line);
+  StackCFIRecord(lldb::addr_t Address, llvm::Optional<lldb::addr_t> Size,
+                 llvm::StringRef UnwindRules)
+      : Record(StackCFI), Address(Address), Size(Size),
+        UnwindRules(UnwindRules) {}
 
-    lldb::addr_t Address;
-    llvm::Optional<lldb::addr_t> Size;
-    llvm::StringRef UnwindRules;
+  lldb::addr_t Address;
+  llvm::Optional<lldb::addr_t> Size;
+  llvm::StringRef UnwindRules;
 };
 
 bool operator==(const StackCFIRecord &L, const StackCFIRecord &R);
@@ -161,22 +159,22 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const StackCFIRecord &R);
 
 class StackWinRecord : public Record {
 public:
-    static llvm::Optional<StackWinRecord> parse(llvm::StringRef Line);
+  static llvm::Optional<StackWinRecord> parse(llvm::StringRef Line);
 
-    StackWinRecord(lldb::addr_t RVA, lldb::addr_t CodeSize,
-                   lldb::addr_t ParameterSize, lldb::addr_t SavedRegisterSize,
-                   lldb::addr_t LocalSize, llvm::StringRef ProgramString)
-        : Record(StackWin), RVA(RVA), CodeSize(CodeSize),
-          ParameterSize(ParameterSize), SavedRegisterSize(SavedRegisterSize),
-          LocalSize(LocalSize), ProgramString(ProgramString) {}
+  StackWinRecord(lldb::addr_t RVA, lldb::addr_t CodeSize,
+                 lldb::addr_t ParameterSize, lldb::addr_t SavedRegisterSize,
+                 lldb::addr_t LocalSize, llvm::StringRef ProgramString)
+      : Record(StackWin), RVA(RVA), CodeSize(CodeSize),
+        ParameterSize(ParameterSize), SavedRegisterSize(SavedRegisterSize),
+        LocalSize(LocalSize), ProgramString(ProgramString) {}
 
-    enum class FrameType : uint8_t { FPO = 0, FrameData = 4 };
-    lldb::addr_t RVA;
-    lldb::addr_t CodeSize;
-    lldb::addr_t ParameterSize;
-    lldb::addr_t SavedRegisterSize;
-    lldb::addr_t LocalSize;
-    llvm::StringRef ProgramString;
+  enum class FrameType : uint8_t { FPO = 0, FrameData = 4 };
+  lldb::addr_t RVA;
+  lldb::addr_t CodeSize;
+  lldb::addr_t ParameterSize;
+  lldb::addr_t SavedRegisterSize;
+  lldb::addr_t LocalSize;
+  llvm::StringRef ProgramString;
 };
 
 bool operator==(const StackWinRecord &L, const StackWinRecord &R);

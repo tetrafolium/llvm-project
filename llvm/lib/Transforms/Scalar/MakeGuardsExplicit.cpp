@@ -46,53 +46,54 @@ using namespace llvm;
 
 namespace {
 struct MakeGuardsExplicitLegacyPass : public FunctionPass {
-    static char ID;
-    MakeGuardsExplicitLegacyPass() : FunctionPass(ID) {
-        initializeMakeGuardsExplicitLegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  MakeGuardsExplicitLegacyPass() : FunctionPass(ID) {
+    initializeMakeGuardsExplicitLegacyPassPass(
+        *PassRegistry::getPassRegistry());
+  }
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 };
-}
+} // namespace
 
 static void turnToExplicitForm(CallInst *Guard, Function *DeoptIntrinsic) {
-    // Replace the guard with an explicit branch (just like in GuardWidening).
-    BasicBlock *OriginalBB = Guard->getParent();
-    (void)OriginalBB;
-    makeGuardControlFlowExplicit(DeoptIntrinsic, Guard, true);
-    assert(isWidenableBranch(OriginalBB->getTerminator()) && "should hold");
+  // Replace the guard with an explicit branch (just like in GuardWidening).
+  BasicBlock *OriginalBB = Guard->getParent();
+  (void)OriginalBB;
+  makeGuardControlFlowExplicit(DeoptIntrinsic, Guard, true);
+  assert(isWidenableBranch(OriginalBB->getTerminator()) && "should hold");
 
-    Guard->eraseFromParent();
+  Guard->eraseFromParent();
 }
 
 static bool explicifyGuards(Function &F) {
-    // Check if we can cheaply rule out the possibility of not having any work to
-    // do.
-    auto *GuardDecl = F.getParent()->getFunction(
-                          Intrinsic::getName(Intrinsic::experimental_guard));
-    if (!GuardDecl || GuardDecl->use_empty())
-        return false;
+  // Check if we can cheaply rule out the possibility of not having any work to
+  // do.
+  auto *GuardDecl = F.getParent()->getFunction(
+      Intrinsic::getName(Intrinsic::experimental_guard));
+  if (!GuardDecl || GuardDecl->use_empty())
+    return false;
 
-    SmallVector<CallInst *, 8> GuardIntrinsics;
-    for (auto &I : instructions(F))
-        if (isGuard(&I))
-            GuardIntrinsics.push_back(cast<CallInst>(&I));
+  SmallVector<CallInst *, 8> GuardIntrinsics;
+  for (auto &I : instructions(F))
+    if (isGuard(&I))
+      GuardIntrinsics.push_back(cast<CallInst>(&I));
 
-    if (GuardIntrinsics.empty())
-        return false;
+  if (GuardIntrinsics.empty())
+    return false;
 
-    auto *DeoptIntrinsic = Intrinsic::getDeclaration(
-                               F.getParent(), Intrinsic::experimental_deoptimize, {F.getReturnType()});
-    DeoptIntrinsic->setCallingConv(GuardDecl->getCallingConv());
+  auto *DeoptIntrinsic = Intrinsic::getDeclaration(
+      F.getParent(), Intrinsic::experimental_deoptimize, {F.getReturnType()});
+  DeoptIntrinsic->setCallingConv(GuardDecl->getCallingConv());
 
-    for (auto *Guard : GuardIntrinsics)
-        turnToExplicitForm(Guard, DeoptIntrinsic);
+  for (auto *Guard : GuardIntrinsics)
+    turnToExplicitForm(Guard, DeoptIntrinsic);
 
-    return true;
+  return true;
 }
 
 bool MakeGuardsExplicitLegacyPass::runOnFunction(Function &F) {
-    return explicifyGuards(F);
+  return explicifyGuards(F);
 }
 
 char MakeGuardsExplicitLegacyPass::ID = 0;
@@ -101,8 +102,8 @@ INITIALIZE_PASS(MakeGuardsExplicitLegacyPass, "make-guards-explicit",
                 false, false)
 
 PreservedAnalyses MakeGuardsExplicitPass::run(Function &F,
-        FunctionAnalysisManager &) {
-    if (explicifyGuards(F))
-        return PreservedAnalyses::none();
-    return PreservedAnalyses::all();
+                                              FunctionAnalysisManager &) {
+  if (explicifyGuards(F))
+    return PreservedAnalyses::none();
+  return PreservedAnalyses::all();
 }

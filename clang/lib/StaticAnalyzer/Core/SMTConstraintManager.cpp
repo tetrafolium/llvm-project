@@ -14,5 +14,5 @@ using namespace ento;
 
 std::unique_ptr<ConstraintManager>
 ento::CreateZ3ConstraintManager(ProgramStateManager &StMgr, ExprEngine *Eng) {
-    return std::make_unique<SMTConstraintManager>(Eng, StMgr.getSValBuilder());
+  return std::make_unique<SMTConstraintManager>(Eng, StMgr.getSValBuilder());
 }

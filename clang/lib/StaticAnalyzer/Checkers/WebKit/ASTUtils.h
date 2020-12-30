@@ -67,16 +67,16 @@ bool isASafeCallArg(const clang::Expr *E);
 
 /// \returns name of AST node or empty string.
 template <typename T> std::string safeGetName(const T *ASTNode) {
-    const auto *const ND = llvm::dyn_cast_or_null<clang::NamedDecl>(ASTNode);
-    if (!ND)
-        return "";
+  const auto *const ND = llvm::dyn_cast_or_null<clang::NamedDecl>(ASTNode);
+  if (!ND)
+    return "";
 
-    // In case F is for example "operator|" the getName() method below would
-    // assert.
-    if (!ND->getDeclName().isIdentifier())
-        return "";
+  // In case F is for example "operator|" the getName() method below would
+  // assert.
+  if (!ND->getDeclName().isIdentifier())
+    return "";
 
-    return ND->getName().str();
+  return ND->getName().str();
 }
 
 } // namespace clang

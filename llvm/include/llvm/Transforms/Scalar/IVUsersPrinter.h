@@ -17,13 +17,13 @@ namespace llvm {
 
 /// Printer pass for the \c IVUsers for a loop.
 class IVUsersPrinterPass : public PassInfoMixin<IVUsersPrinterPass> {
-    raw_ostream &OS;
+  raw_ostream &OS;
 
 public:
-    explicit IVUsersPrinterPass(raw_ostream &OS) : OS(OS) {}
-    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
+  explicit IVUsersPrinterPass(raw_ostream &OS) : OS(OS) {}
+  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
-}
+} // namespace llvm
 
 #endif

@@ -1,9 +1,9 @@
 #include <clc/clc.h>
 
-#define _CLC_DEFINE_ISEQUAL(RET_TYPE, FUNCTION, ARG1_TYPE, ARG2_TYPE) \
-_CLC_DEF _CLC_OVERLOAD RET_TYPE FUNCTION(ARG1_TYPE x, ARG2_TYPE y) { \
-  return (x == y); \
-} \
+#define _CLC_DEFINE_ISEQUAL(RET_TYPE, FUNCTION, ARG1_TYPE, ARG2_TYPE)          \
+  _CLC_DEF _CLC_OVERLOAD RET_TYPE FUNCTION(ARG1_TYPE x, ARG2_TYPE y) {         \
+    return (x == y);                                                           \
+  }
 
 _CLC_DEFINE_ISEQUAL(int, isequal, float, float)
 _CLC_DEFINE_ISEQUAL(int2, isequal, float2, float2)

@@ -27,98 +27,90 @@ class raw_ostream;
 /// compute the post-dominator tree.
 class PostDominatorTree : public PostDomTreeBase<BasicBlock> {
 public:
-    using Base = PostDomTreeBase<BasicBlock>;
+  using Base = PostDomTreeBase<BasicBlock>;
 
-    PostDominatorTree() = default;
-    explicit PostDominatorTree(Function &F) {
-        recalculate(F);
-    }
-    /// Handle invalidation explicitly.
-    bool invalidate(Function &F, const PreservedAnalyses &PA,
-                    FunctionAnalysisManager::Invalidator &);
+  PostDominatorTree() = default;
+  explicit PostDominatorTree(Function &F) { recalculate(F); }
+  /// Handle invalidation explicitly.
+  bool invalidate(Function &F, const PreservedAnalyses &PA,
+                  FunctionAnalysisManager::Invalidator &);
 
-    // Ensure base-class overloads are visible.
-    using Base::dominates;
+  // Ensure base-class overloads are visible.
+  using Base::dominates;
 
-    /// Return true if \p I1 dominates \p I2. This checks if \p I2 comes before
-    /// \p I1 if they belongs to the same basic block.
-    bool dominates(const Instruction *I1, const Instruction *I2) const;
+  /// Return true if \p I1 dominates \p I2. This checks if \p I2 comes before
+  /// \p I1 if they belongs to the same basic block.
+  bool dominates(const Instruction *I1, const Instruction *I2) const;
 };
 
 /// Analysis pass which computes a \c PostDominatorTree.
 class PostDominatorTreeAnalysis
     : public AnalysisInfoMixin<PostDominatorTreeAnalysis> {
-    friend AnalysisInfoMixin<PostDominatorTreeAnalysis>;
+  friend AnalysisInfoMixin<PostDominatorTreeAnalysis>;
 
-    static AnalysisKey Key;
+  static AnalysisKey Key;
 
 public:
-    /// Provide the result type for this analysis pass.
-    using Result = PostDominatorTree;
+  /// Provide the result type for this analysis pass.
+  using Result = PostDominatorTree;
 
-    /// Run the analysis pass over a function and produce a post dominator
-    ///        tree.
-    PostDominatorTree run(Function &F, FunctionAnalysisManager &);
+  /// Run the analysis pass over a function and produce a post dominator
+  ///        tree.
+  PostDominatorTree run(Function &F, FunctionAnalysisManager &);
 };
 
 /// Printer pass for the \c PostDominatorTree.
 class PostDominatorTreePrinterPass
     : public PassInfoMixin<PostDominatorTreePrinterPass> {
-    raw_ostream &OS;
+  raw_ostream &OS;
 
 public:
-    explicit PostDominatorTreePrinterPass(raw_ostream &OS);
+  explicit PostDominatorTreePrinterPass(raw_ostream &OS);
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 struct PostDominatorTreeWrapperPass : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
+  static char ID; // Pass identification, replacement for typeid
 
-    PostDominatorTree DT;
+  PostDominatorTree DT;
 
-    PostDominatorTreeWrapperPass();
+  PostDominatorTreeWrapperPass();
 
-    PostDominatorTree &getPostDomTree() {
-        return DT;
-    }
-    const PostDominatorTree &getPostDomTree() const {
-        return DT;
-    }
+  PostDominatorTree &getPostDomTree() { return DT; }
+  const PostDominatorTree &getPostDomTree() const { return DT; }
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 
-    void verifyAnalysis() const override;
+  void verifyAnalysis() const override;
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+  }
 
-    void releaseMemory() override {
-        DT.reset();
-    }
+  void releaseMemory() override { DT.reset(); }
 
-    void print(raw_ostream &OS, const Module*) const override;
+  void print(raw_ostream &OS, const Module *) const override;
 };
 
-FunctionPass* createPostDomTree();
+FunctionPass *createPostDomTree();
 
-template <> struct GraphTraits<PostDominatorTree*>
-    : public GraphTraits<DomTreeNode*> {
-    static NodeRef getEntryNode(PostDominatorTree *DT) {
-        return DT->getRootNode();
-    }
+template <>
+struct GraphTraits<PostDominatorTree *> : public GraphTraits<DomTreeNode *> {
+  static NodeRef getEntryNode(PostDominatorTree *DT) {
+    return DT->getRootNode();
+  }
 
-    static nodes_iterator nodes_begin(PostDominatorTree *N) {
-        if (getEntryNode(N))
-            return df_begin(getEntryNode(N));
-        else
-            return df_end(getEntryNode(N));
-    }
+  static nodes_iterator nodes_begin(PostDominatorTree *N) {
+    if (getEntryNode(N))
+      return df_begin(getEntryNode(N));
+    else
+      return df_end(getEntryNode(N));
+  }
 
-    static nodes_iterator nodes_end(PostDominatorTree *N) {
-        return df_end(getEntryNode(N));
-    }
+  static nodes_iterator nodes_end(PostDominatorTree *N) {
+    return df_end(getEntryNode(N));
+  }
 };
 
 } // end namespace llvm

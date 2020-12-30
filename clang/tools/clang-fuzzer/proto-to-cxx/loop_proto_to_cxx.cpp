@@ -30,12 +30,8 @@ namespace clang_fuzzer {
 static bool inner_loop = false;
 class InnerLoop {
 public:
-    InnerLoop() {
-        inner_loop = true;
-    }
-    ~InnerLoop() {
-        inner_loop = false;
-    }
+  InnerLoop() { inner_loop = true; }
+  ~InnerLoop() { inner_loop = false; }
 };
 
 // Forward decls.
@@ -44,116 +40,116 @@ std::ostream &operator<<(std::ostream &os, const StatementSeq &x);
 
 // Proto to C++.
 std::ostream &operator<<(std::ostream &os, const Const &x) {
-    return os << "(" << x.val() << ")";
+  return os << "(" << x.val() << ")";
 }
 std::ostream &operator<<(std::ostream &os, const VarRef &x) {
-    std::string which_loop = inner_loop ? "j" : "i";
-    switch (x.arr()) {
-    case VarRef::ARR_A:
-        return os << "a[" << which_loop << "]";
-    case VarRef::ARR_B:
-        return os << "b[" << which_loop << "]";
-    case VarRef::ARR_C:
-        return os << "c[" << which_loop << "]";
-    }
+  std::string which_loop = inner_loop ? "j" : "i";
+  switch (x.arr()) {
+  case VarRef::ARR_A:
+    return os << "a[" << which_loop << "]";
+  case VarRef::ARR_B:
+    return os << "b[" << which_loop << "]";
+  case VarRef::ARR_C:
+    return os << "c[" << which_loop << "]";
+  }
 }
 std::ostream &operator<<(std::ostream &os, const Rvalue &x) {
-    if (x.has_cons())
-        return os << x.cons();
-    if (x.has_binop())
-        return os << x.binop();
-    if (x.has_varref())
-        return os << x.varref();
-    return os << "1";
+  if (x.has_cons())
+    return os << x.cons();
+  if (x.has_binop())
+    return os << x.binop();
+  if (x.has_varref())
+    return os << x.varref();
+  return os << "1";
 }
 std::ostream &operator<<(std::ostream &os, const BinaryOp &x) {
-    os << "(" << x.left();
-    switch (x.op()) {
-    case BinaryOp::PLUS:
-        os << "+";
-        break;
-    case BinaryOp::MINUS:
-        os << "-";
-        break;
-    case BinaryOp::MUL:
-        os << "*";
-        break;
-    case BinaryOp::XOR:
-        os << "^";
-        break;
-    case BinaryOp::AND:
-        os << "&";
-        break;
-    case BinaryOp::OR:
-        os << "|";
-        break;
-    case BinaryOp::EQ:
-        os << "==";
-        break;
-    case BinaryOp::NE:
-        os << "!=";
-        break;
-    case BinaryOp::LE:
-        os << "<=";
-        break;
-    case BinaryOp::GE:
-        os << ">=";
-        break;
-    case BinaryOp::LT:
-        os << "<";
-        break;
-    case BinaryOp::GT:
-        os << ">";
-        break;
-    }
-    return os << x.right() << ")";
+  os << "(" << x.left();
+  switch (x.op()) {
+  case BinaryOp::PLUS:
+    os << "+";
+    break;
+  case BinaryOp::MINUS:
+    os << "-";
+    break;
+  case BinaryOp::MUL:
+    os << "*";
+    break;
+  case BinaryOp::XOR:
+    os << "^";
+    break;
+  case BinaryOp::AND:
+    os << "&";
+    break;
+  case BinaryOp::OR:
+    os << "|";
+    break;
+  case BinaryOp::EQ:
+    os << "==";
+    break;
+  case BinaryOp::NE:
+    os << "!=";
+    break;
+  case BinaryOp::LE:
+    os << "<=";
+    break;
+  case BinaryOp::GE:
+    os << ">=";
+    break;
+  case BinaryOp::LT:
+    os << "<";
+    break;
+  case BinaryOp::GT:
+    os << ">";
+    break;
+  }
+  return os << x.right() << ")";
 }
 std::ostream &operator<<(std::ostream &os, const AssignmentStatement &x) {
-    return os << x.varref() << "=" << x.rvalue() << ";\n";
+  return os << x.varref() << "=" << x.rvalue() << ";\n";
 }
 std::ostream &operator<<(std::ostream &os, const Statement &x) {
-    return os << x.assignment();
+  return os << x.assignment();
 }
 std::ostream &operator<<(std::ostream &os, const StatementSeq &x) {
-    for (auto &st : x.statements())
-        os << st;
-    return os;
+  for (auto &st : x.statements())
+    os << st;
+  return os;
 }
 void NestedLoopToString(std::ostream &os, const LoopFunction &x) {
-    os << "void foo(int *a, int *b, int *__restrict__ c, size_t s) {\n"
-       << "for (int i=0; i<s; i++){\n"
-       << "for (int j=0; j<s; j++){\n";
-    {
-        InnerLoop IL;
-        os << x.inner_statements() << "}\n";
-    }
-    os << x.outer_statements() << "}\n}\n";
+  os << "void foo(int *a, int *b, int *__restrict__ c, size_t s) {\n"
+     << "for (int i=0; i<s; i++){\n"
+     << "for (int j=0; j<s; j++){\n";
+  {
+    InnerLoop IL;
+    os << x.inner_statements() << "}\n";
+  }
+  os << x.outer_statements() << "}\n}\n";
 }
 void SingleLoopToString(std::ostream &os, const LoopFunction &x) {
-    os << "void foo(int *a, int *b, int *__restrict__ c, size_t s) {\n"
-       << "for (int i=0; i<s; i++){\n"
-       << x.outer_statements() << "}\n}\n";
+  os << "void foo(int *a, int *b, int *__restrict__ c, size_t s) {\n"
+     << "for (int i=0; i<s; i++){\n"
+     << x.outer_statements() << "}\n}\n";
 }
 std::ostream &operator<<(std::ostream &os, const LoopFunction &x) {
-    if (x.has_inner_statements())
-        NestedLoopToString(os, x);
-    else
-        SingleLoopToString(os, x);
-    return os;
+  if (x.has_inner_statements())
+    NestedLoopToString(os, x);
+  else
+    SingleLoopToString(os, x);
+  return os;
 }
 
 // ---------------------------------
 
 std::string LoopFunctionToString(const LoopFunction &input) {
-    std::ostringstream os;
-    os << input;
-    return os.str();
+  std::ostringstream os;
+  os << input;
+  return os.str();
 }
 std::string LoopProtoToCxx(const uint8_t *data, size_t size) {
-    LoopFunction message;
-    if (!message.ParsePartialFromArray(data, size))
-        return "#error invalid proto\n";
-    return LoopFunctionToString(message);
+  LoopFunction message;
+  if (!message.ParsePartialFromArray(data, size))
+    return "#error invalid proto\n";
+  return LoopFunctionToString(message);
 }
 
 } // namespace clang_fuzzer

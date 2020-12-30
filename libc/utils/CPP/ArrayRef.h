@@ -23,90 +23,70 @@ namespace cpp {
 
 template <typename T> class ArrayRef {
 public:
-    using iterator = const T *;
+  using iterator = const T *;
 
 private:
-    const T *Data = nullptr;
-    size_t Length = 0;
+  const T *Data = nullptr;
+  size_t Length = 0;
 
 public:
-    ArrayRef() = default;
+  ArrayRef() = default;
 
-    // From Array.
-    template <size_t N>
-    ArrayRef(const Array<T, N> &Arr) : Data(Arr.Data), Length(N) {}
+  // From Array.
+  template <size_t N>
+  ArrayRef(const Array<T, N> &Arr) : Data(Arr.Data), Length(N) {}
 
-    // Construct an ArrayRef from a single element.
-    explicit ArrayRef(const T &OneElt) : Data(&OneElt), Length(1) {}
+  // Construct an ArrayRef from a single element.
+  explicit ArrayRef(const T &OneElt) : Data(&OneElt), Length(1) {}
 
-    // Construct an ArrayRef from a pointer and length.
-    ArrayRef(const T *data, size_t length) : Data(data), Length(length) {}
+  // Construct an ArrayRef from a pointer and length.
+  ArrayRef(const T *data, size_t length) : Data(data), Length(length) {}
 
-    // Construct an ArrayRef from a range.
-    ArrayRef(const T *begin, const T *end) : Data(begin), Length(end - begin) {}
+  // Construct an ArrayRef from a range.
+  ArrayRef(const T *begin, const T *end) : Data(begin), Length(end - begin) {}
 
-    // Construct an ArrayRef from a C array.
-    template <size_t N>
-    constexpr ArrayRef(const T (&Arr)[N]) : Data(Arr), Length(N) {}
+  // Construct an ArrayRef from a C array.
+  template <size_t N>
+  constexpr ArrayRef(const T (&Arr)[N]) : Data(Arr), Length(N) {}
 
-    iterator begin() const {
-        return Data;
-    }
-    iterator end() const {
-        return Data + Length;
-    }
+  iterator begin() const { return Data; }
+  iterator end() const { return Data + Length; }
 
-    bool empty() const {
-        return Length == 0;
-    }
+  bool empty() const { return Length == 0; }
 
-    const T *data() const {
-        return Data;
-    }
+  const T *data() const { return Data; }
 
-    size_t size() const {
-        return Length;
-    }
+  size_t size() const { return Length; }
 
-    const T &operator[](size_t Index) const {
-        return Data[Index];
-    }
+  const T &operator[](size_t Index) const { return Data[Index]; }
 };
 
 template <typename T> class MutableArrayRef : public ArrayRef<T> {
 public:
-    using iterator = T *;
+  using iterator = T *;
 
-    // From Array.
-    template <size_t N> MutableArrayRef(Array<T, N> &Arr) : ArrayRef<T>(Arr) {}
+  // From Array.
+  template <size_t N> MutableArrayRef(Array<T, N> &Arr) : ArrayRef<T>(Arr) {}
 
-    // Construct from a single element.
-    explicit MutableArrayRef(T &OneElt) : ArrayRef<T>(OneElt) {}
+  // Construct from a single element.
+  explicit MutableArrayRef(T &OneElt) : ArrayRef<T>(OneElt) {}
 
-    // Construct from a pointer and length.
-    MutableArrayRef(T *data, size_t length) : ArrayRef<T>(data, length) {}
+  // Construct from a pointer and length.
+  MutableArrayRef(T *data, size_t length) : ArrayRef<T>(data, length) {}
 
-    // Construct from a range.
-    MutableArrayRef(T *begin, T *end) : ArrayRef<T>(begin, end) {}
+  // Construct from a range.
+  MutableArrayRef(T *begin, T *end) : ArrayRef<T>(begin, end) {}
 
-    // Construct from a C array.
-    template <size_t N>
-    constexpr MutableArrayRef(T (&Arr)[N]) : ArrayRef<T>(Arr) {}
+  // Construct from a C array.
+  template <size_t N>
+  constexpr MutableArrayRef(T (&Arr)[N]) : ArrayRef<T>(Arr) {}
 
-    T *data() const {
-        return const_cast<T *>(ArrayRef<T>::data());
-    }
+  T *data() const { return const_cast<T *>(ArrayRef<T>::data()); }
 
-    iterator begin() const {
-        return data();
-    }
-    iterator end() const {
-        return data() + this->size();
-    }
+  iterator begin() const { return data(); }
+  iterator end() const { return data() + this->size(); }
 
-    T &operator[](size_t Index) const {
-        return data()[Index];
-    }
+  T &operator[](size_t Index) const { return data()[Index]; }
 };
 
 } // namespace cpp

@@ -25,36 +25,36 @@ using namespace llvm;
 
 namespace {
 void nameInstructions(Function &F) {
-    for (auto &Arg : F.args()) {
-        if (!Arg.hasName())
-            Arg.setName("arg");
-    }
+  for (auto &Arg : F.args()) {
+    if (!Arg.hasName())
+      Arg.setName("arg");
+  }
 
-    for (BasicBlock &BB : F) {
-        if (!BB.hasName())
-            BB.setName("bb");
+  for (BasicBlock &BB : F) {
+    if (!BB.hasName())
+      BB.setName("bb");
 
-        for (Instruction &I : BB) {
-            if (!I.hasName() && !I.getType()->isVoidTy())
-                I.setName("i");
-        }
+    for (Instruction &I : BB) {
+      if (!I.hasName() && !I.getType()->isVoidTy())
+        I.setName("i");
     }
+  }
 }
 
 struct InstNamer : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    InstNamer() : FunctionPass(ID) {
-        initializeInstNamerPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  InstNamer() : FunctionPass(ID) {
+    initializeInstNamerPass(*PassRegistry::getPassRegistry());
+  }
 
-    void getAnalysisUsage(AnalysisUsage &Info) const override {
-        Info.setPreservesAll();
-    }
+  void getAnalysisUsage(AnalysisUsage &Info) const override {
+    Info.setPreservesAll();
+  }
 
-    bool runOnFunction(Function &F) override {
-        nameInstructions(F);
-        return true;
-    }
+  bool runOnFunction(Function &F) override {
+    nameInstructions(F);
+    return true;
+  }
 };
 
 char InstNamer::ID = 0;
@@ -67,12 +67,10 @@ char &llvm::InstructionNamerID = InstNamer::ID;
 //
 // InstructionNamer - Give any unnamed non-void instructions "tmp" names.
 //
-FunctionPass *llvm::createInstructionNamerPass() {
-    return new InstNamer();
-}
+FunctionPass *llvm::createInstructionNamerPass() { return new InstNamer(); }
 
 PreservedAnalyses InstructionNamerPass::run(Function &F,
-        FunctionAnalysisManager &FAM) {
-    nameInstructions(F);
-    return PreservedAnalyses::all();
+                                            FunctionAnalysisManager &FAM) {
+  nameInstructions(F);
+  return PreservedAnalyses::all();
 }

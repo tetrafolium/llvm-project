@@ -27,54 +27,54 @@ using namespace llvm;
 STATISTIC(NumDeadPrototypes, "Number of dead prototypes removed");
 
 static bool stripDeadPrototypes(Module &M) {
-    bool MadeChange = false;
+  bool MadeChange = false;
 
-    // Erase dead function prototypes.
-    for (Module::iterator I = M.begin(), E = M.end(); I != E; ) {
-        Function *F = &*I++;
-        // Function must be a prototype and unused.
-        if (F->isDeclaration() && F->use_empty()) {
-            F->eraseFromParent();
-            ++NumDeadPrototypes;
-            MadeChange = true;
-        }
+  // Erase dead function prototypes.
+  for (Module::iterator I = M.begin(), E = M.end(); I != E;) {
+    Function *F = &*I++;
+    // Function must be a prototype and unused.
+    if (F->isDeclaration() && F->use_empty()) {
+      F->eraseFromParent();
+      ++NumDeadPrototypes;
+      MadeChange = true;
     }
+  }
 
-    // Erase dead global var prototypes.
-    for (Module::global_iterator I = M.global_begin(), E = M.global_end();
-            I != E; ) {
-        GlobalVariable *GV = &*I++;
-        // Global must be a prototype and unused.
-        if (GV->isDeclaration() && GV->use_empty())
-            GV->eraseFromParent();
-    }
+  // Erase dead global var prototypes.
+  for (Module::global_iterator I = M.global_begin(), E = M.global_end();
+       I != E;) {
+    GlobalVariable *GV = &*I++;
+    // Global must be a prototype and unused.
+    if (GV->isDeclaration() && GV->use_empty())
+      GV->eraseFromParent();
+  }
 
-    // Return an indication of whether we changed anything or not.
-    return MadeChange;
+  // Return an indication of whether we changed anything or not.
+  return MadeChange;
 }
 
 PreservedAnalyses StripDeadPrototypesPass::run(Module &M,
-        ModuleAnalysisManager &) {
-    if (stripDeadPrototypes(M))
-        return PreservedAnalyses::none();
-    return PreservedAnalyses::all();
+                                               ModuleAnalysisManager &) {
+  if (stripDeadPrototypes(M))
+    return PreservedAnalyses::none();
+  return PreservedAnalyses::all();
 }
 
 namespace {
 
 class StripDeadPrototypesLegacyPass : public ModulePass {
 public:
-    static char ID; // Pass identification, replacement for typeid
-    StripDeadPrototypesLegacyPass() : ModulePass(ID) {
-        initializeStripDeadPrototypesLegacyPassPass(
-            *PassRegistry::getPassRegistry());
-    }
-    bool runOnModule(Module &M) override {
-        if (skipModule(M))
-            return false;
+  static char ID; // Pass identification, replacement for typeid
+  StripDeadPrototypesLegacyPass() : ModulePass(ID) {
+    initializeStripDeadPrototypesLegacyPassPass(
+        *PassRegistry::getPassRegistry());
+  }
+  bool runOnModule(Module &M) override {
+    if (skipModule(M))
+      return false;
 
-        return stripDeadPrototypes(M);
-    }
+    return stripDeadPrototypes(M);
+  }
 };
 
 } // end anonymous namespace
@@ -84,5 +84,5 @@ INITIALIZE_PASS(StripDeadPrototypesLegacyPass, "strip-dead-prototypes",
                 "Strip Unused Function Prototypes", false, false)
 
 ModulePass *llvm::createStripDeadPrototypesPass() {
-    return new StripDeadPrototypesLegacyPass();
+  return new StripDeadPrototypesLegacyPass();
 }

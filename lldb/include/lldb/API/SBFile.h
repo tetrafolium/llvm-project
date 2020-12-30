@@ -14,35 +14,35 @@
 namespace lldb {
 
 class LLDB_API SBFile {
-    friend class SBInstruction;
-    friend class SBInstructionList;
-    friend class SBDebugger;
-    friend class SBCommandReturnObject;
-    friend class SBProcess;
+  friend class SBInstruction;
+  friend class SBInstructionList;
+  friend class SBDebugger;
+  friend class SBCommandReturnObject;
+  friend class SBProcess;
 
 public:
-    SBFile();
-    SBFile(FileSP file_sp);
-    SBFile(const SBFile &rhs);
-    SBFile(FILE *file, bool transfer_ownership);
-    SBFile(int fd, const char *mode, bool transfer_ownership);
-    ~SBFile();
+  SBFile();
+  SBFile(FileSP file_sp);
+  SBFile(const SBFile &rhs);
+  SBFile(FILE *file, bool transfer_ownership);
+  SBFile(int fd, const char *mode, bool transfer_ownership);
+  ~SBFile();
 
-    SBFile &operator=(const SBFile &rhs);
+  SBFile &operator=(const SBFile &rhs);
 
-    SBError Read(uint8_t *buf, size_t num_bytes, size_t *bytes_read);
-    SBError Write(const uint8_t *buf, size_t num_bytes, size_t *bytes_written);
-    SBError Flush();
-    bool IsValid() const;
-    SBError Close();
+  SBError Read(uint8_t *buf, size_t num_bytes, size_t *bytes_read);
+  SBError Write(const uint8_t *buf, size_t num_bytes, size_t *bytes_written);
+  SBError Flush();
+  bool IsValid() const;
+  SBError Close();
 
-    operator bool() const;
-    bool operator!() const;
+  operator bool() const;
+  bool operator!() const;
 
-    FileSP GetFile() const;
+  FileSP GetFile() const;
 
 private:
-    FileSP m_opaque_sp;
+  FileSP m_opaque_sp;
 };
 
 } // namespace lldb

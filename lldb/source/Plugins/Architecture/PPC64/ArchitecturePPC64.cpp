@@ -23,51 +23,47 @@ using namespace lldb;
 LLDB_PLUGIN_DEFINE(ArchitecturePPC64)
 
 ConstString ArchitecturePPC64::GetPluginNameStatic() {
-    return ConstString("ppc64");
+  return ConstString("ppc64");
 }
 
 void ArchitecturePPC64::Initialize() {
-    PluginManager::RegisterPlugin(GetPluginNameStatic(),
-                                  "PPC64-specific algorithms",
-                                  &ArchitecturePPC64::Create);
+  PluginManager::RegisterPlugin(GetPluginNameStatic(),
+                                "PPC64-specific algorithms",
+                                &ArchitecturePPC64::Create);
 }
 
 void ArchitecturePPC64::Terminate() {
-    PluginManager::UnregisterPlugin(&ArchitecturePPC64::Create);
+  PluginManager::UnregisterPlugin(&ArchitecturePPC64::Create);
 }
 
 std::unique_ptr<Architecture> ArchitecturePPC64::Create(const ArchSpec &arch) {
-    if (arch.GetTriple().isPPC64() &&
-            arch.GetTriple().getObjectFormat() == llvm::Triple::ObjectFormatType::ELF)
-        return std::unique_ptr<Architecture>(new ArchitecturePPC64());
-    return nullptr;
+  if (arch.GetTriple().isPPC64() &&
+      arch.GetTriple().getObjectFormat() == llvm::Triple::ObjectFormatType::ELF)
+    return std::unique_ptr<Architecture>(new ArchitecturePPC64());
+  return nullptr;
 }
 
-ConstString ArchitecturePPC64::GetPluginName() {
-    return GetPluginNameStatic();
-}
-uint32_t ArchitecturePPC64::GetPluginVersion() {
-    return 1;
-}
+ConstString ArchitecturePPC64::GetPluginName() { return GetPluginNameStatic(); }
+uint32_t ArchitecturePPC64::GetPluginVersion() { return 1; }
 
 static int32_t GetLocalEntryOffset(const Symbol &sym) {
-    unsigned char other = sym.GetFlags() >> 8 & 0xFF;
-    return llvm::ELF::decodePPC64LocalEntryOffset(other);
+  unsigned char other = sym.GetFlags() >> 8 & 0xFF;
+  return llvm::ELF::decodePPC64LocalEntryOffset(other);
 }
 
 size_t ArchitecturePPC64::GetBytesToSkip(Symbol &func,
-        const Address &curr_addr) const {
-    if (curr_addr.GetFileAddress() ==
-            func.GetFileAddress() + GetLocalEntryOffset(func))
-        return func.GetPrologueByteSize();
-    return 0;
+                                         const Address &curr_addr) const {
+  if (curr_addr.GetFileAddress() ==
+      func.GetFileAddress() + GetLocalEntryOffset(func))
+    return func.GetPrologueByteSize();
+  return 0;
 }
 
 void ArchitecturePPC64::AdjustBreakpointAddress(const Symbol &func,
-        Address &addr) const {
-    int32_t loffs = GetLocalEntryOffset(func);
-    if (!loffs)
-        return;
+                                                Address &addr) const {
+  int32_t loffs = GetLocalEntryOffset(func);
+  if (!loffs)
+    return;
 
-    addr.SetOffset(addr.GetOffset() + loffs);
+  addr.SetOffset(addr.GetOffset() + loffs);
 }

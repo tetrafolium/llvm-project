@@ -24,25 +24,22 @@ class MachineBlockFrequencyInfo;
 
 class MBFIWrapper {
 public:
-    MBFIWrapper(const MachineBlockFrequencyInfo &I) : MBFI(I) {}
+  MBFIWrapper(const MachineBlockFrequencyInfo &I) : MBFI(I) {}
 
-    BlockFrequency getBlockFreq(const MachineBasicBlock *MBB) const;
-    void setBlockFreq(const MachineBasicBlock *MBB, BlockFrequency F);
-    Optional<uint64_t> getBlockProfileCount(const MachineBasicBlock *MBB) const;
+  BlockFrequency getBlockFreq(const MachineBasicBlock *MBB) const;
+  void setBlockFreq(const MachineBasicBlock *MBB, BlockFrequency F);
+  Optional<uint64_t> getBlockProfileCount(const MachineBasicBlock *MBB) const;
 
-    raw_ostream &printBlockFreq(raw_ostream &OS,
-                                const MachineBasicBlock *MBB) const;
-    raw_ostream &printBlockFreq(raw_ostream &OS,
-                                const BlockFrequency Freq) const;
-    void view(const Twine &Name, bool isSimple = true);
-    uint64_t getEntryFreq() const;
-    const MachineBlockFrequencyInfo &getMBFI() {
-        return MBFI;
-    }
+  raw_ostream &printBlockFreq(raw_ostream &OS,
+                              const MachineBasicBlock *MBB) const;
+  raw_ostream &printBlockFreq(raw_ostream &OS, const BlockFrequency Freq) const;
+  void view(const Twine &Name, bool isSimple = true);
+  uint64_t getEntryFreq() const;
+  const MachineBlockFrequencyInfo &getMBFI() { return MBFI; }
 
 private:
-    const MachineBlockFrequencyInfo &MBFI;
-    DenseMap<const MachineBasicBlock *, BlockFrequency> MergedBBFreq;
+  const MachineBlockFrequencyInfo &MBFI;
+  DenseMap<const MachineBasicBlock *, BlockFrequency> MergedBBFreq;
 };
 
 } // end namespace llvm

@@ -30,10 +30,10 @@ class Type;
 /// textual references to the values in the module can be parsed outside of the
 /// module's source.
 struct SlotMapping {
-    std::vector<GlobalValue *> GlobalValues;
-    std::map<unsigned, TrackingMDNodeRef> MetadataNodes;
-    StringMap<Type *> NamedTypes;
-    std::map<unsigned, Type *> Types;
+  std::vector<GlobalValue *> GlobalValues;
+  std::map<unsigned, TrackingMDNodeRef> MetadataNodes;
+  StringMap<Type *> NamedTypes;
+  std::map<unsigned, Type *> Types;
 };
 
 } // end namespace llvm

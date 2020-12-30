@@ -32,31 +32,31 @@ class Stream;
 
 class AddressResolver : public Searcher {
 public:
-    enum MatchType { Exact, Regexp, Glob };
+  enum MatchType { Exact, Regexp, Glob };
 
-    AddressResolver();
+  AddressResolver();
 
-    ~AddressResolver() override;
+  ~AddressResolver() override;
 
-    virtual void ResolveAddress(SearchFilter &filter);
+  virtual void ResolveAddress(SearchFilter &filter);
 
-    virtual void ResolveAddressInModules(SearchFilter &filter,
-                                         ModuleList &modules);
+  virtual void ResolveAddressInModules(SearchFilter &filter,
+                                       ModuleList &modules);
 
-    void GetDescription(Stream *s) override = 0;
+  void GetDescription(Stream *s) override = 0;
 
-    std::vector<AddressRange> &GetAddressRanges();
+  std::vector<AddressRange> &GetAddressRanges();
 
-    size_t GetNumberOfAddresses();
+  size_t GetNumberOfAddresses();
 
-    AddressRange &GetAddressRangeAtIndex(size_t idx);
+  AddressRange &GetAddressRangeAtIndex(size_t idx);
 
 protected:
-    std::vector<AddressRange> m_address_ranges;
+  std::vector<AddressRange> m_address_ranges;
 
 private:
-    AddressResolver(const AddressResolver &) = delete;
-    const AddressResolver &operator=(const AddressResolver &) = delete;
+  AddressResolver(const AddressResolver &) = delete;
+  const AddressResolver &operator=(const AddressResolver &) = delete;
 };
 
 } // namespace lldb_private

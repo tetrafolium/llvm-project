@@ -25,23 +25,21 @@ namespace lldb_private {
 
 class ExpressionTypeSystemHelper {
 public:
-    enum LLVMCastKind {
-        eKindClangHelper,
-        eKindSwiftHelper,
-        eKindGoHelper,
-        kNumKinds
-    };
+  enum LLVMCastKind {
+    eKindClangHelper,
+    eKindSwiftHelper,
+    eKindGoHelper,
+    kNumKinds
+  };
 
-    LLVMCastKind getKind() const {
-        return m_kind;
-    }
+  LLVMCastKind getKind() const { return m_kind; }
 
-    ExpressionTypeSystemHelper(LLVMCastKind kind) : m_kind(kind) {}
+  ExpressionTypeSystemHelper(LLVMCastKind kind) : m_kind(kind) {}
 
-    ~ExpressionTypeSystemHelper() {}
+  ~ExpressionTypeSystemHelper() {}
 
 protected:
-    LLVMCastKind m_kind;
+  LLVMCastKind m_kind;
 };
 
 } // namespace lldb_private

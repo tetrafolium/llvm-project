@@ -1,7 +1,7 @@
 ///===- LazyMachineBlockFrequencyInfo.h - Lazy Block Frequency -*- C++ -*--===//
 ///
-/// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
-/// See https://llvm.org/LICENSE.txt for license information.
+/// Part of the LLVM Project, under the Apache License v2.0 with LLVM
+/// Exceptions. See https://llvm.org/LICENSE.txt for license information.
 /// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 ///
 ///===---------------------------------------------------------------------===//
@@ -36,42 +36,40 @@ namespace llvm {
 
 class LazyMachineBlockFrequencyInfoPass : public MachineFunctionPass {
 private:
-    /// If generated on the fly this own the instance.
-    mutable std::unique_ptr<MachineBlockFrequencyInfo> OwnedMBFI;
+  /// If generated on the fly this own the instance.
+  mutable std::unique_ptr<MachineBlockFrequencyInfo> OwnedMBFI;
 
-    /// If generated on the fly this own the instance.
-    mutable std::unique_ptr<MachineLoopInfo> OwnedMLI;
+  /// If generated on the fly this own the instance.
+  mutable std::unique_ptr<MachineLoopInfo> OwnedMLI;
 
-    /// If generated on the fly this own the instance.
-    mutable std::unique_ptr<MachineDominatorTree> OwnedMDT;
+  /// If generated on the fly this own the instance.
+  mutable std::unique_ptr<MachineDominatorTree> OwnedMDT;
 
-    /// The function.
-    MachineFunction *MF = nullptr;
+  /// The function.
+  MachineFunction *MF = nullptr;
 
-    /// Calculate MBFI and all other analyses that's not available and
-    /// required by BFI.
-    MachineBlockFrequencyInfo &calculateIfNotAvailable() const;
+  /// Calculate MBFI and all other analyses that's not available and
+  /// required by BFI.
+  MachineBlockFrequencyInfo &calculateIfNotAvailable() const;
 
 public:
-    static char ID;
+  static char ID;
 
-    LazyMachineBlockFrequencyInfoPass();
+  LazyMachineBlockFrequencyInfoPass();
 
-    /// Compute and return the block frequencies.
-    MachineBlockFrequencyInfo &getBFI() {
-        return calculateIfNotAvailable();
-    }
+  /// Compute and return the block frequencies.
+  MachineBlockFrequencyInfo &getBFI() { return calculateIfNotAvailable(); }
 
-    /// Compute and return the block frequencies.
-    const MachineBlockFrequencyInfo &getBFI() const {
-        return calculateIfNotAvailable();
-    }
+  /// Compute and return the block frequencies.
+  const MachineBlockFrequencyInfo &getBFI() const {
+    return calculateIfNotAvailable();
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    bool runOnMachineFunction(MachineFunction &F) override;
-    void releaseMemory() override;
-    void print(raw_ostream &OS, const Module *M) const override;
+  bool runOnMachineFunction(MachineFunction &F) override;
+  void releaseMemory() override;
+  void print(raw_ostream &OS, const Module *M) const override;
 };
-}
+} // namespace llvm
 #endif

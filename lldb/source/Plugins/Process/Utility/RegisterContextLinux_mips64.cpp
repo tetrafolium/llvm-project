@@ -6,7 +6,6 @@
 //
 //===---------------------------------------------------------------------===//
 
-
 #include <stddef.h>
 #include <vector>
 
@@ -54,8 +53,8 @@ const uint32_t g_gp_regnums_mips64[] = {
 };
 
 static_assert((sizeof(g_gp_regnums_mips64) / sizeof(g_gp_regnums_mips64[0])) -
-              1 ==
-              k_num_gpr_registers_mips64,
+                      1 ==
+                  k_num_gpr_registers_mips64,
               "g_gp_regnums_mips64 has wrong number of register infos");
 
 // mips64 floating point registers.
@@ -73,8 +72,8 @@ const uint32_t g_fp_regnums_mips64[] = {
 };
 
 static_assert((sizeof(g_fp_regnums_mips64) / sizeof(g_fp_regnums_mips64[0])) -
-              1 ==
-              k_num_fpr_registers_mips64,
+                      1 ==
+                  k_num_fpr_registers_mips64,
               "g_fp_regnums_mips64 has wrong number of register infos");
 
 // mips64 MSA registers.
@@ -93,8 +92,8 @@ const uint32_t g_msa_regnums_mips64[] = {
 };
 
 static_assert((sizeof(g_msa_regnums_mips64) / sizeof(g_msa_regnums_mips64[0])) -
-              1 ==
-              k_num_msa_registers_mips64,
+                      1 ==
+                  k_num_msa_registers_mips64,
               "g_msa_regnums_mips64 has wrong number of register infos");
 
 // Number of register sets provided by this context.
@@ -102,85 +101,82 @@ constexpr size_t k_num_register_sets = 3;
 
 // Register sets for mips64.
 static const RegisterSet g_reg_sets_mips64[k_num_register_sets] = {
-    {   "General Purpose Registers", "gpr", k_num_gpr_registers_mips64,
-        g_gp_regnums_mips64
-    },
-    {   "Floating Point Registers", "fpu", k_num_fpr_registers_mips64,
-        g_fp_regnums_mips64
-    },
+    {"General Purpose Registers", "gpr", k_num_gpr_registers_mips64,
+     g_gp_regnums_mips64},
+    {"Floating Point Registers", "fpu", k_num_fpr_registers_mips64,
+     g_fp_regnums_mips64},
     {"MSA Registers", "msa", k_num_msa_registers_mips64, g_msa_regnums_mips64},
 };
 
 const RegisterSet *
 RegisterContextLinux_mips64::GetRegisterSet(size_t set) const {
-    if (set >= k_num_register_sets)
-        return nullptr;
-
-    switch (m_target_arch.GetMachine()) {
-    case llvm::Triple::mips64:
-    case llvm::Triple::mips64el:
-        return &g_reg_sets_mips64[set];
-    default:
-        assert(false && "Unhandled target architecture.");
-        return nullptr;
-    }
+  if (set >= k_num_register_sets)
     return nullptr;
+
+  switch (m_target_arch.GetMachine()) {
+  case llvm::Triple::mips64:
+  case llvm::Triple::mips64el:
+    return &g_reg_sets_mips64[set];
+  default:
+    assert(false && "Unhandled target architecture.");
+    return nullptr;
+  }
+  return nullptr;
 }
 
-size_t
-RegisterContextLinux_mips64::GetRegisterSetCount() const {
-    return k_num_register_sets;
+size_t RegisterContextLinux_mips64::GetRegisterSetCount() const {
+  return k_num_register_sets;
 }
 
 static const RegisterInfo *GetRegisterInfoPtr(const ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::mips64:
-    case llvm::Triple::mips64el:
-        return g_register_infos_mips64;
-    case llvm::Triple::mips:
-    case llvm::Triple::mipsel:
-        return g_register_infos_mips;
-    default:
-        assert(false && "Unhandled target architecture.");
-        return nullptr;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::mips64:
+  case llvm::Triple::mips64el:
+    return g_register_infos_mips64;
+  case llvm::Triple::mips:
+  case llvm::Triple::mipsel:
+    return g_register_infos_mips;
+  default:
+    assert(false && "Unhandled target architecture.");
+    return nullptr;
+  }
 }
 
 static uint32_t GetRegisterInfoCount(const ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::mips64:
-    case llvm::Triple::mips64el:
-        return static_cast<uint32_t>(sizeof(g_register_infos_mips64) /
-                                     sizeof(g_register_infos_mips64[0]));
-    case llvm::Triple::mips:
-    case llvm::Triple::mipsel:
-        return static_cast<uint32_t>(sizeof(g_register_infos_mips) /
-                                     sizeof(g_register_infos_mips[0]));
-    default:
-        assert(false && "Unhandled target architecture.");
-        return 0;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::mips64:
+  case llvm::Triple::mips64el:
+    return static_cast<uint32_t>(sizeof(g_register_infos_mips64) /
+                                 sizeof(g_register_infos_mips64[0]));
+  case llvm::Triple::mips:
+  case llvm::Triple::mipsel:
+    return static_cast<uint32_t>(sizeof(g_register_infos_mips) /
+                                 sizeof(g_register_infos_mips[0]));
+  default:
+    assert(false && "Unhandled target architecture.");
+    return 0;
+  }
 }
 
 uint32_t GetUserRegisterInfoCount(const ArchSpec &target_arch,
                                   bool msa_present) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::mips:
-    case llvm::Triple::mipsel:
-        if (msa_present)
-            return static_cast<uint32_t>(k_num_user_registers_mips);
-        return static_cast<uint32_t>(k_num_user_registers_mips -
-                                     k_num_msa_registers_mips);
-    case llvm::Triple::mips64el:
-    case llvm::Triple::mips64:
-        if (msa_present)
-            return static_cast<uint32_t>(k_num_user_registers_mips64);
-        return static_cast<uint32_t>(k_num_user_registers_mips64 -
-                                     k_num_msa_registers_mips64);
-    default:
-        assert(false && "Unhandled target architecture.");
-        return 0;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::mips:
+  case llvm::Triple::mipsel:
+    if (msa_present)
+      return static_cast<uint32_t>(k_num_user_registers_mips);
+    return static_cast<uint32_t>(k_num_user_registers_mips -
+                                 k_num_msa_registers_mips);
+  case llvm::Triple::mips64el:
+  case llvm::Triple::mips64:
+    if (msa_present)
+      return static_cast<uint32_t>(k_num_user_registers_mips64);
+    return static_cast<uint32_t>(k_num_user_registers_mips64 -
+                                 k_num_msa_registers_mips64);
+  default:
+    assert(false && "Unhandled target architecture.");
+    return 0;
+  }
 }
 
 RegisterContextLinux_mips64::RegisterContextLinux_mips64(
@@ -192,18 +188,17 @@ RegisterContextLinux_mips64::RegisterContextLinux_mips64(
           GetUserRegisterInfoCount(target_arch, msa_present)) {}
 
 size_t RegisterContextLinux_mips64::GetGPRSize() const {
-    return sizeof(GPR_linux_mips);
+  return sizeof(GPR_linux_mips);
 }
 
 const RegisterInfo *RegisterContextLinux_mips64::GetRegisterInfo() const {
-    return m_register_info_p;
+  return m_register_info_p;
 }
 
 uint32_t RegisterContextLinux_mips64::GetRegisterCount() const {
-    return m_register_info_count;
+  return m_register_info_count;
 }
 
 uint32_t RegisterContextLinux_mips64::GetUserRegisterCount() const {
-    return m_user_register_count;
+  return m_user_register_count;
 }
-

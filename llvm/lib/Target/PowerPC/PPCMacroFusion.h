@@ -19,4 +19,4 @@ namespace llvm {
 ///   DAG.addMutation(createPowerPCMacroFusionDAGMutation());
 /// to PPCPassConfig::createMachineScheduler() to have an effect.
 std::unique_ptr<ScheduleDAGMutation> createPowerPCMacroFusionDAGMutation();
-} // llvm
+} // namespace llvm

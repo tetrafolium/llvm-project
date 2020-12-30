@@ -17,8 +17,8 @@ namespace py = pybind11;
 // -----------------------------------------------------------------------------
 
 PYBIND11_MODULE(_mlirTransforms, m) {
-    m.doc() = "MLIR Transforms library";
+  m.doc() = "MLIR Transforms library";
 
-    // Register all the passes in the Transforms library on load.
-    mlirRegisterTransformsPasses();
+  // Register all the passes in the Transforms library on load.
+  mlirRegisterTransformsPasses();
 }

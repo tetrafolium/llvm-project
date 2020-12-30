@@ -30,28 +30,28 @@ namespace llvm_libc {
 class Command;
 
 class Generator {
-    llvm::StringRef HeaderDefFile;
-    const std::vector<std::string> &EntrypointNameList;
-    llvm::StringRef StdHeader;
-    std::unordered_map<std::string, std::string> &ArgMap;
+  llvm::StringRef HeaderDefFile;
+  const std::vector<std::string> &EntrypointNameList;
+  llvm::StringRef StdHeader;
+  std::unordered_map<std::string, std::string> &ArgMap;
 
-    std::unique_ptr<Command> IncludeFileCmd;
-    std::unique_ptr<Command> PublicAPICmd;
+  std::unique_ptr<Command> IncludeFileCmd;
+  std::unique_ptr<Command> PublicAPICmd;
 
-    Command *getCommandHandler(llvm::StringRef CommandName);
+  Command *getCommandHandler(llvm::StringRef CommandName);
 
-    void parseCommandArgs(llvm::StringRef ArgStr, ArgVector &Args);
+  void parseCommandArgs(llvm::StringRef ArgStr, ArgVector &Args);
 
-    void printError(llvm::StringRef Msg);
+  void printError(llvm::StringRef Msg);
 
 public:
-    Generator(const std::string &DefFile, const std::vector<std::string> &EN,
-              const std::string &Header,
-              std::unordered_map<std::string, std::string> &Map)
-        : HeaderDefFile(DefFile), EntrypointNameList(EN), StdHeader(Header),
-          ArgMap(Map) {}
+  Generator(const std::string &DefFile, const std::vector<std::string> &EN,
+            const std::string &Header,
+            std::unordered_map<std::string, std::string> &Map)
+      : HeaderDefFile(DefFile), EntrypointNameList(EN), StdHeader(Header),
+        ArgMap(Map) {}
 
-    void generate(llvm::raw_ostream &OS, llvm::RecordKeeper &Records);
+  void generate(llvm::raw_ostream &OS, llvm::RecordKeeper &Records);
 };
 
 } // namespace llvm_libc

@@ -58,52 +58,52 @@ static Value *getBoundsCheckCond(Value *Ptr, Value *InstVal,
                                  const DataLayout &DL, TargetLibraryInfo &TLI,
                                  ObjectSizeOffsetEvaluator &ObjSizeEval,
                                  BuilderTy &IRB, ScalarEvolution &SE) {
-    uint64_t NeededSize = DL.getTypeStoreSize(InstVal->getType());
-    LLVM_DEBUG(dbgs() << "Instrument " << *Ptr << " for " << Twine(NeededSize)
-               << " bytes\n");
+  uint64_t NeededSize = DL.getTypeStoreSize(InstVal->getType());
+  LLVM_DEBUG(dbgs() << "Instrument " << *Ptr << " for " << Twine(NeededSize)
+                    << " bytes\n");
 
-    SizeOffsetEvalType SizeOffset = ObjSizeEval.compute(Ptr);
+  SizeOffsetEvalType SizeOffset = ObjSizeEval.compute(Ptr);
 
-    if (!ObjSizeEval.bothKnown(SizeOffset)) {
-        ++ChecksUnable;
-        return nullptr;
-    }
+  if (!ObjSizeEval.bothKnown(SizeOffset)) {
+    ++ChecksUnable;
+    return nullptr;
+  }
 
-    Value *Size   = SizeOffset.first;
-    Value *Offset = SizeOffset.second;
-    ConstantInt *SizeCI = dyn_cast<ConstantInt>(Size);
+  Value *Size = SizeOffset.first;
+  Value *Offset = SizeOffset.second;
+  ConstantInt *SizeCI = dyn_cast<ConstantInt>(Size);
 
-    Type *IntTy = DL.getIntPtrType(Ptr->getType());
-    Value *NeededSizeVal = ConstantInt::get(IntTy, NeededSize);
+  Type *IntTy = DL.getIntPtrType(Ptr->getType());
+  Value *NeededSizeVal = ConstantInt::get(IntTy, NeededSize);
 
-    auto SizeRange = SE.getUnsignedRange(SE.getSCEV(Size));
-    auto OffsetRange = SE.getUnsignedRange(SE.getSCEV(Offset));
-    auto NeededSizeRange = SE.getUnsignedRange(SE.getSCEV(NeededSizeVal));
+  auto SizeRange = SE.getUnsignedRange(SE.getSCEV(Size));
+  auto OffsetRange = SE.getUnsignedRange(SE.getSCEV(Offset));
+  auto NeededSizeRange = SE.getUnsignedRange(SE.getSCEV(NeededSizeVal));
 
-    // three checks are required to ensure safety:
-    // . Offset >= 0  (since the offset is given from the base ptr)
-    // . Size >= Offset  (unsigned)
-    // . Size - Offset >= NeededSize  (unsigned)
-    //
-    // optimization: if Size >= 0 (signed), skip 1st check
-    // FIXME: add NSW/NUW here?  -- we dont care if the subtraction overflows
-    Value *ObjSize = IRB.CreateSub(Size, Offset);
-    Value *Cmp2 = SizeRange.getUnsignedMin().uge(OffsetRange.getUnsignedMax())
-                  ? ConstantInt::getFalse(Ptr->getContext())
-                  : IRB.CreateICmpULT(Size, Offset);
-    Value *Cmp3 = SizeRange.sub(OffsetRange)
-                  .getUnsignedMin()
-                  .uge(NeededSizeRange.getUnsignedMax())
-                  ? ConstantInt::getFalse(Ptr->getContext())
-                  : IRB.CreateICmpULT(ObjSize, NeededSizeVal);
-    Value *Or = IRB.CreateOr(Cmp2, Cmp3);
-    if ((!SizeCI || SizeCI->getValue().slt(0)) &&
-            !SizeRange.getSignedMin().isNonNegative()) {
-        Value *Cmp1 = IRB.CreateICmpSLT(Offset, ConstantInt::get(IntTy, 0));
-        Or = IRB.CreateOr(Cmp1, Or);
-    }
+  // three checks are required to ensure safety:
+  // . Offset >= 0  (since the offset is given from the base ptr)
+  // . Size >= Offset  (unsigned)
+  // . Size - Offset >= NeededSize  (unsigned)
+  //
+  // optimization: if Size >= 0 (signed), skip 1st check
+  // FIXME: add NSW/NUW here?  -- we dont care if the subtraction overflows
+  Value *ObjSize = IRB.CreateSub(Size, Offset);
+  Value *Cmp2 = SizeRange.getUnsignedMin().uge(OffsetRange.getUnsignedMax())
+                    ? ConstantInt::getFalse(Ptr->getContext())
+                    : IRB.CreateICmpULT(Size, Offset);
+  Value *Cmp3 = SizeRange.sub(OffsetRange)
+                        .getUnsignedMin()
+                        .uge(NeededSizeRange.getUnsignedMax())
+                    ? ConstantInt::getFalse(Ptr->getContext())
+                    : IRB.CreateICmpULT(ObjSize, NeededSizeVal);
+  Value *Or = IRB.CreateOr(Cmp2, Cmp3);
+  if ((!SizeCI || SizeCI->getValue().slt(0)) &&
+      !SizeRange.getSignedMin().isNonNegative()) {
+    Value *Cmp1 = IRB.CreateICmpSLT(Offset, ConstantInt::get(IntTy, 0));
+    Or = IRB.CreateOr(Cmp1, Or);
+  }
 
-    return Or;
+  return Or;
 }
 
 /// Adds run-time bounds checks to memory accessing instructions.
@@ -113,132 +113,134 @@ static Value *getBoundsCheckCond(Value *Ptr, Value *InstVal,
 /// \p GetTrapBB is a callable that returns the trap BB to use on failure.
 template <typename GetTrapBBT>
 static void insertBoundsCheck(Value *Or, BuilderTy &IRB, GetTrapBBT GetTrapBB) {
-    // check if the comparison is always false
-    ConstantInt *C = dyn_cast_or_null<ConstantInt>(Or);
-    if (C) {
-        ++ChecksSkipped;
-        // If non-zero, nothing to do.
-        if (!C->getZExtValue())
-            return;
-    }
-    ++ChecksAdded;
+  // check if the comparison is always false
+  ConstantInt *C = dyn_cast_or_null<ConstantInt>(Or);
+  if (C) {
+    ++ChecksSkipped;
+    // If non-zero, nothing to do.
+    if (!C->getZExtValue())
+      return;
+  }
+  ++ChecksAdded;
 
-    BasicBlock::iterator SplitI = IRB.GetInsertPoint();
-    BasicBlock *OldBB = SplitI->getParent();
-    BasicBlock *Cont = OldBB->splitBasicBlock(SplitI);
-    OldBB->getTerminator()->eraseFromParent();
+  BasicBlock::iterator SplitI = IRB.GetInsertPoint();
+  BasicBlock *OldBB = SplitI->getParent();
+  BasicBlock *Cont = OldBB->splitBasicBlock(SplitI);
+  OldBB->getTerminator()->eraseFromParent();
 
-    if (C) {
-        // If we have a constant zero, unconditionally branch.
-        // FIXME: We should really handle this differently to bypass the splitting
-        // the block.
-        BranchInst::Create(GetTrapBB(IRB), OldBB);
-        return;
-    }
+  if (C) {
+    // If we have a constant zero, unconditionally branch.
+    // FIXME: We should really handle this differently to bypass the splitting
+    // the block.
+    BranchInst::Create(GetTrapBB(IRB), OldBB);
+    return;
+  }
 
-    // Create the conditional branch.
-    BranchInst::Create(GetTrapBB(IRB), Cont, Or, OldBB);
+  // Create the conditional branch.
+  BranchInst::Create(GetTrapBB(IRB), Cont, Or, OldBB);
 }
 
 static bool addBoundsChecking(Function &F, TargetLibraryInfo &TLI,
                               ScalarEvolution &SE) {
-    const DataLayout &DL = F.getParent()->getDataLayout();
-    ObjectSizeOpts EvalOpts;
-    EvalOpts.RoundToAlign = true;
-    ObjectSizeOffsetEvaluator ObjSizeEval(DL, &TLI, F.getContext(), EvalOpts);
+  const DataLayout &DL = F.getParent()->getDataLayout();
+  ObjectSizeOpts EvalOpts;
+  EvalOpts.RoundToAlign = true;
+  ObjectSizeOffsetEvaluator ObjSizeEval(DL, &TLI, F.getContext(), EvalOpts);
 
-    // check HANDLE_MEMORY_INST in include/llvm/Instruction.def for memory
-    // touching instructions
-    SmallVector<std::pair<Instruction *, Value *>, 4> TrapInfo;
-    for (Instruction &I : instructions(F)) {
-        Value *Or = nullptr;
-        BuilderTy IRB(I.getParent(), BasicBlock::iterator(&I), TargetFolder(DL));
-        if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
-            if (!LI->isVolatile())
-                Or = getBoundsCheckCond(LI->getPointerOperand(), LI, DL, TLI,
-                                        ObjSizeEval, IRB, SE);
-        } else if (StoreInst *SI = dyn_cast<StoreInst>(&I)) {
-            if (!SI->isVolatile())
-                Or = getBoundsCheckCond(SI->getPointerOperand(), SI->getValueOperand(),
-                                        DL, TLI, ObjSizeEval, IRB, SE);
-        } else if (AtomicCmpXchgInst *AI = dyn_cast<AtomicCmpXchgInst>(&I)) {
-            if (!AI->isVolatile())
-                Or =
-                    getBoundsCheckCond(AI->getPointerOperand(), AI->getCompareOperand(),
-                                       DL, TLI, ObjSizeEval, IRB, SE);
-        } else if (AtomicRMWInst *AI = dyn_cast<AtomicRMWInst>(&I)) {
-            if (!AI->isVolatile())
-                Or = getBoundsCheckCond(AI->getPointerOperand(), AI->getValOperand(),
-                                        DL, TLI, ObjSizeEval, IRB, SE);
-        }
-        if (Or)
-            TrapInfo.push_back(std::make_pair(&I, Or));
+  // check HANDLE_MEMORY_INST in include/llvm/Instruction.def for memory
+  // touching instructions
+  SmallVector<std::pair<Instruction *, Value *>, 4> TrapInfo;
+  for (Instruction &I : instructions(F)) {
+    Value *Or = nullptr;
+    BuilderTy IRB(I.getParent(), BasicBlock::iterator(&I), TargetFolder(DL));
+    if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
+      if (!LI->isVolatile())
+        Or = getBoundsCheckCond(LI->getPointerOperand(), LI, DL, TLI,
+                                ObjSizeEval, IRB, SE);
+    } else if (StoreInst *SI = dyn_cast<StoreInst>(&I)) {
+      if (!SI->isVolatile())
+        Or = getBoundsCheckCond(SI->getPointerOperand(), SI->getValueOperand(),
+                                DL, TLI, ObjSizeEval, IRB, SE);
+    } else if (AtomicCmpXchgInst *AI = dyn_cast<AtomicCmpXchgInst>(&I)) {
+      if (!AI->isVolatile())
+        Or =
+            getBoundsCheckCond(AI->getPointerOperand(), AI->getCompareOperand(),
+                               DL, TLI, ObjSizeEval, IRB, SE);
+    } else if (AtomicRMWInst *AI = dyn_cast<AtomicRMWInst>(&I)) {
+      if (!AI->isVolatile())
+        Or = getBoundsCheckCond(AI->getPointerOperand(), AI->getValOperand(),
+                                DL, TLI, ObjSizeEval, IRB, SE);
     }
+    if (Or)
+      TrapInfo.push_back(std::make_pair(&I, Or));
+  }
 
-    // Create a trapping basic block on demand using a callback. Depending on
-    // flags, this will either create a single block for the entire function or
-    // will create a fresh block every time it is called.
-    BasicBlock *TrapBB = nullptr;
-    auto GetTrapBB = [&TrapBB](BuilderTy &IRB) {
-        if (TrapBB && SingleTrapBB)
-            return TrapBB;
+  // Create a trapping basic block on demand using a callback. Depending on
+  // flags, this will either create a single block for the entire function or
+  // will create a fresh block every time it is called.
+  BasicBlock *TrapBB = nullptr;
+  auto GetTrapBB = [&TrapBB](BuilderTy &IRB) {
+    if (TrapBB && SingleTrapBB)
+      return TrapBB;
 
-        Function *Fn = IRB.GetInsertBlock()->getParent();
-        // FIXME: This debug location doesn't make a lot of sense in the
-        // `SingleTrapBB` case.
-        auto DebugLoc = IRB.getCurrentDebugLocation();
-        IRBuilder<>::InsertPointGuard Guard(IRB);
-        TrapBB = BasicBlock::Create(Fn->getContext(), "trap", Fn);
-        IRB.SetInsertPoint(TrapBB);
+    Function *Fn = IRB.GetInsertBlock()->getParent();
+    // FIXME: This debug location doesn't make a lot of sense in the
+    // `SingleTrapBB` case.
+    auto DebugLoc = IRB.getCurrentDebugLocation();
+    IRBuilder<>::InsertPointGuard Guard(IRB);
+    TrapBB = BasicBlock::Create(Fn->getContext(), "trap", Fn);
+    IRB.SetInsertPoint(TrapBB);
 
-        auto *F = Intrinsic::getDeclaration(Fn->getParent(), Intrinsic::trap);
-        CallInst *TrapCall = IRB.CreateCall(F, {});
-        TrapCall->setDoesNotReturn();
-        TrapCall->setDoesNotThrow();
-        TrapCall->setDebugLoc(DebugLoc);
-        IRB.CreateUnreachable();
+    auto *F = Intrinsic::getDeclaration(Fn->getParent(), Intrinsic::trap);
+    CallInst *TrapCall = IRB.CreateCall(F, {});
+    TrapCall->setDoesNotReturn();
+    TrapCall->setDoesNotThrow();
+    TrapCall->setDebugLoc(DebugLoc);
+    IRB.CreateUnreachable();
 
-        return TrapBB;
-    };
+    return TrapBB;
+  };
 
-    // Add the checks.
-    for (const auto &Entry : TrapInfo) {
-        Instruction *Inst = Entry.first;
-        BuilderTy IRB(Inst->getParent(), BasicBlock::iterator(Inst), TargetFolder(DL));
-        insertBoundsCheck(Entry.second, IRB, GetTrapBB);
-    }
+  // Add the checks.
+  for (const auto &Entry : TrapInfo) {
+    Instruction *Inst = Entry.first;
+    BuilderTy IRB(Inst->getParent(), BasicBlock::iterator(Inst),
+                  TargetFolder(DL));
+    insertBoundsCheck(Entry.second, IRB, GetTrapBB);
+  }
 
-    return !TrapInfo.empty();
+  return !TrapInfo.empty();
 }
 
-PreservedAnalyses BoundsCheckingPass::run(Function &F, FunctionAnalysisManager &AM) {
-    auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
-    auto &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
+PreservedAnalyses BoundsCheckingPass::run(Function &F,
+                                          FunctionAnalysisManager &AM) {
+  auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
+  auto &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
 
-    if (!addBoundsChecking(F, TLI, SE))
-        return PreservedAnalyses::all();
+  if (!addBoundsChecking(F, TLI, SE))
+    return PreservedAnalyses::all();
 
-    return PreservedAnalyses::none();
+  return PreservedAnalyses::none();
 }
 
 namespace {
 struct BoundsCheckingLegacyPass : public FunctionPass {
-    static char ID;
+  static char ID;
 
-    BoundsCheckingLegacyPass() : FunctionPass(ID) {
-        initializeBoundsCheckingLegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  BoundsCheckingLegacyPass() : FunctionPass(ID) {
+    initializeBoundsCheckingLegacyPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnFunction(Function &F) override {
-        auto &TLI = getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-        auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-        return addBoundsChecking(F, TLI, SE);
-    }
+  bool runOnFunction(Function &F) override {
+    auto &TLI = getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+    auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+    return addBoundsChecking(F, TLI, SE);
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<TargetLibraryInfoWrapperPass>();
-        AU.addRequired<ScalarEvolutionWrapperPass>();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<TargetLibraryInfoWrapperPass>();
+    AU.addRequired<ScalarEvolutionWrapperPass>();
+  }
 };
 } // namespace
 
@@ -250,5 +252,5 @@ INITIALIZE_PASS_END(BoundsCheckingLegacyPass, "bounds-checking",
                     "Run-time bounds checking", false, false)
 
 FunctionPass *llvm::createBoundsCheckingLegacyPass() {
-    return new BoundsCheckingLegacyPass();
+  return new BoundsCheckingLegacyPass();
 }

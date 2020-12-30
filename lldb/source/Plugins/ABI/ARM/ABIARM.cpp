@@ -14,11 +14,11 @@
 LLDB_PLUGIN_DEFINE(ABIARM)
 
 void ABIARM::Initialize() {
-    ABISysV_arm::Initialize();
-    ABIMacOSX_arm::Initialize();
+  ABISysV_arm::Initialize();
+  ABIMacOSX_arm::Initialize();
 }
 
 void ABIARM::Terminate() {
-    ABISysV_arm::Terminate();
-    ABIMacOSX_arm::Terminate();
+  ABISysV_arm::Terminate();
+  ABIMacOSX_arm::Terminate();
 }

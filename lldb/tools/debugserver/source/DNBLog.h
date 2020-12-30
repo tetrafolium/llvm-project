@@ -35,21 +35,21 @@ extern "C" {
 #if defined(DNBLOG_ENABLED)
 
 void _DNBLog(uint32_t flags, const char *format, ...)
-__attribute__((format(printf, 2, 3)));
+    __attribute__((format(printf, 2, 3)));
 void _DNBLogDebug(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void _DNBLogDebugVerbose(const char *fmt, ...)
-__attribute__((format(printf, 1, 2)));
+    __attribute__((format(printf, 1, 2)));
 void _DNBLogThreaded(const char *fmt, ...)
-__attribute__((format(printf, 1, 2)));
+    __attribute__((format(printf, 1, 2)));
 void _DNBLogThreadedIf(uint32_t mask, const char *fmt, ...)
-__attribute__((format(printf, 2, 3)));
+    __attribute__((format(printf, 2, 3)));
 void _DNBLogError(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void _DNBLogFatalError(int err, const char *fmt, ...)
-__attribute__((format(printf, 2, 3)));
+    __attribute__((format(printf, 2, 3)));
 void _DNBLogVerbose(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void _DNBLogWarning(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 void _DNBLogWarningVerbose(const char *fmt, ...)
-__attribute__((format(printf, 1, 2)));
+    __attribute__((format(printf, 1, 2)));
 bool DNBLogCheckLogBit(uint32_t bit);
 uint32_t DNBLogSetLogMask(uint32_t mask);
 uint32_t DNBLogGetLogMask();

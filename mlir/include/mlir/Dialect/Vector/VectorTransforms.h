@@ -66,8 +66,8 @@ namespace vector {
 /// This will be extended in the future to support more advanced use cases than
 /// simple pointwise ops.
 SmallVector<Value, 1> unrollSingleResultVectorOp(OpBuilder &builder,
-        Operation *op,
-        ArrayRef<int64_t> targetShape);
+                                                 Operation *op,
+                                                 ArrayRef<int64_t> targetShape);
 
 /// Unroll a transfer_write op. Break up the vector source into a tuple of
 /// vectors matching the given shape. Then store each element with its own
@@ -87,80 +87,78 @@ LogicalResult unrollTransferWriteOp(OpBuilder &builder, Operation *op,
 
 /// Options that control the vector unrolling.
 struct UnrollVectorOptions {
-    using FilterConstraintFnType = std::function<LogicalResult(Operation *op)>;
-    /// Callback function that indicates whether vector unrolling should be
-    /// attempted on the operation.
-    FilterConstraintFnType filterConstraint = nullptr;
-    UnrollVectorOptions &setFilterConstraint(FilterConstraintFnType constraint) {
-        filterConstraint = constraint;
-        return *this;
-    }
+  using FilterConstraintFnType = std::function<LogicalResult(Operation *op)>;
+  /// Callback function that indicates whether vector unrolling should be
+  /// attempted on the operation.
+  FilterConstraintFnType filterConstraint = nullptr;
+  UnrollVectorOptions &setFilterConstraint(FilterConstraintFnType constraint) {
+    filterConstraint = constraint;
+    return *this;
+  }
 
-    using NativeShapeFnType =
-        std::function<Optional<SmallVector<int64_t, 4>>(Operation *op)>;
-    /// Function that returns the shape of the vector to unroll to for a given
-    /// operation. The unrolling is aborted if the function returns `llvm::None`.
-    NativeShapeFnType nativeShape = nullptr;
-    UnrollVectorOptions &setNativeShapeFn(NativeShapeFnType fn) {
-        nativeShape = fn;
-        return *this;
-    }
+  using NativeShapeFnType =
+      std::function<Optional<SmallVector<int64_t, 4>>(Operation *op)>;
+  /// Function that returns the shape of the vector to unroll to for a given
+  /// operation. The unrolling is aborted if the function returns `llvm::None`.
+  NativeShapeFnType nativeShape = nullptr;
+  UnrollVectorOptions &setNativeShapeFn(NativeShapeFnType fn) {
+    nativeShape = fn;
+    return *this;
+  }
 
-    /// Set the native shape to use for unrolling.
-    UnrollVectorOptions &setNativeShape(ArrayRef<int64_t> shape) {
-        SmallVector<int64_t, 4> tsShape(shape.begin(), shape.end());
-        nativeShape = [=](Operation *) -> Optional<SmallVector<int64_t, 4>> {
-            return tsShape;
-        };
-        return *this;
-    }
+  /// Set the native shape to use for unrolling.
+  UnrollVectorOptions &setNativeShape(ArrayRef<int64_t> shape) {
+    SmallVector<int64_t, 4> tsShape(shape.begin(), shape.end());
+    nativeShape = [=](Operation *) -> Optional<SmallVector<int64_t, 4>> {
+      return tsShape;
+    };
+    return *this;
+  }
 };
 /// Pattern to apply `unrollSingleResultVectorOp` to a `targetShape`
 /// declaratively.
 struct UnrollVectorPattern : public RewritePattern {
-    using FilterConstraintType = std::function<LogicalResult(Operation *op)>;
-    UnrollVectorPattern(MLIRContext *context, UnrollVectorOptions options)
-        : RewritePattern(/*benefit=*/1, MatchAnyOpTypeTag()), options(options) {}
-    LogicalResult matchAndRewrite(Operation *op,
-                                  PatternRewriter &rewriter) const override {
-        if (options.filterConstraint && failed(options.filterConstraint(op)))
-            return failure();
-        if (!options.nativeShape) {
-            return op->emitError("vector unrolling expects the native shape or native"
-                                 "shape call back function to be set");
-        }
-        auto unrollableVectorOp = dyn_cast<VectorUnrollOpInterface>(op);
-        if (!unrollableVectorOp)
-            return failure();
-        auto maybeUnrollShape = unrollableVectorOp.getShapeForUnroll();
-        if (!maybeUnrollShape)
-            return failure();
-        Optional<SmallVector<int64_t, 4>> targetShape = options.nativeShape(op);
-        if (!targetShape)
-            return op->emitError("failed to get target shape for vector unroll");
-        auto maybeShapeRatio = shapeRatio(*maybeUnrollShape, *targetShape);
-        if (!maybeShapeRatio ||
-        llvm::all_of(*maybeShapeRatio, [](int64_t v) {
-        return v == 1;
-    }))
-        return failure();
-        if (isa<TransferWriteOp>(op)) {
-            if (failed(unrollTransferWriteOp(rewriter, op, *targetShape)))
-                return failure();
-            rewriter.eraseOp(op);
-            return success();
-        }
-        if (op->getNumResults() != 1)
-            return failure();
-        auto resultVector = unrollSingleResultVectorOp(rewriter, op, *targetShape);
-        if (resultVector.size() != 1)
-            return failure();
-        rewriter.replaceOp(op, resultVector.front());
-        return success();
+  using FilterConstraintType = std::function<LogicalResult(Operation *op)>;
+  UnrollVectorPattern(MLIRContext *context, UnrollVectorOptions options)
+      : RewritePattern(/*benefit=*/1, MatchAnyOpTypeTag()), options(options) {}
+  LogicalResult matchAndRewrite(Operation *op,
+                                PatternRewriter &rewriter) const override {
+    if (options.filterConstraint && failed(options.filterConstraint(op)))
+      return failure();
+    if (!options.nativeShape) {
+      return op->emitError("vector unrolling expects the native shape or native"
+                           "shape call back function to be set");
     }
+    auto unrollableVectorOp = dyn_cast<VectorUnrollOpInterface>(op);
+    if (!unrollableVectorOp)
+      return failure();
+    auto maybeUnrollShape = unrollableVectorOp.getShapeForUnroll();
+    if (!maybeUnrollShape)
+      return failure();
+    Optional<SmallVector<int64_t, 4>> targetShape = options.nativeShape(op);
+    if (!targetShape)
+      return op->emitError("failed to get target shape for vector unroll");
+    auto maybeShapeRatio = shapeRatio(*maybeUnrollShape, *targetShape);
+    if (!maybeShapeRatio ||
+        llvm::all_of(*maybeShapeRatio, [](int64_t v) { return v == 1; }))
+      return failure();
+    if (isa<TransferWriteOp>(op)) {
+      if (failed(unrollTransferWriteOp(rewriter, op, *targetShape)))
+        return failure();
+      rewriter.eraseOp(op);
+      return success();
+    }
+    if (op->getNumResults() != 1)
+      return failure();
+    auto resultVector = unrollSingleResultVectorOp(rewriter, op, *targetShape);
+    if (resultVector.size() != 1)
+      return failure();
+    rewriter.replaceOp(op, resultVector.front());
+    return success();
+  }
 
 private:
-    UnrollVectorOptions options;
+  UnrollVectorOptions options;
 };
 
 /// Split a vector.transfer operation into an unmasked fastpath and a slowpath.
@@ -205,32 +203,30 @@ LogicalResult splitFullAndPartialTransfer(
 /// Apply `splitFullAndPartialTransfer` selectively via a pattern. This pattern
 /// may take an extra filter to perform selection at a finer granularity.
 struct VectorTransferFullPartialRewriter : public RewritePattern {
-    using FilterConstraintType =
-        std::function<LogicalResult(VectorTransferOpInterface op)>;
+  using FilterConstraintType =
+      std::function<LogicalResult(VectorTransferOpInterface op)>;
 
-    explicit VectorTransferFullPartialRewriter(
-        MLIRContext *context,
-        VectorTransformsOptions options = VectorTransformsOptions(),
-        FilterConstraintType filter =
-    [](VectorTransferOpInterface op) {
-        return success();
-    },
-    PatternBenefit benefit = 1)
-        : RewritePattern(benefit, MatchAnyOpTypeTag()), options(options),
-          filter(filter) {}
+  explicit VectorTransferFullPartialRewriter(
+      MLIRContext *context,
+      VectorTransformsOptions options = VectorTransformsOptions(),
+      FilterConstraintType filter =
+          [](VectorTransferOpInterface op) { return success(); },
+      PatternBenefit benefit = 1)
+      : RewritePattern(benefit, MatchAnyOpTypeTag()), options(options),
+        filter(filter) {}
 
-    /// Performs the rewrite.
-    LogicalResult matchAndRewrite(Operation *op,
-                                  PatternRewriter &rewriter) const override;
+  /// Performs the rewrite.
+  LogicalResult matchAndRewrite(Operation *op,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    VectorTransformsOptions options;
-    FilterConstraintType filter;
+  VectorTransformsOptions options;
+  FilterConstraintType filter;
 };
 
 struct DistributeOps {
-    ExtractMapOp extract;
-    InsertMapOp insert;
+  ExtractMapOp extract;
+  InsertMapOp insert;
 };
 
 /// Distribute a N-D vector pointwise operation over a range of given ids taking
@@ -258,18 +254,16 @@ distributPointwiseVectorOp(OpBuilder &builder, Operation *op,
 /// %db = vector.extract_map %a, %id, 32 : vector<32xf32> into vector<1xf32>
 /// %dv = addf %da, %db : vector<1xf32>
 struct PointwiseExtractPattern : public OpRewritePattern<ExtractMapOp> {
-    using FilterConstraintType = std::function<LogicalResult(ExtractMapOp op)>;
-    PointwiseExtractPattern(
-        MLIRContext *context, FilterConstraintType constraint =
-    [](ExtractMapOp op) {
-        return success();
-    })
-        : OpRewritePattern<ExtractMapOp>(context), filter(constraint) {}
-    LogicalResult matchAndRewrite(ExtractMapOp extract,
-                                  PatternRewriter &rewriter) const override;
+  using FilterConstraintType = std::function<LogicalResult(ExtractMapOp op)>;
+  PointwiseExtractPattern(
+      MLIRContext *context, FilterConstraintType constraint =
+                                [](ExtractMapOp op) { return success(); })
+      : OpRewritePattern<ExtractMapOp>(context), filter(constraint) {}
+  LogicalResult matchAndRewrite(ExtractMapOp extract,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    FilterConstraintType filter;
+  FilterConstraintType filter;
 };
 
 /// Implements transfer op write to read forwarding and dead transfer write
@@ -298,27 +292,27 @@ void transferOpflowOpt(FuncOp func);
 class ContractionOpToMatmulOpLowering
     : public OpRewritePattern<vector::ContractionOp> {
 public:
-    using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
-    using FilterConstraintType =
-        std::function<LogicalResult(vector::ContractionOp op)>;
+  using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
+  using FilterConstraintType =
+      std::function<LogicalResult(vector::ContractionOp op)>;
 
-    static LogicalResult defaultFilter(vector::ContractionOp op) {
-        return success();
-    }
+  static LogicalResult defaultFilter(vector::ContractionOp op) {
+    return success();
+  }
 
-    ContractionOpToMatmulOpLowering(
-        vector::VectorTransformsOptions vectorTransformsOptions,
-        MLIRContext *context, FilterConstraintType constraint = defaultFilter)
-        : OpRewritePattern<vector::ContractionOp>(context),
-          vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
+  ContractionOpToMatmulOpLowering(
+      vector::VectorTransformsOptions vectorTransformsOptions,
+      MLIRContext *context, FilterConstraintType constraint = defaultFilter)
+      : OpRewritePattern<vector::ContractionOp>(context),
+        vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
 
-    LogicalResult matchAndRewrite(vector::ContractionOp op,
-                                  PatternRewriter &rewriter) const override;
+  LogicalResult matchAndRewrite(vector::ContractionOp op,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    /// Options to control the vector patterns.
-    vector::VectorTransformsOptions vectorTransformsOptions;
-    FilterConstraintType filter;
+  /// Options to control the vector patterns.
+  vector::VectorTransformsOptions vectorTransformsOptions;
+  FilterConstraintType filter;
 };
 
 /// Progressive lowering of a `vector.contract %a, %b, %c` with row-major matmul
@@ -339,27 +333,27 @@ private:
 class ContractionOpToOuterProductOpLowering
     : public OpRewritePattern<vector::ContractionOp> {
 public:
-    using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
-    using FilterConstraintType =
-        std::function<LogicalResult(vector::ContractionOp op)>;
+  using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
+  using FilterConstraintType =
+      std::function<LogicalResult(vector::ContractionOp op)>;
 
-    static LogicalResult defaultFilter(vector::ContractionOp op) {
-        return success();
-    }
+  static LogicalResult defaultFilter(vector::ContractionOp op) {
+    return success();
+  }
 
-    ContractionOpToOuterProductOpLowering(
-        vector::VectorTransformsOptions vectorTransformsOptions,
-        MLIRContext *context, FilterConstraintType constraint = defaultFilter)
-        : OpRewritePattern<vector::ContractionOp>(context),
-          vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
+  ContractionOpToOuterProductOpLowering(
+      vector::VectorTransformsOptions vectorTransformsOptions,
+      MLIRContext *context, FilterConstraintType constraint = defaultFilter)
+      : OpRewritePattern<vector::ContractionOp>(context),
+        vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
 
-    LogicalResult matchAndRewrite(vector::ContractionOp op,
-                                  PatternRewriter &rewriter) const override;
+  LogicalResult matchAndRewrite(vector::ContractionOp op,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    /// Options to control the vector patterns.
-    vector::VectorTransformsOptions vectorTransformsOptions;
-    FilterConstraintType filter;
+  /// Options to control the vector patterns.
+  vector::VectorTransformsOptions vectorTransformsOptions;
+  FilterConstraintType filter;
 };
 
 /// Progressive lowering of a `vector.contract %a, %b, %c` with row-major matmul
@@ -383,28 +377,28 @@ private:
 class ContractionOpToDotLowering
     : public OpRewritePattern<vector::ContractionOp> {
 public:
-    using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
-    using FilterConstraintType =
-        std::function<LogicalResult(vector::ContractionOp op)>;
+  using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
+  using FilterConstraintType =
+      std::function<LogicalResult(vector::ContractionOp op)>;
 
-    static LogicalResult defaultFilter(vector::ContractionOp op) {
-        return success();
-    }
+  static LogicalResult defaultFilter(vector::ContractionOp op) {
+    return success();
+  }
 
-    ContractionOpToDotLowering(
-        vector::VectorTransformsOptions vectorTransformsOptions,
-        MLIRContext *context, FilterConstraintType constraint = defaultFilter)
-        : OpRewritePattern<vector::ContractionOp>(context),
-          vectorTransformsOptions(vectorTransformsOptions),
-          filter(defaultFilter) {}
+  ContractionOpToDotLowering(
+      vector::VectorTransformsOptions vectorTransformsOptions,
+      MLIRContext *context, FilterConstraintType constraint = defaultFilter)
+      : OpRewritePattern<vector::ContractionOp>(context),
+        vectorTransformsOptions(vectorTransformsOptions),
+        filter(defaultFilter) {}
 
-    LogicalResult matchAndRewrite(vector::ContractionOp op,
-                                  PatternRewriter &rewriter) const override;
+  LogicalResult matchAndRewrite(vector::ContractionOp op,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    /// Options to control the vector patterns.
-    vector::VectorTransformsOptions vectorTransformsOptions;
-    FilterConstraintType filter;
+  /// Options to control the vector patterns.
+  vector::VectorTransformsOptions vectorTransformsOptions;
+  FilterConstraintType filter;
 };
 
 /// Progressive lowering of ContractionOp.
@@ -423,33 +417,33 @@ private:
 /// to Dot or when other contraction patterns fail.
 class ContractionOpLowering : public OpRewritePattern<vector::ContractionOp> {
 public:
-    using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
-    using FilterConstraintType =
-        std::function<LogicalResult(vector::ContractionOp op)>;
+  using OpRewritePattern<vector::ContractionOp>::OpRewritePattern;
+  using FilterConstraintType =
+      std::function<LogicalResult(vector::ContractionOp op)>;
 
-    static LogicalResult defaultFilter(vector::ContractionOp op) {
-        return success();
-    }
+  static LogicalResult defaultFilter(vector::ContractionOp op) {
+    return success();
+  }
 
-    ContractionOpLowering(vector::VectorTransformsOptions vectorTransformsOptions,
-                          MLIRContext *context,
-                          FilterConstraintType constraint = defaultFilter)
-        : OpRewritePattern<vector::ContractionOp>(context),
-          vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
+  ContractionOpLowering(vector::VectorTransformsOptions vectorTransformsOptions,
+                        MLIRContext *context,
+                        FilterConstraintType constraint = defaultFilter)
+      : OpRewritePattern<vector::ContractionOp>(context),
+        vectorTransformsOptions(vectorTransformsOptions), filter(constraint) {}
 
-    LogicalResult matchAndRewrite(vector::ContractionOp op,
-                                  PatternRewriter &rewriter) const override;
+  LogicalResult matchAndRewrite(vector::ContractionOp op,
+                                PatternRewriter &rewriter) const override;
 
 private:
-    /// Options to control the vector patterns.
-    vector::VectorTransformsOptions vectorTransformsOptions;
-    FilterConstraintType filter;
-    // Lower one parallel dimension.
-    Value lowerParallel(vector::ContractionOp op, int64_t lhsIndex,
-                        int64_t rhsIndex, PatternRewriter &rewriter) const;
-    // Lower one reduction dimension.
-    Value lowerReduction(vector::ContractionOp op,
-                         PatternRewriter &rewriter) const;
+  /// Options to control the vector patterns.
+  vector::VectorTransformsOptions vectorTransformsOptions;
+  FilterConstraintType filter;
+  // Lower one parallel dimension.
+  Value lowerParallel(vector::ContractionOp op, int64_t lhsIndex,
+                      int64_t rhsIndex, PatternRewriter &rewriter) const;
+  // Lower one reduction dimension.
+  Value lowerReduction(vector::ContractionOp op,
+                       PatternRewriter &rewriter) const;
 };
 
 } // namespace mlir

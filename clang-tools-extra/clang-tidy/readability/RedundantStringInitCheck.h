@@ -20,16 +20,16 @@ namespace readability {
 /// Finds unnecessary string initializations.
 class RedundantStringInitCheck : public ClangTidyCheck {
 public:
-    RedundantStringInitCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  RedundantStringInitCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    std::vector<std::string> StringNames;
+  std::vector<std::string> StringNames;
 };
 
 } // namespace readability

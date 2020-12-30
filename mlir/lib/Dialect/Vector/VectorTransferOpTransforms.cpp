@@ -28,54 +28,54 @@ using namespace mlir;
 /// Return the ancestor op in the region or nullptr if the region is not
 /// an ancestor of the op.
 static Operation *findAncestorOpInRegion(Region *region, Operation *op) {
-    for (; op != nullptr && op->getParentRegion() != region;
-            op = op->getParentOp())
-        ;
-    return op;
+  for (; op != nullptr && op->getParentRegion() != region;
+       op = op->getParentOp())
+    ;
+  return op;
 }
 
 namespace {
 
 class TransferOptimization {
 public:
-    TransferOptimization(FuncOp func) : dominators(func), postDominators(func) {}
-    void deadStoreOp(vector::TransferWriteOp);
-    void storeToLoadForwarding(vector::TransferReadOp);
-    void removeDeadOp() {
-        for (Operation *op : opToErase)
-            op->erase();
-        opToErase.clear();
-    }
+  TransferOptimization(FuncOp func) : dominators(func), postDominators(func) {}
+  void deadStoreOp(vector::TransferWriteOp);
+  void storeToLoadForwarding(vector::TransferReadOp);
+  void removeDeadOp() {
+    for (Operation *op : opToErase)
+      op->erase();
+    opToErase.clear();
+  }
 
 private:
-    bool isReachable(Operation *start, Operation *dest);
-    DominanceInfo dominators;
-    PostDominanceInfo postDominators;
-    std::vector<Operation *> opToErase;
+  bool isReachable(Operation *start, Operation *dest);
+  DominanceInfo dominators;
+  PostDominanceInfo postDominators;
+  std::vector<Operation *> opToErase;
 };
 
 /// Return true if there is a path from start operation to dest operation,
 /// otherwise return false. The operations have to be in the same region.
 bool TransferOptimization::isReachable(Operation *start, Operation *dest) {
-    assert(start->getParentRegion() == dest->getParentRegion() &&
-           "This function only works for ops i the same region");
-    // Simple case where the start op dominate the destination.
-    if (dominators.dominates(start, dest))
-        return true;
-    Block *startBlock = start->getBlock();
-    Block *destBlock = dest->getBlock();
-    SmallVector<Block *, 32> worklist(startBlock->succ_begin(),
-                                      startBlock->succ_end());
-    SmallPtrSet<Block *, 32> visited;
-    while (!worklist.empty()) {
-        Block *bb = worklist.pop_back_val();
-        if (!visited.insert(bb).second)
-            continue;
-        if (dominators.dominates(bb, destBlock))
-            return true;
-        worklist.append(bb->succ_begin(), bb->succ_end());
-    }
-    return false;
+  assert(start->getParentRegion() == dest->getParentRegion() &&
+         "This function only works for ops i the same region");
+  // Simple case where the start op dominate the destination.
+  if (dominators.dominates(start, dest))
+    return true;
+  Block *startBlock = start->getBlock();
+  Block *destBlock = dest->getBlock();
+  SmallVector<Block *, 32> worklist(startBlock->succ_begin(),
+                                    startBlock->succ_end());
+  SmallPtrSet<Block *, 32> visited;
+  while (!worklist.empty()) {
+    Block *bb = worklist.pop_back_val();
+    if (!visited.insert(bb).second)
+      continue;
+    if (dominators.dominates(bb, destBlock))
+      return true;
+    worklist.append(bb->succ_begin(), bb->succ_end());
+  }
+  return false;
 }
 
 /// For transfer_write to overwrite fully another transfer_write must:
@@ -90,59 +90,59 @@ bool TransferOptimization::isReachable(Operation *start, Operation *dest) {
 /// transfer_write is dead if all reads that can be reached from the potentially
 /// dead transfer_write are dominated by the overwriting transfer_write.
 void TransferOptimization::deadStoreOp(vector::TransferWriteOp write) {
-    LLVM_DEBUG(DBGS() << "Candidate for dead store: " << *write.getOperation()
-               << "\n");
-    llvm::SmallVector<Operation *, 8> reads;
-    Operation *firstOverwriteCandidate = nullptr;
-    for (auto *user : write.source().getUsers()) {
-        if (user == write.getOperation())
-            continue;
-        if (auto nextWrite = dyn_cast<vector::TransferWriteOp>(user)) {
-            // Check candidate that can override the store.
-            if (write.indices() == nextWrite.indices() &&
-                    write.getVectorType() == nextWrite.getVectorType() &&
-                    write.permutation_map() == write.permutation_map() &&
-                    postDominators.postDominates(nextWrite, write)) {
-                if (firstOverwriteCandidate == nullptr ||
-                        postDominators.postDominates(firstOverwriteCandidate, nextWrite))
-                    firstOverwriteCandidate = nextWrite;
-                else
-                    assert(
-                        postDominators.postDominates(nextWrite, firstOverwriteCandidate));
-            }
-        } else {
-            if (auto read = dyn_cast<vector::TransferReadOp>(user)) {
-                // Don't need to consider disjoint reads.
-                if (isDisjointTransferSet(
-                            cast<VectorTransferOpInterface>(write.getOperation()),
-                            cast<VectorTransferOpInterface>(read.getOperation())))
-                    continue;
-            }
-            reads.push_back(user);
-        }
+  LLVM_DEBUG(DBGS() << "Candidate for dead store: " << *write.getOperation()
+                    << "\n");
+  llvm::SmallVector<Operation *, 8> reads;
+  Operation *firstOverwriteCandidate = nullptr;
+  for (auto *user : write.source().getUsers()) {
+    if (user == write.getOperation())
+      continue;
+    if (auto nextWrite = dyn_cast<vector::TransferWriteOp>(user)) {
+      // Check candidate that can override the store.
+      if (write.indices() == nextWrite.indices() &&
+          write.getVectorType() == nextWrite.getVectorType() &&
+          write.permutation_map() == write.permutation_map() &&
+          postDominators.postDominates(nextWrite, write)) {
+        if (firstOverwriteCandidate == nullptr ||
+            postDominators.postDominates(firstOverwriteCandidate, nextWrite))
+          firstOverwriteCandidate = nextWrite;
+        else
+          assert(
+              postDominators.postDominates(nextWrite, firstOverwriteCandidate));
+      }
+    } else {
+      if (auto read = dyn_cast<vector::TransferReadOp>(user)) {
+        // Don't need to consider disjoint reads.
+        if (isDisjointTransferSet(
+                cast<VectorTransferOpInterface>(write.getOperation()),
+                cast<VectorTransferOpInterface>(read.getOperation())))
+          continue;
+      }
+      reads.push_back(user);
     }
-    if (firstOverwriteCandidate == nullptr)
-        return;
-    Region *topRegion = firstOverwriteCandidate->getParentRegion();
-    Operation *writeAncestor = findAncestorOpInRegion(topRegion, write);
-    assert(writeAncestor &&
-           "write op should be recursively part of the top region");
+  }
+  if (firstOverwriteCandidate == nullptr)
+    return;
+  Region *topRegion = firstOverwriteCandidate->getParentRegion();
+  Operation *writeAncestor = findAncestorOpInRegion(topRegion, write);
+  assert(writeAncestor &&
+         "write op should be recursively part of the top region");
 
-    for (Operation *read : reads) {
-        Operation *readAncestor = findAncestorOpInRegion(topRegion, read);
-        // TODO: if the read and write have the same ancestor we could recurse in
-        // the region to know if the read is reachable with more precision.
-        if (readAncestor == nullptr || !isReachable(writeAncestor, readAncestor))
-            continue;
-        if (!dominators.dominates(firstOverwriteCandidate, read)) {
-            LLVM_DEBUG(DBGS() << "Store may not be dead due to op: " << *read
-                       << "\n");
-            return;
-        }
+  for (Operation *read : reads) {
+    Operation *readAncestor = findAncestorOpInRegion(topRegion, read);
+    // TODO: if the read and write have the same ancestor we could recurse in
+    // the region to know if the read is reachable with more precision.
+    if (readAncestor == nullptr || !isReachable(writeAncestor, readAncestor))
+      continue;
+    if (!dominators.dominates(firstOverwriteCandidate, read)) {
+      LLVM_DEBUG(DBGS() << "Store may not be dead due to op: " << *read
+                        << "\n");
+      return;
     }
-    LLVM_DEBUG(DBGS() << "Found dead store: " << *write.getOperation()
-               << " overwritten by: " << *firstOverwriteCandidate << "\n");
-    opToErase.push_back(write.getOperation());
+  }
+  LLVM_DEBUG(DBGS() << "Found dead store: " << *write.getOperation()
+                    << " overwritten by: " << *firstOverwriteCandidate << "\n");
+  opToErase.push_back(write.getOperation());
 }
 
 /// A transfer_write candidate to storeToLoad forwarding must:
@@ -157,76 +157,72 @@ void TransferOptimization::deadStoreOp(vector::TransferWriteOp write) {
 /// potentially aliasing ops that may reach the transfer_read are post-dominated
 /// by the transfer_write.
 void TransferOptimization::storeToLoadForwarding(vector::TransferReadOp read) {
-    if (read.hasMaskedDim())
-        return;
-    LLVM_DEBUG(DBGS() << "Candidate for Forwarding: " << *read.getOperation()
-               << "\n");
-    SmallVector<Operation *, 8> blockingWrites;
-    vector::TransferWriteOp lastwrite = nullptr;
-    for (Operation *user : read.source().getUsers()) {
-        if (isa<vector::TransferReadOp>(user))
-            continue;
-        if (auto write = dyn_cast<vector::TransferWriteOp>(user)) {
-            // If there is a write, but we can prove that it is disjoint we can ignore
-            // the write.
-            if (isDisjointTransferSet(
-                        cast<VectorTransferOpInterface>(write.getOperation()),
-                        cast<VectorTransferOpInterface>(read.getOperation())))
-                continue;
-            if (dominators.dominates(write, read) && !write.hasMaskedDim() &&
-                    write.indices() == read.indices() &&
-                    write.getVectorType() == read.getVectorType() &&
-                    write.permutation_map() == read.permutation_map()) {
-                if (lastwrite == nullptr || dominators.dominates(lastwrite, write))
-                    lastwrite = write;
-                else
-                    assert(dominators.dominates(write, lastwrite));
-                continue;
-            }
-        }
-        blockingWrites.push_back(user);
+  if (read.hasMaskedDim())
+    return;
+  LLVM_DEBUG(DBGS() << "Candidate for Forwarding: " << *read.getOperation()
+                    << "\n");
+  SmallVector<Operation *, 8> blockingWrites;
+  vector::TransferWriteOp lastwrite = nullptr;
+  for (Operation *user : read.source().getUsers()) {
+    if (isa<vector::TransferReadOp>(user))
+      continue;
+    if (auto write = dyn_cast<vector::TransferWriteOp>(user)) {
+      // If there is a write, but we can prove that it is disjoint we can ignore
+      // the write.
+      if (isDisjointTransferSet(
+              cast<VectorTransferOpInterface>(write.getOperation()),
+              cast<VectorTransferOpInterface>(read.getOperation())))
+        continue;
+      if (dominators.dominates(write, read) && !write.hasMaskedDim() &&
+          write.indices() == read.indices() &&
+          write.getVectorType() == read.getVectorType() &&
+          write.permutation_map() == read.permutation_map()) {
+        if (lastwrite == nullptr || dominators.dominates(lastwrite, write))
+          lastwrite = write;
+        else
+          assert(dominators.dominates(write, lastwrite));
+        continue;
+      }
     }
+    blockingWrites.push_back(user);
+  }
 
-    if (lastwrite == nullptr)
-        return;
+  if (lastwrite == nullptr)
+    return;
 
-    Region *topRegion = lastwrite->getParentRegion();
-    Operation *readAncestor = findAncestorOpInRegion(topRegion, read);
-    assert(readAncestor &&
-           "read op should be recursively part of the top region");
+  Region *topRegion = lastwrite->getParentRegion();
+  Operation *readAncestor = findAncestorOpInRegion(topRegion, read);
+  assert(readAncestor &&
+         "read op should be recursively part of the top region");
 
-    for (Operation *write : blockingWrites) {
-        Operation *writeAncestor = findAncestorOpInRegion(topRegion, write);
-        // TODO: if the store and read have the same ancestor we could recurse in
-        // the region to know if the read is reachable with more precision.
-        if (writeAncestor == nullptr || !isReachable(writeAncestor, readAncestor))
-            continue;
-        if (!postDominators.postDominates(lastwrite, write)) {
-            LLVM_DEBUG(DBGS() << "Fail to do write to read forwarding due to op: "
-                       << *write << "\n");
-            return;
-        }
+  for (Operation *write : blockingWrites) {
+    Operation *writeAncestor = findAncestorOpInRegion(topRegion, write);
+    // TODO: if the store and read have the same ancestor we could recurse in
+    // the region to know if the read is reachable with more precision.
+    if (writeAncestor == nullptr || !isReachable(writeAncestor, readAncestor))
+      continue;
+    if (!postDominators.postDominates(lastwrite, write)) {
+      LLVM_DEBUG(DBGS() << "Fail to do write to read forwarding due to op: "
+                        << *write << "\n");
+      return;
     }
+  }
 
-    LLVM_DEBUG(DBGS() << "Forward value from " << *lastwrite.getOperation()
-               << " to: " << *read.getOperation() << "\n");
-    read.replaceAllUsesWith(lastwrite.vector());
-    opToErase.push_back(read.getOperation());
+  LLVM_DEBUG(DBGS() << "Forward value from " << *lastwrite.getOperation()
+                    << " to: " << *read.getOperation() << "\n");
+  read.replaceAllUsesWith(lastwrite.vector());
+  opToErase.push_back(read.getOperation());
 }
 
 } // namespace
 
 void mlir::vector::transferOpflowOpt(FuncOp func) {
-    TransferOptimization opt(func);
-    // Run store to load forwarding first since it can expose more dead store
-    // opportunity.
-    func.walk(
-    [&](vector::TransferReadOp read) {
-        opt.storeToLoadForwarding(read);
-    });
-    opt.removeDeadOp();
-    func.walk([&](vector::TransferWriteOp write) {
-        opt.deadStoreOp(write);
-    });
-    opt.removeDeadOp();
+  TransferOptimization opt(func);
+  // Run store to load forwarding first since it can expose more dead store
+  // opportunity.
+  func.walk(
+      [&](vector::TransferReadOp read) { opt.storeToLoadForwarding(read); });
+  opt.removeDeadOp();
+  func.walk([&](vector::TransferWriteOp write) { opt.deadStoreOp(write); });
+  opt.removeDeadOp();
 }

@@ -29,7 +29,7 @@ namespace llvm {
 class BasicBlock;
 class Instruction;
 class Value;
-}
+} // namespace llvm
 
 namespace llvm {
 namespace objcarc {
@@ -42,12 +42,12 @@ class ProvenanceAnalysis;
 /// There are several kinds of dependence-like concepts in use here.
 ///
 enum DependenceKind {
-    NeedsPositiveRetainCount,
-    AutoreleasePoolBoundary,
-    CanChangeRetainCount,
-    RetainAutoreleaseDep,       ///< Blocks objc_retainAutorelease.
-    RetainAutoreleaseRVDep,     ///< Blocks objc_retainAutoreleaseReturnValue.
-    RetainRVDep                 ///< Blocks objc_retainAutoreleasedReturnValue.
+  NeedsPositiveRetainCount,
+  AutoreleasePoolBoundary,
+  CanChangeRetainCount,
+  RetainAutoreleaseDep,   ///< Blocks objc_retainAutorelease.
+  RetainAutoreleaseRVDep, ///< Blocks objc_retainAutoreleaseReturnValue.
+  RetainRVDep             ///< Blocks objc_retainAutoreleasedReturnValue.
 };
 
 /// Find dependent instructions. If there is exactly one dependent instruction,
@@ -57,9 +57,8 @@ llvm::Instruction *findSingleDependency(DependenceKind Flavor, const Value *Arg,
                                         Instruction *StartInst,
                                         ProvenanceAnalysis &PA);
 
-bool
-Depends(DependenceKind Flavor, Instruction *Inst, const Value *Arg,
-        ProvenanceAnalysis &PA);
+bool Depends(DependenceKind Flavor, Instruction *Inst, const Value *Arg,
+             ProvenanceAnalysis &PA);
 
 /// Test whether the given instruction can "use" the given pointer's object in a
 /// way that requires the reference count to be positive.
@@ -79,7 +78,7 @@ bool CanDecrementRefCount(const Instruction *Inst, const Value *Ptr,
 static inline bool CanDecrementRefCount(const Instruction *Inst,
                                         const Value *Ptr,
                                         ProvenanceAnalysis &PA) {
-    return CanDecrementRefCount(Inst, Ptr, PA, GetARCInstKind(Inst));
+  return CanDecrementRefCount(Inst, Ptr, PA, GetARCInstKind(Inst));
 }
 
 } // namespace objcarc

@@ -12,14 +12,13 @@
 
 /* Return the opposite of "part".
  */
-static __isl_give PART *FN(UNION,neg_entry)(__isl_take PART *part, void *user)
-{
-    return FN(PART,neg)(part);
+static __isl_give PART *FN(UNION, neg_entry)(__isl_take PART *part,
+                                             void *user) {
+  return FN(PART, neg)(part);
 }
 
 /* Return the opposite of "u".
  */
-__isl_give UNION *FN(UNION,neg)(__isl_take UNION *u)
-{
-    return FN(UNION,transform_inplace)(u, &FN(UNION,neg_entry), NULL);
+__isl_give UNION *FN(UNION, neg)(__isl_take UNION *u) {
+  return FN(UNION, transform_inplace)(u, &FN(UNION, neg_entry), NULL);
 }

@@ -25,16 +25,16 @@ class RISCVTargetLowering;
 class RISCVCallLowering : public CallLowering {
 
 public:
-    RISCVCallLowering(const RISCVTargetLowering &TLI);
+  RISCVCallLowering(const RISCVTargetLowering &TLI);
 
-    bool lowerReturn(MachineIRBuilder &MIRBuiler, const Value *Val,
-                     ArrayRef<Register> VRegs) const override;
+  bool lowerReturn(MachineIRBuilder &MIRBuiler, const Value *Val,
+                   ArrayRef<Register> VRegs) const override;
 
-    bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
-                              ArrayRef<ArrayRef<Register>> VRegs) const override;
+  bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
+                            ArrayRef<ArrayRef<Register>> VRegs) const override;
 
-    bool lowerCall(MachineIRBuilder &MIRBuilder,
-                   CallLoweringInfo &Info) const override;
+  bool lowerCall(MachineIRBuilder &MIRBuilder,
+                 CallLoweringInfo &Info) const override;
 };
 
 } // end namespace llvm

@@ -22,79 +22,79 @@ namespace performance {
 namespace {
 
 llvm::Optional<std::string> MakeCharacterLiteral(const StringLiteral *Literal) {
-    std::string Result;
-    {
-        llvm::raw_string_ostream OS(Result);
-        Literal->outputString(OS);
-    }
-    // Now replace the " with '.
-    auto pos = Result.find_first_of('"');
-    if (pos == Result.npos)
-        return llvm::None;
-    Result[pos] = '\'';
-    pos = Result.find_last_of('"');
-    if (pos == Result.npos)
-        return llvm::None;
-    Result[pos] = '\'';
-    return Result;
+  std::string Result;
+  {
+    llvm::raw_string_ostream OS(Result);
+    Literal->outputString(OS);
+  }
+  // Now replace the " with '.
+  auto pos = Result.find_first_of('"');
+  if (pos == Result.npos)
+    return llvm::None;
+  Result[pos] = '\'';
+  pos = Result.find_last_of('"');
+  if (pos == Result.npos)
+    return llvm::None;
+  Result[pos] = '\'';
+  return Result;
 }
 
 AST_MATCHER_FUNCTION(ast_matchers::internal::Matcher<Expr>,
                      hasSubstitutedType) {
-    return hasType(qualType(anyOf(substTemplateTypeParmType(),
-                                  hasDescendant(substTemplateTypeParmType()))));
+  return hasType(qualType(anyOf(substTemplateTypeParmType(),
+                                hasDescendant(substTemplateTypeParmType()))));
 }
 
 } // namespace
 
 FasterStringFindCheck::FasterStringFindCheck(StringRef Name,
-        ClangTidyContext *Context)
+                                             ClangTidyContext *Context)
     : ClangTidyCheck(Name, Context),
       StringLikeClasses(utils::options::parseStringList(
-                            Options.get("StringLikeClasses",
-                                        "::std::basic_string;::std::basic_string_view"))) {}
+          Options.get("StringLikeClasses",
+                      "::std::basic_string;::std::basic_string_view"))) {}
 
 void FasterStringFindCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
-    Options.store(Opts, "StringLikeClasses",
-                  utils::options::serializeStringList(StringLikeClasses));
+  Options.store(Opts, "StringLikeClasses",
+                utils::options::serializeStringList(StringLikeClasses));
 }
 
 void FasterStringFindCheck::registerMatchers(MatchFinder *Finder) {
-    const auto SingleChar =
-        expr(ignoringParenCasts(stringLiteral(hasSize(1)).bind("literal")));
-    const auto StringFindFunctions =
-        hasAnyName("find", "rfind", "find_first_of", "find_first_not_of",
-                   "find_last_of", "find_last_not_of");
+  const auto SingleChar =
+      expr(ignoringParenCasts(stringLiteral(hasSize(1)).bind("literal")));
+  const auto StringFindFunctions =
+      hasAnyName("find", "rfind", "find_first_of", "find_first_not_of",
+                 "find_last_of", "find_last_not_of");
 
-    Finder->addMatcher(
-        cxxMemberCallExpr(
-            callee(functionDecl(StringFindFunctions).bind("func")),
-            anyOf(argumentCountIs(1), argumentCountIs(2)),
-            hasArgument(0, SingleChar),
-            on(expr(
-                   hasType(hasUnqualifiedDesugaredType(recordType(hasDeclaration(
-                               recordDecl(hasAnyName(SmallVector<StringRef, 4>(
-                                       StringLikeClasses.begin(), StringLikeClasses.end()))))))),
-                   unless(hasSubstitutedType())))),
-        this);
+  Finder->addMatcher(
+      cxxMemberCallExpr(
+          callee(functionDecl(StringFindFunctions).bind("func")),
+          anyOf(argumentCountIs(1), argumentCountIs(2)),
+          hasArgument(0, SingleChar),
+          on(expr(
+              hasType(hasUnqualifiedDesugaredType(recordType(hasDeclaration(
+                  recordDecl(hasAnyName(SmallVector<StringRef, 4>(
+                      StringLikeClasses.begin(), StringLikeClasses.end()))))))),
+              unless(hasSubstitutedType())))),
+      this);
 }
 
 void FasterStringFindCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *Literal = Result.Nodes.getNodeAs<StringLiteral>("literal");
-    const auto *FindFunc = Result.Nodes.getNodeAs<FunctionDecl>("func");
+  const auto *Literal = Result.Nodes.getNodeAs<StringLiteral>("literal");
+  const auto *FindFunc = Result.Nodes.getNodeAs<FunctionDecl>("func");
 
-    auto Replacement = MakeCharacterLiteral(Literal);
-    if (!Replacement)
-        return;
+  auto Replacement = MakeCharacterLiteral(Literal);
+  if (!Replacement)
+    return;
 
-    diag(Literal->getBeginLoc(), "%0 called with a string literal consisting of "
-         "a single character; consider using the more "
-         "effective overload accepting a character")
-            << FindFunc
-            << FixItHint::CreateReplacement(
-                CharSourceRange::getTokenRange(Literal->getBeginLoc(),
-                        Literal->getEndLoc()),
-                *Replacement);
+  diag(Literal->getBeginLoc(), "%0 called with a string literal consisting of "
+                               "a single character; consider using the more "
+                               "effective overload accepting a character")
+      << FindFunc
+      << FixItHint::CreateReplacement(
+             CharSourceRange::getTokenRange(Literal->getBeginLoc(),
+                                            Literal->getEndLoc()),
+             *Replacement);
 }
 
 } // namespace performance

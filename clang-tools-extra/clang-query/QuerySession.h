@@ -23,23 +23,23 @@ namespace query {
 /// Represents the state for a particular clang-query session.
 class QuerySession {
 public:
-    QuerySession(llvm::ArrayRef<std::unique_ptr<ASTUnit>> ASTs)
-        : ASTs(ASTs), PrintOutput(false), DiagOutput(true),
-          DetailedASTOutput(false), BindRoot(true), PrintMatcher(false),
-          Terminate(false), TK(TK_AsIs) {}
+  QuerySession(llvm::ArrayRef<std::unique_ptr<ASTUnit>> ASTs)
+      : ASTs(ASTs), PrintOutput(false), DiagOutput(true),
+        DetailedASTOutput(false), BindRoot(true), PrintMatcher(false),
+        Terminate(false), TK(TK_AsIs) {}
 
-    llvm::ArrayRef<std::unique_ptr<ASTUnit>> ASTs;
+  llvm::ArrayRef<std::unique_ptr<ASTUnit>> ASTs;
 
-    bool PrintOutput;
-    bool DiagOutput;
-    bool DetailedASTOutput;
+  bool PrintOutput;
+  bool DiagOutput;
+  bool DetailedASTOutput;
 
-    bool BindRoot;
-    bool PrintMatcher;
-    bool Terminate;
+  bool BindRoot;
+  bool PrintMatcher;
+  bool Terminate;
 
-    TraversalKind TK;
-    llvm::StringMap<ast_matchers::dynamic::VariantValue> NamedValues;
+  TraversalKind TK;
+  llvm::StringMap<ast_matchers::dynamic::VariantValue> NamedValues;
 };
 
 } // namespace query

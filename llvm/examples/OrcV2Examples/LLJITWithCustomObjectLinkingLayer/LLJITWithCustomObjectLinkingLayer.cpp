@@ -27,40 +27,40 @@ using namespace llvm::orc;
 ExitOnError ExitOnErr;
 
 int main(int argc, char *argv[]) {
-    // Initialize LLVM.
-    InitLLVM X(argc, argv);
+  // Initialize LLVM.
+  InitLLVM X(argc, argv);
 
-    InitializeNativeTarget();
-    InitializeNativeTargetAsmPrinter();
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
 
-    cl::ParseCommandLineOptions(argc, argv, "LLJITWithCustomObjectLinkingLayer");
-    ExitOnErr.setBanner(std::string(argv[0]) + ": ");
+  cl::ParseCommandLineOptions(argc, argv, "LLJITWithCustomObjectLinkingLayer");
+  ExitOnErr.setBanner(std::string(argv[0]) + ": ");
 
-    // Detect the host and set code model to small.
-    auto JTMB = ExitOnErr(JITTargetMachineBuilder::detectHost());
-    JTMB.setCodeModel(CodeModel::Small);
+  // Detect the host and set code model to small.
+  auto JTMB = ExitOnErr(JITTargetMachineBuilder::detectHost());
+  JTMB.setCodeModel(CodeModel::Small);
 
-    // Create an LLJIT instance with an ObjectLinkingLayer as the base layer.
-    auto J = ExitOnErr(
-                 LLJITBuilder()
-                 .setJITTargetMachineBuilder(std::move(JTMB))
-                 .setObjectLinkingLayerCreator(
-    [&](ExecutionSession &ES, const Triple &TT) {
-        return std::make_unique<ObjectLinkingLayer>(
-                   ES, std::make_unique<jitlink::InProcessMemoryManager>());
-    })
-    .create());
+  // Create an LLJIT instance with an ObjectLinkingLayer as the base layer.
+  auto J = ExitOnErr(
+      LLJITBuilder()
+          .setJITTargetMachineBuilder(std::move(JTMB))
+          .setObjectLinkingLayerCreator(
+              [&](ExecutionSession &ES, const Triple &TT) {
+                return std::make_unique<ObjectLinkingLayer>(
+                    ES, std::make_unique<jitlink::InProcessMemoryManager>());
+              })
+          .create());
 
-    auto M = ExitOnErr(parseExampleModule(Add1Example, "add1"));
+  auto M = ExitOnErr(parseExampleModule(Add1Example, "add1"));
 
-    ExitOnErr(J->addIRModule(std::move(M)));
+  ExitOnErr(J->addIRModule(std::move(M)));
 
-    // Look up the JIT'd function, cast it to a function pointer, then call it.
-    auto Add1Sym = ExitOnErr(J->lookup("add1"));
-    int (*Add1)(int) = (int (*)(int))Add1Sym.getAddress();
+  // Look up the JIT'd function, cast it to a function pointer, then call it.
+  auto Add1Sym = ExitOnErr(J->lookup("add1"));
+  int (*Add1)(int) = (int (*)(int))Add1Sym.getAddress();
 
-    int Result = Add1(42);
-    outs() << "add1(42) = " << Result << "\n";
+  int Result = Add1(42);
+  outs() << "add1(42) = " << Result << "\n";
 
-    return 0;
+  return 0;
 }

@@ -82,7 +82,7 @@ int __sanitizer_install_malloc_and_free_hooks(
 */
 void __sanitizer_purge_allocator(void);
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
 
 #endif

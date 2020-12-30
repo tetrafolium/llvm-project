@@ -20,18 +20,18 @@ namespace pdb {
 /// in theory could be used to add arbitrary source code.
 class IPDBInjectedSource {
 public:
-    virtual ~IPDBInjectedSource();
+  virtual ~IPDBInjectedSource();
 
-    virtual uint32_t getCrc32() const = 0;
-    virtual uint64_t getCodeByteSize() const = 0;
-    virtual std::string getFileName() const = 0;
-    virtual std::string getObjectFileName() const = 0;
-    virtual std::string getVirtualFileName() const = 0;
-    // The returned value depends on the PDB producer,
-    // but 0 is guaranteed to mean "no compression".
-    // The enum PDB_SourceCompression lists known return values.
-    virtual uint32_t getCompression() const = 0;
-    virtual std::string getCode() const = 0;
+  virtual uint32_t getCrc32() const = 0;
+  virtual uint64_t getCodeByteSize() const = 0;
+  virtual std::string getFileName() const = 0;
+  virtual std::string getObjectFileName() const = 0;
+  virtual std::string getVirtualFileName() const = 0;
+  // The returned value depends on the PDB producer,
+  // but 0 is guaranteed to mean "no compression".
+  // The enum PDB_SourceCompression lists known return values.
+  virtual uint32_t getCompression() const = 0;
+  virtual std::string getCode() const = 0;
 };
 } // namespace pdb
 } // namespace llvm

@@ -13,7 +13,7 @@
 
 namespace llvm {
 struct FixIrreduciblePass : PassInfoMixin<FixIrreduciblePass> {
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 

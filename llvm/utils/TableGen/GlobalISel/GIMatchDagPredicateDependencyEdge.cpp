@@ -17,21 +17,21 @@ using namespace llvm;
 
 LLVM_DUMP_METHOD void
 GIMatchDagPredicateDependencyEdge::print(raw_ostream &OS) const {
-    OS << getRequiredMI()->getName();
-    if (getRequiredMO())
-        OS << "[" << getRequiredMO()->getName() << "]";
-    OS << " ==> " << getPredicate()->getName() << "["
-       << getPredicateOp()->getName() << "]";
+  OS << getRequiredMI()->getName();
+  if (getRequiredMO())
+    OS << "[" << getRequiredMO()->getName() << "]";
+  OS << " ==> " << getPredicate()->getName() << "["
+     << getPredicateOp()->getName() << "]";
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void GIMatchDagPredicateDependencyEdge::dump() const {
-    print(errs());
+  print(errs());
 }
 #endif // if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 
 raw_ostream &llvm::operator<<(raw_ostream &OS,
                               const GIMatchDagPredicateDependencyEdge &E) {
-    E.print(OS);
-    return OS;
+  E.print(OS);
+  return OS;
 }

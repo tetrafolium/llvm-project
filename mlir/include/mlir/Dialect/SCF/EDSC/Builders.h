@@ -24,8 +24,7 @@ namespace edsc {
 
 /// Adapters for building loop nests using the builder and the location stored
 /// in ScopedContext. Actual builders are in scf::buildLoopNest.
-scf::LoopNest loopNestBuilder(ValueRange lbs, ValueRange ubs,
-                              ValueRange steps,
+scf::LoopNest loopNestBuilder(ValueRange lbs, ValueRange ubs, ValueRange steps,
                               function_ref<void(ValueRange)> fun = nullptr);
 scf::LoopNest loopNestBuilder(Value lb, Value ub, Value step,
                               function_ref<void(Value)> fun = nullptr);

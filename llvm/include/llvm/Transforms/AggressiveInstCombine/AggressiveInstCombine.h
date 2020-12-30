@@ -25,7 +25,7 @@ class AggressiveInstCombinePass
     : public PassInfoMixin<AggressiveInstCombinePass> {
 
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 //===----------------------------------------------------------------------===//
@@ -34,6 +34,6 @@ public:
 // fewer, simple instructions. This pass does not modify the CFG.
 //
 FunctionPass *createAggressiveInstCombinerPass();
-}
+} // namespace llvm
 
 #endif

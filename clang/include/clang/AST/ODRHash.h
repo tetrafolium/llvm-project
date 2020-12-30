@@ -16,8 +16,8 @@
 #define LLVM_CLANG_AST_ODRHASH_H
 
 #include "clang/AST/DeclarationName.h"
-#include "clang/AST/Type.h"
 #include "clang/AST/TemplateBase.h"
+#include "clang/AST/Type.h"
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/FoldingSet.h"
 #include "llvm/ADT/PointerUnion.h"
@@ -39,62 +39,62 @@ class TemplateParameterList;
 // Typically, only one Add* call is needed.  clear can be called to reuse the
 // object.
 class ODRHash {
-    // Use DenseMaps to convert from DeclarationName and Type pointers
-    // to an index value.
-    llvm::DenseMap<DeclarationName, unsigned> DeclNameMap;
+  // Use DenseMaps to convert from DeclarationName and Type pointers
+  // to an index value.
+  llvm::DenseMap<DeclarationName, unsigned> DeclNameMap;
 
-    // Save space by processing bools at the end.
-    llvm::SmallVector<bool, 128> Bools;
+  // Save space by processing bools at the end.
+  llvm::SmallVector<bool, 128> Bools;
 
-    llvm::FoldingSetNodeID ID;
+  llvm::FoldingSetNodeID ID;
 
 public:
-    ODRHash() {}
+  ODRHash() {}
 
-    // Use this for ODR checking classes between modules.  This method compares
-    // more information than the AddDecl class.
-    void AddCXXRecordDecl(const CXXRecordDecl *Record);
+  // Use this for ODR checking classes between modules.  This method compares
+  // more information than the AddDecl class.
+  void AddCXXRecordDecl(const CXXRecordDecl *Record);
 
-    // Use this for ODR checking functions between modules.  This method compares
-    // more information than the AddDecl class.  SkipBody will process the
-    // hash as if the function has no body.
-    void AddFunctionDecl(const FunctionDecl *Function, bool SkipBody = false);
+  // Use this for ODR checking functions between modules.  This method compares
+  // more information than the AddDecl class.  SkipBody will process the
+  // hash as if the function has no body.
+  void AddFunctionDecl(const FunctionDecl *Function, bool SkipBody = false);
 
-    // Use this for ODR checking enums between modules.  This method compares
-    // more information than the AddDecl class.
-    void AddEnumDecl(const EnumDecl *Enum);
+  // Use this for ODR checking enums between modules.  This method compares
+  // more information than the AddDecl class.
+  void AddEnumDecl(const EnumDecl *Enum);
 
-    // Process SubDecls of the main Decl.  This method calls the DeclVisitor
-    // while AddDecl does not.
-    void AddSubDecl(const Decl *D);
+  // Process SubDecls of the main Decl.  This method calls the DeclVisitor
+  // while AddDecl does not.
+  void AddSubDecl(const Decl *D);
 
-    // Reset the object for reuse.
-    void clear();
+  // Reset the object for reuse.
+  void clear();
 
-    // Add booleans to ID and uses it to calculate the hash.
-    unsigned CalculateHash();
+  // Add booleans to ID and uses it to calculate the hash.
+  unsigned CalculateHash();
 
-    // Add AST nodes that need to be processed.
-    void AddDecl(const Decl *D);
-    void AddType(const Type *T);
-    void AddQualType(QualType T);
-    void AddStmt(const Stmt *S);
-    void AddIdentifierInfo(const IdentifierInfo *II);
-    void AddNestedNameSpecifier(const NestedNameSpecifier *NNS);
-    void AddTemplateName(TemplateName Name);
-    void AddDeclarationName(DeclarationName Name, bool TreatAsDecl = false);
-    void AddTemplateArgument(TemplateArgument TA);
-    void AddTemplateParameterList(const TemplateParameterList *TPL);
+  // Add AST nodes that need to be processed.
+  void AddDecl(const Decl *D);
+  void AddType(const Type *T);
+  void AddQualType(QualType T);
+  void AddStmt(const Stmt *S);
+  void AddIdentifierInfo(const IdentifierInfo *II);
+  void AddNestedNameSpecifier(const NestedNameSpecifier *NNS);
+  void AddTemplateName(TemplateName Name);
+  void AddDeclarationName(DeclarationName Name, bool TreatAsDecl = false);
+  void AddTemplateArgument(TemplateArgument TA);
+  void AddTemplateParameterList(const TemplateParameterList *TPL);
 
-    // Save booleans until the end to lower the size of data to process.
-    void AddBoolean(bool value);
+  // Save booleans until the end to lower the size of data to process.
+  void AddBoolean(bool value);
 
-    static bool isDeclToBeProcessed(const Decl* D, const DeclContext *Parent);
+  static bool isDeclToBeProcessed(const Decl *D, const DeclContext *Parent);
 
 private:
-    void AddDeclarationNameImpl(DeclarationName Name);
+  void AddDeclarationNameImpl(DeclarationName Name);
 };
 
-}  // end namespace clang
+} // end namespace clang
 
 #endif

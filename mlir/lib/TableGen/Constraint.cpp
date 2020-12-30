@@ -18,57 +18,57 @@ using namespace mlir::tblgen;
 
 Constraint::Constraint(const llvm::Record *record)
     : def(record), kind(CK_Uncategorized) {
-    // Look through OpVariable's to their constraint.
-    if (def->isSubClassOf("OpVariable"))
-        def = def->getValueAsDef("constraint");
-    if (def->isSubClassOf("TypeConstraint")) {
-        kind = CK_Type;
-    } else if (def->isSubClassOf("AttrConstraint")) {
-        kind = CK_Attr;
-    } else if (def->isSubClassOf("RegionConstraint")) {
-        kind = CK_Region;
-    } else if (def->isSubClassOf("SuccessorConstraint")) {
-        kind = CK_Successor;
-    } else {
-        assert(def->isSubClassOf("Constraint"));
-    }
+  // Look through OpVariable's to their constraint.
+  if (def->isSubClassOf("OpVariable"))
+    def = def->getValueAsDef("constraint");
+  if (def->isSubClassOf("TypeConstraint")) {
+    kind = CK_Type;
+  } else if (def->isSubClassOf("AttrConstraint")) {
+    kind = CK_Attr;
+  } else if (def->isSubClassOf("RegionConstraint")) {
+    kind = CK_Region;
+  } else if (def->isSubClassOf("SuccessorConstraint")) {
+    kind = CK_Successor;
+  } else {
+    assert(def->isSubClassOf("Constraint"));
+  }
 }
 
 Constraint::Constraint(Kind kind, const llvm::Record *record)
     : def(record), kind(kind) {
-    // Look through OpVariable's to their constraint.
-    if (def->isSubClassOf("OpVariable"))
-        def = def->getValueAsDef("constraint");
+  // Look through OpVariable's to their constraint.
+  if (def->isSubClassOf("OpVariable"))
+    def = def->getValueAsDef("constraint");
 }
 
 Pred Constraint::getPredicate() const {
-    auto *val = def->getValue("predicate");
+  auto *val = def->getValue("predicate");
 
-    // If no predicate is specified, then return the null predicate (which
-    // corresponds to true).
-    if (!val)
-        return Pred();
+  // If no predicate is specified, then return the null predicate (which
+  // corresponds to true).
+  if (!val)
+    return Pred();
 
-    const auto *pred = dyn_cast<llvm::DefInit>(val->getValue());
-    return Pred(pred);
+  const auto *pred = dyn_cast<llvm::DefInit>(val->getValue());
+  return Pred(pred);
 }
 
 std::string Constraint::getConditionTemplate() const {
-    return getPredicate().getCondition();
+  return getPredicate().getCondition();
 }
 
 StringRef Constraint::getDescription() const {
-    // If a summary is found, we use that given that it is a focused single line
-    // comment.
-    if (Optional<StringRef> summary = def->getValueAsOptionalString("summary"))
-        return *summary;
-    // If a summary can't be found, look for a specific description field to use
-    // for the constraint.
-    StringRef desc = def->getValueAsString("description");
-    if (!desc.empty())
-        return desc;
-    // Otherwise, fallback to the name of the constraint definition.
-    return def->getName();
+  // If a summary is found, we use that given that it is a focused single line
+  // comment.
+  if (Optional<StringRef> summary = def->getValueAsOptionalString("summary"))
+    return *summary;
+  // If a summary can't be found, look for a specific description field to use
+  // for the constraint.
+  StringRef desc = def->getValueAsString("description");
+  if (!desc.empty())
+    return desc;
+  // Otherwise, fallback to the name of the constraint definition.
+  return def->getName();
 }
 
 AppliedConstraint::AppliedConstraint(Constraint &&constraint,

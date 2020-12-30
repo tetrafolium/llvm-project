@@ -27,7 +27,7 @@ class Pass;
 /// to strip-mine the loops and to perform the dependence analysis before
 /// calling the conversion.
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createAffineForToGPUPass(unsigned numBlockDims, unsigned numThreadDims);
+createAffineForToGPUPass(unsigned numBlockDims, unsigned numThreadDims);
 std::unique_ptr<OperationPass<FuncOp>> createAffineForToGPUPass();
 
 /// Creates a pass that converts scf.parallel operations into a gpu.launch

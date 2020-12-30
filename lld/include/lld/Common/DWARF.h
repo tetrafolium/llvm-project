@@ -25,25 +25,23 @@ namespace lld {
 
 class DWARFCache {
 public:
-    DWARFCache(std::unique_ptr<llvm::DWARFContext> dwarf);
-    llvm::Optional<llvm::DILineInfo> getDILineInfo(uint64_t offset,
-            uint64_t sectionIndex);
-    llvm::Optional<std::pair<std::string, unsigned>>
-            getVariableLoc(StringRef name);
+  DWARFCache(std::unique_ptr<llvm::DWARFContext> dwarf);
+  llvm::Optional<llvm::DILineInfo> getDILineInfo(uint64_t offset,
+                                                 uint64_t sectionIndex);
+  llvm::Optional<std::pair<std::string, unsigned>>
+  getVariableLoc(StringRef name);
 
-    llvm::DWARFContext *getContext() {
-        return dwarf.get();
-    }
+  llvm::DWARFContext *getContext() { return dwarf.get(); }
 
 private:
-    std::unique_ptr<llvm::DWARFContext> dwarf;
-    std::vector<const llvm::DWARFDebugLine::LineTable *> lineTables;
-    struct VarLoc {
-        const llvm::DWARFDebugLine::LineTable *lt;
-        unsigned file;
-        unsigned line;
-    };
-    llvm::DenseMap<StringRef, VarLoc> variableLoc;
+  std::unique_ptr<llvm::DWARFContext> dwarf;
+  std::vector<const llvm::DWARFDebugLine::LineTable *> lineTables;
+  struct VarLoc {
+    const llvm::DWARFDebugLine::LineTable *lt;
+    unsigned file;
+    unsigned line;
+  };
+  llvm::DenseMap<StringRef, VarLoc> variableLoc;
 };
 
 } // namespace lld

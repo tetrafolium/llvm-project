@@ -13,24 +13,22 @@ using namespace llvm;
 
 StringRef ELFAttrs::attrTypeAsString(unsigned attr, TagNameMap tagNameMap,
                                      bool hasTagPrefix) {
-    auto tagNameIt = find_if(
-    tagNameMap, [attr](const TagNameItem item) {
-        return item.attr == attr;
-    });
-    if (tagNameIt == tagNameMap.end())
-        return "";
-    StringRef tagName = tagNameIt->tagName;
-    return hasTagPrefix ? tagName : tagName.drop_front(4);
+  auto tagNameIt = find_if(
+      tagNameMap, [attr](const TagNameItem item) { return item.attr == attr; });
+  if (tagNameIt == tagNameMap.end())
+    return "";
+  StringRef tagName = tagNameIt->tagName;
+  return hasTagPrefix ? tagName : tagName.drop_front(4);
 }
 
 Optional<unsigned> ELFAttrs::attrTypeFromString(StringRef tag,
-        TagNameMap tagNameMap) {
-    bool hasTagPrefix = tag.startswith("Tag_");
-    auto tagNameIt =
-    find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
+                                                TagNameMap tagNameMap) {
+  bool hasTagPrefix = tag.startswith("Tag_");
+  auto tagNameIt =
+      find_if(tagNameMap, [tag, hasTagPrefix](const TagNameItem item) {
         return item.tagName.drop_front(hasTagPrefix ? 0 : 4) == tag;
-    });
-    if (tagNameIt == tagNameMap.end())
-        return None;
-    return tagNameIt->attr;
+      });
+  if (tagNameIt == tagNameMap.end())
+    return None;
+  return tagNameIt->attr;
 }

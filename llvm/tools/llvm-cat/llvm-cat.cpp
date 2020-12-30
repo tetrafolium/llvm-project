@@ -35,63 +35,63 @@ using namespace llvm;
 cl::OptionCategory CatCategory("llvm-cat Options");
 
 static cl::opt<bool>
-BinaryCat("b", cl::desc("Whether to perform binary concatenation"),
-          cl::cat(CatCategory));
+    BinaryCat("b", cl::desc("Whether to perform binary concatenation"),
+              cl::cat(CatCategory));
 
 static cl::opt<std::string> OutputFilename("o", cl::Required,
-        cl::desc("Output filename"),
-        cl::value_desc("filename"),
-        cl::cat(CatCategory));
+                                           cl::desc("Output filename"),
+                                           cl::value_desc("filename"),
+                                           cl::cat(CatCategory));
 
 static cl::list<std::string> InputFilenames(cl::Positional, cl::ZeroOrMore,
-        cl::desc("<input  files>"),
-        cl::cat(CatCategory));
+                                            cl::desc("<input  files>"),
+                                            cl::cat(CatCategory));
 
 int main(int argc, char **argv) {
-    cl::HideUnrelatedOptions(CatCategory);
-    cl::ParseCommandLineOptions(argc, argv, "Module concatenation");
+  cl::HideUnrelatedOptions(CatCategory);
+  cl::ParseCommandLineOptions(argc, argv, "Module concatenation");
 
-    ExitOnError ExitOnErr("llvm-cat: ");
-    LLVMContext Context;
+  ExitOnError ExitOnErr("llvm-cat: ");
+  LLVMContext Context;
 
-    SmallVector<char, 0> Buffer;
-    BitcodeWriter Writer(Buffer);
-    if (BinaryCat) {
-        for (const auto &InputFilename : InputFilenames) {
-            std::unique_ptr<MemoryBuffer> MB = ExitOnErr(
-                                                   errorOrToExpected(MemoryBuffer::getFileOrSTDIN(InputFilename)));
-            std::vector<BitcodeModule> Mods = ExitOnErr(getBitcodeModuleList(*MB));
-            for (auto &BitcodeMod : Mods) {
-                Buffer.insert(Buffer.end(), BitcodeMod.getBuffer().begin(),
-                              BitcodeMod.getBuffer().end());
-                Writer.copyStrtab(BitcodeMod.getStrtab());
-            }
-        }
-    } else {
-        // The string table does not own strings added to it, some of which are
-        // owned by the modules; keep them alive until we write the string table.
-        std::vector<std::unique_ptr<Module>> OwnedMods;
-        for (const auto &InputFilename : InputFilenames) {
-            SMDiagnostic Err;
-            std::unique_ptr<Module> M = parseIRFile(InputFilename, Err, Context);
-            if (!M) {
-                Err.print(argv[0], errs());
-                return 1;
-            }
-            Writer.writeModule(*M);
-            OwnedMods.push_back(std::move(M));
-        }
-        Writer.writeStrtab();
+  SmallVector<char, 0> Buffer;
+  BitcodeWriter Writer(Buffer);
+  if (BinaryCat) {
+    for (const auto &InputFilename : InputFilenames) {
+      std::unique_ptr<MemoryBuffer> MB = ExitOnErr(
+          errorOrToExpected(MemoryBuffer::getFileOrSTDIN(InputFilename)));
+      std::vector<BitcodeModule> Mods = ExitOnErr(getBitcodeModuleList(*MB));
+      for (auto &BitcodeMod : Mods) {
+        Buffer.insert(Buffer.end(), BitcodeMod.getBuffer().begin(),
+                      BitcodeMod.getBuffer().end());
+        Writer.copyStrtab(BitcodeMod.getStrtab());
+      }
     }
-
-    std::error_code EC;
-    raw_fd_ostream OS(OutputFilename, EC, sys::fs::OpenFlags::OF_None);
-    if (EC) {
-        errs() << argv[0] << ": cannot open " << OutputFilename << " for writing: "
-               << EC.message();
+  } else {
+    // The string table does not own strings added to it, some of which are
+    // owned by the modules; keep them alive until we write the string table.
+    std::vector<std::unique_ptr<Module>> OwnedMods;
+    for (const auto &InputFilename : InputFilenames) {
+      SMDiagnostic Err;
+      std::unique_ptr<Module> M = parseIRFile(InputFilename, Err, Context);
+      if (!M) {
+        Err.print(argv[0], errs());
         return 1;
+      }
+      Writer.writeModule(*M);
+      OwnedMods.push_back(std::move(M));
     }
+    Writer.writeStrtab();
+  }
 
-    OS.write(Buffer.data(), Buffer.size());
-    return 0;
+  std::error_code EC;
+  raw_fd_ostream OS(OutputFilename, EC, sys::fs::OpenFlags::OF_None);
+  if (EC) {
+    errs() << argv[0] << ": cannot open " << OutputFilename
+           << " for writing: " << EC.message();
+    return 1;
+  }
+
+  OS.write(Buffer.data(), Buffer.size());
+  return 0;
 }

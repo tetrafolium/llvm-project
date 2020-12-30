@@ -35,39 +35,39 @@ namespace detail {
 template <typename ContainerOpT>
 inline OwningOpRef<ContainerOpT> constructContainerOpForParserIfNecessary(
     Block *parsedBlock, MLIRContext *context, Location sourceFileLoc) {
-    static_assert(
-        ContainerOpT::template hasTrait<OpTrait::OneRegion>() &&
-        std::is_base_of<typename OpTrait::SingleBlockImplicitTerminator<
-        typename ContainerOpT::ImplicitTerminatorOpT>::
-        template Impl<ContainerOpT>,
-        ContainerOpT>::value,
-        "Expected `ContainerOpT` to have a single region with a single "
-        "block that has an implicit terminator");
+  static_assert(
+      ContainerOpT::template hasTrait<OpTrait::OneRegion>() &&
+          std::is_base_of<typename OpTrait::SingleBlockImplicitTerminator<
+                              typename ContainerOpT::ImplicitTerminatorOpT>::
+                              template Impl<ContainerOpT>,
+                          ContainerOpT>::value,
+      "Expected `ContainerOpT` to have a single region with a single "
+      "block that has an implicit terminator");
 
-    // Check to see if we parsed a single instance of this operation.
-    if (llvm::hasSingleElement(*parsedBlock)) {
-        if (ContainerOpT op = dyn_cast<ContainerOpT>(parsedBlock->front())) {
-            op->remove();
-            return op;
-        }
+  // Check to see if we parsed a single instance of this operation.
+  if (llvm::hasSingleElement(*parsedBlock)) {
+    if (ContainerOpT op = dyn_cast<ContainerOpT>(parsedBlock->front())) {
+      op->remove();
+      return op;
     }
+  }
 
-    // If not, then build a new one to contain the parsed operations.
-    OpBuilder builder(context);
-    ContainerOpT op = builder.create<ContainerOpT>(sourceFileLoc);
-    OwningOpRef<ContainerOpT> opRef(op);
-    assert(op->getNumRegions() == 1 && llvm::hasSingleElement(op->getRegion(0)) &&
-           "expected generated operation to have a single region with a single "
-           "block");
-    Block *opBlock = &op->getRegion(0).front();
-    opBlock->getOperations().splice(opBlock->begin(),
-                                    parsedBlock->getOperations());
+  // If not, then build a new one to contain the parsed operations.
+  OpBuilder builder(context);
+  ContainerOpT op = builder.create<ContainerOpT>(sourceFileLoc);
+  OwningOpRef<ContainerOpT> opRef(op);
+  assert(op->getNumRegions() == 1 && llvm::hasSingleElement(op->getRegion(0)) &&
+         "expected generated operation to have a single region with a single "
+         "block");
+  Block *opBlock = &op->getRegion(0).front();
+  opBlock->getOperations().splice(opBlock->begin(),
+                                  parsedBlock->getOperations());
 
-    // After splicing, verify just this operation to ensure it can properly
-    // contain the operations inside of it.
-    if (failed(op.verify()))
-        return OwningOpRef<ContainerOpT>();
-    return std::move(opRef);
+  // After splicing, verify just this operation to ensure it can properly
+  // contain the operations inside of it.
+  if (failed(op.verify()))
+    return OwningOpRef<ContainerOpT>();
+  return std::move(opRef);
 }
 } // end namespace detail
 
@@ -127,12 +127,12 @@ LogicalResult parseSourceString(llvm::StringRef sourceStr, Block *block,
 template <typename ContainerOpT>
 inline OwningOpRef<ContainerOpT>
 parseSourceFile(const llvm::SourceMgr &sourceMgr, MLIRContext *context) {
-    LocationAttr sourceFileLoc;
-    Block block;
-    if (failed(parseSourceFile(sourceMgr, &block, context, &sourceFileLoc)))
-        return OwningOpRef<ContainerOpT>();
-    return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
-               &block, context, sourceFileLoc);
+  LocationAttr sourceFileLoc;
+  Block block;
+  if (failed(parseSourceFile(sourceMgr, &block, context, &sourceFileLoc)))
+    return OwningOpRef<ContainerOpT>();
+  return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
+      &block, context, sourceFileLoc);
 }
 
 /// This parses the file specified by the indicated filename. If the source IR
@@ -145,13 +145,13 @@ parseSourceFile(const llvm::SourceMgr &sourceMgr, MLIRContext *context) {
 /// `SingleBlockImplicitTerminator` trait.
 template <typename ContainerOpT>
 inline OwningOpRef<ContainerOpT> parseSourceFile(llvm::StringRef filename,
-        MLIRContext *context) {
-    LocationAttr sourceFileLoc;
-    Block block;
-    if (failed(parseSourceFile(filename, &block, context, &sourceFileLoc)))
-        return OwningOpRef<ContainerOpT>();
-    return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
-               &block, context, sourceFileLoc);
+                                                 MLIRContext *context) {
+  LocationAttr sourceFileLoc;
+  Block block;
+  if (failed(parseSourceFile(filename, &block, context, &sourceFileLoc)))
+    return OwningOpRef<ContainerOpT>();
+  return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
+      &block, context, sourceFileLoc);
 }
 
 /// This parses the file specified by the indicated filename using the provided
@@ -164,15 +164,15 @@ inline OwningOpRef<ContainerOpT> parseSourceFile(llvm::StringRef filename,
 /// implement the `SingleBlockImplicitTerminator` trait.
 template <typename ContainerOpT>
 inline OwningOpRef<ContainerOpT> parseSourceFile(llvm::StringRef filename,
-        llvm::SourceMgr &sourceMgr,
-        MLIRContext *context) {
-    LocationAttr sourceFileLoc;
-    Block block;
-    if (failed(parseSourceFile(filename, sourceMgr, &block, context,
-                               &sourceFileLoc)))
-        return OwningOpRef<ContainerOpT>();
-    return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
-               &block, context, sourceFileLoc);
+                                                 llvm::SourceMgr &sourceMgr,
+                                                 MLIRContext *context) {
+  LocationAttr sourceFileLoc;
+  Block block;
+  if (failed(parseSourceFile(filename, sourceMgr, &block, context,
+                             &sourceFileLoc)))
+    return OwningOpRef<ContainerOpT>();
+  return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
+      &block, context, sourceFileLoc);
 }
 
 /// This parses the provided string containing MLIR. If the source IR contained
@@ -185,33 +185,33 @@ inline OwningOpRef<ContainerOpT> parseSourceFile(llvm::StringRef filename,
 /// `SingleBlockImplicitTerminator` trait.
 template <typename ContainerOpT>
 inline OwningOpRef<ContainerOpT> parseSourceString(llvm::StringRef sourceStr,
-        MLIRContext *context) {
-    LocationAttr sourceFileLoc;
-    Block block;
-    if (failed(parseSourceString(sourceStr, &block, context, &sourceFileLoc)))
-        return OwningOpRef<ContainerOpT>();
-    return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
-               &block, context, sourceFileLoc);
+                                                   MLIRContext *context) {
+  LocationAttr sourceFileLoc;
+  Block block;
+  if (failed(parseSourceString(sourceStr, &block, context, &sourceFileLoc)))
+    return OwningOpRef<ContainerOpT>();
+  return detail::constructContainerOpForParserIfNecessary<ContainerOpT>(
+      &block, context, sourceFileLoc);
 }
 
 /// TODO: These methods are deprecated in favor of the above template versions.
 /// They should be removed when usages have been updated.
 inline OwningModuleRef parseSourceFile(const llvm::SourceMgr &sourceMgr,
                                        MLIRContext *context) {
-    return parseSourceFile<ModuleOp>(sourceMgr, context);
+  return parseSourceFile<ModuleOp>(sourceMgr, context);
 }
 inline OwningModuleRef parseSourceFile(llvm::StringRef filename,
                                        MLIRContext *context) {
-    return parseSourceFile<ModuleOp>(filename, context);
+  return parseSourceFile<ModuleOp>(filename, context);
 }
 inline OwningModuleRef parseSourceFile(llvm::StringRef filename,
                                        llvm::SourceMgr &sourceMgr,
                                        MLIRContext *context) {
-    return parseSourceFile<ModuleOp>(filename, sourceMgr, context);
+  return parseSourceFile<ModuleOp>(filename, sourceMgr, context);
 }
 inline OwningModuleRef parseSourceString(llvm::StringRef moduleStr,
-        MLIRContext *context) {
-    return parseSourceString<ModuleOp>(moduleStr, context);
+                                         MLIRContext *context) {
+  return parseSourceString<ModuleOp>(moduleStr, context);
 }
 
 /// This parses a single MLIR attribute to an MLIR context if it was valid.  If

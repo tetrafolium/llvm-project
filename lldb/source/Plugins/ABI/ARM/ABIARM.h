@@ -11,7 +11,7 @@
 
 class ABIARM {
 public:
-    static void Initialize();
-    static void Terminate();
+  static void Initialize();
+  static void Terminate();
 };
 #endif

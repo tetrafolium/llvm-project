@@ -43,174 +43,172 @@ namespace lldb_private {
 /// is cleared of the value of the error changes.
 class Status {
 public:
-    /// Every error value that this object can contain needs to be able to fit
-    /// into ValueType.
-    typedef uint32_t ValueType;
+  /// Every error value that this object can contain needs to be able to fit
+  /// into ValueType.
+  typedef uint32_t ValueType;
 
-    Status();
+  Status();
 
-    /// Initialize the error object with a generic success value.
-    ///
-    /// \param[in] err
-    ///     An error code.
-    ///
-    /// \param[in] type
-    ///     The type for \a err.
-    explicit Status(ValueType err,
-                    lldb::ErrorType type = lldb::eErrorTypeGeneric);
+  /// Initialize the error object with a generic success value.
+  ///
+  /// \param[in] err
+  ///     An error code.
+  ///
+  /// \param[in] type
+  ///     The type for \a err.
+  explicit Status(ValueType err,
+                  lldb::ErrorType type = lldb::eErrorTypeGeneric);
 
-    Status(std::error_code EC);
+  Status(std::error_code EC);
 
-    explicit Status(const char *format, ...)
-    __attribute__((format(printf, 2, 3)));
+  explicit Status(const char *format, ...)
+      __attribute__((format(printf, 2, 3)));
 
-    ~Status();
+  ~Status();
 
-    // llvm::Error support
-    explicit Status(llvm::Error error) {
-        *this = std::move(error);
-    }
-    const Status &operator=(llvm::Error error);
-    llvm::Error ToError() const;
+  // llvm::Error support
+  explicit Status(llvm::Error error) { *this = std::move(error); }
+  const Status &operator=(llvm::Error error);
+  llvm::Error ToError() const;
 
-    /// Get the error string associated with the current error.
-    //
-    /// Gets the error value as a NULL terminated C string. The error string
-    /// will be fetched and cached on demand. The error string will be retrieved
-    /// from a callback that is appropriate for the type of the error and will
-    /// be cached until the error value is changed or cleared.
-    ///
-    /// \return
-    ///     The error as a NULL terminated C string value if the error
-    ///     is valid and is able to be converted to a string value,
-    ///     NULL otherwise.
-    const char *AsCString(const char *default_error_str = "unknown error") const;
+  /// Get the error string associated with the current error.
+  //
+  /// Gets the error value as a NULL terminated C string. The error string
+  /// will be fetched and cached on demand. The error string will be retrieved
+  /// from a callback that is appropriate for the type of the error and will
+  /// be cached until the error value is changed or cleared.
+  ///
+  /// \return
+  ///     The error as a NULL terminated C string value if the error
+  ///     is valid and is able to be converted to a string value,
+  ///     NULL otherwise.
+  const char *AsCString(const char *default_error_str = "unknown error") const;
 
-    /// Clear the object state.
-    ///
-    /// Reverts the state of this object to contain a generic success value and
-    /// frees any cached error string value.
-    void Clear();
+  /// Clear the object state.
+  ///
+  /// Reverts the state of this object to contain a generic success value and
+  /// frees any cached error string value.
+  void Clear();
 
-    /// Test for error condition.
-    ///
-    /// \return
-    ///     \b true if this object contains an error, \b false
-    ///     otherwise.
-    bool Fail() const;
+  /// Test for error condition.
+  ///
+  /// \return
+  ///     \b true if this object contains an error, \b false
+  ///     otherwise.
+  bool Fail() const;
 
-    /// Access the error value.
-    ///
-    /// \return
-    ///     The error value.
-    ValueType GetError() const;
+  /// Access the error value.
+  ///
+  /// \return
+  ///     The error value.
+  ValueType GetError() const;
 
-    /// Access the error type.
-    ///
-    /// \return
-    ///     The error type enumeration value.
-    lldb::ErrorType GetType() const;
+  /// Access the error type.
+  ///
+  /// \return
+  ///     The error type enumeration value.
+  lldb::ErrorType GetType() const;
 
-    /// Set accessor from a kern_return_t.
-    ///
-    /// Set accessor for the error value to \a err and the error type to \c
-    /// MachKernel.
-    ///
-    /// \param[in] err
-    ///     A mach error code.
-    void SetMachError(uint32_t err);
+  /// Set accessor from a kern_return_t.
+  ///
+  /// Set accessor for the error value to \a err and the error type to \c
+  /// MachKernel.
+  ///
+  /// \param[in] err
+  ///     A mach error code.
+  void SetMachError(uint32_t err);
 
-    void SetExpressionError(lldb::ExpressionResults, const char *mssg);
+  void SetExpressionError(lldb::ExpressionResults, const char *mssg);
 
-    int SetExpressionErrorWithFormat(lldb::ExpressionResults, const char *format,
-                                     ...) __attribute__((format(printf, 3, 4)));
+  int SetExpressionErrorWithFormat(lldb::ExpressionResults, const char *format,
+                                   ...) __attribute__((format(printf, 3, 4)));
 
-    /// Set accessor with an error value and type.
-    ///
-    /// Set accessor for the error value to \a err and the error type to \a
-    /// type.
-    ///
-    /// \param[in] err
-    ///     A mach error code.
-    ///
-    /// \param[in] type
-    ///     The type for \a err.
-    void SetError(ValueType err, lldb::ErrorType type);
+  /// Set accessor with an error value and type.
+  ///
+  /// Set accessor for the error value to \a err and the error type to \a
+  /// type.
+  ///
+  /// \param[in] err
+  ///     A mach error code.
+  ///
+  /// \param[in] type
+  ///     The type for \a err.
+  void SetError(ValueType err, lldb::ErrorType type);
 
-    /// Set the current error to errno.
-    ///
-    /// Update the error value to be \c errno and update the type to be \c
-    /// Status::POSIX.
-    void SetErrorToErrno();
+  /// Set the current error to errno.
+  ///
+  /// Update the error value to be \c errno and update the type to be \c
+  /// Status::POSIX.
+  void SetErrorToErrno();
 
-    /// Set the current error to a generic error.
-    ///
-    /// Update the error value to be \c LLDB_GENERIC_ERROR and update the type
-    /// to be \c Status::Generic.
-    void SetErrorToGenericError();
+  /// Set the current error to a generic error.
+  ///
+  /// Update the error value to be \c LLDB_GENERIC_ERROR and update the type
+  /// to be \c Status::Generic.
+  void SetErrorToGenericError();
 
-    /// Set the current error string to \a err_str.
-    ///
-    /// Set accessor for the error string value for a generic errors, or to
-    /// supply additional details above and beyond the standard error strings
-    /// that the standard type callbacks typically provide. This allows custom
-    /// strings to be supplied as an error explanation. The error string value
-    /// will remain until the error value is cleared or a new error value/type
-    /// is assigned.
-    ///
-    /// \param err_str
-    ///     The new custom error string to copy and cache.
-    void SetErrorString(llvm::StringRef err_str);
+  /// Set the current error string to \a err_str.
+  ///
+  /// Set accessor for the error string value for a generic errors, or to
+  /// supply additional details above and beyond the standard error strings
+  /// that the standard type callbacks typically provide. This allows custom
+  /// strings to be supplied as an error explanation. The error string value
+  /// will remain until the error value is cleared or a new error value/type
+  /// is assigned.
+  ///
+  /// \param err_str
+  ///     The new custom error string to copy and cache.
+  void SetErrorString(llvm::StringRef err_str);
 
-    /// Set the current error string to a formatted error string.
-    ///
-    /// \param format
-    ///     A printf style format string
-    int SetErrorStringWithFormat(const char *format, ...)
-    __attribute__((format(printf, 2, 3)));
+  /// Set the current error string to a formatted error string.
+  ///
+  /// \param format
+  ///     A printf style format string
+  int SetErrorStringWithFormat(const char *format, ...)
+      __attribute__((format(printf, 2, 3)));
 
-    int SetErrorStringWithVarArg(const char *format, va_list args);
+  int SetErrorStringWithVarArg(const char *format, va_list args);
 
-    template <typename... Args>
-    void SetErrorStringWithFormatv(const char *format, Args &&... args) {
-        SetErrorString(llvm::formatv(format, std::forward<Args>(args)...).str());
-    }
+  template <typename... Args>
+  void SetErrorStringWithFormatv(const char *format, Args &&... args) {
+    SetErrorString(llvm::formatv(format, std::forward<Args>(args)...).str());
+  }
 
-    /// Test for success condition.
-    ///
-    /// Returns true if the error code in this object is considered a successful
-    /// return value.
-    ///
-    /// \return
-    ///     \b true if this object contains an value that describes
-    ///     success (non-erro), \b false otherwise.
-    bool Success() const;
+  /// Test for success condition.
+  ///
+  /// Returns true if the error code in this object is considered a successful
+  /// return value.
+  ///
+  /// \return
+  ///     \b true if this object contains an value that describes
+  ///     success (non-erro), \b false otherwise.
+  bool Success() const;
 
-    /// Test for a failure due to a generic interrupt.
-    ///
-    /// Returns true if the error code in this object was caused by an
-    /// interrupt. At present only supports Posix EINTR.
-    ///
-    /// \return
-    ///     \b true if this object contains an value that describes
-    ///     failure due to interrupt, \b false otherwise.
-    bool WasInterrupted() const;
+  /// Test for a failure due to a generic interrupt.
+  ///
+  /// Returns true if the error code in this object was caused by an
+  /// interrupt. At present only supports Posix EINTR.
+  ///
+  /// \return
+  ///     \b true if this object contains an value that describes
+  ///     failure due to interrupt, \b false otherwise.
+  bool WasInterrupted() const;
 
 protected:
-    /// Member variables
-    ValueType m_code;             ///< Status code as an integer value.
-    lldb::ErrorType m_type;       ///< The type of the above error code.
-    mutable std::string m_string; ///< A string representation of the error code.
+  /// Member variables
+  ValueType m_code;             ///< Status code as an integer value.
+  lldb::ErrorType m_type;       ///< The type of the above error code.
+  mutable std::string m_string; ///< A string representation of the error code.
 };
 
 } // namespace lldb_private
 
 namespace llvm {
 template <> struct format_provider<lldb_private::Status> {
-    static void format(const lldb_private::Status &error, llvm::raw_ostream &OS,
-                       llvm::StringRef Options);
+  static void format(const lldb_private::Status &error, llvm::raw_ostream &OS,
+                     llvm::StringRef Options);
 };
-}
+} // namespace llvm
 
 #define LLDB_ERRORF(status, fmt, ...)                                          \
   do {                                                                         \

@@ -23,7 +23,7 @@ namespace llvm {
 class UniqueInternalLinkageNamesPass
     : public PassInfoMixin<UniqueInternalLinkageNamesPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

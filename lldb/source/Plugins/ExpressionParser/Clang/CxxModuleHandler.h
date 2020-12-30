@@ -30,36 +30,34 @@ namespace lldb_private {
 /// that instantiating this template is safe to do, e.g. because the target
 /// decl is a container class from the STL.
 class CxxModuleHandler {
-    /// The ASTImporter that should be used to import any Decls which aren't
-    /// directly handled by this class itself.
-    clang::ASTImporter *m_importer = nullptr;
+  /// The ASTImporter that should be used to import any Decls which aren't
+  /// directly handled by this class itself.
+  clang::ASTImporter *m_importer = nullptr;
 
-    /// The Sema instance of the target ASTContext.
-    clang::Sema *m_sema = nullptr;
+  /// The Sema instance of the target ASTContext.
+  clang::Sema *m_sema = nullptr;
 
-    /// List of template names this class currently supports. These are the
-    /// template names inside the 'std' namespace such as 'vector' or 'list'.
-    llvm::StringSet<> m_supported_templates;
+  /// List of template names this class currently supports. These are the
+  /// template names inside the 'std' namespace such as 'vector' or 'list'.
+  llvm::StringSet<> m_supported_templates;
 
-    /// Tries to manually instantiate the given foreign template in the target
-    /// context (designated by m_sema).
-    llvm::Optional<clang::Decl *> tryInstantiateStdTemplate(clang::Decl *d);
+  /// Tries to manually instantiate the given foreign template in the target
+  /// context (designated by m_sema).
+  llvm::Optional<clang::Decl *> tryInstantiateStdTemplate(clang::Decl *d);
 
 public:
-    CxxModuleHandler() = default;
-    CxxModuleHandler(clang::ASTImporter &importer, clang::ASTContext *target);
+  CxxModuleHandler() = default;
+  CxxModuleHandler(clang::ASTImporter &importer, clang::ASTContext *target);
 
-    /// Attempts to import the given decl into the target ASTContext by
-    /// deserializing it from the 'std' module. This function returns a Decl if a
-    /// Decl has been deserialized from the 'std' module. Otherwise this function
-    /// returns nothing.
-    llvm::Optional<clang::Decl *> Import(clang::Decl *d);
+  /// Attempts to import the given decl into the target ASTContext by
+  /// deserializing it from the 'std' module. This function returns a Decl if a
+  /// Decl has been deserialized from the 'std' module. Otherwise this function
+  /// returns nothing.
+  llvm::Optional<clang::Decl *> Import(clang::Decl *d);
 
-    /// Returns true iff this instance is capable of importing any declarations
-    /// in the target ASTContext.
-    bool isValid() const {
-        return m_sema != nullptr;
-    }
+  /// Returns true iff this instance is capable of importing any declarations
+  /// in the target ASTContext.
+  bool isValid() const { return m_sema != nullptr; }
 };
 
 } // namespace lldb_private

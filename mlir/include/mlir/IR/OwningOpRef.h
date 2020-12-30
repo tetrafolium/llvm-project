@@ -26,48 +26,40 @@ namespace mlir {
 template <typename OpTy>
 class OwningOpRef {
 public:
-    /// The underlying operation type stored in this reference.
-    using OperationT = OpTy;
+  /// The underlying operation type stored in this reference.
+  using OperationT = OpTy;
 
-    OwningOpRef(std::nullptr_t = nullptr) {}
-    OwningOpRef(OpTy op) : op(op) {}
-    OwningOpRef(OwningOpRef &&other) : op(other.release()) {}
-    ~OwningOpRef() {
-        if (op)
-            op->erase();
-    }
+  OwningOpRef(std::nullptr_t = nullptr) {}
+  OwningOpRef(OpTy op) : op(op) {}
+  OwningOpRef(OwningOpRef &&other) : op(other.release()) {}
+  ~OwningOpRef() {
+    if (op)
+      op->erase();
+  }
 
-    /// Assign from another op reference.
-    OwningOpRef &operator=(OwningOpRef &&other) {
-        if (op)
-            op->erase();
-        op = other.release();
-        return *this;
-    }
+  /// Assign from another op reference.
+  OwningOpRef &operator=(OwningOpRef &&other) {
+    if (op)
+      op->erase();
+    op = other.release();
+    return *this;
+  }
 
-    /// Allow accessing the internal op.
-    OpTy get() const {
-        return op;
-    }
-    OpTy operator*() const {
-        return op;
-    }
-    OpTy *operator->() {
-        return &op;
-    }
-    explicit operator bool() const {
-        return op;
-    }
+  /// Allow accessing the internal op.
+  OpTy get() const { return op; }
+  OpTy operator*() const { return op; }
+  OpTy *operator->() { return &op; }
+  explicit operator bool() const { return op; }
 
-    /// Release the referenced op.
-    OpTy release() {
-        OpTy released;
-        std::swap(released, op);
-        return released;
-    }
+  /// Release the referenced op.
+  OpTy release() {
+    OpTy released;
+    std::swap(released, op);
+    return released;
+  }
 
 private:
-    OpTy op;
+  OpTy op;
 };
 
 } // end namespace mlir

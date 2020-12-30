@@ -25,84 +25,84 @@ namespace process_linux {
 class NativeProcessLinux;
 
 class NativeThreadLinux : public NativeThreadProtocol {
-    friend class NativeProcessLinux;
+  friend class NativeProcessLinux;
 
 public:
-    NativeThreadLinux(NativeProcessLinux &process, lldb::tid_t tid);
+  NativeThreadLinux(NativeProcessLinux &process, lldb::tid_t tid);
 
-    // NativeThreadProtocol Interface
-    std::string GetName() override;
+  // NativeThreadProtocol Interface
+  std::string GetName() override;
 
-    lldb::StateType GetState() override;
+  lldb::StateType GetState() override;
 
-    bool GetStopReason(ThreadStopInfo &stop_info,
-                       std::string &description) override;
+  bool GetStopReason(ThreadStopInfo &stop_info,
+                     std::string &description) override;
 
-    NativeRegisterContextLinux &GetRegisterContext() override {
-        return *m_reg_context_up;
-    }
+  NativeRegisterContextLinux &GetRegisterContext() override {
+    return *m_reg_context_up;
+  }
 
-    Status SetWatchpoint(lldb::addr_t addr, size_t size, uint32_t watch_flags,
-                         bool hardware) override;
+  Status SetWatchpoint(lldb::addr_t addr, size_t size, uint32_t watch_flags,
+                       bool hardware) override;
 
-    Status RemoveWatchpoint(lldb::addr_t addr) override;
+  Status RemoveWatchpoint(lldb::addr_t addr) override;
 
-    Status SetHardwareBreakpoint(lldb::addr_t addr, size_t size) override;
+  Status SetHardwareBreakpoint(lldb::addr_t addr, size_t size) override;
 
-    Status RemoveHardwareBreakpoint(lldb::addr_t addr) override;
+  Status RemoveHardwareBreakpoint(lldb::addr_t addr) override;
 
 private:
-    // Interface for friend classes
+  // Interface for friend classes
 
-    /// Resumes the thread.  If \p signo is anything but
-    /// LLDB_INVALID_SIGNAL_NUMBER, deliver that signal to the thread.
-    Status Resume(uint32_t signo);
+  /// Resumes the thread.  If \p signo is anything but
+  /// LLDB_INVALID_SIGNAL_NUMBER, deliver that signal to the thread.
+  Status Resume(uint32_t signo);
 
-    /// Single steps the thread.  If \p signo is anything but
-    /// LLDB_INVALID_SIGNAL_NUMBER, deliver that signal to the thread.
-    Status SingleStep(uint32_t signo);
+  /// Single steps the thread.  If \p signo is anything but
+  /// LLDB_INVALID_SIGNAL_NUMBER, deliver that signal to the thread.
+  Status SingleStep(uint32_t signo);
 
-    void SetStoppedBySignal(uint32_t signo, const siginfo_t *info = nullptr);
+  void SetStoppedBySignal(uint32_t signo, const siginfo_t *info = nullptr);
 
-    /// Return true if the thread is stopped.
-    /// If stopped by a signal, indicate the signo in the signo argument.
-    /// Otherwise, return LLDB_INVALID_SIGNAL_NUMBER.
-    bool IsStopped(int *signo);
+  /// Return true if the thread is stopped.
+  /// If stopped by a signal, indicate the signo in the signo argument.
+  /// Otherwise, return LLDB_INVALID_SIGNAL_NUMBER.
+  bool IsStopped(int *signo);
 
-    void SetStoppedByExec();
+  void SetStoppedByExec();
 
-    void SetStoppedByBreakpoint();
+  void SetStoppedByBreakpoint();
 
-    void SetStoppedByWatchpoint(uint32_t wp_index);
+  void SetStoppedByWatchpoint(uint32_t wp_index);
 
-    bool IsStoppedAtBreakpoint();
+  bool IsStoppedAtBreakpoint();
 
-    bool IsStoppedAtWatchpoint();
+  bool IsStoppedAtWatchpoint();
 
-    void SetStoppedByTrace();
+  void SetStoppedByTrace();
 
-    void SetStoppedWithNoReason();
+  void SetStoppedWithNoReason();
 
-    void SetExited();
+  void SetExited();
 
-    Status RequestStop();
+  Status RequestStop();
 
-    // Private interface
-    void MaybeLogStateChange(lldb::StateType new_state);
+  // Private interface
+  void MaybeLogStateChange(lldb::StateType new_state);
 
-    NativeProcessLinux &GetProcess();
+  NativeProcessLinux &GetProcess();
 
-    void SetStopped();
+  void SetStopped();
 
-    // Member Variables
-    lldb::StateType m_state;
-    ThreadStopInfo m_stop_info;
-    std::unique_ptr<NativeRegisterContextLinux> m_reg_context_up;
-    std::string m_stop_description;
-    using WatchpointIndexMap = std::map<lldb::addr_t, uint32_t>;
-    WatchpointIndexMap m_watchpoint_index_map;
-    WatchpointIndexMap m_hw_break_index_map;
-    std::unique_ptr<SingleStepWorkaround> m_step_workaround;
+  // Member Variables
+  lldb::StateType m_state;
+  ThreadStopInfo m_stop_info;
+  std::unique_ptr<NativeRegisterContextLinux> m_reg_context_up;
+  std::string m_stop_description;
+  using WatchpointIndexMap = std::map<lldb::addr_t, uint32_t>;
+  WatchpointIndexMap m_watchpoint_index_map;
+  WatchpointIndexMap m_hw_break_index_map;
+  std::unique_ptr<SingleStepWorkaround> m_step_workaround;
 };
 } // namespace process_linux
 } // namespace lldb_private

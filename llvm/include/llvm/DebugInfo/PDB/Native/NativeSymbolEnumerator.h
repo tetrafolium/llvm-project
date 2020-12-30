@@ -19,29 +19,29 @@ class NativeTypeEnum;
 
 class NativeSymbolEnumerator : public NativeRawSymbol {
 public:
-    NativeSymbolEnumerator(NativeSession &Session, SymIndexId Id,
-                           const NativeTypeEnum &Parent,
-                           codeview::EnumeratorRecord Record);
+  NativeSymbolEnumerator(NativeSession &Session, SymIndexId Id,
+                         const NativeTypeEnum &Parent,
+                         codeview::EnumeratorRecord Record);
 
-    ~NativeSymbolEnumerator() override;
+  ~NativeSymbolEnumerator() override;
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    SymIndexId getClassParentId() const override;
-    SymIndexId getLexicalParentId() const override;
-    std::string getName() const override;
-    SymIndexId getTypeId() const override;
-    PDB_DataKind getDataKind() const override;
-    PDB_LocType getLocationType() const override;
-    bool isConstType() const override;
-    bool isVolatileType() const override;
-    bool isUnalignedType() const override;
-    Variant getValue() const override;
+  SymIndexId getClassParentId() const override;
+  SymIndexId getLexicalParentId() const override;
+  std::string getName() const override;
+  SymIndexId getTypeId() const override;
+  PDB_DataKind getDataKind() const override;
+  PDB_LocType getLocationType() const override;
+  bool isConstType() const override;
+  bool isVolatileType() const override;
+  bool isUnalignedType() const override;
+  Variant getValue() const override;
 
 protected:
-    const NativeTypeEnum &Parent;
-    codeview::EnumeratorRecord Record;
+  const NativeTypeEnum &Parent;
+  codeview::EnumeratorRecord Record;
 };
 
 } // namespace pdb

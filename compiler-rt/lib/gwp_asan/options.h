@@ -34,22 +34,22 @@ namespace options {
 typedef size_t (*Backtrace_t)(uintptr_t *TraceBuffer, size_t Size);
 
 struct Options {
-    Backtrace_t Backtrace = nullptr;
+  Backtrace_t Backtrace = nullptr;
 
-    // Read the options from the included definitions file.
+  // Read the options from the included definitions file.
 #define GWP_ASAN_OPTION(Type, Name, DefaultValue, Description)                 \
   Type Name = DefaultValue;
 #include "gwp_asan/options.inc"
 #undef GWP_ASAN_OPTION
 
-    void setDefaults() {
+  void setDefaults() {
 #define GWP_ASAN_OPTION(Type, Name, DefaultValue, Description)                 \
   Name = DefaultValue;
 #include "gwp_asan/options.inc"
 #undef GWP_ASAN_OPTION
 
-        Backtrace = nullptr;
-    }
+    Backtrace = nullptr;
+  }
 };
 } // namespace options
 } // namespace gwp_asan

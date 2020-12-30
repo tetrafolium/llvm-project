@@ -39,98 +39,98 @@ void registerTestDialect(DialectRegistry &);
 } // namespace mlir
 
 static llvm::cl::opt<std::string> inputFilename(llvm::cl::Positional,
-        llvm::cl::Required,
-        llvm::cl::desc("<input file>"));
+                                                llvm::cl::Required,
+                                                llvm::cl::desc("<input file>"));
 
 static llvm::cl::opt<std::string>
-testFilename("test", llvm::cl::Required, llvm::cl::desc("Testing script"));
+    testFilename("test", llvm::cl::Required, llvm::cl::desc("Testing script"));
 
 static llvm::cl::list<std::string>
-testArguments("test-args", llvm::cl::ZeroOrMore,
-              llvm::cl::desc("Testing script arguments"));
+    testArguments("test-args", llvm::cl::ZeroOrMore,
+                  llvm::cl::desc("Testing script arguments"));
 
 static llvm::cl::opt<std::string>
-outputFilename("o",
-               llvm::cl::desc("Output filename for the reduced test case"),
-               llvm::cl::init("-"));
+    outputFilename("o",
+                   llvm::cl::desc("Output filename for the reduced test case"),
+                   llvm::cl::init("-"));
 
 // TODO: Use PassPipelineCLParser to define pass pieplines in the command line.
 static llvm::cl::opt<std::string>
-passTestSpecifier("pass-test",
-                  llvm::cl::desc("Indicate a specific pass to be tested"));
+    passTestSpecifier("pass-test",
+                      llvm::cl::desc("Indicate a specific pass to be tested"));
 
 // Parse and verify the input MLIR file.
 static LogicalResult loadModule(MLIRContext &context, OwningModuleRef &module,
                                 StringRef inputFilename) {
-    module = parseSourceFile(inputFilename, &context);
-    if (!module)
-        return failure();
+  module = parseSourceFile(inputFilename, &context);
+  if (!module)
+    return failure();
 
-    return success();
+  return success();
 }
 
 int main(int argc, char **argv) {
 
-    llvm::InitLLVM y(argc, argv);
+  llvm::InitLLVM y(argc, argv);
 
-    registerMLIRContextCLOptions();
-    registerPassManagerCLOptions();
+  registerMLIRContextCLOptions();
+  registerPassManagerCLOptions();
 
-    llvm::cl::ParseCommandLineOptions(argc, argv,
-                                      "MLIR test case reduction tool.\n");
+  llvm::cl::ParseCommandLineOptions(argc, argv,
+                                    "MLIR test case reduction tool.\n");
 
-    std::string errorMessage;
+  std::string errorMessage;
 
-    auto testscript = openInputFile(testFilename, &errorMessage);
-    if (!testscript)
-        llvm::report_fatal_error(errorMessage);
+  auto testscript = openInputFile(testFilename, &errorMessage);
+  if (!testscript)
+    llvm::report_fatal_error(errorMessage);
 
-    auto output = openOutputFile(outputFilename, &errorMessage);
-    if (!output)
-        llvm::report_fatal_error(errorMessage);
+  auto output = openOutputFile(outputFilename, &errorMessage);
+  if (!output)
+    llvm::report_fatal_error(errorMessage);
 
-    mlir::MLIRContext context;
-    registerAllDialects(context.getDialectRegistry());
+  mlir::MLIRContext context;
+  registerAllDialects(context.getDialectRegistry());
 #ifdef MLIR_INCLUDE_TESTS
-    mlir::test::registerTestDialect(context.getDialectRegistry());
+  mlir::test::registerTestDialect(context.getDialectRegistry());
 #endif
 
-    mlir::OwningModuleRef moduleRef;
-    if (failed(loadModule(context, moduleRef, inputFilename)))
-        llvm::report_fatal_error("Input test case can't be parsed");
+  mlir::OwningModuleRef moduleRef;
+  if (failed(loadModule(context, moduleRef, inputFilename)))
+    llvm::report_fatal_error("Input test case can't be parsed");
 
-    // Initialize test environment.
-    const Tester test(testFilename, testArguments);
+  // Initialize test environment.
+  const Tester test(testFilename, testArguments);
 
-    if (!test.isInteresting(inputFilename))
-        llvm::report_fatal_error(
-            "Input test case does not exhibit interesting behavior");
+  if (!test.isInteresting(inputFilename))
+    llvm::report_fatal_error(
+        "Input test case does not exhibit interesting behavior");
 
-    // Reduction pass pipeline.
-    PassManager pm(&context);
+  // Reduction pass pipeline.
+  PassManager pm(&context);
 
-    if (passTestSpecifier == "DCE") {
+  if (passTestSpecifier == "DCE") {
 
-        // Opt Reduction Pass with SymbolDCEPass as opt pass.
-        pm.addPass(std::make_unique<OptReductionPass>(test, &context,
-                   createSymbolDCEPass()));
+    // Opt Reduction Pass with SymbolDCEPass as opt pass.
+    pm.addPass(std::make_unique<OptReductionPass>(test, &context,
+                                                  createSymbolDCEPass()));
 
-    } else if (passTestSpecifier == "function-reducer") {
+  } else if (passTestSpecifier == "function-reducer") {
 
-        // Reduction tree pass with OpReducer variant generation and single path
-        // traversal.
-        pm.addPass(
-            std::make_unique<ReductionTreePass<OpReducer<FuncOp>, SinglePath>>(
-                test));
-    }
+    // Reduction tree pass with OpReducer variant generation and single path
+    // traversal.
+    pm.addPass(
+        std::make_unique<ReductionTreePass<OpReducer<FuncOp>, SinglePath>>(
+            test));
+  }
 
-    ModuleOp m = moduleRef.get().clone();
+  ModuleOp m = moduleRef.get().clone();
 
-    if (failed(pm.run(m)))
-        llvm::report_fatal_error("Error running the reduction pass pipeline");
+  if (failed(pm.run(m)))
+    llvm::report_fatal_error("Error running the reduction pass pipeline");
 
-    m.print(output->os());
-    output->keep();
+  m.print(output->os());
+  output->keep();
 
-    return 0;
+  return 0;
 }

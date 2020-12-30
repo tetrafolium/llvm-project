@@ -23,20 +23,20 @@ FixItHint changeVarDeclToReference(const VarDecl &Var, ASTContext &Context);
 
 /// This enum defines where the qualifier shall be preferably added.
 enum class QualifierPolicy {
-    Left,  // Add the qualifier always to the left side, if that is possible.
-    Right, // Add the qualifier always to the right side.
+  Left,  // Add the qualifier always to the left side, if that is possible.
+  Right, // Add the qualifier always to the right side.
 };
 
 /// This enum defines which entity is the target for adding the qualifier. This
 /// makes only a difference for pointer-types. Other types behave identical
 /// for either value of \c ConstTarget.
 enum class QualifierTarget {
-    Pointee, /// Transforming a pointer attaches to the pointee and not the
-    /// pointer itself. For references and normal values this option has
-    /// no effect. `int * p = &i;` -> `const int * p = &i` or `int const
-    /// * p = &i`.
-    Value,   /// Transforming pointers will consider the pointer itself.
-    /// `int * p = &i;` -> `int * const = &i`
+  Pointee, /// Transforming a pointer attaches to the pointee and not the
+  /// pointer itself. For references and normal values this option has
+  /// no effect. `int * p = &i;` -> `const int * p = &i` or `int const
+  /// * p = &i`.
+  Value, /// Transforming pointers will consider the pointer itself.
+         /// `int * p = &i;` -> `int * const = &i`
 };
 
 /// \brief Creates fix to qualify ``VarDecl`` with the specified \c Qualifier.

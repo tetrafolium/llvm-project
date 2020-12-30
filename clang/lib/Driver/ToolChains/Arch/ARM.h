@@ -27,7 +27,7 @@ std::string getARMTargetCPU(StringRef CPU, llvm::StringRef Arch,
 const std::string getARMArch(llvm::StringRef Arch, const llvm::Triple &Triple);
 StringRef getARMCPUForMArch(llvm::StringRef Arch, const llvm::Triple &Triple);
 llvm::ARM::ArchKind getLLVMArchKindForARM(StringRef CPU, StringRef Arch,
-        const llvm::Triple &Triple);
+                                          const llvm::Triple &Triple);
 StringRef getLLVMArchSuffixForARM(llvm::StringRef CPU, llvm::StringRef Arch,
                                   const llvm::Triple &Triple);
 
@@ -35,16 +35,16 @@ void appendBE8LinkFlag(const llvm::opt::ArgList &Args,
                        llvm::opt::ArgStringList &CmdArgs,
                        const llvm::Triple &Triple);
 enum class ReadTPMode {
-    Invalid,
-    Soft,
-    Cp15,
+  Invalid,
+  Soft,
+  Cp15,
 };
 
 enum class FloatABI {
-    Invalid,
-    Soft,
-    SoftFP,
-    Hard,
+  Invalid,
+  Soft,
+  SoftFP,
+  Hard,
 };
 
 FloatABI getDefaultFloatABI(const llvm::Triple &Triple);

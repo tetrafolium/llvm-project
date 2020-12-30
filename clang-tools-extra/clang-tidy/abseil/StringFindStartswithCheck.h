@@ -26,18 +26,18 @@ namespace abseil {
 // FIXME(niko): Add equivalent modernize checks for C++20's std::starts_With
 class StringFindStartswithCheck : public ClangTidyCheck {
 public:
-    using ClangTidyCheck::ClangTidyCheck;
-    StringFindStartswithCheck(StringRef Name, ClangTidyContext *Context);
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  using ClangTidyCheck::ClangTidyCheck;
+  StringFindStartswithCheck(StringRef Name, ClangTidyContext *Context);
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-    const std::vector<std::string> StringLikeClasses;
-    utils::IncludeInserter IncludeInserter;
-    const std::string AbseilStringsMatchHeader;
+  const std::vector<std::string> StringLikeClasses;
+  utils::IncludeInserter IncludeInserter;
+  const std::string AbseilStringsMatchHeader;
 };
 
 } // namespace abseil

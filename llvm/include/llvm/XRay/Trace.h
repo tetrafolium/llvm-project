@@ -44,36 +44,26 @@ namespace xray {
 ///   }
 ///
 class Trace {
-    XRayFileHeader FileHeader;
-    using RecordVector = std::vector<XRayRecord>;
-    RecordVector Records;
+  XRayFileHeader FileHeader;
+  using RecordVector = std::vector<XRayRecord>;
+  RecordVector Records;
 
-    typedef std::vector<XRayRecord>::const_iterator citerator;
+  typedef std::vector<XRayRecord>::const_iterator citerator;
 
-    friend Expected<Trace> loadTrace(const DataExtractor &, bool);
+  friend Expected<Trace> loadTrace(const DataExtractor &, bool);
 
 public:
-    using size_type = RecordVector::size_type;
-    using value_type = RecordVector::value_type;
-    using const_iterator = RecordVector::const_iterator;
+  using size_type = RecordVector::size_type;
+  using value_type = RecordVector::value_type;
+  using const_iterator = RecordVector::const_iterator;
 
-    /// Provides access to the loaded XRay trace file header.
-    const XRayFileHeader &getFileHeader() const {
-        return FileHeader;
-    }
+  /// Provides access to the loaded XRay trace file header.
+  const XRayFileHeader &getFileHeader() const { return FileHeader; }
 
-    const_iterator begin() const {
-        return Records.begin();
-    }
-    const_iterator end() const {
-        return Records.end();
-    }
-    bool empty() const {
-        return Records.empty();
-    }
-    size_type size() const {
-        return Records.size();
-    }
+  const_iterator begin() const { return Records.begin(); }
+  const_iterator end() const { return Records.end(); }
+  bool empty() const { return Records.empty(); }
+  size_type size() const { return Records.size(); }
 };
 
 /// This function will attempt to load XRay trace records from the provided

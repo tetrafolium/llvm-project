@@ -22,8 +22,8 @@ namespace llvm {
 /// Move instructions into successor blocks when possible.
 class SinkingPass : public PassInfoMixin<SinkingPass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
-}
+} // namespace llvm
 
 #endif // LLVM_TRANSFORMS_SCALAR_SINK_H

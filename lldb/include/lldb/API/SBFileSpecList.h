@@ -16,40 +16,40 @@ namespace lldb {
 
 class LLDB_API SBFileSpecList {
 public:
-    SBFileSpecList();
+  SBFileSpecList();
 
-    SBFileSpecList(const lldb::SBFileSpecList &rhs);
+  SBFileSpecList(const lldb::SBFileSpecList &rhs);
 
-    ~SBFileSpecList();
+  ~SBFileSpecList();
 
-    const SBFileSpecList &operator=(const lldb::SBFileSpecList &rhs);
+  const SBFileSpecList &operator=(const lldb::SBFileSpecList &rhs);
 
-    uint32_t GetSize() const;
+  uint32_t GetSize() const;
 
-    bool GetDescription(SBStream &description) const;
+  bool GetDescription(SBStream &description) const;
 
-    void Append(const SBFileSpec &sb_file);
+  void Append(const SBFileSpec &sb_file);
 
-    bool AppendIfUnique(const SBFileSpec &sb_file);
+  bool AppendIfUnique(const SBFileSpec &sb_file);
 
-    void Clear();
+  void Clear();
 
-    uint32_t FindFileIndex(uint32_t idx, const SBFileSpec &sb_file, bool full);
+  uint32_t FindFileIndex(uint32_t idx, const SBFileSpec &sb_file, bool full);
 
-    const SBFileSpec GetFileSpecAtIndex(uint32_t idx) const;
+  const SBFileSpec GetFileSpecAtIndex(uint32_t idx) const;
 
 private:
-    friend class SBTarget;
+  friend class SBTarget;
 
-    const lldb_private::FileSpecList *operator->() const;
+  const lldb_private::FileSpecList *operator->() const;
 
-    const lldb_private::FileSpecList *get() const;
+  const lldb_private::FileSpecList *get() const;
 
-    const lldb_private::FileSpecList &operator*() const;
+  const lldb_private::FileSpecList &operator*() const;
 
-    const lldb_private::FileSpecList &ref() const;
+  const lldb_private::FileSpecList &ref() const;
 
-    std::unique_ptr<lldb_private::FileSpecList> m_opaque_up;
+  std::unique_ptr<lldb_private::FileSpecList> m_opaque_up;
 };
 
 } // namespace lldb

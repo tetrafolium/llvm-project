@@ -57,8 +57,8 @@ FunctionPass *createDelinearizationPass();
 
 //===--------------------------------------------------------------------===//
 //
-// createLegacyDivergenceAnalysisPass - This pass determines which branches in a GPU
-// program are divergent.
+// createLegacyDivergenceAnalysisPass - This pass determines which branches in a
+// GPU program are divergent.
 //
 FunctionPass *createLegacyDivergenceAnalysisPass();
 
@@ -107,6 +107,6 @@ FunctionPass *createMustExecutePrinter();
 //
 ModulePass *createMustBeExecutedContextPrinter();
 
-}
+} // namespace llvm
 
 #endif

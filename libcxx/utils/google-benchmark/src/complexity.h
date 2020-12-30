@@ -40,11 +40,11 @@ std::vector<BenchmarkReporter::Run> ComputeBigO(
 //                   parameter will return the best fitting curve detected.
 
 struct LeastSq {
-    LeastSq() : coef(0.0), rms(0.0), complexity(oNone) {}
+  LeastSq() : coef(0.0), rms(0.0), complexity(oNone) {}
 
-    double coef;
-    double rms;
-    BigO complexity;
+  double coef;
+  double rms;
+  BigO complexity;
 };
 
 // Function to return an string for the calculated complexity

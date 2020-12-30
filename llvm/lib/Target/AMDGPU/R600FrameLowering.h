@@ -16,21 +16,19 @@ namespace llvm {
 
 class R600FrameLowering : public AMDGPUFrameLowering {
 public:
-    R600FrameLowering(StackDirection D, Align StackAl, int LAO,
-                      Align TransAl = Align(1))
-        : AMDGPUFrameLowering(D, StackAl, LAO, TransAl) {}
-    ~R600FrameLowering() override;
+  R600FrameLowering(StackDirection D, Align StackAl, int LAO,
+                    Align TransAl = Align(1))
+      : AMDGPUFrameLowering(D, StackAl, LAO, TransAl) {}
+  ~R600FrameLowering() override;
 
-    void emitPrologue(MachineFunction &MF,
-                      MachineBasicBlock &MBB) const override {}
-    void emitEpilogue(MachineFunction &MF,
-                      MachineBasicBlock &MBB) const override {}
-    StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
-                                       Register &FrameReg) const override;
+  void emitPrologue(MachineFunction &MF,
+                    MachineBasicBlock &MBB) const override {}
+  void emitEpilogue(MachineFunction &MF,
+                    MachineBasicBlock &MBB) const override {}
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
 
-    bool hasFP(const MachineFunction &MF) const override {
-        return false;
-    }
+  bool hasFP(const MachineFunction &MF) const override { return false; }
 };
 
 } // end namespace llvm

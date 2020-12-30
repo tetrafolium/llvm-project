@@ -19,11 +19,11 @@
 #include "llvm/Support/TargetSelect.h"
 
 int main(int argc, char **argv) {
-    llvm::InitLLVM y(argc, argv);
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    llvm::InitializeNativeTargetAsmParser();
-    mlir::initializeLLVMPasses();
+  llvm::InitLLVM y(argc, argv);
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
+  llvm::InitializeNativeTargetAsmParser();
+  mlir::initializeLLVMPasses();
 
-    return mlir::JitRunnerMain(argc, argv);
+  return mlir::JitRunnerMain(argc, argv);
 }

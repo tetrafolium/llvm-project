@@ -48,35 +48,34 @@ static cl::extrahelp MoreHelp(
     "\n"
     "\tNote, that path/in/subtree and current directory should follow the\n"
     "\trules described above.\n"
-    "\n"
-);
+    "\n");
 
 static cl::OptionCategory ClangCheckCategory("clang-check options");
 static const opt::OptTable &Options = getDriverOptTable();
 static cl::opt<bool>
-ASTDump("ast-dump",
-        cl::desc(Options.getOptionHelpText(options::OPT_ast_dump)),
-        cl::cat(ClangCheckCategory));
+    ASTDump("ast-dump",
+            cl::desc(Options.getOptionHelpText(options::OPT_ast_dump)),
+            cl::cat(ClangCheckCategory));
 static cl::opt<bool>
-ASTList("ast-list",
-        cl::desc(Options.getOptionHelpText(options::OPT_ast_list)),
-        cl::cat(ClangCheckCategory));
+    ASTList("ast-list",
+            cl::desc(Options.getOptionHelpText(options::OPT_ast_list)),
+            cl::cat(ClangCheckCategory));
 static cl::opt<bool>
-ASTPrint("ast-print",
-         cl::desc(Options.getOptionHelpText(options::OPT_ast_print)),
-         cl::cat(ClangCheckCategory));
+    ASTPrint("ast-print",
+             cl::desc(Options.getOptionHelpText(options::OPT_ast_print)),
+             cl::cat(ClangCheckCategory));
 static cl::opt<std::string> ASTDumpFilter(
     "ast-dump-filter",
     cl::desc(Options.getOptionHelpText(options::OPT_ast_dump_filter)),
     cl::cat(ClangCheckCategory));
 static cl::opt<bool>
-Analyze("analyze",
-        cl::desc(Options.getOptionHelpText(options::OPT_analyze)),
-        cl::cat(ClangCheckCategory));
+    Analyze("analyze",
+            cl::desc(Options.getOptionHelpText(options::OPT_analyze)),
+            cl::cat(ClangCheckCategory));
 
 static cl::opt<bool>
-Fixit("fixit", cl::desc(Options.getOptionHelpText(options::OPT_fixit)),
-      cl::cat(ClangCheckCategory));
+    Fixit("fixit", cl::desc(Options.getOptionHelpText(options::OPT_fixit)),
+          cl::cat(ClangCheckCategory));
 static cl::opt<bool> FixWhatYouCan(
     "fix-what-you-can",
     cl::desc(Options.getOptionHelpText(options::OPT_fix_what_you_can)),
@@ -88,18 +87,16 @@ namespace {
 // into a header file and reuse that.
 class FixItOptions : public clang::FixItOptions {
 public:
-    FixItOptions() {
-        FixWhatYouCan = ::FixWhatYouCan;
-    }
+  FixItOptions() { FixWhatYouCan = ::FixWhatYouCan; }
 
-    std::string RewriteFilename(const std::string& filename, int &fd) override {
-        // We don't need to do permission checking here since clang will diagnose
-        // any I/O errors itself.
+  std::string RewriteFilename(const std::string &filename, int &fd) override {
+    // We don't need to do permission checking here since clang will diagnose
+    // any I/O errors itself.
 
-        fd = -1;  // No file descriptor for file.
+    fd = -1; // No file descriptor for file.
 
-        return filename;
-    }
+    return filename;
+  }
 };
 
 /// Subclasses \c clang::FixItRewriter to not count fixed errors/warnings
@@ -109,83 +106,80 @@ public:
 /// successfully fixing all errors.
 class FixItRewriter : public clang::FixItRewriter {
 public:
-    FixItRewriter(clang::DiagnosticsEngine& Diags,
-                  clang::SourceManager& SourceMgr,
-                  const clang::LangOptions& LangOpts,
-                  clang::FixItOptions* FixItOpts)
-        : clang::FixItRewriter(Diags, SourceMgr, LangOpts, FixItOpts) {
-    }
+  FixItRewriter(clang::DiagnosticsEngine &Diags,
+                clang::SourceManager &SourceMgr,
+                const clang::LangOptions &LangOpts,
+                clang::FixItOptions *FixItOpts)
+      : clang::FixItRewriter(Diags, SourceMgr, LangOpts, FixItOpts) {}
 
-    bool IncludeInDiagnosticCounts() const override {
-        return false;
-    }
+  bool IncludeInDiagnosticCounts() const override { return false; }
 };
 
 /// Subclasses \c clang::FixItAction so that we can install the custom
 /// \c FixItRewriter.
 class ClangCheckFixItAction : public clang::FixItAction {
 public:
-    bool BeginSourceFileAction(clang::CompilerInstance& CI) override {
-        FixItOpts.reset(new FixItOptions);
-        Rewriter.reset(new FixItRewriter(CI.getDiagnostics(), CI.getSourceManager(),
-                                         CI.getLangOpts(), FixItOpts.get()));
-        return true;
-    }
+  bool BeginSourceFileAction(clang::CompilerInstance &CI) override {
+    FixItOpts.reset(new FixItOptions);
+    Rewriter.reset(new FixItRewriter(CI.getDiagnostics(), CI.getSourceManager(),
+                                     CI.getLangOpts(), FixItOpts.get()));
+    return true;
+  }
 };
 
 class ClangCheckActionFactory {
 public:
-    std::unique_ptr<clang::ASTConsumer> newASTConsumer() {
-        if (ASTList)
-            return clang::CreateASTDeclNodeLister();
-        if (ASTDump)
-            return clang::CreateASTDumper(nullptr /*Dump to stdout.*/, ASTDumpFilter,
-                                          /*DumpDecls=*/true,
-                                          /*Deserialize=*/false,
-                                          /*DumpLookups=*/false,
-                                          /*DumpDeclTypes=*/false,
-                                          clang::ADOF_Default);
-        if (ASTPrint)
-            return clang::CreateASTPrinter(nullptr, ASTDumpFilter);
-        return std::make_unique<clang::ASTConsumer>();
-    }
+  std::unique_ptr<clang::ASTConsumer> newASTConsumer() {
+    if (ASTList)
+      return clang::CreateASTDeclNodeLister();
+    if (ASTDump)
+      return clang::CreateASTDumper(nullptr /*Dump to stdout.*/, ASTDumpFilter,
+                                    /*DumpDecls=*/true,
+                                    /*Deserialize=*/false,
+                                    /*DumpLookups=*/false,
+                                    /*DumpDeclTypes=*/false,
+                                    clang::ADOF_Default);
+    if (ASTPrint)
+      return clang::CreateASTPrinter(nullptr, ASTDumpFilter);
+    return std::make_unique<clang::ASTConsumer>();
+  }
 };
 
 } // namespace
 
 int main(int argc, const char **argv) {
-    llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-    // Initialize targets for clang module support.
-    llvm::InitializeAllTargets();
-    llvm::InitializeAllTargetMCs();
-    llvm::InitializeAllAsmPrinters();
-    llvm::InitializeAllAsmParsers();
+  // Initialize targets for clang module support.
+  llvm::InitializeAllTargets();
+  llvm::InitializeAllTargetMCs();
+  llvm::InitializeAllAsmPrinters();
+  llvm::InitializeAllAsmParsers();
 
-    CommonOptionsParser OptionsParser(argc, argv, ClangCheckCategory);
-    ClangTool Tool(OptionsParser.getCompilations(),
-                   OptionsParser.getSourcePathList());
+  CommonOptionsParser OptionsParser(argc, argv, ClangCheckCategory);
+  ClangTool Tool(OptionsParser.getCompilations(),
+                 OptionsParser.getSourcePathList());
 
-    // Clear adjusters because -fsyntax-only is inserted by the default chain.
-    Tool.clearArgumentsAdjusters();
-    Tool.appendArgumentsAdjuster(getClangStripOutputAdjuster());
-    Tool.appendArgumentsAdjuster(getClangStripDependencyFileAdjuster());
+  // Clear adjusters because -fsyntax-only is inserted by the default chain.
+  Tool.clearArgumentsAdjusters();
+  Tool.appendArgumentsAdjuster(getClangStripOutputAdjuster());
+  Tool.appendArgumentsAdjuster(getClangStripDependencyFileAdjuster());
 
-    // Running the analyzer requires --analyze. Other modes can work with the
-    // -fsyntax-only option.
-    Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
-                                     Analyze ? "--analyze" : "-fsyntax-only", ArgumentInsertPosition::BEGIN));
+  // Running the analyzer requires --analyze. Other modes can work with the
+  // -fsyntax-only option.
+  Tool.appendArgumentsAdjuster(getInsertArgumentAdjuster(
+      Analyze ? "--analyze" : "-fsyntax-only", ArgumentInsertPosition::BEGIN));
 
-    ClangCheckActionFactory CheckFactory;
-    std::unique_ptr<FrontendActionFactory> FrontendFactory;
+  ClangCheckActionFactory CheckFactory;
+  std::unique_ptr<FrontendActionFactory> FrontendFactory;
 
-    // Choose the correct factory based on the selected mode.
-    if (Analyze)
-        FrontendFactory = newFrontendActionFactory<clang::ento::AnalysisAction>();
-    else if (Fixit)
-        FrontendFactory = newFrontendActionFactory<ClangCheckFixItAction>();
-    else
-        FrontendFactory = newFrontendActionFactory(&CheckFactory);
+  // Choose the correct factory based on the selected mode.
+  if (Analyze)
+    FrontendFactory = newFrontendActionFactory<clang::ento::AnalysisAction>();
+  else if (Fixit)
+    FrontendFactory = newFrontendActionFactory<ClangCheckFixItAction>();
+  else
+    FrontendFactory = newFrontendActionFactory(&CheckFactory);
 
-    return Tool.run(FrontendFactory.get());
+  return Tool.run(FrontendFactory.get());
 }

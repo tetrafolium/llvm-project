@@ -54,10 +54,10 @@ bool NSURLSummaryProvider(ValueObject &valobj, Stream &stream,
                           const TypeSummaryOptions &options);
 
 extern template bool NSDataSummaryProvider<true>(ValueObject &, Stream &,
-        const TypeSummaryOptions &);
+                                                 const TypeSummaryOptions &);
 
 extern template bool NSDataSummaryProvider<false>(ValueObject &, Stream &,
-        const TypeSummaryOptions &);
+                                                  const TypeSummaryOptions &);
 
 SyntheticChildrenFrontEnd *
 NSArraySyntheticFrontEndCreator(CXXSyntheticChildren *, lldb::ValueObjectSP);
@@ -83,10 +83,10 @@ bool ObjCSELSummaryProvider(ValueObject &valobj, Stream &stream,
                             const TypeSummaryOptions &options);
 
 extern template bool ObjCSELSummaryProvider<true>(ValueObject &, Stream &,
-        const TypeSummaryOptions &);
+                                                  const TypeSummaryOptions &);
 
 extern template bool ObjCSELSummaryProvider<false>(ValueObject &, Stream &,
-        const TypeSummaryOptions &);
+                                                   const TypeSummaryOptions &);
 
 bool NSError_SummaryProvider(ValueObject &valobj, Stream &stream,
                              const TypeSummaryOptions &options);
@@ -104,11 +104,11 @@ NSExceptionSyntheticFrontEndCreator(CXXSyntheticChildren *,
 
 class NSArray_Additionals {
 public:
-    static std::map<ConstString, CXXFunctionSummaryFormat::Callback> &
-    GetAdditionalSummaries();
+  static std::map<ConstString, CXXFunctionSummaryFormat::Callback> &
+  GetAdditionalSummaries();
 
-    static std::map<ConstString, CXXSyntheticChildren::CreateFrontEndCallback> &
-    GetAdditionalSynthetics();
+  static std::map<ConstString, CXXSyntheticChildren::CreateFrontEndCallback> &
+  GetAdditionalSynthetics();
 };
 } // namespace formatters
 } // namespace lldb_private

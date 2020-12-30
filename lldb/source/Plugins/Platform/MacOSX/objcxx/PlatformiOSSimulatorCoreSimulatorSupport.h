@@ -30,172 +30,150 @@ typedef void *id;
 namespace CoreSimulatorSupport {
 class Process {
 public:
-    lldb::pid_t GetPID() {
-        return m_pid;
-    }
+  lldb::pid_t GetPID() { return m_pid; }
 
-    explicit operator bool() {
-        return m_pid != LLDB_INVALID_PROCESS_ID;
-    }
+  explicit operator bool() { return m_pid != LLDB_INVALID_PROCESS_ID; }
 
-    lldb_private::Status GetError() {
-        return m_error;
-    }
+  lldb_private::Status GetError() { return m_error; }
 
 private:
-    Process(lldb::pid_t p);
+  Process(lldb::pid_t p);
 
-    Process(lldb_private::Status error);
+  Process(lldb_private::Status error);
 
-    Process(lldb::pid_t p, lldb_private::Status error);
+  Process(lldb::pid_t p, lldb_private::Status error);
 
-    lldb::pid_t m_pid;
-    lldb_private::Status m_error;
+  lldb::pid_t m_pid;
+  lldb_private::Status m_error;
 
-    friend class Device;
+  friend class Device;
 };
 
 class ModelIdentifier {
 public:
-    ModelIdentifier(const std::string &mi);
-    ModelIdentifier();
+  ModelIdentifier(const std::string &mi);
+  ModelIdentifier();
 
-    explicit operator bool() const {
-        return !m_versions.empty();
-    }
+  explicit operator bool() const { return !m_versions.empty(); }
 
-    size_t GetNumVersions() const {
-        return m_versions.size();
-    }
+  size_t GetNumVersions() const { return m_versions.size(); }
 
-    unsigned int GetVersionAtIndex(size_t idx) const {
-        return m_versions[idx];
-    }
+  unsigned int GetVersionAtIndex(size_t idx) const { return m_versions[idx]; }
 
-    std::string GetFamily() const {
-        return m_family.c_str();
-    }
+  std::string GetFamily() const { return m_family.c_str(); }
 
 private:
-    std::string m_family;
-    std::vector<unsigned int> m_versions;
+  std::string m_family;
+  std::vector<unsigned int> m_versions;
 };
 
 class DeviceType {
 public:
-    enum class ProductFamilyID : int32_t {
-        iPhone = 1,
-        iPad = 2,
-        appleTV = 3,
-        appleWatch = 4
-    };
+  enum class ProductFamilyID : int32_t {
+    iPhone = 1,
+    iPad = 2,
+    appleTV = 3,
+    appleWatch = 4
+  };
 
-    DeviceType();
+  DeviceType();
 
-    DeviceType(id d);
+  DeviceType(id d);
 
-    explicit operator bool();
+  explicit operator bool();
 
-    std::string GetName();
+  std::string GetName();
 
-    lldb_private::ConstString GetIdentifier();
+  lldb_private::ConstString GetIdentifier();
 
-    ModelIdentifier GetModelIdentifier();
+  ModelIdentifier GetModelIdentifier();
 
-    lldb_private::ConstString GetProductFamily();
+  lldb_private::ConstString GetProductFamily();
 
-    ProductFamilyID GetProductFamilyID();
+  ProductFamilyID GetProductFamilyID();
 
 private:
-    id m_dev;
-    llvm::Optional<ModelIdentifier> m_model_identifier;
+  id m_dev;
+  llvm::Optional<ModelIdentifier> m_model_identifier;
 };
 
 class OSVersion {
 public:
-    OSVersion(const std::string &ver, const std::string &build);
+  OSVersion(const std::string &ver, const std::string &build);
 
-    OSVersion();
+  OSVersion();
 
-    explicit operator bool() const {
-        return !m_versions.empty();
-    }
+  explicit operator bool() const { return !m_versions.empty(); }
 
-    size_t GetNumVersions() const {
-        return m_versions.size();
-    }
+  size_t GetNumVersions() const { return m_versions.size(); }
 
-    unsigned int GetVersionAtIndex(size_t idx) const {
-        return m_versions[idx];
-    }
+  unsigned int GetVersionAtIndex(size_t idx) const { return m_versions[idx]; }
 
-    const char *GetBuild() const {
-        return m_build.c_str();
-    }
+  const char *GetBuild() const { return m_build.c_str(); }
 
 private:
-    std::vector<unsigned int> m_versions;
-    std::string m_build;
+  std::vector<unsigned int> m_versions;
+  std::string m_build;
 };
 
 class DeviceRuntime {
 public:
-    DeviceRuntime();
+  DeviceRuntime();
 
-    DeviceRuntime(id d);
+  DeviceRuntime(id d);
 
-    explicit operator bool();
+  explicit operator bool();
 
-    OSVersion GetVersion();
+  OSVersion GetVersion();
 
-    bool IsAvailable();
+  bool IsAvailable();
 
 private:
-    id m_dev;
-    llvm::Optional<OSVersion> m_os_version;
+  id m_dev;
+  llvm::Optional<OSVersion> m_os_version;
 };
 
 class Device {
 private:
-    typedef unsigned long int NSUInteger;
+  typedef unsigned long int NSUInteger;
 
 public:
-    enum class State : NSUInteger {
-        Creating,
-        Shutdown,
-        Booting,
-        Booted,
-        ShuttingDown
-    };
+  enum class State : NSUInteger {
+    Creating,
+    Shutdown,
+    Booting,
+    Booted,
+    ShuttingDown
+  };
 
-    Device();
+  Device();
 
-    Device(id d);
+  Device(id d);
 
-    explicit operator bool();
+  explicit operator bool();
 
-    std::string GetName() const;
+  std::string GetName() const;
 
-    DeviceType GetDeviceType();
+  DeviceType GetDeviceType();
 
-    DeviceRuntime GetDeviceRuntime();
+  DeviceRuntime GetDeviceRuntime();
 
-    State GetState();
+  State GetState();
 
-    bool Boot(lldb_private::Status &err);
+  bool Boot(lldb_private::Status &err);
 
-    bool Shutdown(lldb_private::Status &err);
+  bool Shutdown(lldb_private::Status &err);
 
-    std::string GetUDID() const;
+  std::string GetUDID() const;
 
-    Process Spawn(lldb_private::ProcessLaunchInfo &launch_info);
+  Process Spawn(lldb_private::ProcessLaunchInfo &launch_info);
 
 private:
-    id m_dev;
-    llvm::Optional<DeviceType> m_dev_type;
-    llvm::Optional<DeviceRuntime> m_dev_runtime;
+  id m_dev;
+  llvm::Optional<DeviceType> m_dev_type;
+  llvm::Optional<DeviceRuntime> m_dev_runtime;
 
-    friend class DeviceSet;
+  friend class DeviceSet;
 };
 
 bool operator>(const OSVersion &lhs, const OSVersion &rhs);
@@ -216,26 +194,26 @@ bool operator!=(const ModelIdentifier &lhs, const ModelIdentifier &rhs);
 
 class DeviceSet {
 public:
-    static DeviceSet GetAllDevices(const char *developer_dir);
+  static DeviceSet GetAllDevices(const char *developer_dir);
 
-    static DeviceSet GetAvailableDevices(const char *developer_dir);
+  static DeviceSet GetAvailableDevices(const char *developer_dir);
 
-    size_t GetNumDevices();
+  size_t GetNumDevices();
 
-    Device GetDeviceAtIndex(size_t idx);
+  Device GetDeviceAtIndex(size_t idx);
 
-    void ForEach(std::function<bool(const Device &)> f);
+  void ForEach(std::function<bool(const Device &)> f);
 
-    DeviceSet GetDevicesIf(std::function<bool(Device)> f);
+  DeviceSet GetDevicesIf(std::function<bool(Device)> f);
 
-    DeviceSet GetDevices(DeviceType::ProductFamilyID dev_id);
+  DeviceSet GetDevices(DeviceType::ProductFamilyID dev_id);
 
-    Device GetFanciest(DeviceType::ProductFamilyID dev_id);
+  Device GetFanciest(DeviceType::ProductFamilyID dev_id);
 
 private:
-    DeviceSet(id arr) : m_dev(arr) {}
+  DeviceSet(id arr) : m_dev(arr) {}
 
-    id m_dev;
+  id m_dev;
 };
 }
 

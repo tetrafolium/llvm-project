@@ -18,33 +18,33 @@ namespace llvm {
 namespace yaml {
 
 bool yaml2archive(ArchYAML::Archive &Doc, raw_ostream &Out, ErrorHandler EH) {
-    Out.write(Doc.Magic.data(), Doc.Magic.size());
+  Out.write(Doc.Magic.data(), Doc.Magic.size());
 
-    if (Doc.Content) {
-        Doc.Content->writeAsBinary(Out);
-        return true;
-    }
-
-    if (!Doc.Members)
-        return true;
-
-    auto WriteField = [&](StringRef Field, uint8_t Size) {
-        Out.write(Field.data(), Field.size());
-        for (size_t I = Field.size(); I != Size; ++I)
-            Out.write(' ');
-    };
-
-    for (const Archive::Child &C : *Doc.Members) {
-        for (auto &P : C.Fields)
-            WriteField(P.second.Value, P.second.MaxLength);
-
-        if (C.Content)
-            C.Content->writeAsBinary(Out);
-        if (C.PaddingByte)
-            Out.write(*C.PaddingByte);
-    }
-
+  if (Doc.Content) {
+    Doc.Content->writeAsBinary(Out);
     return true;
+  }
+
+  if (!Doc.Members)
+    return true;
+
+  auto WriteField = [&](StringRef Field, uint8_t Size) {
+    Out.write(Field.data(), Field.size());
+    for (size_t I = Field.size(); I != Size; ++I)
+      Out.write(' ');
+  };
+
+  for (const Archive::Child &C : *Doc.Members) {
+    for (auto &P : C.Fields)
+      WriteField(P.second.Value, P.second.MaxLength);
+
+    if (C.Content)
+      C.Content->writeAsBinary(Out);
+    if (C.PaddingByte)
+      Out.write(*C.PaddingByte);
+  }
+
+  return true;
 }
 
 } // namespace yaml

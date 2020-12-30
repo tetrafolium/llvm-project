@@ -18,13 +18,13 @@ namespace readability {
 /// Finds unnecessary calls to `std::string::c_str()`.
 class RedundantStringCStrCheck : public ClangTidyCheck {
 public:
-    RedundantStringCStrCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  RedundantStringCStrCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace readability

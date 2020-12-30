@@ -17,12 +17,7 @@ namespace llvm {
 class GlobalValue;
 
 namespace SystemZCP {
-enum SystemZCPModifier {
-    TLSGD,
-    TLSLDM,
-    DTPOFF,
-    NTPOFF
-};
+enum SystemZCPModifier { TLSGD, TLSLDM, DTPOFF, NTPOFF };
 } // end namespace SystemZCP
 
 /// A SystemZ-specific constant pool value.  At present, the only
@@ -30,30 +25,26 @@ enum SystemZCPModifier {
 /// thread-local variables (written x@TLSGD, x@TLSLDM, x@DTPOFF,
 /// or x@NTPOFF).
 class SystemZConstantPoolValue : public MachineConstantPoolValue {
-    const GlobalValue *GV;
-    SystemZCP::SystemZCPModifier Modifier;
+  const GlobalValue *GV;
+  SystemZCP::SystemZCPModifier Modifier;
 
 protected:
-    SystemZConstantPoolValue(const GlobalValue *GV,
-                             SystemZCP::SystemZCPModifier Modifier);
+  SystemZConstantPoolValue(const GlobalValue *GV,
+                           SystemZCP::SystemZCPModifier Modifier);
 
 public:
-    static SystemZConstantPoolValue *
-    Create(const GlobalValue *GV, SystemZCP::SystemZCPModifier Modifier);
+  static SystemZConstantPoolValue *
+  Create(const GlobalValue *GV, SystemZCP::SystemZCPModifier Modifier);
 
-    // Override MachineConstantPoolValue.
-    int getExistingMachineCPValue(MachineConstantPool *CP,
-                                  Align Alignment) override;
-    void addSelectionDAGCSEId(FoldingSetNodeID &ID) override;
-    void print(raw_ostream &O) const override;
+  // Override MachineConstantPoolValue.
+  int getExistingMachineCPValue(MachineConstantPool *CP,
+                                Align Alignment) override;
+  void addSelectionDAGCSEId(FoldingSetNodeID &ID) override;
+  void print(raw_ostream &O) const override;
 
-    // Access SystemZ-specific fields.
-    const GlobalValue *getGlobalValue() const {
-        return GV;
-    }
-    SystemZCP::SystemZCPModifier getModifier() const {
-        return Modifier;
-    }
+  // Access SystemZ-specific fields.
+  const GlobalValue *getGlobalValue() const { return GV; }
+  SystemZCP::SystemZCPModifier getModifier() const { return Modifier; }
 };
 
 } // end namespace llvm

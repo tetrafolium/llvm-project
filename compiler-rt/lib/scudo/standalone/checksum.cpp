@@ -39,20 +39,20 @@ Checksum HashAlgorithm = {Checksum::BSD};
 #endif
 
 bool hasHardwareCRC32() {
-    u32 Eax, Ebx = 0, Ecx = 0, Edx = 0;
-    __get_cpuid(0, &Eax, &Ebx, &Ecx, &Edx);
-    const bool IsIntel = (Ebx == signature_INTEL_ebx) &&
-                         (Edx == signature_INTEL_edx) &&
-                         (Ecx == signature_INTEL_ecx);
-    const bool IsAMD = (Ebx == signature_AMD_ebx) && (Edx == signature_AMD_edx) &&
-                       (Ecx == signature_AMD_ecx);
-    const bool IsHygon = (Ebx == signature_HYGON_ebx) &&
-                         (Edx == signature_HYGON_edx) &&
-                         (Ecx == signature_HYGON_ecx);
-    if (!IsIntel && !IsAMD && !IsHygon)
-        return false;
-    __get_cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
-    return !!(Ecx & bit_SSE4_2);
+  u32 Eax, Ebx = 0, Ecx = 0, Edx = 0;
+  __get_cpuid(0, &Eax, &Ebx, &Ecx, &Edx);
+  const bool IsIntel = (Ebx == signature_INTEL_ebx) &&
+                       (Edx == signature_INTEL_edx) &&
+                       (Ecx == signature_INTEL_ecx);
+  const bool IsAMD = (Ebx == signature_AMD_ebx) && (Edx == signature_AMD_edx) &&
+                     (Ecx == signature_AMD_ecx);
+  const bool IsHygon = (Ebx == signature_HYGON_ebx) &&
+                       (Edx == signature_HYGON_edx) &&
+                       (Ecx == signature_HYGON_ecx);
+  if (!IsIntel && !IsAMD && !IsHygon)
+    return false;
+  __get_cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
+  return !!(Ecx & bit_SSE4_2);
 }
 #elif defined(__arm__) || defined(__aarch64__)
 #ifndef AT_HWCAP
@@ -64,21 +64,19 @@ bool hasHardwareCRC32() {
 
 bool hasHardwareCRC32() {
 #if SCUDO_FUCHSIA
-    u32 HWCap;
-    const zx_status_t Status =
-        zx_system_get_features(ZX_FEATURE_KIND_CPU, &HWCap);
-    if (Status != ZX_OK)
-        return false;
-    return !!(HWCap & ZX_ARM64_FEATURE_ISA_CRC32);
+  u32 HWCap;
+  const zx_status_t Status =
+      zx_system_get_features(ZX_FEATURE_KIND_CPU, &HWCap);
+  if (Status != ZX_OK)
+    return false;
+  return !!(HWCap & ZX_ARM64_FEATURE_ISA_CRC32);
 #else
-    return !!(getauxval(AT_HWCAP) & HWCAP_CRC32);
+  return !!(getauxval(AT_HWCAP) & HWCAP_CRC32);
 #endif // SCUDO_FUCHSIA
 }
 #else
 // No hardware CRC32 implemented in Scudo for other architectures.
-bool hasHardwareCRC32() {
-    return false;
-}
+bool hasHardwareCRC32() { return false; }
 #endif // defined(__x86_64__) || defined(__i386__)
 
 } // namespace scudo

@@ -22,8 +22,8 @@
 
 #include <clc/clc.h>
 
-#include "math.h"
 #include "../clcmacro.h"
+#include "math.h"
 
 /*
  * ====================================================
@@ -36,135 +36,151 @@
  * ====================================================
  */
 
-#define erx_f   8.4506291151e-01f        /* 0x3f58560b */
+#define erx_f 8.4506291151e-01f /* 0x3f58560b */
 
 // Coefficients for approximation to  erf on [00.84375]
 
-#define efx   1.2837916613e-01f        /* 0x3e0375d4 */
-#define efx8  1.0270333290e+00f        /* 0x3f8375d4 */
+#define efx 1.2837916613e-01f  /* 0x3e0375d4 */
+#define efx8 1.0270333290e+00f /* 0x3f8375d4 */
 
-#define pp0   1.2837916613e-01f        /* 0x3e0375d4 */
-#define pp1  -3.2504209876e-01f        /* 0xbea66beb */
-#define pp2  -2.8481749818e-02f        /* 0xbce9528f */
-#define pp3  -5.7702702470e-03f        /* 0xbbbd1489 */
-#define pp4  -2.3763017452e-05f        /* 0xb7c756b1 */
-#define qq1   3.9791721106e-01f        /* 0x3ecbbbce */
-#define qq2   6.5022252500e-02f        /* 0x3d852a63 */
-#define qq3   5.0813062117e-03f        /* 0x3ba68116 */
-#define qq4   1.3249473704e-04f        /* 0x390aee49 */
-#define qq5  -3.9602282413e-06f        /* 0xb684e21a */
+#define pp0 1.2837916613e-01f  /* 0x3e0375d4 */
+#define pp1 -3.2504209876e-01f /* 0xbea66beb */
+#define pp2 -2.8481749818e-02f /* 0xbce9528f */
+#define pp3 -5.7702702470e-03f /* 0xbbbd1489 */
+#define pp4 -2.3763017452e-05f /* 0xb7c756b1 */
+#define qq1 3.9791721106e-01f  /* 0x3ecbbbce */
+#define qq2 6.5022252500e-02f  /* 0x3d852a63 */
+#define qq3 5.0813062117e-03f  /* 0x3ba68116 */
+#define qq4 1.3249473704e-04f  /* 0x390aee49 */
+#define qq5 -3.9602282413e-06f /* 0xb684e21a */
 
 // Coefficients for approximation to  erf  in [0.843751.25]
 
-#define pa0  -2.3621185683e-03f        /* 0xbb1acdc6 */
-#define pa1   4.1485610604e-01f        /* 0x3ed46805 */
-#define pa2  -3.7220788002e-01f        /* 0xbebe9208 */
-#define pa3   3.1834661961e-01f        /* 0x3ea2fe54 */
-#define pa4  -1.1089469492e-01f        /* 0xbde31cc2 */
-#define pa5   3.5478305072e-02f        /* 0x3d1151b3 */
-#define pa6  -2.1663755178e-03f        /* 0xbb0df9c0 */
-#define qa1   1.0642088205e-01f        /* 0x3dd9f331 */
-#define qa2   5.4039794207e-01f        /* 0x3f0a5785 */
-#define qa3   7.1828655899e-02f        /* 0x3d931ae7 */
-#define qa4   1.2617121637e-01f        /* 0x3e013307 */
-#define qa5   1.3637083583e-02f        /* 0x3c5f6e13 */
-#define qa6   1.1984500103e-02f        /* 0x3c445aa3 */
+#define pa0 -2.3621185683e-03f /* 0xbb1acdc6 */
+#define pa1 4.1485610604e-01f  /* 0x3ed46805 */
+#define pa2 -3.7220788002e-01f /* 0xbebe9208 */
+#define pa3 3.1834661961e-01f  /* 0x3ea2fe54 */
+#define pa4 -1.1089469492e-01f /* 0xbde31cc2 */
+#define pa5 3.5478305072e-02f  /* 0x3d1151b3 */
+#define pa6 -2.1663755178e-03f /* 0xbb0df9c0 */
+#define qa1 1.0642088205e-01f  /* 0x3dd9f331 */
+#define qa2 5.4039794207e-01f  /* 0x3f0a5785 */
+#define qa3 7.1828655899e-02f  /* 0x3d931ae7 */
+#define qa4 1.2617121637e-01f  /* 0x3e013307 */
+#define qa5 1.3637083583e-02f  /* 0x3c5f6e13 */
+#define qa6 1.1984500103e-02f  /* 0x3c445aa3 */
 
 // Coefficients for approximation to  erfc in [1.251/0.35]
 
-#define ra0  -9.8649440333e-03f        /* 0xbc21a093 */
-#define ra1  -6.9385856390e-01f        /* 0xbf31a0b7 */
-#define ra2  -1.0558626175e+01f        /* 0xc128f022 */
-#define ra3  -6.2375331879e+01f        /* 0xc2798057 */
-#define ra4  -1.6239666748e+02f        /* 0xc322658c */
-#define ra5  -1.8460508728e+02f        /* 0xc3389ae7 */
-#define ra6  -8.1287437439e+01f        /* 0xc2a2932b */
-#define ra7  -9.8143291473e+00f        /* 0xc11d077e */
-#define sa1   1.9651271820e+01f        /* 0x419d35ce */
-#define sa2   1.3765776062e+02f        /* 0x4309a863 */
-#define sa3   4.3456588745e+02f        /* 0x43d9486f */
-#define sa4   6.4538726807e+02f        /* 0x442158c9 */
-#define sa5   4.2900814819e+02f        /* 0x43d6810b */
-#define sa6   1.0863500214e+02f        /* 0x42d9451f */
-#define sa7   6.5702495575e+00f        /* 0x40d23f7c */
-#define sa8  -6.0424413532e-02f        /* 0xbd777f97 */
+#define ra0 -9.8649440333e-03f /* 0xbc21a093 */
+#define ra1 -6.9385856390e-01f /* 0xbf31a0b7 */
+#define ra2 -1.0558626175e+01f /* 0xc128f022 */
+#define ra3 -6.2375331879e+01f /* 0xc2798057 */
+#define ra4 -1.6239666748e+02f /* 0xc322658c */
+#define ra5 -1.8460508728e+02f /* 0xc3389ae7 */
+#define ra6 -8.1287437439e+01f /* 0xc2a2932b */
+#define ra7 -9.8143291473e+00f /* 0xc11d077e */
+#define sa1 1.9651271820e+01f  /* 0x419d35ce */
+#define sa2 1.3765776062e+02f  /* 0x4309a863 */
+#define sa3 4.3456588745e+02f  /* 0x43d9486f */
+#define sa4 6.4538726807e+02f  /* 0x442158c9 */
+#define sa5 4.2900814819e+02f  /* 0x43d6810b */
+#define sa6 1.0863500214e+02f  /* 0x42d9451f */
+#define sa7 6.5702495575e+00f  /* 0x40d23f7c */
+#define sa8 -6.0424413532e-02f /* 0xbd777f97 */
 
 // Coefficients for approximation to  erfc in [1/.3528]
 
-#define rb0  -9.8649431020e-03f        /* 0xbc21a092 */
-#define rb1  -7.9928326607e-01f        /* 0xbf4c9dd4 */
-#define rb2  -1.7757955551e+01f        /* 0xc18e104b */
-#define rb3  -1.6063638306e+02f        /* 0xc320a2ea */
-#define rb4  -6.3756646729e+02f        /* 0xc41f6441 */
-#define rb5  -1.0250950928e+03f        /* 0xc480230b */
-#define rb6  -4.8351919556e+02f        /* 0xc3f1c275 */
-#define sb1   3.0338060379e+01f        /* 0x41f2b459 */
-#define sb2   3.2579251099e+02f        /* 0x43a2e571 */
-#define sb3   1.5367296143e+03f        /* 0x44c01759 */
-#define sb4   3.1998581543e+03f        /* 0x4547fdbb */
-#define sb5   2.5530502930e+03f        /* 0x451f90ce */
-#define sb6   4.7452853394e+02f        /* 0x43ed43a7 */
-#define sb7  -2.2440952301e+01f        /* 0xc1b38712 */
+#define rb0 -9.8649431020e-03f /* 0xbc21a092 */
+#define rb1 -7.9928326607e-01f /* 0xbf4c9dd4 */
+#define rb2 -1.7757955551e+01f /* 0xc18e104b */
+#define rb3 -1.6063638306e+02f /* 0xc320a2ea */
+#define rb4 -6.3756646729e+02f /* 0xc41f6441 */
+#define rb5 -1.0250950928e+03f /* 0xc480230b */
+#define rb6 -4.8351919556e+02f /* 0xc3f1c275 */
+#define sb1 3.0338060379e+01f  /* 0x41f2b459 */
+#define sb2 3.2579251099e+02f  /* 0x43a2e571 */
+#define sb3 1.5367296143e+03f  /* 0x44c01759 */
+#define sb4 3.1998581543e+03f  /* 0x4547fdbb */
+#define sb5 2.5530502930e+03f  /* 0x451f90ce */
+#define sb6 4.7452853394e+02f  /* 0x43ed43a7 */
+#define sb7 -2.2440952301e+01f /* 0xc1b38712 */
 
 _CLC_OVERLOAD _CLC_DEF float erfc(float x) {
-    int hx = as_int(x);
-    int ix = hx & 0x7fffffff;
-    float absx = as_float(ix);
+  int hx = as_int(x);
+  int ix = hx & 0x7fffffff;
+  float absx = as_float(ix);
 
-    // Argument for polys
-    float x2 = absx * absx;
-    float t = 1.0f / x2;
-    float tt = absx - 1.0f;
-    t = absx < 1.25f ? tt : t;
-    t = absx < 0.84375f ? x2 : t;
+  // Argument for polys
+  float x2 = absx * absx;
+  float t = 1.0f / x2;
+  float tt = absx - 1.0f;
+  t = absx < 1.25f ? tt : t;
+  t = absx < 0.84375f ? x2 : t;
 
-    // Evaluate polys
-    float tu, tv, u, v;
+  // Evaluate polys
+  float tu, tv, u, v;
 
-    u = mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, rb6, rb5), rb4), rb3), rb2), rb1), rb0);
-    v = mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, sb7, sb6), sb5), sb4), sb3), sb2), sb1);
+  u = mad(t,
+          mad(t, mad(t, mad(t, mad(t, mad(t, rb6, rb5), rb4), rb3), rb2), rb1),
+          rb0);
+  v = mad(t,
+          mad(t, mad(t, mad(t, mad(t, mad(t, sb7, sb6), sb5), sb4), sb3), sb2),
+          sb1);
 
-    tu = mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, ra7, ra6), ra5), ra4), ra3), ra2), ra1), ra0);
-    tv = mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, sa8, sa7), sa6), sa5), sa4), sa3), sa2), sa1);
-    u = absx < 0x1.6db6dap+1f ? tu : u;
-    v = absx < 0x1.6db6dap+1f ? tv : v;
+  tu = mad(
+      t,
+      mad(t,
+          mad(t, mad(t, mad(t, mad(t, mad(t, ra7, ra6), ra5), ra4), ra3), ra2),
+          ra1),
+      ra0);
+  tv = mad(
+      t,
+      mad(t,
+          mad(t, mad(t, mad(t, mad(t, mad(t, sa8, sa7), sa6), sa5), sa4), sa3),
+          sa2),
+      sa1);
+  u = absx < 0x1.6db6dap+1f ? tu : u;
+  v = absx < 0x1.6db6dap+1f ? tv : v;
 
-    tu = mad(t, mad(t, mad(t, mad(t, mad(t, mad(t, pa6, pa5), pa4), pa3), pa2), pa1), pa0);
-    tv = mad(t, mad(t, mad(t, mad(t, mad(t, qa6, qa5), qa4), qa3), qa2), qa1);
-    u = absx < 1.25f ? tu : u;
-    v = absx < 1.25f ? tv : v;
+  tu = mad(t,
+           mad(t, mad(t, mad(t, mad(t, mad(t, pa6, pa5), pa4), pa3), pa2), pa1),
+           pa0);
+  tv = mad(t, mad(t, mad(t, mad(t, mad(t, qa6, qa5), qa4), qa3), qa2), qa1);
+  u = absx < 1.25f ? tu : u;
+  v = absx < 1.25f ? tv : v;
 
-    tu = mad(t, mad(t, mad(t, mad(t, pp4, pp3), pp2), pp1), pp0);
-    tv = mad(t, mad(t, mad(t, mad(t, qq5, qq4), qq3), qq2), qq1);
-    u = absx < 0.84375f ? tu : u;
-    v = absx < 0.84375f ? tv : v;
+  tu = mad(t, mad(t, mad(t, mad(t, pp4, pp3), pp2), pp1), pp0);
+  tv = mad(t, mad(t, mad(t, mad(t, qq5, qq4), qq3), qq2), qq1);
+  u = absx < 0.84375f ? tu : u;
+  v = absx < 0.84375f ? tv : v;
 
-    v = mad(t, v, 1.0f);
+  v = mad(t, v, 1.0f);
 
-    float q = MATH_DIVIDE(u, v);
+  float q = MATH_DIVIDE(u, v);
 
-    float ret = 0.0f;
+  float ret = 0.0f;
 
-    float z = as_float(ix & 0xfffff000);
-    float r = exp(mad(-z, z, -0.5625f)) * exp(mad(z - absx, z + absx, q));
-    r = MATH_DIVIDE(r, absx);
-    t = 2.0f - r;
-    r = x < 0.0f ? t : r;
-    ret = absx < 28.0f ? r : ret;
+  float z = as_float(ix & 0xfffff000);
+  float r = exp(mad(-z, z, -0.5625f)) * exp(mad(z - absx, z + absx, q));
+  r = MATH_DIVIDE(r, absx);
+  t = 2.0f - r;
+  r = x < 0.0f ? t : r;
+  ret = absx < 28.0f ? r : ret;
 
-    r = 1.0f - erx_f - q;
-    t = erx_f + q + 1.0f;
-    r = x < 0.0f ? t : r;
-    ret = absx < 1.25f ? r : ret;
+  r = 1.0f - erx_f - q;
+  t = erx_f + q + 1.0f;
+  r = x < 0.0f ? t : r;
+  ret = absx < 1.25f ? r : ret;
 
-    r = 0.5f - mad(x, q, x - 0.5f);
-    ret = absx < 0.84375f ? r : ret;
+  r = 0.5f - mad(x, q, x - 0.5f);
+  ret = absx < 0.84375f ? r : ret;
 
-    ret = x < -6.0f ? 2.0f : ret;
+  ret = x < -6.0f ? 2.0f : ret;
 
-    ret = isnan(x) ? x : ret;
+  ret = isnan(x) ? x : ret;
 
-    return ret;
+  return ret;
 }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, erfc, float);
@@ -286,12 +302,12 @@ _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, erfc, float);
 #define AU5 -1.02509513161107724954e+03
 #define AU6 -4.83519191608651397019e+02
 
-#define AV0  3.03380607434824582924e+01
-#define AV1  3.25792512996573918826e+02
-#define AV2  1.53672958608443695994e+03
-#define AV3  3.19985821950859553908e+03
-#define AV4  2.55305040643316442583e+03
-#define AV5  4.74528541206955367215e+02
+#define AV0 3.03380607434824582924e+01
+#define AV1 3.25792512996573918826e+02
+#define AV2 1.53672958608443695994e+03
+#define AV3 3.19985821950859553908e+03
+#define AV4 2.55305040643316442583e+03
+#define AV5 4.74528541206955367215e+02
 #define AV6 -2.24409524465858183362e+01
 
 #define BU0 -9.86494403484714822705e-03
@@ -303,21 +319,21 @@ _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, erfc, float);
 #define BU6 -8.12874355063065934246e+01
 #define BU7 -9.81432934416914548592e+00
 
-#define BV0  1.96512716674392571292e+01
-#define BV1  1.37657754143519042600e+02
-#define BV2  4.34565877475229228821e+02
-#define BV3  6.45387271733267880336e+02
-#define BV4  4.29008140027567833386e+02
-#define BV5  1.08635005541779435134e+02
-#define BV6  6.57024977031928170135e+00
+#define BV0 1.96512716674392571292e+01
+#define BV1 1.37657754143519042600e+02
+#define BV2 4.34565877475229228821e+02
+#define BV3 6.45387271733267880336e+02
+#define BV4 4.29008140027567833386e+02
+#define BV5 1.08635005541779435134e+02
+#define BV6 6.57024977031928170135e+00
 #define BV7 -6.04244152148580987438e-02
 
 #define CU0 -2.36211856075265944077e-03
-#define CU1  4.14856118683748331666e-01
+#define CU1 4.14856118683748331666e-01
 #define CU2 -3.72207876035701323847e-01
-#define CU3  3.18346619901161753674e-01
+#define CU3 3.18346619901161753674e-01
 #define CU4 -1.10894694282396677476e-01
-#define CU5  3.54783043256182359371e-02
+#define CU5 3.54783043256182359371e-02
 #define CU6 -2.16637559486879084300e-03
 
 #define CV0 1.06420880400844228286e-01
@@ -327,85 +343,99 @@ _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, erfc, float);
 #define CV4 1.36370839120290507362e-02
 #define CV5 1.19844998467991074170e-02
 
-#define DU0  1.28379167095512558561e-01
+#define DU0 1.28379167095512558561e-01
 #define DU1 -3.25042107247001499370e-01
 #define DU2 -2.84817495755985104766e-02
 #define DU3 -5.77027029648944159157e-03
 #define DU4 -2.37630166566501626084e-05
 
-#define DV0  3.97917223959155352819e-01
-#define DV1  6.50222499887672944485e-02
-#define DV2  5.08130628187576562776e-03
-#define DV3  1.32494738004321644526e-04
+#define DV0 3.97917223959155352819e-01
+#define DV1 6.50222499887672944485e-02
+#define DV2 5.08130628187576562776e-03
+#define DV3 1.32494738004321644526e-04
 #define DV4 -3.96022827877536812320e-06
 
 _CLC_OVERLOAD _CLC_DEF double erfc(double x) {
-    long lx = as_long(x);
-    long ax = lx & 0x7fffffffffffffffL;
-    double absx = as_double(ax);
-    int xneg = lx != ax;
+  long lx = as_long(x);
+  long ax = lx & 0x7fffffffffffffffL;
+  double absx = as_double(ax);
+  int xneg = lx != ax;
 
-    // Poly arg
-    double x2 = x * x;
-    double xm1 = absx - 1.0;
-    double t = 1.0 / x2;
-    t = absx < 1.25 ? xm1 : t;
-    t = absx < 0.84375 ? x2 : t;
+  // Poly arg
+  double x2 = x * x;
+  double xm1 = absx - 1.0;
+  double t = 1.0 / x2;
+  t = absx < 1.25 ? xm1 : t;
+  t = absx < 0.84375 ? x2 : t;
 
+  // Evaluate rational poly
+  // XXX Need to evaluate if we can grab the 14 coefficients from a
+  // table faster than evaluating 3 pairs of polys
+  double tu, tv, u, v;
 
-    // Evaluate rational poly
-    // XXX Need to evaluate if we can grab the 14 coefficients from a
-    // table faster than evaluating 3 pairs of polys
-    double tu, tv, u, v;
+  // |x| < 28
+  u = fma(t,
+          fma(t, fma(t, fma(t, fma(t, fma(t, AU6, AU5), AU4), AU3), AU2), AU1),
+          AU0);
+  v = fma(t,
+          fma(t, fma(t, fma(t, fma(t, fma(t, AV6, AV5), AV4), AV3), AV2), AV1),
+          AV0);
 
-    // |x| < 28
-    u = fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, AU6, AU5), AU4), AU3), AU2), AU1), AU0);
-    v = fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, AV6, AV5), AV4), AV3), AV2), AV1), AV0);
+  tu = fma(
+      t,
+      fma(t,
+          fma(t, fma(t, fma(t, fma(t, fma(t, BU7, BU6), BU5), BU4), BU3), BU2),
+          BU1),
+      BU0);
+  tv = fma(
+      t,
+      fma(t,
+          fma(t, fma(t, fma(t, fma(t, fma(t, BV7, BV6), BV5), BV4), BV3), BV2),
+          BV1),
+      BV0);
+  u = absx < 0x1.6db6dp+1 ? tu : u;
+  v = absx < 0x1.6db6dp+1 ? tv : v;
 
-    tu = fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, BU7, BU6), BU5), BU4), BU3), BU2), BU1), BU0);
-    tv = fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, BV7, BV6), BV5), BV4), BV3), BV2), BV1), BV0);
-    u = absx < 0x1.6db6dp+1 ? tu : u;
-    v = absx < 0x1.6db6dp+1 ? tv : v;
+  tu = fma(t,
+           fma(t, fma(t, fma(t, fma(t, fma(t, CU6, CU5), CU4), CU3), CU2), CU1),
+           CU0);
+  tv = fma(t, fma(t, fma(t, fma(t, fma(t, CV5, CV4), CV3), CV2), CV1), CV0);
+  u = absx < 1.25 ? tu : u;
+  v = absx < 1.25 ? tv : v;
 
-    tu = fma(t, fma(t, fma(t, fma(t, fma(t, fma(t, CU6, CU5), CU4), CU3), CU2), CU1), CU0);
-    tv = fma(t, fma(t, fma(t, fma(t, fma(t, CV5, CV4), CV3), CV2), CV1), CV0);
-    u = absx < 1.25 ? tu : u;
-    v = absx < 1.25 ? tv : v;
+  tu = fma(t, fma(t, fma(t, fma(t, DU4, DU3), DU2), DU1), DU0);
+  tv = fma(t, fma(t, fma(t, fma(t, DV4, DV3), DV2), DV1), DV0);
+  u = absx < 0.84375 ? tu : u;
+  v = absx < 0.84375 ? tv : v;
 
-    tu = fma(t, fma(t, fma(t, fma(t, DU4, DU3), DU2), DU1), DU0);
-    tv = fma(t, fma(t, fma(t, fma(t, DV4, DV3), DV2), DV1), DV0);
-    u = absx < 0.84375 ? tu : u;
-    v = absx < 0.84375 ? tv : v;
+  v = fma(t, v, 1.0);
+  double q = u / v;
 
-    v = fma(t, v, 1.0);
-    double q = u / v;
+  // Evaluate return value
 
+  // |x| < 28
+  double z = as_double(ax & 0xffffffff00000000UL);
+  double ret = exp(-z * z - 0.5625) * exp((z - absx) * (z + absx) + q) / absx;
+  t = 2.0 - ret;
+  ret = xneg ? t : ret;
 
-    // Evaluate return value
+  const double erx = 8.45062911510467529297e-01;
+  z = erx + q + 1.0;
+  t = 1.0 - erx - q;
+  t = xneg ? z : t;
+  ret = absx < 1.25 ? t : ret;
 
-    // |x| < 28
-    double z = as_double(ax & 0xffffffff00000000UL);
-    double ret = exp(-z * z - 0.5625) * exp((z - absx) * (z + absx) + q) / absx;
-    t = 2.0 - ret;
-    ret = xneg ? t : ret;
+  // z = 1.0 - fma(x, q, x);
+  // t = 0.5 - fma(x, q, x - 0.5);
+  // t = xneg == 1 | absx < 0.25 ? z : t;
+  t = fma(-x, q, 1.0 - x);
+  ret = absx < 0.84375 ? t : ret;
 
-    const double erx = 8.45062911510467529297e-01;
-    z = erx + q + 1.0;
-    t = 1.0 - erx - q;
-    t = xneg ? z : t;
-    ret = absx < 1.25 ? t : ret;
+  ret = x >= 28.0 ? 0.0 : ret;
+  ret = x <= -6.0 ? 2.0 : ret;
+  ret = ax > 0x7ff0000000000000UL ? x : ret;
 
-    // z = 1.0 - fma(x, q, x);
-    // t = 0.5 - fma(x, q, x - 0.5);
-    // t = xneg == 1 | absx < 0.25 ? z : t;
-    t = fma(-x, q, 1.0 - x);
-    ret = absx < 0.84375 ? t : ret;
-
-    ret = x >= 28.0 ? 0.0 : ret;
-    ret = x <= -6.0 ? 2.0 : ret;
-    ret = ax > 0x7ff0000000000000UL ? x : ret;
-
-    return ret;
+  return ret;
 }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, double, erfc, double);

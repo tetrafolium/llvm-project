@@ -26,57 +26,57 @@ namespace llvm {
 namespace remarks {
 /// Parses and holds the state of the latest parsed remark.
 struct BitstreamRemarkParser : public RemarkParser {
-    /// The buffer to parse.
-    BitstreamParserHelper ParserHelper;
-    /// The string table used for parsing strings.
-    Optional<ParsedStringTable> StrTab;
-    /// Temporary remark buffer used when the remarks are stored separately.
-    std::unique_ptr<MemoryBuffer> TmpRemarkBuffer;
-    /// The common metadata used to decide how to parse the buffer.
-    /// This is filled when parsing the metadata block.
-    uint64_t ContainerVersion = 0;
-    uint64_t RemarkVersion = 0;
-    BitstreamRemarkContainerType ContainerType =
-        BitstreamRemarkContainerType::Standalone;
-    /// Wether the parser is ready to parse remarks.
-    bool ReadyToParseRemarks = false;
+  /// The buffer to parse.
+  BitstreamParserHelper ParserHelper;
+  /// The string table used for parsing strings.
+  Optional<ParsedStringTable> StrTab;
+  /// Temporary remark buffer used when the remarks are stored separately.
+  std::unique_ptr<MemoryBuffer> TmpRemarkBuffer;
+  /// The common metadata used to decide how to parse the buffer.
+  /// This is filled when parsing the metadata block.
+  uint64_t ContainerVersion = 0;
+  uint64_t RemarkVersion = 0;
+  BitstreamRemarkContainerType ContainerType =
+      BitstreamRemarkContainerType::Standalone;
+  /// Wether the parser is ready to parse remarks.
+  bool ReadyToParseRemarks = false;
 
-    /// Create a parser that expects to find a string table embedded in the
-    /// stream.
-    explicit BitstreamRemarkParser(StringRef Buf)
-        : RemarkParser(Format::Bitstream), ParserHelper(Buf) {}
+  /// Create a parser that expects to find a string table embedded in the
+  /// stream.
+  explicit BitstreamRemarkParser(StringRef Buf)
+      : RemarkParser(Format::Bitstream), ParserHelper(Buf) {}
 
-    /// Create a parser that uses a pre-parsed string table.
-    BitstreamRemarkParser(StringRef Buf, ParsedStringTable StrTab)
-        : RemarkParser(Format::Bitstream), ParserHelper(Buf),
-          StrTab(std::move(StrTab)) {}
+  /// Create a parser that uses a pre-parsed string table.
+  BitstreamRemarkParser(StringRef Buf, ParsedStringTable StrTab)
+      : RemarkParser(Format::Bitstream), ParserHelper(Buf),
+        StrTab(std::move(StrTab)) {}
 
-    Expected<std::unique_ptr<Remark>> next() override;
+  Expected<std::unique_ptr<Remark>> next() override;
 
-    static bool classof(const RemarkParser *P) {
-        return P->ParserFormat == Format::Bitstream;
-    }
+  static bool classof(const RemarkParser *P) {
+    return P->ParserFormat == Format::Bitstream;
+  }
 
-    /// Parse and process the metadata of the buffer.
-    Error parseMeta();
+  /// Parse and process the metadata of the buffer.
+  Error parseMeta();
 
-    /// Parse a Bitstream remark.
-    Expected<std::unique_ptr<Remark>> parseRemark();
+  /// Parse a Bitstream remark.
+  Expected<std::unique_ptr<Remark>> parseRemark();
 
 private:
-    /// Helper functions.
-    Error processCommonMeta(BitstreamMetaParserHelper &Helper);
-    Error processStandaloneMeta(BitstreamMetaParserHelper &Helper);
-    Error processSeparateRemarksFileMeta(BitstreamMetaParserHelper &Helper);
-    Error processSeparateRemarksMetaMeta(BitstreamMetaParserHelper &Helper);
-    Expected<std::unique_ptr<Remark>>
-                                   processRemark(BitstreamRemarkParserHelper &Helper);
-    Error processExternalFilePath(Optional<StringRef> ExternalFilePath);
+  /// Helper functions.
+  Error processCommonMeta(BitstreamMetaParserHelper &Helper);
+  Error processStandaloneMeta(BitstreamMetaParserHelper &Helper);
+  Error processSeparateRemarksFileMeta(BitstreamMetaParserHelper &Helper);
+  Error processSeparateRemarksMetaMeta(BitstreamMetaParserHelper &Helper);
+  Expected<std::unique_ptr<Remark>>
+  processRemark(BitstreamRemarkParserHelper &Helper);
+  Error processExternalFilePath(Optional<StringRef> ExternalFilePath);
 };
 
 Expected<std::unique_ptr<BitstreamRemarkParser>> createBitstreamParserFromMeta(
-            StringRef Buf, Optional<ParsedStringTable> StrTab = None,
-            Optional<StringRef> ExternalFilePrependPath = None);
+    StringRef Buf, Optional<ParsedStringTable> StrTab = None,
+    Optional<StringRef> ExternalFilePrependPath = None);
 
 } // end namespace remarks
 } // end namespace llvm

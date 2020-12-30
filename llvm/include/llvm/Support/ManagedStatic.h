@@ -20,22 +20,16 @@ namespace llvm {
 
 /// object_creator - Helper method for ManagedStatic.
 template <class C> struct object_creator {
-    static void *call() {
-        return new C();
-    }
+  static void *call() { return new C(); }
 };
 
 /// object_deleter - Helper method for ManagedStatic.
 ///
 template <typename T> struct object_deleter {
-    static void call(void *Ptr) {
-        delete (T *)Ptr;
-    }
+  static void call(void *Ptr) { delete (T *)Ptr; }
 };
 template <typename T, size_t N> struct object_deleter<T[N]> {
-    static void call(void *Ptr) {
-        delete[](T *)Ptr;
-    }
+  static void call(void *Ptr) { delete[](T *) Ptr; }
 };
 
 // ManagedStatic must be initialized to zero, and it must *not* have a dynamic
@@ -55,30 +49,28 @@ template <typename T, size_t N> struct object_deleter<T[N]> {
 class ManagedStaticBase {
 protected:
 #ifdef LLVM_USE_CONSTEXPR_CTOR
-    mutable std::atomic<void *> Ptr {};
-    mutable void (*DeleterFn)(void *) = nullptr;
-    mutable const ManagedStaticBase *Next = nullptr;
+  mutable std::atomic<void *> Ptr{};
+  mutable void (*DeleterFn)(void *) = nullptr;
+  mutable const ManagedStaticBase *Next = nullptr;
 #else
-    // This should only be used as a static variable, which guarantees that this
-    // will be zero initialized.
-    mutable std::atomic<void *> Ptr;
-    mutable void (*DeleterFn)(void *);
-    mutable const ManagedStaticBase *Next;
+  // This should only be used as a static variable, which guarantees that this
+  // will be zero initialized.
+  mutable std::atomic<void *> Ptr;
+  mutable void (*DeleterFn)(void *);
+  mutable const ManagedStaticBase *Next;
 #endif
 
-    void RegisterManagedStatic(void *(*creator)(), void (*deleter)(void*)) const;
+  void RegisterManagedStatic(void *(*creator)(), void (*deleter)(void *)) const;
 
 public:
 #ifdef LLVM_USE_CONSTEXPR_CTOR
-    constexpr ManagedStaticBase() = default;
+  constexpr ManagedStaticBase() = default;
 #endif
 
-    /// isConstructed - Return true if this object has not been created yet.
-    bool isConstructed() const {
-        return Ptr != nullptr;
-    }
+  /// isConstructed - Return true if this object has not been created yet.
+  bool isConstructed() const { return Ptr != nullptr; }
 
-    void destroy() const;
+  void destroy() const;
 };
 
 /// ManagedStatic - This transparently changes the behavior of global statics to
@@ -90,36 +82,30 @@ template <class C, class Creator = object_creator<C>,
           class Deleter = object_deleter<C>>
 class ManagedStatic : public ManagedStaticBase {
 public:
-    // Accessors.
-    C &operator*() {
-        void *Tmp = Ptr.load(std::memory_order_acquire);
-        if (!Tmp)
-            RegisterManagedStatic(Creator::call, Deleter::call);
+  // Accessors.
+  C &operator*() {
+    void *Tmp = Ptr.load(std::memory_order_acquire);
+    if (!Tmp)
+      RegisterManagedStatic(Creator::call, Deleter::call);
 
-        return *static_cast<C *>(Ptr.load(std::memory_order_relaxed));
-    }
+    return *static_cast<C *>(Ptr.load(std::memory_order_relaxed));
+  }
 
-    C *operator->() {
-        return &**this;
-    }
+  C *operator->() { return &**this; }
 
-    const C &operator*() const {
-        void *Tmp = Ptr.load(std::memory_order_acquire);
-        if (!Tmp)
-            RegisterManagedStatic(Creator::call, Deleter::call);
+  const C &operator*() const {
+    void *Tmp = Ptr.load(std::memory_order_acquire);
+    if (!Tmp)
+      RegisterManagedStatic(Creator::call, Deleter::call);
 
-        return *static_cast<C *>(Ptr.load(std::memory_order_relaxed));
-    }
+    return *static_cast<C *>(Ptr.load(std::memory_order_relaxed));
+  }
 
-    const C *operator->() const {
-        return &**this;
-    }
+  const C *operator->() const { return &**this; }
 
-    // Extract the instance, leaving the ManagedStatic uninitialized. The
-    // user is then responsible for the lifetime of the returned instance.
-    C *claim() {
-        return static_cast<C *>(Ptr.exchange(nullptr));
-    }
+  // Extract the instance, leaving the ManagedStatic uninitialized. The
+  // user is then responsible for the lifetime of the returned instance.
+  C *claim() { return static_cast<C *>(Ptr.exchange(nullptr)); }
 };
 
 /// llvm_shutdown - Deallocate and destroy all ManagedStatic variables.
@@ -128,10 +114,8 @@ void llvm_shutdown();
 /// llvm_shutdown_obj - This is a simple helper class that calls
 /// llvm_shutdown() when it is destroyed.
 struct llvm_shutdown_obj {
-    llvm_shutdown_obj() = default;
-    ~llvm_shutdown_obj() {
-        llvm_shutdown();
-    }
+  llvm_shutdown_obj() = default;
+  ~llvm_shutdown_obj() { llvm_shutdown(); }
 };
 
 } // end namespace llvm

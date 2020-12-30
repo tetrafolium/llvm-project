@@ -26,20 +26,18 @@ namespace llvm {
 namespace mca {
 
 class InstructionTables final : public Stage {
-    const MCSchedModel &SM;
-    SmallVector<std::pair<ResourceRef, ResourceCycles>, 4> UsedResources;
-    SmallVector<uint64_t, 8> Masks;
+  const MCSchedModel &SM;
+  SmallVector<std::pair<ResourceRef, ResourceCycles>, 4> UsedResources;
+  SmallVector<uint64_t, 8> Masks;
 
 public:
-    InstructionTables(const MCSchedModel &Model)
-        : Stage(), SM(Model), Masks(Model.getNumProcResourceKinds()) {
-        computeProcResourceMasks(Model, Masks);
-    }
+  InstructionTables(const MCSchedModel &Model)
+      : Stage(), SM(Model), Masks(Model.getNumProcResourceKinds()) {
+    computeProcResourceMasks(Model, Masks);
+  }
 
-    bool hasWorkToComplete() const override {
-        return false;
-    }
-    Error execute(InstRef &IR) override;
+  bool hasWorkToComplete() const override { return false; }
+  Error execute(InstRef &IR) override;
 };
 } // namespace mca
 } // namespace llvm

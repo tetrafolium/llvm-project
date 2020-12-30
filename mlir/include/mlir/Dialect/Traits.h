@@ -87,9 +87,9 @@ template <typename ConcreteType>
 class ResultsBroadcastableShape
     : public TraitBase<ConcreteType, ResultsBroadcastableShape> {
 public:
-    static LogicalResult verifyTrait(Operation *op) {
-        return impl::verifyCompatibleOperandBroadcast(op);
-    }
+  static LogicalResult verifyTrait(Operation *op) {
+    return impl::verifyCompatibleOperandBroadcast(op);
+  }
 };
 
 } // end namespace OpTrait

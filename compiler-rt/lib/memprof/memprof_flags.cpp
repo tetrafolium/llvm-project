@@ -24,9 +24,9 @@ Flags memprof_flags_dont_use_directly; // use via flags().
 
 static const char *MaybeUseMemprofDefaultOptionsCompileDefinition() {
 #ifdef MEMPROF_DEFAULT_OPTIONS
-    return SANITIZER_STRINGIFY(MEMPROF_DEFAULT_OPTIONS);
+  return SANITIZER_STRINGIFY(MEMPROF_DEFAULT_OPTIONS);
 #else
-    return "";
+  return "";
 #endif
 }
 
@@ -44,50 +44,50 @@ static void RegisterMemprofFlags(FlagParser *parser, Flags *f) {
 }
 
 void InitializeFlags() {
-    // Set the default values and prepare for parsing MemProf and common flags.
-    SetCommonFlagsDefaults();
-    {
-        CommonFlags cf;
-        cf.CopyFrom(*common_flags());
-        cf.external_symbolizer_path = GetEnv("MEMPROF_SYMBOLIZER_PATH");
-        cf.malloc_context_size = kDefaultMallocContextSize;
-        cf.intercept_tls_get_addr = true;
-        cf.exitcode = 1;
-        OverrideCommonFlags(cf);
-    }
-    Flags *f = flags();
-    f->SetDefaults();
+  // Set the default values and prepare for parsing MemProf and common flags.
+  SetCommonFlagsDefaults();
+  {
+    CommonFlags cf;
+    cf.CopyFrom(*common_flags());
+    cf.external_symbolizer_path = GetEnv("MEMPROF_SYMBOLIZER_PATH");
+    cf.malloc_context_size = kDefaultMallocContextSize;
+    cf.intercept_tls_get_addr = true;
+    cf.exitcode = 1;
+    OverrideCommonFlags(cf);
+  }
+  Flags *f = flags();
+  f->SetDefaults();
 
-    FlagParser memprof_parser;
-    RegisterMemprofFlags(&memprof_parser, f);
-    RegisterCommonFlags(&memprof_parser);
+  FlagParser memprof_parser;
+  RegisterMemprofFlags(&memprof_parser, f);
+  RegisterCommonFlags(&memprof_parser);
 
-    // Override from MemProf compile definition.
-    const char *memprof_compile_def =
-        MaybeUseMemprofDefaultOptionsCompileDefinition();
-    memprof_parser.ParseString(memprof_compile_def);
+  // Override from MemProf compile definition.
+  const char *memprof_compile_def =
+      MaybeUseMemprofDefaultOptionsCompileDefinition();
+  memprof_parser.ParseString(memprof_compile_def);
 
-    // Override from user-specified string.
-    const char *memprof_default_options = __memprof_default_options();
-    memprof_parser.ParseString(memprof_default_options);
+  // Override from user-specified string.
+  const char *memprof_default_options = __memprof_default_options();
+  memprof_parser.ParseString(memprof_default_options);
 
-    // Override from command line.
-    memprof_parser.ParseStringFromEnv("MEMPROF_OPTIONS");
+  // Override from command line.
+  memprof_parser.ParseStringFromEnv("MEMPROF_OPTIONS");
 
-    InitializeCommonFlags();
+  InitializeCommonFlags();
 
-    if (Verbosity())
-        ReportUnrecognizedFlags();
+  if (Verbosity())
+    ReportUnrecognizedFlags();
 
-    if (common_flags()->help) {
-        memprof_parser.PrintFlagDescriptions();
-    }
+  if (common_flags()->help) {
+    memprof_parser.PrintFlagDescriptions();
+  }
 
-    CHECK_LE((uptr)common_flags()->malloc_context_size, kStackTraceMax);
+  CHECK_LE((uptr)common_flags()->malloc_context_size, kStackTraceMax);
 }
 
 } // namespace __memprof
 
 SANITIZER_INTERFACE_WEAK_DEF(const char *, __memprof_default_options, void) {
-    return "";
+  return "";
 }

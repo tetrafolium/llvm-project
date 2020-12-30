@@ -20,7 +20,7 @@ enum {
 #define COMMENTSTART
 #include "clang/Basic/DiagnosticCommentKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_COMMENT_DIAGNOSTICS
+  NUM_BUILTIN_COMMENT_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

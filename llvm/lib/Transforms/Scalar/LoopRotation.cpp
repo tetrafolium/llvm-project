@@ -40,89 +40,89 @@ LoopRotatePass::LoopRotatePass(bool EnableHeaderDuplication)
 PreservedAnalyses LoopRotatePass::run(Loop &L, LoopAnalysisManager &AM,
                                       LoopStandardAnalysisResults &AR,
                                       LPMUpdater &) {
-    // Vectorization requires loop-rotation. Use default threshold for loops the
-    // user explicitly marked for vectorization, even when header duplication is
-    // disabled.
-    int Threshold = EnableHeaderDuplication ||
-                    hasVectorizeTransformation(&L) == TM_ForcedByUser
-                    ? DefaultRotationThreshold
-                    : 0;
-    const DataLayout &DL = L.getHeader()->getModule()->getDataLayout();
-    const SimplifyQuery SQ = getBestSimplifyQuery(AR, DL);
+  // Vectorization requires loop-rotation. Use default threshold for loops the
+  // user explicitly marked for vectorization, even when header duplication is
+  // disabled.
+  int Threshold = EnableHeaderDuplication ||
+                          hasVectorizeTransformation(&L) == TM_ForcedByUser
+                      ? DefaultRotationThreshold
+                      : 0;
+  const DataLayout &DL = L.getHeader()->getModule()->getDataLayout();
+  const SimplifyQuery SQ = getBestSimplifyQuery(AR, DL);
 
-    Optional<MemorySSAUpdater> MSSAU;
-    if (AR.MSSA)
-        MSSAU = MemorySSAUpdater(AR.MSSA);
-    bool Changed = LoopRotation(&L, &AR.LI, &AR.TTI, &AR.AC, &AR.DT, &AR.SE,
-                                MSSAU.hasValue() ? MSSAU.getPointer() : nullptr,
-                                SQ, false, Threshold, false);
+  Optional<MemorySSAUpdater> MSSAU;
+  if (AR.MSSA)
+    MSSAU = MemorySSAUpdater(AR.MSSA);
+  bool Changed = LoopRotation(&L, &AR.LI, &AR.TTI, &AR.AC, &AR.DT, &AR.SE,
+                              MSSAU.hasValue() ? MSSAU.getPointer() : nullptr,
+                              SQ, false, Threshold, false);
 
-    if (!Changed)
-        return PreservedAnalyses::all();
+  if (!Changed)
+    return PreservedAnalyses::all();
 
-    if (AR.MSSA && VerifyMemorySSA)
-        AR.MSSA->verifyMemorySSA();
+  if (AR.MSSA && VerifyMemorySSA)
+    AR.MSSA->verifyMemorySSA();
 
-    auto PA = getLoopPassPreservedAnalyses();
-    if (AR.MSSA)
-        PA.preserve<MemorySSAAnalysis>();
-    return PA;
+  auto PA = getLoopPassPreservedAnalyses();
+  if (AR.MSSA)
+    PA.preserve<MemorySSAAnalysis>();
+  return PA;
 }
 
 namespace {
 
 class LoopRotateLegacyPass : public LoopPass {
-    unsigned MaxHeaderSize;
+  unsigned MaxHeaderSize;
 
 public:
-    static char ID; // Pass ID, replacement for typeid
-    LoopRotateLegacyPass(int SpecifiedMaxHeaderSize = -1) : LoopPass(ID) {
-        initializeLoopRotateLegacyPassPass(*PassRegistry::getPassRegistry());
-        if (SpecifiedMaxHeaderSize == -1)
-            MaxHeaderSize = DefaultRotationThreshold;
-        else
-            MaxHeaderSize = unsigned(SpecifiedMaxHeaderSize);
+  static char ID; // Pass ID, replacement for typeid
+  LoopRotateLegacyPass(int SpecifiedMaxHeaderSize = -1) : LoopPass(ID) {
+    initializeLoopRotateLegacyPassPass(*PassRegistry::getPassRegistry());
+    if (SpecifiedMaxHeaderSize == -1)
+      MaxHeaderSize = DefaultRotationThreshold;
+    else
+      MaxHeaderSize = unsigned(SpecifiedMaxHeaderSize);
+  }
+
+  // LCSSA form makes instruction renaming easier.
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<AssumptionCacheTracker>();
+    AU.addRequired<TargetTransformInfoWrapperPass>();
+    if (EnableMSSALoopDependency)
+      AU.addPreserved<MemorySSAWrapperPass>();
+    getLoopAnalysisUsage(AU);
+  }
+
+  bool runOnLoop(Loop *L, LPPassManager &LPM) override {
+    if (skipLoop(L))
+      return false;
+    Function &F = *L->getHeader()->getParent();
+
+    auto *LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+    const auto *TTI = &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
+    auto *AC = &getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
+    auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+    const SimplifyQuery SQ = getBestSimplifyQuery(*this, F);
+    Optional<MemorySSAUpdater> MSSAU;
+    if (EnableMSSALoopDependency) {
+      // Not requiring MemorySSA and getting it only if available will split
+      // the loop pass pipeline when LoopRotate is being run first.
+      auto *MSSAA = getAnalysisIfAvailable<MemorySSAWrapperPass>();
+      if (MSSAA)
+        MSSAU = MemorySSAUpdater(&MSSAA->getMSSA());
     }
-
-    // LCSSA form makes instruction renaming easier.
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<AssumptionCacheTracker>();
-        AU.addRequired<TargetTransformInfoWrapperPass>();
-        if (EnableMSSALoopDependency)
-            AU.addPreserved<MemorySSAWrapperPass>();
-        getLoopAnalysisUsage(AU);
-    }
-
-    bool runOnLoop(Loop *L, LPPassManager &LPM) override {
-        if (skipLoop(L))
-            return false;
-        Function &F = *L->getHeader()->getParent();
-
-        auto *LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-        const auto *TTI = &getAnalysis<TargetTransformInfoWrapperPass>().getTTI(F);
-        auto *AC = &getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
-        auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-        auto &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-        const SimplifyQuery SQ = getBestSimplifyQuery(*this, F);
-        Optional<MemorySSAUpdater> MSSAU;
-        if (EnableMSSALoopDependency) {
-            // Not requiring MemorySSA and getting it only if available will split
-            // the loop pass pipeline when LoopRotate is being run first.
-            auto *MSSAA = getAnalysisIfAvailable<MemorySSAWrapperPass>();
-            if (MSSAA)
-                MSSAU = MemorySSAUpdater(&MSSAA->getMSSA());
-        }
-        // Vectorization requires loop-rotation. Use default threshold for loops the
-        // user explicitly marked for vectorization, even when header duplication is
-        // disabled.
-        int Threshold = hasVectorizeTransformation(L) == TM_ForcedByUser
+    // Vectorization requires loop-rotation. Use default threshold for loops the
+    // user explicitly marked for vectorization, even when header duplication is
+    // disabled.
+    int Threshold = hasVectorizeTransformation(L) == TM_ForcedByUser
                         ? DefaultRotationThreshold
                         : MaxHeaderSize;
 
-        return LoopRotation(L, LI, TTI, AC, &DT, &SE,
-                            MSSAU.hasValue() ? MSSAU.getPointer() : nullptr, SQ,
-                            false, Threshold, false);
-    }
+    return LoopRotation(L, LI, TTI, AC, &DT, &SE,
+                        MSSAU.hasValue() ? MSSAU.getPointer() : nullptr, SQ,
+                        false, Threshold, false);
+  }
 };
 } // end namespace
 
@@ -137,5 +137,5 @@ INITIALIZE_PASS_END(LoopRotateLegacyPass, "loop-rotate", "Rotate Loops", false,
                     false)
 
 Pass *llvm::createLoopRotatePass(int MaxHeaderSize) {
-    return new LoopRotateLegacyPass(MaxHeaderSize);
+  return new LoopRotateLegacyPass(MaxHeaderSize);
 }

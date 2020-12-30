@@ -32,14 +32,14 @@ bool containsEnum(const Stmt *S);
 bool containsStaticLocal(const Stmt *S);
 bool containsBuiltinOffsetOf(const Stmt *S);
 template <class T> bool containsStmt(const Stmt *S) {
-    if (isa<T>(S))
-        return true;
+  if (isa<T>(S))
+    return true;
 
-    for (const Stmt *Child : S->children())
-        if (Child && containsStmt<T>(Child))
-            return true;
+  for (const Stmt *Child : S->children())
+    if (Child && containsStmt<T>(Child))
+      return true;
 
-    return false;
+  return false;
 }
 
 std::pair<const clang::VarDecl *, const clang::Expr *>
@@ -52,13 +52,13 @@ parseAssignment(const Stmt *S);
 // stored for a symbol. When a symbol is already contradicted, it can not be
 // casted back to nullable.
 enum class Nullability : char {
-    Contradicted, // Tracked nullability is contradicted by an explicit cast. Do
-    // not report any nullability related issue for this symbol.
-    // This nullability is propagated aggressively to avoid false
-    // positive results. See the comment on getMostNullable method.
-    Nullable,
-    Unspecified,
-    Nonnull
+  Contradicted, // Tracked nullability is contradicted by an explicit cast. Do
+  // not report any nullability related issue for this symbol.
+  // This nullability is propagated aggressively to avoid false
+  // positive results. See the comment on getMostNullable method.
+  Nullable,
+  Unspecified,
+  Nonnull
 };
 
 /// Get nullability annotation for a given type.

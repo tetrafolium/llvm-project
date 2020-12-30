@@ -28,23 +28,23 @@ namespace exegesis {
 
 class SnippetRepetitor {
 public:
-    static std::unique_ptr<const SnippetRepetitor>
-    Create(InstructionBenchmark::RepetitionModeE Mode, const LLVMState &State);
+  static std::unique_ptr<const SnippetRepetitor>
+  Create(InstructionBenchmark::RepetitionModeE Mode, const LLVMState &State);
 
-    virtual ~SnippetRepetitor();
+  virtual ~SnippetRepetitor();
 
-    // Returns the set of registers that are reserved by the repetitor.
-    virtual BitVector getReservedRegs() const = 0;
+  // Returns the set of registers that are reserved by the repetitor.
+  virtual BitVector getReservedRegs() const = 0;
 
-    // Returns a functor that repeats `Instructions` so that the function executes
-    // at least `MinInstructions` instructions.
-    virtual FillFunction Repeat(ArrayRef<MCInst> Instructions,
-                                unsigned MinInstructions) const = 0;
+  // Returns a functor that repeats `Instructions` so that the function executes
+  // at least `MinInstructions` instructions.
+  virtual FillFunction Repeat(ArrayRef<MCInst> Instructions,
+                              unsigned MinInstructions) const = 0;
 
-    explicit SnippetRepetitor(const LLVMState &State) : State(State) {}
+  explicit SnippetRepetitor(const LLVMState &State) : State(State) {}
 
 protected:
-    const LLVMState &State;
+  const LLVMState &State;
 };
 
 } // namespace exegesis

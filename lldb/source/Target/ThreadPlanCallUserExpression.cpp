@@ -8,7 +8,6 @@
 
 #include "lldb/Target/ThreadPlanCallUserExpression.h"
 
-
 #include "lldb/Breakpoint/Breakpoint.h"
 #include "lldb/Breakpoint/BreakpointLocation.h"
 #include "lldb/Core/Address.h"
@@ -37,81 +36,81 @@ ThreadPlanCallUserExpression::ThreadPlanCallUserExpression(
     lldb::UserExpressionSP &user_expression_sp)
     : ThreadPlanCallFunction(thread, function, CompilerType(), args, options),
       m_user_expression_sp(user_expression_sp) {
-    // User expressions are generally "User generated" so we should set them up
-    // to stop when done.
-    SetIsMasterPlan(true);
-    SetOkayToDiscard(false);
+  // User expressions are generally "User generated" so we should set them up
+  // to stop when done.
+  SetIsMasterPlan(true);
+  SetOkayToDiscard(false);
 }
 
 ThreadPlanCallUserExpression::~ThreadPlanCallUserExpression() {}
 
 void ThreadPlanCallUserExpression::GetDescription(
     Stream *s, lldb::DescriptionLevel level) {
-    if (level == eDescriptionLevelBrief)
-        s->Printf("User Expression thread plan");
-    else
-        ThreadPlanCallFunction::GetDescription(s, level);
+  if (level == eDescriptionLevelBrief)
+    s->Printf("User Expression thread plan");
+  else
+    ThreadPlanCallFunction::GetDescription(s, level);
 }
 
 void ThreadPlanCallUserExpression::DidPush() {
-    ThreadPlanCallFunction::DidPush();
-    if (m_user_expression_sp)
-        m_user_expression_sp->WillStartExecuting();
+  ThreadPlanCallFunction::DidPush();
+  if (m_user_expression_sp)
+    m_user_expression_sp->WillStartExecuting();
 }
 
 void ThreadPlanCallUserExpression::WillPop() {
-    ThreadPlanCallFunction::WillPop();
-    if (m_user_expression_sp)
-        m_user_expression_sp.reset();
+  ThreadPlanCallFunction::WillPop();
+  if (m_user_expression_sp)
+    m_user_expression_sp.reset();
 }
 
 bool ThreadPlanCallUserExpression::MischiefManaged() {
-    Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_STEP));
+  Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_STEP));
 
-    if (IsPlanComplete()) {
-        LLDB_LOGF(log, "ThreadPlanCallFunction(%p): Completed call function plan.",
-                  static_cast<void *>(this));
+  if (IsPlanComplete()) {
+    LLDB_LOGF(log, "ThreadPlanCallFunction(%p): Completed call function plan.",
+              static_cast<void *>(this));
 
-        if (m_manage_materialization && PlanSucceeded() && m_user_expression_sp) {
-            lldb::addr_t function_stack_top;
-            lldb::addr_t function_stack_bottom;
-            lldb::addr_t function_stack_pointer = GetFunctionStackPointer();
+    if (m_manage_materialization && PlanSucceeded() && m_user_expression_sp) {
+      lldb::addr_t function_stack_top;
+      lldb::addr_t function_stack_bottom;
+      lldb::addr_t function_stack_pointer = GetFunctionStackPointer();
 
-            function_stack_bottom = function_stack_pointer - HostInfo::GetPageSize();
-            function_stack_top = function_stack_pointer;
+      function_stack_bottom = function_stack_pointer - HostInfo::GetPageSize();
+      function_stack_top = function_stack_pointer;
 
-            DiagnosticManager diagnostics;
+      DiagnosticManager diagnostics;
 
-            ExecutionContext exe_ctx(GetThread());
+      ExecutionContext exe_ctx(GetThread());
 
-            m_user_expression_sp->FinalizeJITExecution(
-                diagnostics, exe_ctx, m_result_var_sp, function_stack_bottom,
-                function_stack_top);
-        }
-
-        ThreadPlan::MischiefManaged();
-        return true;
-    } else {
-        return false;
+      m_user_expression_sp->FinalizeJITExecution(
+          diagnostics, exe_ctx, m_result_var_sp, function_stack_bottom,
+          function_stack_top);
     }
+
+    ThreadPlan::MischiefManaged();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 StopInfoSP ThreadPlanCallUserExpression::GetRealStopInfo() {
-    StopInfoSP stop_info_sp = ThreadPlanCallFunction::GetRealStopInfo();
+  StopInfoSP stop_info_sp = ThreadPlanCallFunction::GetRealStopInfo();
 
-    if (stop_info_sp) {
-        lldb::addr_t addr = GetStopAddress();
-        DynamicCheckerFunctions *checkers = m_process.GetDynamicCheckers();
-        StreamString s;
+  if (stop_info_sp) {
+    lldb::addr_t addr = GetStopAddress();
+    DynamicCheckerFunctions *checkers = m_process.GetDynamicCheckers();
+    StreamString s;
 
-        if (checkers && checkers->DoCheckersExplainStop(addr, s))
-            stop_info_sp->SetDescription(s.GetData());
-    }
+    if (checkers && checkers->DoCheckersExplainStop(addr, s))
+      stop_info_sp->SetDescription(s.GetData());
+  }
 
-    return stop_info_sp;
+  return stop_info_sp;
 }
 
 void ThreadPlanCallUserExpression::DoTakedown(bool success) {
-    ThreadPlanCallFunction::DoTakedown(success);
-    m_user_expression_sp->DidFinishExecuting();
+  ThreadPlanCallFunction::DoTakedown(success);
+  m_user_expression_sp->DidFinishExecuting();
 }

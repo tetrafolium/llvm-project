@@ -16,48 +16,48 @@ namespace utils {
 
 /// Return whether \p S is a reference to the declaration of \p Var.
 static bool isAccessForVar(const Stmt *S, const VarDecl *Var) {
-    if (const auto *DRE = dyn_cast<DeclRefExpr>(S))
-        return DRE->getDecl() == Var;
+  if (const auto *DRE = dyn_cast<DeclRefExpr>(S))
+    return DRE->getDecl() == Var;
 
-    return false;
+  return false;
 }
 
 /// Return whether \p Var has a pointer or reference in \p S.
 static bool isPtrOrReferenceForVar(const Stmt *S, const VarDecl *Var) {
-    if (const auto *DS = dyn_cast<DeclStmt>(S)) {
-        for (const Decl *D : DS->getDeclGroup()) {
-            if (const auto *LeftVar = dyn_cast<VarDecl>(D)) {
-                if (LeftVar->hasInit() && LeftVar->getType()->isReferenceType()) {
-                    return isAccessForVar(LeftVar->getInit(), Var);
-                }
-            }
+  if (const auto *DS = dyn_cast<DeclStmt>(S)) {
+    for (const Decl *D : DS->getDeclGroup()) {
+      if (const auto *LeftVar = dyn_cast<VarDecl>(D)) {
+        if (LeftVar->hasInit() && LeftVar->getType()->isReferenceType()) {
+          return isAccessForVar(LeftVar->getInit(), Var);
         }
-    } else if (const auto *UnOp = dyn_cast<UnaryOperator>(S)) {
-        if (UnOp->getOpcode() == UO_AddrOf)
-            return isAccessForVar(UnOp->getSubExpr(), Var);
+      }
     }
+  } else if (const auto *UnOp = dyn_cast<UnaryOperator>(S)) {
+    if (UnOp->getOpcode() == UO_AddrOf)
+      return isAccessForVar(UnOp->getSubExpr(), Var);
+  }
 
-    return false;
+  return false;
 }
 
 /// Return whether \p Var has a pointer or reference in \p S.
 static bool hasPtrOrReferenceInStmt(const Stmt *S, const VarDecl *Var) {
-    if (isPtrOrReferenceForVar(S, Var))
-        return true;
+  if (isPtrOrReferenceForVar(S, Var))
+    return true;
 
-    for (const Stmt *Child : S->children()) {
-        if (!Child)
-            continue;
+  for (const Stmt *Child : S->children()) {
+    if (!Child)
+      continue;
 
-        if (hasPtrOrReferenceInStmt(Child, Var))
-            return true;
-    }
+    if (hasPtrOrReferenceInStmt(Child, Var))
+      return true;
+  }
 
-    return false;
+  return false;
 }
 
 bool hasPtrOrReferenceInFunc(const FunctionDecl *Func, const VarDecl *Var) {
-    return hasPtrOrReferenceInStmt(Func->getBody(), Var);
+  return hasPtrOrReferenceInStmt(Func->getBody(), Var);
 }
 
 } // namespace utils

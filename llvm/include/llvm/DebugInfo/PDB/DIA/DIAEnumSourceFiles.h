@@ -19,19 +19,19 @@ class DIASession;
 
 class DIAEnumSourceFiles : public IPDBEnumChildren<IPDBSourceFile> {
 public:
-    explicit DIAEnumSourceFiles(const DIASession &PDBSession,
-                                CComPtr<IDiaEnumSourceFiles> DiaEnumerator);
+  explicit DIAEnumSourceFiles(const DIASession &PDBSession,
+                              CComPtr<IDiaEnumSourceFiles> DiaEnumerator);
 
-    uint32_t getChildCount() const override;
-    ChildTypePtr getChildAtIndex(uint32_t Index) const override;
-    ChildTypePtr getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  ChildTypePtr getChildAtIndex(uint32_t Index) const override;
+  ChildTypePtr getNext() override;
+  void reset() override;
 
 private:
-    const DIASession &Session;
-    CComPtr<IDiaEnumSourceFiles> Enumerator;
+  const DIASession &Session;
+  CComPtr<IDiaEnumSourceFiles> Enumerator;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

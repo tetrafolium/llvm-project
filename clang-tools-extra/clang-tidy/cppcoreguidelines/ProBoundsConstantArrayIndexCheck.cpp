@@ -26,100 +26,100 @@ ProBoundsConstantArrayIndexCheck::ProBoundsConstantArrayIndexCheck(
 
 void ProBoundsConstantArrayIndexCheck::storeOptions(
     ClangTidyOptions::OptionMap &Opts) {
-    Options.store(Opts, "GslHeader", GslHeader);
-    Options.store(Opts, "IncludeStyle", Inserter.getStyle());
+  Options.store(Opts, "GslHeader", GslHeader);
+  Options.store(Opts, "IncludeStyle", Inserter.getStyle());
 }
 
 void ProBoundsConstantArrayIndexCheck::registerPPCallbacks(
     const SourceManager &SM, Preprocessor *PP, Preprocessor *ModuleExpanderPP) {
-    Inserter.registerPreprocessor(PP);
+  Inserter.registerPreprocessor(PP);
 }
 
 void ProBoundsConstantArrayIndexCheck::registerMatchers(MatchFinder *Finder) {
-    // Note: if a struct contains an array member, the compiler-generated
-    // constructor has an arraySubscriptExpr.
-    Finder->addMatcher(
-        arraySubscriptExpr(
-            hasBase(ignoringImpCasts(hasType(constantArrayType().bind("type")))),
-            hasIndex(expr().bind("index")), unless(hasAncestor(isImplicit())))
-        .bind("expr"),
-        this);
+  // Note: if a struct contains an array member, the compiler-generated
+  // constructor has an arraySubscriptExpr.
+  Finder->addMatcher(
+      arraySubscriptExpr(
+          hasBase(ignoringImpCasts(hasType(constantArrayType().bind("type")))),
+          hasIndex(expr().bind("index")), unless(hasAncestor(isImplicit())))
+          .bind("expr"),
+      this);
 
-    Finder->addMatcher(
-        cxxOperatorCallExpr(
-            hasOverloadedOperatorName("[]"),
-            hasArgument(
-                0, hasType(cxxRecordDecl(hasName("::std::array")).bind("type"))),
-            hasArgument(1, expr().bind("index")))
-        .bind("expr"),
-        this);
+  Finder->addMatcher(
+      cxxOperatorCallExpr(
+          hasOverloadedOperatorName("[]"),
+          hasArgument(
+              0, hasType(cxxRecordDecl(hasName("::std::array")).bind("type"))),
+          hasArgument(1, expr().bind("index")))
+          .bind("expr"),
+      this);
 }
 
 void ProBoundsConstantArrayIndexCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *Matched = Result.Nodes.getNodeAs<Expr>("expr");
-    const auto *IndexExpr = Result.Nodes.getNodeAs<Expr>("index");
+  const auto *Matched = Result.Nodes.getNodeAs<Expr>("expr");
+  const auto *IndexExpr = Result.Nodes.getNodeAs<Expr>("index");
 
-    if (IndexExpr->isValueDependent())
-        return; // We check in the specialization.
+  if (IndexExpr->isValueDependent())
+    return; // We check in the specialization.
 
-    Optional<llvm::APSInt> Index =
-        IndexExpr->getIntegerConstantExpr(*Result.Context);
-    if (!Index) {
-        SourceRange BaseRange;
-        if (const auto *ArraySubscriptE = dyn_cast<ArraySubscriptExpr>(Matched))
-            BaseRange = ArraySubscriptE->getBase()->getSourceRange();
-        else
-            BaseRange =
-                dyn_cast<CXXOperatorCallExpr>(Matched)->getArg(0)->getSourceRange();
-        SourceRange IndexRange = IndexExpr->getSourceRange();
+  Optional<llvm::APSInt> Index =
+      IndexExpr->getIntegerConstantExpr(*Result.Context);
+  if (!Index) {
+    SourceRange BaseRange;
+    if (const auto *ArraySubscriptE = dyn_cast<ArraySubscriptExpr>(Matched))
+      BaseRange = ArraySubscriptE->getBase()->getSourceRange();
+    else
+      BaseRange =
+          dyn_cast<CXXOperatorCallExpr>(Matched)->getArg(0)->getSourceRange();
+    SourceRange IndexRange = IndexExpr->getSourceRange();
 
-        auto Diag = diag(Matched->getExprLoc(),
-                         "do not use array subscript when the index is "
-                         "not an integer constant expression; use gsl::at() "
-                         "instead");
-        if (!GslHeader.empty()) {
-            Diag << FixItHint::CreateInsertion(BaseRange.getBegin(), "gsl::at(")
-                 << FixItHint::CreateReplacement(
-                     SourceRange(BaseRange.getEnd().getLocWithOffset(1),
-                                 IndexRange.getBegin().getLocWithOffset(-1)),
-                     ", ")
-                 << FixItHint::CreateReplacement(Matched->getEndLoc(), ")")
-                 << Inserter.createMainFileIncludeInsertion(GslHeader);
-        }
-        return;
+    auto Diag = diag(Matched->getExprLoc(),
+                     "do not use array subscript when the index is "
+                     "not an integer constant expression; use gsl::at() "
+                     "instead");
+    if (!GslHeader.empty()) {
+      Diag << FixItHint::CreateInsertion(BaseRange.getBegin(), "gsl::at(")
+           << FixItHint::CreateReplacement(
+                  SourceRange(BaseRange.getEnd().getLocWithOffset(1),
+                              IndexRange.getBegin().getLocWithOffset(-1)),
+                  ", ")
+           << FixItHint::CreateReplacement(Matched->getEndLoc(), ")")
+           << Inserter.createMainFileIncludeInsertion(GslHeader);
     }
+    return;
+  }
 
-    const auto *StdArrayDecl =
-        Result.Nodes.getNodeAs<ClassTemplateSpecializationDecl>("type");
+  const auto *StdArrayDecl =
+      Result.Nodes.getNodeAs<ClassTemplateSpecializationDecl>("type");
 
-    // For static arrays, this is handled in clang-diagnostic-array-bounds.
-    if (!StdArrayDecl)
-        return;
+  // For static arrays, this is handled in clang-diagnostic-array-bounds.
+  if (!StdArrayDecl)
+    return;
 
-    if (Index->isSigned() && Index->isNegative()) {
-        diag(Matched->getExprLoc(), "std::array<> index %0 is negative")
-                << Index->toString(10);
-        return;
-    }
+  if (Index->isSigned() && Index->isNegative()) {
+    diag(Matched->getExprLoc(), "std::array<> index %0 is negative")
+        << Index->toString(10);
+    return;
+  }
 
-    const TemplateArgumentList &TemplateArgs = StdArrayDecl->getTemplateArgs();
-    if (TemplateArgs.size() < 2)
-        return;
-    // First template arg of std::array is the type, second arg is the size.
-    const auto &SizeArg = TemplateArgs[1];
-    if (SizeArg.getKind() != TemplateArgument::Integral)
-        return;
-    llvm::APInt ArraySize = SizeArg.getAsIntegral();
+  const TemplateArgumentList &TemplateArgs = StdArrayDecl->getTemplateArgs();
+  if (TemplateArgs.size() < 2)
+    return;
+  // First template arg of std::array is the type, second arg is the size.
+  const auto &SizeArg = TemplateArgs[1];
+  if (SizeArg.getKind() != TemplateArgument::Integral)
+    return;
+  llvm::APInt ArraySize = SizeArg.getAsIntegral();
 
-    // Get uint64_t values, because different bitwidths would lead to an assertion
-    // in APInt::uge.
-    if (Index->getZExtValue() >= ArraySize.getZExtValue()) {
-        diag(Matched->getExprLoc(),
-             "std::array<> index %0 is past the end of the array "
-             "(which contains %1 elements)")
-                << Index->toString(10) << ArraySize.toString(10, false);
-    }
+  // Get uint64_t values, because different bitwidths would lead to an assertion
+  // in APInt::uge.
+  if (Index->getZExtValue() >= ArraySize.getZExtValue()) {
+    diag(Matched->getExprLoc(),
+         "std::array<> index %0 is past the end of the array "
+         "(which contains %1 elements)")
+        << Index->toString(10) << ArraySize.toString(10, false);
+  }
 }
 
 } // namespace cppcoreguidelines

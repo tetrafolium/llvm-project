@@ -40,41 +40,39 @@ namespace clangd {
 ///  - add a public interface implemented on top of read()
 class FileCache {
 protected:
-    // Path must be absolute.
-    FileCache(PathRef Path);
+  // Path must be absolute.
+  FileCache(PathRef Path);
 
-    // Updates the cached value if needed, then provides threadsafe access to it.
-    //
-    // Specifically:
-    // - Parse() may be called (if the cache was not up-to-date)
-    //   The lock is held, so cache storage may be safely written.
-    //   Parse(None) means the file doesn't exist.
-    // - Read() will always be called, to provide access to the value.
-    //   The lock is again held, so the value can be copied or used.
-    //
-    // If the last Parse is newer than FreshTime, we don't check metadata.
-    //   - time_point::min() means we only do IO if we never read the file before
-    //   - time_point::max() means we always at least stat the file
-    //   - steady_clock::now() + seconds(1) means we accept 1 second of staleness
-    void read(const ThreadsafeFS &TFS,
-              std::chrono::steady_clock::time_point FreshTime,
-              llvm::function_ref<void(llvm::Optional<llvm::StringRef>)> Parse,
-              llvm::function_ref<void()> Read) const;
+  // Updates the cached value if needed, then provides threadsafe access to it.
+  //
+  // Specifically:
+  // - Parse() may be called (if the cache was not up-to-date)
+  //   The lock is held, so cache storage may be safely written.
+  //   Parse(None) means the file doesn't exist.
+  // - Read() will always be called, to provide access to the value.
+  //   The lock is again held, so the value can be copied or used.
+  //
+  // If the last Parse is newer than FreshTime, we don't check metadata.
+  //   - time_point::min() means we only do IO if we never read the file before
+  //   - time_point::max() means we always at least stat the file
+  //   - steady_clock::now() + seconds(1) means we accept 1 second of staleness
+  void read(const ThreadsafeFS &TFS,
+            std::chrono::steady_clock::time_point FreshTime,
+            llvm::function_ref<void(llvm::Optional<llvm::StringRef>)> Parse,
+            llvm::function_ref<void()> Read) const;
 
-    PathRef path() const {
-        return Path;
-    }
+  PathRef path() const { return Path; }
 
 private:
-    std::string Path;
-    // Members are mutable so read() can present a const interface.
-    // (It is threadsafe and approximates read-through to TFS).
-    mutable std::mutex Mu;
-    // Time when the cache was known valid (reflected disk state).
-    mutable std::chrono::steady_clock::time_point ValidTime;
-    // Filesystem metadata corresponding to the currently cached data.
-    mutable llvm::sys::TimePoint<> ModifiedTime;
-    mutable uint64_t Size;
+  std::string Path;
+  // Members are mutable so read() can present a const interface.
+  // (It is threadsafe and approximates read-through to TFS).
+  mutable std::mutex Mu;
+  // Time when the cache was known valid (reflected disk state).
+  mutable std::chrono::steady_clock::time_point ValidTime;
+  // Filesystem metadata corresponding to the currently cached data.
+  mutable llvm::sys::TimePoint<> ModifiedTime;
+  mutable uint64_t Size;
 };
 
 } // namespace clangd

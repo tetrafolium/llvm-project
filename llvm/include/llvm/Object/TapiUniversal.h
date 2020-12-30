@@ -25,106 +25,94 @@ namespace object {
 
 class TapiUniversal : public Binary {
 public:
-    class ObjectForArch {
-        const TapiUniversal *Parent;
-        int Index;
+  class ObjectForArch {
+    const TapiUniversal *Parent;
+    int Index;
 
-    public:
-        ObjectForArch(const TapiUniversal *Parent, int Index)
-            : Parent(Parent), Index(Index) {}
+  public:
+    ObjectForArch(const TapiUniversal *Parent, int Index)
+        : Parent(Parent), Index(Index) {}
 
-        ObjectForArch getNext() const {
-            return ObjectForArch(Parent, Index + 1);
-        }
+    ObjectForArch getNext() const { return ObjectForArch(Parent, Index + 1); }
 
-        bool operator==(const ObjectForArch &Other) const {
-            return (Parent == Other.Parent) && (Index == Other.Index);
-        }
-
-        uint32_t getCPUType() const {
-            auto Result =
-                MachO::getCPUTypeFromArchitecture(Parent->Libraries[Index].Arch);
-            return Result.first;
-        }
-
-        uint32_t getCPUSubType() const {
-            auto Result =
-                MachO::getCPUTypeFromArchitecture(Parent->Libraries[Index].Arch);
-            return Result.second;
-        }
-
-        StringRef getArchFlagName() const {
-            return MachO::getArchitectureName(Parent->Libraries[Index].Arch);
-        }
-
-        std::string getInstallName() const {
-            return std::string(Parent->Libraries[Index].InstallName);
-        }
-
-        bool isTopLevelLib() const {
-            return Parent->ParsedFile->getInstallName() == getInstallName();
-        }
-
-        Expected<std::unique_ptr<TapiFile>> getAsObjectFile() const;
-    };
-
-    class object_iterator {
-        ObjectForArch Obj;
-
-    public:
-        object_iterator(const ObjectForArch &Obj) : Obj(Obj) {}
-        const ObjectForArch *operator->() const {
-            return &Obj;
-        }
-        const ObjectForArch &operator*() const {
-            return Obj;
-        }
-
-        bool operator==(const object_iterator &Other) const {
-            return Obj == Other.Obj;
-        }
-        bool operator!=(const object_iterator &Other) const {
-            return !(*this == Other);
-        }
-
-        object_iterator &operator++() { // Preincrement
-            Obj = Obj.getNext();
-            return *this;
-        }
-    };
-
-    TapiUniversal(MemoryBufferRef Source, Error &Err);
-    static Expected<std::unique_ptr<TapiUniversal>>
-            create(MemoryBufferRef Source);
-    ~TapiUniversal() override;
-
-    object_iterator begin_objects() const {
-        return ObjectForArch(this, 0);
-    }
-    object_iterator end_objects() const {
-        return ObjectForArch(this, Libraries.size());
+    bool operator==(const ObjectForArch &Other) const {
+      return (Parent == Other.Parent) && (Index == Other.Index);
     }
 
-    iterator_range<object_iterator> objects() const {
-        return make_range(begin_objects(), end_objects());
+    uint32_t getCPUType() const {
+      auto Result =
+          MachO::getCPUTypeFromArchitecture(Parent->Libraries[Index].Arch);
+      return Result.first;
     }
 
-    uint32_t getNumberOfObjects() const {
-        return Libraries.size();
+    uint32_t getCPUSubType() const {
+      auto Result =
+          MachO::getCPUTypeFromArchitecture(Parent->Libraries[Index].Arch);
+      return Result.second;
     }
 
-    static bool classof(const Binary *v) {
-        return v->isTapiUniversal();
+    StringRef getArchFlagName() const {
+      return MachO::getArchitectureName(Parent->Libraries[Index].Arch);
     }
+
+    std::string getInstallName() const {
+      return std::string(Parent->Libraries[Index].InstallName);
+    }
+
+    bool isTopLevelLib() const {
+      return Parent->ParsedFile->getInstallName() == getInstallName();
+    }
+
+    Expected<std::unique_ptr<TapiFile>> getAsObjectFile() const;
+  };
+
+  class object_iterator {
+    ObjectForArch Obj;
+
+  public:
+    object_iterator(const ObjectForArch &Obj) : Obj(Obj) {}
+    const ObjectForArch *operator->() const { return &Obj; }
+    const ObjectForArch &operator*() const { return Obj; }
+
+    bool operator==(const object_iterator &Other) const {
+      return Obj == Other.Obj;
+    }
+    bool operator!=(const object_iterator &Other) const {
+      return !(*this == Other);
+    }
+
+    object_iterator &operator++() { // Preincrement
+      Obj = Obj.getNext();
+      return *this;
+    }
+  };
+
+  TapiUniversal(MemoryBufferRef Source, Error &Err);
+  static Expected<std::unique_ptr<TapiUniversal>>
+  create(MemoryBufferRef Source);
+  ~TapiUniversal() override;
+
+  object_iterator begin_objects() const { return ObjectForArch(this, 0); }
+  object_iterator end_objects() const {
+    return ObjectForArch(this, Libraries.size());
+  }
+
+  iterator_range<object_iterator> objects() const {
+    return make_range(begin_objects(), end_objects());
+  }
+
+  uint32_t getNumberOfObjects() const { return Libraries.size(); }
+
+  static bool classof(const Binary *v) { return v->isTapiUniversal(); }
 
 private:
-    struct Library {
-        StringRef InstallName;
-        MachO::Architecture Arch;
-    };
+  struct Library {
+    StringRef InstallName;
+    MachO::Architecture Arch;
+  };
 
-    std::unique_ptr<MachO::InterfaceFile> ParsedFile;
-    std::vector<Library> Libraries;
+  std::unique_ptr<MachO::InterfaceFile> ParsedFile;
+  std::vector<Library> Libraries;
 };
 
 } // end namespace object.

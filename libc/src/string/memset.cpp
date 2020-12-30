@@ -13,9 +13,9 @@
 namespace __llvm_libc {
 
 void *LLVM_LIBC_ENTRYPOINT(memset)(void *dst, int value, size_t count) {
-    GeneralPurposeMemset(reinterpret_cast<char *>(dst),
-                         static_cast<unsigned char>(value), count);
-    return dst;
+  GeneralPurposeMemset(reinterpret_cast<char *>(dst),
+                       static_cast<unsigned char>(value), count);
+  return dst;
 }
 
 } // namespace __llvm_libc

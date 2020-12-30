@@ -8,6 +8,6 @@
  */
 
 #undef VAL_BASE
-#define VAL_BASE	val
+#define VAL_BASE val
 
 #include <isl_pw_add_constant_templ.c>

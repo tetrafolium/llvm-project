@@ -11,6 +11,4 @@
 
 AEABI_RTABI fp_t __aeabi_dsub(fp_t, fp_t);
 
-AEABI_RTABI fp_t __aeabi_drsub(fp_t a, fp_t b) {
-    return __aeabi_dsub(b, a);
-}
+AEABI_RTABI fp_t __aeabi_drsub(fp_t a, fp_t b) { return __aeabi_dsub(b, a); }

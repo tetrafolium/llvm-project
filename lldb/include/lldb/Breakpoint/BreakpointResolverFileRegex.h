@@ -10,9 +10,9 @@
 #ifndef LLDB_BREAKPOINT_BREAKPOINTRESOLVERFILEREGEX_H
 #define LLDB_BREAKPOINT_BREAKPOINTRESOLVERFILEREGEX_H
 
-#include <set>
 #include "lldb/Breakpoint/BreakpointResolver.h"
 #include "lldb/Utility/ConstString.h"
+#include <set>
 
 namespace lldb_private {
 
@@ -23,56 +23,56 @@ namespace lldb_private {
 
 class BreakpointResolverFileRegex : public BreakpointResolver {
 public:
-    BreakpointResolverFileRegex(
-        const lldb::BreakpointSP &bkpt, RegularExpression regex,
-        const std::unordered_set<std::string> &func_name_set, bool exact_match);
+  BreakpointResolverFileRegex(
+      const lldb::BreakpointSP &bkpt, RegularExpression regex,
+      const std::unordered_set<std::string> &func_name_set, bool exact_match);
 
-    static BreakpointResolver *
-    CreateFromStructuredData(const lldb::BreakpointSP &bkpt,
-                             const StructuredData::Dictionary &options_dict,
-                             Status &error);
+  static BreakpointResolver *
+  CreateFromStructuredData(const lldb::BreakpointSP &bkpt,
+                           const StructuredData::Dictionary &options_dict,
+                           Status &error);
 
-    StructuredData::ObjectSP SerializeToStructuredData() override;
+  StructuredData::ObjectSP SerializeToStructuredData() override;
 
-    ~BreakpointResolverFileRegex() override = default;
+  ~BreakpointResolverFileRegex() override = default;
 
-    Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
-                                            SymbolContext &context,
-                                            Address *addr) override;
+  Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
+                                          SymbolContext &context,
+                                          Address *addr) override;
 
-    lldb::SearchDepth GetDepth() override;
+  lldb::SearchDepth GetDepth() override;
 
-    void GetDescription(Stream *s) override;
+  void GetDescription(Stream *s) override;
 
-    void Dump(Stream *s) const override;
+  void Dump(Stream *s) const override;
 
-    void AddFunctionName(const char *func_name);
+  void AddFunctionName(const char *func_name);
 
-    /// Methods for support type inquiry through isa, cast, and dyn_cast:
-    static inline bool classof(const BreakpointResolverFileRegex *) {
-        return true;
-    }
-    static inline bool classof(const BreakpointResolver *V) {
-        return V->getResolverID() == BreakpointResolver::FileRegexResolver;
-    }
+  /// Methods for support type inquiry through isa, cast, and dyn_cast:
+  static inline bool classof(const BreakpointResolverFileRegex *) {
+    return true;
+  }
+  static inline bool classof(const BreakpointResolver *V) {
+    return V->getResolverID() == BreakpointResolver::FileRegexResolver;
+  }
 
-    lldb::BreakpointResolverSP
-    CopyForBreakpoint(lldb::BreakpointSP &breakpoint) override;
+  lldb::BreakpointResolverSP
+  CopyForBreakpoint(lldb::BreakpointSP &breakpoint) override;
 
 protected:
-    friend class Breakpoint;
-    RegularExpression
-    m_regex;        // This is the line expression that we are looking for.
-    bool m_exact_match; // If true, then if the source we match is in a comment,
-    // we won't set a location there.
-    std::unordered_set<std::string> m_function_names; // Limit the search to
-    // functions in the
-    // comp_unit passed in.
+  friend class Breakpoint;
+  RegularExpression
+      m_regex;        // This is the line expression that we are looking for.
+  bool m_exact_match; // If true, then if the source we match is in a comment,
+  // we won't set a location there.
+  std::unordered_set<std::string> m_function_names; // Limit the search to
+                                                    // functions in the
+                                                    // comp_unit passed in.
 
 private:
-    BreakpointResolverFileRegex(const BreakpointResolverFileRegex &) = delete;
-    const BreakpointResolverFileRegex &
-    operator=(const BreakpointResolverFileRegex &) = delete;
+  BreakpointResolverFileRegex(const BreakpointResolverFileRegex &) = delete;
+  const BreakpointResolverFileRegex &
+  operator=(const BreakpointResolverFileRegex &) = delete;
 };
 
 } // namespace lldb_private

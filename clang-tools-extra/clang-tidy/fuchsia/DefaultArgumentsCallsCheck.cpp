@@ -15,19 +15,19 @@ namespace tidy {
 namespace fuchsia {
 
 void DefaultArgumentsCallsCheck::registerMatchers(MatchFinder *Finder) {
-    // Calling a function which uses default arguments is disallowed.
-    Finder->addMatcher(cxxDefaultArgExpr().bind("stmt"), this);
+  // Calling a function which uses default arguments is disallowed.
+  Finder->addMatcher(cxxDefaultArgExpr().bind("stmt"), this);
 }
 
 void DefaultArgumentsCallsCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *S = Result.Nodes.getNodeAs<CXXDefaultArgExpr>("stmt");
-    if (!S)
-        return;
+  const auto *S = Result.Nodes.getNodeAs<CXXDefaultArgExpr>("stmt");
+  if (!S)
+    return;
 
-    diag(S->getUsedLocation(),
-         "calling a function that uses a default argument is disallowed");
-    diag(S->getParam()->getBeginLoc(), "default parameter was declared here",
-         DiagnosticIDs::Note);
+  diag(S->getUsedLocation(),
+       "calling a function that uses a default argument is disallowed");
+  diag(S->getParam()->getBeginLoc(), "default parameter was declared here",
+       DiagnosticIDs::Note);
 }
 
 } // namespace fuchsia

@@ -27,50 +27,46 @@ enum class StorageClass : uint32_t;
 /// allowed version/capabilities/extensions.
 class TargetEnv {
 public:
-    explicit TargetEnv(TargetEnvAttr targetAttr);
+  explicit TargetEnv(TargetEnvAttr targetAttr);
 
-    Version getVersion() const;
+  Version getVersion() const;
 
-    /// Returns true if the given capability is allowed.
-    bool allows(Capability) const;
-    /// Returns the first allowed one if any of the given capabilities is allowed.
-    /// Returns llvm::None otherwise.
-    Optional<Capability> allows(ArrayRef<Capability>) const;
+  /// Returns true if the given capability is allowed.
+  bool allows(Capability) const;
+  /// Returns the first allowed one if any of the given capabilities is allowed.
+  /// Returns llvm::None otherwise.
+  Optional<Capability> allows(ArrayRef<Capability>) const;
 
-    /// Returns true if the given extension is allowed.
-    bool allows(Extension) const;
-    /// Returns the first allowed one if any of the given extensions is allowed.
-    /// Returns llvm::None otherwise.
-    Optional<Extension> allows(ArrayRef<Extension>) const;
+  /// Returns true if the given extension is allowed.
+  bool allows(Extension) const;
+  /// Returns the first allowed one if any of the given extensions is allowed.
+  /// Returns llvm::None otherwise.
+  Optional<Extension> allows(ArrayRef<Extension>) const;
 
-    /// Returns the vendor ID.
-    Vendor getVendorID() const;
+  /// Returns the vendor ID.
+  Vendor getVendorID() const;
 
-    /// Returns the device type.
-    DeviceType getDeviceType() const;
+  /// Returns the device type.
+  DeviceType getDeviceType() const;
 
-    /// Returns the device ID.
-    uint32_t getDeviceID() const;
+  /// Returns the device ID.
+  uint32_t getDeviceID() const;
 
-    /// Returns the MLIRContext.
-    MLIRContext *getContext() const;
+  /// Returns the MLIRContext.
+  MLIRContext *getContext() const;
 
-    /// Returns the target resource limits.
-    ResourceLimitsAttr getResourceLimits() const;
+  /// Returns the target resource limits.
+  ResourceLimitsAttr getResourceLimits() const;
 
-    TargetEnvAttr getAttr() const {
-        return targetAttr;
-    }
+  TargetEnvAttr getAttr() const { return targetAttr; }
 
-    /// Allows implicity converting to the underlying spirv::TargetEnvAttr.
-    operator TargetEnvAttr() const {
-        return targetAttr;
-    }
+  /// Allows implicity converting to the underlying spirv::TargetEnvAttr.
+  operator TargetEnvAttr() const { return targetAttr; }
 
 private:
-    TargetEnvAttr targetAttr;
-    llvm::SmallSet<Extension, 4> givenExtensions;    /// Allowed extensions
-    llvm::SmallSet<Capability, 8> givenCapabilities; /// Allowed capabilities
+  TargetEnvAttr targetAttr;
+  llvm::SmallSet<Extension, 4> givenExtensions;    /// Allowed extensions
+  llvm::SmallSet<Capability, 8> givenCapabilities; /// Allowed capabilities
 };
 
 /// Returns the attribute name for specifying argument ABI information.
@@ -78,9 +74,9 @@ StringRef getInterfaceVarABIAttrName();
 
 /// Gets the InterfaceVarABIAttr given its fields.
 InterfaceVarABIAttr getInterfaceVarABIAttr(unsigned descriptorSet,
-        unsigned binding,
-        Optional<StorageClass> storageClass,
-        MLIRContext *context);
+                                           unsigned binding,
+                                           Optional<StorageClass> storageClass,
+                                           MLIRContext *context);
 
 /// Returns whether the given SPIR-V target (described by TargetEnvAttr) needs
 /// ABI attributes for interface variables (spv.interface_var_abi).

@@ -21,149 +21,129 @@ namespace wasm {
 /// ObjectFile protocol.
 class ObjectFileWasm : public ObjectFile {
 public:
-    static void Initialize();
-    static void Terminate();
+  static void Initialize();
+  static void Terminate();
 
-    static ConstString GetPluginNameStatic();
-    static const char *GetPluginDescriptionStatic() {
-        return "WebAssembly object file reader.";
-    }
+  static ConstString GetPluginNameStatic();
+  static const char *GetPluginDescriptionStatic() {
+    return "WebAssembly object file reader.";
+  }
 
-    static ObjectFile *
-    CreateInstance(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
-                   lldb::offset_t data_offset, const FileSpec *file,
-                   lldb::offset_t file_offset, lldb::offset_t length);
+  static ObjectFile *
+  CreateInstance(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
+                 lldb::offset_t data_offset, const FileSpec *file,
+                 lldb::offset_t file_offset, lldb::offset_t length);
 
-    static ObjectFile *CreateMemoryInstance(const lldb::ModuleSP &module_sp,
-                                            lldb::DataBufferSP &data_sp,
-                                            const lldb::ProcessSP &process_sp,
-                                            lldb::addr_t header_addr);
-
-    static size_t GetModuleSpecifications(const FileSpec &file,
+  static ObjectFile *CreateMemoryInstance(const lldb::ModuleSP &module_sp,
                                           lldb::DataBufferSP &data_sp,
-                                          lldb::offset_t data_offset,
-                                          lldb::offset_t file_offset,
-                                          lldb::offset_t length,
-                                          ModuleSpecList &specs);
+                                          const lldb::ProcessSP &process_sp,
+                                          lldb::addr_t header_addr);
 
-    /// PluginInterface protocol.
-    /// \{
-    ConstString GetPluginName() override {
-        return GetPluginNameStatic();
-    }
-    uint32_t GetPluginVersion() override {
-        return 1;
-    }
-    /// \}
+  static size_t GetModuleSpecifications(const FileSpec &file,
+                                        lldb::DataBufferSP &data_sp,
+                                        lldb::offset_t data_offset,
+                                        lldb::offset_t file_offset,
+                                        lldb::offset_t length,
+                                        ModuleSpecList &specs);
 
-    /// LLVM RTTI support
-    /// \{
-    static char ID;
-    bool isA(const void *ClassID) const override {
-        return ClassID == &ID || ObjectFile::isA(ClassID);
-    }
-    static bool classof(const ObjectFile *obj) {
-        return obj->isA(&ID);
-    }
-    /// \}
+  /// PluginInterface protocol.
+  /// \{
+  ConstString GetPluginName() override { return GetPluginNameStatic(); }
+  uint32_t GetPluginVersion() override { return 1; }
+  /// \}
 
-    /// ObjectFile Protocol.
-    /// \{
-    bool ParseHeader() override;
+  /// LLVM RTTI support
+  /// \{
+  static char ID;
+  bool isA(const void *ClassID) const override {
+    return ClassID == &ID || ObjectFile::isA(ClassID);
+  }
+  static bool classof(const ObjectFile *obj) { return obj->isA(&ID); }
+  /// \}
 
-    lldb::ByteOrder GetByteOrder() const override {
-        return m_arch.GetByteOrder();
-    }
+  /// ObjectFile Protocol.
+  /// \{
+  bool ParseHeader() override;
 
-    bool IsExecutable() const override {
-        return false;
-    }
+  lldb::ByteOrder GetByteOrder() const override {
+    return m_arch.GetByteOrder();
+  }
 
-    uint32_t GetAddressByteSize() const override {
-        return m_arch.GetAddressByteSize();
-    }
+  bool IsExecutable() const override { return false; }
 
-    AddressClass GetAddressClass(lldb::addr_t file_addr) override {
-        return AddressClass::eInvalid;
-    }
+  uint32_t GetAddressByteSize() const override {
+    return m_arch.GetAddressByteSize();
+  }
 
-    Symtab *GetSymtab() override;
+  AddressClass GetAddressClass(lldb::addr_t file_addr) override {
+    return AddressClass::eInvalid;
+  }
 
-    bool IsStripped() override {
-        return !!GetExternalDebugInfoFileSpec();
-    }
+  Symtab *GetSymtab() override;
 
-    void CreateSections(SectionList &unified_section_list) override;
+  bool IsStripped() override { return !!GetExternalDebugInfoFileSpec(); }
 
-    void Dump(Stream *s) override;
+  void CreateSections(SectionList &unified_section_list) override;
 
-    ArchSpec GetArchitecture() override {
-        return m_arch;
-    }
+  void Dump(Stream *s) override;
 
-    UUID GetUUID() override {
-        return m_uuid;
-    }
+  ArchSpec GetArchitecture() override { return m_arch; }
 
-    uint32_t GetDependentModules(FileSpecList &files) override {
-        return 0;
-    }
+  UUID GetUUID() override { return m_uuid; }
 
-    Type CalculateType() override {
-        return eTypeSharedLibrary;
-    }
+  uint32_t GetDependentModules(FileSpecList &files) override { return 0; }
 
-    Strata CalculateStrata() override {
-        return eStrataUser;
-    }
+  Type CalculateType() override { return eTypeSharedLibrary; }
 
-    bool SetLoadAddress(lldb_private::Target &target, lldb::addr_t value,
-                        bool value_is_offset) override;
+  Strata CalculateStrata() override { return eStrataUser; }
 
-    lldb_private::Address GetBaseAddress() override {
-        return IsInMemory() ? Address(m_memory_addr) : Address(0);
-    }
-    /// \}
+  bool SetLoadAddress(lldb_private::Target &target, lldb::addr_t value,
+                      bool value_is_offset) override;
 
-    /// A Wasm module that has external DWARF debug information should contain a
-    /// custom section named "external_debug_info", whose payload is an UTF-8
-    /// encoded string that points to a Wasm module that contains the debug
-    /// information for this module.
-    llvm::Optional<FileSpec> GetExternalDebugInfoFileSpec();
+  lldb_private::Address GetBaseAddress() override {
+    return IsInMemory() ? Address(m_memory_addr) : Address(0);
+  }
+  /// \}
+
+  /// A Wasm module that has external DWARF debug information should contain a
+  /// custom section named "external_debug_info", whose payload is an UTF-8
+  /// encoded string that points to a Wasm module that contains the debug
+  /// information for this module.
+  llvm::Optional<FileSpec> GetExternalDebugInfoFileSpec();
 
 private:
-    ObjectFileWasm(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
-                   lldb::offset_t data_offset, const FileSpec *file,
-                   lldb::offset_t offset, lldb::offset_t length);
-    ObjectFileWasm(const lldb::ModuleSP &module_sp,
-                   lldb::DataBufferSP &header_data_sp,
-                   const lldb::ProcessSP &process_sp, lldb::addr_t header_addr);
+  ObjectFileWasm(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
+                 lldb::offset_t data_offset, const FileSpec *file,
+                 lldb::offset_t offset, lldb::offset_t length);
+  ObjectFileWasm(const lldb::ModuleSP &module_sp,
+                 lldb::DataBufferSP &header_data_sp,
+                 const lldb::ProcessSP &process_sp, lldb::addr_t header_addr);
 
-    /// Wasm section decoding routines.
-    /// \{
-    bool DecodeNextSection(lldb::offset_t *offset_ptr);
-    bool DecodeSections();
-    /// \}
+  /// Wasm section decoding routines.
+  /// \{
+  bool DecodeNextSection(lldb::offset_t *offset_ptr);
+  bool DecodeSections();
+  /// \}
 
-    /// Read a range of bytes from the Wasm module.
-    DataExtractor ReadImageData(lldb::offset_t offset, uint32_t size);
+  /// Read a range of bytes from the Wasm module.
+  DataExtractor ReadImageData(lldb::offset_t offset, uint32_t size);
 
-    typedef struct section_info {
-        lldb::offset_t offset;
-        uint32_t size;
-        uint32_t id;
-        ConstString name;
-    } section_info_t;
+  typedef struct section_info {
+    lldb::offset_t offset;
+    uint32_t size;
+    uint32_t id;
+    ConstString name;
+  } section_info_t;
 
-    /// Wasm section header dump routines.
-    /// \{
-    void DumpSectionHeader(llvm::raw_ostream &ostream, const section_info_t &sh);
-    void DumpSectionHeaders(llvm::raw_ostream &ostream);
-    /// \}
+  /// Wasm section header dump routines.
+  /// \{
+  void DumpSectionHeader(llvm::raw_ostream &ostream, const section_info_t &sh);
+  void DumpSectionHeaders(llvm::raw_ostream &ostream);
+  /// \}
 
-    std::vector<section_info_t> m_sect_infos;
-    ArchSpec m_arch;
-    UUID m_uuid;
+  std::vector<section_info_t> m_sect_infos;
+  ArchSpec m_arch;
+  UUID m_uuid;
 };
 
 } // namespace wasm

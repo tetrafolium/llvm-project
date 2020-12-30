@@ -30,76 +30,76 @@ RefactoringTool::RefactoringTool(
     : ClangTool(Compilations, SourcePaths, std::move(PCHContainerOps)) {}
 
 std::map<std::string, Replacements> &RefactoringTool::getReplacements() {
-    return FileToReplaces;
+  return FileToReplaces;
 }
 
 int RefactoringTool::runAndSave(FrontendActionFactory *ActionFactory) {
-    if (int Result = run(ActionFactory)) {
-        return Result;
-    }
+  if (int Result = run(ActionFactory)) {
+    return Result;
+  }
 
-    LangOptions DefaultLangOptions;
-    IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
-    TextDiagnosticPrinter DiagnosticPrinter(llvm::errs(), &*DiagOpts);
-    DiagnosticsEngine Diagnostics(
-        IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()),
-        &*DiagOpts, &DiagnosticPrinter, false);
-    SourceManager Sources(Diagnostics, getFiles());
-    Rewriter Rewrite(Sources, DefaultLangOptions);
+  LangOptions DefaultLangOptions;
+  IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
+  TextDiagnosticPrinter DiagnosticPrinter(llvm::errs(), &*DiagOpts);
+  DiagnosticsEngine Diagnostics(
+      IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()), &*DiagOpts,
+      &DiagnosticPrinter, false);
+  SourceManager Sources(Diagnostics, getFiles());
+  Rewriter Rewrite(Sources, DefaultLangOptions);
 
-    if (!applyAllReplacements(Rewrite)) {
-        llvm::errs() << "Skipped some replacements.\n";
-    }
+  if (!applyAllReplacements(Rewrite)) {
+    llvm::errs() << "Skipped some replacements.\n";
+  }
 
-    return saveRewrittenFiles(Rewrite);
+  return saveRewrittenFiles(Rewrite);
 }
 
 bool RefactoringTool::applyAllReplacements(Rewriter &Rewrite) {
-    bool Result = true;
-    for (const auto &Entry : groupReplacementsByFile(
-                Rewrite.getSourceMgr().getFileManager(), FileToReplaces))
-        Result = tooling::applyAllReplacements(Entry.second, Rewrite) && Result;
-    return Result;
+  bool Result = true;
+  for (const auto &Entry : groupReplacementsByFile(
+           Rewrite.getSourceMgr().getFileManager(), FileToReplaces))
+    Result = tooling::applyAllReplacements(Entry.second, Rewrite) && Result;
+  return Result;
 }
 
 int RefactoringTool::saveRewrittenFiles(Rewriter &Rewrite) {
-    return Rewrite.overwriteChangedFiles() ? 1 : 0;
+  return Rewrite.overwriteChangedFiles() ? 1 : 0;
 }
 
 bool formatAndApplyAllReplacements(
     const std::map<std::string, Replacements> &FileToReplaces,
     Rewriter &Rewrite, StringRef Style) {
-    SourceManager &SM = Rewrite.getSourceMgr();
-    FileManager &Files = SM.getFileManager();
+  SourceManager &SM = Rewrite.getSourceMgr();
+  FileManager &Files = SM.getFileManager();
 
-    bool Result = true;
-    for (const auto &FileAndReplaces : groupReplacementsByFile(
-                Rewrite.getSourceMgr().getFileManager(), FileToReplaces)) {
-        const std::string &FilePath = FileAndReplaces.first;
-        auto &CurReplaces = FileAndReplaces.second;
+  bool Result = true;
+  for (const auto &FileAndReplaces : groupReplacementsByFile(
+           Rewrite.getSourceMgr().getFileManager(), FileToReplaces)) {
+    const std::string &FilePath = FileAndReplaces.first;
+    auto &CurReplaces = FileAndReplaces.second;
 
-        const FileEntry *Entry = nullptr;
-        if (auto File = Files.getFile(FilePath))
-            Entry = *File;
+    const FileEntry *Entry = nullptr;
+    if (auto File = Files.getFile(FilePath))
+      Entry = *File;
 
-        FileID ID = SM.getOrCreateFileID(Entry, SrcMgr::C_User);
-        StringRef Code = SM.getBufferData(ID);
+    FileID ID = SM.getOrCreateFileID(Entry, SrcMgr::C_User);
+    StringRef Code = SM.getBufferData(ID);
 
-        auto CurStyle = format::getStyle(Style, FilePath, "LLVM");
-        if (!CurStyle) {
-            llvm::errs() << llvm::toString(CurStyle.takeError()) << "\n";
-            return false;
-        }
-
-        auto NewReplacements =
-            format::formatReplacements(Code, CurReplaces, *CurStyle);
-        if (!NewReplacements) {
-            llvm::errs() << llvm::toString(NewReplacements.takeError()) << "\n";
-            return false;
-        }
-        Result = applyAllReplacements(*NewReplacements, Rewrite) && Result;
+    auto CurStyle = format::getStyle(Style, FilePath, "LLVM");
+    if (!CurStyle) {
+      llvm::errs() << llvm::toString(CurStyle.takeError()) << "\n";
+      return false;
     }
-    return Result;
+
+    auto NewReplacements =
+        format::formatReplacements(Code, CurReplaces, *CurStyle);
+    if (!NewReplacements) {
+      llvm::errs() << llvm::toString(NewReplacements.takeError()) << "\n";
+      return false;
+    }
+    Result = applyAllReplacements(*NewReplacements, Rewrite) && Result;
+  }
+  return Result;
 }
 
 } // end namespace tooling

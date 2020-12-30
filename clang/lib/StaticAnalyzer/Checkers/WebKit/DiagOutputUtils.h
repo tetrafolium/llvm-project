@@ -17,18 +17,18 @@ namespace clang {
 template <typename NamedDeclDerivedT>
 void printQuotedQualifiedName(llvm::raw_ostream &Os,
                               const NamedDeclDerivedT &D) {
-    Os << "'";
-    D->getNameForDiagnostic(Os, D->getASTContext().getPrintingPolicy(),
-                            /*Qualified=*/true);
-    Os << "'";
+  Os << "'";
+  D->getNameForDiagnostic(Os, D->getASTContext().getPrintingPolicy(),
+                          /*Qualified=*/true);
+  Os << "'";
 }
 
 template <typename NamedDeclDerivedT>
 void printQuotedName(llvm::raw_ostream &Os, const NamedDeclDerivedT &D) {
-    Os << "'";
-    D->getNameForDiagnostic(Os, D->getASTContext().getPrintingPolicy(),
-                            /*Qualified=*/false);
-    Os << "'";
+  Os << "'";
+  D->getNameForDiagnostic(Os, D->getASTContext().getPrintingPolicy(),
+                          /*Qualified=*/false);
+  Os << "'";
 }
 
 } // namespace clang

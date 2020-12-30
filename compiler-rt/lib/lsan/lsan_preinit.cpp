@@ -16,6 +16,6 @@
 #if SANITIZER_CAN_USE_PREINIT_ARRAY
 // We force __lsan_init to be called before anyone else by placing it into
 // .preinit_array section.
-__attribute__((section(".preinit_array"), used))
-void (*__local_lsan_preinit)(void) = __lsan_init;
+__attribute__((section(".preinit_array"),
+               used)) void (*__local_lsan_preinit)(void) = __lsan_init;
 #endif

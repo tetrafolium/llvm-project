@@ -16,13 +16,13 @@ using namespace llvm;
 namespace {
 class ARMAsmBackendWinCOFF : public ARMAsmBackend {
 public:
-    ARMAsmBackendWinCOFF(const Target &T, const MCSubtargetInfo &STI)
-        : ARMAsmBackend(T, STI, support::little) {}
-    std::unique_ptr<MCObjectTargetWriter>
-    createObjectTargetWriter() const override {
-        return createARMWinCOFFObjectWriter(/*Is64Bit=*/false);
-    }
+  ARMAsmBackendWinCOFF(const Target &T, const MCSubtargetInfo &STI)
+      : ARMAsmBackend(T, STI, support::little) {}
+  std::unique_ptr<MCObjectTargetWriter>
+  createObjectTargetWriter() const override {
+    return createARMWinCOFFObjectWriter(/*Is64Bit=*/false);
+  }
 };
-}
+} // namespace
 
 #endif

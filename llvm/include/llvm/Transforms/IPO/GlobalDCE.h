@@ -28,43 +28,43 @@ namespace llvm {
 /// Pass to remove unused function declarations.
 class GlobalDCEPass : public PassInfoMixin<GlobalDCEPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
 
 private:
-    SmallPtrSet<GlobalValue*, 32> AliveGlobals;
+  SmallPtrSet<GlobalValue *, 32> AliveGlobals;
 
-    /// Global -> Global that uses this global.
-    DenseMap<GlobalValue *, SmallPtrSet<GlobalValue *, 4>> GVDependencies;
+  /// Global -> Global that uses this global.
+  DenseMap<GlobalValue *, SmallPtrSet<GlobalValue *, 4>> GVDependencies;
 
-    /// Constant -> Globals that use this global cache.
-    std::unordered_map<Constant *, SmallPtrSet<GlobalValue *, 8>>
-            ConstantDependenciesCache;
+  /// Constant -> Globals that use this global cache.
+  std::unordered_map<Constant *, SmallPtrSet<GlobalValue *, 8>>
+      ConstantDependenciesCache;
 
-    /// Comdat -> Globals in that Comdat section.
-    std::unordered_multimap<Comdat *, GlobalValue *> ComdatMembers;
+  /// Comdat -> Globals in that Comdat section.
+  std::unordered_multimap<Comdat *, GlobalValue *> ComdatMembers;
 
-    /// !type metadata -> set of (vtable, offset) pairs
-    DenseMap<Metadata *, SmallSet<std::pair<GlobalVariable *, uint64_t>, 4>>
-            TypeIdMap;
+  /// !type metadata -> set of (vtable, offset) pairs
+  DenseMap<Metadata *, SmallSet<std::pair<GlobalVariable *, uint64_t>, 4>>
+      TypeIdMap;
 
-    // Global variables which are vtables, and which we have enough information
-    // about to safely do dead virtual function elimination.
-    SmallPtrSet<GlobalValue *, 32> VFESafeVTables;
+  // Global variables which are vtables, and which we have enough information
+  // about to safely do dead virtual function elimination.
+  SmallPtrSet<GlobalValue *, 32> VFESafeVTables;
 
-    void UpdateGVDependencies(GlobalValue &GV);
-    void MarkLive(GlobalValue &GV,
-                  SmallVectorImpl<GlobalValue *> *Updates = nullptr);
-    bool RemoveUnusedGlobalValue(GlobalValue &GV);
+  void UpdateGVDependencies(GlobalValue &GV);
+  void MarkLive(GlobalValue &GV,
+                SmallVectorImpl<GlobalValue *> *Updates = nullptr);
+  bool RemoveUnusedGlobalValue(GlobalValue &GV);
 
-    // Dead virtual function elimination.
-    void AddVirtualFunctionDependencies(Module &M);
-    void ScanVTables(Module &M);
-    void ScanTypeCheckedLoadIntrinsics(Module &M);
-    void ScanVTableLoad(Function *Caller, Metadata *TypeId, uint64_t CallOffset);
+  // Dead virtual function elimination.
+  void AddVirtualFunctionDependencies(Module &M);
+  void ScanVTables(Module &M);
+  void ScanTypeCheckedLoadIntrinsics(Module &M);
+  void ScanVTableLoad(Function *Caller, Metadata *TypeId, uint64_t CallOffset);
 
-    void ComputeDependencies(Value *V, SmallPtrSetImpl<GlobalValue *> &U);
+  void ComputeDependencies(Value *V, SmallPtrSetImpl<GlobalValue *> &U);
 };
 
-}
+} // namespace llvm
 
 #endif // LLVM_TRANSFORMS_IPO_GLOBALDCE_H

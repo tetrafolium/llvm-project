@@ -46,7 +46,7 @@ class Value;
 /// instruction. If \p Updates is specified, collect all necessary DT updates
 /// into this vector. If \p KeepOneInputPHIs is true, one-input Phis in
 /// successors of blocks being deleted will be preserved.
-void DetatchDeadBlocks(ArrayRef <BasicBlock *> BBs,
+void DetatchDeadBlocks(ArrayRef<BasicBlock *> BBs,
                        SmallVectorImpl<DominatorTree::UpdateType> *Updates,
                        bool KeepOneInputPHIs = false);
 
@@ -60,8 +60,7 @@ void DeleteDeadBlock(BasicBlock *BB, DomTreeUpdater *DTU = nullptr,
 /// relevant loop info updates should be done before this function is called.
 /// If \p KeepOneInputPHIs is true, one-input Phis in successors of blocks
 /// being deleted will be preserved.
-void DeleteDeadBlocks(ArrayRef <BasicBlock *> BBs,
-                      DomTreeUpdater *DTU = nullptr,
+void DeleteDeadBlocks(ArrayRef<BasicBlock *> BBs, DomTreeUpdater *DTU = nullptr,
                       bool KeepOneInputPHIs = false);
 
 /// Delete all basic blocks from \p F that are not reachable from its entry
@@ -133,49 +132,49 @@ void ReplaceInstWithInst(Instruction *From, Instruction *To);
 /// This provides a builder interface for overriding the default options used
 /// during critical edge splitting.
 struct CriticalEdgeSplittingOptions {
-    DominatorTree *DT;
-    PostDominatorTree *PDT;
-    LoopInfo *LI;
-    MemorySSAUpdater *MSSAU;
-    bool MergeIdenticalEdges = false;
-    bool KeepOneInputPHIs = false;
-    bool PreserveLCSSA = false;
-    bool IgnoreUnreachableDests = false;
-    /// SplitCriticalEdge is guaranteed to preserve loop-simplify form if LI is
-    /// provided. If it cannot be preserved, no splitting will take place. If it
-    /// is not set, preserve loop-simplify form if possible.
-    bool PreserveLoopSimplify = true;
+  DominatorTree *DT;
+  PostDominatorTree *PDT;
+  LoopInfo *LI;
+  MemorySSAUpdater *MSSAU;
+  bool MergeIdenticalEdges = false;
+  bool KeepOneInputPHIs = false;
+  bool PreserveLCSSA = false;
+  bool IgnoreUnreachableDests = false;
+  /// SplitCriticalEdge is guaranteed to preserve loop-simplify form if LI is
+  /// provided. If it cannot be preserved, no splitting will take place. If it
+  /// is not set, preserve loop-simplify form if possible.
+  bool PreserveLoopSimplify = true;
 
-    CriticalEdgeSplittingOptions(DominatorTree *DT = nullptr,
-                                 LoopInfo *LI = nullptr,
-                                 MemorySSAUpdater *MSSAU = nullptr,
-                                 PostDominatorTree *PDT = nullptr)
-        : DT(DT), PDT(PDT), LI(LI), MSSAU(MSSAU) {}
+  CriticalEdgeSplittingOptions(DominatorTree *DT = nullptr,
+                               LoopInfo *LI = nullptr,
+                               MemorySSAUpdater *MSSAU = nullptr,
+                               PostDominatorTree *PDT = nullptr)
+      : DT(DT), PDT(PDT), LI(LI), MSSAU(MSSAU) {}
 
-    CriticalEdgeSplittingOptions &setMergeIdenticalEdges() {
-        MergeIdenticalEdges = true;
-        return *this;
-    }
+  CriticalEdgeSplittingOptions &setMergeIdenticalEdges() {
+    MergeIdenticalEdges = true;
+    return *this;
+  }
 
-    CriticalEdgeSplittingOptions &setKeepOneInputPHIs() {
-        KeepOneInputPHIs = true;
-        return *this;
-    }
+  CriticalEdgeSplittingOptions &setKeepOneInputPHIs() {
+    KeepOneInputPHIs = true;
+    return *this;
+  }
 
-    CriticalEdgeSplittingOptions &setPreserveLCSSA() {
-        PreserveLCSSA = true;
-        return *this;
-    }
+  CriticalEdgeSplittingOptions &setPreserveLCSSA() {
+    PreserveLCSSA = true;
+    return *this;
+  }
 
-    CriticalEdgeSplittingOptions &setIgnoreUnreachableDests() {
-        IgnoreUnreachableDests = true;
-        return *this;
-    }
+  CriticalEdgeSplittingOptions &setIgnoreUnreachableDests() {
+    IgnoreUnreachableDests = true;
+    return *this;
+  }
 
-    CriticalEdgeSplittingOptions &unsetPreserveLoopSimplify() {
-        PreserveLoopSimplify = false;
-        return *this;
-    }
+  CriticalEdgeSplittingOptions &unsetPreserveLoopSimplify() {
+    PreserveLoopSimplify = false;
+    return *this;
+  }
 };
 
 /// If this edge is a critical edge, insert a new node to split the critical
@@ -202,8 +201,8 @@ inline BasicBlock *
 SplitCriticalEdge(BasicBlock *BB, succ_iterator SI,
                   const CriticalEdgeSplittingOptions &Options =
                       CriticalEdgeSplittingOptions()) {
-    return SplitCriticalEdge(BB->getTerminator(), SI.getSuccessorIndex(),
-                             Options);
+  return SplitCriticalEdge(BB->getTerminator(), SI.getSuccessorIndex(),
+                           Options);
 }
 
 /// If the edge from *PI to BB is not critical, return false. Otherwise, split
@@ -213,12 +212,12 @@ SplitCriticalEdge(BasicBlock *BB, succ_iterator SI,
 inline bool SplitCriticalEdge(BasicBlock *Succ, pred_iterator PI,
                               const CriticalEdgeSplittingOptions &Options =
                                   CriticalEdgeSplittingOptions()) {
-    bool MadeChange = false;
-    Instruction *TI = (*PI)->getTerminator();
-    for (unsigned i = 0, e = TI->getNumSuccessors(); i != e; ++i)
-        if (TI->getSuccessor(i) == Succ)
-            MadeChange |= !!SplitCriticalEdge(TI, i, Options);
-    return MadeChange;
+  bool MadeChange = false;
+  Instruction *TI = (*PI)->getTerminator();
+  for (unsigned i = 0, e = TI->getNumSuccessors(); i != e; ++i)
+    if (TI->getSuccessor(i) == Succ)
+      MadeChange |= !!SplitCriticalEdge(TI, i, Options);
+  return MadeChange;
 }
 
 /// If an edge from Src to Dst is critical, split the edge and return true,
@@ -228,14 +227,14 @@ inline BasicBlock *
 SplitCriticalEdge(BasicBlock *Src, BasicBlock *Dst,
                   const CriticalEdgeSplittingOptions &Options =
                       CriticalEdgeSplittingOptions()) {
-    Instruction *TI = Src->getTerminator();
-    unsigned i = 0;
-    while (true) {
-        assert(i != TI->getNumSuccessors() && "Edge doesn't exist!");
-        if (TI->getSuccessor(i) == Dst)
-            return SplitCriticalEdge(TI, i, Options);
-        ++i;
-    }
+  Instruction *TI = Src->getTerminator();
+  unsigned i = 0;
+  while (true) {
+    assert(i != TI->getNumSuccessors() && "Edge doesn't exist!");
+    if (TI->getSuccessor(i) == Dst)
+      return SplitCriticalEdge(TI, i, Options);
+    ++i;
+  }
 }
 
 /// Loop over all of the edges in the CFG, breaking critical edges as they are

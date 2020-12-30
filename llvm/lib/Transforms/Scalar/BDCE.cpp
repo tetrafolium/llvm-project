@@ -42,159 +42,158 @@ STATISTIC(NumSExt2ZExt,
 /// instruction may need to be cleared of assumptions that can no longer be
 /// guaranteed correct.
 static void clearAssumptionsOfUsers(Instruction *I, DemandedBits &DB) {
-    assert(I->getType()->isIntOrIntVectorTy() &&
-           "Trivializing a non-integer value?");
+  assert(I->getType()->isIntOrIntVectorTy() &&
+         "Trivializing a non-integer value?");
 
-    // Initialize the worklist with eligible direct users.
-    SmallPtrSet<Instruction *, 16> Visited;
-    SmallVector<Instruction *, 16> WorkList;
-    for (User *JU : I->users()) {
-        // If all bits of a user are demanded, then we know that nothing below that
-        // in the def-use chain needs to be changed.
-        auto *J = dyn_cast<Instruction>(JU);
-        if (J && J->getType()->isIntOrIntVectorTy() &&
-                !DB.getDemandedBits(J).isAllOnesValue()) {
-            Visited.insert(J);
-            WorkList.push_back(J);
-        }
-
-        // Note that we need to check for non-int types above before asking for
-        // demanded bits. Normally, the only way to reach an instruction with an
-        // non-int type is via an instruction that has side effects (or otherwise
-        // will demand its input bits). However, if we have a readnone function
-        // that returns an unsized type (e.g., void), we must avoid asking for the
-        // demanded bits of the function call's return value. A void-returning
-        // readnone function is always dead (and so we can stop walking the use/def
-        // chain here), but the check is necessary to avoid asserting.
+  // Initialize the worklist with eligible direct users.
+  SmallPtrSet<Instruction *, 16> Visited;
+  SmallVector<Instruction *, 16> WorkList;
+  for (User *JU : I->users()) {
+    // If all bits of a user are demanded, then we know that nothing below that
+    // in the def-use chain needs to be changed.
+    auto *J = dyn_cast<Instruction>(JU);
+    if (J && J->getType()->isIntOrIntVectorTy() &&
+        !DB.getDemandedBits(J).isAllOnesValue()) {
+      Visited.insert(J);
+      WorkList.push_back(J);
     }
 
-    // DFS through subsequent users while tracking visits to avoid cycles.
-    while (!WorkList.empty()) {
-        Instruction *J = WorkList.pop_back_val();
+    // Note that we need to check for non-int types above before asking for
+    // demanded bits. Normally, the only way to reach an instruction with an
+    // non-int type is via an instruction that has side effects (or otherwise
+    // will demand its input bits). However, if we have a readnone function
+    // that returns an unsized type (e.g., void), we must avoid asking for the
+    // demanded bits of the function call's return value. A void-returning
+    // readnone function is always dead (and so we can stop walking the use/def
+    // chain here), but the check is necessary to avoid asserting.
+  }
 
-        // NSW, NUW, and exact are based on operands that might have changed.
-        J->dropPoisonGeneratingFlags();
+  // DFS through subsequent users while tracking visits to avoid cycles.
+  while (!WorkList.empty()) {
+    Instruction *J = WorkList.pop_back_val();
 
-        // We do not have to worry about llvm.assume or range metadata:
-        // 1. llvm.assume demands its operand, so trivializing can't change it.
-        // 2. range metadata only applies to memory accesses which demand all bits.
+    // NSW, NUW, and exact are based on operands that might have changed.
+    J->dropPoisonGeneratingFlags();
 
-        for (User *KU : J->users()) {
-            // If all bits of a user are demanded, then we know that nothing below
-            // that in the def-use chain needs to be changed.
-            auto *K = dyn_cast<Instruction>(KU);
-            if (K && Visited.insert(K).second && K->getType()->isIntOrIntVectorTy() &&
-                    !DB.getDemandedBits(K).isAllOnesValue())
-                WorkList.push_back(K);
-        }
+    // We do not have to worry about llvm.assume or range metadata:
+    // 1. llvm.assume demands its operand, so trivializing can't change it.
+    // 2. range metadata only applies to memory accesses which demand all bits.
+
+    for (User *KU : J->users()) {
+      // If all bits of a user are demanded, then we know that nothing below
+      // that in the def-use chain needs to be changed.
+      auto *K = dyn_cast<Instruction>(KU);
+      if (K && Visited.insert(K).second && K->getType()->isIntOrIntVectorTy() &&
+          !DB.getDemandedBits(K).isAllOnesValue())
+        WorkList.push_back(K);
     }
+  }
 }
 
 static bool bitTrackingDCE(Function &F, DemandedBits &DB) {
-    SmallVector<Instruction*, 128> Worklist;
-    bool Changed = false;
-    for (Instruction &I : instructions(F)) {
-        // If the instruction has side effects and no non-dbg uses,
-        // skip it. This way we avoid computing known bits on an instruction
-        // that will not help us.
-        if (I.mayHaveSideEffects() && I.use_empty())
-            continue;
+  SmallVector<Instruction *, 128> Worklist;
+  bool Changed = false;
+  for (Instruction &I : instructions(F)) {
+    // If the instruction has side effects and no non-dbg uses,
+    // skip it. This way we avoid computing known bits on an instruction
+    // that will not help us.
+    if (I.mayHaveSideEffects() && I.use_empty())
+      continue;
 
-        // Remove instructions that are dead, either because they were not reached
-        // during analysis or have no demanded bits.
-        if (DB.isInstructionDead(&I) ||
-                (I.getType()->isIntOrIntVectorTy() &&
-                 DB.getDemandedBits(&I).isNullValue() &&
-                 wouldInstructionBeTriviallyDead(&I))) {
-            salvageDebugInfo(I);
-            Worklist.push_back(&I);
-            I.dropAllReferences();
-            Changed = true;
-            continue;
-        }
-
-        // Convert SExt into ZExt if none of the extension bits is required
-        if (SExtInst *SE = dyn_cast<SExtInst>(&I)) {
-            APInt Demanded = DB.getDemandedBits(SE);
-            const uint32_t SrcBitSize = SE->getSrcTy()->getScalarSizeInBits();
-            auto *const DstTy = SE->getDestTy();
-            const uint32_t DestBitSize = DstTy->getScalarSizeInBits();
-            if (Demanded.countLeadingZeros() >= (DestBitSize - SrcBitSize)) {
-                clearAssumptionsOfUsers(SE, DB);
-                IRBuilder<> Builder(SE);
-                I.replaceAllUsesWith(
-                    Builder.CreateZExt(SE->getOperand(0), DstTy, SE->getName()));
-                Worklist.push_back(SE);
-                Changed = true;
-                NumSExt2ZExt++;
-                continue;
-            }
-        }
-
-        for (Use &U : I.operands()) {
-            // DemandedBits only detects dead integer uses.
-            if (!U->getType()->isIntOrIntVectorTy())
-                continue;
-
-            if (!isa<Instruction>(U) && !isa<Argument>(U))
-                continue;
-
-            if (!DB.isUseDead(&U))
-                continue;
-
-            LLVM_DEBUG(dbgs() << "BDCE: Trivializing: " << U << " (all bits dead)\n");
-
-            clearAssumptionsOfUsers(&I, DB);
-
-            // FIXME: In theory we could substitute undef here instead of zero.
-            // This should be reconsidered once we settle on the semantics of
-            // undef, poison, etc.
-            U.set(ConstantInt::get(U->getType(), 0));
-            ++NumSimplified;
-            Changed = true;
-        }
+    // Remove instructions that are dead, either because they were not reached
+    // during analysis or have no demanded bits.
+    if (DB.isInstructionDead(&I) || (I.getType()->isIntOrIntVectorTy() &&
+                                     DB.getDemandedBits(&I).isNullValue() &&
+                                     wouldInstructionBeTriviallyDead(&I))) {
+      salvageDebugInfo(I);
+      Worklist.push_back(&I);
+      I.dropAllReferences();
+      Changed = true;
+      continue;
     }
 
-    for (Instruction *&I : Worklist) {
-        ++NumRemoved;
-        I->eraseFromParent();
+    // Convert SExt into ZExt if none of the extension bits is required
+    if (SExtInst *SE = dyn_cast<SExtInst>(&I)) {
+      APInt Demanded = DB.getDemandedBits(SE);
+      const uint32_t SrcBitSize = SE->getSrcTy()->getScalarSizeInBits();
+      auto *const DstTy = SE->getDestTy();
+      const uint32_t DestBitSize = DstTy->getScalarSizeInBits();
+      if (Demanded.countLeadingZeros() >= (DestBitSize - SrcBitSize)) {
+        clearAssumptionsOfUsers(SE, DB);
+        IRBuilder<> Builder(SE);
+        I.replaceAllUsesWith(
+            Builder.CreateZExt(SE->getOperand(0), DstTy, SE->getName()));
+        Worklist.push_back(SE);
+        Changed = true;
+        NumSExt2ZExt++;
+        continue;
+      }
     }
 
-    return Changed;
+    for (Use &U : I.operands()) {
+      // DemandedBits only detects dead integer uses.
+      if (!U->getType()->isIntOrIntVectorTy())
+        continue;
+
+      if (!isa<Instruction>(U) && !isa<Argument>(U))
+        continue;
+
+      if (!DB.isUseDead(&U))
+        continue;
+
+      LLVM_DEBUG(dbgs() << "BDCE: Trivializing: " << U << " (all bits dead)\n");
+
+      clearAssumptionsOfUsers(&I, DB);
+
+      // FIXME: In theory we could substitute undef here instead of zero.
+      // This should be reconsidered once we settle on the semantics of
+      // undef, poison, etc.
+      U.set(ConstantInt::get(U->getType(), 0));
+      ++NumSimplified;
+      Changed = true;
+    }
+  }
+
+  for (Instruction *&I : Worklist) {
+    ++NumRemoved;
+    I->eraseFromParent();
+  }
+
+  return Changed;
 }
 
 PreservedAnalyses BDCEPass::run(Function &F, FunctionAnalysisManager &AM) {
-    auto &DB = AM.getResult<DemandedBitsAnalysis>(F);
-    if (!bitTrackingDCE(F, DB))
-        return PreservedAnalyses::all();
+  auto &DB = AM.getResult<DemandedBitsAnalysis>(F);
+  if (!bitTrackingDCE(F, DB))
+    return PreservedAnalyses::all();
 
-    PreservedAnalyses PA;
-    PA.preserveSet<CFGAnalyses>();
-    PA.preserve<GlobalsAA>();
-    return PA;
+  PreservedAnalyses PA;
+  PA.preserveSet<CFGAnalyses>();
+  PA.preserve<GlobalsAA>();
+  return PA;
 }
 
 namespace {
 struct BDCELegacyPass : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    BDCELegacyPass() : FunctionPass(ID) {
-        initializeBDCELegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  BDCELegacyPass() : FunctionPass(ID) {
+    initializeBDCELegacyPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnFunction(Function &F) override {
-        if (skipFunction(F))
-            return false;
-        auto &DB = getAnalysis<DemandedBitsWrapperPass>().getDemandedBits();
-        return bitTrackingDCE(F, DB);
-    }
+  bool runOnFunction(Function &F) override {
+    if (skipFunction(F))
+      return false;
+    auto &DB = getAnalysis<DemandedBitsWrapperPass>().getDemandedBits();
+    return bitTrackingDCE(F, DB);
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addRequired<DemandedBitsWrapperPass>();
-        AU.addPreserved<GlobalsAAWrapperPass>();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addRequired<DemandedBitsWrapperPass>();
+    AU.addPreserved<GlobalsAAWrapperPass>();
+  }
 };
-}
+} // namespace
 
 char BDCELegacyPass::ID = 0;
 INITIALIZE_PASS_BEGIN(BDCELegacyPass, "bdce",
@@ -203,6 +202,4 @@ INITIALIZE_PASS_DEPENDENCY(DemandedBitsWrapperPass)
 INITIALIZE_PASS_END(BDCELegacyPass, "bdce",
                     "Bit-Tracking Dead Code Elimination", false, false)
 
-FunctionPass *llvm::createBitTrackingDCEPass() {
-    return new BDCELegacyPass();
-}
+FunctionPass *llvm::createBitTrackingDCEPass() { return new BDCELegacyPass(); }

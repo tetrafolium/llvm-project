@@ -15,15 +15,13 @@
 namespace lldb_private {
 class UnimplementedError : public llvm::ErrorInfo<UnimplementedError> {
 public:
-    static char ID;
+  static char ID;
 
-    void log(llvm::raw_ostream &OS) const override {
-        OS << "Not implemented";
-    }
+  void log(llvm::raw_ostream &OS) const override { OS << "Not implemented"; }
 
-    std::error_code convertToErrorCode() const override {
-        return llvm::errc::not_supported;
-    };
+  std::error_code convertToErrorCode() const override {
+    return llvm::errc::not_supported;
+  };
 };
 } // namespace lldb_private
 

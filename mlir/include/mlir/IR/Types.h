@@ -70,125 +70,115 @@ namespace mlir {
 //       the key.
 class Type {
 public:
-    /// Utility class for implementing types.
-    template <typename ConcreteType, typename BaseType, typename StorageType,
-              template <typename T> class... Traits>
-    using TypeBase = detail::StorageUserBase<ConcreteType, BaseType, StorageType,
-          detail::TypeUniquer, Traits...>;
+  /// Utility class for implementing types.
+  template <typename ConcreteType, typename BaseType, typename StorageType,
+            template <typename T> class... Traits>
+  using TypeBase = detail::StorageUserBase<ConcreteType, BaseType, StorageType,
+                                           detail::TypeUniquer, Traits...>;
 
-    using ImplType = TypeStorage;
+  using ImplType = TypeStorage;
 
-    constexpr Type() : impl(nullptr) {}
-    /* implicit */ Type(const ImplType *impl)
-        : impl(const_cast<ImplType *>(impl)) {}
+  constexpr Type() : impl(nullptr) {}
+  /* implicit */ Type(const ImplType *impl)
+      : impl(const_cast<ImplType *>(impl)) {}
 
-    Type(const Type &other) = default;
-    Type &operator=(const Type &other) = default;
+  Type(const Type &other) = default;
+  Type &operator=(const Type &other) = default;
 
-    bool operator==(Type other) const {
-        return impl == other.impl;
-    }
-    bool operator!=(Type other) const {
-        return !(*this == other);
-    }
-    explicit operator bool() const {
-        return impl;
-    }
+  bool operator==(Type other) const { return impl == other.impl; }
+  bool operator!=(Type other) const { return !(*this == other); }
+  explicit operator bool() const { return impl; }
 
-    bool operator!() const {
-        return impl == nullptr;
-    }
+  bool operator!() const { return impl == nullptr; }
 
-    template <typename U> bool isa() const;
-    template <typename First, typename Second, typename... Rest>
-    bool isa() const;
-    template <typename U> U dyn_cast() const;
-    template <typename U> U dyn_cast_or_null() const;
-    template <typename U> U cast() const;
+  template <typename U>
+  bool isa() const;
+  template <typename First, typename Second, typename... Rest>
+  bool isa() const;
+  template <typename U>
+  U dyn_cast() const;
+  template <typename U>
+  U dyn_cast_or_null() const;
+  template <typename U>
+  U cast() const;
 
-    // Support type casting Type to itself.
-    static bool classof(Type) {
-        return true;
-    }
+  // Support type casting Type to itself.
+  static bool classof(Type) { return true; }
 
-    /// Return a unique identifier for the concrete type. This is used to support
-    /// dynamic type casting.
-    TypeID getTypeID() {
-        return impl->getAbstractType().getTypeID();
-    }
+  /// Return a unique identifier for the concrete type. This is used to support
+  /// dynamic type casting.
+  TypeID getTypeID() { return impl->getAbstractType().getTypeID(); }
 
-    /// Return the MLIRContext in which this type was uniqued.
-    MLIRContext *getContext() const;
+  /// Return the MLIRContext in which this type was uniqued.
+  MLIRContext *getContext() const;
 
-    /// Get the dialect this type is registered to.
-    Dialect &getDialect() const;
+  /// Get the dialect this type is registered to.
+  Dialect &getDialect() const;
 
-    // Convenience predicates.  This is only for floating point types,
-    // derived types should use isa/dyn_cast.
-    bool isIndex() const;
-    bool isBF16() const;
-    bool isF16() const;
-    bool isF32() const;
-    bool isF64() const;
+  // Convenience predicates.  This is only for floating point types,
+  // derived types should use isa/dyn_cast.
+  bool isIndex() const;
+  bool isBF16() const;
+  bool isF16() const;
+  bool isF32() const;
+  bool isF64() const;
 
-    /// Return true if this is an integer type with the specified width.
-    bool isInteger(unsigned width) const;
-    /// Return true if this is a signless integer type (with the specified width).
-    bool isSignlessInteger() const;
-    bool isSignlessInteger(unsigned width) const;
-    /// Return true if this is a signed integer type (with the specified width).
-    bool isSignedInteger() const;
-    bool isSignedInteger(unsigned width) const;
-    /// Return true if this is an unsigned integer type (with the specified
-    /// width).
-    bool isUnsignedInteger() const;
-    bool isUnsignedInteger(unsigned width) const;
+  /// Return true if this is an integer type with the specified width.
+  bool isInteger(unsigned width) const;
+  /// Return true if this is a signless integer type (with the specified width).
+  bool isSignlessInteger() const;
+  bool isSignlessInteger(unsigned width) const;
+  /// Return true if this is a signed integer type (with the specified width).
+  bool isSignedInteger() const;
+  bool isSignedInteger(unsigned width) const;
+  /// Return true if this is an unsigned integer type (with the specified
+  /// width).
+  bool isUnsignedInteger() const;
+  bool isUnsignedInteger(unsigned width) const;
 
-    /// Return the bit width of an integer or a float type, assert failure on
-    /// other types.
-    unsigned getIntOrFloatBitWidth() const;
+  /// Return the bit width of an integer or a float type, assert failure on
+  /// other types.
+  unsigned getIntOrFloatBitWidth() const;
 
-    /// Return true if this is a signless integer or index type.
-    bool isSignlessIntOrIndex() const;
-    /// Return true if this is a signless integer, index, or float type.
-    bool isSignlessIntOrIndexOrFloat() const;
-    /// Return true of this is a signless integer or a float type.
-    bool isSignlessIntOrFloat() const;
+  /// Return true if this is a signless integer or index type.
+  bool isSignlessIntOrIndex() const;
+  /// Return true if this is a signless integer, index, or float type.
+  bool isSignlessIntOrIndexOrFloat() const;
+  /// Return true of this is a signless integer or a float type.
+  bool isSignlessIntOrFloat() const;
 
-    /// Return true if this is an integer (of any signedness) or an index type.
-    bool isIntOrIndex() const;
-    /// Return true if this is an integer (of any signedness) or a float type.
-    bool isIntOrFloat() const;
-    /// Return true if this is an integer (of any signedness), index, or float
-    /// type.
-    bool isIntOrIndexOrFloat() const;
+  /// Return true if this is an integer (of any signedness) or an index type.
+  bool isIntOrIndex() const;
+  /// Return true if this is an integer (of any signedness) or a float type.
+  bool isIntOrFloat() const;
+  /// Return true if this is an integer (of any signedness), index, or float
+  /// type.
+  bool isIntOrIndexOrFloat() const;
 
-    /// Print the current type.
-    void print(raw_ostream &os);
-    void dump();
+  /// Print the current type.
+  void print(raw_ostream &os);
+  void dump();
 
-    friend ::llvm::hash_code hash_value(Type arg);
+  friend ::llvm::hash_code hash_value(Type arg);
 
-    /// Methods for supporting PointerLikeTypeTraits.
-    const void *getAsOpaquePointer() const {
-        return static_cast<const void *>(impl);
-    }
-    static Type getFromOpaquePointer(const void *pointer) {
-        return Type(reinterpret_cast<ImplType *>(const_cast<void *>(pointer)));
-    }
+  /// Methods for supporting PointerLikeTypeTraits.
+  const void *getAsOpaquePointer() const {
+    return static_cast<const void *>(impl);
+  }
+  static Type getFromOpaquePointer(const void *pointer) {
+    return Type(reinterpret_cast<ImplType *>(const_cast<void *>(pointer)));
+  }
 
-    /// Return the abstract type descriptor for this type.
-    const AbstractType &getAbstractType() {
-        return impl->getAbstractType();
-    }
+  /// Return the abstract type descriptor for this type.
+  const AbstractType &getAbstractType() { return impl->getAbstractType(); }
 
 protected:
-    ImplType *impl;
+  ImplType *impl;
 };
 
 inline raw_ostream &operator<<(raw_ostream &os, Type type) {
-    type.print(os);
-    return os;
+  type.print(os);
+  return os;
 }
 
 //===----------------------------------------------------------------------===//
@@ -209,21 +199,21 @@ using TraitBase = detail::StorageUserTraitBase<ConcreteType, TraitType>;
 /// `detail::Interface` for requirements on the `Traits` type.
 template <typename ConcreteType, typename Traits>
 class TypeInterface : public detail::Interface<ConcreteType, Type, Traits, Type,
-    TypeTrait::TraitBase> {
+                                               TypeTrait::TraitBase> {
 public:
-    using Base = TypeInterface<ConcreteType, Traits>;
-    using InterfaceBase =
-        detail::Interface<ConcreteType, Type, Traits, Type, TypeTrait::TraitBase>;
-    using InterfaceBase::InterfaceBase;
+  using Base = TypeInterface<ConcreteType, Traits>;
+  using InterfaceBase =
+      detail::Interface<ConcreteType, Type, Traits, Type, TypeTrait::TraitBase>;
+  using InterfaceBase::InterfaceBase;
 
 private:
-    /// Returns the impl interface instance for the given type.
-    static typename InterfaceBase::Concept *getInterfaceFor(Type type) {
-        return type.getAbstractType().getInterface<ConcreteType>();
-    }
+  /// Returns the impl interface instance for the given type.
+  static typename InterfaceBase::Concept *getInterfaceFor(Type type) {
+    return type.getAbstractType().getInterface<ConcreteType>();
+  }
 
-    /// Allow access to 'getInterfaceFor'.
-    friend InterfaceBase;
+  /// Allow access to 'getInterfaceFor'.
+  friend InterfaceBase;
 };
 
 //===----------------------------------------------------------------------===//
@@ -232,28 +222,32 @@ private:
 
 // Make Type hashable.
 inline ::llvm::hash_code hash_value(Type arg) {
-    return ::llvm::hash_value(arg.impl);
+  return ::llvm::hash_value(arg.impl);
 }
 
-template <typename U> bool Type::isa() const {
-    assert(impl && "isa<> used on a null type.");
-    return U::classof(*this);
+template <typename U>
+bool Type::isa() const {
+  assert(impl && "isa<> used on a null type.");
+  return U::classof(*this);
 }
 
 template <typename First, typename Second, typename... Rest>
 bool Type::isa() const {
-    return isa<First>() || isa<Second, Rest...>();
+  return isa<First>() || isa<Second, Rest...>();
 }
 
-template <typename U> U Type::dyn_cast() const {
-    return isa<U>() ? U(impl) : U(nullptr);
+template <typename U>
+U Type::dyn_cast() const {
+  return isa<U>() ? U(impl) : U(nullptr);
 }
-template <typename U> U Type::dyn_cast_or_null() const {
-    return (impl && isa<U>()) ? U(impl) : U(nullptr);
+template <typename U>
+U Type::dyn_cast_or_null() const {
+  return (impl && isa<U>()) ? U(impl) : U(nullptr);
 }
-template <typename U> U Type::cast() const {
-    assert(isa<U>());
-    return U(impl);
+template <typename U>
+U Type::cast() const {
+  assert(isa<U>());
+  return U(impl);
 }
 
 } // end namespace mlir
@@ -261,33 +255,31 @@ template <typename U> U Type::cast() const {
 namespace llvm {
 
 // Type hash just like pointers.
-template <> struct DenseMapInfo<mlir::Type> {
-    static mlir::Type getEmptyKey() {
-        auto pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
-        return mlir::Type(static_cast<mlir::Type::ImplType *>(pointer));
-    }
-    static mlir::Type getTombstoneKey() {
-        auto pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
-        return mlir::Type(static_cast<mlir::Type::ImplType *>(pointer));
-    }
-    static unsigned getHashValue(mlir::Type val) {
-        return mlir::hash_value(val);
-    }
-    static bool isEqual(mlir::Type LHS, mlir::Type RHS) {
-        return LHS == RHS;
-    }
+template <>
+struct DenseMapInfo<mlir::Type> {
+  static mlir::Type getEmptyKey() {
+    auto pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
+    return mlir::Type(static_cast<mlir::Type::ImplType *>(pointer));
+  }
+  static mlir::Type getTombstoneKey() {
+    auto pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
+    return mlir::Type(static_cast<mlir::Type::ImplType *>(pointer));
+  }
+  static unsigned getHashValue(mlir::Type val) { return mlir::hash_value(val); }
+  static bool isEqual(mlir::Type LHS, mlir::Type RHS) { return LHS == RHS; }
 };
 
 /// We align TypeStorage by 8, so allow LLVM to steal the low bits.
-template <> struct PointerLikeTypeTraits<mlir::Type> {
+template <>
+struct PointerLikeTypeTraits<mlir::Type> {
 public:
-    static inline void *getAsVoidPointer(mlir::Type I) {
-        return const_cast<void *>(I.getAsOpaquePointer());
-    }
-    static inline mlir::Type getFromVoidPointer(void *P) {
-        return mlir::Type::getFromOpaquePointer(P);
-    }
-    static constexpr int NumLowBitsAvailable = 3;
+  static inline void *getAsVoidPointer(mlir::Type I) {
+    return const_cast<void *>(I.getAsOpaquePointer());
+  }
+  static inline mlir::Type getFromVoidPointer(void *P) {
+    return mlir::Type::getFromOpaquePointer(P);
+  }
+  static constexpr int NumLowBitsAvailable = 3;
 };
 
 } // namespace llvm

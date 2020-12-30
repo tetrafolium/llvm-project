@@ -43,126 +43,112 @@ void checkAPIUses(MigrationPass &pass);
 void removeEmptyStatementsAndDeallocFinalize(MigrationPass &pass);
 
 class BodyContext {
-    MigrationContext &MigrateCtx;
-    ParentMap PMap;
-    Stmt *TopStmt;
+  MigrationContext &MigrateCtx;
+  ParentMap PMap;
+  Stmt *TopStmt;
 
 public:
-    BodyContext(MigrationContext &MigrateCtx, Stmt *S)
-        : MigrateCtx(MigrateCtx), PMap(S), TopStmt(S) {}
+  BodyContext(MigrationContext &MigrateCtx, Stmt *S)
+      : MigrateCtx(MigrateCtx), PMap(S), TopStmt(S) {}
 
-    MigrationContext &getMigrationContext() {
-        return MigrateCtx;
-    }
-    ParentMap &getParentMap() {
-        return PMap;
-    }
-    Stmt *getTopStmt() {
-        return TopStmt;
-    }
+  MigrationContext &getMigrationContext() { return MigrateCtx; }
+  ParentMap &getParentMap() { return PMap; }
+  Stmt *getTopStmt() { return TopStmt; }
 };
 
 class ObjCImplementationContext {
-    MigrationContext &MigrateCtx;
-    ObjCImplementationDecl *ImpD;
+  MigrationContext &MigrateCtx;
+  ObjCImplementationDecl *ImpD;
 
 public:
-    ObjCImplementationContext(MigrationContext &MigrateCtx,
-                              ObjCImplementationDecl *D)
-        : MigrateCtx(MigrateCtx), ImpD(D) {}
+  ObjCImplementationContext(MigrationContext &MigrateCtx,
+                            ObjCImplementationDecl *D)
+      : MigrateCtx(MigrateCtx), ImpD(D) {}
 
-    MigrationContext &getMigrationContext() {
-        return MigrateCtx;
-    }
-    ObjCImplementationDecl *getImplementationDecl() {
-        return ImpD;
-    }
+  MigrationContext &getMigrationContext() { return MigrateCtx; }
+  ObjCImplementationDecl *getImplementationDecl() { return ImpD; }
 };
 
 class ASTTraverser {
 public:
-    virtual ~ASTTraverser();
-    virtual void traverseTU(MigrationContext &MigrateCtx) { }
-    virtual void traverseBody(BodyContext &BodyCtx) { }
-    virtual void traverseObjCImplementation(ObjCImplementationContext &ImplCtx) {}
+  virtual ~ASTTraverser();
+  virtual void traverseTU(MigrationContext &MigrateCtx) {}
+  virtual void traverseBody(BodyContext &BodyCtx) {}
+  virtual void traverseObjCImplementation(ObjCImplementationContext &ImplCtx) {}
 };
 
 class MigrationContext {
-    std::vector<ASTTraverser *> Traversers;
+  std::vector<ASTTraverser *> Traversers;
 
 public:
-    MigrationPass &Pass;
+  MigrationPass &Pass;
 
-    struct GCAttrOccurrence {
-        enum AttrKind { Weak, Strong } Kind;
-        SourceLocation Loc;
-        QualType ModifiedType;
-        Decl *Dcl;
-        /// true if the attribute is owned, e.g. it is in a body and not just
-        /// in an interface.
-        bool FullyMigratable;
-    };
-    std::vector<GCAttrOccurrence> GCAttrs;
-    llvm::DenseSet<SourceLocation> AttrSet;
-    llvm::DenseSet<SourceLocation> RemovedAttrSet;
+  struct GCAttrOccurrence {
+    enum AttrKind { Weak, Strong } Kind;
+    SourceLocation Loc;
+    QualType ModifiedType;
+    Decl *Dcl;
+    /// true if the attribute is owned, e.g. it is in a body and not just
+    /// in an interface.
+    bool FullyMigratable;
+  };
+  std::vector<GCAttrOccurrence> GCAttrs;
+  llvm::DenseSet<SourceLocation> AttrSet;
+  llvm::DenseSet<SourceLocation> RemovedAttrSet;
 
-    /// Set of raw '@' locations for 'assign' properties group that contain
-    /// GC __weak.
-    llvm::DenseSet<SourceLocation> AtPropsWeak;
+  /// Set of raw '@' locations for 'assign' properties group that contain
+  /// GC __weak.
+  llvm::DenseSet<SourceLocation> AtPropsWeak;
 
-    explicit MigrationContext(MigrationPass &pass) : Pass(pass) {}
-    ~MigrationContext();
+  explicit MigrationContext(MigrationPass &pass) : Pass(pass) {}
+  ~MigrationContext();
 
-    typedef std::vector<ASTTraverser *>::iterator traverser_iterator;
-    traverser_iterator traversers_begin() {
-        return Traversers.begin();
-    }
-    traverser_iterator traversers_end() {
-        return Traversers.end();
-    }
+  typedef std::vector<ASTTraverser *>::iterator traverser_iterator;
+  traverser_iterator traversers_begin() { return Traversers.begin(); }
+  traverser_iterator traversers_end() { return Traversers.end(); }
 
-    void addTraverser(ASTTraverser *traverser) {
-        Traversers.push_back(traverser);
-    }
+  void addTraverser(ASTTraverser *traverser) {
+    Traversers.push_back(traverser);
+  }
 
-    bool isGCOwnedNonObjC(QualType T);
-    bool removePropertyAttribute(StringRef fromAttr, SourceLocation atLoc) {
-        return rewritePropertyAttribute(fromAttr, StringRef(), atLoc);
-    }
-    bool rewritePropertyAttribute(StringRef fromAttr, StringRef toAttr,
-                                  SourceLocation atLoc);
-    bool addPropertyAttribute(StringRef attr, SourceLocation atLoc);
+  bool isGCOwnedNonObjC(QualType T);
+  bool removePropertyAttribute(StringRef fromAttr, SourceLocation atLoc) {
+    return rewritePropertyAttribute(fromAttr, StringRef(), atLoc);
+  }
+  bool rewritePropertyAttribute(StringRef fromAttr, StringRef toAttr,
+                                SourceLocation atLoc);
+  bool addPropertyAttribute(StringRef attr, SourceLocation atLoc);
 
-    void traverse(TranslationUnitDecl *TU);
+  void traverse(TranslationUnitDecl *TU);
 
-    void dumpGCAttrs();
+  void dumpGCAttrs();
 };
 
 class PropertyRewriteTraverser : public ASTTraverser {
 public:
-    void traverseObjCImplementation(ObjCImplementationContext &ImplCtx) override;
+  void traverseObjCImplementation(ObjCImplementationContext &ImplCtx) override;
 };
 
 class BlockObjCVariableTraverser : public ASTTraverser {
 public:
-    void traverseBody(BodyContext &BodyCtx) override;
+  void traverseBody(BodyContext &BodyCtx) override;
 };
 
 class ProtectedScopeTraverser : public ASTTraverser {
 public:
-    void traverseBody(BodyContext &BodyCtx) override;
+  void traverseBody(BodyContext &BodyCtx) override;
 };
 
 // GC transformations
 
 class GCAttrsTraverser : public ASTTraverser {
 public:
-    void traverseTU(MigrationContext &MigrateCtx) override;
+  void traverseTU(MigrationContext &MigrateCtx) override;
 };
 
 class GCCollectableCallsTraverser : public ASTTraverser {
 public:
-    void traverseBody(BodyContext &BodyCtx) override;
+  void traverseBody(BodyContext &BodyCtx) override;
 };
 
 //===----------------------------------------------------------------------===//
@@ -196,24 +182,25 @@ bool isGlobalVar(Expr *E);
 StringRef getNilString(MigrationPass &Pass);
 
 template <typename BODY_TRANS>
-class BodyTransform : public RecursiveASTVisitor<BodyTransform<BODY_TRANS> > {
-    MigrationPass &Pass;
-    Decl *ParentD;
+class BodyTransform : public RecursiveASTVisitor<BodyTransform<BODY_TRANS>> {
+  MigrationPass &Pass;
+  Decl *ParentD;
 
-    typedef RecursiveASTVisitor<BodyTransform<BODY_TRANS> > base;
+  typedef RecursiveASTVisitor<BodyTransform<BODY_TRANS>> base;
+
 public:
-    BodyTransform(MigrationPass &pass) : Pass(pass), ParentD(nullptr) { }
+  BodyTransform(MigrationPass &pass) : Pass(pass), ParentD(nullptr) {}
 
-    bool TraverseStmt(Stmt *rootS) {
-        if (rootS)
-            BODY_TRANS(Pass).transformBody(rootS, ParentD);
-        return true;
-    }
+  bool TraverseStmt(Stmt *rootS) {
+    if (rootS)
+      BODY_TRANS(Pass).transformBody(rootS, ParentD);
+    return true;
+  }
 
-    bool TraverseObjCMethodDecl(ObjCMethodDecl *D) {
-        SaveAndRestore<Decl *> SetParent(ParentD, D);
-        return base::TraverseObjCMethodDecl(D);
-    }
+  bool TraverseObjCMethodDecl(ObjCMethodDecl *D) {
+    SaveAndRestore<Decl *> SetParent(ParentD, D);
+    return base::TraverseObjCMethodDecl(D);
+  }
 };
 
 typedef llvm::DenseSet<Expr *> ExprSet;
@@ -221,8 +208,8 @@ typedef llvm::DenseSet<Expr *> ExprSet;
 void clearRefsIn(Stmt *S, ExprSet &refs);
 template <typename iterator>
 void clearRefsIn(iterator begin, iterator end, ExprSet &refs) {
-    for (; begin != end; ++begin)
-        clearRefsIn(*begin, refs);
+  for (; begin != end; ++begin)
+    clearRefsIn(*begin, refs);
 }
 
 void collectRefs(ValueDecl *D, Stmt *S, ExprSet &refs);

@@ -23,42 +23,42 @@ namespace llvm {
 namespace mca {
 
 llvm::Error RetireStage::cycleStart() {
-    if (RCU.isEmpty())
-        return llvm::ErrorSuccess();
-
-    const unsigned MaxRetirePerCycle = RCU.getMaxRetirePerCycle();
-    unsigned NumRetired = 0;
-    while (!RCU.isEmpty()) {
-        if (MaxRetirePerCycle != 0 && NumRetired == MaxRetirePerCycle)
-            break;
-        const RetireControlUnit::RUToken &Current = RCU.getCurrentToken();
-        if (!Current.Executed)
-            break;
-        notifyInstructionRetired(Current.IR);
-        RCU.consumeCurrentToken();
-        NumRetired++;
-    }
-
+  if (RCU.isEmpty())
     return llvm::ErrorSuccess();
+
+  const unsigned MaxRetirePerCycle = RCU.getMaxRetirePerCycle();
+  unsigned NumRetired = 0;
+  while (!RCU.isEmpty()) {
+    if (MaxRetirePerCycle != 0 && NumRetired == MaxRetirePerCycle)
+      break;
+    const RetireControlUnit::RUToken &Current = RCU.getCurrentToken();
+    if (!Current.Executed)
+      break;
+    notifyInstructionRetired(Current.IR);
+    RCU.consumeCurrentToken();
+    NumRetired++;
+  }
+
+  return llvm::ErrorSuccess();
 }
 
 llvm::Error RetireStage::execute(InstRef &IR) {
-    RCU.onInstructionExecuted(IR.getInstruction()->getRCUTokenID());
-    return llvm::ErrorSuccess();
+  RCU.onInstructionExecuted(IR.getInstruction()->getRCUTokenID());
+  return llvm::ErrorSuccess();
 }
 
 void RetireStage::notifyInstructionRetired(const InstRef &IR) const {
-    LLVM_DEBUG(llvm::dbgs() << "[E] Instruction Retired: #" << IR << '\n');
-    llvm::SmallVector<unsigned, 4> FreedRegs(PRF.getNumRegisterFiles());
-    const Instruction &Inst = *IR.getInstruction();
+  LLVM_DEBUG(llvm::dbgs() << "[E] Instruction Retired: #" << IR << '\n');
+  llvm::SmallVector<unsigned, 4> FreedRegs(PRF.getNumRegisterFiles());
+  const Instruction &Inst = *IR.getInstruction();
 
-    // Release the load/store queue entries.
-    if (Inst.isMemOp())
-        LSU.onInstructionRetired(IR);
+  // Release the load/store queue entries.
+  if (Inst.isMemOp())
+    LSU.onInstructionRetired(IR);
 
-    for (const WriteState &WS : Inst.getDefs())
-        PRF.removeRegisterWrite(WS, FreedRegs);
-    notifyEvent<HWInstructionEvent>(HWInstructionRetiredEvent(IR, FreedRegs));
+  for (const WriteState &WS : Inst.getDefs())
+    PRF.removeRegisterWrite(WS, FreedRegs);
+  notifyEvent<HWInstructionEvent>(HWInstructionRetiredEvent(IR, FreedRegs));
 }
 
 } // namespace mca

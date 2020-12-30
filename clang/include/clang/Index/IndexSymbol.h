@@ -21,75 +21,75 @@ class LangOptions;
 namespace index {
 
 enum class SymbolKind : uint8_t {
-    Unknown,
+  Unknown,
 
-    Module,
-    Namespace,
-    NamespaceAlias,
-    Macro,
+  Module,
+  Namespace,
+  NamespaceAlias,
+  Macro,
 
-    Enum,
-    Struct,
-    Class,
-    Protocol,
-    Extension,
-    Union,
-    TypeAlias,
+  Enum,
+  Struct,
+  Class,
+  Protocol,
+  Extension,
+  Union,
+  TypeAlias,
 
-    Function,
-    Variable,
-    Field,
-    EnumConstant,
+  Function,
+  Variable,
+  Field,
+  EnumConstant,
 
-    InstanceMethod,
-    ClassMethod,
-    StaticMethod,
-    InstanceProperty,
-    ClassProperty,
-    StaticProperty,
+  InstanceMethod,
+  ClassMethod,
+  StaticMethod,
+  InstanceProperty,
+  ClassProperty,
+  StaticProperty,
 
-    Constructor,
-    Destructor,
-    ConversionFunction,
+  Constructor,
+  Destructor,
+  ConversionFunction,
 
-    Parameter,
-    Using,
-    TemplateTypeParm,
-    TemplateTemplateParm,
-    NonTypeTemplateParm,
+  Parameter,
+  Using,
+  TemplateTypeParm,
+  TemplateTemplateParm,
+  NonTypeTemplateParm,
 };
 
 enum class SymbolLanguage : uint8_t {
-    C,
-    ObjC,
-    CXX,
-    Swift,
+  C,
+  ObjC,
+  CXX,
+  Swift,
 };
 
 /// Language specific sub-kinds.
 enum class SymbolSubKind : uint8_t {
-    None,
-    CXXCopyConstructor,
-    CXXMoveConstructor,
-    AccessorGetter,
-    AccessorSetter,
-    UsingTypename,
-    UsingValue,
+  None,
+  CXXCopyConstructor,
+  CXXMoveConstructor,
+  AccessorGetter,
+  AccessorSetter,
+  UsingTypename,
+  UsingValue,
 };
 
 typedef uint16_t SymbolPropertySet;
 /// Set of properties that provide additional info about a symbol.
 enum class SymbolProperty : SymbolPropertySet {
-    Generic                       = 1 << 0,
-    TemplatePartialSpecialization = 1 << 1,
-    TemplateSpecialization        = 1 << 2,
-    UnitTest                      = 1 << 3,
-    IBAnnotated                   = 1 << 4,
-    IBOutletCollection            = 1 << 5,
-    GKInspectable                 = 1 << 6,
-    Local                         = 1 << 7,
-    /// Symbol is part of a protocol interface.
-    ProtocolInterface             = 1 << 8,
+  Generic = 1 << 0,
+  TemplatePartialSpecialization = 1 << 1,
+  TemplateSpecialization = 1 << 2,
+  UnitTest = 1 << 3,
+  IBAnnotated = 1 << 4,
+  IBOutletCollection = 1 << 5,
+  GKInspectable = 1 << 6,
+  Local = 1 << 7,
+  /// Symbol is part of a protocol interface.
+  ProtocolInterface = 1 << 8,
 };
 static const unsigned SymbolPropertyBitNum = 9;
 
@@ -97,52 +97,52 @@ static const unsigned SymbolPropertyBitNum = 9;
 ///
 /// Low 9 bits of clang-c/include/Index.h CXSymbolRole mirrors this enum.
 enum class SymbolRole : uint32_t {
-    Declaration = 1 << 0,
-    Definition = 1 << 1,
-    Reference = 1 << 2,
-    Read = 1 << 3,
-    Write = 1 << 4,
-    Call = 1 << 5,
-    Dynamic = 1 << 6,
-    AddressOf = 1 << 7,
-    Implicit = 1 << 8,
-    // FIXME: this is not mirrored in CXSymbolRole.
-    // Note that macro occurrences aren't currently supported in libclang.
-    Undefinition = 1 << 9, // macro #undef
+  Declaration = 1 << 0,
+  Definition = 1 << 1,
+  Reference = 1 << 2,
+  Read = 1 << 3,
+  Write = 1 << 4,
+  Call = 1 << 5,
+  Dynamic = 1 << 6,
+  AddressOf = 1 << 7,
+  Implicit = 1 << 8,
+  // FIXME: this is not mirrored in CXSymbolRole.
+  // Note that macro occurrences aren't currently supported in libclang.
+  Undefinition = 1 << 9, // macro #undef
 
-    // Relation roles.
-    RelationChildOf = 1 << 10,
-    RelationBaseOf = 1 << 11,
-    RelationOverrideOf = 1 << 12,
-    RelationReceivedBy = 1 << 13,
-    RelationCalledBy = 1 << 14,
-    RelationExtendedBy = 1 << 15,
-    RelationAccessorOf = 1 << 16,
-    RelationContainedBy = 1 << 17,
-    RelationIBTypeOf = 1 << 18,
-    RelationSpecializationOf = 1 << 19,
+  // Relation roles.
+  RelationChildOf = 1 << 10,
+  RelationBaseOf = 1 << 11,
+  RelationOverrideOf = 1 << 12,
+  RelationReceivedBy = 1 << 13,
+  RelationCalledBy = 1 << 14,
+  RelationExtendedBy = 1 << 15,
+  RelationAccessorOf = 1 << 16,
+  RelationContainedBy = 1 << 17,
+  RelationIBTypeOf = 1 << 18,
+  RelationSpecializationOf = 1 << 19,
 
-    // Symbol only references the name of the object as written. For example, a
-    // constructor references the class declaration using that role.
-    NameReference = 1 << 20,
+  // Symbol only references the name of the object as written. For example, a
+  // constructor references the class declaration using that role.
+  NameReference = 1 << 20,
 };
 static const unsigned SymbolRoleBitNum = 21;
 typedef unsigned SymbolRoleSet;
 
 /// Represents a relation to another symbol for a symbol occurrence.
 struct SymbolRelation {
-    SymbolRoleSet Roles;
-    const Decl *RelatedSymbol;
+  SymbolRoleSet Roles;
+  const Decl *RelatedSymbol;
 
-    SymbolRelation(SymbolRoleSet Roles, const Decl *Sym)
-        : Roles(Roles), RelatedSymbol(Sym) {}
+  SymbolRelation(SymbolRoleSet Roles, const Decl *Sym)
+      : Roles(Roles), RelatedSymbol(Sym) {}
 };
 
 struct SymbolInfo {
-    SymbolKind Kind;
-    SymbolSubKind SubKind;
-    SymbolLanguage Lang;
-    SymbolPropertySet Properties;
+  SymbolKind Kind;
+  SymbolSubKind SubKind;
+  SymbolLanguage Lang;
+  SymbolPropertySet Properties;
 };
 
 SymbolInfo getSymbolInfo(const Decl *D);
@@ -153,8 +153,8 @@ bool isFunctionLocalSymbol(const Decl *D);
 
 void applyForEachSymbolRole(SymbolRoleSet Roles,
                             llvm::function_ref<void(SymbolRole)> Fn);
-bool applyForEachSymbolRoleInterruptible(SymbolRoleSet Roles,
-        llvm::function_ref<bool(SymbolRole)> Fn);
+bool applyForEachSymbolRoleInterruptible(
+    SymbolRoleSet Roles, llvm::function_ref<bool(SymbolRole)> Fn);
 void printSymbolRoles(SymbolRoleSet Roles, raw_ostream &OS);
 
 /// \returns true if no name was printed, false otherwise.

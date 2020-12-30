@@ -34,33 +34,33 @@ SANITIZER_WEAK_ATTRIBUTE char __memprof_profile_filename[1];
 namespace __memprof {
 
 static void MemprofDie() {
-    static atomic_uint32_t num_calls;
-    if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) != 0) {
-        // Don't die twice - run a busy loop.
-        while (1) {
-        }
+  static atomic_uint32_t num_calls;
+  if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) != 0) {
+    // Don't die twice - run a busy loop.
+    while (1) {
     }
-    if (common_flags()->print_module_map >= 1)
-        DumpProcessMap();
-    if (flags()->unmap_shadow_on_exit) {
-        if (kHighShadowEnd)
-            UnmapOrDie((void *)kLowShadowBeg, kHighShadowEnd - kLowShadowBeg);
-    }
+  }
+  if (common_flags()->print_module_map >= 1)
+    DumpProcessMap();
+  if (flags()->unmap_shadow_on_exit) {
+    if (kHighShadowEnd)
+      UnmapOrDie((void *)kLowShadowBeg, kHighShadowEnd - kLowShadowBeg);
+  }
 }
 
 static void MemprofCheckFailed(const char *file, int line, const char *cond,
                                u64 v1, u64 v2) {
-    Report("MemProfiler CHECK failed: %s:%d \"%s\" (0x%zx, 0x%zx)\n", file, line,
-           cond, (uptr)v1, (uptr)v2);
+  Report("MemProfiler CHECK failed: %s:%d \"%s\" (0x%zx, 0x%zx)\n", file, line,
+         cond, (uptr)v1, (uptr)v2);
 
-    // Print a stack trace the first time we come here. Otherwise, we probably
-    // failed a CHECK during symbolization.
-    static atomic_uint32_t num_calls;
-    if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) == 0) {
-        PRINT_CURRENT_STACK_CHECK();
-    }
+  // Print a stack trace the first time we come here. Otherwise, we probably
+  // failed a CHECK during symbolization.
+  static atomic_uint32_t num_calls;
+  if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) == 0) {
+    PRINT_CURRENT_STACK_CHECK();
+  }
 
-    Die();
+  Die();
 }
 
 // -------------------------- Globals --------------------- {{{1
@@ -91,8 +91,8 @@ MEMPROF_MEMORY_ACCESS_CALLBACK(store)
 // the executable itself. This should help if the build system is removing dead
 // code at link time.
 static NOINLINE void force_interface_symbols() {
-    volatile int fake_condition = 0; // prevent dead condition elimination.
-    // clang-format off
+  volatile int fake_condition = 0; // prevent dead condition elimination.
+                                   // clang-format off
     switch (fake_condition) {
     case 1:
         __memprof_record_access(nullptr);
@@ -101,153 +101,151 @@ static NOINLINE void force_interface_symbols() {
         __memprof_record_access_range(nullptr, 0);
         break;
     }
-    // clang-format on
+                                   // clang-format on
 }
 
 static void memprof_atexit() {
-    Printf("MemProfiler exit stats:\n");
-    __memprof_print_accumulated_stats();
+  Printf("MemProfiler exit stats:\n");
+  __memprof_print_accumulated_stats();
 }
 
 static void InitializeHighMemEnd() {
-    kHighMemEnd = GetMaxUserVirtualAddress();
-    // Increase kHighMemEnd to make sure it's properly
-    // aligned together with kHighMemBeg:
-    kHighMemEnd |= (GetMmapGranularity() << SHADOW_SCALE) - 1;
+  kHighMemEnd = GetMaxUserVirtualAddress();
+  // Increase kHighMemEnd to make sure it's properly
+  // aligned together with kHighMemBeg:
+  kHighMemEnd |= (GetMmapGranularity() << SHADOW_SCALE) - 1;
 }
 
 void PrintAddressSpaceLayout() {
-    if (kHighMemBeg) {
-        Printf("|| `[%p, %p]` || HighMem    ||\n", (void *)kHighMemBeg,
-               (void *)kHighMemEnd);
-        Printf("|| `[%p, %p]` || HighShadow ||\n", (void *)kHighShadowBeg,
-               (void *)kHighShadowEnd);
-    }
-    Printf("|| `[%p, %p]` || ShadowGap  ||\n", (void *)kShadowGapBeg,
-           (void *)kShadowGapEnd);
-    if (kLowShadowBeg) {
-        Printf("|| `[%p, %p]` || LowShadow  ||\n", (void *)kLowShadowBeg,
-               (void *)kLowShadowEnd);
-        Printf("|| `[%p, %p]` || LowMem     ||\n", (void *)kLowMemBeg,
-               (void *)kLowMemEnd);
-    }
-    Printf("MemToShadow(shadow): %p %p", (void *)MEM_TO_SHADOW(kLowShadowBeg),
-           (void *)MEM_TO_SHADOW(kLowShadowEnd));
-    if (kHighMemBeg) {
-        Printf(" %p %p", (void *)MEM_TO_SHADOW(kHighShadowBeg),
-               (void *)MEM_TO_SHADOW(kHighShadowEnd));
-    }
-    Printf("\n");
-    Printf("malloc_context_size=%zu\n",
-           (uptr)common_flags()->malloc_context_size);
+  if (kHighMemBeg) {
+    Printf("|| `[%p, %p]` || HighMem    ||\n", (void *)kHighMemBeg,
+           (void *)kHighMemEnd);
+    Printf("|| `[%p, %p]` || HighShadow ||\n", (void *)kHighShadowBeg,
+           (void *)kHighShadowEnd);
+  }
+  Printf("|| `[%p, %p]` || ShadowGap  ||\n", (void *)kShadowGapBeg,
+         (void *)kShadowGapEnd);
+  if (kLowShadowBeg) {
+    Printf("|| `[%p, %p]` || LowShadow  ||\n", (void *)kLowShadowBeg,
+           (void *)kLowShadowEnd);
+    Printf("|| `[%p, %p]` || LowMem     ||\n", (void *)kLowMemBeg,
+           (void *)kLowMemEnd);
+  }
+  Printf("MemToShadow(shadow): %p %p", (void *)MEM_TO_SHADOW(kLowShadowBeg),
+         (void *)MEM_TO_SHADOW(kLowShadowEnd));
+  if (kHighMemBeg) {
+    Printf(" %p %p", (void *)MEM_TO_SHADOW(kHighShadowBeg),
+           (void *)MEM_TO_SHADOW(kHighShadowEnd));
+  }
+  Printf("\n");
+  Printf("malloc_context_size=%zu\n",
+         (uptr)common_flags()->malloc_context_size);
 
-    Printf("SHADOW_SCALE: %d\n", (int)SHADOW_SCALE);
-    Printf("SHADOW_GRANULARITY: %d\n", (int)SHADOW_GRANULARITY);
-    Printf("SHADOW_OFFSET: 0x%zx\n", (uptr)SHADOW_OFFSET);
-    CHECK(SHADOW_SCALE >= 3 && SHADOW_SCALE <= 7);
+  Printf("SHADOW_SCALE: %d\n", (int)SHADOW_SCALE);
+  Printf("SHADOW_GRANULARITY: %d\n", (int)SHADOW_GRANULARITY);
+  Printf("SHADOW_OFFSET: 0x%zx\n", (uptr)SHADOW_OFFSET);
+  CHECK(SHADOW_SCALE >= 3 && SHADOW_SCALE <= 7);
 }
 
 static bool UNUSED __local_memprof_dyninit = [] {
-    MaybeStartBackgroudThread();
-    SetSoftRssLimitExceededCallback(MemprofSoftRssLimitExceededCallback);
+  MaybeStartBackgroudThread();
+  SetSoftRssLimitExceededCallback(MemprofSoftRssLimitExceededCallback);
 
-    return false;
+  return false;
 }();
 
 static void MemprofInitInternal() {
-    if (LIKELY(memprof_inited))
-        return;
-    SanitizerToolName = "MemProfiler";
-    CHECK(!memprof_init_is_running && "MemProf init calls itself!");
-    memprof_init_is_running = true;
+  if (LIKELY(memprof_inited))
+    return;
+  SanitizerToolName = "MemProfiler";
+  CHECK(!memprof_init_is_running && "MemProf init calls itself!");
+  memprof_init_is_running = true;
 
-    CacheBinaryName();
+  CacheBinaryName();
 
-    // Initialize flags. This must be done early, because most of the
-    // initialization steps look at flags().
-    InitializeFlags();
+  // Initialize flags. This must be done early, because most of the
+  // initialization steps look at flags().
+  InitializeFlags();
 
-    AvoidCVE_2016_2143();
+  AvoidCVE_2016_2143();
 
-    SetMallocContextSize(common_flags()->malloc_context_size);
+  SetMallocContextSize(common_flags()->malloc_context_size);
 
-    InitializeHighMemEnd();
+  InitializeHighMemEnd();
 
-    // Make sure we are not statically linked.
-    MemprofDoesNotSupportStaticLinkage();
+  // Make sure we are not statically linked.
+  MemprofDoesNotSupportStaticLinkage();
 
-    // Install tool-specific callbacks in sanitizer_common.
-    AddDieCallback(MemprofDie);
-    SetCheckFailedCallback(MemprofCheckFailed);
+  // Install tool-specific callbacks in sanitizer_common.
+  AddDieCallback(MemprofDie);
+  SetCheckFailedCallback(MemprofCheckFailed);
 
-    // Use profile name specified via the binary itself if it exists, and hasn't
-    // been overrriden by a flag at runtime.
-    if (__memprof_profile_filename[0] != 0 && !common_flags()->log_path)
-        __sanitizer_set_report_path(__memprof_profile_filename);
-    else
-        __sanitizer_set_report_path(common_flags()->log_path);
+  // Use profile name specified via the binary itself if it exists, and hasn't
+  // been overrriden by a flag at runtime.
+  if (__memprof_profile_filename[0] != 0 && !common_flags()->log_path)
+    __sanitizer_set_report_path(__memprof_profile_filename);
+  else
+    __sanitizer_set_report_path(common_flags()->log_path);
 
-    __sanitizer::InitializePlatformEarly();
+  __sanitizer::InitializePlatformEarly();
 
-    // Re-exec ourselves if we need to set additional env or command line args.
-    MaybeReexec();
+  // Re-exec ourselves if we need to set additional env or command line args.
+  MaybeReexec();
 
-    // Setup internal allocator callback.
-    SetLowLevelAllocateMinAlignment(SHADOW_GRANULARITY);
+  // Setup internal allocator callback.
+  SetLowLevelAllocateMinAlignment(SHADOW_GRANULARITY);
 
-    InitializeMemprofInterceptors();
-    CheckASLR();
+  InitializeMemprofInterceptors();
+  CheckASLR();
 
-    ReplaceSystemMalloc();
+  ReplaceSystemMalloc();
 
-    DisableCoreDumperIfNecessary();
+  DisableCoreDumperIfNecessary();
 
-    InitializeShadowMemory();
+  InitializeShadowMemory();
 
-    TSDInit(PlatformTSDDtor);
+  TSDInit(PlatformTSDDtor);
 
-    InitializeAllocator();
+  InitializeAllocator();
 
-    // On Linux MemprofThread::ThreadStart() calls malloc() that's why
-    // memprof_inited should be set to 1 prior to initializing the threads.
-    memprof_inited = 1;
-    memprof_init_is_running = false;
+  // On Linux MemprofThread::ThreadStart() calls malloc() that's why
+  // memprof_inited should be set to 1 prior to initializing the threads.
+  memprof_inited = 1;
+  memprof_init_is_running = false;
 
-    if (flags()->atexit)
-        Atexit(memprof_atexit);
+  if (flags()->atexit)
+    Atexit(memprof_atexit);
 
-    InitializeCoverage(common_flags()->coverage, common_flags()->coverage_dir);
+  InitializeCoverage(common_flags()->coverage, common_flags()->coverage_dir);
 
-    // interceptors
-    InitTlsSize();
+  // interceptors
+  InitTlsSize();
 
-    // Create main thread.
-    MemprofThread *main_thread = CreateMainThread();
-    CHECK_EQ(0, main_thread->tid());
-    force_interface_symbols(); // no-op.
-    SanitizerInitializeUnwinder();
+  // Create main thread.
+  MemprofThread *main_thread = CreateMainThread();
+  CHECK_EQ(0, main_thread->tid());
+  force_interface_symbols(); // no-op.
+  SanitizerInitializeUnwinder();
 
-    Symbolizer::LateInitialize();
+  Symbolizer::LateInitialize();
 
-    VReport(1, "MemProfiler Init done\n");
+  VReport(1, "MemProfiler Init done\n");
 
-    memprof_init_done = 1;
+  memprof_init_done = 1;
 }
 
 void MemprofInitTime() {
-    if (LIKELY(memprof_timestamp_inited))
-        return;
-    timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    memprof_init_timestamp_s = ts.tv_sec;
-    memprof_timestamp_inited = 1;
+  if (LIKELY(memprof_timestamp_inited))
+    return;
+  timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  memprof_init_timestamp_s = ts.tv_sec;
+  memprof_timestamp_inited = 1;
 }
 
 // Initialize as requested from some part of MemProf runtime library
 // (interceptors, allocator, etc).
-void MemprofInitFromRtl() {
-    MemprofInitInternal();
-}
+void MemprofInitFromRtl() { MemprofInitInternal(); }
 
 #if MEMPROF_DYNAMIC
 // Initialize runtime in case it's LD_PRELOAD-ed into uninstrumented executable
@@ -255,9 +253,7 @@ void MemprofInitFromRtl() {
 
 class MemprofInitializer {
 public:
-    MemprofInitializer() {
-        MemprofInitFromRtl();
-    }
+  MemprofInitializer() { MemprofInitFromRtl(); }
 };
 
 static MemprofInitializer memprof_initializer;
@@ -270,18 +266,16 @@ using namespace __memprof;
 
 // Initialize as requested from instrumented application code.
 void __memprof_init() {
-    MemprofInitTime();
-    MemprofInitInternal();
+  MemprofInitTime();
+  MemprofInitInternal();
 }
 
-void __memprof_preinit() {
-    MemprofInitInternal();
-}
+void __memprof_preinit() { MemprofInitInternal(); }
 
 void __memprof_version_mismatch_check_v1() {}
 
 void __memprof_record_access(void const volatile *addr) {
-    __memprof::RecordAccess((uptr)addr);
+  __memprof::RecordAccess((uptr)addr);
 }
 
 // We only record the access on the first location in the range,
@@ -291,41 +285,41 @@ void __memprof_record_access(void const volatile *addr) {
 // TODO: Should we do something else so we can better track utilization?
 void __memprof_record_access_range(void const volatile *addr,
                                    UNUSED uptr size) {
-    __memprof::RecordAccess((uptr)addr);
+  __memprof::RecordAccess((uptr)addr);
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE u16
 __sanitizer_unaligned_load16(const uu16 *p) {
-    __memprof_record_access(p);
-    return *p;
+  __memprof_record_access(p);
+  return *p;
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE u32
 __sanitizer_unaligned_load32(const uu32 *p) {
-    __memprof_record_access(p);
-    return *p;
+  __memprof_record_access(p);
+  return *p;
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE u64
 __sanitizer_unaligned_load64(const uu64 *p) {
-    __memprof_record_access(p);
-    return *p;
+  __memprof_record_access(p);
+  return *p;
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE void
 __sanitizer_unaligned_store16(uu16 *p, u16 x) {
-    __memprof_record_access(p);
-    *p = x;
+  __memprof_record_access(p);
+  *p = x;
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE void
 __sanitizer_unaligned_store32(uu32 *p, u32 x) {
-    __memprof_record_access(p);
-    *p = x;
+  __memprof_record_access(p);
+  *p = x;
 }
 
 extern "C" SANITIZER_INTERFACE_ATTRIBUTE void
 __sanitizer_unaligned_store64(uu64 *p, u64 x) {
-    __memprof_record_access(p);
-    *p = x;
+  __memprof_record_access(p);
+  *p = x;
 }

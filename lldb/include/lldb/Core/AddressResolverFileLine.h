@@ -28,29 +28,29 @@ class SymbolContext;
 
 class AddressResolverFileLine : public AddressResolver {
 public:
-    AddressResolverFileLine(const FileSpec &resolver, uint32_t line_no,
-                            bool check_inlines);
+  AddressResolverFileLine(const FileSpec &resolver, uint32_t line_no,
+                          bool check_inlines);
 
-    ~AddressResolverFileLine() override;
+  ~AddressResolverFileLine() override;
 
-    Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
-                                            SymbolContext &context,
-                                            Address *addr) override;
+  Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
+                                          SymbolContext &context,
+                                          Address *addr) override;
 
-    lldb::SearchDepth GetDepth() override;
+  lldb::SearchDepth GetDepth() override;
 
-    void GetDescription(Stream *s) override;
+  void GetDescription(Stream *s) override;
 
 protected:
-    FileSpec m_file_spec;   // This is the file spec we are looking for.
-    uint32_t m_line_number; // This is the line number that we are looking for.
-    bool m_inlines; // This determines whether the resolver looks for inlined
-    // functions or not.
+  FileSpec m_file_spec;   // This is the file spec we are looking for.
+  uint32_t m_line_number; // This is the line number that we are looking for.
+  bool m_inlines; // This determines whether the resolver looks for inlined
+                  // functions or not.
 
 private:
-    AddressResolverFileLine(const AddressResolverFileLine &) = delete;
-    const AddressResolverFileLine &
-    operator=(const AddressResolverFileLine &) = delete;
+  AddressResolverFileLine(const AddressResolverFileLine &) = delete;
+  const AddressResolverFileLine &
+  operator=(const AddressResolverFileLine &) = delete;
 };
 
 } // namespace lldb_private

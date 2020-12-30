@@ -22,18 +22,18 @@ namespace llvm {
 
 struct BPFRegisterInfo : public BPFGenRegisterInfo {
 
-    BPFRegisterInfo();
+  BPFRegisterInfo();
 
-    const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+  const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
-    BitVector getReservedRegs(const MachineFunction &MF) const override;
+  BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-    void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
-                             unsigned FIOperandNum,
-                             RegScavenger *RS = nullptr) const override;
+  void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
-    Register getFrameRegister(const MachineFunction &MF) const override;
+  Register getFrameRegister(const MachineFunction &MF) const override;
 };
-}
+} // namespace llvm
 
 #endif

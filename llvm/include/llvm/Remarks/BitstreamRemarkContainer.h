@@ -33,38 +33,38 @@ constexpr StringLiteral ContainerMagic("RMRK");
 ///             auxiliary file that contains the remarks.
 /// * standalone: the metadata and the remarks are emitted together.
 enum class BitstreamRemarkContainerType {
-    /// The metadata emitted separately.
-    /// This will contain the following:
-    /// * Container version and type
-    /// * String table
-    /// * External file
-    SeparateRemarksMeta,
-    /// The remarks emitted separately.
-    /// This will contain the following:
-    /// * Container version and type
-    /// * Remark version
-    SeparateRemarksFile,
-    /// Everything is emitted together.
-    /// This will contain the following:
-    /// * Container version and type
-    /// * Remark version
-    /// * String table
-    Standalone,
-    First = SeparateRemarksMeta,
-    Last = Standalone,
+  /// The metadata emitted separately.
+  /// This will contain the following:
+  /// * Container version and type
+  /// * String table
+  /// * External file
+  SeparateRemarksMeta,
+  /// The remarks emitted separately.
+  /// This will contain the following:
+  /// * Container version and type
+  /// * Remark version
+  SeparateRemarksFile,
+  /// Everything is emitted together.
+  /// This will contain the following:
+  /// * Container version and type
+  /// * Remark version
+  /// * String table
+  Standalone,
+  First = SeparateRemarksMeta,
+  Last = Standalone,
 };
 
 /// The possible blocks that will be encountered in a bitstream remark
 /// container.
 enum BlockIDs {
-    /// The metadata block is mandatory. It should always come after the
-    /// BLOCKINFO_BLOCK, and contains metadata that should be used when parsing
-    /// REMARK_BLOCKs.
-    /// There should always be only one META_BLOCK.
-    META_BLOCK_ID = bitc::FIRST_APPLICATION_BLOCKID,
-    /// One remark entry is represented using a REMARK_BLOCK. There can be
-    /// multiple REMARK_BLOCKs in the same file.
-    REMARK_BLOCK_ID
+  /// The metadata block is mandatory. It should always come after the
+  /// BLOCKINFO_BLOCK, and contains metadata that should be used when parsing
+  /// REMARK_BLOCKs.
+  /// There should always be only one META_BLOCK.
+  META_BLOCK_ID = bitc::FIRST_APPLICATION_BLOCKID,
+  /// One remark entry is represented using a REMARK_BLOCK. There can be
+  /// multiple REMARK_BLOCKs in the same file.
+  REMARK_BLOCK_ID
 };
 
 constexpr StringRef MetaBlockName = StringRef("Meta", 4);
@@ -73,20 +73,20 @@ constexpr StringRef RemarkBlockName = StringRef("Remark", 6);
 /// The possible records that can be encountered in the previously described
 /// blocks.
 enum RecordIDs {
-    // Meta block records.
-    RECORD_META_CONTAINER_INFO = 1,
-    RECORD_META_REMARK_VERSION,
-    RECORD_META_STRTAB,
-    RECORD_META_EXTERNAL_FILE,
-    // Remark block records.
-    RECORD_REMARK_HEADER,
-    RECORD_REMARK_DEBUG_LOC,
-    RECORD_REMARK_HOTNESS,
-    RECORD_REMARK_ARG_WITH_DEBUGLOC,
-    RECORD_REMARK_ARG_WITHOUT_DEBUGLOC,
-    // Helpers.
-    RECORD_FIRST = RECORD_META_CONTAINER_INFO,
-    RECORD_LAST = RECORD_REMARK_ARG_WITHOUT_DEBUGLOC
+  // Meta block records.
+  RECORD_META_CONTAINER_INFO = 1,
+  RECORD_META_REMARK_VERSION,
+  RECORD_META_STRTAB,
+  RECORD_META_EXTERNAL_FILE,
+  // Remark block records.
+  RECORD_REMARK_HEADER,
+  RECORD_REMARK_DEBUG_LOC,
+  RECORD_REMARK_HOTNESS,
+  RECORD_REMARK_ARG_WITH_DEBUGLOC,
+  RECORD_REMARK_ARG_WITHOUT_DEBUGLOC,
+  // Helpers.
+  RECORD_FIRST = RECORD_META_CONTAINER_INFO,
+  RECORD_LAST = RECORD_REMARK_ARG_WITHOUT_DEBUGLOC
 };
 
 constexpr StringRef MetaContainerInfoName = StringRef("Container info", 14);

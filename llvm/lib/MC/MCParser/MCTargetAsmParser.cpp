@@ -19,11 +19,9 @@ MCTargetAsmParser::MCTargetAsmParser(MCTargetOptions const &MCOptions,
 MCTargetAsmParser::~MCTargetAsmParser() = default;
 
 MCSubtargetInfo &MCTargetAsmParser::copySTI() {
-    MCSubtargetInfo &STICopy = getContext().getSubtargetCopy(getSTI());
-    STI = &STICopy;
-    return STICopy;
+  MCSubtargetInfo &STICopy = getContext().getSubtargetCopy(getSTI());
+  STI = &STICopy;
+  return STICopy;
 }
 
-const MCSubtargetInfo &MCTargetAsmParser::getSTI() const {
-    return *STI;
-}
+const MCSubtargetInfo &MCTargetAsmParser::getSTI() const { return *STI; }

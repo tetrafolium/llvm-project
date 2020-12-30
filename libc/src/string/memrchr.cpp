@@ -13,14 +13,14 @@
 namespace __llvm_libc {
 
 void *LLVM_LIBC_ENTRYPOINT(memrchr)(const void *src, int c, size_t n) {
-    const unsigned char *str = reinterpret_cast<const unsigned char *>(src);
-    const unsigned char ch = c;
-    for (; n != 0; --n) {
-        const unsigned char *s = str + n - 1;
-        if (*s == ch)
-            return const_cast<unsigned char *>(s);
-    }
-    return nullptr;
+  const unsigned char *str = reinterpret_cast<const unsigned char *>(src);
+  const unsigned char ch = c;
+  for (; n != 0; --n) {
+    const unsigned char *s = str + n - 1;
+    if (*s == ch)
+      return const_cast<unsigned char *>(s);
+  }
+  return nullptr;
 }
 
 } // namespace __llvm_libc

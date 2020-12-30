@@ -71,31 +71,26 @@ template <typename ThisT, typename ParentT> class RTTIExtends;
 /// type comparisons.
 class RTTIRoot {
 public:
-    virtual ~RTTIRoot() = default;
+  virtual ~RTTIRoot() = default;
 
-    /// Returns the class ID for this type.
-    static const void *classID() {
-        return &ID;
-    }
+  /// Returns the class ID for this type.
+  static const void *classID() { return &ID; }
 
-    /// Returns the class ID for the dynamic type of this RTTIRoot instance.
-    virtual const void *dynamicClassID() const = 0;
+  /// Returns the class ID for the dynamic type of this RTTIRoot instance.
+  virtual const void *dynamicClassID() const = 0;
 
-    /// Returns true if this class's ID matches the given class ID.
-    virtual bool isA(const void *const ClassID) const {
-        return ClassID == classID();
-    }
+  /// Returns true if this class's ID matches the given class ID.
+  virtual bool isA(const void *const ClassID) const {
+    return ClassID == classID();
+  }
 
-    /// Check whether this instance is a subclass of QueryT.
-    template <typename QueryT>
-    bool isA() const {
-        return isA(QueryT::classID());
-    }
+  /// Check whether this instance is a subclass of QueryT.
+  template <typename QueryT> bool isA() const { return isA(QueryT::classID()); }
 
 private:
-    virtual void anchor();
+  virtual void anchor();
 
-    static char ID;
+  static char ID;
 };
 
 /// Inheritance utility for extensible RTTI.
@@ -117,27 +112,20 @@ private:
 ///   static char ID;
 /// };
 ///
-template <typename ThisT, typename ParentT>
-class RTTIExtends : public ParentT {
+template <typename ThisT, typename ParentT> class RTTIExtends : public ParentT {
 public:
-    // Inherit constructors from ParentT.
-    using ParentT::ParentT;
+  // Inherit constructors from ParentT.
+  using ParentT::ParentT;
 
-    static const void *classID() {
-        return &ThisT::ID;
-    }
+  static const void *classID() { return &ThisT::ID; }
 
-    const void *dynamicClassID() const override {
-        return &ThisT::ID;
-    }
+  const void *dynamicClassID() const override { return &ThisT::ID; }
 
-    bool isA(const void *const ClassID) const override {
-        return ClassID == classID() || ParentT::isA(ClassID);
-    }
+  bool isA(const void *const ClassID) const override {
+    return ClassID == classID() || ParentT::isA(ClassID);
+  }
 
-    static bool classof(const RTTIRoot *R) {
-        return R->isA<ThisT>();
-    }
+  static bool classof(const RTTIRoot *R) { return R->isA<ThisT>(); }
 };
 
 } // end namespace llvm

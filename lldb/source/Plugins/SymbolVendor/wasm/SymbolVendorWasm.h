@@ -17,22 +17,22 @@ namespace wasm {
 
 class SymbolVendorWasm : public lldb_private::SymbolVendor {
 public:
-    SymbolVendorWasm(const lldb::ModuleSP &module_sp);
+  SymbolVendorWasm(const lldb::ModuleSP &module_sp);
 
-    static void Initialize();
-    static void Terminate();
-    static lldb_private::ConstString GetPluginNameStatic();
-    static const char *GetPluginDescriptionStatic();
+  static void Initialize();
+  static void Terminate();
+  static lldb_private::ConstString GetPluginNameStatic();
+  static const char *GetPluginDescriptionStatic();
 
-    static lldb_private::SymbolVendor *
-    CreateInstance(const lldb::ModuleSP &module_sp,
-                   lldb_private::Stream *feedback_strm);
+  static lldb_private::SymbolVendor *
+  CreateInstance(const lldb::ModuleSP &module_sp,
+                 lldb_private::Stream *feedback_strm);
 
-    /// PluginInterface protocol.
-    /// \{
-    lldb_private::ConstString GetPluginName() override;
-    uint32_t GetPluginVersion() override;
-    /// \}
+  /// PluginInterface protocol.
+  /// \{
+  lldb_private::ConstString GetPluginName() override;
+  uint32_t GetPluginVersion() override;
+  /// \}
 };
 
 } // namespace wasm

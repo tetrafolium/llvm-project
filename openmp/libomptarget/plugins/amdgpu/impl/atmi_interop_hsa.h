@@ -45,9 +45,9 @@ extern "C" {
  * @retval ::ATMI_STATUS_UNKNOWN The function encountered errors.
  */
 atmi_status_t atmi_interop_hsa_get_symbol_info(atmi_mem_place_t place,
-        const char *symbol,
-        void **var_addr,
-        unsigned int *var_size);
+                                               const char *symbol,
+                                               void **var_addr,
+                                               unsigned int *var_size);
 
 /**
  * @brief Get the HSA-specific kernel info from a kernel name

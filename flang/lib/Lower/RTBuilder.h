@@ -47,152 +47,152 @@ template <typename T>
 static constexpr TypeBuilderFunc getModel();
 template <>
 constexpr TypeBuilderFunc getModel<int>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::IntegerType::get(context, 8 * sizeof(int));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context, 8 * sizeof(int));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<int &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        TypeBuilderFunc f{getModel<int>()};
-        return fir::ReferenceType::get(f(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    TypeBuilderFunc f{getModel<int>()};
+    return fir::ReferenceType::get(f(context));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<Fortran::runtime::io::Iostat>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::IntegerType::get(context,
-                                      8 * sizeof(Fortran::runtime::io::Iostat));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context,
+                                  8 * sizeof(Fortran::runtime::io::Iostat));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<char *>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return fir::ReferenceType::get(mlir::IntegerType::get(context, 8));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return fir::ReferenceType::get(mlir::IntegerType::get(context, 8));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<const char *>() {
-    return getModel<char *>();
+  return getModel<char *>();
 }
 template <>
 constexpr TypeBuilderFunc getModel<const char16_t *>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return fir::ReferenceType::get(mlir::IntegerType::get(context, 16));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return fir::ReferenceType::get(mlir::IntegerType::get(context, 16));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<const char32_t *>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return fir::ReferenceType::get(mlir::IntegerType::get(context, 32));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return fir::ReferenceType::get(mlir::IntegerType::get(context, 32));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<void **>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return fir::ReferenceType::get(
-            fir::PointerType::get(mlir::IntegerType::get(context, 8)));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return fir::ReferenceType::get(
+        fir::PointerType::get(mlir::IntegerType::get(context, 8)));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<std::int64_t>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::IntegerType::get(context, 64);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context, 64);
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<std::int64_t &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        TypeBuilderFunc f{getModel<std::int64_t>()};
-        return fir::ReferenceType::get(f(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    TypeBuilderFunc f{getModel<std::int64_t>()};
+    return fir::ReferenceType::get(f(context));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<std::size_t>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::IntegerType::get(context, 8 * sizeof(std::size_t));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context, 8 * sizeof(std::size_t));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<Fortran::runtime::io::IoStatementState *>() {
-    return getModel<char *>();
+  return getModel<char *>();
 }
 template <>
 constexpr TypeBuilderFunc getModel<double>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::FloatType::getF64(context);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::FloatType::getF64(context);
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<double &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        TypeBuilderFunc f{getModel<double>()};
-        return fir::ReferenceType::get(f(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    TypeBuilderFunc f{getModel<double>()};
+    return fir::ReferenceType::get(f(context));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<float>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::FloatType::getF32(context);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::FloatType::getF32(context);
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<float &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        TypeBuilderFunc f{getModel<float>()};
-        return fir::ReferenceType::get(f(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    TypeBuilderFunc f{getModel<float>()};
+    return fir::ReferenceType::get(f(context));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<bool>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::IntegerType::get(context, 1);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::IntegerType::get(context, 1);
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<bool &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        TypeBuilderFunc f{getModel<bool>()};
-        return fir::ReferenceType::get(f(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    TypeBuilderFunc f{getModel<bool>()};
+    return fir::ReferenceType::get(f(context));
+  };
 }
 
 template <>
 constexpr TypeBuilderFunc getModel<const Fortran::runtime::Descriptor &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return fir::BoxType::get(mlir::NoneType::get(context));
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return fir::BoxType::get(mlir::NoneType::get(context));
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<const Fortran::runtime::NamelistGroup &>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        // FIXME: a namelist group must be some well-defined data structure, use a
-        // tuple as a proxy for the moment
-        return mlir::TupleType::get(context);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    // FIXME: a namelist group must be some well-defined data structure, use a
+    // tuple as a proxy for the moment
+    return mlir::TupleType::get(context);
+  };
 }
 template <>
 constexpr TypeBuilderFunc getModel<void>() {
-    return [](mlir::MLIRContext *context) -> mlir::Type {
-        return mlir::NoneType::get(context);
-    };
+  return [](mlir::MLIRContext *context) -> mlir::Type {
+    return mlir::NoneType::get(context);
+  };
 }
 
 template <typename...>
 struct RuntimeTableKey;
 template <typename RT, typename... ATs>
 struct RuntimeTableKey<RT(ATs...)> {
-    static constexpr FuncTypeBuilderFunc getTypeModel() {
-        return [](mlir::MLIRContext *ctxt) {
-            TypeBuilderFunc ret = getModel<RT>();
-            std::array<TypeBuilderFunc, sizeof...(ATs)> args = {getModel<ATs>()...};
-            mlir::Type retTy = ret(ctxt);
-            llvm::SmallVector<mlir::Type, sizeof...(ATs)> argTys;
-            for (auto f : args)
-                argTys.push_back(f(ctxt));
-            return mlir::FunctionType::get(ctxt, argTys, {retTy});
-        };
-    }
+  static constexpr FuncTypeBuilderFunc getTypeModel() {
+    return [](mlir::MLIRContext *ctxt) {
+      TypeBuilderFunc ret = getModel<RT>();
+      std::array<TypeBuilderFunc, sizeof...(ATs)> args = {getModel<ATs>()...};
+      mlir::Type retTy = ret(ctxt);
+      llvm::SmallVector<mlir::Type, sizeof...(ATs)> argTys;
+      for (auto f : args)
+        argTys.push_back(f(ctxt));
+      return mlir::FunctionType::get(ctxt, argTys, {retTy});
+    };
+  }
 };
 
 //===----------------------------------------------------------------------===//
@@ -206,32 +206,32 @@ namespace details {
 template <typename T, T... As, T... Bs>
 static constexpr std::integer_sequence<T, As..., Bs...>
 concat(std::integer_sequence<T, As...>, std::integer_sequence<T, Bs...>) {
-    return {};
+  return {};
 }
 template <typename T, T... As, T... Bs, typename... Cs>
 static constexpr auto concat(std::integer_sequence<T, As...>,
                              std::integer_sequence<T, Bs...>, Cs...) {
-    return concat(std::integer_sequence<T, As..., Bs...> {}, Cs{}...);
+  return concat(std::integer_sequence<T, As..., Bs...>{}, Cs{}...);
 }
 template <typename T>
 static constexpr std::integer_sequence<T> concat(std::integer_sequence<T>) {
-    return {};
+  return {};
 }
 template <typename T, T a>
 static constexpr auto filterZero(std::integer_sequence<T, a>) {
-    if constexpr (a != 0) {
-        return std::integer_sequence<T, a> {};
-    } else {
-        return std::integer_sequence<T> {};
-    }
+  if constexpr (a != 0) {
+    return std::integer_sequence<T, a>{};
+  } else {
+    return std::integer_sequence<T>{};
+  }
 }
 template <typename T, T... b>
 static constexpr auto filter(std::integer_sequence<T, b...>) {
-    if constexpr (sizeof...(b) > 0) {
-        return details::concat(filterZero(std::integer_sequence<T, b> {})...);
-    } else {
-        return std::integer_sequence<T> {};
-    }
+  if constexpr (sizeof...(b) > 0) {
+    return details::concat(filterZero(std::integer_sequence<T, b>{})...);
+  } else {
+    return std::integer_sequence<T>{};
+  }
 }
 } // namespace details
 
@@ -239,10 +239,10 @@ template <typename...>
 struct RuntimeTableEntry;
 template <typename KT, char... Cs>
 struct RuntimeTableEntry<RuntimeTableKey<KT>, RuntimeIdentifier<Cs...>> {
-    static constexpr FuncTypeBuilderFunc getTypeModel() {
-        return RuntimeTableKey<KT>::getTypeModel();
-    }
-    static constexpr const char name[sizeof...(Cs) + 1] = {Cs..., '\0'};
+  static constexpr FuncTypeBuilderFunc getTypeModel() {
+    return RuntimeTableKey<KT>::getTypeModel();
+  }
+  static constexpr const char name[sizeof...(Cs) + 1] = {Cs..., '\0'};
 };
 
 #undef E

@@ -30,13 +30,13 @@ class ARMGenRegisterBankInfo : public RegisterBankInfo {
 /// This class provides the information for the target register banks.
 class ARMRegisterBankInfo final : public ARMGenRegisterBankInfo {
 public:
-    ARMRegisterBankInfo(const TargetRegisterInfo &TRI);
+  ARMRegisterBankInfo(const TargetRegisterInfo &TRI);
 
-    const RegisterBank &getRegBankFromRegClass(const TargetRegisterClass &RC,
-            LLT) const override;
+  const RegisterBank &getRegBankFromRegClass(const TargetRegisterClass &RC,
+                                             LLT) const override;
 
-    const InstructionMapping &
-    getInstrMapping(const MachineInstr &MI) const override;
+  const InstructionMapping &
+  getInstrMapping(const MachineInstr &MI) const override;
 };
-} // End llvm namespace.
+} // namespace llvm
 #endif

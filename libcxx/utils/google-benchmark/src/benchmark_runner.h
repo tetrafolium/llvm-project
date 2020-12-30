@@ -33,11 +33,11 @@ namespace internal {
 extern MemoryManager* memory_manager;
 
 struct RunResults {
-    std::vector<BenchmarkReporter::Run> non_aggregates;
-    std::vector<BenchmarkReporter::Run> aggregates_only;
+  std::vector<BenchmarkReporter::Run> non_aggregates;
+  std::vector<BenchmarkReporter::Run> aggregates_only;
 
-    bool display_report_aggregates_only = false;
-    bool file_report_aggregates_only = false;
+  bool display_report_aggregates_only = false;
+  bool file_report_aggregates_only = false;
 };
 
 RunResults RunBenchmark(

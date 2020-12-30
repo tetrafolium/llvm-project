@@ -19,56 +19,32 @@ namespace llvm {
 template <bool EnableSentinelTracking> class ilist_node_base;
 
 template <> class ilist_node_base<false> {
-    ilist_node_base *Prev = nullptr;
-    ilist_node_base *Next = nullptr;
+  ilist_node_base *Prev = nullptr;
+  ilist_node_base *Next = nullptr;
 
 public:
-    void setPrev(ilist_node_base *Prev) {
-        this->Prev = Prev;
-    }
-    void setNext(ilist_node_base *Next) {
-        this->Next = Next;
-    }
-    ilist_node_base *getPrev() const {
-        return Prev;
-    }
-    ilist_node_base *getNext() const {
-        return Next;
-    }
+  void setPrev(ilist_node_base *Prev) { this->Prev = Prev; }
+  void setNext(ilist_node_base *Next) { this->Next = Next; }
+  ilist_node_base *getPrev() const { return Prev; }
+  ilist_node_base *getNext() const { return Next; }
 
-    bool isKnownSentinel() const {
-        return false;
-    }
-    void initializeSentinel() {}
+  bool isKnownSentinel() const { return false; }
+  void initializeSentinel() {}
 };
 
 template <> class ilist_node_base<true> {
-    PointerIntPair<ilist_node_base *, 1> PrevAndSentinel;
-    ilist_node_base *Next = nullptr;
+  PointerIntPair<ilist_node_base *, 1> PrevAndSentinel;
+  ilist_node_base *Next = nullptr;
 
 public:
-    void setPrev(ilist_node_base *Prev) {
-        PrevAndSentinel.setPointer(Prev);
-    }
-    void setNext(ilist_node_base *Next) {
-        this->Next = Next;
-    }
-    ilist_node_base *getPrev() const {
-        return PrevAndSentinel.getPointer();
-    }
-    ilist_node_base *getNext() const {
-        return Next;
-    }
+  void setPrev(ilist_node_base *Prev) { PrevAndSentinel.setPointer(Prev); }
+  void setNext(ilist_node_base *Next) { this->Next = Next; }
+  ilist_node_base *getPrev() const { return PrevAndSentinel.getPointer(); }
+  ilist_node_base *getNext() const { return Next; }
 
-    bool isSentinel() const {
-        return PrevAndSentinel.getInt();
-    }
-    bool isKnownSentinel() const {
-        return isSentinel();
-    }
-    void initializeSentinel() {
-        PrevAndSentinel.setInt(true);
-    }
+  bool isSentinel() const { return PrevAndSentinel.getInt(); }
+  bool isKnownSentinel() const { return isSentinel(); }
+  void initializeSentinel() { PrevAndSentinel.setInt(true); }
 };
 
 } // end namespace llvm

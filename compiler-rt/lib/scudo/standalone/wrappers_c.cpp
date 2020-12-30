@@ -33,8 +33,6 @@ scudo::Allocator<scudo::Config, SCUDO_PREFIX(malloc_postinit)> SCUDO_ALLOCATOR;
 #undef SCUDO_ALLOCATOR
 #undef SCUDO_PREFIX
 
-extern "C" INTERFACE void __scudo_print_stats(void) {
-    Allocator.printStats();
-}
+extern "C" INTERFACE void __scudo_print_stats(void) { Allocator.printStats(); }
 
 #endif // !SCUDO_ANDROID || !_BIONIC

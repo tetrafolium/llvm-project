@@ -22,45 +22,45 @@ namespace testing {
 template <typename T>
 cpp::EnableIfType<cpp::IsIntegral<T>::Value, std::string>
 uintToHex(T X, size_t Length = sizeof(T) * 2) {
-    std::string s(Length, '0');
+  std::string s(Length, '0');
 
-    for (auto it = s.rbegin(), end = s.rend(); it != end; ++it, X >>= 4) {
-        unsigned char Mod = static_cast<unsigned char>(X) & 15;
-        *it = llvm::hexdigit(Mod, true);
-    }
+  for (auto it = s.rbegin(), end = s.rend(); it != end; ++it, X >>= 4) {
+    unsigned char Mod = static_cast<unsigned char>(X) & 15;
+    *it = llvm::hexdigit(Mod, true);
+  }
 
-    return s;
+  return s;
 }
 
 template <typename ValType>
 cpp::EnableIfType<cpp::IsFloatingPointType<ValType>::Value, void>
 describeValue(const char *label, ValType value,
               testutils::StreamWrapper &stream) {
-    stream << label;
+  stream << label;
 
-    FPBits<ValType> bits(value);
-    if (bits.isNaN()) {
-        stream << "(NaN)";
-    } else if (bits.isInf()) {
-        if (bits.sign)
-            stream << "(-Infinity)";
-        else
-            stream << "(+Infinity)";
-    } else {
-        constexpr int exponentWidthInHex =
-            (fputil::ExponentWidth<ValType>::value - 1) / 4 + 1;
-        constexpr int mantissaWidthInHex =
-            (fputil::MantissaWidth<ValType>::value - 1) / 4 + 1;
+  FPBits<ValType> bits(value);
+  if (bits.isNaN()) {
+    stream << "(NaN)";
+  } else if (bits.isInf()) {
+    if (bits.sign)
+      stream << "(-Infinity)";
+    else
+      stream << "(+Infinity)";
+  } else {
+    constexpr int exponentWidthInHex =
+        (fputil::ExponentWidth<ValType>::value - 1) / 4 + 1;
+    constexpr int mantissaWidthInHex =
+        (fputil::MantissaWidth<ValType>::value - 1) / 4 + 1;
 
-        stream << "Sign: " << (bits.sign ? '1' : '0') << ", "
-               << "Exponent: 0x"
-               << uintToHex<uint16_t>(bits.exponent, exponentWidthInHex) << ", "
-               << "Mantissa: 0x"
-               << uintToHex<typename fputil::FPBits<ValType>::UIntType>(
-                   bits.mantissa, mantissaWidthInHex);
-    }
+    stream << "Sign: " << (bits.sign ? '1' : '0') << ", "
+           << "Exponent: 0x"
+           << uintToHex<uint16_t>(bits.exponent, exponentWidthInHex) << ", "
+           << "Mantissa: 0x"
+           << uintToHex<typename fputil::FPBits<ValType>::UIntType>(
+                  bits.mantissa, mantissaWidthInHex);
+  }
 
-    stream << '\n';
+  stream << '\n';
 }
 
 template void describeValue<float>(const char *, float,
@@ -68,7 +68,7 @@ template void describeValue<float>(const char *, float,
 template void describeValue<double>(const char *, double,
                                     testutils::StreamWrapper &);
 template void describeValue<long double>(const char *, long double,
-        testutils::StreamWrapper &);
+                                         testutils::StreamWrapper &);
 
 } // namespace testing
 } // namespace fputil

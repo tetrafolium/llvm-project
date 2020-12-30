@@ -22,47 +22,45 @@ using namespace ento;
 using namespace taint;
 
 namespace {
-class TaintTesterChecker : public Checker< check::PostStmt<Expr> > {
+class TaintTesterChecker : public Checker<check::PostStmt<Expr>> {
 
-    mutable std::unique_ptr<BugType> BT;
-    void initBugType() const;
+  mutable std::unique_ptr<BugType> BT;
+  void initBugType() const;
 
-    /// Given a pointer argument, get the symbol of the value it contains
-    /// (points to).
-    SymbolRef getPointedToSymbol(CheckerContext &C,
-                                 const Expr* Arg,
-                                 bool IssueWarning = true) const;
+  /// Given a pointer argument, get the symbol of the value it contains
+  /// (points to).
+  SymbolRef getPointedToSymbol(CheckerContext &C, const Expr *Arg,
+                               bool IssueWarning = true) const;
 
 public:
-    void checkPostStmt(const Expr *E, CheckerContext &C) const;
+  void checkPostStmt(const Expr *E, CheckerContext &C) const;
 };
-}
+} // namespace
 
 inline void TaintTesterChecker::initBugType() const {
-    if (!BT)
-        BT.reset(new BugType(this, "Tainted data", "General"));
+  if (!BT)
+    BT.reset(new BugType(this, "Tainted data", "General"));
 }
 
-void TaintTesterChecker::checkPostStmt(const Expr *E,
-                                       CheckerContext &C) const {
-    ProgramStateRef State = C.getState();
-    if (!State)
-        return;
+void TaintTesterChecker::checkPostStmt(const Expr *E, CheckerContext &C) const {
+  ProgramStateRef State = C.getState();
+  if (!State)
+    return;
 
-    if (isTainted(State, E, C.getLocationContext())) {
-        if (ExplodedNode *N = C.generateNonFatalErrorNode()) {
-            initBugType();
-            auto report = std::make_unique<PathSensitiveBugReport>(*BT, "tainted", N);
-            report->addRange(E->getSourceRange());
-            C.emitReport(std::move(report));
-        }
+  if (isTainted(State, E, C.getLocationContext())) {
+    if (ExplodedNode *N = C.generateNonFatalErrorNode()) {
+      initBugType();
+      auto report = std::make_unique<PathSensitiveBugReport>(*BT, "tainted", N);
+      report->addRange(E->getSourceRange());
+      C.emitReport(std::move(report));
     }
+  }
 }
 
 void ento::registerTaintTesterChecker(CheckerManager &mgr) {
-    mgr.registerChecker<TaintTesterChecker>();
+  mgr.registerChecker<TaintTesterChecker>();
 }
 
 bool ento::shouldRegisterTaintTesterChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

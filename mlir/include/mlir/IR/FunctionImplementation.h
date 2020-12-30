@@ -25,14 +25,12 @@ namespace impl {
 /// A named class for passing around the variadic flag.
 class VariadicFlag {
 public:
-    explicit VariadicFlag(bool variadic) : variadic(variadic) {}
-    bool isVariadic() const {
-        return variadic;
-    }
+  explicit VariadicFlag(bool variadic) : variadic(variadic) {}
+  bool isVariadic() const { return variadic; }
 
 private:
-    /// Underlying storage.
-    bool variadic;
+  /// Underlying storage.
+  bool variadic;
 };
 
 /// Adds argument and result attributes, provided as `argAttrs` and
@@ -49,7 +47,7 @@ void addArgAndResultAttrs(Builder &builder, OperationState &result,
 /// should have variadic arguments; in case of error, it may populate the last
 /// argument with a message.
 using FuncTypeBuilder = function_ref<Type(
-                            Builder &, ArrayRef<Type>, ArrayRef<Type>, VariadicFlag, std::string &)>;
+    Builder &, ArrayRef<Type>, ArrayRef<Type>, VariadicFlag, std::string &)>;
 
 /// Parses function arguments using `parser`. The `allowVariadic` argument
 /// indicates whether functions with variadic arguments are supported. The

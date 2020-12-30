@@ -18,44 +18,44 @@
 namespace lldb {
 
 class LLDB_API SBExecutionContext {
-    friend class SBCommandInterpreter;
+  friend class SBCommandInterpreter;
 
 public:
-    SBExecutionContext();
+  SBExecutionContext();
 
-    SBExecutionContext(const lldb::SBExecutionContext &rhs);
+  SBExecutionContext(const lldb::SBExecutionContext &rhs);
 
-    SBExecutionContext(lldb::ExecutionContextRefSP exe_ctx_ref_sp);
+  SBExecutionContext(lldb::ExecutionContextRefSP exe_ctx_ref_sp);
 
-    SBExecutionContext(const lldb::SBTarget &target);
+  SBExecutionContext(const lldb::SBTarget &target);
 
-    SBExecutionContext(const lldb::SBProcess &process);
+  SBExecutionContext(const lldb::SBProcess &process);
 
-    SBExecutionContext(lldb::SBThread thread); // can't be a const& because
-    // SBThread::get() isn't itself a
-    // const function
+  SBExecutionContext(lldb::SBThread thread); // can't be a const& because
+  // SBThread::get() isn't itself a
+  // const function
 
-    SBExecutionContext(const lldb::SBFrame &frame);
+  SBExecutionContext(const lldb::SBFrame &frame);
 
-    ~SBExecutionContext();
+  ~SBExecutionContext();
 
-    const SBExecutionContext &operator=(const lldb::SBExecutionContext &rhs);
+  const SBExecutionContext &operator=(const lldb::SBExecutionContext &rhs);
 
-    SBTarget GetTarget() const;
+  SBTarget GetTarget() const;
 
-    SBProcess GetProcess() const;
+  SBProcess GetProcess() const;
 
-    SBThread GetThread() const;
+  SBThread GetThread() const;
 
-    SBFrame GetFrame() const;
+  SBFrame GetFrame() const;
 
 protected:
-    void reset(lldb::ExecutionContextRefSP &event_sp);
+  void reset(lldb::ExecutionContextRefSP &event_sp);
 
-    lldb_private::ExecutionContextRef *get() const;
+  lldb_private::ExecutionContextRef *get() const;
 
 private:
-    mutable lldb::ExecutionContextRefSP m_exe_ctx_sp;
+  mutable lldb::ExecutionContextRefSP m_exe_ctx_sp;
 };
 
 } // namespace lldb

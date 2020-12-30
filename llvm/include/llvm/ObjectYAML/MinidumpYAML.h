@@ -25,33 +25,33 @@ namespace MinidumpYAML {
 /// unrecognised stream Type will be handled via RawContentStream). The mapping
 /// from Types to Kinds is fixed and given by the static getKind function.
 struct Stream {
-    enum class StreamKind {
-        Exception,
-        MemoryInfoList,
-        MemoryList,
-        ModuleList,
-        RawContent,
-        SystemInfo,
-        TextContent,
-        ThreadList,
-    };
+  enum class StreamKind {
+    Exception,
+    MemoryInfoList,
+    MemoryList,
+    ModuleList,
+    RawContent,
+    SystemInfo,
+    TextContent,
+    ThreadList,
+  };
 
-    Stream(StreamKind Kind, minidump::StreamType Type) : Kind(Kind), Type(Type) {}
-    virtual ~Stream(); // anchor
+  Stream(StreamKind Kind, minidump::StreamType Type) : Kind(Kind), Type(Type) {}
+  virtual ~Stream(); // anchor
 
-    const StreamKind Kind;
-    const minidump::StreamType Type;
+  const StreamKind Kind;
+  const minidump::StreamType Type;
 
-    /// Get the stream Kind used for representing streams of a given Type.
-    static StreamKind getKind(minidump::StreamType Type);
+  /// Get the stream Kind used for representing streams of a given Type.
+  static StreamKind getKind(minidump::StreamType Type);
 
-    /// Create an empty stream of the given Type.
-    static std::unique_ptr<Stream> create(minidump::StreamType Type);
+  /// Create an empty stream of the given Type.
+  static std::unique_ptr<Stream> create(minidump::StreamType Type);
 
-    /// Create a stream from the given stream directory entry.
-    static Expected<std::unique_ptr<Stream>>
-                                          create(const minidump::Directory &StreamDesc,
-                                                  const object::MinidumpFile &File);
+  /// Create a stream from the given stream directory entry.
+  static Expected<std::unique_ptr<Stream>>
+  create(const minidump::Directory &StreamDesc,
+         const object::MinidumpFile &File);
 };
 
 namespace detail {
@@ -59,46 +59,44 @@ namespace detail {
 /// instantiations can be used to represent the ModuleList stream and other
 /// streams with a similar structure.
 template <typename EntryT> struct ListStream : public Stream {
-    using entry_type = EntryT;
+  using entry_type = EntryT;
 
-    std::vector<entry_type> Entries;
+  std::vector<entry_type> Entries;
 
-    explicit ListStream(std::vector<entry_type> Entries = {})
-        : Stream(EntryT::Kind, EntryT::Type), Entries(std::move(Entries)) {}
+  explicit ListStream(std::vector<entry_type> Entries = {})
+      : Stream(EntryT::Kind, EntryT::Type), Entries(std::move(Entries)) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == EntryT::Kind;
-    }
+  static bool classof(const Stream *S) { return S->Kind == EntryT::Kind; }
 };
 
 /// A structure containing all data belonging to a single minidump module.
 struct ParsedModule {
-    static constexpr Stream::StreamKind Kind = Stream::StreamKind::ModuleList;
-    static constexpr minidump::StreamType Type = minidump::StreamType::ModuleList;
+  static constexpr Stream::StreamKind Kind = Stream::StreamKind::ModuleList;
+  static constexpr minidump::StreamType Type = minidump::StreamType::ModuleList;
 
-    minidump::Module Entry;
-    std::string Name;
-    yaml::BinaryRef CvRecord;
-    yaml::BinaryRef MiscRecord;
+  minidump::Module Entry;
+  std::string Name;
+  yaml::BinaryRef CvRecord;
+  yaml::BinaryRef MiscRecord;
 };
 
 /// A structure containing all data belonging to a single minidump thread.
 struct ParsedThread {
-    static constexpr Stream::StreamKind Kind = Stream::StreamKind::ThreadList;
-    static constexpr minidump::StreamType Type = minidump::StreamType::ThreadList;
+  static constexpr Stream::StreamKind Kind = Stream::StreamKind::ThreadList;
+  static constexpr minidump::StreamType Type = minidump::StreamType::ThreadList;
 
-    minidump::Thread Entry;
-    yaml::BinaryRef Stack;
-    yaml::BinaryRef Context;
+  minidump::Thread Entry;
+  yaml::BinaryRef Stack;
+  yaml::BinaryRef Context;
 };
 
 /// A structure containing all data describing a single memory region.
 struct ParsedMemoryDescriptor {
-    static constexpr Stream::StreamKind Kind = Stream::StreamKind::MemoryList;
-    static constexpr minidump::StreamType Type = minidump::StreamType::MemoryList;
+  static constexpr Stream::StreamKind Kind = Stream::StreamKind::MemoryList;
+  static constexpr minidump::StreamType Type = minidump::StreamType::MemoryList;
 
-    minidump::MemoryDescriptor Entry;
-    yaml::BinaryRef Content;
+  minidump::MemoryDescriptor Entry;
+  yaml::BinaryRef Content;
 };
 } // namespace detail
 
@@ -108,76 +106,76 @@ using MemoryListStream = detail::ListStream<detail::ParsedMemoryDescriptor>;
 
 /// ExceptionStream minidump stream.
 struct ExceptionStream : public Stream {
-    minidump::ExceptionStream MDExceptionStream;
-    yaml::BinaryRef ThreadContext;
+  minidump::ExceptionStream MDExceptionStream;
+  yaml::BinaryRef ThreadContext;
 
-    ExceptionStream()
-        : Stream(StreamKind::Exception, minidump::StreamType::Exception),
-          MDExceptionStream({}) {}
+  ExceptionStream()
+      : Stream(StreamKind::Exception, minidump::StreamType::Exception),
+        MDExceptionStream({}) {}
 
-    explicit ExceptionStream(const minidump::ExceptionStream &MDExceptionStream,
-                             ArrayRef<uint8_t> ThreadContext)
-        : Stream(StreamKind::Exception, minidump::StreamType::Exception),
-          MDExceptionStream(MDExceptionStream), ThreadContext(ThreadContext) {}
+  explicit ExceptionStream(const minidump::ExceptionStream &MDExceptionStream,
+                           ArrayRef<uint8_t> ThreadContext)
+      : Stream(StreamKind::Exception, minidump::StreamType::Exception),
+        MDExceptionStream(MDExceptionStream), ThreadContext(ThreadContext) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == StreamKind::Exception;
-    }
+  static bool classof(const Stream *S) {
+    return S->Kind == StreamKind::Exception;
+  }
 };
 
 /// A structure containing the list of MemoryInfo entries comprising a
 /// MemoryInfoList stream.
 struct MemoryInfoListStream : public Stream {
-    std::vector<minidump::MemoryInfo> Infos;
+  std::vector<minidump::MemoryInfo> Infos;
 
-    MemoryInfoListStream()
-        : Stream(StreamKind::MemoryInfoList,
-                 minidump::StreamType::MemoryInfoList) {}
+  MemoryInfoListStream()
+      : Stream(StreamKind::MemoryInfoList,
+               minidump::StreamType::MemoryInfoList) {}
 
-    explicit MemoryInfoListStream(
-        iterator_range<object::MinidumpFile::MemoryInfoIterator> Range)
-        : Stream(StreamKind::MemoryInfoList,
-                 minidump::StreamType::MemoryInfoList),
-          Infos(Range.begin(), Range.end()) {}
+  explicit MemoryInfoListStream(
+      iterator_range<object::MinidumpFile::MemoryInfoIterator> Range)
+      : Stream(StreamKind::MemoryInfoList,
+               minidump::StreamType::MemoryInfoList),
+        Infos(Range.begin(), Range.end()) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == StreamKind::MemoryInfoList;
-    }
+  static bool classof(const Stream *S) {
+    return S->Kind == StreamKind::MemoryInfoList;
+  }
 };
 
 /// A minidump stream represented as a sequence of hex bytes. This is used as a
 /// fallback when no other stream kind is suitable.
 struct RawContentStream : public Stream {
-    yaml::BinaryRef Content;
-    yaml::Hex32 Size;
+  yaml::BinaryRef Content;
+  yaml::Hex32 Size;
 
-    RawContentStream(minidump::StreamType Type, ArrayRef<uint8_t> Content = {})
-        : Stream(StreamKind::RawContent, Type), Content(Content),
-          Size(Content.size()) {}
+  RawContentStream(minidump::StreamType Type, ArrayRef<uint8_t> Content = {})
+      : Stream(StreamKind::RawContent, Type), Content(Content),
+        Size(Content.size()) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == StreamKind::RawContent;
-    }
+  static bool classof(const Stream *S) {
+    return S->Kind == StreamKind::RawContent;
+  }
 };
 
 /// SystemInfo minidump stream.
 struct SystemInfoStream : public Stream {
-    minidump::SystemInfo Info;
-    std::string CSDVersion;
+  minidump::SystemInfo Info;
+  std::string CSDVersion;
 
-    SystemInfoStream()
-        : Stream(StreamKind::SystemInfo, minidump::StreamType::SystemInfo) {
-        memset(&Info, 0, sizeof(Info));
-    }
+  SystemInfoStream()
+      : Stream(StreamKind::SystemInfo, minidump::StreamType::SystemInfo) {
+    memset(&Info, 0, sizeof(Info));
+  }
 
-    explicit SystemInfoStream(const minidump::SystemInfo &Info,
-                              std::string CSDVersion)
-        : Stream(StreamKind::SystemInfo, minidump::StreamType::SystemInfo),
-          Info(Info), CSDVersion(std::move(CSDVersion)) {}
+  explicit SystemInfoStream(const minidump::SystemInfo &Info,
+                            std::string CSDVersion)
+      : Stream(StreamKind::SystemInfo, minidump::StreamType::SystemInfo),
+        Info(Info), CSDVersion(std::move(CSDVersion)) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == StreamKind::SystemInfo;
-    }
+  static bool classof(const Stream *S) {
+    return S->Kind == StreamKind::SystemInfo;
+  }
 };
 
 /// A StringRef, which is printed using YAML block notation.
@@ -186,14 +184,14 @@ LLVM_YAML_STRONG_TYPEDEF(StringRef, BlockStringRef)
 /// A minidump stream containing textual data (typically, the contents of a
 /// /proc/<pid> file on linux).
 struct TextContentStream : public Stream {
-    BlockStringRef Text;
+  BlockStringRef Text;
 
-    TextContentStream(minidump::StreamType Type, StringRef Text = {})
-        : Stream(StreamKind::TextContent, Type), Text(Text) {}
+  TextContentStream(minidump::StreamType Type, StringRef Text = {})
+      : Stream(StreamKind::TextContent, Type), Text(Text) {}
 
-    static bool classof(const Stream *S) {
-        return S->Kind == StreamKind::TextContent;
-    }
+  static bool classof(const Stream *S) {
+    return S->Kind == StreamKind::TextContent;
+  }
 };
 
 /// The top level structure representing a minidump object, consisting of a
@@ -201,49 +199,49 @@ struct TextContentStream : public Stream {
 /// minidump file, use the static create function. To serialize to/from yaml,
 /// use the appropriate streaming operator on a yaml stream.
 struct Object {
-    Object() = default;
-    Object(const Object &) = delete;
-    Object &operator=(const Object &) = delete;
-    Object(Object &&) = default;
-    Object &operator=(Object &&) = default;
+  Object() = default;
+  Object(const Object &) = delete;
+  Object &operator=(const Object &) = delete;
+  Object(Object &&) = default;
+  Object &operator=(Object &&) = default;
 
-    Object(const minidump::Header &Header,
-           std::vector<std::unique_ptr<Stream>> Streams)
-        : Header(Header), Streams(std::move(Streams)) {}
+  Object(const minidump::Header &Header,
+         std::vector<std::unique_ptr<Stream>> Streams)
+      : Header(Header), Streams(std::move(Streams)) {}
 
-    /// The minidump header.
-    minidump::Header Header;
+  /// The minidump header.
+  minidump::Header Header;
 
-    /// The list of streams in this minidump object.
-    std::vector<std::unique_ptr<Stream>> Streams;
+  /// The list of streams in this minidump object.
+  std::vector<std::unique_ptr<Stream>> Streams;
 
-    static Expected<Object> create(const object::MinidumpFile &File);
+  static Expected<Object> create(const object::MinidumpFile &File);
 };
 
 } // namespace MinidumpYAML
 
 namespace yaml {
 template <> struct BlockScalarTraits<MinidumpYAML::BlockStringRef> {
-    static void output(const MinidumpYAML::BlockStringRef &Text, void *,
-                       raw_ostream &OS) {
-        OS << Text;
-    }
+  static void output(const MinidumpYAML::BlockStringRef &Text, void *,
+                     raw_ostream &OS) {
+    OS << Text;
+  }
 
-    static StringRef input(StringRef Scalar, void *,
-                           MinidumpYAML::BlockStringRef &Text) {
-        Text = Scalar;
-        return "";
-    }
+  static StringRef input(StringRef Scalar, void *,
+                         MinidumpYAML::BlockStringRef &Text) {
+    Text = Scalar;
+    return "";
+  }
 };
 
 template <> struct MappingTraits<std::unique_ptr<MinidumpYAML::Stream>> {
-    static void mapping(IO &IO, std::unique_ptr<MinidumpYAML::Stream> &S);
-    static std::string validate(IO &IO, std::unique_ptr<MinidumpYAML::Stream> &S);
+  static void mapping(IO &IO, std::unique_ptr<MinidumpYAML::Stream> &S);
+  static std::string validate(IO &IO, std::unique_ptr<MinidumpYAML::Stream> &S);
 };
 
 template <> struct MappingContextTraits<minidump::MemoryDescriptor, BinaryRef> {
-    static void mapping(IO &IO, minidump::MemoryDescriptor &Memory,
-                        BinaryRef &Content);
+  static void mapping(IO &IO, minidump::MemoryDescriptor &Memory,
+                      BinaryRef &Content);
 };
 
 } // namespace yaml

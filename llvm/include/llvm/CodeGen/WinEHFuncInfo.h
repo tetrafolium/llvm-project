@@ -38,80 +38,78 @@ class MCSymbol;
 using MBBOrBasicBlock = PointerUnion<const BasicBlock *, MachineBasicBlock *>;
 
 struct CxxUnwindMapEntry {
-    int ToState;
-    MBBOrBasicBlock Cleanup;
+  int ToState;
+  MBBOrBasicBlock Cleanup;
 };
 
 /// Similar to CxxUnwindMapEntry, but supports SEH filters.
 struct SEHUnwindMapEntry {
-    /// If unwinding continues through this handler, transition to the handler at
-    /// this state. This indexes into SEHUnwindMap.
-    int ToState = -1;
+  /// If unwinding continues through this handler, transition to the handler at
+  /// this state. This indexes into SEHUnwindMap.
+  int ToState = -1;
 
-    bool IsFinally = false;
+  bool IsFinally = false;
 
-    /// Holds the filter expression function.
-    const Function *Filter = nullptr;
+  /// Holds the filter expression function.
+  const Function *Filter = nullptr;
 
-    /// Holds the __except or __finally basic block.
-    MBBOrBasicBlock Handler;
+  /// Holds the __except or __finally basic block.
+  MBBOrBasicBlock Handler;
 };
 
 struct WinEHHandlerType {
-    int Adjectives;
-    /// The CatchObj starts out life as an LLVM alloca and is eventually turned
-    /// frame index.
-    union {
-        const AllocaInst *Alloca;
-        int FrameIndex;
-    } CatchObj = {};
-    GlobalVariable *TypeDescriptor;
-    MBBOrBasicBlock Handler;
+  int Adjectives;
+  /// The CatchObj starts out life as an LLVM alloca and is eventually turned
+  /// frame index.
+  union {
+    const AllocaInst *Alloca;
+    int FrameIndex;
+  } CatchObj = {};
+  GlobalVariable *TypeDescriptor;
+  MBBOrBasicBlock Handler;
 };
 
 struct WinEHTryBlockMapEntry {
-    int TryLow = -1;
-    int TryHigh = -1;
-    int CatchHigh = -1;
-    SmallVector<WinEHHandlerType, 1> HandlerArray;
+  int TryLow = -1;
+  int TryHigh = -1;
+  int CatchHigh = -1;
+  SmallVector<WinEHHandlerType, 1> HandlerArray;
 };
 
 enum class ClrHandlerType { Catch, Finally, Fault, Filter };
 
 struct ClrEHUnwindMapEntry {
-    MBBOrBasicBlock Handler;
-    uint32_t TypeToken;
-    int HandlerParentState; ///< Outer handler enclosing this entry's handler
-    int TryParentState; ///< Outer try region enclosing this entry's try region,
-    ///< treating later catches on same try as "outer"
-    ClrHandlerType HandlerType;
+  MBBOrBasicBlock Handler;
+  uint32_t TypeToken;
+  int HandlerParentState; ///< Outer handler enclosing this entry's handler
+  int TryParentState; ///< Outer try region enclosing this entry's try region,
+  ///< treating later catches on same try as "outer"
+  ClrHandlerType HandlerType;
 };
 
 struct WinEHFuncInfo {
-    DenseMap<const Instruction *, int> EHPadStateMap;
-    DenseMap<const FuncletPadInst *, int> FuncletBaseStateMap;
-    DenseMap<const InvokeInst *, int> InvokeStateMap;
-    DenseMap<MCSymbol *, std::pair<int, MCSymbol *>> LabelToStateMap;
-    SmallVector<CxxUnwindMapEntry, 4> CxxUnwindMap;
-    SmallVector<WinEHTryBlockMapEntry, 4> TryBlockMap;
-    SmallVector<SEHUnwindMapEntry, 4> SEHUnwindMap;
-    SmallVector<ClrEHUnwindMapEntry, 4> ClrEHUnwindMap;
-    int UnwindHelpFrameIdx = std::numeric_limits<int>::max();
-    int PSPSymFrameIdx = std::numeric_limits<int>::max();
+  DenseMap<const Instruction *, int> EHPadStateMap;
+  DenseMap<const FuncletPadInst *, int> FuncletBaseStateMap;
+  DenseMap<const InvokeInst *, int> InvokeStateMap;
+  DenseMap<MCSymbol *, std::pair<int, MCSymbol *>> LabelToStateMap;
+  SmallVector<CxxUnwindMapEntry, 4> CxxUnwindMap;
+  SmallVector<WinEHTryBlockMapEntry, 4> TryBlockMap;
+  SmallVector<SEHUnwindMapEntry, 4> SEHUnwindMap;
+  SmallVector<ClrEHUnwindMapEntry, 4> ClrEHUnwindMap;
+  int UnwindHelpFrameIdx = std::numeric_limits<int>::max();
+  int PSPSymFrameIdx = std::numeric_limits<int>::max();
 
-    int getLastStateNumber() const {
-        return CxxUnwindMap.size() - 1;
-    }
+  int getLastStateNumber() const { return CxxUnwindMap.size() - 1; }
 
-    void addIPToStateRange(const InvokeInst *II, MCSymbol *InvokeBegin,
-                           MCSymbol *InvokeEnd);
+  void addIPToStateRange(const InvokeInst *II, MCSymbol *InvokeBegin,
+                         MCSymbol *InvokeEnd);
 
-    int EHRegNodeFrameIndex = std::numeric_limits<int>::max();
-    int EHRegNodeEndOffset = std::numeric_limits<int>::max();
-    int EHGuardFrameIndex = std::numeric_limits<int>::max();
-    int SEHSetFrameOffset = std::numeric_limits<int>::max();
+  int EHRegNodeFrameIndex = std::numeric_limits<int>::max();
+  int EHRegNodeEndOffset = std::numeric_limits<int>::max();
+  int EHGuardFrameIndex = std::numeric_limits<int>::max();
+  int SEHSetFrameOffset = std::numeric_limits<int>::max();
 
-    WinEHFuncInfo();
+  WinEHFuncInfo();
 };
 
 /// Analyze the IR in ParentFn and it's handlers to build WinEHFuncInfo, which

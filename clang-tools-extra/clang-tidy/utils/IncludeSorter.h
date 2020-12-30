@@ -22,53 +22,53 @@ namespace utils {
 /// ``IncludeKinds``.
 class IncludeSorter {
 public:
-    /// Supported include styles.
-    enum IncludeStyle { IS_LLVM = 0, IS_Google = 1, IS_Google_ObjC };
+  /// Supported include styles.
+  enum IncludeStyle { IS_LLVM = 0, IS_Google = 1, IS_Google_ObjC };
 
-    /// The classifications of inclusions, in the order they should be sorted.
-    enum IncludeKinds {
-        IK_MainTUInclude = 0,    ///< e.g. ``#include "foo.h"`` when editing foo.cc
-        IK_CSystemInclude = 1,   ///< e.g. ``#include <stdio.h>``
-        IK_CXXSystemInclude = 2, ///< e.g. ``#include <vector>``
-        IK_NonSystemInclude = 3, ///< e.g. ``#include "bar.h"``
-        IK_GeneratedInclude = 4, ///< e.g. ``#include "bar.proto.h"``
-        IK_InvalidInclude = 5    ///< total number of valid ``IncludeKind``s
-    };
+  /// The classifications of inclusions, in the order they should be sorted.
+  enum IncludeKinds {
+    IK_MainTUInclude = 0,    ///< e.g. ``#include "foo.h"`` when editing foo.cc
+    IK_CSystemInclude = 1,   ///< e.g. ``#include <stdio.h>``
+    IK_CXXSystemInclude = 2, ///< e.g. ``#include <vector>``
+    IK_NonSystemInclude = 3, ///< e.g. ``#include "bar.h"``
+    IK_GeneratedInclude = 4, ///< e.g. ``#include "bar.proto.h"``
+    IK_InvalidInclude = 5    ///< total number of valid ``IncludeKind``s
+  };
 
-    /// ``IncludeSorter`` constructor; takes the FileID and name of the file to be
-    /// processed by the sorter.
-    IncludeSorter(const SourceManager *SourceMgr, const FileID FileID,
-                  StringRef FileName, IncludeStyle Style);
+  /// ``IncludeSorter`` constructor; takes the FileID and name of the file to be
+  /// processed by the sorter.
+  IncludeSorter(const SourceManager *SourceMgr, const FileID FileID,
+                StringRef FileName, IncludeStyle Style);
 
-    /// Adds the given include directive to the sorter.
-    void AddInclude(StringRef FileName, bool IsAngled,
-                    SourceLocation HashLocation, SourceLocation EndLocation);
+  /// Adds the given include directive to the sorter.
+  void AddInclude(StringRef FileName, bool IsAngled,
+                  SourceLocation HashLocation, SourceLocation EndLocation);
 
-    /// Creates a quoted inclusion directive in the right sort order. Returns None
-    /// on error or if header inclusion directive for header already exists.
-    Optional<FixItHint> CreateIncludeInsertion(StringRef FileName, bool IsAngled);
+  /// Creates a quoted inclusion directive in the right sort order. Returns None
+  /// on error or if header inclusion directive for header already exists.
+  Optional<FixItHint> CreateIncludeInsertion(StringRef FileName, bool IsAngled);
 
 private:
-    typedef SmallVector<SourceRange, 1> SourceRangeVector;
+  typedef SmallVector<SourceRange, 1> SourceRangeVector;
 
-    const SourceManager *SourceMgr;
-    const IncludeStyle Style;
-    FileID CurrentFileID;
-    /// The file name stripped of common suffixes.
-    StringRef CanonicalFile;
-    /// Locations of visited include directives.
-    SourceRangeVector SourceLocations;
-    /// Mapping from file name to #include locations.
-    llvm::StringMap<SourceRangeVector> IncludeLocations;
-    /// Includes sorted into buckets.
-    SmallVector<std::string, 1> IncludeBucket[IK_InvalidInclude];
+  const SourceManager *SourceMgr;
+  const IncludeStyle Style;
+  FileID CurrentFileID;
+  /// The file name stripped of common suffixes.
+  StringRef CanonicalFile;
+  /// Locations of visited include directives.
+  SourceRangeVector SourceLocations;
+  /// Mapping from file name to #include locations.
+  llvm::StringMap<SourceRangeVector> IncludeLocations;
+  /// Includes sorted into buckets.
+  SmallVector<std::string, 1> IncludeBucket[IK_InvalidInclude];
 };
 
 } // namespace utils
 
 template <> struct OptionEnumMapping<utils::IncludeSorter::IncludeStyle> {
-    static ArrayRef<std::pair<utils::IncludeSorter::IncludeStyle, StringRef>>
-            getEnumMapping();
+  static ArrayRef<std::pair<utils::IncludeSorter::IncludeStyle, StringRef>>
+  getEnumMapping();
 };
 } // namespace tidy
 } // namespace clang

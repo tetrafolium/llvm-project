@@ -19,25 +19,21 @@ namespace tblgen {
 // TableGen.
 class Region : public Constraint {
 public:
-    using Constraint::Constraint;
+  using Constraint::Constraint;
 
-    static bool classof(const Constraint *c) {
-        return c->getKind() == CK_Region;
-    }
+  static bool classof(const Constraint *c) { return c->getKind() == CK_Region; }
 
-    // Returns true if this region is variadic.
-    bool isVariadic() const;
+  // Returns true if this region is variadic.
+  bool isVariadic() const;
 };
 
 // A struct bundling a region's constraint and its name.
 struct NamedRegion {
-    // Returns true if this region is variadic.
-    bool isVariadic() const {
-        return constraint.isVariadic();
-    }
+  // Returns true if this region is variadic.
+  bool isVariadic() const { return constraint.isVariadic(); }
 
-    StringRef name;
-    Region constraint;
+  StringRef name;
+  Region constraint;
 };
 
 } // end namespace tblgen

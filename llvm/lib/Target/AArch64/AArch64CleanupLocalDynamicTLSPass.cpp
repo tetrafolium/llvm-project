@@ -35,121 +35,119 @@ using namespace llvm;
 
 namespace {
 struct LDTLSCleanup : public MachineFunctionPass {
-    static char ID;
-    LDTLSCleanup() : MachineFunctionPass(ID) {
-        initializeLDTLSCleanupPass(*PassRegistry::getPassRegistry());
+  static char ID;
+  LDTLSCleanup() : MachineFunctionPass(ID) {
+    initializeLDTLSCleanupPass(*PassRegistry::getPassRegistry());
+  }
+
+  bool runOnMachineFunction(MachineFunction &MF) override {
+    if (skipFunction(MF.getFunction()))
+      return false;
+
+    AArch64FunctionInfo *AFI = MF.getInfo<AArch64FunctionInfo>();
+    if (AFI->getNumLocalDynamicTLSAccesses() < 2) {
+      // No point folding accesses if there isn't at least two.
+      return false;
     }
 
-    bool runOnMachineFunction(MachineFunction &MF) override {
-        if (skipFunction(MF.getFunction()))
-            return false;
+    MachineDominatorTree *DT = &getAnalysis<MachineDominatorTree>();
+    return VisitNode(DT->getRootNode(), 0);
+  }
 
-        AArch64FunctionInfo *AFI = MF.getInfo<AArch64FunctionInfo>();
-        if (AFI->getNumLocalDynamicTLSAccesses() < 2) {
-            // No point folding accesses if there isn't at least two.
-            return false;
-        }
+  // Visit the dominator subtree rooted at Node in pre-order.
+  // If TLSBaseAddrReg is non-null, then use that to replace any
+  // TLS_base_addr instructions. Otherwise, create the register
+  // when the first such instruction is seen, and then use it
+  // as we encounter more instructions.
+  bool VisitNode(MachineDomTreeNode *Node, unsigned TLSBaseAddrReg) {
+    MachineBasicBlock *BB = Node->getBlock();
+    bool Changed = false;
 
-        MachineDominatorTree *DT = &getAnalysis<MachineDominatorTree>();
-        return VisitNode(DT->getRootNode(), 0);
+    // Traverse the current block.
+    for (MachineBasicBlock::iterator I = BB->begin(), E = BB->end(); I != E;
+         ++I) {
+      switch (I->getOpcode()) {
+      case AArch64::TLSDESC_CALLSEQ:
+        // Make sure it's a local dynamic access.
+        if (!I->getOperand(0).isSymbol() ||
+            strcmp(I->getOperand(0).getSymbolName(), "_TLS_MODULE_BASE_"))
+          break;
+
+        if (TLSBaseAddrReg)
+          I = replaceTLSBaseAddrCall(*I, TLSBaseAddrReg);
+        else
+          I = setRegister(*I, &TLSBaseAddrReg);
+        Changed = true;
+        break;
+      default:
+        break;
+      }
     }
 
-    // Visit the dominator subtree rooted at Node in pre-order.
-    // If TLSBaseAddrReg is non-null, then use that to replace any
-    // TLS_base_addr instructions. Otherwise, create the register
-    // when the first such instruction is seen, and then use it
-    // as we encounter more instructions.
-    bool VisitNode(MachineDomTreeNode *Node, unsigned TLSBaseAddrReg) {
-        MachineBasicBlock *BB = Node->getBlock();
-        bool Changed = false;
-
-        // Traverse the current block.
-        for (MachineBasicBlock::iterator I = BB->begin(), E = BB->end(); I != E;
-                ++I) {
-            switch (I->getOpcode()) {
-            case AArch64::TLSDESC_CALLSEQ:
-                // Make sure it's a local dynamic access.
-                if (!I->getOperand(0).isSymbol() ||
-                        strcmp(I->getOperand(0).getSymbolName(), "_TLS_MODULE_BASE_"))
-                    break;
-
-                if (TLSBaseAddrReg)
-                    I = replaceTLSBaseAddrCall(*I, TLSBaseAddrReg);
-                else
-                    I = setRegister(*I, &TLSBaseAddrReg);
-                Changed = true;
-                break;
-            default:
-                break;
-            }
-        }
-
-        // Visit the children of this block in the dominator tree.
-        for (MachineDomTreeNode *N : *Node) {
-            Changed |= VisitNode(N, TLSBaseAddrReg);
-        }
-
-        return Changed;
+    // Visit the children of this block in the dominator tree.
+    for (MachineDomTreeNode *N : *Node) {
+      Changed |= VisitNode(N, TLSBaseAddrReg);
     }
 
-    // Replace the TLS_base_addr instruction I with a copy from
-    // TLSBaseAddrReg, returning the new instruction.
-    MachineInstr *replaceTLSBaseAddrCall(MachineInstr &I,
-                                         unsigned TLSBaseAddrReg) {
-        MachineFunction *MF = I.getParent()->getParent();
-        const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
+    return Changed;
+  }
 
-        // Insert a Copy from TLSBaseAddrReg to x0, which is where the rest of the
-        // code sequence assumes the address will be.
-        MachineInstr *Copy = BuildMI(*I.getParent(), I, I.getDebugLoc(),
-                                     TII->get(TargetOpcode::COPY), AArch64::X0)
+  // Replace the TLS_base_addr instruction I with a copy from
+  // TLSBaseAddrReg, returning the new instruction.
+  MachineInstr *replaceTLSBaseAddrCall(MachineInstr &I,
+                                       unsigned TLSBaseAddrReg) {
+    MachineFunction *MF = I.getParent()->getParent();
+    const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
+
+    // Insert a Copy from TLSBaseAddrReg to x0, which is where the rest of the
+    // code sequence assumes the address will be.
+    MachineInstr *Copy = BuildMI(*I.getParent(), I, I.getDebugLoc(),
+                                 TII->get(TargetOpcode::COPY), AArch64::X0)
                              .addReg(TLSBaseAddrReg);
 
-        // Update the call site info.
-        if (I.shouldUpdateCallSiteInfo())
-            I.getMF()->eraseCallSiteInfo(&I);
+    // Update the call site info.
+    if (I.shouldUpdateCallSiteInfo())
+      I.getMF()->eraseCallSiteInfo(&I);
 
-        // Erase the TLS_base_addr instruction.
-        I.eraseFromParent();
+    // Erase the TLS_base_addr instruction.
+    I.eraseFromParent();
 
-        return Copy;
-    }
+    return Copy;
+  }
 
-    // Create a virtual register in *TLSBaseAddrReg, and populate it by
-    // inserting a copy instruction after I. Returns the new instruction.
-    MachineInstr *setRegister(MachineInstr &I, unsigned *TLSBaseAddrReg) {
-        MachineFunction *MF = I.getParent()->getParent();
-        const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
+  // Create a virtual register in *TLSBaseAddrReg, and populate it by
+  // inserting a copy instruction after I. Returns the new instruction.
+  MachineInstr *setRegister(MachineInstr &I, unsigned *TLSBaseAddrReg) {
+    MachineFunction *MF = I.getParent()->getParent();
+    const TargetInstrInfo *TII = MF->getSubtarget().getInstrInfo();
 
-        // Create a virtual register for the TLS base address.
-        MachineRegisterInfo &RegInfo = MF->getRegInfo();
-        *TLSBaseAddrReg = RegInfo.createVirtualRegister(&AArch64::GPR64RegClass);
+    // Create a virtual register for the TLS base address.
+    MachineRegisterInfo &RegInfo = MF->getRegInfo();
+    *TLSBaseAddrReg = RegInfo.createVirtualRegister(&AArch64::GPR64RegClass);
 
-        // Insert a copy from X0 to TLSBaseAddrReg for later.
-        MachineInstr *Copy =
-            BuildMI(*I.getParent(), ++I.getIterator(), I.getDebugLoc(),
-                    TII->get(TargetOpcode::COPY), *TLSBaseAddrReg)
+    // Insert a copy from X0 to TLSBaseAddrReg for later.
+    MachineInstr *Copy =
+        BuildMI(*I.getParent(), ++I.getIterator(), I.getDebugLoc(),
+                TII->get(TargetOpcode::COPY), *TLSBaseAddrReg)
             .addReg(AArch64::X0);
 
-        return Copy;
-    }
+    return Copy;
+  }
 
-    StringRef getPassName() const override {
-        return TLSCLEANUP_PASS_NAME;
-    }
+  StringRef getPassName() const override { return TLSCLEANUP_PASS_NAME; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addRequired<MachineDominatorTree>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addRequired<MachineDominatorTree>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 };
-}
+} // namespace
 
 INITIALIZE_PASS(LDTLSCleanup, "aarch64-local-dynamic-tls-cleanup",
                 TLSCLEANUP_PASS_NAME, false, false)
 
 char LDTLSCleanup::ID = 0;
 FunctionPass *llvm::createAArch64CleanupLocalDynamicTLSPass() {
-    return new LDTLSCleanup();
+  return new LDTLSCleanup();
 }

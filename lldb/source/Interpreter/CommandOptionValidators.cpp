@@ -16,21 +16,21 @@ using namespace lldb_private;
 
 bool PosixPlatformCommandOptionValidator::IsValid(
     Platform &platform, const ExecutionContext &target) const {
-    llvm::Triple::OSType os =
-        platform.GetSystemArchitecture().GetTriple().getOS();
-    switch (os) {
-    // Are there any other platforms that are not POSIX-compatible?
-    case llvm::Triple::Win32:
-        return false;
-    default:
-        return true;
-    }
+  llvm::Triple::OSType os =
+      platform.GetSystemArchitecture().GetTriple().getOS();
+  switch (os) {
+  // Are there any other platforms that are not POSIX-compatible?
+  case llvm::Triple::Win32:
+    return false;
+  default:
+    return true;
+  }
 }
 
 const char *PosixPlatformCommandOptionValidator::ShortConditionString() const {
-    return "POSIX";
+  return "POSIX";
 }
 
 const char *PosixPlatformCommandOptionValidator::LongConditionString() const {
-    return "Option only valid for POSIX-compliant hosts.";
+  return "Option only valid for POSIX-compliant hosts.";
 }

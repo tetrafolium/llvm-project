@@ -32,12 +32,10 @@ using namespace lldb_private;
 #define DBG_OFFSET_NAME(reg) 0
 
 #define DEFINE_DBG(reg, i)                                                     \
-  #reg, NULL,                                                                  \
-      0, DBG_OFFSET_NAME(reg[i]), eEncodingUint, eFormatHex,                   \
-                              {LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,       \
-                               LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,       \
-                               LLDB_INVALID_REGNUM },                          \
-                               NULL, NULL, NULL, 0
+#reg, NULL, 0, DBG_OFFSET_NAME(reg[i]), eEncodingUint, eFormatHex,           \
+      {LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM,          \
+       LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM },                             \
+       NULL, NULL, NULL, 0
 
 // Include RegisterInfos_arm64 to declare our g_register_infos_arm64 structure.
 #define DECLARE_REGISTER_INFOS_ARM64_STRUCT
@@ -82,12 +80,10 @@ uint32_t g_fpu_reg_indices[] = {
 };
 
 RegisterSet g_register_sets[] = {
-    {   "General Purpose Registers", "gpr",
-        llvm::array_lengthof(g_gpr_reg_indices), g_gpr_reg_indices
-    },
-    {   "Floating Point Registers", "fpu", llvm::array_lengthof(g_fpu_reg_indices),
-        g_fpu_reg_indices
-    },
+    {"General Purpose Registers", "gpr",
+     llvm::array_lengthof(g_gpr_reg_indices), g_gpr_reg_indices},
+    {"Floating Point Registers", "fpu", llvm::array_lengthof(g_fpu_reg_indices),
+     g_fpu_reg_indices},
 };
 
 // Constructors and Destructors
@@ -98,347 +94,347 @@ RegisterContextWindows_arm64::RegisterContextWindows_arm64(
 RegisterContextWindows_arm64::~RegisterContextWindows_arm64() {}
 
 size_t RegisterContextWindows_arm64::GetRegisterCount() {
-    return llvm::array_lengthof(g_register_infos_arm64_le);
+  return llvm::array_lengthof(g_register_infos_arm64_le);
 }
 
 const RegisterInfo *
 RegisterContextWindows_arm64::GetRegisterInfoAtIndex(size_t reg) {
-    if (reg < k_num_register_infos)
-        return &g_register_infos_arm64_le[reg];
-    return NULL;
+  if (reg < k_num_register_infos)
+    return &g_register_infos_arm64_le[reg];
+  return NULL;
 }
 
 size_t RegisterContextWindows_arm64::GetRegisterSetCount() {
-    return llvm::array_lengthof(g_register_sets);
+  return llvm::array_lengthof(g_register_sets);
 }
 
 const RegisterSet *
 RegisterContextWindows_arm64::GetRegisterSet(size_t reg_set) {
-    return &g_register_sets[reg_set];
+  return &g_register_sets[reg_set];
 }
 
 bool RegisterContextWindows_arm64::ReadRegister(const RegisterInfo *reg_info,
-        RegisterValue &reg_value) {
-    if (!CacheAllRegisterValues())
-        return false;
+                                                RegisterValue &reg_value) {
+  if (!CacheAllRegisterValues())
+    return false;
 
-    if (reg_info == nullptr)
-        return false;
+  if (reg_info == nullptr)
+    return false;
 
-    const uint32_t reg = reg_info->kinds[eRegisterKindLLDB];
+  const uint32_t reg = reg_info->kinds[eRegisterKindLLDB];
 
-    switch (reg) {
-    case gpr_x0:
-    case gpr_x1:
-    case gpr_x2:
-    case gpr_x3:
-    case gpr_x4:
-    case gpr_x5:
-    case gpr_x6:
-    case gpr_x7:
-    case gpr_x8:
-    case gpr_x9:
-    case gpr_x10:
-    case gpr_x11:
-    case gpr_x12:
-    case gpr_x13:
-    case gpr_x14:
-    case gpr_x15:
-    case gpr_x16:
-    case gpr_x17:
-    case gpr_x18:
-    case gpr_x19:
-    case gpr_x20:
-    case gpr_x21:
-    case gpr_x22:
-    case gpr_x23:
-    case gpr_x24:
-    case gpr_x25:
-    case gpr_x26:
-    case gpr_x27:
-    case gpr_x28:
-        reg_value.SetUInt64(m_context.X[reg - gpr_x0]);
-        break;
+  switch (reg) {
+  case gpr_x0:
+  case gpr_x1:
+  case gpr_x2:
+  case gpr_x3:
+  case gpr_x4:
+  case gpr_x5:
+  case gpr_x6:
+  case gpr_x7:
+  case gpr_x8:
+  case gpr_x9:
+  case gpr_x10:
+  case gpr_x11:
+  case gpr_x12:
+  case gpr_x13:
+  case gpr_x14:
+  case gpr_x15:
+  case gpr_x16:
+  case gpr_x17:
+  case gpr_x18:
+  case gpr_x19:
+  case gpr_x20:
+  case gpr_x21:
+  case gpr_x22:
+  case gpr_x23:
+  case gpr_x24:
+  case gpr_x25:
+  case gpr_x26:
+  case gpr_x27:
+  case gpr_x28:
+    reg_value.SetUInt64(m_context.X[reg - gpr_x0]);
+    break;
 
-    case gpr_fp:
-        reg_value.SetUInt64(m_context.Fp);
-        break;
-    case gpr_sp:
-        reg_value.SetUInt64(m_context.Sp);
-        break;
-    case gpr_lr:
-        reg_value.SetUInt64(m_context.Lr);
-        break;
-    case gpr_pc:
-        reg_value.SetUInt64(m_context.Pc);
-        break;
-    case gpr_cpsr:
-        reg_value.SetUInt64(m_context.Cpsr);
-        break;
+  case gpr_fp:
+    reg_value.SetUInt64(m_context.Fp);
+    break;
+  case gpr_sp:
+    reg_value.SetUInt64(m_context.Sp);
+    break;
+  case gpr_lr:
+    reg_value.SetUInt64(m_context.Lr);
+    break;
+  case gpr_pc:
+    reg_value.SetUInt64(m_context.Pc);
+    break;
+  case gpr_cpsr:
+    reg_value.SetUInt64(m_context.Cpsr);
+    break;
 
-    case gpr_w0:
-    case gpr_w1:
-    case gpr_w2:
-    case gpr_w3:
-    case gpr_w4:
-    case gpr_w5:
-    case gpr_w6:
-    case gpr_w7:
-    case gpr_w8:
-    case gpr_w9:
-    case gpr_w10:
-    case gpr_w11:
-    case gpr_w12:
-    case gpr_w13:
-    case gpr_w14:
-    case gpr_w15:
-    case gpr_w16:
-    case gpr_w17:
-    case gpr_w18:
-    case gpr_w19:
-    case gpr_w20:
-    case gpr_w21:
-    case gpr_w22:
-    case gpr_w23:
-    case gpr_w24:
-    case gpr_w25:
-    case gpr_w26:
-    case gpr_w27:
-    case gpr_w28:
-        reg_value.SetUInt32(
-            static_cast<uint32_t>(m_context.X[reg - gpr_w0] & 0xffffffff));
-        break;
+  case gpr_w0:
+  case gpr_w1:
+  case gpr_w2:
+  case gpr_w3:
+  case gpr_w4:
+  case gpr_w5:
+  case gpr_w6:
+  case gpr_w7:
+  case gpr_w8:
+  case gpr_w9:
+  case gpr_w10:
+  case gpr_w11:
+  case gpr_w12:
+  case gpr_w13:
+  case gpr_w14:
+  case gpr_w15:
+  case gpr_w16:
+  case gpr_w17:
+  case gpr_w18:
+  case gpr_w19:
+  case gpr_w20:
+  case gpr_w21:
+  case gpr_w22:
+  case gpr_w23:
+  case gpr_w24:
+  case gpr_w25:
+  case gpr_w26:
+  case gpr_w27:
+  case gpr_w28:
+    reg_value.SetUInt32(
+        static_cast<uint32_t>(m_context.X[reg - gpr_w0] & 0xffffffff));
+    break;
 
-    case fpu_v0:
-    case fpu_v1:
-    case fpu_v2:
-    case fpu_v3:
-    case fpu_v4:
-    case fpu_v5:
-    case fpu_v6:
-    case fpu_v7:
-    case fpu_v8:
-    case fpu_v9:
-    case fpu_v10:
-    case fpu_v11:
-    case fpu_v12:
-    case fpu_v13:
-    case fpu_v14:
-    case fpu_v15:
-    case fpu_v16:
-    case fpu_v17:
-    case fpu_v18:
-    case fpu_v19:
-    case fpu_v20:
-    case fpu_v21:
-    case fpu_v22:
-    case fpu_v23:
-    case fpu_v24:
-    case fpu_v25:
-    case fpu_v26:
-    case fpu_v27:
-    case fpu_v28:
-    case fpu_v29:
-    case fpu_v30:
-    case fpu_v31:
-        reg_value.SetBytes(m_context.V[reg - fpu_v0].B, reg_info->byte_size,
-                           endian::InlHostByteOrder());
-        break;
+  case fpu_v0:
+  case fpu_v1:
+  case fpu_v2:
+  case fpu_v3:
+  case fpu_v4:
+  case fpu_v5:
+  case fpu_v6:
+  case fpu_v7:
+  case fpu_v8:
+  case fpu_v9:
+  case fpu_v10:
+  case fpu_v11:
+  case fpu_v12:
+  case fpu_v13:
+  case fpu_v14:
+  case fpu_v15:
+  case fpu_v16:
+  case fpu_v17:
+  case fpu_v18:
+  case fpu_v19:
+  case fpu_v20:
+  case fpu_v21:
+  case fpu_v22:
+  case fpu_v23:
+  case fpu_v24:
+  case fpu_v25:
+  case fpu_v26:
+  case fpu_v27:
+  case fpu_v28:
+  case fpu_v29:
+  case fpu_v30:
+  case fpu_v31:
+    reg_value.SetBytes(m_context.V[reg - fpu_v0].B, reg_info->byte_size,
+                       endian::InlHostByteOrder());
+    break;
 
-    case fpu_s0:
-    case fpu_s1:
-    case fpu_s2:
-    case fpu_s3:
-    case fpu_s4:
-    case fpu_s5:
-    case fpu_s6:
-    case fpu_s7:
-    case fpu_s8:
-    case fpu_s9:
-    case fpu_s10:
-    case fpu_s11:
-    case fpu_s12:
-    case fpu_s13:
-    case fpu_s14:
-    case fpu_s15:
-    case fpu_s16:
-    case fpu_s17:
-    case fpu_s18:
-    case fpu_s19:
-    case fpu_s20:
-    case fpu_s21:
-    case fpu_s22:
-    case fpu_s23:
-    case fpu_s24:
-    case fpu_s25:
-    case fpu_s26:
-    case fpu_s27:
-    case fpu_s28:
-    case fpu_s29:
-    case fpu_s30:
-    case fpu_s31:
-        reg_value.SetFloat(m_context.V[reg - fpu_s0].S[0]);
-        break;
+  case fpu_s0:
+  case fpu_s1:
+  case fpu_s2:
+  case fpu_s3:
+  case fpu_s4:
+  case fpu_s5:
+  case fpu_s6:
+  case fpu_s7:
+  case fpu_s8:
+  case fpu_s9:
+  case fpu_s10:
+  case fpu_s11:
+  case fpu_s12:
+  case fpu_s13:
+  case fpu_s14:
+  case fpu_s15:
+  case fpu_s16:
+  case fpu_s17:
+  case fpu_s18:
+  case fpu_s19:
+  case fpu_s20:
+  case fpu_s21:
+  case fpu_s22:
+  case fpu_s23:
+  case fpu_s24:
+  case fpu_s25:
+  case fpu_s26:
+  case fpu_s27:
+  case fpu_s28:
+  case fpu_s29:
+  case fpu_s30:
+  case fpu_s31:
+    reg_value.SetFloat(m_context.V[reg - fpu_s0].S[0]);
+    break;
 
-    case fpu_d0:
-    case fpu_d1:
-    case fpu_d2:
-    case fpu_d3:
-    case fpu_d4:
-    case fpu_d5:
-    case fpu_d6:
-    case fpu_d7:
-    case fpu_d8:
-    case fpu_d9:
-    case fpu_d10:
-    case fpu_d11:
-    case fpu_d12:
-    case fpu_d13:
-    case fpu_d14:
-    case fpu_d15:
-    case fpu_d16:
-    case fpu_d17:
-    case fpu_d18:
-    case fpu_d19:
-    case fpu_d20:
-    case fpu_d21:
-    case fpu_d22:
-    case fpu_d23:
-    case fpu_d24:
-    case fpu_d25:
-    case fpu_d26:
-    case fpu_d27:
-    case fpu_d28:
-    case fpu_d29:
-    case fpu_d30:
-    case fpu_d31:
-        reg_value.SetDouble(m_context.V[reg - fpu_d0].D[0]);
-        break;
+  case fpu_d0:
+  case fpu_d1:
+  case fpu_d2:
+  case fpu_d3:
+  case fpu_d4:
+  case fpu_d5:
+  case fpu_d6:
+  case fpu_d7:
+  case fpu_d8:
+  case fpu_d9:
+  case fpu_d10:
+  case fpu_d11:
+  case fpu_d12:
+  case fpu_d13:
+  case fpu_d14:
+  case fpu_d15:
+  case fpu_d16:
+  case fpu_d17:
+  case fpu_d18:
+  case fpu_d19:
+  case fpu_d20:
+  case fpu_d21:
+  case fpu_d22:
+  case fpu_d23:
+  case fpu_d24:
+  case fpu_d25:
+  case fpu_d26:
+  case fpu_d27:
+  case fpu_d28:
+  case fpu_d29:
+  case fpu_d30:
+  case fpu_d31:
+    reg_value.SetDouble(m_context.V[reg - fpu_d0].D[0]);
+    break;
 
-    case fpu_fpsr:
-        reg_value.SetUInt32(m_context.Fpsr);
-        break;
+  case fpu_fpsr:
+    reg_value.SetUInt32(m_context.Fpsr);
+    break;
 
-    case fpu_fpcr:
-        reg_value.SetUInt32(m_context.Fpcr);
-        break;
+  case fpu_fpcr:
+    reg_value.SetUInt32(m_context.Fpcr);
+    break;
 
-    default:
-        reg_value.SetValueToInvalid();
-        return false;
-    }
-    return true;
+  default:
+    reg_value.SetValueToInvalid();
+    return false;
+  }
+  return true;
 }
 
 bool RegisterContextWindows_arm64::WriteRegister(
     const RegisterInfo *reg_info, const RegisterValue &reg_value) {
-    // Since we cannot only write a single register value to the inferior, we
-    // need to make sure our cached copy of the register values are fresh.
-    // Otherwise when writing one register, we may also overwrite some other
-    // register with a stale value.
-    if (!CacheAllRegisterValues())
-        return false;
+  // Since we cannot only write a single register value to the inferior, we
+  // need to make sure our cached copy of the register values are fresh.
+  // Otherwise when writing one register, we may also overwrite some other
+  // register with a stale value.
+  if (!CacheAllRegisterValues())
+    return false;
 
-    const uint32_t reg = reg_info->kinds[eRegisterKindLLDB];
+  const uint32_t reg = reg_info->kinds[eRegisterKindLLDB];
 
-    switch (reg) {
-    case gpr_x0:
-    case gpr_x1:
-    case gpr_x2:
-    case gpr_x3:
-    case gpr_x4:
-    case gpr_x5:
-    case gpr_x6:
-    case gpr_x7:
-    case gpr_x8:
-    case gpr_x9:
-    case gpr_x10:
-    case gpr_x11:
-    case gpr_x12:
-    case gpr_x13:
-    case gpr_x14:
-    case gpr_x15:
-    case gpr_x16:
-    case gpr_x17:
-    case gpr_x18:
-    case gpr_x19:
-    case gpr_x20:
-    case gpr_x21:
-    case gpr_x22:
-    case gpr_x23:
-    case gpr_x24:
-    case gpr_x25:
-    case gpr_x26:
-    case gpr_x27:
-    case gpr_x28:
-        m_context.X[reg - gpr_x0] = reg_value.GetAsUInt64();
-        break;
+  switch (reg) {
+  case gpr_x0:
+  case gpr_x1:
+  case gpr_x2:
+  case gpr_x3:
+  case gpr_x4:
+  case gpr_x5:
+  case gpr_x6:
+  case gpr_x7:
+  case gpr_x8:
+  case gpr_x9:
+  case gpr_x10:
+  case gpr_x11:
+  case gpr_x12:
+  case gpr_x13:
+  case gpr_x14:
+  case gpr_x15:
+  case gpr_x16:
+  case gpr_x17:
+  case gpr_x18:
+  case gpr_x19:
+  case gpr_x20:
+  case gpr_x21:
+  case gpr_x22:
+  case gpr_x23:
+  case gpr_x24:
+  case gpr_x25:
+  case gpr_x26:
+  case gpr_x27:
+  case gpr_x28:
+    m_context.X[reg - gpr_x0] = reg_value.GetAsUInt64();
+    break;
 
-    case gpr_fp:
-        m_context.Fp = reg_value.GetAsUInt64();
-        break;
-    case gpr_sp:
-        m_context.Sp = reg_value.GetAsUInt64();
-        break;
-    case gpr_lr:
-        m_context.Lr = reg_value.GetAsUInt64();
-        break;
-    case gpr_pc:
-        m_context.Pc = reg_value.GetAsUInt64();
-        break;
-    case gpr_cpsr:
-        m_context.Cpsr = reg_value.GetAsUInt64();
-        break;
+  case gpr_fp:
+    m_context.Fp = reg_value.GetAsUInt64();
+    break;
+  case gpr_sp:
+    m_context.Sp = reg_value.GetAsUInt64();
+    break;
+  case gpr_lr:
+    m_context.Lr = reg_value.GetAsUInt64();
+    break;
+  case gpr_pc:
+    m_context.Pc = reg_value.GetAsUInt64();
+    break;
+  case gpr_cpsr:
+    m_context.Cpsr = reg_value.GetAsUInt64();
+    break;
 
-    case fpu_v0:
-    case fpu_v1:
-    case fpu_v2:
-    case fpu_v3:
-    case fpu_v4:
-    case fpu_v5:
-    case fpu_v6:
-    case fpu_v7:
-    case fpu_v8:
-    case fpu_v9:
-    case fpu_v10:
-    case fpu_v11:
-    case fpu_v12:
-    case fpu_v13:
-    case fpu_v14:
-    case fpu_v15:
-    case fpu_v16:
-    case fpu_v17:
-    case fpu_v18:
-    case fpu_v19:
-    case fpu_v20:
-    case fpu_v21:
-    case fpu_v22:
-    case fpu_v23:
-    case fpu_v24:
-    case fpu_v25:
-    case fpu_v26:
-    case fpu_v27:
-    case fpu_v28:
-    case fpu_v29:
-    case fpu_v30:
-    case fpu_v31:
-        memcpy(m_context.V[reg - fpu_v0].B, reg_value.GetBytes(), 16);
-        break;
+  case fpu_v0:
+  case fpu_v1:
+  case fpu_v2:
+  case fpu_v3:
+  case fpu_v4:
+  case fpu_v5:
+  case fpu_v6:
+  case fpu_v7:
+  case fpu_v8:
+  case fpu_v9:
+  case fpu_v10:
+  case fpu_v11:
+  case fpu_v12:
+  case fpu_v13:
+  case fpu_v14:
+  case fpu_v15:
+  case fpu_v16:
+  case fpu_v17:
+  case fpu_v18:
+  case fpu_v19:
+  case fpu_v20:
+  case fpu_v21:
+  case fpu_v22:
+  case fpu_v23:
+  case fpu_v24:
+  case fpu_v25:
+  case fpu_v26:
+  case fpu_v27:
+  case fpu_v28:
+  case fpu_v29:
+  case fpu_v30:
+  case fpu_v31:
+    memcpy(m_context.V[reg - fpu_v0].B, reg_value.GetBytes(), 16);
+    break;
 
-    case fpu_fpsr:
-        m_context.Fpsr = reg_value.GetAsUInt32();
-        break;
+  case fpu_fpsr:
+    m_context.Fpsr = reg_value.GetAsUInt32();
+    break;
 
-    case fpu_fpcr:
-        m_context.Fpcr = reg_value.GetAsUInt32();
-        break;
+  case fpu_fpcr:
+    m_context.Fpcr = reg_value.GetAsUInt32();
+    break;
 
-    default:
-        return false;
-    }
+  default:
+    return false;
+  }
 
-    // Physically update the registers in the target process.
-    return ApplyAllRegisterValues();
+  // Physically update the registers in the target process.
+  return ApplyAllRegisterValues();
 }
 
 #endif // defined(__aarch64__) || defined(_M_ARM64)

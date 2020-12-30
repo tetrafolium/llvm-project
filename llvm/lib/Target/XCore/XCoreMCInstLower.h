@@ -21,19 +21,20 @@ class AsmPrinter;
 
 /// This class is used to lower an MachineInstr into an MCInst.
 class LLVM_LIBRARY_VISIBILITY XCoreMCInstLower {
-    typedef MachineOperand::MachineOperandType MachineOperandType;
-    MCContext *Ctx;
-    AsmPrinter &Printer;
+  typedef MachineOperand::MachineOperandType MachineOperandType;
+  MCContext *Ctx;
+  AsmPrinter &Printer;
+
 public:
-    XCoreMCInstLower(class AsmPrinter &asmprinter);
-    void Initialize(MCContext *C);
-    void Lower(const MachineInstr *MI, MCInst &OutMI) const;
-    MCOperand LowerOperand(const MachineOperand& MO, unsigned offset = 0) const;
+  XCoreMCInstLower(class AsmPrinter &asmprinter);
+  void Initialize(MCContext *C);
+  void Lower(const MachineInstr *MI, MCInst &OutMI) const;
+  MCOperand LowerOperand(const MachineOperand &MO, unsigned offset = 0) const;
 
 private:
-    MCOperand LowerSymbolOperand(const MachineOperand &MO,
-                                 MachineOperandType MOTy, unsigned Offset) const;
+  MCOperand LowerSymbolOperand(const MachineOperand &MO,
+                               MachineOperandType MOTy, unsigned Offset) const;
 };
-}
+} // namespace llvm
 
 #endif

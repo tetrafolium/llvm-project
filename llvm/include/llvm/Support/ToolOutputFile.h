@@ -24,48 +24,45 @@ namespace llvm {
 ///   - The file is automatically deleted when the ToolOutputFile
 ///     object is destroyed unless the client calls keep().
 class ToolOutputFile {
-    /// This class is declared before the raw_fd_ostream so that it is constructed
-    /// before the raw_fd_ostream is constructed and destructed after the
-    /// raw_fd_ostream is destructed. It installs cleanups in its constructor and
-    /// uninstalls them in its destructor.
-    class CleanupInstaller {
-        /// The name of the file.
-        std::string Filename;
-    public:
-        /// The flag which indicates whether we should not delete the file.
-        bool Keep;
+  /// This class is declared before the raw_fd_ostream so that it is constructed
+  /// before the raw_fd_ostream is constructed and destructed after the
+  /// raw_fd_ostream is destructed. It installs cleanups in its constructor and
+  /// uninstalls them in its destructor.
+  class CleanupInstaller {
+    /// The name of the file.
+    std::string Filename;
 
-        explicit CleanupInstaller(StringRef Filename);
-        ~CleanupInstaller();
-    } Installer;
+  public:
+    /// The flag which indicates whether we should not delete the file.
+    bool Keep;
 
-    /// Storage for the stream, if we're owning our own stream. This is
-    /// intentionally declared after Installer.
-    Optional<raw_fd_ostream> OSHolder;
+    explicit CleanupInstaller(StringRef Filename);
+    ~CleanupInstaller();
+  } Installer;
 
-    /// The actual stream to use.
-    raw_fd_ostream *OS;
+  /// Storage for the stream, if we're owning our own stream. This is
+  /// intentionally declared after Installer.
+  Optional<raw_fd_ostream> OSHolder;
+
+  /// The actual stream to use.
+  raw_fd_ostream *OS;
 
 public:
-    /// This constructor's arguments are passed to raw_fd_ostream's
-    /// constructor.
-    ToolOutputFile(StringRef Filename, std::error_code &EC,
-                   sys::fs::OpenFlags Flags);
+  /// This constructor's arguments are passed to raw_fd_ostream's
+  /// constructor.
+  ToolOutputFile(StringRef Filename, std::error_code &EC,
+                 sys::fs::OpenFlags Flags);
 
-    ToolOutputFile(StringRef Filename, int FD);
+  ToolOutputFile(StringRef Filename, int FD);
 
-    /// Return the contained raw_fd_ostream.
-    raw_fd_ostream &os() {
-        return *OS;
-    }
+  /// Return the contained raw_fd_ostream.
+  raw_fd_ostream &os() { return *OS; }
 
-    /// Indicate that the tool's job wrt this output file has been successful and
-    /// the file should not be deleted.
-    void keep() {
-        Installer.Keep = true;
-    }
+  /// Indicate that the tool's job wrt this output file has been successful and
+  /// the file should not be deleted.
+  void keep() { Installer.Keep = true; }
 };
 
-} // end llvm namespace
+} // namespace llvm
 
 #endif

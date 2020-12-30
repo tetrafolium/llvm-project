@@ -23,16 +23,16 @@ namespace llvm {
 
 class ThinLTOBitcodeWriterPass
     : public PassInfoMixin<ThinLTOBitcodeWriterPass> {
-    raw_ostream &OS;
-    raw_ostream *ThinLinkOS;
+  raw_ostream &OS;
+  raw_ostream *ThinLinkOS;
 
 public:
-    // Writes bitcode to OS. Also write thin link file to ThinLinkOS, if
-    // it's not nullptr.
-    ThinLTOBitcodeWriterPass(raw_ostream &OS, raw_ostream *ThinLinkOS)
-        : OS(OS), ThinLinkOS(ThinLinkOS) {}
+  // Writes bitcode to OS. Also write thin link file to ThinLinkOS, if
+  // it's not nullptr.
+  ThinLTOBitcodeWriterPass(raw_ostream &OS, raw_ostream *ThinLinkOS)
+      : OS(OS), ThinLinkOS(ThinLinkOS) {}
 
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // namespace llvm

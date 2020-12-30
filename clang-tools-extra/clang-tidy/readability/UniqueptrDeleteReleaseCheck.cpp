@@ -18,49 +18,49 @@ namespace tidy {
 namespace readability {
 
 void UniqueptrDeleteReleaseCheck::registerMatchers(MatchFinder *Finder) {
-    auto IsSusbstituted = qualType(anyOf(
-                                       substTemplateTypeParmType(), hasDescendant(substTemplateTypeParmType())));
+  auto IsSusbstituted = qualType(anyOf(
+      substTemplateTypeParmType(), hasDescendant(substTemplateTypeParmType())));
 
-    auto UniquePtrWithDefaultDelete = classTemplateSpecializationDecl(
-                                          hasName("std::unique_ptr"),
-                                          hasTemplateArgument(1, refersToType(qualType(hasDeclaration(cxxRecordDecl(
-                                                  hasName("std::default_delete")))))));
+  auto UniquePtrWithDefaultDelete = classTemplateSpecializationDecl(
+      hasName("std::unique_ptr"),
+      hasTemplateArgument(1, refersToType(qualType(hasDeclaration(cxxRecordDecl(
+                                 hasName("std::default_delete")))))));
 
-    Finder->addMatcher(
-        cxxDeleteExpr(has(ignoringParenImpCasts(cxxMemberCallExpr(
-                              on(expr(hasType(UniquePtrWithDefaultDelete),
-                                      unless(hasType(IsSusbstituted)))
-                                 .bind("uptr")),
-                              callee(cxxMethodDecl(hasName("release")))))))
-        .bind("delete"),
-        this);
+  Finder->addMatcher(
+      cxxDeleteExpr(has(ignoringParenImpCasts(cxxMemberCallExpr(
+                        on(expr(hasType(UniquePtrWithDefaultDelete),
+                                unless(hasType(IsSusbstituted)))
+                               .bind("uptr")),
+                        callee(cxxMethodDecl(hasName("release")))))))
+          .bind("delete"),
+      this);
 }
 
 void UniqueptrDeleteReleaseCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *PtrExpr = Result.Nodes.getNodeAs<Expr>("uptr");
-    const auto *DeleteExpr = Result.Nodes.getNodeAs<Expr>("delete");
+  const auto *PtrExpr = Result.Nodes.getNodeAs<Expr>("uptr");
+  const auto *DeleteExpr = Result.Nodes.getNodeAs<Expr>("delete");
 
-    if (PtrExpr->getBeginLoc().isMacroID())
-        return;
+  if (PtrExpr->getBeginLoc().isMacroID())
+    return;
 
-    // Ignore dependent types.
-    // It can give us false positives, so we go with false negatives instead to
-    // be safe.
-    if (PtrExpr->getType()->isDependentType())
-        return;
+  // Ignore dependent types.
+  // It can give us false positives, so we go with false negatives instead to
+  // be safe.
+  if (PtrExpr->getType()->isDependentType())
+    return;
 
-    SourceLocation AfterPtr = Lexer::getLocForEndOfToken(
-                                  PtrExpr->getEndLoc(), 0, *Result.SourceManager, getLangOpts());
+  SourceLocation AfterPtr = Lexer::getLocForEndOfToken(
+      PtrExpr->getEndLoc(), 0, *Result.SourceManager, getLangOpts());
 
-    diag(DeleteExpr->getBeginLoc(),
-         "prefer '= nullptr' to 'delete x.release()' to reset unique_ptr<> "
-         "objects")
-            << FixItHint::CreateRemoval(CharSourceRange::getCharRange(
-                                            DeleteExpr->getBeginLoc(), PtrExpr->getBeginLoc()))
-            << FixItHint::CreateReplacement(
-                CharSourceRange::getTokenRange(AfterPtr, DeleteExpr->getEndLoc()),
-                " = nullptr");
+  diag(DeleteExpr->getBeginLoc(),
+       "prefer '= nullptr' to 'delete x.release()' to reset unique_ptr<> "
+       "objects")
+      << FixItHint::CreateRemoval(CharSourceRange::getCharRange(
+             DeleteExpr->getBeginLoc(), PtrExpr->getBeginLoc()))
+      << FixItHint::CreateReplacement(
+             CharSourceRange::getTokenRange(AfterPtr, DeleteExpr->getEndLoc()),
+             " = nullptr");
 }
 
 } // namespace readability

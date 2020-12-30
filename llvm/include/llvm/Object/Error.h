@@ -27,19 +27,19 @@ class Binary;
 const std::error_category &object_category();
 
 enum class object_error {
-    // Error code 0 is absent. Use std::error_code() instead.
-    arch_not_found = 1,
-    invalid_file_type,
-    parse_failed,
-    unexpected_eof,
-    string_table_non_null_end,
-    invalid_section_index,
-    bitcode_section_not_found,
-    invalid_symbol_index,
+  // Error code 0 is absent. Use std::error_code() instead.
+  arch_not_found = 1,
+  invalid_file_type,
+  parse_failed,
+  unexpected_eof,
+  string_table_non_null_end,
+  invalid_section_index,
+  bitcode_section_not_found,
+  invalid_symbol_index,
 };
 
 inline std::error_code make_error_code(object_error e) {
-    return std::error_code(static_cast<int>(e), object_category());
+  return std::error_code(static_cast<int>(e), object_category());
 }
 
 /// Base class for all errors indicating malformed binary files.
@@ -51,13 +51,14 @@ inline std::error_code make_error_code(object_error e) {
 /// Currently inherits from ECError for easy interoperability with
 /// std::error_code, but this will be removed in the future.
 class BinaryError : public ErrorInfo<BinaryError, ECError> {
-    void anchor() override;
+  void anchor() override;
+
 public:
-    static char ID;
-    BinaryError() {
-        // Default to parse_failed, can be overridden with setErrorCode.
-        setErrorCode(make_error_code(object_error::parse_failed));
-    }
+  static char ID;
+  BinaryError() {
+    // Default to parse_failed, can be overridden with setErrorCode.
+    setErrorCode(make_error_code(object_error::parse_failed));
+  }
 };
 
 /// Generic binary error.
@@ -66,21 +67,20 @@ public:
 /// this class can be used to describe the error via a string message.
 class GenericBinaryError : public ErrorInfo<GenericBinaryError, BinaryError> {
 public:
-    static char ID;
-    GenericBinaryError(const Twine &Msg);
-    GenericBinaryError(const Twine &Msg, object_error ECOverride);
-    const std::string &getMessage() const {
-        return Msg;
-    }
-    void log(raw_ostream &OS) const override;
+  static char ID;
+  GenericBinaryError(const Twine &Msg);
+  GenericBinaryError(const Twine &Msg, object_error ECOverride);
+  const std::string &getMessage() const { return Msg; }
+  void log(raw_ostream &OS) const override;
+
 private:
-    std::string Msg;
+  std::string Msg;
 };
 
 /// isNotObjectErrorInvalidFileType() is used when looping through the children
 /// of an archive after calling getAsBinary() on the child and it returns an
-/// llvm::Error.  In the cases we want to loop through the children and ignore the
-/// non-objects in the archive this is used to test the error to see if an
+/// llvm::Error.  In the cases we want to loop through the children and ignore
+/// the non-objects in the archive this is used to test the error to see if an
 /// error() function needs to called on the llvm::Error.
 Error isNotObjectErrorInvalidFileType(llvm::Error Err);
 
@@ -91,6 +91,6 @@ Error isNotObjectErrorInvalidFileType(llvm::Error Err);
 namespace std {
 template <>
 struct is_error_code_enum<llvm::object::object_error> : std::true_type {};
-}
+} // namespace std
 
 #endif

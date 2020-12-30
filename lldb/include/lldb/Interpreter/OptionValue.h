@@ -22,321 +22,312 @@ namespace lldb_private {
 // OptionValue
 class OptionValue {
 public:
-    enum Type {
-        eTypeInvalid = 0,
-        eTypeArch,
-        eTypeArgs,
-        eTypeArray,
-        eTypeBoolean,
-        eTypeChar,
-        eTypeDictionary,
-        eTypeEnum,
-        eTypeFileLineColumn,
-        eTypeFileSpec,
-        eTypeFileSpecList,
-        eTypeFormat,
-        eTypeLanguage,
-        eTypePathMap,
-        eTypeProperties,
-        eTypeRegex,
-        eTypeSInt64,
-        eTypeString,
-        eTypeUInt64,
-        eTypeUUID,
-        eTypeFormatEntity
-    };
+  enum Type {
+    eTypeInvalid = 0,
+    eTypeArch,
+    eTypeArgs,
+    eTypeArray,
+    eTypeBoolean,
+    eTypeChar,
+    eTypeDictionary,
+    eTypeEnum,
+    eTypeFileLineColumn,
+    eTypeFileSpec,
+    eTypeFileSpecList,
+    eTypeFormat,
+    eTypeLanguage,
+    eTypePathMap,
+    eTypeProperties,
+    eTypeRegex,
+    eTypeSInt64,
+    eTypeString,
+    eTypeUInt64,
+    eTypeUUID,
+    eTypeFormatEntity
+  };
 
-    enum {
-        eDumpOptionName = (1u << 0),
-        eDumpOptionType = (1u << 1),
-        eDumpOptionValue = (1u << 2),
-        eDumpOptionDescription = (1u << 3),
-        eDumpOptionRaw = (1u << 4),
-        eDumpOptionCommand = (1u << 5),
-        eDumpGroupValue = (eDumpOptionName | eDumpOptionType | eDumpOptionValue),
-        eDumpGroupHelp =
-            (eDumpOptionName | eDumpOptionType | eDumpOptionDescription),
-        eDumpGroupExport = (eDumpOptionCommand | eDumpOptionName | eDumpOptionValue)
-    };
+  enum {
+    eDumpOptionName = (1u << 0),
+    eDumpOptionType = (1u << 1),
+    eDumpOptionValue = (1u << 2),
+    eDumpOptionDescription = (1u << 3),
+    eDumpOptionRaw = (1u << 4),
+    eDumpOptionCommand = (1u << 5),
+    eDumpGroupValue = (eDumpOptionName | eDumpOptionType | eDumpOptionValue),
+    eDumpGroupHelp =
+        (eDumpOptionName | eDumpOptionType | eDumpOptionDescription),
+    eDumpGroupExport = (eDumpOptionCommand | eDumpOptionName | eDumpOptionValue)
+  };
 
-    OptionValue() : m_value_was_set(false) {}
+  OptionValue() : m_value_was_set(false) {}
 
-    virtual ~OptionValue() = default;
+  virtual ~OptionValue() = default;
 
-    // Subclasses should override these functions
-    virtual Type GetType() const = 0;
+  // Subclasses should override these functions
+  virtual Type GetType() const = 0;
 
-    // If this value is always hidden, the avoid showing any info on this value,
-    // just show the info for the child values.
-    virtual bool ValueIsTransparent() const {
-        return GetType() == eTypeProperties;
+  // If this value is always hidden, the avoid showing any info on this value,
+  // just show the info for the child values.
+  virtual bool ValueIsTransparent() const {
+    return GetType() == eTypeProperties;
+  }
+
+  virtual const char *GetTypeAsCString() const {
+    return GetBuiltinTypeAsCString(GetType());
+  }
+
+  static const char *GetBuiltinTypeAsCString(Type t);
+
+  virtual void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
+                         uint32_t dump_mask) = 0;
+
+  virtual Status
+  SetValueFromString(llvm::StringRef value,
+                     VarSetOperationType op = eVarSetOperationAssign);
+
+  virtual void Clear() = 0;
+
+  virtual lldb::OptionValueSP DeepCopy() const = 0;
+
+  virtual void AutoComplete(CommandInterpreter &interpreter,
+                            CompletionRequest &request);
+
+  // Subclasses can override these functions
+  virtual lldb::OptionValueSP GetSubValue(const ExecutionContext *exe_ctx,
+                                          llvm::StringRef name,
+                                          bool will_modify,
+                                          Status &error) const {
+    error.SetErrorStringWithFormat("'%s' is not a value subvalue",
+                                   name.str().c_str());
+    return lldb::OptionValueSP();
+  }
+
+  virtual Status SetSubValue(const ExecutionContext *exe_ctx,
+                             VarSetOperationType op, llvm::StringRef name,
+                             llvm::StringRef value);
+
+  virtual bool IsAggregateValue() const { return false; }
+
+  virtual ConstString GetName() const { return ConstString(); }
+
+  virtual bool DumpQualifiedName(Stream &strm) const;
+
+  // Subclasses should NOT override these functions as they use the above
+  // functions to implement functionality
+  uint32_t GetTypeAsMask() { return 1u << GetType(); }
+
+  static uint32_t ConvertTypeToMask(OptionValue::Type type) {
+    return 1u << type;
+  }
+
+  static OptionValue::Type ConvertTypeMaskToType(uint32_t type_mask) {
+    // If only one bit is set, then return an appropriate enumeration
+    switch (type_mask) {
+    case 1u << eTypeArch:
+      return eTypeArch;
+    case 1u << eTypeArgs:
+      return eTypeArgs;
+    case 1u << eTypeArray:
+      return eTypeArray;
+    case 1u << eTypeBoolean:
+      return eTypeBoolean;
+    case 1u << eTypeChar:
+      return eTypeChar;
+    case 1u << eTypeDictionary:
+      return eTypeDictionary;
+    case 1u << eTypeEnum:
+      return eTypeEnum;
+    case 1u << eTypeFileLineColumn:
+      return eTypeFileLineColumn;
+    case 1u << eTypeFileSpec:
+      return eTypeFileSpec;
+    case 1u << eTypeFileSpecList:
+      return eTypeFileSpecList;
+    case 1u << eTypeFormat:
+      return eTypeFormat;
+    case 1u << eTypeLanguage:
+      return eTypeLanguage;
+    case 1u << eTypePathMap:
+      return eTypePathMap;
+    case 1u << eTypeProperties:
+      return eTypeProperties;
+    case 1u << eTypeRegex:
+      return eTypeRegex;
+    case 1u << eTypeSInt64:
+      return eTypeSInt64;
+    case 1u << eTypeString:
+      return eTypeString;
+    case 1u << eTypeUInt64:
+      return eTypeUInt64;
+    case 1u << eTypeUUID:
+      return eTypeUUID;
     }
+    // Else return invalid
+    return eTypeInvalid;
+  }
 
-    virtual const char *GetTypeAsCString() const {
-        return GetBuiltinTypeAsCString(GetType());
-    }
-
-    static const char *GetBuiltinTypeAsCString(Type t);
-
-    virtual void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
-                           uint32_t dump_mask) = 0;
-
-    virtual Status
-    SetValueFromString(llvm::StringRef value,
-                       VarSetOperationType op = eVarSetOperationAssign);
-
-    virtual void Clear() = 0;
-
-    virtual lldb::OptionValueSP DeepCopy() const = 0;
-
-    virtual void AutoComplete(CommandInterpreter &interpreter,
-                              CompletionRequest &request);
-
-    // Subclasses can override these functions
-    virtual lldb::OptionValueSP GetSubValue(const ExecutionContext *exe_ctx,
-                                            llvm::StringRef name,
-                                            bool will_modify,
-                                            Status &error) const {
-        error.SetErrorStringWithFormat("'%s' is not a value subvalue", name.str().c_str());
-        return lldb::OptionValueSP();
-    }
-
-    virtual Status SetSubValue(const ExecutionContext *exe_ctx,
-                               VarSetOperationType op, llvm::StringRef name,
-                               llvm::StringRef value);
-
-    virtual bool IsAggregateValue() const {
-        return false;
-    }
-
-    virtual ConstString GetName() const {
-        return ConstString();
-    }
-
-    virtual bool DumpQualifiedName(Stream &strm) const;
-
-    // Subclasses should NOT override these functions as they use the above
-    // functions to implement functionality
-    uint32_t GetTypeAsMask() {
-        return 1u << GetType();
-    }
+  static lldb::OptionValueSP
+  CreateValueFromCStringForTypeMask(const char *value_cstr, uint32_t type_mask,
+                                    Status &error);
 
-    static uint32_t ConvertTypeToMask(OptionValue::Type type) {
-        return 1u << type;
-    }
+  // Get this value as a uint64_t value if it is encoded as a boolean, uint64_t
+  // or int64_t. Other types will cause "fail_value" to be returned
+  uint64_t GetUInt64Value(uint64_t fail_value, bool *success_ptr);
 
-    static OptionValue::Type ConvertTypeMaskToType(uint32_t type_mask) {
-        // If only one bit is set, then return an appropriate enumeration
-        switch (type_mask) {
-        case 1u << eTypeArch:
-            return eTypeArch;
-        case 1u << eTypeArgs:
-            return eTypeArgs;
-        case 1u << eTypeArray:
-            return eTypeArray;
-        case 1u << eTypeBoolean:
-            return eTypeBoolean;
-        case 1u << eTypeChar:
-            return eTypeChar;
-        case 1u << eTypeDictionary:
-            return eTypeDictionary;
-        case 1u << eTypeEnum:
-            return eTypeEnum;
-        case 1u << eTypeFileLineColumn:
-            return eTypeFileLineColumn;
-        case 1u << eTypeFileSpec:
-            return eTypeFileSpec;
-        case 1u << eTypeFileSpecList:
-            return eTypeFileSpecList;
-        case 1u << eTypeFormat:
-            return eTypeFormat;
-        case 1u << eTypeLanguage:
-            return eTypeLanguage;
-        case 1u << eTypePathMap:
-            return eTypePathMap;
-        case 1u << eTypeProperties:
-            return eTypeProperties;
-        case 1u << eTypeRegex:
-            return eTypeRegex;
-        case 1u << eTypeSInt64:
-            return eTypeSInt64;
-        case 1u << eTypeString:
-            return eTypeString;
-        case 1u << eTypeUInt64:
-            return eTypeUInt64;
-        case 1u << eTypeUUID:
-            return eTypeUUID;
-        }
-        // Else return invalid
-        return eTypeInvalid;
-    }
+  OptionValueArch *GetAsArch();
 
-    static lldb::OptionValueSP
-    CreateValueFromCStringForTypeMask(const char *value_cstr, uint32_t type_mask,
-                                      Status &error);
+  const OptionValueArch *GetAsArch() const;
 
-    // Get this value as a uint64_t value if it is encoded as a boolean, uint64_t
-    // or int64_t. Other types will cause "fail_value" to be returned
-    uint64_t GetUInt64Value(uint64_t fail_value, bool *success_ptr);
+  OptionValueArray *GetAsArray();
 
-    OptionValueArch *GetAsArch();
+  const OptionValueArray *GetAsArray() const;
 
-    const OptionValueArch *GetAsArch() const;
+  OptionValueArgs *GetAsArgs();
 
-    OptionValueArray *GetAsArray();
+  const OptionValueArgs *GetAsArgs() const;
 
-    const OptionValueArray *GetAsArray() const;
+  OptionValueBoolean *GetAsBoolean();
 
-    OptionValueArgs *GetAsArgs();
+  OptionValueChar *GetAsChar();
 
-    const OptionValueArgs *GetAsArgs() const;
+  const OptionValueBoolean *GetAsBoolean() const;
 
-    OptionValueBoolean *GetAsBoolean();
+  const OptionValueChar *GetAsChar() const;
 
-    OptionValueChar *GetAsChar();
+  OptionValueDictionary *GetAsDictionary();
 
-    const OptionValueBoolean *GetAsBoolean() const;
+  const OptionValueDictionary *GetAsDictionary() const;
 
-    const OptionValueChar *GetAsChar() const;
+  OptionValueEnumeration *GetAsEnumeration();
 
-    OptionValueDictionary *GetAsDictionary();
+  const OptionValueEnumeration *GetAsEnumeration() const;
 
-    const OptionValueDictionary *GetAsDictionary() const;
+  OptionValueFileSpec *GetAsFileSpec();
 
-    OptionValueEnumeration *GetAsEnumeration();
+  const OptionValueFileSpec *GetAsFileSpec() const;
 
-    const OptionValueEnumeration *GetAsEnumeration() const;
+  OptionValueFileSpecList *GetAsFileSpecList();
 
-    OptionValueFileSpec *GetAsFileSpec();
+  const OptionValueFileSpecList *GetAsFileSpecList() const;
 
-    const OptionValueFileSpec *GetAsFileSpec() const;
+  OptionValueFormat *GetAsFormat();
 
-    OptionValueFileSpecList *GetAsFileSpecList();
+  const OptionValueFormat *GetAsFormat() const;
 
-    const OptionValueFileSpecList *GetAsFileSpecList() const;
+  OptionValueLanguage *GetAsLanguage();
 
-    OptionValueFormat *GetAsFormat();
+  const OptionValueLanguage *GetAsLanguage() const;
 
-    const OptionValueFormat *GetAsFormat() const;
+  OptionValuePathMappings *GetAsPathMappings();
 
-    OptionValueLanguage *GetAsLanguage();
+  const OptionValuePathMappings *GetAsPathMappings() const;
 
-    const OptionValueLanguage *GetAsLanguage() const;
+  OptionValueProperties *GetAsProperties();
 
-    OptionValuePathMappings *GetAsPathMappings();
+  const OptionValueProperties *GetAsProperties() const;
 
-    const OptionValuePathMappings *GetAsPathMappings() const;
+  OptionValueRegex *GetAsRegex();
 
-    OptionValueProperties *GetAsProperties();
+  const OptionValueRegex *GetAsRegex() const;
 
-    const OptionValueProperties *GetAsProperties() const;
+  OptionValueSInt64 *GetAsSInt64();
 
-    OptionValueRegex *GetAsRegex();
+  const OptionValueSInt64 *GetAsSInt64() const;
 
-    const OptionValueRegex *GetAsRegex() const;
+  OptionValueString *GetAsString();
 
-    OptionValueSInt64 *GetAsSInt64();
+  const OptionValueString *GetAsString() const;
 
-    const OptionValueSInt64 *GetAsSInt64() const;
+  OptionValueUInt64 *GetAsUInt64();
 
-    OptionValueString *GetAsString();
+  const OptionValueUInt64 *GetAsUInt64() const;
 
-    const OptionValueString *GetAsString() const;
+  OptionValueUUID *GetAsUUID();
 
-    OptionValueUInt64 *GetAsUInt64();
+  const OptionValueUUID *GetAsUUID() const;
 
-    const OptionValueUInt64 *GetAsUInt64() const;
+  OptionValueFormatEntity *GetAsFormatEntity();
 
-    OptionValueUUID *GetAsUUID();
+  const OptionValueFormatEntity *GetAsFormatEntity() const;
 
-    const OptionValueUUID *GetAsUUID() const;
+  bool GetBooleanValue(bool fail_value = false) const;
 
-    OptionValueFormatEntity *GetAsFormatEntity();
+  bool SetBooleanValue(bool new_value);
 
-    const OptionValueFormatEntity *GetAsFormatEntity() const;
+  char GetCharValue(char fail_value) const;
 
-    bool GetBooleanValue(bool fail_value = false) const;
+  char SetCharValue(char new_value);
 
-    bool SetBooleanValue(bool new_value);
+  int64_t GetEnumerationValue(int64_t fail_value = -1) const;
 
-    char GetCharValue(char fail_value) const;
+  bool SetEnumerationValue(int64_t value);
 
-    char SetCharValue(char new_value);
+  FileSpec GetFileSpecValue() const;
 
-    int64_t GetEnumerationValue(int64_t fail_value = -1) const;
+  bool SetFileSpecValue(const FileSpec &file_spec);
 
-    bool SetEnumerationValue(int64_t value);
+  FileSpecList GetFileSpecListValue() const;
 
-    FileSpec GetFileSpecValue() const;
+  lldb::Format
+  GetFormatValue(lldb::Format fail_value = lldb::eFormatDefault) const;
 
-    bool SetFileSpecValue(const FileSpec &file_spec);
+  bool SetFormatValue(lldb::Format new_value);
 
-    FileSpecList GetFileSpecListValue() const;
+  lldb::LanguageType GetLanguageValue(
+      lldb::LanguageType fail_value = lldb::eLanguageTypeUnknown) const;
 
-    lldb::Format
-    GetFormatValue(lldb::Format fail_value = lldb::eFormatDefault) const;
+  bool SetLanguageValue(lldb::LanguageType new_language);
 
-    bool SetFormatValue(lldb::Format new_value);
+  const FormatEntity::Entry *GetFormatEntity() const;
 
-    lldb::LanguageType GetLanguageValue(
-        lldb::LanguageType fail_value = lldb::eLanguageTypeUnknown) const;
+  const RegularExpression *GetRegexValue() const;
 
-    bool SetLanguageValue(lldb::LanguageType new_language);
+  int64_t GetSInt64Value(int64_t fail_value = 0) const;
 
-    const FormatEntity::Entry *GetFormatEntity() const;
+  bool SetSInt64Value(int64_t new_value);
 
-    const RegularExpression *GetRegexValue() const;
+  llvm::StringRef GetStringValue(llvm::StringRef fail_value) const;
+  llvm::StringRef GetStringValue() const {
+    return GetStringValue(llvm::StringRef());
+  }
 
-    int64_t GetSInt64Value(int64_t fail_value = 0) const;
+  bool SetStringValue(llvm::StringRef new_value);
 
-    bool SetSInt64Value(int64_t new_value);
+  uint64_t GetUInt64Value(uint64_t fail_value = 0) const;
 
-    llvm::StringRef GetStringValue(llvm::StringRef fail_value) const;
-    llvm::StringRef GetStringValue() const {
-        return GetStringValue(llvm::StringRef());
-    }
+  bool SetUInt64Value(uint64_t new_value);
 
-    bool SetStringValue(llvm::StringRef new_value);
+  UUID GetUUIDValue() const;
 
-    uint64_t GetUInt64Value(uint64_t fail_value = 0) const;
+  bool SetUUIDValue(const UUID &uuid);
 
-    bool SetUInt64Value(uint64_t new_value);
+  bool OptionWasSet() const { return m_value_was_set; }
 
-    UUID GetUUIDValue() const;
+  void SetOptionWasSet() { m_value_was_set = true; }
 
-    bool SetUUIDValue(const UUID &uuid);
+  void SetParent(const lldb::OptionValueSP &parent_sp) {
+    m_parent_wp = parent_sp;
+  }
 
-    bool OptionWasSet() const {
-        return m_value_was_set;
-    }
+  void SetValueChangedCallback(std::function<void()> callback) {
+    assert(!m_callback);
+    m_callback = std::move(callback);
+  }
 
-    void SetOptionWasSet() {
-        m_value_was_set = true;
-    }
-
-    void SetParent(const lldb::OptionValueSP &parent_sp) {
-        m_parent_wp = parent_sp;
-    }
-
-    void SetValueChangedCallback(std::function<void()> callback) {
-        assert(!m_callback);
-        m_callback = std::move(callback);
-    }
-
-    void NotifyValueChanged() {
-        if (m_callback)
-            m_callback();
-    }
+  void NotifyValueChanged() {
+    if (m_callback)
+      m_callback();
+  }
 
 protected:
-    lldb::OptionValueWP m_parent_wp;
-    std::function<void()> m_callback;
-    bool m_value_was_set; // This can be used to see if a value has been set
-    // by a call to SetValueFromCString(). It is often
-    // handy to know if an option value was set from the
-    // command line or as a setting, versus if we just have
-    // the default value that was already populated in the
-    // option value.
+  lldb::OptionValueWP m_parent_wp;
+  std::function<void()> m_callback;
+  bool m_value_was_set; // This can be used to see if a value has been set
+                        // by a call to SetValueFromCString(). It is often
+                        // handy to know if an option value was set from the
+                        // command line or as a setting, versus if we just have
+                        // the default value that was already populated in the
+                        // option value.
 };
 
 } // namespace lldb_private

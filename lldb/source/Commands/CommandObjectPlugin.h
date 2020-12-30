@@ -15,9 +15,9 @@ namespace lldb_private {
 
 class CommandObjectPlugin : public CommandObjectMultiword {
 public:
-    CommandObjectPlugin(CommandInterpreter &interpreter);
+  CommandObjectPlugin(CommandInterpreter &interpreter);
 
-    ~CommandObjectPlugin() override;
+  ~CommandObjectPlugin() override;
 };
 
 } // namespace lldb_private

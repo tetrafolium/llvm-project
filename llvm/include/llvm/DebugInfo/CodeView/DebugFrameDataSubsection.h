@@ -19,51 +19,45 @@ namespace llvm {
 namespace codeview {
 class DebugFrameDataSubsectionRef final : public DebugSubsectionRef {
 public:
-    DebugFrameDataSubsectionRef()
-        : DebugSubsectionRef(DebugSubsectionKind::FrameData) {}
-    static bool classof(const DebugSubsection *S) {
-        return S->kind() == DebugSubsectionKind::FrameData;
-    }
+  DebugFrameDataSubsectionRef()
+      : DebugSubsectionRef(DebugSubsectionKind::FrameData) {}
+  static bool classof(const DebugSubsection *S) {
+    return S->kind() == DebugSubsectionKind::FrameData;
+  }
 
-    Error initialize(BinaryStreamReader Reader);
-    Error initialize(BinaryStreamRef Stream);
+  Error initialize(BinaryStreamReader Reader);
+  Error initialize(BinaryStreamRef Stream);
 
-    FixedStreamArray<FrameData>::Iterator begin() const {
-        return Frames.begin();
-    }
-    FixedStreamArray<FrameData>::Iterator end() const {
-        return Frames.end();
-    }
+  FixedStreamArray<FrameData>::Iterator begin() const { return Frames.begin(); }
+  FixedStreamArray<FrameData>::Iterator end() const { return Frames.end(); }
 
-    const support::ulittle32_t *getRelocPtr() const {
-        return RelocPtr;
-    }
+  const support::ulittle32_t *getRelocPtr() const { return RelocPtr; }
 
 private:
-    const support::ulittle32_t *RelocPtr = nullptr;
-    FixedStreamArray<FrameData> Frames;
+  const support::ulittle32_t *RelocPtr = nullptr;
+  FixedStreamArray<FrameData> Frames;
 };
 
 class DebugFrameDataSubsection final : public DebugSubsection {
 public:
-    DebugFrameDataSubsection(bool IncludeRelocPtr)
-        : DebugSubsection(DebugSubsectionKind::FrameData),
-          IncludeRelocPtr(IncludeRelocPtr) {}
-    static bool classof(const DebugSubsection *S) {
-        return S->kind() == DebugSubsectionKind::FrameData;
-    }
+  DebugFrameDataSubsection(bool IncludeRelocPtr)
+      : DebugSubsection(DebugSubsectionKind::FrameData),
+        IncludeRelocPtr(IncludeRelocPtr) {}
+  static bool classof(const DebugSubsection *S) {
+    return S->kind() == DebugSubsectionKind::FrameData;
+  }
 
-    uint32_t calculateSerializedSize() const override;
-    Error commit(BinaryStreamWriter &Writer) const override;
+  uint32_t calculateSerializedSize() const override;
+  Error commit(BinaryStreamWriter &Writer) const override;
 
-    void addFrameData(const FrameData &Frame);
-    void setFrames(ArrayRef<FrameData> Frames);
+  void addFrameData(const FrameData &Frame);
+  void setFrames(ArrayRef<FrameData> Frames);
 
 private:
-    bool IncludeRelocPtr = false;
-    std::vector<FrameData> Frames;
+  bool IncludeRelocPtr = false;
+  std::vector<FrameData> Frames;
 };
-}
-}
+} // namespace codeview
+} // namespace llvm
 
 #endif

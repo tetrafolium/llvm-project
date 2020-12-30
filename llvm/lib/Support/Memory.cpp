@@ -33,18 +33,18 @@ namespace llvm {
 namespace sys {
 
 raw_ostream &operator<<(raw_ostream &OS, const Memory::ProtectionFlags &PF) {
-    assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
-           "Unrecognized flags");
+  assert((PF & ~(Memory::MF_READ | Memory::MF_WRITE | Memory::MF_EXEC)) == 0 &&
+         "Unrecognized flags");
 
-    return OS << (PF & Memory::MF_READ ? 'R' : '-')
-           << (PF & Memory::MF_WRITE ? 'W' : '-')
-           << (PF & Memory::MF_EXEC ? 'X' : '-');
+  return OS << (PF & Memory::MF_READ ? 'R' : '-')
+            << (PF & Memory::MF_WRITE ? 'W' : '-')
+            << (PF & Memory::MF_EXEC ? 'X' : '-');
 }
 
 raw_ostream &operator<<(raw_ostream &OS, const MemoryBlock &MB) {
-    return OS << "[ " << MB.base() << " .. "
-           << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
-           << MB.allocatedSize() << " bytes)";
+  return OS << "[ " << MB.base() << " .. "
+            << (void *)((char *)MB.base() + MB.allocatedSize()) << " ] ("
+            << MB.allocatedSize() << " bytes)";
 }
 
 } // end namespace sys

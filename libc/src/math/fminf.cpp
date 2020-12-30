@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 float LLVM_LIBC_ENTRYPOINT(fminf)(float x, float y) {
-    return fputil::fmin(x, y);
+  return fputil::fmin(x, y);
 }
 
 } // namespace __llvm_libc

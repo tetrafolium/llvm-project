@@ -11,78 +11,54 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <isl/ctx.h>
-#include <isl_options_private.h>
 #include <isl/ast_build.h>
+#include <isl/ctx.h>
 #include <isl/schedule.h>
 #include <isl/version.h>
+#include <isl_options_private.h>
 
 struct isl_arg_choice isl_pip_context_choice[] = {
-    {"gbr",		ISL_CONTEXT_GBR},
-    {"lexmin",	ISL_CONTEXT_LEXMIN},
-    {0}
-};
+    {"gbr", ISL_CONTEXT_GBR}, {"lexmin", ISL_CONTEXT_LEXMIN}, {0}};
 
-struct isl_arg_choice isl_gbr_choice[] = {
-    {"never",	ISL_GBR_NEVER},
-    {"once",	ISL_GBR_ONCE},
-    {"always",	ISL_GBR_ALWAYS},
-    {0}
-};
+struct isl_arg_choice isl_gbr_choice[] = {{"never", ISL_GBR_NEVER},
+                                          {"once", ISL_GBR_ONCE},
+                                          {"always", ISL_GBR_ALWAYS},
+                                          {0}};
 
 struct isl_arg_choice isl_closure_choice[] = {
-    {"isl",		ISL_CLOSURE_ISL},
-    {"box",		ISL_CLOSURE_BOX},
-    {0}
-};
+    {"isl", ISL_CLOSURE_ISL}, {"box", ISL_CLOSURE_BOX}, {0}};
 
 static struct isl_arg_choice bound[] = {
-    {"bernstein",	ISL_BOUND_BERNSTEIN},
-    {"range",	ISL_BOUND_RANGE},
-    {0}
-};
+    {"bernstein", ISL_BOUND_BERNSTEIN}, {"range", ISL_BOUND_RANGE}, {0}};
 
-static struct isl_arg_choice on_error[] = {
-    {"warn",	ISL_ON_ERROR_WARN},
-    {"continue",	ISL_ON_ERROR_CONTINUE},
-    {"abort",	ISL_ON_ERROR_ABORT},
-    {0}
-};
+static struct isl_arg_choice on_error[] = {{"warn", ISL_ON_ERROR_WARN},
+                                           {"continue", ISL_ON_ERROR_CONTINUE},
+                                           {"abort", ISL_ON_ERROR_ABORT},
+                                           {0}};
 
 static struct isl_arg_choice isl_schedule_algorithm_choice[] = {
-    {"isl",		ISL_SCHEDULE_ALGORITHM_ISL},
-    {"feautrier",   ISL_SCHEDULE_ALGORITHM_FEAUTRIER},
-    {0}
-};
+    {"isl", ISL_SCHEDULE_ALGORITHM_ISL},
+    {"feautrier", ISL_SCHEDULE_ALGORITHM_FEAUTRIER},
+    {0}};
 
 static struct isl_arg_flags bernstein_recurse[] = {
-    {"none",	ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS, 0},
-    {   "factors",	ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
-        ISL_BERNSTEIN_FACTORS
-    },
-    {   "intervals",	ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
-        ISL_BERNSTEIN_INTERVALS
-    },
-    {   "full",	ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
-        ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS
-    },
-    {0}
-};
+    {"none", ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS, 0},
+    {"factors", ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
+     ISL_BERNSTEIN_FACTORS},
+    {"intervals", ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
+     ISL_BERNSTEIN_INTERVALS},
+    {"full", ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS,
+     ISL_BERNSTEIN_FACTORS | ISL_BERNSTEIN_INTERVALS},
+    {0}};
 
 static struct isl_arg_choice convex[] = {
-    {"wrap",	ISL_CONVEX_HULL_WRAP},
-    {"fm",		ISL_CONVEX_HULL_FM},
-    {0}
-};
+    {"wrap", ISL_CONVEX_HULL_WRAP}, {"fm", ISL_CONVEX_HULL_FM}, {0}};
 
-#define		ISL_SCHEDULE_FUSE_MAX			0
-#define		ISL_SCHEDULE_FUSE_MIN			1
+#define ISL_SCHEDULE_FUSE_MAX 0
+#define ISL_SCHEDULE_FUSE_MIN 1
 
 static struct isl_arg_choice fuse[] = {
-    {"max",		ISL_SCHEDULE_FUSE_MAX},
-    {"min",		ISL_SCHEDULE_FUSE_MIN},
-    {0}
-};
+    {"max", ISL_SCHEDULE_FUSE_MAX}, {"min", ISL_SCHEDULE_FUSE_MIN}, {0}};
 
 /* Callback for setting the "schedule-fuse" option.
  * This (now hidden) option tries to mimic an option that was
@@ -90,66 +66,62 @@ static struct isl_arg_choice fuse[] = {
  * Setting the old option to ISL_SCHEDULE_FUSE_MIN is now
  * expressed by turning on the schedule-serialize-sccs option.
  */
-static int set_fuse(void *opt, unsigned val)
-{
-    struct isl_options *options = opt;
+static int set_fuse(void *opt, unsigned val) {
+  struct isl_options *options = opt;
 
-    options->schedule_serialize_sccs = (val == ISL_SCHEDULE_FUSE_MIN);
+  options->schedule_serialize_sccs = (val == ISL_SCHEDULE_FUSE_MIN);
 
-    return 0;
+  return 0;
 }
 
 static struct isl_arg_choice separation_bounds[] = {
-    {"explicit",	ISL_AST_BUILD_SEPARATION_BOUNDS_EXPLICIT},
-    {"implicit",	ISL_AST_BUILD_SEPARATION_BOUNDS_IMPLICIT},
-    {0}
-};
+    {"explicit", ISL_AST_BUILD_SEPARATION_BOUNDS_EXPLICIT},
+    {"implicit", ISL_AST_BUILD_SEPARATION_BOUNDS_IMPLICIT},
+    {0}};
 
-static void print_version(void)
-{
-    printf("%s", isl_version());
-}
+static void print_version(void) { printf("%s", isl_version()); }
 
 ISL_ARGS_START(struct isl_options, isl_options_args)
-ISL_ARG_CHOICE(struct isl_options, context, 0, "context", \
-               isl_pip_context_choice,	ISL_CONTEXT_GBR,
+ISL_ARG_CHOICE(struct isl_options, context, 0, "context",
+               isl_pip_context_choice, ISL_CONTEXT_GBR,
                "how to handle the pip context tableau")
-ISL_ARG_CHOICE(struct isl_options, gbr, 0, "gbr", \
-               isl_gbr_choice,	ISL_GBR_ALWAYS,
-               "how often to use generalized basis reduction")
-ISL_ARG_CHOICE(struct isl_options, closure, 0, "closure", \
-               isl_closure_choice,	ISL_CLOSURE_ISL,
-               "closure operation to use")
+ISL_ARG_CHOICE(struct isl_options, gbr, 0, "gbr", isl_gbr_choice,
+               ISL_GBR_ALWAYS, "how often to use generalized basis reduction")
+ISL_ARG_CHOICE(struct isl_options, closure, 0, "closure", isl_closure_choice,
+               ISL_CLOSURE_ISL, "closure operation to use")
 ISL_ARG_BOOL(struct isl_options, gbr_only_first, 0, "gbr-only-first", 0,
              "only perform basis reduction in first direction")
 ISL_ARG_CHOICE(struct isl_options, bound, 0, "bound", bound,
                ISL_BOUND_BERNSTEIN, "algorithm to use for computing bounds")
 ISL_ARG_CHOICE(struct isl_options, on_error, 0, "on-error", on_error,
                ISL_ON_ERROR_WARN, "how to react if an error is detected")
-ISL_ARG_FLAGS(struct isl_options, bernstein_recurse, 0,
-              "bernstein-recurse", bernstein_recurse, ISL_BERNSTEIN_FACTORS, NULL)
+ISL_ARG_FLAGS(struct isl_options, bernstein_recurse, 0, "bernstein-recurse",
+              bernstein_recurse, ISL_BERNSTEIN_FACTORS, NULL)
 ISL_ARG_BOOL(struct isl_options, bernstein_triangulate, 0,
              "bernstein-triangulate", 1,
              "triangulate domains during Bernstein expansion")
 ISL_ARG_BOOL(struct isl_options, pip_symmetry, 0, "pip-symmetry", 1,
              "detect simple symmetries in PIP input")
-ISL_ARG_CHOICE(struct isl_options, convex, 0, "convex-hull", \
-               convex,	ISL_CONVEX_HULL_WRAP, "convex hull algorithm to use")
+ISL_ARG_CHOICE(struct isl_options, convex, 0, "convex-hull", convex,
+               ISL_CONVEX_HULL_WRAP, "convex hull algorithm to use")
 ISL_ARG_BOOL(struct isl_options, coalesce_bounded_wrapping, 0,
              "coalesce-bounded-wrapping", 1, "bound wrapping during coalescing")
 ISL_ARG_BOOL(struct isl_options, coalesce_preserve_locals, 0,
              "coalesce-preserve-locals", 0,
              "preserve local variables during coalescing")
-ISL_ARG_INT(struct isl_options, schedule_max_coefficient, 0,
-            "schedule-max-coefficient", "limit", -1, "Only consider schedules "
-            "where the coefficients of the variable and parameter dimensions "
-            "do not exceed <limit>. A value of -1 allows arbitrary coefficients.")
+ISL_ARG_INT(
+    struct isl_options, schedule_max_coefficient, 0, "schedule-max-coefficient",
+    "limit", -1,
+    "Only consider schedules "
+    "where the coefficients of the variable and parameter dimensions "
+    "do not exceed <limit>. A value of -1 allows arbitrary coefficients.")
 ISL_ARG_INT(struct isl_options, schedule_max_constant_term, 0,
-            "schedule-max-constant-term", "limit", -1, "Only consider schedules "
+            "schedule-max-constant-term", "limit", -1,
+            "Only consider schedules "
             "where the coefficients of the constant dimension do not exceed "
             "<limit>. A value of -1 allows arbitrary coefficients.")
-ISL_ARG_BOOL(struct isl_options, schedule_parametric, 0,
-             "schedule-parametric", 1, "construct possibly parametric schedules")
+ISL_ARG_BOOL(struct isl_options, schedule_parametric, 0, "schedule-parametric",
+             1, "construct possibly parametric schedules")
 ISL_ARG_BOOL(struct isl_options, schedule_outer_coincidence, 0,
              "schedule-outer-coincidence", 0,
              "try to construct schedules where the outer member of each band "
@@ -172,29 +144,32 @@ ISL_ARG_BOOL(struct isl_options, schedule_separate_components, 0,
 ISL_ARG_BOOL(struct isl_options, schedule_whole_component, 0,
              "schedule-whole-component", 0,
              "try and compute schedule for entire component first")
-ISL_ARG_CHOICE(struct isl_options, schedule_algorithm, 0,
-               "schedule-algorithm", isl_schedule_algorithm_choice,
-               ISL_SCHEDULE_ALGORITHM_ISL, "scheduling algorithm to use")
+ISL_ARG_CHOICE(struct isl_options, schedule_algorithm, 0, "schedule-algorithm",
+               isl_schedule_algorithm_choice, ISL_SCHEDULE_ALGORITHM_ISL,
+               "scheduling algorithm to use")
 ISL_ARG_BOOL(struct isl_options, schedule_carry_self_first, 0,
-             "schedule-carry-self-first", 1, "try and carry self-dependences first")
+             "schedule-carry-self-first", 1,
+             "try and carry self-dependences first")
 ISL_ARG_BOOL(struct isl_options, schedule_serialize_sccs, 0,
              "schedule-serialize-sccs", 0,
              "serialize strongly connected components in dependence graph")
 ISL_ARG_PHANTOM_USER_CHOICE_F(0, "schedule-fuse", fuse, &set_fuse,
-                              ISL_SCHEDULE_FUSE_MAX, "level of fusion during scheduling",
+                              ISL_SCHEDULE_FUSE_MAX,
+                              "level of fusion during scheduling",
                               ISL_ARG_HIDDEN)
 ISL_ARG_BOOL(struct isl_options, tile_scale_tile_loops, 0,
              "tile-scale-tile-loops", 1, "scale tile loops")
 ISL_ARG_BOOL(struct isl_options, tile_shift_point_loops, 0,
              "tile-shift-point-loops", 1, "shift point loops to start at zero")
-ISL_ARG_STR(struct isl_options, ast_iterator_type, 0,
-            "ast-iterator-type", "type", "int",
-            "type used for iterators during printing of AST")
+ISL_ARG_STR(struct isl_options, ast_iterator_type, 0, "ast-iterator-type",
+            "type", "int", "type used for iterators during printing of AST")
 ISL_ARG_BOOL(struct isl_options, ast_always_print_block, 0,
-             "ast-always-print-block", 0, "print for and if bodies as a block "
+             "ast-always-print-block", 0,
+             "print for and if bodies as a block "
              "regardless of the number of statements in the body")
 ISL_ARG_BOOL(struct isl_options, ast_print_outermost_block, 0,
-             "ast-print-outermost-block", 1, "print outermost block node as a block")
+             "ast-print-outermost-block", 1,
+             "print outermost block node as a block")
 ISL_ARG_BOOL(struct isl_options, ast_print_macro_once, 0,
              "ast-print-macro-once", 0, "only print macro definitions once")
 ISL_ARG_BOOL(struct isl_options, ast_build_atomic_upper_bound, 0,
@@ -217,13 +192,14 @@ ISL_ARG_BOOL(struct isl_options, ast_build_scale_strides, 0,
              "ast-build-scale-strides", 1,
              "allow iterators of strided loops to be scaled down")
 ISL_ARG_BOOL(struct isl_options, ast_build_allow_else, 0,
-             "ast-build-allow-else", 1, "generate if statements with else branches")
-ISL_ARG_BOOL(struct isl_options, ast_build_allow_or, 0,
-             "ast-build-allow-or", 1, "generate if conditions with disjunctions")
+             "ast-build-allow-else", 1,
+             "generate if statements with else branches")
+ISL_ARG_BOOL(struct isl_options, ast_build_allow_or, 0, "ast-build-allow-or", 1,
+             "generate if conditions with disjunctions")
 ISL_ARG_BOOL(struct isl_options, print_stats, 0, "print-stats", 0,
              "print statistics for every isl_ctx")
-ISL_ARG_ULONG(struct isl_options, max_operations, 0,
-              "max-operations", 0, "default number of maximal operations per isl_ctx")
+ISL_ARG_ULONG(struct isl_options, max_operations, 0, "max-operations", 0,
+              "default number of maximal operations per isl_ctx")
 ISL_ARG_VERSION(print_version)
 ISL_ARGS_END
 

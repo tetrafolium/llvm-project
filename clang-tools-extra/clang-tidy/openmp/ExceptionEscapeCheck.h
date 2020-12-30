@@ -23,18 +23,18 @@ namespace openmp {
 /// http://clang.llvm.org/extra/clang-tidy/checks/openmp-exception-escape.html
 class ExceptionEscapeCheck : public ClangTidyCheck {
 public:
-    ExceptionEscapeCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.OpenMP && LangOpts.CPlusPlus && LangOpts.CXXExceptions;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  ExceptionEscapeCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.OpenMP && LangOpts.CPlusPlus && LangOpts.CXXExceptions;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    std::string RawIgnoredExceptions;
+  std::string RawIgnoredExceptions;
 
-    utils::ExceptionAnalyzer Tracer;
+  utils::ExceptionAnalyzer Tracer;
 };
 
 } // namespace openmp

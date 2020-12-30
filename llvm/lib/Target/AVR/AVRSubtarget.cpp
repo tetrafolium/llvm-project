@@ -42,16 +42,16 @@ AVRSubtarget::AVRSubtarget(const Triple &TT, const std::string &CPU,
 
       InstrInfo(), FrameLowering(),
       TLInfo(TM, initializeSubtargetDependencies(CPU, FS, TM)), TSInfo() {
-    // Parse features string.
-    ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
+  // Parse features string.
+  ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
 }
 
 AVRSubtarget &
 AVRSubtarget::initializeSubtargetDependencies(StringRef CPU, StringRef FS,
-        const TargetMachine &TM) {
-    // Parse features string.
-    ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
-    return *this;
+                                              const TargetMachine &TM) {
+  // Parse features string.
+  ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
+  return *this;
 }
 
 } // end of namespace llvm

@@ -16,13 +16,13 @@
 namespace __llvm_libc {
 
 int LLVM_LIBC_ENTRYPOINT(sigfillset)(sigset_t *set) {
-    if (!set) {
-        llvmlibc_errno = EINVAL;
-        return -1;
-    }
-    auto *sigset = reinterpret_cast<__llvm_libc::Sigset *>(set);
-    *sigset = __llvm_libc::Sigset::fullset();
-    return 0;
+  if (!set) {
+    llvmlibc_errno = EINVAL;
+    return -1;
+  }
+  auto *sigset = reinterpret_cast<__llvm_libc::Sigset *>(set);
+  *sigset = __llvm_libc::Sigset::fullset();
+  return 0;
 }
 
 } // namespace __llvm_libc

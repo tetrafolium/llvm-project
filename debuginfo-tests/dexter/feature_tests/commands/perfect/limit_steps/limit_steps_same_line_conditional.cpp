@@ -7,17 +7,17 @@
 // CHECK: limit_steps_same_line_conditional.cpp
 
 int main() {
-    int val1 = 0;
+  int val1 = 0;
 
-    int placeholder;
-    for(int ix = 0; ix != 4; ++ix) {
-        val1 = ix;
-        placeholder = ix;    // DexLabel('from')
-        placeholder = ix;
-        val1 += 2;           // DexLabel('to')
-        placeholder = ix;    // DexLabel('extended_to')
-    }
-    return val1 + placeholder;
+  int placeholder;
+  for (int ix = 0; ix != 4; ++ix) {
+    val1 = ix;
+    placeholder = ix; // DexLabel('from')
+    placeholder = ix;
+    val1 += 2;        // DexLabel('to')
+    placeholder = ix; // DexLabel('extended_to')
+  }
+  return val1 + placeholder;
 }
 
 // DexExpectWatchValue('val1', 0, 1, 3, from_line='from', to_line='extended_to')

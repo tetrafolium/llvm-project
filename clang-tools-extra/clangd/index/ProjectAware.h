@@ -21,7 +21,7 @@ namespace clangd {
 /// should perform any high latency operation in a separate thread through
 /// AsyncTaskRunner.
 using IndexFactory = std::function<std::unique_ptr<SymbolIndex>(
-                         const Config::ExternalIndexSpec &, AsyncTaskRunner &)>;
+    const Config::ExternalIndexSpec &, AsyncTaskRunner &)>;
 
 /// Returns an index that answers queries using external indices. IndexFactory
 /// specifies how to generate an index from an external source.

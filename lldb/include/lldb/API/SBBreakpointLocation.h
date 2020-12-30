@@ -16,86 +16,86 @@ namespace lldb {
 
 class LLDB_API SBBreakpointLocation {
 public:
-    SBBreakpointLocation();
+  SBBreakpointLocation();
 
-    SBBreakpointLocation(const lldb::SBBreakpointLocation &rhs);
+  SBBreakpointLocation(const lldb::SBBreakpointLocation &rhs);
 
-    ~SBBreakpointLocation();
+  ~SBBreakpointLocation();
 
-    const lldb::SBBreakpointLocation &
-    operator=(const lldb::SBBreakpointLocation &rhs);
+  const lldb::SBBreakpointLocation &
+  operator=(const lldb::SBBreakpointLocation &rhs);
 
-    break_id_t GetID();
+  break_id_t GetID();
 
-    explicit operator bool() const;
+  explicit operator bool() const;
 
-    bool IsValid() const;
+  bool IsValid() const;
 
-    lldb::SBAddress GetAddress();
+  lldb::SBAddress GetAddress();
 
-    lldb::addr_t GetLoadAddress();
+  lldb::addr_t GetLoadAddress();
 
-    void SetEnabled(bool enabled);
+  void SetEnabled(bool enabled);
 
-    bool IsEnabled();
+  bool IsEnabled();
 
-    uint32_t GetHitCount();
+  uint32_t GetHitCount();
 
-    uint32_t GetIgnoreCount();
+  uint32_t GetIgnoreCount();
 
-    void SetIgnoreCount(uint32_t n);
+  void SetIgnoreCount(uint32_t n);
 
-    void SetCondition(const char *condition);
+  void SetCondition(const char *condition);
 
-    const char *GetCondition();
+  const char *GetCondition();
 
-    void SetAutoContinue(bool auto_continue);
+  void SetAutoContinue(bool auto_continue);
 
-    bool GetAutoContinue();
+  bool GetAutoContinue();
 
-    void SetScriptCallbackFunction(const char *callback_function_name);
+  void SetScriptCallbackFunction(const char *callback_function_name);
 
-    SBError SetScriptCallbackFunction(const char *callback_function_name,
-                                      lldb::SBStructuredData &extra_args);
+  SBError SetScriptCallbackFunction(const char *callback_function_name,
+                                    lldb::SBStructuredData &extra_args);
 
-    SBError SetScriptCallbackBody(const char *script_body_text);
+  SBError SetScriptCallbackBody(const char *script_body_text);
 
-    void SetCommandLineCommands(lldb::SBStringList &commands);
+  void SetCommandLineCommands(lldb::SBStringList &commands);
 
-    bool GetCommandLineCommands(lldb::SBStringList &commands);
+  bool GetCommandLineCommands(lldb::SBStringList &commands);
 
-    void SetThreadID(lldb::tid_t sb_thread_id);
+  void SetThreadID(lldb::tid_t sb_thread_id);
 
-    lldb::tid_t GetThreadID();
+  lldb::tid_t GetThreadID();
 
-    void SetThreadIndex(uint32_t index);
+  void SetThreadIndex(uint32_t index);
 
-    uint32_t GetThreadIndex() const;
+  uint32_t GetThreadIndex() const;
 
-    void SetThreadName(const char *thread_name);
+  void SetThreadName(const char *thread_name);
 
-    const char *GetThreadName() const;
+  const char *GetThreadName() const;
 
-    void SetQueueName(const char *queue_name);
+  void SetQueueName(const char *queue_name);
 
-    const char *GetQueueName() const;
+  const char *GetQueueName() const;
 
-    bool IsResolved();
+  bool IsResolved();
 
-    bool GetDescription(lldb::SBStream &description, DescriptionLevel level);
+  bool GetDescription(lldb::SBStream &description, DescriptionLevel level);
 
-    SBBreakpoint GetBreakpoint();
+  SBBreakpoint GetBreakpoint();
 
-    SBBreakpointLocation(const lldb::BreakpointLocationSP &break_loc_sp);
+  SBBreakpointLocation(const lldb::BreakpointLocationSP &break_loc_sp);
 
 private:
-    friend class SBBreakpoint;
-    friend class SBBreakpointCallbackBaton;
+  friend class SBBreakpoint;
+  friend class SBBreakpointCallbackBaton;
 
-    void SetLocation(const lldb::BreakpointLocationSP &break_loc_sp);
-    BreakpointLocationSP GetSP() const;
+  void SetLocation(const lldb::BreakpointLocationSP &break_loc_sp);
+  BreakpointLocationSP GetSP() const;
 
-    lldb::BreakpointLocationWP m_opaque_wp;
+  lldb::BreakpointLocationWP m_opaque_wp;
 };
 
 } // namespace lldb

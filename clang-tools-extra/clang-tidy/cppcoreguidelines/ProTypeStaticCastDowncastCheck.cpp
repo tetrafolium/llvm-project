@@ -17,33 +17,33 @@ namespace tidy {
 namespace cppcoreguidelines {
 
 void ProTypeStaticCastDowncastCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        cxxStaticCastExpr(unless(isInTemplateInstantiation())).bind("cast"),
-        this);
+  Finder->addMatcher(
+      cxxStaticCastExpr(unless(isInTemplateInstantiation())).bind("cast"),
+      this);
 }
 
 void ProTypeStaticCastDowncastCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *MatchedCast = Result.Nodes.getNodeAs<CXXStaticCastExpr>("cast");
-    if (MatchedCast->getCastKind() != CK_BaseToDerived)
-        return;
+  const auto *MatchedCast = Result.Nodes.getNodeAs<CXXStaticCastExpr>("cast");
+  if (MatchedCast->getCastKind() != CK_BaseToDerived)
+    return;
 
-    QualType SourceType = MatchedCast->getSubExpr()->getType();
-    const auto *SourceDecl = SourceType->getPointeeCXXRecordDecl();
-    if (!SourceDecl) // The cast is from object to reference
-        SourceDecl = SourceType->getAsCXXRecordDecl();
-    if (!SourceDecl)
-        return;
+  QualType SourceType = MatchedCast->getSubExpr()->getType();
+  const auto *SourceDecl = SourceType->getPointeeCXXRecordDecl();
+  if (!SourceDecl) // The cast is from object to reference
+    SourceDecl = SourceType->getAsCXXRecordDecl();
+  if (!SourceDecl)
+    return;
 
-    if (SourceDecl->isPolymorphic())
-        diag(MatchedCast->getOperatorLoc(),
-             "do not use static_cast to downcast from a base to a derived class; "
-             "use dynamic_cast instead")
-                << FixItHint::CreateReplacement(MatchedCast->getOperatorLoc(),
-                                                "dynamic_cast");
-    else
-        diag(MatchedCast->getOperatorLoc(),
-             "do not use static_cast to downcast from a base to a derived class");
+  if (SourceDecl->isPolymorphic())
+    diag(MatchedCast->getOperatorLoc(),
+         "do not use static_cast to downcast from a base to a derived class; "
+         "use dynamic_cast instead")
+        << FixItHint::CreateReplacement(MatchedCast->getOperatorLoc(),
+                                        "dynamic_cast");
+  else
+    diag(MatchedCast->getOperatorLoc(),
+         "do not use static_cast to downcast from a base to a derived class");
 }
 
 } // namespace cppcoreguidelines

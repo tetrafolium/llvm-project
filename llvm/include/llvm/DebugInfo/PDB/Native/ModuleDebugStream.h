@@ -26,68 +26,64 @@ namespace pdb {
 class DbiModuleDescriptor;
 
 class ModuleDebugStreamRef {
-    using DebugSubsectionIterator = codeview::DebugSubsectionArray::Iterator;
+  using DebugSubsectionIterator = codeview::DebugSubsectionArray::Iterator;
 
 public:
-    ModuleDebugStreamRef(const DbiModuleDescriptor &Module,
-                         std::unique_ptr<msf::MappedBlockStream> Stream);
-    ModuleDebugStreamRef(ModuleDebugStreamRef &&Other) = default;
-    ModuleDebugStreamRef(const ModuleDebugStreamRef &Other) = default;
-    ~ModuleDebugStreamRef();
+  ModuleDebugStreamRef(const DbiModuleDescriptor &Module,
+                       std::unique_ptr<msf::MappedBlockStream> Stream);
+  ModuleDebugStreamRef(ModuleDebugStreamRef &&Other) = default;
+  ModuleDebugStreamRef(const ModuleDebugStreamRef &Other) = default;
+  ~ModuleDebugStreamRef();
 
-    Error reload();
+  Error reload();
 
-    uint32_t signature() const {
-        return Signature;
-    }
+  uint32_t signature() const { return Signature; }
 
-    iterator_range<codeview::CVSymbolArray::Iterator>
-    symbols(bool *HadError) const;
+  iterator_range<codeview::CVSymbolArray::Iterator>
+  symbols(bool *HadError) const;
 
-    const codeview::CVSymbolArray &getSymbolArray() const {
-        return SymbolArray;
-    }
-    const codeview::CVSymbolArray
-    getSymbolArrayForScope(uint32_t ScopeBegin) const;
+  const codeview::CVSymbolArray &getSymbolArray() const { return SymbolArray; }
+  const codeview::CVSymbolArray
+  getSymbolArrayForScope(uint32_t ScopeBegin) const;
 
-    BinarySubstreamRef getSymbolsSubstream() const;
-    BinarySubstreamRef getC11LinesSubstream() const;
-    BinarySubstreamRef getC13LinesSubstream() const;
-    BinarySubstreamRef getGlobalRefsSubstream() const;
+  BinarySubstreamRef getSymbolsSubstream() const;
+  BinarySubstreamRef getC11LinesSubstream() const;
+  BinarySubstreamRef getC13LinesSubstream() const;
+  BinarySubstreamRef getGlobalRefsSubstream() const;
 
-    ModuleDebugStreamRef &operator=(ModuleDebugStreamRef &&Other) = delete;
+  ModuleDebugStreamRef &operator=(ModuleDebugStreamRef &&Other) = delete;
 
-    codeview::CVSymbol readSymbolAtOffset(uint32_t Offset) const;
+  codeview::CVSymbol readSymbolAtOffset(uint32_t Offset) const;
 
-    iterator_range<DebugSubsectionIterator> subsections() const;
-    codeview::DebugSubsectionArray getSubsectionsArray() const {
-        return Subsections;
-    }
+  iterator_range<DebugSubsectionIterator> subsections() const;
+  codeview::DebugSubsectionArray getSubsectionsArray() const {
+    return Subsections;
+  }
 
-    bool hasDebugSubsections() const;
+  bool hasDebugSubsections() const;
 
-    Error commit();
+  Error commit();
 
-    Expected<codeview::DebugChecksumsSubsectionRef>
-    findChecksumsSubsection() const;
+  Expected<codeview::DebugChecksumsSubsectionRef>
+  findChecksumsSubsection() const;
 
 private:
-    Error reloadSerialize(BinaryStreamReader &Reader);
+  Error reloadSerialize(BinaryStreamReader &Reader);
 
-    DbiModuleDescriptor Mod;
+  DbiModuleDescriptor Mod;
 
-    uint32_t Signature;
+  uint32_t Signature;
 
-    std::shared_ptr<msf::MappedBlockStream> Stream;
+  std::shared_ptr<msf::MappedBlockStream> Stream;
 
-    codeview::CVSymbolArray SymbolArray;
+  codeview::CVSymbolArray SymbolArray;
 
-    BinarySubstreamRef SymbolsSubstream;
-    BinarySubstreamRef C11LinesSubstream;
-    BinarySubstreamRef C13LinesSubstream;
-    BinarySubstreamRef GlobalRefsSubstream;
+  BinarySubstreamRef SymbolsSubstream;
+  BinarySubstreamRef C11LinesSubstream;
+  BinarySubstreamRef C13LinesSubstream;
+  BinarySubstreamRef GlobalRefsSubstream;
 
-    codeview::DebugSubsectionArray Subsections;
+  codeview::DebugSubsectionArray Subsections;
 };
 
 } // end namespace pdb

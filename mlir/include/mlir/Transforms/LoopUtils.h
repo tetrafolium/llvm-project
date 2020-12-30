@@ -145,8 +145,8 @@ AffineForOp sinkSequentialLoops(AffineForOp forOp);
 using Loops = SmallVector<scf::ForOp, 8>;
 using TileLoops = std::pair<Loops, Loops>;
 SmallVector<SmallVector<AffineForOp, 8>, 8> tile(ArrayRef<AffineForOp> forOps,
-        ArrayRef<uint64_t> sizes,
-        ArrayRef<AffineForOp> targets);
+                                                 ArrayRef<uint64_t> sizes,
+                                                 ArrayRef<AffineForOp> targets);
 SmallVector<Loops, 8> tile(ArrayRef<scf::ForOp> forOps, ArrayRef<Value> sizes,
                            ArrayRef<scf::ForOp> targets);
 
@@ -168,16 +168,16 @@ Loops tilePerfectlyNested(scf::ForOp rootForOp, ArrayRef<Value> sizes);
 
 /// Explicit copy / DMA generation options for mlir::affineDataCopyGenerate.
 struct AffineCopyOptions {
-    // True if DMAs should be generated instead of point-wise copies.
-    bool generateDma;
-    // The slower memory space from which data is to be moved.
-    unsigned slowMemorySpace;
-    // Memory space of the faster one (typically a scratchpad).
-    unsigned fastMemorySpace;
-    // Memory space to place tags in: only meaningful for DMAs.
-    unsigned tagMemorySpace;
-    // Capacity of the fast memory space in bytes.
-    uint64_t fastMemCapacityBytes;
+  // True if DMAs should be generated instead of point-wise copies.
+  bool generateDma;
+  // The slower memory space from which data is to be moved.
+  unsigned slowMemorySpace;
+  // Memory space of the faster one (typically a scratchpad).
+  unsigned fastMemorySpace;
+  // Memory space to place tags in: only meaningful for DMAs.
+  unsigned tagMemorySpace;
+  // Capacity of the fast memory space in bytes.
+  uint64_t fastMemCapacityBytes;
 };
 
 /// Performs explicit copying for the contiguous sequence of operations in the
@@ -205,15 +205,15 @@ uint64_t affineDataCopyGenerate(AffineForOp forOp,
 
 /// Result for calling generateCopyForMemRegion.
 struct CopyGenerateResult {
-    // Number of bytes used by alloc.
-    uint64_t sizeInBytes;
+  // Number of bytes used by alloc.
+  uint64_t sizeInBytes;
 
-    // The newly created buffer allocation.
-    Operation *alloc;
+  // The newly created buffer allocation.
+  Operation *alloc;
 
-    // Generated loop nest for copying data between the allocated buffer and the
-    // original memref.
-    Operation *copyNest;
+  // Generated loop nest for copying data between the allocated buffer and the
+  // original memref.
+  Operation *copyNest;
 };
 
 /// generateCopyForMemRegion is similar to affineDataCopyGenerate, but works
@@ -289,10 +289,10 @@ void gatherLoops(FuncOp func,
 /// canonicalized, i.e., unused and duplicate operands are removed, any constant
 /// operands propagated/folded in, and duplicate bound maps dropped.
 AffineForOp createCanonicalizedAffineForOp(OpBuilder b, Location loc,
-        ValueRange lbOperands,
-        AffineMap lbMap,
-        ValueRange ubOperands,
-        AffineMap ubMap, int64_t step = 1);
+                                           ValueRange lbOperands,
+                                           AffineMap lbMap,
+                                           ValueRange ubOperands,
+                                           AffineMap ubMap, int64_t step = 1);
 
 /// Separates full tiles from partial tiles for a perfect nest `nest` by
 /// generating a conditional guard that selects between the full tile version

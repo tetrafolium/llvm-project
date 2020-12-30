@@ -21,16 +21,16 @@ LLVM_C_EXTERN_C_BEGIN
 
 /* This enum is provided for backwards-compatibility only. It has no effect. */
 typedef enum {
-    LLVMLinkerDestroySource = 0, /* This is the default behavior. */
-    LLVMLinkerPreserveSource_Removed = 1 /* This option has been deprecated and
-                                          should not be used. */
+  LLVMLinkerDestroySource = 0,         /* This is the default behavior. */
+  LLVMLinkerPreserveSource_Removed = 1 /* This option has been deprecated and
+                                        should not be used. */
 } LLVMLinkerMode;
 
 /* Links the source module into the destination module. The source module is
  * destroyed.
  * The return value is true if an error occurred, false otherwise.
  * Use the diagnostic handler to get any diagnostic message.
-*/
+ */
 LLVMBool LLVMLinkModules2(LLVMModuleRef Dest, LLVMModuleRef Src);
 
 LLVM_C_EXTERN_C_END

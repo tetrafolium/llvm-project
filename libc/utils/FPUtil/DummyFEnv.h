@@ -17,25 +17,15 @@ namespace fputil {
 
 // All dummy functions silently succeed.
 
-static inline int clearExcept(int) {
-    return 0;
-}
+static inline int clearExcept(int) { return 0; }
 
-static inline int testExcept(int) {
-    return 0;
-}
+static inline int testExcept(int) { return 0; }
 
-static inline int raiseExcept(int) {
-    return 0;
-}
+static inline int raiseExcept(int) { return 0; }
 
-static inline int getRound() {
-    return FE_TONEAREST;
-}
+static inline int getRound() { return FE_TONEAREST; }
 
-static inline int setRound(int) {
-    return 0;
-}
+static inline int setRound(int) { return 0; }
 
 } // namespace fputil
 } // namespace __llvm_libc

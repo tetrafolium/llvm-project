@@ -15,9 +15,9 @@
 #include <deque>
 
 struct A {
-    int a;
-    A(int a) : a(a) {}
-    A() : a(0) {}
+  int a;
+  A(int a) : a(a) {}
+  A() : a(0) {}
 };
 
 using deq_t = std::deque<A>;
@@ -25,24 +25,23 @@ using deq_t = std::deque<A>;
 template class std::deque<A>;
 
 static void __attribute__((noinline, optnone)) escape(deq_t &deq) {
-    static volatile deq_t *sink;
-    sink = &deq;
+  static volatile deq_t *sink;
+  sink = &deq;
 }
 
 int main() {
-    deq_t deq;
-    deq.push_back(1234);
-    deq.push_back(56789);
-    escape(deq); // DexLabel('first')
-    while (!deq.empty()) {
-        auto record = deq.front();
-        deq.pop_front();
-        escape(deq); // DexLabel('second')
-    }
+  deq_t deq;
+  deq.push_back(1234);
+  deq.push_back(56789);
+  escape(deq); // DexLabel('first')
+  while (!deq.empty()) {
+    auto record = deq.front();
+    deq.pop_front();
+    escape(deq); // DexLabel('second')
+  }
 }
 
 // DexExpectWatchValue('deq[0].a', '1234', on_line='first')
 // DexExpectWatchValue('deq[1].a', '56789', on_line='first')
 
 // DexExpectWatchValue('deq[0].a', '56789', '0', on_line='second')
-

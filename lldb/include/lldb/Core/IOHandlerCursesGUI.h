@@ -15,26 +15,26 @@ namespace lldb_private {
 
 class IOHandlerCursesGUI : public IOHandler {
 public:
-    IOHandlerCursesGUI(Debugger &debugger);
+  IOHandlerCursesGUI(Debugger &debugger);
 
-    ~IOHandlerCursesGUI() override;
+  ~IOHandlerCursesGUI() override;
 
-    void Run() override;
+  void Run() override;
 
-    void Cancel() override;
+  void Cancel() override;
 
-    bool Interrupt() override;
+  bool Interrupt() override;
 
-    void GotEOF() override;
+  void GotEOF() override;
 
-    void Activate() override;
+  void Activate() override;
 
-    void Deactivate() override;
+  void Deactivate() override;
 
-    void TerminalSizeChanged() override;
+  void TerminalSizeChanged() override;
 
 protected:
-    curses::ApplicationAP m_app_ap;
+  curses::ApplicationAP m_app_ap;
 };
 
 } // namespace lldb_private

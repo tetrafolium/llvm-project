@@ -28,15 +28,15 @@
 
 namespace lldb_private {
 class ProcessKDPLog {
-    static Log::Channel g_channel;
+  static Log::Channel g_channel;
 
 public:
-    static void Initialize();
+  static void Initialize();
 
-    static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
-        return g_channel.GetLogIfAll(mask);
-    }
+  static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
+    return g_channel.GetLogIfAll(mask);
+  }
 };
-}
+} // namespace lldb_private
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_MACOSX_KERNEL_PROCESSKDPLOG_H

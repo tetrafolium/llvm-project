@@ -19,17 +19,17 @@ class DIASession;
 
 class DIAFrameData : public IPDBFrameData {
 public:
-    explicit DIAFrameData(CComPtr<IDiaFrameData> DiaFrameData);
+  explicit DIAFrameData(CComPtr<IDiaFrameData> DiaFrameData);
 
-    uint32_t getAddressOffset() const override;
-    uint32_t getAddressSection() const override;
-    uint32_t getLengthBlock() const override;
-    std::string getProgram() const override;
-    uint32_t getRelativeVirtualAddress() const override;
-    uint64_t getVirtualAddress() const override;
+  uint32_t getAddressOffset() const override;
+  uint32_t getAddressSection() const override;
+  uint32_t getLengthBlock() const override;
+  std::string getProgram() const override;
+  uint32_t getRelativeVirtualAddress() const override;
+  uint64_t getVirtualAddress() const override;
 
 private:
-    CComPtr<IDiaFrameData> FrameData;
+  CComPtr<IDiaFrameData> FrameData;
 };
 
 } // namespace pdb

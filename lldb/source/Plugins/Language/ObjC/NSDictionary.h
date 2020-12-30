@@ -38,56 +38,54 @@ NSDictionarySyntheticFrontEndCreator(CXXSyntheticChildren *,
 
 class NSDictionary_Additionals {
 public:
-    class AdditionalFormatterMatching {
+  class AdditionalFormatterMatching {
+  public:
+    class Matcher {
     public:
-        class Matcher {
-        public:
-            virtual ~Matcher() = default;
-            virtual bool Match(ConstString class_name) = 0;
+      virtual ~Matcher() = default;
+      virtual bool Match(ConstString class_name) = 0;
 
-            typedef std::unique_ptr<Matcher> UP;
-        };
-        class Prefix : public Matcher {
-        public:
-            Prefix(ConstString p);
-            ~Prefix() override = default;
-            bool Match(ConstString class_name) override;
-
-        private:
-            ConstString m_prefix;
-        };
-        class Full : public Matcher {
-        public:
-            Full(ConstString n);
-            ~Full() override = default;
-            bool Match(ConstString class_name) override;
-
-        private:
-            ConstString m_name;
-        };
-        typedef Matcher::UP MatcherUP;
-
-        MatcherUP GetFullMatch(ConstString n) {
-            return std::make_unique<Full>(n);
-        }
-
-        MatcherUP GetPrefixMatch(ConstString p) {
-            return std::make_unique<Prefix>(p);
-        }
+      typedef std::unique_ptr<Matcher> UP;
     };
+    class Prefix : public Matcher {
+    public:
+      Prefix(ConstString p);
+      ~Prefix() override = default;
+      bool Match(ConstString class_name) override;
 
-    template <typename FormatterType>
-    using AdditionalFormatter =
-        std::pair<AdditionalFormatterMatching::MatcherUP, FormatterType>;
+    private:
+      ConstString m_prefix;
+    };
+    class Full : public Matcher {
+    public:
+      Full(ConstString n);
+      ~Full() override = default;
+      bool Match(ConstString class_name) override;
 
-    template <typename FormatterType>
-    using AdditionalFormatters = std::vector<AdditionalFormatter<FormatterType>>;
+    private:
+      ConstString m_name;
+    };
+    typedef Matcher::UP MatcherUP;
 
-    static AdditionalFormatters<CXXFunctionSummaryFormat::Callback> &
-    GetAdditionalSummaries();
+    MatcherUP GetFullMatch(ConstString n) { return std::make_unique<Full>(n); }
 
-    static AdditionalFormatters<CXXSyntheticChildren::CreateFrontEndCallback> &
-    GetAdditionalSynthetics();
+    MatcherUP GetPrefixMatch(ConstString p) {
+      return std::make_unique<Prefix>(p);
+    }
+  };
+
+  template <typename FormatterType>
+  using AdditionalFormatter =
+      std::pair<AdditionalFormatterMatching::MatcherUP, FormatterType>;
+
+  template <typename FormatterType>
+  using AdditionalFormatters = std::vector<AdditionalFormatter<FormatterType>>;
+
+  static AdditionalFormatters<CXXFunctionSummaryFormat::Callback> &
+  GetAdditionalSummaries();
+
+  static AdditionalFormatters<CXXSyntheticChildren::CreateFrontEndCallback> &
+  GetAdditionalSynthetics();
 };
 } // namespace formatters
 } // namespace lldb_private

@@ -24,53 +24,49 @@ namespace llvm {
 /// A simple alias analysis implementation that uses ScalarEvolution to answer
 /// queries.
 class SCEVAAResult : public AAResultBase<SCEVAAResult> {
-    ScalarEvolution &SE;
+  ScalarEvolution &SE;
 
 public:
-    explicit SCEVAAResult(ScalarEvolution &SE) : AAResultBase(), SE(SE) {}
-    SCEVAAResult(SCEVAAResult &&Arg) : AAResultBase(std::move(Arg)), SE(Arg.SE) {}
+  explicit SCEVAAResult(ScalarEvolution &SE) : AAResultBase(), SE(SE) {}
+  SCEVAAResult(SCEVAAResult &&Arg) : AAResultBase(std::move(Arg)), SE(Arg.SE) {}
 
-    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                      AAQueryInfo &AAQI);
+  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                    AAQueryInfo &AAQI);
 
 private:
-    Value *GetBaseValue(const SCEV *S);
+  Value *GetBaseValue(const SCEV *S);
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class SCEVAA : public AnalysisInfoMixin<SCEVAA> {
-    friend AnalysisInfoMixin<SCEVAA>;
-    static AnalysisKey Key;
+  friend AnalysisInfoMixin<SCEVAA>;
+  static AnalysisKey Key;
 
 public:
-    typedef SCEVAAResult Result;
+  typedef SCEVAAResult Result;
 
-    SCEVAAResult run(Function &F, FunctionAnalysisManager &AM);
+  SCEVAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the SCEVAAResult object.
 class SCEVAAWrapperPass : public FunctionPass {
-    std::unique_ptr<SCEVAAResult> Result;
+  std::unique_ptr<SCEVAAResult> Result;
 
 public:
-    static char ID;
+  static char ID;
 
-    SCEVAAWrapperPass();
+  SCEVAAWrapperPass();
 
-    SCEVAAResult &getResult() {
-        return *Result;
-    }
-    const SCEVAAResult &getResult() const {
-        return *Result;
-    }
+  SCEVAAResult &getResult() { return *Result; }
+  const SCEVAAResult &getResult() const { return *Result; }
 
-    bool runOnFunction(Function &F) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnFunction(Function &F) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 /// Creates an instance of \c SCEVAAWrapperPass.
 FunctionPass *createSCEVAAWrapperPass();
 
-}
+} // namespace llvm
 
 #endif

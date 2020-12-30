@@ -16,21 +16,21 @@ namespace __llvm_libc {
 namespace cpp {
 
 template <size_t NumberOfBits> struct Bitset {
-    static_assert(NumberOfBits != 0,
-                  "Cannot create a __llvm_libc::cpp::Bitset of size 0.");
+  static_assert(NumberOfBits != 0,
+                "Cannot create a __llvm_libc::cpp::Bitset of size 0.");
 
-    constexpr void set(size_t Index) {
-        Data[Index / BitsPerUnit] |= (uintptr_t{1} << (Index % BitsPerUnit));
-    }
+  constexpr void set(size_t Index) {
+    Data[Index / BitsPerUnit] |= (uintptr_t{1} << (Index % BitsPerUnit));
+  }
 
-    constexpr bool test(size_t Index) const {
-        return Data[Index / BitsPerUnit] & (uintptr_t{1} << (Index % BitsPerUnit));
-    }
+  constexpr bool test(size_t Index) const {
+    return Data[Index / BitsPerUnit] & (uintptr_t{1} << (Index % BitsPerUnit));
+  }
 
 private:
-    static constexpr size_t BitsPerByte = 8;
-    static constexpr size_t BitsPerUnit = BitsPerByte * sizeof(uintptr_t);
-    uintptr_t Data[(NumberOfBits + BitsPerUnit - 1) / BitsPerUnit] = {0};
+  static constexpr size_t BitsPerByte = 8;
+  static constexpr size_t BitsPerUnit = BitsPerByte * sizeof(uintptr_t);
+  uintptr_t Data[(NumberOfBits + BitsPerUnit - 1) / BitsPerUnit] = {0};
 };
 
 } // namespace cpp

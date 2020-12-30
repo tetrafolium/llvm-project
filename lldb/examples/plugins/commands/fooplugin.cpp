@@ -24,23 +24,23 @@ bool PluginInitialize(lldb::SBDebugger debugger);
 
 class ChildCommand : public lldb::SBCommandPluginInterface {
 public:
-    virtual bool DoExecute(lldb::SBDebugger debugger, char **command,
-                           lldb::SBCommandReturnObject &result) {
-        if (command) {
-            const char *arg = *command;
-            while (arg) {
-                result.Printf("%s\n", arg);
-                arg = *(++command);
-            }
-            return true;
-        }
-        return false;
+  virtual bool DoExecute(lldb::SBDebugger debugger, char **command,
+                         lldb::SBCommandReturnObject &result) {
+    if (command) {
+      const char *arg = *command;
+      while (arg) {
+        result.Printf("%s\n", arg);
+        arg = *(++command);
+      }
+      return true;
     }
+    return false;
+  }
 };
 
 bool lldb::PluginInitialize(lldb::SBDebugger debugger) {
-    lldb::SBCommandInterpreter interpreter = debugger.GetCommandInterpreter();
-    lldb::SBCommand foo = interpreter.AddMultiwordCommand("foo", NULL);
-    foo.AddCommand("child", new ChildCommand(), "a child of foo");
-    return true;
+  lldb::SBCommandInterpreter interpreter = debugger.GetCommandInterpreter();
+  lldb::SBCommand foo = interpreter.AddMultiwordCommand("foo", NULL);
+  foo.AddCommand("child", new ChildCommand(), "a child of foo");
+  return true;
 }

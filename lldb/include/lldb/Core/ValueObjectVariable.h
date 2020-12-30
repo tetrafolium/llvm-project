@@ -32,60 +32,58 @@ class SymbolContextScope;
 // have children.
 class ValueObjectVariable : public ValueObject {
 public:
-    ~ValueObjectVariable() override;
+  ~ValueObjectVariable() override;
 
-    static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
-                                      const lldb::VariableSP &var_sp);
+  static lldb::ValueObjectSP Create(ExecutionContextScope *exe_scope,
+                                    const lldb::VariableSP &var_sp);
 
-    llvm::Optional<uint64_t> GetByteSize() override;
+  llvm::Optional<uint64_t> GetByteSize() override;
 
-    ConstString GetTypeName() override;
+  ConstString GetTypeName() override;
 
-    ConstString GetQualifiedTypeName() override;
+  ConstString GetQualifiedTypeName() override;
 
-    ConstString GetDisplayTypeName() override;
+  ConstString GetDisplayTypeName() override;
 
-    size_t CalculateNumChildren(uint32_t max) override;
+  size_t CalculateNumChildren(uint32_t max) override;
 
-    lldb::ValueType GetValueType() const override;
+  lldb::ValueType GetValueType() const override;
 
-    bool IsInScope() override;
+  bool IsInScope() override;
 
-    lldb::ModuleSP GetModule() override;
+  lldb::ModuleSP GetModule() override;
 
-    SymbolContextScope *GetSymbolContextScope() override;
+  SymbolContextScope *GetSymbolContextScope() override;
 
-    bool GetDeclaration(Declaration &decl) override;
+  bool GetDeclaration(Declaration &decl) override;
 
-    const char *GetLocationAsCString() override;
+  const char *GetLocationAsCString() override;
 
-    bool SetValueFromCString(const char *value_str, Status &error) override;
+  bool SetValueFromCString(const char *value_str, Status &error) override;
 
-    bool SetData(DataExtractor &data, Status &error) override;
+  bool SetData(DataExtractor &data, Status &error) override;
 
-    lldb::VariableSP GetVariable() override {
-        return m_variable_sp;
-    }
+  lldb::VariableSP GetVariable() override { return m_variable_sp; }
 
 protected:
-    bool UpdateValue() override;
+  bool UpdateValue() override;
 
-    void DoUpdateChildrenAddressType(ValueObject &valobj) override;
+  void DoUpdateChildrenAddressType(ValueObject &valobj) override;
 
-    CompilerType GetCompilerTypeImpl() override;
+  CompilerType GetCompilerTypeImpl() override;
 
-    lldb::VariableSP
-    m_variable_sp;      ///< The variable that this value object is based upon
-    Value m_resolved_value; ///< The value that DWARFExpression resolves this
-    ///variable to before we patch it up
+  lldb::VariableSP
+      m_variable_sp;      ///< The variable that this value object is based upon
+  Value m_resolved_value; ///< The value that DWARFExpression resolves this
+                          /// variable to before we patch it up
 
 private:
-    ValueObjectVariable(ExecutionContextScope *exe_scope,
-                        ValueObjectManager &manager,
-                        const lldb::VariableSP &var_sp);
-    // For ValueObject only
-    ValueObjectVariable(const ValueObjectVariable &) = delete;
-    const ValueObjectVariable &operator=(const ValueObjectVariable &) = delete;
+  ValueObjectVariable(ExecutionContextScope *exe_scope,
+                      ValueObjectManager &manager,
+                      const lldb::VariableSP &var_sp);
+  // For ValueObject only
+  ValueObjectVariable(const ValueObjectVariable &) = delete;
+  const ValueObjectVariable &operator=(const ValueObjectVariable &) = delete;
 };
 
 } // namespace lldb_private

@@ -11,5 +11,5 @@
 #include <cstring>
 
 MlirStringRef mlirStringRefCreateFromCString(const char *str) {
-    return mlirStringRefCreate(str, strlen(str));
+  return mlirStringRefCreate(str, strlen(str));
 }

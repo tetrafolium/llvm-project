@@ -18,11 +18,11 @@ struct ReturnStmt;
 namespace Fortran::semantics {
 class ReturnStmtChecker : public virtual BaseChecker {
 public:
-    ReturnStmtChecker(SemanticsContext &context) : context_{context} {}
-    void Leave(const parser::ReturnStmt &);
+  ReturnStmtChecker(SemanticsContext &context) : context_{context} {}
+  void Leave(const parser::ReturnStmt &);
 
 private:
-    SemanticsContext &context_;
+  SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_RETURN_H_

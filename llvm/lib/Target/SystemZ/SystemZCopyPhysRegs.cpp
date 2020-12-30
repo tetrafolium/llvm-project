@@ -28,32 +28,28 @@ using namespace llvm;
 #define SYSTEMZ_COPYPHYSREGS_NAME "SystemZ Copy Physregs"
 
 namespace llvm {
-void initializeSystemZCopyPhysRegsPass(PassRegistry&);
+void initializeSystemZCopyPhysRegsPass(PassRegistry &);
 }
 
 namespace {
 
 class SystemZCopyPhysRegs : public MachineFunctionPass {
 public:
-    static char ID;
-    SystemZCopyPhysRegs()
-        : MachineFunctionPass(ID), TII(nullptr), MRI(nullptr) {
-        initializeSystemZCopyPhysRegsPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  SystemZCopyPhysRegs() : MachineFunctionPass(ID), TII(nullptr), MRI(nullptr) {
+    initializeSystemZCopyPhysRegsPass(*PassRegistry::getPassRegistry());
+  }
 
-    StringRef getPassName() const override {
-        return SYSTEMZ_COPYPHYSREGS_NAME;
-    }
+  StringRef getPassName() const override { return SYSTEMZ_COPYPHYSREGS_NAME; }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
 private:
+  bool visitMBB(MachineBasicBlock &MBB);
 
-    bool visitMBB(MachineBasicBlock &MBB);
-
-    const SystemZInstrInfo *TII;
-    MachineRegisterInfo *MRI;
+  const SystemZInstrInfo *TII;
+  MachineRegisterInfo *MRI;
 };
 
 char SystemZCopyPhysRegs::ID = 0;
@@ -64,59 +60,57 @@ INITIALIZE_PASS(SystemZCopyPhysRegs, "systemz-copy-physregs",
                 SYSTEMZ_COPYPHYSREGS_NAME, false, false)
 
 FunctionPass *llvm::createSystemZCopyPhysRegsPass(SystemZTargetMachine &TM) {
-    return new SystemZCopyPhysRegs();
+  return new SystemZCopyPhysRegs();
 }
 
 void SystemZCopyPhysRegs::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.setPreservesCFG();
-    MachineFunctionPass::getAnalysisUsage(AU);
+  AU.setPreservesCFG();
+  MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 bool SystemZCopyPhysRegs::visitMBB(MachineBasicBlock &MBB) {
-    bool Modified = false;
+  bool Modified = false;
 
-    // Certain special registers can only be copied from a subset of the
-    // default register class of the type. It is therefore necessary to create
-    // the target copy instructions before regalloc instead of in copyPhysReg().
-    for (MachineBasicBlock::iterator MBBI = MBB.begin(), E = MBB.end();
-            MBBI != E; ) {
-        MachineInstr *MI = &*MBBI++;
-        if (!MI->isCopy())
-            continue;
+  // Certain special registers can only be copied from a subset of the
+  // default register class of the type. It is therefore necessary to create
+  // the target copy instructions before regalloc instead of in copyPhysReg().
+  for (MachineBasicBlock::iterator MBBI = MBB.begin(), E = MBB.end();
+       MBBI != E;) {
+    MachineInstr *MI = &*MBBI++;
+    if (!MI->isCopy())
+      continue;
 
-        DebugLoc DL = MI->getDebugLoc();
-        Register SrcReg = MI->getOperand(1).getReg();
-        Register DstReg = MI->getOperand(0).getReg();
-        if (DstReg.isVirtual() &&
-                (SrcReg == SystemZ::CC || SystemZ::AR32BitRegClass.contains(SrcReg))) {
-            Register Tmp = MRI->createVirtualRegister(&SystemZ::GR32BitRegClass);
-            if (SrcReg == SystemZ::CC)
-                BuildMI(MBB, MI, DL, TII->get(SystemZ::IPM), Tmp);
-            else
-                BuildMI(MBB, MI, DL, TII->get(SystemZ::EAR), Tmp).addReg(SrcReg);
-            MI->getOperand(1).setReg(Tmp);
-            Modified = true;
-        }
-        else if (SrcReg.isVirtual() &&
-                 SystemZ::AR32BitRegClass.contains(DstReg)) {
-            Register Tmp = MRI->createVirtualRegister(&SystemZ::GR32BitRegClass);
-            MI->getOperand(0).setReg(Tmp);
-            BuildMI(MBB, MBBI, DL, TII->get(SystemZ::SAR), DstReg).addReg(Tmp);
-            Modified = true;
-        }
+    DebugLoc DL = MI->getDebugLoc();
+    Register SrcReg = MI->getOperand(1).getReg();
+    Register DstReg = MI->getOperand(0).getReg();
+    if (DstReg.isVirtual() &&
+        (SrcReg == SystemZ::CC || SystemZ::AR32BitRegClass.contains(SrcReg))) {
+      Register Tmp = MRI->createVirtualRegister(&SystemZ::GR32BitRegClass);
+      if (SrcReg == SystemZ::CC)
+        BuildMI(MBB, MI, DL, TII->get(SystemZ::IPM), Tmp);
+      else
+        BuildMI(MBB, MI, DL, TII->get(SystemZ::EAR), Tmp).addReg(SrcReg);
+      MI->getOperand(1).setReg(Tmp);
+      Modified = true;
+    } else if (SrcReg.isVirtual() &&
+               SystemZ::AR32BitRegClass.contains(DstReg)) {
+      Register Tmp = MRI->createVirtualRegister(&SystemZ::GR32BitRegClass);
+      MI->getOperand(0).setReg(Tmp);
+      BuildMI(MBB, MBBI, DL, TII->get(SystemZ::SAR), DstReg).addReg(Tmp);
+      Modified = true;
     }
+  }
 
-    return Modified;
+  return Modified;
 }
 
 bool SystemZCopyPhysRegs::runOnMachineFunction(MachineFunction &F) {
-    TII = static_cast<const SystemZInstrInfo *>(F.getSubtarget().getInstrInfo());
-    MRI = &F.getRegInfo();
+  TII = static_cast<const SystemZInstrInfo *>(F.getSubtarget().getInstrInfo());
+  MRI = &F.getRegInfo();
 
-    bool Modified = false;
-    for (auto &MBB : F)
-        Modified |= visitMBB(MBB);
+  bool Modified = false;
+  for (auto &MBB : F)
+    Modified |= visitMBB(MBB);
 
-    return Modified;
+  return Modified;
 }
-

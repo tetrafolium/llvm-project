@@ -17,27 +17,27 @@ using namespace clang;
 
 Expected<Optional<DarwinSDKInfo>>
 driver::parseDarwinSDKInfo(llvm::vfs::FileSystem &VFS, StringRef SDKRootPath) {
-    llvm::SmallString<256> Filepath = SDKRootPath;
-    llvm::sys::path::append(Filepath, "SDKSettings.json");
-    llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> File =
-                VFS.getBufferForFile(Filepath);
-    if (!File) {
-        // If the file couldn't be read, assume it just doesn't exist.
-        return None;
-    }
-    Expected<llvm::json::Value> Result =
-        llvm::json::parse(File.get()->getBuffer());
-    if (!Result)
-        return Result.takeError();
+  llvm::SmallString<256> Filepath = SDKRootPath;
+  llvm::sys::path::append(Filepath, "SDKSettings.json");
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> File =
+      VFS.getBufferForFile(Filepath);
+  if (!File) {
+    // If the file couldn't be read, assume it just doesn't exist.
+    return None;
+  }
+  Expected<llvm::json::Value> Result =
+      llvm::json::parse(File.get()->getBuffer());
+  if (!Result)
+    return Result.takeError();
 
-    if (const auto *Obj = Result->getAsObject()) {
-        auto VersionString = Obj->getString("Version");
-        if (VersionString) {
-            VersionTuple Version;
-            if (!Version.tryParse(*VersionString))
-                return DarwinSDKInfo(Version);
-        }
+  if (const auto *Obj = Result->getAsObject()) {
+    auto VersionString = Obj->getString("Version");
+    if (VersionString) {
+      VersionTuple Version;
+      if (!Version.tryParse(*VersionString))
+        return DarwinSDKInfo(Version);
     }
-    return llvm::make_error<llvm::StringError>("invalid SDKSettings.json",
-            llvm::inconvertibleErrorCode());
+  }
+  return llvm::make_error<llvm::StringError>("invalid SDKSettings.json",
+                                             llvm::inconvertibleErrorCode());
 }

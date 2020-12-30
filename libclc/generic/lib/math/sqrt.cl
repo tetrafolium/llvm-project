@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  */
 
-#include <clc/clc.h>
 #include "math/clc_sqrt.h"
+#include <clc/clc.h>
 
 #define __CLC_FUNCTION sqrt
 #include "unary_builtin.inc"

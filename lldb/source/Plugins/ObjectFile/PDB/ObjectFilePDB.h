@@ -18,115 +18,89 @@ namespace lldb_private {
 
 class ObjectFilePDB : public ObjectFile {
 public:
-    // Static Functions
-    static void Initialize();
-    static void Terminate();
+  // Static Functions
+  static void Initialize();
+  static void Terminate();
 
-    static ConstString GetPluginNameStatic();
-    static const char *GetPluginDescriptionStatic() {
-        return "PDB object file reader.";
-    }
+  static ConstString GetPluginNameStatic();
+  static const char *GetPluginDescriptionStatic() {
+    return "PDB object file reader.";
+  }
 
-    static std::unique_ptr<llvm::pdb::PDBFile>
-    loadPDBFile(std::string PdbPath, llvm::BumpPtrAllocator &Allocator);
+  static std::unique_ptr<llvm::pdb::PDBFile>
+  loadPDBFile(std::string PdbPath, llvm::BumpPtrAllocator &Allocator);
 
-    static ObjectFile *
-    CreateInstance(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
-                   lldb::offset_t data_offset, const FileSpec *file,
-                   lldb::offset_t file_offset, lldb::offset_t length);
+  static ObjectFile *
+  CreateInstance(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
+                 lldb::offset_t data_offset, const FileSpec *file,
+                 lldb::offset_t file_offset, lldb::offset_t length);
 
-    static ObjectFile *CreateMemoryInstance(const lldb::ModuleSP &module_sp,
-                                            lldb::DataBufferSP &data_sp,
-                                            const lldb::ProcessSP &process_sp,
-                                            lldb::addr_t header_addr);
-
-    static size_t GetModuleSpecifications(const FileSpec &file,
+  static ObjectFile *CreateMemoryInstance(const lldb::ModuleSP &module_sp,
                                           lldb::DataBufferSP &data_sp,
-                                          lldb::offset_t data_offset,
-                                          lldb::offset_t file_offset,
-                                          lldb::offset_t length,
-                                          ModuleSpecList &specs);
+                                          const lldb::ProcessSP &process_sp,
+                                          lldb::addr_t header_addr);
 
-    // PluginInterface protocol
-    ConstString GetPluginName() override {
-        return GetPluginNameStatic();
-    }
+  static size_t GetModuleSpecifications(const FileSpec &file,
+                                        lldb::DataBufferSP &data_sp,
+                                        lldb::offset_t data_offset,
+                                        lldb::offset_t file_offset,
+                                        lldb::offset_t length,
+                                        ModuleSpecList &specs);
 
-    uint32_t GetPluginVersion() override {
-        return 1;
-    }
+  // PluginInterface protocol
+  ConstString GetPluginName() override { return GetPluginNameStatic(); }
 
-    // LLVM RTTI support
-    static char ID;
-    bool isA(const void *ClassID) const override {
-        return ClassID == &ID || ObjectFile::isA(ClassID);
-    }
-    static bool classof(const ObjectFile *obj) {
-        return obj->isA(&ID);
-    }
+  uint32_t GetPluginVersion() override { return 1; }
 
-    // ObjectFile Protocol.
-    uint32_t GetAddressByteSize() const override {
-        return 8;
-    }
+  // LLVM RTTI support
+  static char ID;
+  bool isA(const void *ClassID) const override {
+    return ClassID == &ID || ObjectFile::isA(ClassID);
+  }
+  static bool classof(const ObjectFile *obj) { return obj->isA(&ID); }
 
-    lldb::ByteOrder GetByteOrder() const override {
-        return lldb::eByteOrderLittle;
-    }
+  // ObjectFile Protocol.
+  uint32_t GetAddressByteSize() const override { return 8; }
 
-    bool ParseHeader() override {
-        return true;
-    }
+  lldb::ByteOrder GetByteOrder() const override {
+    return lldb::eByteOrderLittle;
+  }
 
-    bool IsExecutable() const override {
-        return false;
-    }
+  bool ParseHeader() override { return true; }
 
-    Symtab *GetSymtab() override {
-        return nullptr;
-    }
+  bool IsExecutable() const override { return false; }
 
-    bool IsStripped() override {
-        return false;
-    }
+  Symtab *GetSymtab() override { return nullptr; }
 
-    // No section in PDB file.
-    void CreateSections(SectionList &unified_section_list) override {}
+  bool IsStripped() override { return false; }
 
-    void Dump(Stream *s) override {}
+  // No section in PDB file.
+  void CreateSections(SectionList &unified_section_list) override {}
 
-    ArchSpec GetArchitecture() override;
+  void Dump(Stream *s) override {}
 
-    UUID GetUUID() override {
-        return m_uuid;
-    }
+  ArchSpec GetArchitecture() override;
 
-    uint32_t GetDependentModules(FileSpecList &files) override {
-        return 0;
-    }
+  UUID GetUUID() override { return m_uuid; }
 
-    Type CalculateType() override {
-        return eTypeDebugInfo;
-    }
+  uint32_t GetDependentModules(FileSpecList &files) override { return 0; }
 
-    Strata CalculateStrata() override {
-        return eStrataUser;
-    }
+  Type CalculateType() override { return eTypeDebugInfo; }
 
-    llvm::pdb::PDBFile &GetPDBFile() {
-        return *m_file_up;
-    }
+  Strata CalculateStrata() override { return eStrataUser; }
 
-    ObjectFilePDB(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
-                  lldb::offset_t data_offset, const FileSpec *file,
-                  lldb::offset_t offset, lldb::offset_t length);
+  llvm::pdb::PDBFile &GetPDBFile() { return *m_file_up; }
+
+  ObjectFilePDB(const lldb::ModuleSP &module_sp, lldb::DataBufferSP &data_sp,
+                lldb::offset_t data_offset, const FileSpec *file,
+                lldb::offset_t offset, lldb::offset_t length);
 
 private:
-    UUID m_uuid;
-    llvm::BumpPtrAllocator m_allocator;
-    std::unique_ptr<llvm::pdb::PDBFile> m_file_up;
+  UUID m_uuid;
+  llvm::BumpPtrAllocator m_allocator;
+  std::unique_ptr<llvm::pdb::PDBFile> m_file_up;
 
-    bool initPDBFile();
+  bool initPDBFile();
 };
 
 } // namespace lldb_private

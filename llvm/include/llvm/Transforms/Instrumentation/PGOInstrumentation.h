@@ -35,59 +35,60 @@ class Module;
 class PGOInstrumentationGenCreateVar
     : public PassInfoMixin<PGOInstrumentationGenCreateVar> {
 public:
-    PGOInstrumentationGenCreateVar(std::string CSInstrName = "")
-        : CSInstrName(CSInstrName) {}
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PGOInstrumentationGenCreateVar(std::string CSInstrName = "")
+      : CSInstrName(CSInstrName) {}
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-    std::string CSInstrName;
+  std::string CSInstrName;
 };
 
 /// The instrumentation (profile-instr-gen) pass for IR based PGO.
 class PGOInstrumentationGen : public PassInfoMixin<PGOInstrumentationGen> {
 public:
-    PGOInstrumentationGen(bool IsCS = false) : IsCS(IsCS) {}
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PGOInstrumentationGen(bool IsCS = false) : IsCS(IsCS) {}
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-    // If this is a context sensitive instrumentation.
-    bool IsCS;
+  // If this is a context sensitive instrumentation.
+  bool IsCS;
 };
 
 /// The profile annotation (profile-instr-use) pass for IR based PGO.
 class PGOInstrumentationUse : public PassInfoMixin<PGOInstrumentationUse> {
 public:
-    PGOInstrumentationUse(std::string Filename = "",
-                          std::string RemappingFilename = "", bool IsCS = false);
+  PGOInstrumentationUse(std::string Filename = "",
+                        std::string RemappingFilename = "", bool IsCS = false);
 
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-    std::string ProfileFileName;
-    std::string ProfileRemappingFileName;
-    // If this is a context sensitive instrumentation.
-    bool IsCS;
+  std::string ProfileFileName;
+  std::string ProfileRemappingFileName;
+  // If this is a context sensitive instrumentation.
+  bool IsCS;
 };
 
 /// The indirect function call promotion pass.
-class PGOIndirectCallPromotion : public PassInfoMixin<PGOIndirectCallPromotion> {
+class PGOIndirectCallPromotion
+    : public PassInfoMixin<PGOIndirectCallPromotion> {
 public:
-    PGOIndirectCallPromotion(bool IsInLTO = false, bool SamplePGO = false)
-        : InLTO(IsInLTO), SamplePGO(SamplePGO) {}
+  PGOIndirectCallPromotion(bool IsInLTO = false, bool SamplePGO = false)
+      : InLTO(IsInLTO), SamplePGO(SamplePGO) {}
 
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-    bool InLTO;
-    bool SamplePGO;
+  bool InLTO;
+  bool SamplePGO;
 };
 
 /// The profile size based optimization pass for memory intrinsics.
 class PGOMemOPSizeOpt : public PassInfoMixin<PGOMemOPSizeOpt> {
 public:
-    PGOMemOPSizeOpt() = default;
+  PGOMemOPSizeOpt() = default;
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 void setProfMetadata(Module *M, Instruction *TI, ArrayRef<uint64_t> EdgeCounts,

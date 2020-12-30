@@ -20,29 +20,28 @@ namespace llvm {
 class ARMSubtarget;
 
 class ARMInstrInfo : public ARMBaseInstrInfo {
-    ARMRegisterInfo RI;
+  ARMRegisterInfo RI;
+
 public:
-    explicit ARMInstrInfo(const ARMSubtarget &STI);
+  explicit ARMInstrInfo(const ARMSubtarget &STI);
 
-    /// Return the noop instruction to use for a noop.
-    void getNoop(MCInst &NopInst) const override;
+  /// Return the noop instruction to use for a noop.
+  void getNoop(MCInst &NopInst) const override;
 
-    // Return the non-pre/post incrementing version of 'Opc'. Return 0
-    // if there is not such an opcode.
-    unsigned getUnindexedOpcode(unsigned Opc) const override;
+  // Return the non-pre/post incrementing version of 'Opc'. Return 0
+  // if there is not such an opcode.
+  unsigned getUnindexedOpcode(unsigned Opc) const override;
 
-    /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
-    /// such, whenever a client has an instance of instruction info, it should
-    /// always be able to get register info as well (through this method).
-    ///
-    const ARMRegisterInfo &getRegisterInfo() const override {
-        return RI;
-    }
+  /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
+  /// such, whenever a client has an instance of instruction info, it should
+  /// always be able to get register info as well (through this method).
+  ///
+  const ARMRegisterInfo &getRegisterInfo() const override { return RI; }
 
 private:
-    void expandLoadStackGuard(MachineBasicBlock::iterator MI) const override;
+  void expandLoadStackGuard(MachineBasicBlock::iterator MI) const override;
 };
 
-}
+} // namespace llvm
 
 #endif

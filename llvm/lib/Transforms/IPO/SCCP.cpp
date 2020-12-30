@@ -9,26 +9,26 @@
 using namespace llvm;
 
 PreservedAnalyses IPSCCPPass::run(Module &M, ModuleAnalysisManager &AM) {
-    const DataLayout &DL = M.getDataLayout();
-    auto &FAM = AM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
-    auto GetTLI = [&FAM](Function &F) -> const TargetLibraryInfo & {
-        return FAM.getResult<TargetLibraryAnalysis>(F);
-    };
-    auto getAnalysis = [&FAM](Function &F) -> AnalysisResultsForFn {
-        DominatorTree &DT = FAM.getResult<DominatorTreeAnalysis>(F);
-        return {
-            std::make_unique<PredicateInfo>(F, DT, FAM.getResult<AssumptionAnalysis>(F)),
+  const DataLayout &DL = M.getDataLayout();
+  auto &FAM = AM.getResult<FunctionAnalysisManagerModuleProxy>(M).getManager();
+  auto GetTLI = [&FAM](Function &F) -> const TargetLibraryInfo & {
+    return FAM.getResult<TargetLibraryAnalysis>(F);
+  };
+  auto getAnalysis = [&FAM](Function &F) -> AnalysisResultsForFn {
+    DominatorTree &DT = FAM.getResult<DominatorTreeAnalysis>(F);
+    return {std::make_unique<PredicateInfo>(
+                F, DT, FAM.getResult<AssumptionAnalysis>(F)),
             &DT, FAM.getCachedResult<PostDominatorTreeAnalysis>(F)};
-    };
+  };
 
-    if (!runIPSCCP(M, DL, GetTLI, getAnalysis))
-        return PreservedAnalyses::all();
+  if (!runIPSCCP(M, DL, GetTLI, getAnalysis))
+    return PreservedAnalyses::all();
 
-    PreservedAnalyses PA;
-    PA.preserve<DominatorTreeAnalysis>();
-    PA.preserve<PostDominatorTreeAnalysis>();
-    PA.preserve<FunctionAnalysisManagerModuleProxy>();
-    return PA;
+  PreservedAnalyses PA;
+  PA.preserve<DominatorTreeAnalysis>();
+  PA.preserve<PostDominatorTreeAnalysis>();
+  PA.preserve<FunctionAnalysisManagerModuleProxy>();
+  return PA;
 }
 
 namespace {
@@ -40,39 +40,39 @@ namespace {
 ///
 class IPSCCPLegacyPass : public ModulePass {
 public:
-    static char ID;
+  static char ID;
 
-    IPSCCPLegacyPass() : ModulePass(ID) {
-        initializeIPSCCPLegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  IPSCCPLegacyPass() : ModulePass(ID) {
+    initializeIPSCCPLegacyPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnModule(Module &M) override {
-        if (skipModule(M))
-            return false;
-        const DataLayout &DL = M.getDataLayout();
-        auto GetTLI = [this](Function &F) -> const TargetLibraryInfo & {
-            return this->getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-        };
-        auto getAnalysis = [this](Function &F) -> AnalysisResultsForFn {
-            DominatorTree &DT =
-            this->getAnalysis<DominatorTreeWrapperPass>(F).getDomTree();
-            return {
-                std::make_unique<PredicateInfo>(
-                    F, DT,
-                    this->getAnalysis<AssumptionCacheTracker>().getAssumptionCache(
-                        F)),
-                nullptr,  // We cannot preserve the DT or PDT with the legacy pass
-                nullptr}; // manager, so set them to nullptr.
-        };
+  bool runOnModule(Module &M) override {
+    if (skipModule(M))
+      return false;
+    const DataLayout &DL = M.getDataLayout();
+    auto GetTLI = [this](Function &F) -> const TargetLibraryInfo & {
+      return this->getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+    };
+    auto getAnalysis = [this](Function &F) -> AnalysisResultsForFn {
+      DominatorTree &DT =
+          this->getAnalysis<DominatorTreeWrapperPass>(F).getDomTree();
+      return {
+          std::make_unique<PredicateInfo>(
+              F, DT,
+              this->getAnalysis<AssumptionCacheTracker>().getAssumptionCache(
+                  F)),
+          nullptr,  // We cannot preserve the DT or PDT with the legacy pass
+          nullptr}; // manager, so set them to nullptr.
+    };
 
-        return runIPSCCP(M, DL, GetTLI, getAnalysis);
-    }
+    return runIPSCCP(M, DL, GetTLI, getAnalysis);
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<AssumptionCacheTracker>();
-        AU.addRequired<DominatorTreeWrapperPass>();
-        AU.addRequired<TargetLibraryInfoWrapperPass>();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<AssumptionCacheTracker>();
+    AU.addRequired<DominatorTreeWrapperPass>();
+    AU.addRequired<TargetLibraryInfoWrapperPass>();
+  }
 };
 
 } // end anonymous namespace
@@ -90,6 +90,4 @@ INITIALIZE_PASS_END(IPSCCPLegacyPass, "ipsccp",
                     false, false)
 
 // createIPSCCPPass - This is the public interface to this file.
-ModulePass *llvm::createIPSCCPPass() {
-    return new IPSCCPLegacyPass();
-}
+ModulePass *llvm::createIPSCCPPass() { return new IPSCCPLegacyPass(); }

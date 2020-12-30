@@ -54,39 +54,39 @@ namespace omp {
 ///    llvm::omp::GRIDVAL[llvm::omp::GVIDX::GV_Warp_Size]
 ///
 enum GVIDX {
-    /// The maximum number of workers in a kernel.
-    /// (THREAD_ABSOLUTE_LIMIT) - (GV_Warp_Size), might be issue for blockDim.z
-    GV_Threads,
-    /// The size reserved for data in a shared memory slot.
-    GV_Slot_Size,
-    /// The default value of maximum number of threads in a worker warp.
-    GV_Warp_Size,
-    /// Alternate warp size for some AMDGCN architectures. Same as GV_Warp_Size
-    /// for NVPTX.
-    GV_Warp_Size_32,
-    /// The number of bits required to represent the max number of threads in warp
-    GV_Warp_Size_Log2,
-    /// GV_Warp_Size * GV_Slot_Size,
-    GV_Warp_Slot_Size,
-    /// the maximum number of teams.
-    GV_Max_Teams,
-    /// Global Memory Alignment
-    GV_Mem_Align,
-    /// (~0u >> (GV_Warp_Size - GV_Warp_Size_Log2))
-    GV_Warp_Size_Log2_Mask,
-    // An alternative to the heavy data sharing infrastructure that uses global
-    // memory is one that uses device __shared__ memory.  The amount of such space
-    // (in bytes) reserved by the OpenMP runtime is noted here.
-    GV_SimpleBufferSize,
-    // The absolute maximum team size for a working group
-    GV_Max_WG_Size,
-    // The default maximum team size for a working group
-    GV_Default_WG_Size,
-    // This is GV_Max_WG_Size / GV_WarpSize. 32 for NVPTX and 16 for AMDGCN.
-    GV_Max_Warp_Number,
-    /// The slot size that should be reserved for a working warp.
-    /// (~0u >> (GV_Warp_Size - GV_Warp_Size_Log2))
-    GV_Warp_Size_Log2_MaskL
+  /// The maximum number of workers in a kernel.
+  /// (THREAD_ABSOLUTE_LIMIT) - (GV_Warp_Size), might be issue for blockDim.z
+  GV_Threads,
+  /// The size reserved for data in a shared memory slot.
+  GV_Slot_Size,
+  /// The default value of maximum number of threads in a worker warp.
+  GV_Warp_Size,
+  /// Alternate warp size for some AMDGCN architectures. Same as GV_Warp_Size
+  /// for NVPTX.
+  GV_Warp_Size_32,
+  /// The number of bits required to represent the max number of threads in warp
+  GV_Warp_Size_Log2,
+  /// GV_Warp_Size * GV_Slot_Size,
+  GV_Warp_Slot_Size,
+  /// the maximum number of teams.
+  GV_Max_Teams,
+  /// Global Memory Alignment
+  GV_Mem_Align,
+  /// (~0u >> (GV_Warp_Size - GV_Warp_Size_Log2))
+  GV_Warp_Size_Log2_Mask,
+  // An alternative to the heavy data sharing infrastructure that uses global
+  // memory is one that uses device __shared__ memory.  The amount of such space
+  // (in bytes) reserved by the OpenMP runtime is noted here.
+  GV_SimpleBufferSize,
+  // The absolute maximum team size for a working group
+  GV_Max_WG_Size,
+  // The default maximum team size for a working group
+  GV_Default_WG_Size,
+  // This is GV_Max_WG_Size / GV_WarpSize. 32 for NVPTX and 16 for AMDGCN.
+  GV_Max_Warp_Number,
+  /// The slot size that should be reserved for a working warp.
+  /// (~0u >> (GV_Warp_Size - GV_Warp_Size_Log2))
+  GV_Warp_Size_Log2_MaskL
 };
 
 /// For AMDGPU GPUs

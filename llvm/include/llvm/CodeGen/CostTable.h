@@ -22,45 +22,45 @@ namespace llvm {
 
 /// Cost Table Entry
 struct CostTblEntry {
-    int ISD;
-    MVT::SimpleValueType Type;
-    unsigned Cost;
+  int ISD;
+  MVT::SimpleValueType Type;
+  unsigned Cost;
 };
 
 /// Find in cost table, TypeTy must be comparable to CompareTy by ==
-inline const CostTblEntry *CostTableLookup(ArrayRef<CostTblEntry> Tbl,
-        int ISD, MVT Ty) {
-    auto I = find_if(Tbl, [=](const CostTblEntry &Entry) {
-        return ISD == Entry.ISD && Ty == Entry.Type;
-    });
-    if (I != Tbl.end())
-        return I;
+inline const CostTblEntry *CostTableLookup(ArrayRef<CostTblEntry> Tbl, int ISD,
+                                           MVT Ty) {
+  auto I = find_if(Tbl, [=](const CostTblEntry &Entry) {
+    return ISD == Entry.ISD && Ty == Entry.Type;
+  });
+  if (I != Tbl.end())
+    return I;
 
-    // Could not find an entry.
-    return nullptr;
+  // Could not find an entry.
+  return nullptr;
 }
 
 /// Type Conversion Cost Table
 struct TypeConversionCostTblEntry {
-    int ISD;
-    MVT::SimpleValueType Dst;
-    MVT::SimpleValueType Src;
-    unsigned Cost;
+  int ISD;
+  MVT::SimpleValueType Dst;
+  MVT::SimpleValueType Src;
+  unsigned Cost;
 };
 
 /// Find in type conversion cost table, TypeTy must be comparable to CompareTy
 /// by ==
 inline const TypeConversionCostTblEntry *
-ConvertCostTableLookup(ArrayRef<TypeConversionCostTblEntry> Tbl,
-                       int ISD, MVT Dst, MVT Src) {
-    auto I = find_if(Tbl, [=](const TypeConversionCostTblEntry &Entry) {
-        return ISD == Entry.ISD && Src == Entry.Src && Dst == Entry.Dst;
-    });
-    if (I != Tbl.end())
-        return I;
+ConvertCostTableLookup(ArrayRef<TypeConversionCostTblEntry> Tbl, int ISD,
+                       MVT Dst, MVT Src) {
+  auto I = find_if(Tbl, [=](const TypeConversionCostTblEntry &Entry) {
+    return ISD == Entry.ISD && Src == Entry.Src && Dst == Entry.Dst;
+  });
+  if (I != Tbl.end())
+    return I;
 
-    // Could not find an entry.
-    return nullptr;
+  // Could not find an entry.
+  return nullptr;
 }
 
 } // namespace llvm

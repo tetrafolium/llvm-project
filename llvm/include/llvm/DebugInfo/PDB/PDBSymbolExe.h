@@ -19,26 +19,26 @@ class raw_ostream;
 namespace pdb {
 
 class PDBSymbolExe : public PDBSymbol {
-    DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::Exe)
+  DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::Exe)
 public:
-    void dump(PDBSymDumper &Dumper) const override;
+  void dump(PDBSymDumper &Dumper) const override;
 
-    FORWARD_SYMBOL_METHOD(getAge)
-    FORWARD_SYMBOL_METHOD(getGuid)
-    FORWARD_SYMBOL_METHOD(hasCTypes)
-    FORWARD_SYMBOL_METHOD(hasPrivateSymbols)
-    FORWARD_SYMBOL_METHOD(getMachineType)
-    FORWARD_SYMBOL_METHOD(getName)
-    FORWARD_SYMBOL_METHOD(getSignature)
-    FORWARD_SYMBOL_METHOD(getSymbolsFileName)
+  FORWARD_SYMBOL_METHOD(getAge)
+  FORWARD_SYMBOL_METHOD(getGuid)
+  FORWARD_SYMBOL_METHOD(hasCTypes)
+  FORWARD_SYMBOL_METHOD(hasPrivateSymbols)
+  FORWARD_SYMBOL_METHOD(getMachineType)
+  FORWARD_SYMBOL_METHOD(getName)
+  FORWARD_SYMBOL_METHOD(getSignature)
+  FORWARD_SYMBOL_METHOD(getSymbolsFileName)
 
-    uint32_t getPointerByteSize() const;
+  uint32_t getPointerByteSize() const;
 
 private:
-    void dumpChildren(raw_ostream &OS, StringRef Label, PDB_SymType ChildType,
-                      int Indent) const;
+  void dumpChildren(raw_ostream &OS, StringRef Label, PDB_SymType ChildType,
+                    int Indent) const;
 };
+} // namespace pdb
 } // namespace llvm
-}
 
 #endif // LLVM_DEBUGINFO_PDB_PDBSYMBOLEXE_H

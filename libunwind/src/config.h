@@ -9,13 +9,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 #ifndef LIBUNWIND_CONFIG_H
 #define LIBUNWIND_CONFIG_H
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <__libunwind_config.h>
@@ -86,9 +85,10 @@
       __attribute__((alias(#name)));
 #else
 #define _LIBUNWIND_WEAK_ALIAS(name, aliasname)                                 \
-  __pragma(comment(linker, "/alternatename:" SYMBOL_NAME(aliasname) "="        \
-                                             SYMBOL_NAME(name)))               \
-  extern "C" _LIBUNWIND_EXPORT __typeof(name) aliasname;
+  __pragma(comment(linker,                                                     \
+                   "/alternatename:" SYMBOL_NAME(aliasname) "=" SYMBOL_NAME(   \
+                       name))) extern "C" _LIBUNWIND_EXPORT __typeof(name)     \
+      aliasname;
 #endif
 #else
 #error Unsupported target
@@ -96,21 +96,20 @@
 
 // Apple/armv7k defaults to DWARF/Compact unwinding, but its libunwind also
 // needs to include the SJLJ APIs.
-#if (defined(__APPLE__) && defined(__arm__)) || defined(__USING_SJLJ_EXCEPTIONS__)
+#if (defined(__APPLE__) && defined(__arm__)) ||                                \
+    defined(__USING_SJLJ_EXCEPTIONS__)
 #define _LIBUNWIND_BUILD_SJLJ_APIS
 #endif
 
-#if defined(__i386__) || defined(__x86_64__) || defined(__ppc__) || defined(__ppc64__) || defined(__powerpc64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(__ppc__) ||            \
+    defined(__ppc64__) || defined(__powerpc64__)
 #define _LIBUNWIND_SUPPORT_FRAME_APIS
 #endif
 
-#if defined(__i386__) || defined(__x86_64__) ||                                \
-    defined(__ppc__) || defined(__ppc64__) || defined(__powerpc64__) ||        \
-    (!defined(__APPLE__) && defined(__arm__)) ||                               \
-    defined(__aarch64__) ||                                                    \
-    defined(__mips__) ||                                                       \
-    defined(__riscv) ||                                                        \
-    defined(__hexagon__)
+#if defined(__i386__) || defined(__x86_64__) || defined(__ppc__) ||            \
+    defined(__ppc64__) || defined(__powerpc64__) ||                            \
+    (!defined(__APPLE__) && defined(__arm__)) || defined(__aarch64__) ||       \
+    defined(__mips__) || defined(__riscv) || defined(__hexagon__)
 #if !defined(_LIBUNWIND_BUILD_SJLJ_APIS)
 #define _LIBUNWIND_BUILD_ZERO_COST_APIS
 #endif
@@ -157,8 +156,7 @@
 #define _LIBUNWIND_LOG0(msg)
 #define _LIBUNWIND_LOG(msg, ...)
 #else
-#define _LIBUNWIND_LOG0(msg)                                               \
-  fprintf(stderr, "libunwind: " msg "\n")
+#define _LIBUNWIND_LOG0(msg) fprintf(stderr, "libunwind: " msg "\n")
 #define _LIBUNWIND_LOG(msg, ...)                                               \
   fprintf(stderr, "libunwind: " msg "\n", __VA_ARGS__)
 #endif
@@ -166,12 +164,12 @@
 #if defined(NDEBUG)
 #define _LIBUNWIND_LOG_IF_FALSE(x) x
 #else
-#define _LIBUNWIND_LOG_IF_FALSE(x)                                           \
-    do {                                                                       \
-      bool _ret = x;                                                           \
-      if (!_ret)                                                               \
-        _LIBUNWIND_LOG("" #x " failed in %s", __FUNCTION__);                   \
-    } while (0)
+#define _LIBUNWIND_LOG_IF_FALSE(x)                                             \
+  do {                                                                         \
+    bool _ret = x;                                                             \
+    if (!_ret)                                                                 \
+      _LIBUNWIND_LOG("" #x " failed in %s", __FUNCTION__);                     \
+  } while (0)
 #endif
 
 // Macros that define away in non-Debug builds
@@ -186,49 +184,47 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern  bool logAPIs();
-extern  bool logUnwinding();
-extern  bool logDWARF();
+extern bool logAPIs();
+extern bool logUnwinding();
+extern bool logDWARF();
 #ifdef __cplusplus
 }
 #endif
-#define _LIBUNWIND_DEBUG_LOG(msg, ...)  _LIBUNWIND_LOG(msg, __VA_ARGS__)
-#define _LIBUNWIND_TRACE_API(msg, ...)                                       \
-    do {                                                                       \
-      if (logAPIs())                                                           \
-        _LIBUNWIND_LOG(msg, __VA_ARGS__);                                      \
-    } while (0)
+#define _LIBUNWIND_DEBUG_LOG(msg, ...) _LIBUNWIND_LOG(msg, __VA_ARGS__)
+#define _LIBUNWIND_TRACE_API(msg, ...)                                         \
+  do {                                                                         \
+    if (logAPIs())                                                             \
+      _LIBUNWIND_LOG(msg, __VA_ARGS__);                                        \
+  } while (0)
 #define _LIBUNWIND_TRACING_UNWINDING logUnwinding()
 #define _LIBUNWIND_TRACING_DWARF logDWARF()
-#define _LIBUNWIND_TRACE_UNWINDING(msg, ...)                                 \
-    do {                                                                       \
-      if (logUnwinding())                                                      \
-        _LIBUNWIND_LOG(msg, __VA_ARGS__);                                      \
-    } while (0)
-#define _LIBUNWIND_TRACE_DWARF(...)                                          \
-    do {                                                                       \
-      if (logDWARF())                                                          \
-        fprintf(stderr, __VA_ARGS__);                                          \
-    } while (0)
+#define _LIBUNWIND_TRACE_UNWINDING(msg, ...)                                   \
+  do {                                                                         \
+    if (logUnwinding())                                                        \
+      _LIBUNWIND_LOG(msg, __VA_ARGS__);                                        \
+  } while (0)
+#define _LIBUNWIND_TRACE_DWARF(...)                                            \
+  do {                                                                         \
+    if (logDWARF())                                                            \
+      fprintf(stderr, __VA_ARGS__);                                            \
+  } while (0)
 #endif
 
 #ifdef __cplusplus
 // Used to fit UnwindCursor and Registers_xxx types against unw_context_t /
 // unw_cursor_t sized memory blocks.
 #if defined(_LIBUNWIND_IS_NATIVE_ONLY)
-# define COMP_OP ==
+#define COMP_OP ==
 #else
-# define COMP_OP <=
+#define COMP_OP <=
 #endif
-template <typename _Type, typename _Mem>
-struct check_fit {
-    template <typename T>
-    struct blk_count {
-        static const size_t count =
-            (sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
-    };
-    static const bool does_fit =
-        (blk_count<_Type>::count COMP_OP blk_count<_Mem>::count);
+template <typename _Type, typename _Mem> struct check_fit {
+  template <typename T> struct blk_count {
+    static const size_t count =
+        (sizeof(T) + sizeof(uint64_t) - 1) / sizeof(uint64_t);
+  };
+  static const bool does_fit =
+      (blk_count<_Type>::count COMP_OP blk_count<_Mem>::count);
 };
 #undef COMP_OP
 #endif // __cplusplus

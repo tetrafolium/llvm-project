@@ -60,56 +60,52 @@ extern uptr kHighMemEnd; // Initialized in __memprof_init.
 
 namespace __memprof {
 
-inline uptr MemToShadowSize(uptr size) {
-    return size >> SHADOW_SCALE;
-}
-inline bool AddrIsInLowMem(uptr a) {
-    return a <= kLowMemEnd;
-}
+inline uptr MemToShadowSize(uptr size) { return size >> SHADOW_SCALE; }
+inline bool AddrIsInLowMem(uptr a) { return a <= kLowMemEnd; }
 
 inline bool AddrIsInLowShadow(uptr a) {
-    return a >= kLowShadowBeg && a <= kLowShadowEnd;
+  return a >= kLowShadowBeg && a <= kLowShadowEnd;
 }
 
 inline bool AddrIsInHighMem(uptr a) {
-    return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
+  return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
 }
 
 inline bool AddrIsInHighShadow(uptr a) {
-    return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
+  return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
 }
 
 inline bool AddrIsInShadowGap(uptr a) {
-    // In zero-based shadow mode we treat addresses near zero as addresses
-    // in shadow gap as well.
-    if (SHADOW_OFFSET == 0)
-        return a <= kShadowGapEnd;
-    return a >= kShadowGapBeg && a <= kShadowGapEnd;
+  // In zero-based shadow mode we treat addresses near zero as addresses
+  // in shadow gap as well.
+  if (SHADOW_OFFSET == 0)
+    return a <= kShadowGapEnd;
+  return a >= kShadowGapBeg && a <= kShadowGapEnd;
 }
 
 inline bool AddrIsInMem(uptr a) {
-    return AddrIsInLowMem(a) || AddrIsInHighMem(a) ||
-           (flags()->protect_shadow_gap == 0 && AddrIsInShadowGap(a));
+  return AddrIsInLowMem(a) || AddrIsInHighMem(a) ||
+         (flags()->protect_shadow_gap == 0 && AddrIsInShadowGap(a));
 }
 
 inline uptr MemToShadow(uptr p) {
-    CHECK(AddrIsInMem(p));
-    return MEM_TO_SHADOW(p);
+  CHECK(AddrIsInMem(p));
+  return MEM_TO_SHADOW(p);
 }
 
 inline bool AddrIsInShadow(uptr a) {
-    return AddrIsInLowShadow(a) || AddrIsInHighShadow(a);
+  return AddrIsInLowShadow(a) || AddrIsInHighShadow(a);
 }
 
 inline bool AddrIsAlignedByGranularity(uptr a) {
-    return (a & (SHADOW_GRANULARITY - 1)) == 0;
+  return (a & (SHADOW_GRANULARITY - 1)) == 0;
 }
 
 inline void RecordAccess(uptr a) {
-    // If we use a different shadow size then the type below needs adjustment.
-    CHECK_EQ(SHADOW_ENTRY_SIZE, 8);
-    u64 *shadow_address = (u64 *)MEM_TO_SHADOW(a);
-    (*shadow_address)++;
+  // If we use a different shadow size then the type below needs adjustment.
+  CHECK_EQ(SHADOW_ENTRY_SIZE, 8);
+  u64 *shadow_address = (u64 *)MEM_TO_SHADOW(a);
+  (*shadow_address)++;
 }
 
 } // namespace __memprof

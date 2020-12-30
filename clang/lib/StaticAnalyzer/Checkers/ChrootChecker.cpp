@@ -28,10 +28,8 @@ namespace {
 // enum value that represent the jail state
 enum Kind { NO_CHROOT, ROOT_CHANGED, JAIL_ENTERED };
 
-bool isRootChanged(intptr_t k) {
-    return k == ROOT_CHANGED;
-}
-//bool isJailEntered(intptr_t k) { return k == JAIL_ENTERED; }
+bool isRootChanged(intptr_t k) { return k == ROOT_CHANGED; }
+// bool isJailEntered(intptr_t k) { return k == JAIL_ENTERED; }
 
 // This checker checks improper use of chroot.
 // The state transition:
@@ -41,103 +39,104 @@ bool isRootChanged(intptr_t k) {
 //                                  |                               |
 //                      bug<--foo()--          JAIL_ENTERED<--foo()--
 class ChrootChecker : public Checker<eval::Call, check::PreCall> {
-    // This bug refers to possibly break out of a chroot() jail.
-    mutable std::unique_ptr<BuiltinBug> BT_BreakJail;
+  // This bug refers to possibly break out of a chroot() jail.
+  mutable std::unique_ptr<BuiltinBug> BT_BreakJail;
 
-    const CallDescription Chroot{"chroot", 1}, Chdir{"chdir", 1};
+  const CallDescription Chroot{"chroot", 1}, Chdir{"chdir", 1};
 
 public:
-    ChrootChecker() {}
+  ChrootChecker() {}
 
-    static void *getTag() {
-        static int x;
-        return &x;
-    }
+  static void *getTag() {
+    static int x;
+    return &x;
+  }
 
-    bool evalCall(const CallEvent &Call, CheckerContext &C) const;
-    void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
+  bool evalCall(const CallEvent &Call, CheckerContext &C) const;
+  void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
 
 private:
-    void evalChroot(const CallEvent &Call, CheckerContext &C) const;
-    void evalChdir(const CallEvent &Call, CheckerContext &C) const;
+  void evalChroot(const CallEvent &Call, CheckerContext &C) const;
+  void evalChdir(const CallEvent &Call, CheckerContext &C) const;
 };
 
 } // end anonymous namespace
 
 bool ChrootChecker::evalCall(const CallEvent &Call, CheckerContext &C) const {
-    if (Call.isCalled(Chroot)) {
-        evalChroot(Call, C);
-        return true;
-    }
-    if (Call.isCalled(Chdir)) {
-        evalChdir(Call, C);
-        return true;
-    }
+  if (Call.isCalled(Chroot)) {
+    evalChroot(Call, C);
+    return true;
+  }
+  if (Call.isCalled(Chdir)) {
+    evalChdir(Call, C);
+    return true;
+  }
 
-    return false;
+  return false;
 }
 
 void ChrootChecker::evalChroot(const CallEvent &Call, CheckerContext &C) const {
-    ProgramStateRef state = C.getState();
-    ProgramStateManager &Mgr = state->getStateManager();
+  ProgramStateRef state = C.getState();
+  ProgramStateManager &Mgr = state->getStateManager();
 
-    // Once encouter a chroot(), set the enum value ROOT_CHANGED directly in
-    // the GDM.
-    state = Mgr.addGDM(state, ChrootChecker::getTag(), (void*) ROOT_CHANGED);
-    C.addTransition(state);
+  // Once encouter a chroot(), set the enum value ROOT_CHANGED directly in
+  // the GDM.
+  state = Mgr.addGDM(state, ChrootChecker::getTag(), (void *)ROOT_CHANGED);
+  C.addTransition(state);
 }
 
 void ChrootChecker::evalChdir(const CallEvent &Call, CheckerContext &C) const {
-    ProgramStateRef state = C.getState();
-    ProgramStateManager &Mgr = state->getStateManager();
+  ProgramStateRef state = C.getState();
+  ProgramStateManager &Mgr = state->getStateManager();
 
-    // If there are no jail state in the GDM, just return.
-    const void *k = state->FindGDM(ChrootChecker::getTag());
-    if (!k)
-        return;
+  // If there are no jail state in the GDM, just return.
+  const void *k = state->FindGDM(ChrootChecker::getTag());
+  if (!k)
+    return;
 
-    // After chdir("/"), enter the jail, set the enum value JAIL_ENTERED.
-    const Expr *ArgExpr = Call.getArgExpr(0);
-    SVal ArgVal = C.getSVal(ArgExpr);
+  // After chdir("/"), enter the jail, set the enum value JAIL_ENTERED.
+  const Expr *ArgExpr = Call.getArgExpr(0);
+  SVal ArgVal = C.getSVal(ArgExpr);
 
-    if (const MemRegion *R = ArgVal.getAsRegion()) {
-        R = R->StripCasts();
-        if (const StringRegion* StrRegion= dyn_cast<StringRegion>(R)) {
-            const StringLiteral* Str = StrRegion->getStringLiteral();
-            if (Str->getString() == "/")
-                state = Mgr.addGDM(state, ChrootChecker::getTag(),
-                                   (void*) JAIL_ENTERED);
-        }
+  if (const MemRegion *R = ArgVal.getAsRegion()) {
+    R = R->StripCasts();
+    if (const StringRegion *StrRegion = dyn_cast<StringRegion>(R)) {
+      const StringLiteral *Str = StrRegion->getStringLiteral();
+      if (Str->getString() == "/")
+        state =
+            Mgr.addGDM(state, ChrootChecker::getTag(), (void *)JAIL_ENTERED);
     }
+  }
 
-    C.addTransition(state);
+  C.addTransition(state);
 }
 
 // Check the jail state before any function call except chroot and chdir().
 void ChrootChecker::checkPreCall(const CallEvent &Call,
                                  CheckerContext &C) const {
-    // Ignore chroot and chdir.
-    if (Call.isCalled(Chroot) || Call.isCalled(Chdir))
-        return;
+  // Ignore chroot and chdir.
+  if (Call.isCalled(Chroot) || Call.isCalled(Chdir))
+    return;
 
-    // If jail state is ROOT_CHANGED, generate BugReport.
-    void *const* k = C.getState()->FindGDM(ChrootChecker::getTag());
-    if (k)
-        if (isRootChanged((intptr_t) *k))
-            if (ExplodedNode *N = C.generateNonFatalErrorNode()) {
-                if (!BT_BreakJail)
-                    BT_BreakJail.reset(new BuiltinBug(
-                                           this, "Break out of jail", "No call of chdir(\"/\") immediately "
-                                           "after chroot"));
-                C.emitReport(std::make_unique<PathSensitiveBugReport>(
-                                 *BT_BreakJail, BT_BreakJail->getDescription(), N));
-            }
+  // If jail state is ROOT_CHANGED, generate BugReport.
+  void *const *k = C.getState()->FindGDM(ChrootChecker::getTag());
+  if (k)
+    if (isRootChanged((intptr_t)*k))
+      if (ExplodedNode *N = C.generateNonFatalErrorNode()) {
+        if (!BT_BreakJail)
+          BT_BreakJail.reset(
+              new BuiltinBug(this, "Break out of jail",
+                             "No call of chdir(\"/\") immediately "
+                             "after chroot"));
+        C.emitReport(std::make_unique<PathSensitiveBugReport>(
+            *BT_BreakJail, BT_BreakJail->getDescription(), N));
+      }
 }
 
 void ento::registerChrootChecker(CheckerManager &mgr) {
-    mgr.registerChecker<ChrootChecker>();
+  mgr.registerChecker<ChrootChecker>();
 }
 
 bool ento::shouldRegisterChrootChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

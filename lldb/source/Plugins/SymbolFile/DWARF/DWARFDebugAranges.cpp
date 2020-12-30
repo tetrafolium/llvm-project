@@ -21,74 +21,74 @@ DWARFDebugAranges::DWARFDebugAranges() : m_aranges() {}
 // CountArangeDescriptors
 class CountArangeDescriptors {
 public:
-    CountArangeDescriptors(uint32_t &count_ref) : count(count_ref) {
-        //      printf("constructor CountArangeDescriptors()\n");
-    }
-    void operator()(const DWARFDebugArangeSet &set) {
-        count += set.NumDescriptors();
-    }
-    uint32_t &count;
+  CountArangeDescriptors(uint32_t &count_ref) : count(count_ref) {
+    //      printf("constructor CountArangeDescriptors()\n");
+  }
+  void operator()(const DWARFDebugArangeSet &set) {
+    count += set.NumDescriptors();
+  }
+  uint32_t &count;
 };
 
 // Extract
 llvm::Error
 DWARFDebugAranges::extract(const DWARFDataExtractor &debug_aranges_data) {
-    lldb::offset_t offset = 0;
+  lldb::offset_t offset = 0;
 
-    DWARFDebugArangeSet set;
-    Range range;
-    while (debug_aranges_data.ValidOffset(offset)) {
-        llvm::Error error = set.extract(debug_aranges_data, &offset);
-        if (error)
-            return error;
+  DWARFDebugArangeSet set;
+  Range range;
+  while (debug_aranges_data.ValidOffset(offset)) {
+    llvm::Error error = set.extract(debug_aranges_data, &offset);
+    if (error)
+      return error;
 
-        const uint32_t num_descriptors = set.NumDescriptors();
-        if (num_descriptors > 0) {
-            const dw_offset_t cu_offset = set.GetHeader().cu_offset;
+    const uint32_t num_descriptors = set.NumDescriptors();
+    if (num_descriptors > 0) {
+      const dw_offset_t cu_offset = set.GetHeader().cu_offset;
 
-            for (uint32_t i = 0; i < num_descriptors; ++i) {
-                const DWARFDebugArangeSet::Descriptor &descriptor =
-                    set.GetDescriptorRef(i);
-                m_aranges.Append(RangeToDIE::Entry(descriptor.address,
-                                                   descriptor.length, cu_offset));
-            }
-        }
-        set.Clear();
+      for (uint32_t i = 0; i < num_descriptors; ++i) {
+        const DWARFDebugArangeSet::Descriptor &descriptor =
+            set.GetDescriptorRef(i);
+        m_aranges.Append(RangeToDIE::Entry(descriptor.address,
+                                           descriptor.length, cu_offset));
+      }
     }
-    return llvm::ErrorSuccess();
+    set.Clear();
+  }
+  return llvm::ErrorSuccess();
 }
 
 void DWARFDebugAranges::Dump(Log *log) const {
-    if (log == nullptr)
-        return;
+  if (log == nullptr)
+    return;
 
-    const size_t num_entries = m_aranges.GetSize();
-    for (size_t i = 0; i < num_entries; ++i) {
-        const RangeToDIE::Entry *entry = m_aranges.GetEntryAtIndex(i);
-        if (entry)
-            LLDB_LOGF(log, "0x%8.8x: [0x%" PRIx64 " - 0x%" PRIx64 ")", entry->data,
-                      entry->GetRangeBase(), entry->GetRangeEnd());
-    }
+  const size_t num_entries = m_aranges.GetSize();
+  for (size_t i = 0; i < num_entries; ++i) {
+    const RangeToDIE::Entry *entry = m_aranges.GetEntryAtIndex(i);
+    if (entry)
+      LLDB_LOGF(log, "0x%8.8x: [0x%" PRIx64 " - 0x%" PRIx64 ")", entry->data,
+                entry->GetRangeBase(), entry->GetRangeEnd());
+  }
 }
 
 void DWARFDebugAranges::AppendRange(dw_offset_t offset, dw_addr_t low_pc,
                                     dw_addr_t high_pc) {
-    if (high_pc > low_pc)
-        m_aranges.Append(RangeToDIE::Entry(low_pc, high_pc - low_pc, offset));
+  if (high_pc > low_pc)
+    m_aranges.Append(RangeToDIE::Entry(low_pc, high_pc - low_pc, offset));
 }
 
 void DWARFDebugAranges::Sort(bool minimize) {
-    LLDB_SCOPED_TIMERF("%s this = %p", LLVM_PRETTY_FUNCTION,
-                       static_cast<void *>(this));
+  LLDB_SCOPED_TIMERF("%s this = %p", LLVM_PRETTY_FUNCTION,
+                     static_cast<void *>(this));
 
-    m_aranges.Sort();
-    m_aranges.CombineConsecutiveEntriesWithEqualData();
+  m_aranges.Sort();
+  m_aranges.CombineConsecutiveEntriesWithEqualData();
 }
 
 // FindAddress
 dw_offset_t DWARFDebugAranges::FindAddress(dw_addr_t address) const {
-    const RangeToDIE::Entry *entry = m_aranges.FindEntryThatContains(address);
-    if (entry)
-        return entry->data;
-    return DW_INVALID_OFFSET;
+  const RangeToDIE::Entry *entry = m_aranges.FindEntryThatContains(address);
+  if (entry)
+    return entry->data;
+  return DW_INVALID_OFFSET;
 }

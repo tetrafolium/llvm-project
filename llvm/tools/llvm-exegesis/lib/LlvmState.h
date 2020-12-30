@@ -35,52 +35,41 @@ struct PfmCountersInfo;
 // measurements.
 class LLVMState {
 public:
-    // Uses the host triple. If CpuName is empty, uses the host CPU.
-    LLVMState(const std::string &CpuName);
+  // Uses the host triple. If CpuName is empty, uses the host CPU.
+  LLVMState(const std::string &CpuName);
 
-    LLVMState(const std::string &Triple,
-              const std::string &CpuName,
-              const std::string &Features = ""); // For tests.
+  LLVMState(const std::string &Triple, const std::string &CpuName,
+            const std::string &Features = ""); // For tests.
 
-    const TargetMachine &getTargetMachine() const {
-        return *TheTargetMachine;
-    }
-    std::unique_ptr<LLVMTargetMachine> createTargetMachine() const;
+  const TargetMachine &getTargetMachine() const { return *TheTargetMachine; }
+  std::unique_ptr<LLVMTargetMachine> createTargetMachine() const;
 
-    const ExegesisTarget &getExegesisTarget() const {
-        return *TheExegesisTarget;
-    }
+  const ExegesisTarget &getExegesisTarget() const { return *TheExegesisTarget; }
 
-    bool canAssemble(const MCInst &mc_inst) const;
+  bool canAssemble(const MCInst &mc_inst) const;
 
-    // For convenience:
-    const MCInstrInfo &getInstrInfo() const {
-        return *TheTargetMachine->getMCInstrInfo();
-    }
-    const MCRegisterInfo &getRegInfo() const {
-        return *TheTargetMachine->getMCRegisterInfo();
-    }
-    const MCSubtargetInfo &getSubtargetInfo() const {
-        return *TheTargetMachine->getMCSubtargetInfo();
-    }
+  // For convenience:
+  const MCInstrInfo &getInstrInfo() const {
+    return *TheTargetMachine->getMCInstrInfo();
+  }
+  const MCRegisterInfo &getRegInfo() const {
+    return *TheTargetMachine->getMCRegisterInfo();
+  }
+  const MCSubtargetInfo &getSubtargetInfo() const {
+    return *TheTargetMachine->getMCSubtargetInfo();
+  }
 
-    const RegisterAliasingTrackerCache &getRATC() const {
-        return *RATC;
-    }
-    const InstructionsCache &getIC() const {
-        return *IC;
-    }
+  const RegisterAliasingTrackerCache &getRATC() const { return *RATC; }
+  const InstructionsCache &getIC() const { return *IC; }
 
-    const PfmCountersInfo &getPfmCounters() const {
-        return *PfmCounters;
-    }
+  const PfmCountersInfo &getPfmCounters() const { return *PfmCounters; }
 
 private:
-    const ExegesisTarget *TheExegesisTarget;
-    std::unique_ptr<const TargetMachine> TheTargetMachine;
-    std::unique_ptr<const RegisterAliasingTrackerCache> RATC;
-    std::unique_ptr<const InstructionsCache> IC;
-    const PfmCountersInfo *PfmCounters;
+  const ExegesisTarget *TheExegesisTarget;
+  std::unique_ptr<const TargetMachine> TheTargetMachine;
+  std::unique_ptr<const RegisterAliasingTrackerCache> RATC;
+  std::unique_ptr<const InstructionsCache> IC;
+  const PfmCountersInfo *PfmCounters;
 };
 
 } // namespace exegesis

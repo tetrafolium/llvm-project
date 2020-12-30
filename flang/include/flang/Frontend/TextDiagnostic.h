@@ -34,35 +34,35 @@ namespace Fortran::frontend {
 ///
 class TextDiagnostic {
 public:
-    TextDiagnostic();
+  TextDiagnostic();
 
-    ~TextDiagnostic();
+  ~TextDiagnostic();
 
-    /// Print the diagnostic level to a llvm::raw_ostream.
-    ///
-    /// This is a static helper that handles colorizing the level and formatting
-    /// it into an arbitrary output stream.
-    ///
-    /// \param os Where the message is printed
-    /// \param level The diagnostic level (e.g. error or warning)
-    /// \param showColors Enable colorizing of the message.
-    static void PrintDiagnosticLevel(llvm::raw_ostream &os,
-                                     clang::DiagnosticsEngine::Level level, bool showColors);
+  /// Print the diagnostic level to a llvm::raw_ostream.
+  ///
+  /// This is a static helper that handles colorizing the level and formatting
+  /// it into an arbitrary output stream.
+  ///
+  /// \param os Where the message is printed
+  /// \param level The diagnostic level (e.g. error or warning)
+  /// \param showColors Enable colorizing of the message.
+  static void PrintDiagnosticLevel(llvm::raw_ostream &os,
+      clang::DiagnosticsEngine::Level level, bool showColors);
 
-    /// Pretty-print a diagnostic message to a llvm::raw_ostream.
-    ///
-    /// This is a static helper to handle the colorizing and rendering diagnostic
-    /// message to a particular ostream. In the future we can
-    /// extend it to support e.g. line wrapping. It is
-    /// publicly visible as at this stage we don't require any state data to
-    /// print a diagnostic.
-    ///
-    /// \param os Where the message is printed
-    /// \param isSupplemental true if this is a continuation note diagnostic
-    /// \param message The text actually printed
-    /// \param showColors Enable colorizing of the message.
-    static void PrintDiagnosticMessage(llvm::raw_ostream &os, bool isSupplemental,
-                                       llvm::StringRef message, bool showColors);
+  /// Pretty-print a diagnostic message to a llvm::raw_ostream.
+  ///
+  /// This is a static helper to handle the colorizing and rendering diagnostic
+  /// message to a particular ostream. In the future we can
+  /// extend it to support e.g. line wrapping. It is
+  /// publicly visible as at this stage we don't require any state data to
+  /// print a diagnostic.
+  ///
+  /// \param os Where the message is printed
+  /// \param isSupplemental true if this is a continuation note diagnostic
+  /// \param message The text actually printed
+  /// \param showColors Enable colorizing of the message.
+  static void PrintDiagnosticMessage(llvm::raw_ostream &os, bool isSupplemental,
+      llvm::StringRef message, bool showColors);
 };
 
 } // namespace Fortran::frontend

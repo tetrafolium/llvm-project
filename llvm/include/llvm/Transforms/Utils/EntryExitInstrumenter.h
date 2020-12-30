@@ -23,11 +23,11 @@ class Function;
 
 struct EntryExitInstrumenterPass
     : public PassInfoMixin<EntryExitInstrumenterPass> {
-    EntryExitInstrumenterPass(bool PostInlining) : PostInlining(PostInlining) {}
+  EntryExitInstrumenterPass(bool PostInlining) : PostInlining(PostInlining) {}
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-    bool PostInlining;
+  bool PostInlining;
 };
 
 } // namespace llvm

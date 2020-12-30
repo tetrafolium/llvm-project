@@ -22,36 +22,36 @@ namespace lldb_private {
 /// files.
 class ThreadTrace : public Thread {
 public:
-    /// \param[in] process
-    ///     The process who owns this thread.
-    ///
-    /// \param[in] tid
-    ///     The tid of this thread.
-    ///
-    /// \param[in] trace_file.
-    ///     The file that contains the list of instructions that were traced when
-    ///     this thread was being executed.
-    ThreadTrace(Process &process, lldb::tid_t tid, const FileSpec &trace_file)
-        : Thread(process, tid), m_trace_file(trace_file) {}
+  /// \param[in] process
+  ///     The process who owns this thread.
+  ///
+  /// \param[in] tid
+  ///     The tid of this thread.
+  ///
+  /// \param[in] trace_file.
+  ///     The file that contains the list of instructions that were traced when
+  ///     this thread was being executed.
+  ThreadTrace(Process &process, lldb::tid_t tid, const FileSpec &trace_file)
+      : Thread(process, tid), m_trace_file(trace_file) {}
 
-    void RefreshStateAfterStop() override;
+  void RefreshStateAfterStop() override;
 
-    lldb::RegisterContextSP GetRegisterContext() override;
+  lldb::RegisterContextSP GetRegisterContext() override;
 
-    lldb::RegisterContextSP
-    CreateRegisterContextForFrame(StackFrame *frame) override;
+  lldb::RegisterContextSP
+  CreateRegisterContextForFrame(StackFrame *frame) override;
 
-    /// \return
-    ///   The trace file of this thread.
-    const FileSpec &GetTraceFile() const;
+  /// \return
+  ///   The trace file of this thread.
+  const FileSpec &GetTraceFile() const;
 
 protected:
-    bool CalculateStopInfo() override;
+  bool CalculateStopInfo() override;
 
-    lldb::RegisterContextSP m_thread_reg_ctx_sp;
+  lldb::RegisterContextSP m_thread_reg_ctx_sp;
 
 private:
-    FileSpec m_trace_file;
+  FileSpec m_trace_file;
 };
 
 typedef std::shared_ptr<ThreadTrace> ThreadTraceSP;

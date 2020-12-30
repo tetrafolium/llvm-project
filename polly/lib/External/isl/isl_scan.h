@@ -14,8 +14,7 @@
 #include <isl/vec.h>
 
 struct isl_scan_callback {
-    isl_stat (*add)(struct isl_scan_callback *cb,
-                    __isl_take isl_vec *sample);
+  isl_stat (*add)(struct isl_scan_callback *cb, __isl_take isl_vec *sample);
 };
 
 isl_stat isl_basic_set_scan(__isl_take isl_basic_set *bset,

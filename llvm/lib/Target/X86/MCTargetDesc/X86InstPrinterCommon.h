@@ -20,22 +20,23 @@ namespace llvm {
 
 class X86InstPrinterCommon : public MCInstPrinter {
 public:
-    using MCInstPrinter::MCInstPrinter;
+  using MCInstPrinter::MCInstPrinter;
 
-    virtual void printOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O) = 0;
-    void printCondCode(const MCInst *MI, unsigned Op, raw_ostream &OS);
-    void printSSEAVXCC(const MCInst *MI, unsigned Op, raw_ostream &OS);
-    void printVPCOMMnemonic(const MCInst *MI, raw_ostream &OS);
-    void printVPCMPMnemonic(const MCInst *MI, raw_ostream &OS);
-    void printCMPMnemonic(const MCInst *MI, bool IsVCmp, raw_ostream &OS);
-    void printRoundingControl(const MCInst *MI, unsigned Op, raw_ostream &O);
-    void printPCRelImm(const MCInst *MI, uint64_t Address, unsigned OpNo,
-                       raw_ostream &O);
+  virtual void printOperand(const MCInst *MI, unsigned OpNo,
+                            raw_ostream &O) = 0;
+  void printCondCode(const MCInst *MI, unsigned Op, raw_ostream &OS);
+  void printSSEAVXCC(const MCInst *MI, unsigned Op, raw_ostream &OS);
+  void printVPCOMMnemonic(const MCInst *MI, raw_ostream &OS);
+  void printVPCMPMnemonic(const MCInst *MI, raw_ostream &OS);
+  void printCMPMnemonic(const MCInst *MI, bool IsVCmp, raw_ostream &OS);
+  void printRoundingControl(const MCInst *MI, unsigned Op, raw_ostream &O);
+  void printPCRelImm(const MCInst *MI, uint64_t Address, unsigned OpNo,
+                     raw_ostream &O);
 
 protected:
-    void printInstFlags(const MCInst *MI, raw_ostream &O);
-    void printOptionalSegReg(const MCInst *MI, unsigned OpNo, raw_ostream &O);
-    void printVKPair(const MCInst *MI, unsigned OpNo, raw_ostream &OS);
+  void printInstFlags(const MCInst *MI, raw_ostream &O);
+  void printOptionalSegReg(const MCInst *MI, unsigned OpNo, raw_ostream &O);
+  void printVKPair(const MCInst *MI, unsigned OpNo, raw_ostream &OS);
 };
 
 } // end namespace llvm

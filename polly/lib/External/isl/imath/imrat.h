@@ -34,45 +34,45 @@ extern "C" {
 #endif
 
 typedef struct mpq {
-    mpz_t   num;    /* Numerator         */
-    mpz_t   den;    /* Denominator, <> 0 */
+  mpz_t num; /* Numerator         */
+  mpz_t den; /* Denominator, <> 0 */
 } mpq_t, *mp_rat;
 
-#define MP_NUMER_P(Q)  (&((Q)->num)) /* Pointer to numerator   */
-#define MP_DENOM_P(Q)  (&((Q)->den)) /* Pointer to denominator */
+#define MP_NUMER_P(Q) (&((Q)->num)) /* Pointer to numerator   */
+#define MP_DENOM_P(Q) (&((Q)->den)) /* Pointer to denominator */
 
 /* Rounding constants */
 typedef enum {
-    MP_ROUND_DOWN,
-    MP_ROUND_HALF_UP,
-    MP_ROUND_UP,
-    MP_ROUND_HALF_DOWN
+  MP_ROUND_DOWN,
+  MP_ROUND_HALF_UP,
+  MP_ROUND_UP,
+  MP_ROUND_HALF_DOWN
 } mp_round_mode;
 
 mp_result mp_rat_init(mp_rat r);
-mp_rat    mp_rat_alloc(void);
+mp_rat mp_rat_alloc(void);
 mp_result mp_rat_reduce(mp_rat r);
 mp_result mp_rat_init_size(mp_rat r, mp_size n_prec, mp_size d_prec);
 mp_result mp_rat_init_copy(mp_rat r, mp_rat old);
 mp_result mp_rat_set_value(mp_rat r, mp_small numer, mp_small denom);
 mp_result mp_rat_set_uvalue(mp_rat r, mp_usmall numer, mp_usmall denom);
-void      mp_rat_clear(mp_rat r);
-void      mp_rat_free(mp_rat r);
-mp_result mp_rat_numer(mp_rat r, mp_int z);             /* z = num(r)  */
-mp_int    mp_rat_numer_ref(mp_rat r);                   /* &num(r)     */
-mp_result mp_rat_denom(mp_rat r, mp_int z);             /* z = den(r)  */
-mp_int    mp_rat_denom_ref(mp_rat r);                   /* &den(r)     */
-mp_sign   mp_rat_sign(mp_rat r);
+void mp_rat_clear(mp_rat r);
+void mp_rat_free(mp_rat r);
+mp_result mp_rat_numer(mp_rat r, mp_int z); /* z = num(r)  */
+mp_int mp_rat_numer_ref(mp_rat r);          /* &num(r)     */
+mp_result mp_rat_denom(mp_rat r, mp_int z); /* z = den(r)  */
+mp_int mp_rat_denom_ref(mp_rat r);          /* &den(r)     */
+mp_sign mp_rat_sign(mp_rat r);
 
-mp_result mp_rat_copy(mp_rat a, mp_rat c);              /* c = a       */
-void      mp_rat_zero(mp_rat r);                        /* r = 0       */
-mp_result mp_rat_abs(mp_rat a, mp_rat c);               /* c = |a|     */
-mp_result mp_rat_neg(mp_rat a, mp_rat c);               /* c = -a      */
-mp_result mp_rat_recip(mp_rat a, mp_rat c);             /* c = 1 / a   */
-mp_result mp_rat_add(mp_rat a, mp_rat b, mp_rat c);     /* c = a + b   */
-mp_result mp_rat_sub(mp_rat a, mp_rat b, mp_rat c);     /* c = a - b   */
-mp_result mp_rat_mul(mp_rat a, mp_rat b, mp_rat c);     /* c = a * b   */
-mp_result mp_rat_div(mp_rat a, mp_rat b, mp_rat c);     /* c = a / b   */
+mp_result mp_rat_copy(mp_rat a, mp_rat c);          /* c = a       */
+void mp_rat_zero(mp_rat r);                         /* r = 0       */
+mp_result mp_rat_abs(mp_rat a, mp_rat c);           /* c = |a|     */
+mp_result mp_rat_neg(mp_rat a, mp_rat c);           /* c = -a      */
+mp_result mp_rat_recip(mp_rat a, mp_rat c);         /* c = 1 / a   */
+mp_result mp_rat_add(mp_rat a, mp_rat b, mp_rat c); /* c = a + b   */
+mp_result mp_rat_sub(mp_rat a, mp_rat b, mp_rat c); /* c = a - b   */
+mp_result mp_rat_mul(mp_rat a, mp_rat b, mp_rat c); /* c = a * b   */
+mp_result mp_rat_div(mp_rat a, mp_rat b, mp_rat c); /* c = a / b   */
 
 mp_result mp_rat_add_int(mp_rat a, mp_int b, mp_rat c); /* c = a + b   */
 mp_result mp_rat_sub_int(mp_rat a, mp_int b, mp_rat c); /* c = a - b   */
@@ -80,11 +80,11 @@ mp_result mp_rat_mul_int(mp_rat a, mp_int b, mp_rat c); /* c = a * b   */
 mp_result mp_rat_div_int(mp_rat a, mp_int b, mp_rat c); /* c = a / b   */
 mp_result mp_rat_expt(mp_rat a, mp_small b, mp_rat c);  /* c = a ^ b   */
 
-int       mp_rat_compare(mp_rat a, mp_rat b);           /* a <=> b     */
-int       mp_rat_compare_unsigned(mp_rat a, mp_rat b);  /* |a| <=> |b| */
-int       mp_rat_compare_zero(mp_rat r);                /* r <=> 0     */
-int       mp_rat_compare_value(mp_rat r, mp_small n, mp_small d); /* r <=> n/d */
-int       mp_rat_is_integer(mp_rat r);
+int mp_rat_compare(mp_rat a, mp_rat b);                     /* a <=> b     */
+int mp_rat_compare_unsigned(mp_rat a, mp_rat b);            /* |a| <=> |b| */
+int mp_rat_compare_zero(mp_rat r);                          /* r <=> 0     */
+int mp_rat_compare_value(mp_rat r, mp_small n, mp_small d); /* r <=> n/d */
+int mp_rat_is_integer(mp_rat r);
 
 /* Convert to integers, if representable (returns MP_RANGE if not). */
 mp_result mp_rat_to_ints(mp_rat r, mp_small *num, mp_small *den);

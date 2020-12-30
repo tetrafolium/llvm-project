@@ -26,62 +26,58 @@ namespace tblgen {
 // and provides helper methods for accessing them.
 class Dialect {
 public:
-    explicit Dialect(const llvm::Record *def);
+  explicit Dialect(const llvm::Record *def);
 
-    // Returns the name of this dialect.
-    StringRef getName() const;
+  // Returns the name of this dialect.
+  StringRef getName() const;
 
-    // Returns the C++ namespaces that ops of this dialect should be placed into.
-    StringRef getCppNamespace() const;
+  // Returns the C++ namespaces that ops of this dialect should be placed into.
+  StringRef getCppNamespace() const;
 
-    // Returns this dialect's C++ class name.
-    std::string getCppClassName() const;
+  // Returns this dialect's C++ class name.
+  std::string getCppClassName() const;
 
-    // Returns the summary description of the dialect. Returns empty string if
-    // none.
-    StringRef getSummary() const;
+  // Returns the summary description of the dialect. Returns empty string if
+  // none.
+  StringRef getSummary() const;
 
-    // Returns the description of the dialect. Returns empty string if none.
-    StringRef getDescription() const;
+  // Returns the description of the dialect. Returns empty string if none.
+  StringRef getDescription() const;
 
-    // Returns the list of dialect (class names) that this dialect depends on.
-    // These are dialects that will be loaded on construction of this dialect.
-    ArrayRef<StringRef> getDependentDialects() const;
+  // Returns the list of dialect (class names) that this dialect depends on.
+  // These are dialects that will be loaded on construction of this dialect.
+  ArrayRef<StringRef> getDependentDialects() const;
 
-    // Returns the dialects extra class declaration code.
-    llvm::Optional<StringRef> getExtraClassDeclaration() const;
+  // Returns the dialects extra class declaration code.
+  llvm::Optional<StringRef> getExtraClassDeclaration() const;
 
-    // Returns true if this dialect has a constant materializer.
-    bool hasConstantMaterializer() const;
+  // Returns true if this dialect has a constant materializer.
+  bool hasConstantMaterializer() const;
 
-    /// Returns true if this dialect has an operation attribute verifier.
-    bool hasOperationAttrVerify() const;
+  /// Returns true if this dialect has an operation attribute verifier.
+  bool hasOperationAttrVerify() const;
 
-    /// Returns true if this dialect has a region argument attribute verifier.
-    bool hasRegionArgAttrVerify() const;
+  /// Returns true if this dialect has a region argument attribute verifier.
+  bool hasRegionArgAttrVerify() const;
 
-    /// Returns true if this dialect has a region result attribute verifier.
-    bool hasRegionResultAttrVerify() const;
+  /// Returns true if this dialect has a region result attribute verifier.
+  bool hasRegionResultAttrVerify() const;
 
-    // Returns whether two dialects are equal by checking the equality of the
-    // underlying record.
-    bool operator==(const Dialect &other) const;
+  // Returns whether two dialects are equal by checking the equality of the
+  // underlying record.
+  bool operator==(const Dialect &other) const;
 
-    bool operator!=(const Dialect &other) const {
-        return !(*this == other);
-    }
+  bool operator!=(const Dialect &other) const { return !(*this == other); }
 
-    // Compares two dialects by comparing the names of the dialects.
-    bool operator<(const Dialect &other) const;
+  // Compares two dialects by comparing the names of the dialects.
+  bool operator<(const Dialect &other) const;
 
-    // Returns whether the dialect is defined.
-    explicit operator bool() const {
-        return def != nullptr;
-    }
+  // Returns whether the dialect is defined.
+  explicit operator bool() const { return def != nullptr; }
 
 private:
-    const llvm::Record *def;
-    std::vector<StringRef> dependentDialects;
+  const llvm::Record *def;
+  std::vector<StringRef> dependentDialects;
 };
 } // end namespace tblgen
 } // end namespace mlir

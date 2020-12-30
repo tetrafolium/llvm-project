@@ -27,43 +27,43 @@ class ValueObject;
 
 class ValueObjectConstResultCast : public ValueObjectCast {
 public:
-    ValueObjectConstResultCast(ValueObject &parent, ConstString name,
-                               const CompilerType &cast_type,
-                               lldb::addr_t live_address = LLDB_INVALID_ADDRESS);
+  ValueObjectConstResultCast(ValueObject &parent, ConstString name,
+                             const CompilerType &cast_type,
+                             lldb::addr_t live_address = LLDB_INVALID_ADDRESS);
 
-    ~ValueObjectConstResultCast() override;
+  ~ValueObjectConstResultCast() override;
 
-    lldb::ValueObjectSP Dereference(Status &error) override;
+  lldb::ValueObjectSP Dereference(Status &error) override;
 
-    ValueObject *CreateChildAtIndex(size_t idx, bool synthetic_array_member,
-                                    int32_t synthetic_index) override;
+  ValueObject *CreateChildAtIndex(size_t idx, bool synthetic_array_member,
+                                  int32_t synthetic_index) override;
 
-    virtual CompilerType GetCompilerType() {
-        return ValueObjectCast::GetCompilerType();
-    }
+  virtual CompilerType GetCompilerType() {
+    return ValueObjectCast::GetCompilerType();
+  }
 
-    lldb::ValueObjectSP GetSyntheticChildAtOffset(
-        uint32_t offset, const CompilerType &type, bool can_create,
-        ConstString name_const_str = ConstString()) override;
+  lldb::ValueObjectSP GetSyntheticChildAtOffset(
+      uint32_t offset, const CompilerType &type, bool can_create,
+      ConstString name_const_str = ConstString()) override;
 
-    lldb::ValueObjectSP AddressOf(Status &error) override;
+  lldb::ValueObjectSP AddressOf(Status &error) override;
 
-    size_t GetPointeeData(DataExtractor &data, uint32_t item_idx = 0,
-                          uint32_t item_count = 1) override;
+  size_t GetPointeeData(DataExtractor &data, uint32_t item_idx = 0,
+                        uint32_t item_count = 1) override;
 
-    lldb::ValueObjectSP Cast(const CompilerType &compiler_type) override;
+  lldb::ValueObjectSP Cast(const CompilerType &compiler_type) override;
 
 protected:
-    ValueObjectConstResultImpl m_impl;
+  ValueObjectConstResultImpl m_impl;
 
 private:
-    friend class ValueObject;
-    friend class ValueObjectConstResult;
-    friend class ValueObjectConstResultImpl;
+  friend class ValueObject;
+  friend class ValueObjectConstResult;
+  friend class ValueObjectConstResultImpl;
 
-    ValueObjectConstResultCast(const ValueObjectConstResultCast &) = delete;
-    const ValueObjectConstResultCast &
-    operator=(const ValueObjectConstResultCast &) = delete;
+  ValueObjectConstResultCast(const ValueObjectConstResultCast &) = delete;
+  const ValueObjectConstResultCast &
+  operator=(const ValueObjectConstResultCast &) = delete;
 };
 
 } // namespace lldb_private

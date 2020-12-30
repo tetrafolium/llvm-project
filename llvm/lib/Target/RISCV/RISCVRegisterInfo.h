@@ -22,44 +22,44 @@ namespace llvm {
 
 struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
 
-    RISCVRegisterInfo(unsigned HwMode);
+  RISCVRegisterInfo(unsigned HwMode);
 
-    const uint32_t *getCallPreservedMask(const MachineFunction &MF,
-                                         CallingConv::ID) const override;
+  const uint32_t *getCallPreservedMask(const MachineFunction &MF,
+                                       CallingConv::ID) const override;
 
-    const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+  const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
-    BitVector getReservedRegs(const MachineFunction &MF) const override;
-    bool isAsmClobberable(const MachineFunction &MF,
-                          MCRegister PhysReg) const override;
+  BitVector getReservedRegs(const MachineFunction &MF) const override;
+  bool isAsmClobberable(const MachineFunction &MF,
+                        MCRegister PhysReg) const override;
 
-    bool isConstantPhysReg(MCRegister PhysReg) const override;
+  bool isConstantPhysReg(MCRegister PhysReg) const override;
 
-    const uint32_t *getNoPreservedMask() const override;
+  const uint32_t *getNoPreservedMask() const override;
 
-    bool hasReservedSpillSlot(const MachineFunction &MF, Register Reg,
-                              int &FrameIdx) const override;
+  bool hasReservedSpillSlot(const MachineFunction &MF, Register Reg,
+                            int &FrameIdx) const override;
 
-    void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
-                             unsigned FIOperandNum,
-                             RegScavenger *RS = nullptr) const override;
+  void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
-    Register getFrameRegister(const MachineFunction &MF) const override;
+  Register getFrameRegister(const MachineFunction &MF) const override;
 
-    bool requiresRegisterScavenging(const MachineFunction &MF) const override {
-        return true;
-    }
+  bool requiresRegisterScavenging(const MachineFunction &MF) const override {
+    return true;
+  }
 
-    bool requiresFrameIndexScavenging(const MachineFunction &MF) const override {
-        return true;
-    }
+  bool requiresFrameIndexScavenging(const MachineFunction &MF) const override {
+    return true;
+  }
 
-    const TargetRegisterClass *
-    getPointerRegClass(const MachineFunction &MF,
-                       unsigned Kind = 0) const override {
-        return &RISCV::GPRRegClass;
-    }
+  const TargetRegisterClass *
+  getPointerRegClass(const MachineFunction &MF,
+                     unsigned Kind = 0) const override {
+    return &RISCV::GPRRegClass;
+  }
 };
-}
+} // namespace llvm
 
 #endif

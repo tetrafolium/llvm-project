@@ -9,10 +9,10 @@
 #ifndef LLVM_LIB_TARGET_HEXAGON_HEXAGONARCH_H
 #define LLVM_LIB_TARGET_HEXAGON_HEXAGONARCH_H
 
+#include "HexagonDepArch.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/StringRef.h"
-#include "HexagonDepArch.h"
 #include <algorithm>
 
 namespace llvm {
@@ -20,20 +20,18 @@ namespace Hexagon {
 
 template <class ArchCont, typename Val>
 bool ValidArch(ArchCont const &ArchList, Val HexArch) {
-    return std::any_of(std::begin(ArchList), std::end(ArchList),
-    [HexArch](Val V) {
-        return V == HexArch;
-    });
+  return std::any_of(std::begin(ArchList), std::end(ArchList),
+                     [HexArch](Val V) { return V == HexArch; });
 }
 
 template <class ArchCont, typename Val>
 llvm::Optional<ArchEnum> GetCpu(ArchCont const &ArchList, Val CPUString) {
-    llvm::Optional<ArchEnum> Res;
-    auto Entry = ArchList.find(CPUString);
-    if (Entry != ArchList.end())
-        Res = Entry->second;
-    return Res;
+  llvm::Optional<ArchEnum> Res;
+  auto Entry = ArchList.find(CPUString);
+  if (Entry != ArchList.end())
+    Res = Entry->second;
+  return Res;
 }
 } // namespace Hexagon
 } // namespace llvm
-#endif  // LLVM_LIB_TARGET_HEXAGON_HEXAGONARCH_H
+#endif // LLVM_LIB_TARGET_HEXAGON_HEXAGONARCH_H

@@ -42,19 +42,19 @@ std::string getMacroStack(SourceLocation Loc, ASTContext &Context);
 /// method update(StringRef)
 template <class T>
 void addDataToConsumer(T &DataConsumer, llvm::StringRef Str) {
-    DataConsumer.update(Str);
+  DataConsumer.update(Str);
 }
 
 template <class T> void addDataToConsumer(T &DataConsumer, const QualType &QT) {
-    addDataToConsumer(DataConsumer, QT.getAsString());
+  addDataToConsumer(DataConsumer, QT.getAsString());
 }
 
 template <class T, class Type>
 std::enable_if_t<std::is_integral<Type>::value || std::is_enum<Type>::value ||
-std::is_convertible<Type, size_t>::value // for llvm::hash_code
->
+                 std::is_convertible<Type, size_t>::value // for llvm::hash_code
+                 >
 addDataToConsumer(T &DataConsumer, Type Data) {
-    DataConsumer.update(StringRef(reinterpret_cast<char *>(&Data), sizeof(Data)));
+  DataConsumer.update(StringRef(reinterpret_cast<char *>(&Data), sizeof(Data)));
 }
 
 } // end namespace data_collection

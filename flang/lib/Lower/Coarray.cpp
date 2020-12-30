@@ -34,27 +34,27 @@ void Fortran::lower::genChangeTeamConstruct(
     Fortran::lower::AbstractConverter &converter,
     Fortran::lower::pft::Evaluation &,
     const Fortran::parser::ChangeTeamConstruct &) {
-    TODO("CHANGE TEAM construct");
+  TODO("CHANGE TEAM construct");
 }
 
 void Fortran::lower::genChangeTeamStmt(
     Fortran::lower::AbstractConverter &converter,
     Fortran::lower::pft::Evaluation &,
     const Fortran::parser::ChangeTeamStmt &) {
-    TODO("CHANGE TEAM stmt");
+  TODO("CHANGE TEAM stmt");
 }
 
 void Fortran::lower::genEndChangeTeamStmt(
     Fortran::lower::AbstractConverter &converter,
     Fortran::lower::pft::Evaluation &,
     const Fortran::parser::EndChangeTeamStmt &) {
-    TODO("END CHANGE TEAM");
+  TODO("END CHANGE TEAM");
 }
 
 void Fortran::lower::genFormTeamStatement(
     Fortran::lower::AbstractConverter &converter,
     Fortran::lower::pft::Evaluation &, const Fortran::parser::FormTeamStmt &) {
-    TODO("FORM TEAM");
+  TODO("FORM TEAM");
 }
 
 //===----------------------------------------------------------------------===//
@@ -63,11 +63,11 @@ void Fortran::lower::genFormTeamStatement(
 
 fir::ExtendedValue Fortran::lower::CoarrayExprHelper::genAddr(
     const Fortran::evaluate::CoarrayRef &expr) {
-    (void)symMap;
-    TODO("co-array address");
+  (void)symMap;
+  TODO("co-array address");
 }
 
 fir::ExtendedValue Fortran::lower::CoarrayExprHelper::genValue(
     const Fortran::evaluate::CoarrayRef &expr) {
-    TODO("co-array value");
+  TODO("co-array value");
 }

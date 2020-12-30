@@ -94,8 +94,8 @@ int const __kmp_openmp_version = 201611;
    a specific format some changes in the recognition routine there need to be
    made before this is changed. */
 char const __kmp_copyright[] = KMP_VERSION_PREFIX KMP_LIBRARY
-                               " ver. " stringer(KMP_VERSION_MAJOR) "." stringer(
-                                   KMP_VERSION_MINOR) "." stringer(KMP_VERSION_BUILD) " " KMP_COPYRIGHT;
+    " ver. " stringer(KMP_VERSION_MAJOR) "." stringer(
+        KMP_VERSION_MINOR) "." stringer(KMP_VERSION_BUILD) " " KMP_COPYRIGHT;
 
 char const __kmp_version_copyright[] = KMP_VERSION_PREFIX KMP_COPYRIGHT;
 char const __kmp_version_lib_ver[] =
@@ -106,7 +106,7 @@ char const __kmp_version_lib_type[] =
 char const __kmp_version_link_type[] =
     KMP_VERSION_PREFIX "link type: " KMP_LINK_TYPE;
 char const __kmp_version_build_time[] = KMP_VERSION_PREFIX "build time: "
-                                        "no_timestamp";
+                                                           "no_timestamp";
 #if KMP_MIC2
 char const __kmp_version_target_env[] =
     KMP_VERSION_PREFIX "target environment: MIC2";
@@ -118,70 +118,70 @@ char const __kmp_version_build_compiler[] =
 static int __kmp_version_1_printed = FALSE;
 
 void __kmp_print_version_1(void) {
-    if (__kmp_version_1_printed) {
-        return;
-    }
-    __kmp_version_1_printed = TRUE;
+  if (__kmp_version_1_printed) {
+    return;
+  }
+  __kmp_version_1_printed = TRUE;
 
 #ifndef KMP_STUB
-    kmp_str_buf_t buffer;
-    __kmp_str_buf_init(&buffer);
-    // Print version strings skipping initial magic.
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_lib_ver[KMP_VERSION_MAGIC_LEN]);
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_lib_type[KMP_VERSION_MAGIC_LEN]);
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_link_type[KMP_VERSION_MAGIC_LEN]);
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_build_time[KMP_VERSION_MAGIC_LEN]);
+  kmp_str_buf_t buffer;
+  __kmp_str_buf_init(&buffer);
+  // Print version strings skipping initial magic.
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_lib_ver[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_lib_type[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_link_type[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_build_time[KMP_VERSION_MAGIC_LEN]);
 #if KMP_MIC
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_target_env[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_target_env[KMP_VERSION_MAGIC_LEN]);
 #endif
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_build_compiler[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_build_compiler[KMP_VERSION_MAGIC_LEN]);
 #if defined(KMP_GOMP_COMPAT)
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_alt_comp[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_alt_comp[KMP_VERSION_MAGIC_LEN]);
 #endif /* defined(KMP_GOMP_COMPAT) */
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_omp_api[KMP_VERSION_MAGIC_LEN]);
-    __kmp_str_buf_print(&buffer, "%sdynamic error checking: %s\n",
-                        KMP_VERSION_PREF_STR,
-                        (__kmp_env_consistency_check ? "yes" : "no"));
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_omp_api[KMP_VERSION_MAGIC_LEN]);
+  __kmp_str_buf_print(&buffer, "%sdynamic error checking: %s\n",
+                      KMP_VERSION_PREF_STR,
+                      (__kmp_env_consistency_check ? "yes" : "no"));
 #ifdef KMP_DEBUG
-    for (int i = bs_plain_barrier; i < bs_last_barrier; ++i) {
-        __kmp_str_buf_print(
-            &buffer, "%s%s barrier branch bits: gather=%u, release=%u\n",
-            KMP_VERSION_PREF_STR, __kmp_barrier_type_name[i],
-            __kmp_barrier_gather_branch_bits[i],
-            __kmp_barrier_release_branch_bits[i]); // __kmp_str_buf_print
-    }
-    for (int i = bs_plain_barrier; i < bs_last_barrier; ++i) {
-        __kmp_str_buf_print(
-            &buffer, "%s%s barrier pattern: gather=%s, release=%s\n",
-            KMP_VERSION_PREF_STR, __kmp_barrier_type_name[i],
-            __kmp_barrier_pattern_name[__kmp_barrier_gather_pattern[i]],
-            __kmp_barrier_pattern_name
-            [__kmp_barrier_release_pattern[i]]); // __kmp_str_buf_print
-    }
-    __kmp_str_buf_print(&buffer, "%s\n",
-                        &__kmp_version_lock[KMP_VERSION_MAGIC_LEN]);
-#endif
+  for (int i = bs_plain_barrier; i < bs_last_barrier; ++i) {
     __kmp_str_buf_print(
-        &buffer, "%sthread affinity support: %s\n", KMP_VERSION_PREF_STR,
-#if KMP_AFFINITY_SUPPORTED
-        (KMP_AFFINITY_CAPABLE()
-         ? (__kmp_affinity_type == affinity_none ? "not used" : "yes")
-         : "no")
-#else
-        "no"
+        &buffer, "%s%s barrier branch bits: gather=%u, release=%u\n",
+        KMP_VERSION_PREF_STR, __kmp_barrier_type_name[i],
+        __kmp_barrier_gather_branch_bits[i],
+        __kmp_barrier_release_branch_bits[i]); // __kmp_str_buf_print
+  }
+  for (int i = bs_plain_barrier; i < bs_last_barrier; ++i) {
+    __kmp_str_buf_print(
+        &buffer, "%s%s barrier pattern: gather=%s, release=%s\n",
+        KMP_VERSION_PREF_STR, __kmp_barrier_type_name[i],
+        __kmp_barrier_pattern_name[__kmp_barrier_gather_pattern[i]],
+        __kmp_barrier_pattern_name
+            [__kmp_barrier_release_pattern[i]]); // __kmp_str_buf_print
+  }
+  __kmp_str_buf_print(&buffer, "%s\n",
+                      &__kmp_version_lock[KMP_VERSION_MAGIC_LEN]);
 #endif
-    );
-    __kmp_printf("%s", buffer.str);
-    __kmp_str_buf_free(&buffer);
-    K_DIAG(1, ("KMP_VERSION is true\n"));
+  __kmp_str_buf_print(
+      &buffer, "%sthread affinity support: %s\n", KMP_VERSION_PREF_STR,
+#if KMP_AFFINITY_SUPPORTED
+      (KMP_AFFINITY_CAPABLE()
+           ? (__kmp_affinity_type == affinity_none ? "not used" : "yes")
+           : "no")
+#else
+      "no"
+#endif
+  );
+  __kmp_printf("%s", buffer.str);
+  __kmp_str_buf_free(&buffer);
+  K_DIAG(1, ("KMP_VERSION is true\n"));
 #endif // KMP_STUB
 } // __kmp_print_version_1
 
@@ -189,10 +189,10 @@ void __kmp_print_version_1(void) {
 static int __kmp_version_2_printed = FALSE;
 
 void __kmp_print_version_2(void) {
-    if (__kmp_version_2_printed) {
-        return;
-    }
-    __kmp_version_2_printed = TRUE;
+  if (__kmp_version_2_printed) {
+    return;
+  }
+  __kmp_version_2_printed = TRUE;
 } // __kmp_print_version_2
 
 // end of file //

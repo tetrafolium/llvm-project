@@ -18,10 +18,8 @@ MCTargetOptions::MCTargetOptions()
       ShowMCEncoding(false), ShowMCInst(false), AsmVerbose(false),
       PreserveAsmComments(true), Dwarf64(false) {}
 
-StringRef MCTargetOptions::getABIName() const {
-    return ABIName;
-}
+StringRef MCTargetOptions::getABIName() const { return ABIName; }
 
 StringRef MCTargetOptions::getAssemblyLanguage() const {
-    return AssemblyLanguage;
+  return AssemblyLanguage;
 }

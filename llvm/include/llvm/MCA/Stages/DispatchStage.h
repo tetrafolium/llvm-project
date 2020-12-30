@@ -47,40 +47,38 @@ namespace mca {
 // If the number of micro opcodes exceedes DispatchWidth, then the instruction
 // is dispatched in multiple cycles.
 class DispatchStage final : public Stage {
-    unsigned DispatchWidth;
-    unsigned AvailableEntries;
-    unsigned CarryOver;
-    InstRef CarriedOver;
-    const MCSubtargetInfo &STI;
-    RetireControlUnit &RCU;
-    RegisterFile &PRF;
+  unsigned DispatchWidth;
+  unsigned AvailableEntries;
+  unsigned CarryOver;
+  InstRef CarriedOver;
+  const MCSubtargetInfo &STI;
+  RetireControlUnit &RCU;
+  RegisterFile &PRF;
 
-    bool checkRCU(const InstRef &IR) const;
-    bool checkPRF(const InstRef &IR) const;
-    bool canDispatch(const InstRef &IR) const;
-    Error dispatch(InstRef IR);
+  bool checkRCU(const InstRef &IR) const;
+  bool checkPRF(const InstRef &IR) const;
+  bool canDispatch(const InstRef &IR) const;
+  Error dispatch(InstRef IR);
 
-    void notifyInstructionDispatched(const InstRef &IR,
-                                     ArrayRef<unsigned> UsedPhysRegs,
-                                     unsigned uOps) const;
+  void notifyInstructionDispatched(const InstRef &IR,
+                                   ArrayRef<unsigned> UsedPhysRegs,
+                                   unsigned uOps) const;
 
 public:
-    DispatchStage(const MCSubtargetInfo &Subtarget, const MCRegisterInfo &MRI,
-                  unsigned MaxDispatchWidth, RetireControlUnit &R,
-                  RegisterFile &F);
+  DispatchStage(const MCSubtargetInfo &Subtarget, const MCRegisterInfo &MRI,
+                unsigned MaxDispatchWidth, RetireControlUnit &R,
+                RegisterFile &F);
 
-    bool isAvailable(const InstRef &IR) const override;
+  bool isAvailable(const InstRef &IR) const override;
 
-    // The dispatch logic internally doesn't buffer instructions. So there is
-    // never work to do at the beginning of every cycle.
-    bool hasWorkToComplete() const override {
-        return false;
-    }
-    Error cycleStart() override;
-    Error execute(InstRef &IR) override;
+  // The dispatch logic internally doesn't buffer instructions. So there is
+  // never work to do at the beginning of every cycle.
+  bool hasWorkToComplete() const override { return false; }
+  Error cycleStart() override;
+  Error execute(InstRef &IR) override;
 
 #ifndef NDEBUG
-    void dump() const;
+  void dump() const;
 #endif
 };
 } // namespace mca

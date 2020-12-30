@@ -21,30 +21,28 @@ namespace llvm {
 class TargetPassConfig;
 
 class ARCTargetMachine : public LLVMTargetMachine {
-    std::unique_ptr<TargetLoweringObjectFile> TLOF;
-    ARCSubtarget Subtarget;
+  std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  ARCSubtarget Subtarget;
 
 public:
-    ARCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                     StringRef FS, const TargetOptions &Options,
-                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                     CodeGenOpt::Level OL, bool JIT);
-    ~ARCTargetMachine() override;
+  ARCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                   StringRef FS, const TargetOptions &Options,
+                   Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                   CodeGenOpt::Level OL, bool JIT);
+  ~ARCTargetMachine() override;
 
-    const ARCSubtarget *getSubtargetImpl() const {
-        return &Subtarget;
-    }
-    const ARCSubtarget *getSubtargetImpl(const Function &) const override {
-        return &Subtarget;
-    }
+  const ARCSubtarget *getSubtargetImpl() const { return &Subtarget; }
+  const ARCSubtarget *getSubtargetImpl(const Function &) const override {
+    return &Subtarget;
+  }
 
-    // Pass Pipeline Configuration
-    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+  // Pass Pipeline Configuration
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
-    TargetLoweringObjectFile *getObjFileLowering() const override {
-        return TLOF.get();
-    }
+  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+  TargetLoweringObjectFile *getObjFileLowering() const override {
+    return TLOF.get();
+  }
 };
 
 } // end namespace llvm

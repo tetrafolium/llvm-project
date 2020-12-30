@@ -22,24 +22,22 @@ namespace __memprof {
 
 void DescribeThread(MemprofThreadContext *context);
 inline void DescribeThread(MemprofThread *t) {
-    if (t)
-        DescribeThread(t->context());
+  if (t)
+    DescribeThread(t->context());
 }
 
 class MemprofThreadIdAndName {
 public:
-    explicit MemprofThreadIdAndName(MemprofThreadContext *t);
-    explicit MemprofThreadIdAndName(u32 tid);
+  explicit MemprofThreadIdAndName(MemprofThreadContext *t);
+  explicit MemprofThreadIdAndName(u32 tid);
 
-    // Contains "T%tid (%name)" or "T%tid" if the name is empty.
-    const char *c_str() const {
-        return &name[0];
-    }
+  // Contains "T%tid (%name)" or "T%tid" if the name is empty.
+  const char *c_str() const { return &name[0]; }
 
 private:
-    void Init(u32 tid, const char *tname);
+  void Init(u32 tid, const char *tname);
 
-    char name[128];
+  char name[128];
 };
 
 } // namespace __memprof

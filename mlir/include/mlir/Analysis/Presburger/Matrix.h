@@ -27,51 +27,51 @@ namespace mlir {
 /// The data is stored in the form of a vector of vectors.
 class Matrix {
 public:
-    Matrix() = delete;
+  Matrix() = delete;
 
-    /// Construct a matrix with the specified number of rows and columns.
-    /// Initially, the values are default initialized.
-    Matrix(unsigned rows, unsigned columns);
+  /// Construct a matrix with the specified number of rows and columns.
+  /// Initially, the values are default initialized.
+  Matrix(unsigned rows, unsigned columns);
 
-    /// Return the identity matrix of the specified dimension.
-    static Matrix identity(unsigned dimension);
+  /// Return the identity matrix of the specified dimension.
+  static Matrix identity(unsigned dimension);
 
-    /// Access the element at the specified row and column.
-    int64_t &at(unsigned row, unsigned column);
-    int64_t at(unsigned row, unsigned column) const;
-    int64_t &operator()(unsigned row, unsigned column);
-    int64_t operator()(unsigned row, unsigned column) const;
+  /// Access the element at the specified row and column.
+  int64_t &at(unsigned row, unsigned column);
+  int64_t at(unsigned row, unsigned column) const;
+  int64_t &operator()(unsigned row, unsigned column);
+  int64_t operator()(unsigned row, unsigned column) const;
 
-    /// Swap the given columns.
-    void swapColumns(unsigned column, unsigned otherColumn);
+  /// Swap the given columns.
+  void swapColumns(unsigned column, unsigned otherColumn);
 
-    /// Swap the given rows.
-    void swapRows(unsigned row, unsigned otherRow);
+  /// Swap the given rows.
+  void swapRows(unsigned row, unsigned otherRow);
 
-    unsigned getNumRows() const;
+  unsigned getNumRows() const;
 
-    unsigned getNumColumns() const;
+  unsigned getNumColumns() const;
 
-    /// Get an ArrayRef corresponding to the specified row.
-    ArrayRef<int64_t> getRow(unsigned row) const;
+  /// Get an ArrayRef corresponding to the specified row.
+  ArrayRef<int64_t> getRow(unsigned row) const;
 
-    /// Add `scale` multiples of the source row to the target row.
-    void addToRow(unsigned sourceRow, unsigned targetRow, int64_t scale);
+  /// Add `scale` multiples of the source row to the target row.
+  void addToRow(unsigned sourceRow, unsigned targetRow, int64_t scale);
 
-    /// Resize the matrix to the specified dimensions. If a dimension is smaller,
-    /// the values are truncated; if it is bigger, the new values are default
-    /// initialized.
-    void resizeVertically(unsigned newNRows);
+  /// Resize the matrix to the specified dimensions. If a dimension is smaller,
+  /// the values are truncated; if it is bigger, the new values are default
+  /// initialized.
+  void resizeVertically(unsigned newNRows);
 
-    /// Print the matrix.
-    void print(raw_ostream &os) const;
-    void dump() const;
+  /// Print the matrix.
+  void print(raw_ostream &os) const;
+  void dump() const;
 
 private:
-    unsigned nRows, nColumns;
+  unsigned nRows, nColumns;
 
-    /// Stores the data. data.size() is equal to nRows * nColumns.
-    SmallVector<int64_t, 64> data;
+  /// Stores the data. data.size() is equal to nRows * nColumns.
+  SmallVector<int64_t, 64> data;
 };
 
 } // namespace mlir

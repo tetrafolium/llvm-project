@@ -29,43 +29,43 @@ namespace elfabi {
 
 class ErrorCollector {
 public:
-    /// Upon destruction, an ErrorCollector will crash if UseFatalErrors=true and
-    /// there are remaining errors that haven't been fetched by makeError().
-    ErrorCollector(bool UseFatalErrors = true) : ErrorsAreFatal(UseFatalErrors) {}
-    // Don't allow copying.
-    ErrorCollector(const ErrorCollector &Stub) = delete;
-    ErrorCollector &operator=(const ErrorCollector &Other) = delete;
-    ~ErrorCollector();
+  /// Upon destruction, an ErrorCollector will crash if UseFatalErrors=true and
+  /// there are remaining errors that haven't been fetched by makeError().
+  ErrorCollector(bool UseFatalErrors = true) : ErrorsAreFatal(UseFatalErrors) {}
+  // Don't allow copying.
+  ErrorCollector(const ErrorCollector &Stub) = delete;
+  ErrorCollector &operator=(const ErrorCollector &Other) = delete;
+  ~ErrorCollector();
 
-    // TODO: Add move constructor and operator= when a testable situation arises.
+  // TODO: Add move constructor and operator= when a testable situation arises.
 
-    /// Returns a single error that contains messages for all stored Errors.
-    Error makeError();
+  /// Returns a single error that contains messages for all stored Errors.
+  Error makeError();
 
-    /// Adds an error with a descriptive tag that helps with identification.
-    /// If the error is an Error::success(), it is checked and discarded.
-    void addError(Error &&E, StringRef Tag);
+  /// Adds an error with a descriptive tag that helps with identification.
+  /// If the error is an Error::success(), it is checked and discarded.
+  void addError(Error &&E, StringRef Tag);
 
-    /// This ensures an ErrorCollector will treat unhandled errors as fatal.
-    /// This function should be called if errors that usually can be ignored
-    /// are suddenly of concern (i.e. attempt multiple things that return Error,
-    /// but only care about the Errors if no attempt succeeds).
-    void escalateToFatal();
+  /// This ensures an ErrorCollector will treat unhandled errors as fatal.
+  /// This function should be called if errors that usually can be ignored
+  /// are suddenly of concern (i.e. attempt multiple things that return Error,
+  /// but only care about the Errors if no attempt succeeds).
+  void escalateToFatal();
 
 private:
-    /// Logs all errors to a raw_ostream.
-    void log(raw_ostream &OS);
+  /// Logs all errors to a raw_ostream.
+  void log(raw_ostream &OS);
 
-    /// Returns true if all errors have been retrieved through makeError(), or
-    /// false if errors have been added since the last makeError() call.
-    bool allErrorsHandled() const;
+  /// Returns true if all errors have been retrieved through makeError(), or
+  /// false if errors have been added since the last makeError() call.
+  bool allErrorsHandled() const;
 
-    /// Dump output and crash.
-    LLVM_ATTRIBUTE_NORETURN void fatalUnhandledError();
+  /// Dump output and crash.
+  LLVM_ATTRIBUTE_NORETURN void fatalUnhandledError();
 
-    bool ErrorsAreFatal;
-    std::vector<Error> Errors;
-    std::vector<std::string> Tags;
+  bool ErrorsAreFatal;
+  std::vector<Error> Errors;
+  std::vector<std::string> Tags;
 };
 
 } // end namespace elfabi

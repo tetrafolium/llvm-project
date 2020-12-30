@@ -28,7 +28,7 @@ enum Architecture : uint8_t {
 #define ARCHINFO(Arch, Type, SubType, NumBits) AK_##Arch,
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
-    AK_unknown, // this has to go last.
+  AK_unknown, // this has to go last.
 };
 
 /// Convert a CPU Type and Subtype pair to an architecture slice.

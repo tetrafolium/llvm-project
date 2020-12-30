@@ -36,39 +36,39 @@ namespace mca {
 /// Information from the machine scheduling model is used to identify processor
 /// resources that are consumed by an instruction.
 class InstrBuilder {
-    const MCSubtargetInfo &STI;
-    const MCInstrInfo &MCII;
-    const MCRegisterInfo &MRI;
-    const MCInstrAnalysis *MCIA;
-    SmallVector<uint64_t, 8> ProcResourceMasks;
+  const MCSubtargetInfo &STI;
+  const MCInstrInfo &MCII;
+  const MCRegisterInfo &MRI;
+  const MCInstrAnalysis *MCIA;
+  SmallVector<uint64_t, 8> ProcResourceMasks;
 
-    DenseMap<unsigned short, std::unique_ptr<const InstrDesc>> Descriptors;
-    DenseMap<const MCInst *, std::unique_ptr<const InstrDesc>> VariantDescriptors;
+  DenseMap<unsigned short, std::unique_ptr<const InstrDesc>> Descriptors;
+  DenseMap<const MCInst *, std::unique_ptr<const InstrDesc>> VariantDescriptors;
 
-    bool FirstCallInst;
-    bool FirstReturnInst;
+  bool FirstCallInst;
+  bool FirstReturnInst;
 
-    Expected<const InstrDesc &> createInstrDescImpl(const MCInst &MCI);
-    Expected<const InstrDesc &> getOrCreateInstrDesc(const MCInst &MCI);
+  Expected<const InstrDesc &> createInstrDescImpl(const MCInst &MCI);
+  Expected<const InstrDesc &> getOrCreateInstrDesc(const MCInst &MCI);
 
-    InstrBuilder(const InstrBuilder &) = delete;
-    InstrBuilder &operator=(const InstrBuilder &) = delete;
+  InstrBuilder(const InstrBuilder &) = delete;
+  InstrBuilder &operator=(const InstrBuilder &) = delete;
 
-    void populateWrites(InstrDesc &ID, const MCInst &MCI, unsigned SchedClassID);
-    void populateReads(InstrDesc &ID, const MCInst &MCI, unsigned SchedClassID);
-    Error verifyInstrDesc(const InstrDesc &ID, const MCInst &MCI) const;
+  void populateWrites(InstrDesc &ID, const MCInst &MCI, unsigned SchedClassID);
+  void populateReads(InstrDesc &ID, const MCInst &MCI, unsigned SchedClassID);
+  Error verifyInstrDesc(const InstrDesc &ID, const MCInst &MCI) const;
 
 public:
-    InstrBuilder(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
-                 const MCRegisterInfo &RI, const MCInstrAnalysis *IA);
+  InstrBuilder(const MCSubtargetInfo &STI, const MCInstrInfo &MCII,
+               const MCRegisterInfo &RI, const MCInstrAnalysis *IA);
 
-    void clear() {
-        VariantDescriptors.shrink_and_clear();
-        FirstCallInst = true;
-        FirstReturnInst = true;
-    }
+  void clear() {
+    VariantDescriptors.shrink_and_clear();
+    FirstCallInst = true;
+    FirstReturnInst = true;
+  }
 
-    Expected<std::unique_ptr<Instruction>> createInstruction(const MCInst &MCI);
+  Expected<std::unique_ptr<Instruction>> createInstruction(const MCInst &MCI);
 };
 } // namespace mca
 } // namespace llvm

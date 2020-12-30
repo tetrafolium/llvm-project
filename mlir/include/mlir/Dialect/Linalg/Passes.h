@@ -24,13 +24,13 @@ std::unique_ptr<Pass> createLinalgFusionOfTensorOpsPass();
 std::unique_ptr<Pass> createFoldReshapeOpsByLinearizationPass();
 
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createLinalgTilingPass(ArrayRef<int64_t> tileSizes = {});
+createLinalgTilingPass(ArrayRef<int64_t> tileSizes = {});
 
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createLinalgTilingToParallelLoopsPass(ArrayRef<int64_t> tileSizes = {});
+createLinalgTilingToParallelLoopsPass(ArrayRef<int64_t> tileSizes = {});
 
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createLinalgPromotionPass(bool dynamicBuffers, bool useAlloca);
+createLinalgPromotionPass(bool dynamicBuffers, bool useAlloca);
 std::unique_ptr<OperationPass<FuncOp>> createLinalgPromotionPass();
 
 /// Create a pass to convert Linalg operations to scf.for loops and
@@ -74,7 +74,7 @@ void populateFoldReshapeOpsByLinearizationPatterns(
 
 /// Patterns for fusing linalg operation on tensors.
 void populateLinalgTensorOpsFusionPatterns(MLIRContext *context,
-        OwningRewritePatternList &patterns);
+                                           OwningRewritePatternList &patterns);
 
 /// Patterns to fold unit-extent dimensions in operands/results of linalg ops on
 /// tensors.

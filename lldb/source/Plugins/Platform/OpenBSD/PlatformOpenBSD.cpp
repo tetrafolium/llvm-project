@@ -38,84 +38,83 @@ LLDB_PLUGIN_DEFINE(PlatformOpenBSD)
 
 static uint32_t g_initialize_count = 0;
 
-
 PlatformSP PlatformOpenBSD::CreateInstance(bool force, const ArchSpec *arch) {
-    Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
-    LLDB_LOG(log, "force = {0}, arch=({1}, {2})", force,
-             arch ? arch->GetArchitectureName() : "<null>",
-             arch ? arch->GetTriple().getTriple() : "<null>");
+  Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
+  LLDB_LOG(log, "force = {0}, arch=({1}, {2})", force,
+           arch ? arch->GetArchitectureName() : "<null>",
+           arch ? arch->GetTriple().getTriple() : "<null>");
 
-    bool create = force;
-    if (!create && arch && arch->IsValid()) {
-        const llvm::Triple &triple = arch->GetTriple();
-        switch (triple.getOS()) {
-        case llvm::Triple::OpenBSD:
-            create = true;
-            break;
+  bool create = force;
+  if (!create && arch && arch->IsValid()) {
+    const llvm::Triple &triple = arch->GetTriple();
+    switch (triple.getOS()) {
+    case llvm::Triple::OpenBSD:
+      create = true;
+      break;
 
 #if defined(__OpenBSD__)
-        // Only accept "unknown" for the OS if the host is BSD and it "unknown"
-        // wasn't specified (it was just returned because it was NOT specified)
-        case llvm::Triple::OSType::UnknownOS:
-            create = !arch->TripleOSWasSpecified();
-            break;
+    // Only accept "unknown" for the OS if the host is BSD and it "unknown"
+    // wasn't specified (it was just returned because it was NOT specified)
+    case llvm::Triple::OSType::UnknownOS:
+      create = !arch->TripleOSWasSpecified();
+      break;
 #endif
-        default:
-            break;
-        }
+    default:
+      break;
     }
-    LLDB_LOG(log, "create = {0}", create);
-    if (create) {
-        return PlatformSP(new PlatformOpenBSD(false));
-    }
-    return PlatformSP();
+  }
+  LLDB_LOG(log, "create = {0}", create);
+  if (create) {
+    return PlatformSP(new PlatformOpenBSD(false));
+  }
+  return PlatformSP();
 }
 
 ConstString PlatformOpenBSD::GetPluginNameStatic(bool is_host) {
-    if (is_host) {
-        static ConstString g_host_name(Platform::GetHostPlatformName());
-        return g_host_name;
-    } else {
-        static ConstString g_remote_name("remote-openbsd");
-        return g_remote_name;
-    }
+  if (is_host) {
+    static ConstString g_host_name(Platform::GetHostPlatformName());
+    return g_host_name;
+  } else {
+    static ConstString g_remote_name("remote-openbsd");
+    return g_remote_name;
+  }
 }
 
 const char *PlatformOpenBSD::GetPluginDescriptionStatic(bool is_host) {
-    if (is_host)
-        return "Local OpenBSD user platform plug-in.";
-    else
-        return "Remote OpenBSD user platform plug-in.";
+  if (is_host)
+    return "Local OpenBSD user platform plug-in.";
+  else
+    return "Remote OpenBSD user platform plug-in.";
 }
 
 ConstString PlatformOpenBSD::GetPluginName() {
-    return GetPluginNameStatic(IsHost());
+  return GetPluginNameStatic(IsHost());
 }
 
 void PlatformOpenBSD::Initialize() {
-    Platform::Initialize();
+  Platform::Initialize();
 
-    if (g_initialize_count++ == 0) {
+  if (g_initialize_count++ == 0) {
 #if defined(__OpenBSD__)
-        PlatformSP default_platform_sp(new PlatformOpenBSD(true));
-        default_platform_sp->SetSystemArchitecture(HostInfo::GetArchitecture());
-        Platform::SetHostPlatform(default_platform_sp);
+    PlatformSP default_platform_sp(new PlatformOpenBSD(true));
+    default_platform_sp->SetSystemArchitecture(HostInfo::GetArchitecture());
+    Platform::SetHostPlatform(default_platform_sp);
 #endif
-        PluginManager::RegisterPlugin(
-            PlatformOpenBSD::GetPluginNameStatic(false),
-            PlatformOpenBSD::GetPluginDescriptionStatic(false),
-            PlatformOpenBSD::CreateInstance, nullptr);
-    }
+    PluginManager::RegisterPlugin(
+        PlatformOpenBSD::GetPluginNameStatic(false),
+        PlatformOpenBSD::GetPluginDescriptionStatic(false),
+        PlatformOpenBSD::CreateInstance, nullptr);
+  }
 }
 
 void PlatformOpenBSD::Terminate() {
-    if (g_initialize_count > 0) {
-        if (--g_initialize_count == 0) {
-            PluginManager::UnregisterPlugin(PlatformOpenBSD::CreateInstance);
-        }
+  if (g_initialize_count > 0) {
+    if (--g_initialize_count == 0) {
+      PluginManager::UnregisterPlugin(PlatformOpenBSD::CreateInstance);
     }
+  }
 
-    PlatformPOSIX::Terminate();
+  PlatformPOSIX::Terminate();
 }
 
 /// Default Constructor
@@ -124,92 +123,90 @@ PlatformOpenBSD::PlatformOpenBSD(bool is_host)
 {}
 
 bool PlatformOpenBSD::GetSupportedArchitectureAtIndex(uint32_t idx,
-        ArchSpec &arch) {
-    if (IsHost()) {
-        ArchSpec hostArch = HostInfo::GetArchitecture(HostInfo::eArchKindDefault);
-        if (hostArch.GetTriple().isOSOpenBSD()) {
-            if (idx == 0) {
-                arch = hostArch;
-                return arch.IsValid();
-            }
-        }
-    } else {
-        if (m_remote_platform_sp)
-            return m_remote_platform_sp->GetSupportedArchitectureAtIndex(idx, arch);
-
-        llvm::Triple triple;
-        // Set the OS to OpenBSD
-        triple.setOS(llvm::Triple::OpenBSD);
-        // Set the architecture
-        switch (idx) {
-        case 0:
-            triple.setArchName("x86_64");
-            break;
-        case 1:
-            triple.setArchName("i386");
-            break;
-        case 2:
-            triple.setArchName("aarch64");
-            break;
-        case 3:
-            triple.setArchName("arm");
-            break;
-        default:
-            return false;
-        }
-        // Leave the vendor as "llvm::Triple:UnknownVendor" and don't specify the
-        // vendor by calling triple.SetVendorName("unknown") so that it is a
-        // "unspecified unknown". This means when someone calls
-        // triple.GetVendorName() it will return an empty string which indicates
-        // that the vendor can be set when two architectures are merged
-
-        // Now set the triple into "arch" and return true
-        arch.SetTriple(triple);
-        return true;
+                                                      ArchSpec &arch) {
+  if (IsHost()) {
+    ArchSpec hostArch = HostInfo::GetArchitecture(HostInfo::eArchKindDefault);
+    if (hostArch.GetTriple().isOSOpenBSD()) {
+      if (idx == 0) {
+        arch = hostArch;
+        return arch.IsValid();
+      }
     }
-    return false;
+  } else {
+    if (m_remote_platform_sp)
+      return m_remote_platform_sp->GetSupportedArchitectureAtIndex(idx, arch);
+
+    llvm::Triple triple;
+    // Set the OS to OpenBSD
+    triple.setOS(llvm::Triple::OpenBSD);
+    // Set the architecture
+    switch (idx) {
+    case 0:
+      triple.setArchName("x86_64");
+      break;
+    case 1:
+      triple.setArchName("i386");
+      break;
+    case 2:
+      triple.setArchName("aarch64");
+      break;
+    case 3:
+      triple.setArchName("arm");
+      break;
+    default:
+      return false;
+    }
+    // Leave the vendor as "llvm::Triple:UnknownVendor" and don't specify the
+    // vendor by calling triple.SetVendorName("unknown") so that it is a
+    // "unspecified unknown". This means when someone calls
+    // triple.GetVendorName() it will return an empty string which indicates
+    // that the vendor can be set when two architectures are merged
+
+    // Now set the triple into "arch" and return true
+    arch.SetTriple(triple);
+    return true;
+  }
+  return false;
 }
 
 void PlatformOpenBSD::GetStatus(Stream &strm) {
-    Platform::GetStatus(strm);
+  Platform::GetStatus(strm);
 
 #if LLDB_ENABLE_POSIX
-    // Display local kernel information only when we are running in host mode.
-    // Otherwise, we would end up printing non-OpenBSD information (when running
-    // on Mac OS for example).
-    if (IsHost()) {
-        struct utsname un;
+  // Display local kernel information only when we are running in host mode.
+  // Otherwise, we would end up printing non-OpenBSD information (when running
+  // on Mac OS for example).
+  if (IsHost()) {
+    struct utsname un;
 
-        if (uname(&un))
-            return;
+    if (uname(&un))
+      return;
 
-        strm.Printf("    Kernel: %s\n", un.sysname);
-        strm.Printf("   Release: %s\n", un.release);
-        strm.Printf("   Version: %s\n", un.version);
-    }
+    strm.Printf("    Kernel: %s\n", un.sysname);
+    strm.Printf("   Release: %s\n", un.release);
+    strm.Printf("   Version: %s\n", un.version);
+  }
 #endif
 }
 
 // OpenBSD processes cannot yet be launched by spawning and attaching.
-bool PlatformOpenBSD::CanDebugProcess() {
-    return false;
-}
+bool PlatformOpenBSD::CanDebugProcess() { return false; }
 
 void PlatformOpenBSD::CalculateTrapHandlerSymbolNames() {
-    m_trap_handlers.push_back(ConstString("_sigtramp"));
+  m_trap_handlers.push_back(ConstString("_sigtramp"));
 }
 
 MmapArgList PlatformOpenBSD::GetMmapArgumentList(const ArchSpec &arch,
-        addr_t addr, addr_t length,
-        unsigned prot, unsigned flags,
-        addr_t fd, addr_t offset) {
-    uint64_t flags_platform = 0;
+                                                 addr_t addr, addr_t length,
+                                                 unsigned prot, unsigned flags,
+                                                 addr_t fd, addr_t offset) {
+  uint64_t flags_platform = 0;
 
-    if (flags & eMmapFlagsPrivate)
-        flags_platform |= MAP_PRIVATE;
-    if (flags & eMmapFlagsAnon)
-        flags_platform |= MAP_ANON;
+  if (flags & eMmapFlagsPrivate)
+    flags_platform |= MAP_PRIVATE;
+  if (flags & eMmapFlagsAnon)
+    flags_platform |= MAP_ANON;
 
-    MmapArgList args({addr, length, prot, flags_platform, fd, offset});
-    return args;
+  MmapArgList args({addr, length, prot, flags_platform, fd, offset});
+  return args;
 }

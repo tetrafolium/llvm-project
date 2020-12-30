@@ -46,24 +46,24 @@ namespace refactor {
 /// Clang-refactor will expected all ranges in one test group to produce
 /// identical results.
 struct TestSelectionRange {
-    unsigned Begin, End;
+  unsigned Begin, End;
 };
 
 /// A set of test selection ranges specified in one file.
 struct TestSelectionRangesInFile {
-    std::string Filename;
-    struct RangeGroup {
-        std::string Name;
-        SmallVector<TestSelectionRange, 8> Ranges;
-    };
-    std::vector<RangeGroup> GroupedRanges;
+  std::string Filename;
+  struct RangeGroup {
+    std::string Name;
+    SmallVector<TestSelectionRange, 8> Ranges;
+  };
+  std::vector<RangeGroup> GroupedRanges;
 
-    bool foreachRange(const SourceManager &SM,
-                      llvm::function_ref<void(SourceRange)> Callback) const;
+  bool foreachRange(const SourceManager &SM,
+                    llvm::function_ref<void(SourceRange)> Callback) const;
 
-    std::unique_ptr<ClangRefactorToolConsumerInterface> createConsumer() const;
+  std::unique_ptr<ClangRefactorToolConsumerInterface> createConsumer() const;
 
-    void dump(llvm::raw_ostream &OS) const;
+  void dump(llvm::raw_ostream &OS) const;
 };
 
 /// Extracts the grouped selection ranges from the file that's specified in

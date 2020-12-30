@@ -17,30 +17,26 @@ class raw_pwrite_stream;
 
 class MCXCOFFObjectTargetWriter : public MCObjectTargetWriter {
 protected:
-    MCXCOFFObjectTargetWriter(bool Is64Bit);
+  MCXCOFFObjectTargetWriter(bool Is64Bit);
 
 public:
-    ~MCXCOFFObjectTargetWriter() override;
+  ~MCXCOFFObjectTargetWriter() override;
 
-    Triple::ObjectFormatType getFormat() const override {
-        return Triple::XCOFF;
-    }
-    static bool classof(const MCObjectTargetWriter *W) {
-        return W->getFormat() == Triple::XCOFF;
-    }
-    bool is64Bit() const {
-        return Is64Bit;
-    }
+  Triple::ObjectFormatType getFormat() const override { return Triple::XCOFF; }
+  static bool classof(const MCObjectTargetWriter *W) {
+    return W->getFormat() == Triple::XCOFF;
+  }
+  bool is64Bit() const { return Is64Bit; }
 
-    // Returns relocation info such as type, sign and size.
-    // First element of the pair contains type,
-    // second element contains sign and size.
-    virtual std::pair<uint8_t, uint8_t>
-    getRelocTypeAndSignSize(const MCValue &Target, const MCFixup &Fixup,
-                            bool IsPCRel) const = 0;
+  // Returns relocation info such as type, sign and size.
+  // First element of the pair contains type,
+  // second element contains sign and size.
+  virtual std::pair<uint8_t, uint8_t>
+  getRelocTypeAndSignSize(const MCValue &Target, const MCFixup &Fixup,
+                          bool IsPCRel) const = 0;
 
 private:
-    bool Is64Bit;
+  bool Is64Bit;
 };
 
 std::unique_ptr<MCObjectWriter>

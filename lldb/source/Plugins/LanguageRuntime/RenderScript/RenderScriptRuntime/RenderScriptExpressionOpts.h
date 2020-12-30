@@ -30,22 +30,22 @@
 
 class RenderScriptRuntimeModulePass : public llvm::ModulePass {
 public:
-    static char ID;
-    RenderScriptRuntimeModulePass(const lldb_private::Process *process)
-        : ModulePass(ID), m_process_ptr(process) {}
+  static char ID;
+  RenderScriptRuntimeModulePass(const lldb_private::Process *process)
+      : ModulePass(ID), m_process_ptr(process) {}
 
-    bool runOnModule(llvm::Module &module) override;
+  bool runOnModule(llvm::Module &module) override;
 
 private:
-    const lldb_private::Process *m_process_ptr;
+  const lldb_private::Process *m_process_ptr;
 };
 
 namespace lldb_private {
 namespace lldb_renderscript {
 struct RSIRPasses : public lldb_private::LLVMUserExpression::IRPasses {
-    RSIRPasses(lldb_private::Process *process);
+  RSIRPasses(lldb_private::Process *process);
 
-    ~RSIRPasses();
+  ~RSIRPasses();
 };
 } // namespace lldb_renderscript
 } // namespace lldb_private

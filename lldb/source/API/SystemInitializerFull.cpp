@@ -35,51 +35,51 @@ SystemInitializerFull::SystemInitializerFull() = default;
 SystemInitializerFull::~SystemInitializerFull() = default;
 
 llvm::Error SystemInitializerFull::Initialize() {
-    llvm::Error error = SystemInitializerCommon::Initialize();
-    if (error) {
-        // During active replay, the ::Initialize call is replayed like any other
-        // SB API call and the return value is ignored. Since we can't intercept
-        // this, we terminate here before the uninitialized debugger inevitably
-        // crashes.
-        if (repro::Reproducer::Instance().IsReplaying())
-            llvm::report_fatal_error(std::move(error));
-        return error;
-    }
+  llvm::Error error = SystemInitializerCommon::Initialize();
+  if (error) {
+    // During active replay, the ::Initialize call is replayed like any other
+    // SB API call and the return value is ignored. Since we can't intercept
+    // this, we terminate here before the uninitialized debugger inevitably
+    // crashes.
+    if (repro::Reproducer::Instance().IsReplaying())
+      llvm::report_fatal_error(std::move(error));
+    return error;
+  }
 
-    // Initialize LLVM and Clang
-    llvm::InitializeAllTargets();
-    llvm::InitializeAllAsmPrinters();
-    llvm::InitializeAllTargetMCs();
-    llvm::InitializeAllDisassemblers();
+  // Initialize LLVM and Clang
+  llvm::InitializeAllTargets();
+  llvm::InitializeAllAsmPrinters();
+  llvm::InitializeAllTargetMCs();
+  llvm::InitializeAllDisassemblers();
 
 #define LLDB_PLUGIN(p) LLDB_PLUGIN_INITIALIZE(p);
 #include "Plugins/Plugins.def"
 
-    // Initialize plug-ins in core LLDB
-    ProcessTrace::Initialize();
+  // Initialize plug-ins in core LLDB
+  ProcessTrace::Initialize();
 
-    // Scan for any system or user LLDB plug-ins
-    PluginManager::Initialize();
+  // Scan for any system or user LLDB plug-ins
+  PluginManager::Initialize();
 
-    // The process settings need to know about installed plug-ins, so the
-    // Settings must be initialized AFTER PluginManager::Initialize is called.
-    Debugger::SettingsInitialize();
+  // The process settings need to know about installed plug-ins, so the
+  // Settings must be initialized AFTER PluginManager::Initialize is called.
+  Debugger::SettingsInitialize();
 
-    return llvm::Error::success();
+  return llvm::Error::success();
 }
 
 void SystemInitializerFull::Terminate() {
-    Debugger::SettingsTerminate();
+  Debugger::SettingsTerminate();
 
-    // Terminate plug-ins in core LLDB
-    ProcessTrace::Terminate();
+  // Terminate plug-ins in core LLDB
+  ProcessTrace::Terminate();
 
-    // Terminate and unload and loaded system or user LLDB plug-ins
-    PluginManager::Terminate();
+  // Terminate and unload and loaded system or user LLDB plug-ins
+  PluginManager::Terminate();
 
 #define LLDB_PLUGIN(p) LLDB_PLUGIN_TERMINATE(p);
 #include "Plugins/Plugins.def"
 
-    // Now shutdown the common parts, in reverse order.
-    SystemInitializerCommon::Terminate();
+  // Now shutdown the common parts, in reverse order.
+  SystemInitializerCommon::Terminate();
 }

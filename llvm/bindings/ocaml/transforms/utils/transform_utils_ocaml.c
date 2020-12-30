@@ -15,9 +15,9 @@
 |*                                                                            *|
 \*===----------------------------------------------------------------------===*/
 
-#include "llvm-c/Core.h"
-#include "caml/mlvalues.h"
 #include "caml/misc.h"
+#include "caml/mlvalues.h"
+#include "llvm-c/Core.h"
 
 /*
  * Do not move directly into external. This function is here to pull in
@@ -27,5 +27,5 @@
 
 /* llmodule -> llmodule */
 CAMLprim LLVMModuleRef llvm_clone_module(LLVMModuleRef M) {
-    return LLVMCloneModule(M);
+  return LLVMCloneModule(M);
 }

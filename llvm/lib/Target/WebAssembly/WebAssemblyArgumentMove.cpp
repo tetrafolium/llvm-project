@@ -42,21 +42,19 @@ using namespace llvm;
 namespace {
 class WebAssemblyArgumentMove final : public MachineFunctionPass {
 public:
-    static char ID; // Pass identification, replacement for typeid
-    WebAssemblyArgumentMove() : MachineFunctionPass(ID) {}
+  static char ID; // Pass identification, replacement for typeid
+  WebAssemblyArgumentMove() : MachineFunctionPass(ID) {}
 
-    StringRef getPassName() const override {
-        return "WebAssembly Argument Move";
-    }
+  StringRef getPassName() const override { return "WebAssembly Argument Move"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addPreserved<MachineBlockFrequencyInfo>();
-        AU.addPreservedID(MachineDominatorsID);
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addPreserved<MachineBlockFrequencyInfo>();
+    AU.addPreservedID(MachineDominatorsID);
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 };
 } // end anonymous namespace
 
@@ -65,35 +63,35 @@ INITIALIZE_PASS(WebAssemblyArgumentMove, DEBUG_TYPE,
                 "Move ARGUMENT instructions for WebAssembly", false, false)
 
 FunctionPass *llvm::createWebAssemblyArgumentMove() {
-    return new WebAssemblyArgumentMove();
+  return new WebAssemblyArgumentMove();
 }
 
 bool WebAssemblyArgumentMove::runOnMachineFunction(MachineFunction &MF) {
-    LLVM_DEBUG({
-        dbgs() << "********** Argument Move **********\n"
-               << "********** Function: " << MF.getName() << '\n';
-    });
+  LLVM_DEBUG({
+    dbgs() << "********** Argument Move **********\n"
+           << "********** Function: " << MF.getName() << '\n';
+  });
 
-    bool Changed = false;
-    MachineBasicBlock &EntryMBB = MF.front();
-    MachineBasicBlock::iterator InsertPt = EntryMBB.end();
+  bool Changed = false;
+  MachineBasicBlock &EntryMBB = MF.front();
+  MachineBasicBlock::iterator InsertPt = EntryMBB.end();
 
-    // Look for the first NonArg instruction.
-    for (MachineInstr &MI : EntryMBB) {
-        if (!WebAssembly::isArgument(MI.getOpcode())) {
-            InsertPt = MI;
-            break;
-        }
+  // Look for the first NonArg instruction.
+  for (MachineInstr &MI : EntryMBB) {
+    if (!WebAssembly::isArgument(MI.getOpcode())) {
+      InsertPt = MI;
+      break;
     }
+  }
 
-    // Now move any argument instructions later in the block
-    // to before our first NonArg instruction.
-    for (MachineInstr &MI : llvm::make_range(InsertPt, EntryMBB.end())) {
-        if (WebAssembly::isArgument(MI.getOpcode())) {
-            EntryMBB.insert(InsertPt, MI.removeFromParent());
-            Changed = true;
-        }
+  // Now move any argument instructions later in the block
+  // to before our first NonArg instruction.
+  for (MachineInstr &MI : llvm::make_range(InsertPt, EntryMBB.end())) {
+    if (WebAssembly::isArgument(MI.getOpcode())) {
+      EntryMBB.insert(InsertPt, MI.removeFromParent());
+      Changed = true;
     }
+  }
 
-    return Changed;
+  return Changed;
 }

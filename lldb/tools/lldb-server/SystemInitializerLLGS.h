@@ -14,8 +14,8 @@
 
 class SystemInitializerLLGS : public lldb_private::SystemInitializerCommon {
 public:
-    llvm::Error Initialize() override;
-    void Terminate() override;
+  llvm::Error Initialize() override;
+  void Terminate() override;
 };
 
 #endif // LLDB_TOOLS_LLDB_SERVER_SYSTEMINITIALIZERLLGS_H

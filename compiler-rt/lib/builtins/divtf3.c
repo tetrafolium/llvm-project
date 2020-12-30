@@ -21,8 +21,6 @@
 
 #include "fp_div_impl.inc"
 
-COMPILER_RT_ABI fp_t __divtf3(fp_t a, fp_t b) {
-    return __divXf3__(a, b);
-}
+COMPILER_RT_ABI fp_t __divtf3(fp_t a, fp_t b) { return __divXf3__(a, b); }
 
 #endif

@@ -25,18 +25,18 @@ namespace llvm {
 namespace object {
 
 struct COFFModuleDefinition {
-    std::vector<COFFShortExport> Exports;
-    std::string OutputFile;
-    std::string ImportName;
-    uint64_t ImageBase = 0;
-    uint64_t StackReserve = 0;
-    uint64_t StackCommit = 0;
-    uint64_t HeapReserve = 0;
-    uint64_t HeapCommit = 0;
-    uint32_t MajorImageVersion = 0;
-    uint32_t MinorImageVersion = 0;
-    uint32_t MajorOSVersion = 0;
-    uint32_t MinorOSVersion = 0;
+  std::vector<COFFShortExport> Exports;
+  std::string OutputFile;
+  std::string ImportName;
+  uint64_t ImageBase = 0;
+  uint64_t StackReserve = 0;
+  uint64_t StackCommit = 0;
+  uint64_t HeapReserve = 0;
+  uint64_t HeapCommit = 0;
+  uint32_t MajorImageVersion = 0;
+  uint32_t MinorImageVersion = 0;
+  uint32_t MajorOSVersion = 0;
+  uint32_t MinorOSVersion = 0;
 };
 
 // mingw and wine def files do not mangle _ for x86 which

@@ -13,16 +13,14 @@ namespace __llvm_libc {
 namespace testutils {
 
 class FDReader {
-    int pipefd[2];
+  int pipefd[2];
 
 public:
-    FDReader();
-    ~FDReader();
+  FDReader();
+  ~FDReader();
 
-    int getWriteFD() {
-        return pipefd[1];
-    }
-    bool matchWritten(const char *);
+  int getWriteFD() { return pipefd[1]; }
+  bool matchWritten(const char *);
 };
 
 } // namespace testutils

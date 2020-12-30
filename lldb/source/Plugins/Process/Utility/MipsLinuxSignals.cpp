@@ -10,13 +10,11 @@
 
 using namespace lldb_private;
 
-MipsLinuxSignals::MipsLinuxSignals() : UnixSignals() {
-    Reset();
-}
+MipsLinuxSignals::MipsLinuxSignals() : UnixSignals() { Reset(); }
 
 void MipsLinuxSignals::Reset() {
-    m_signals.clear();
-    // clang-format off
+  m_signals.clear();
+  // clang-format off
     //        SIGNO   NAME            SUPPRESS  STOP    NOTIFY  DESCRIPTION
     //        ======  ==============  ========  ======  ======  ===================================================
     AddSignal(1, "SIGHUP",            false,    true,   true,   "hangup");
@@ -83,5 +81,5 @@ void MipsLinuxSignals::Reset() {
     AddSignal(62, "SIGRTMAX-2",       false,    false,  false,  "real time signal 28");
     AddSignal(63, "SIGRTMAX-1",       false,    false,  false,  "real time signal 29");
     AddSignal(64, "SIGRTMAX",         false,    false,  false,  "real time signal 30");
-    // clang-format on
+  // clang-format on
 }

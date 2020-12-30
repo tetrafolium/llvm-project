@@ -32,122 +32,120 @@ static uint32_t g_initialize_count = 0;
 
 // Static Functions
 void PlatformRemoteiOS::Initialize() {
-    PlatformDarwin::Initialize();
+  PlatformDarwin::Initialize();
 
-    if (g_initialize_count++ == 0) {
-        PluginManager::RegisterPlugin(PlatformRemoteiOS::GetPluginNameStatic(),
-                                      PlatformRemoteiOS::GetDescriptionStatic(),
-                                      PlatformRemoteiOS::CreateInstance);
-    }
+  if (g_initialize_count++ == 0) {
+    PluginManager::RegisterPlugin(PlatformRemoteiOS::GetPluginNameStatic(),
+                                  PlatformRemoteiOS::GetDescriptionStatic(),
+                                  PlatformRemoteiOS::CreateInstance);
+  }
 }
 
 void PlatformRemoteiOS::Terminate() {
-    if (g_initialize_count > 0) {
-        if (--g_initialize_count == 0) {
-            PluginManager::UnregisterPlugin(PlatformRemoteiOS::CreateInstance);
-        }
+  if (g_initialize_count > 0) {
+    if (--g_initialize_count == 0) {
+      PluginManager::UnregisterPlugin(PlatformRemoteiOS::CreateInstance);
     }
+  }
 
-    PlatformDarwin::Terminate();
+  PlatformDarwin::Terminate();
 }
 
 PlatformSP PlatformRemoteiOS::CreateInstance(bool force, const ArchSpec *arch) {
-    Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
-    if (log) {
-        const char *arch_name;
-        if (arch && arch->GetArchitectureName())
-            arch_name = arch->GetArchitectureName();
-        else
-            arch_name = "<null>";
+  Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
+  if (log) {
+    const char *arch_name;
+    if (arch && arch->GetArchitectureName())
+      arch_name = arch->GetArchitectureName();
+    else
+      arch_name = "<null>";
 
-        const char *triple_cstr =
-            arch ? arch->GetTriple().getTriple().c_str() : "<null>";
+    const char *triple_cstr =
+        arch ? arch->GetTriple().getTriple().c_str() : "<null>";
 
-        LLDB_LOGF(log, "PlatformRemoteiOS::%s(force=%s, arch={%s,%s})",
-                  __FUNCTION__, force ? "true" : "false", arch_name, triple_cstr);
-    }
+    LLDB_LOGF(log, "PlatformRemoteiOS::%s(force=%s, arch={%s,%s})",
+              __FUNCTION__, force ? "true" : "false", arch_name, triple_cstr);
+  }
 
-    bool create = force;
-    if (!create && arch && arch->IsValid()) {
-        switch (arch->GetMachine()) {
-        case llvm::Triple::arm:
-        case llvm::Triple::aarch64:
-        case llvm::Triple::thumb: {
-            const llvm::Triple &triple = arch->GetTriple();
-            llvm::Triple::VendorType vendor = triple.getVendor();
-            switch (vendor) {
-            case llvm::Triple::Apple:
-                create = true;
-                break;
+  bool create = force;
+  if (!create && arch && arch->IsValid()) {
+    switch (arch->GetMachine()) {
+    case llvm::Triple::arm:
+    case llvm::Triple::aarch64:
+    case llvm::Triple::thumb: {
+      const llvm::Triple &triple = arch->GetTriple();
+      llvm::Triple::VendorType vendor = triple.getVendor();
+      switch (vendor) {
+      case llvm::Triple::Apple:
+        create = true;
+        break;
 
 #if defined(__APPLE__)
-            // Only accept "unknown" for the vendor if the host is Apple and
-            // "unknown" wasn't specified (it was just returned because it was NOT
-            // specified)
-            case llvm::Triple::UnknownVendor:
-                create = !arch->TripleVendorWasSpecified();
-                break;
+      // Only accept "unknown" for the vendor if the host is Apple and
+      // "unknown" wasn't specified (it was just returned because it was NOT
+      // specified)
+      case llvm::Triple::UnknownVendor:
+        create = !arch->TripleVendorWasSpecified();
+        break;
 
 #endif
-            default:
-                break;
-            }
-            if (create) {
-                switch (triple.getOS()) {
-                case llvm::Triple::Darwin: // Deprecated, but still support Darwin for
-                // historical reasons
-                case llvm::Triple::IOS:    // This is the right triple value for iOS
-                    // debugging
-                    break;
-
-                default:
-                    create = false;
-                    break;
-                }
-            }
-        }
+      default:
         break;
+      }
+      if (create) {
+        switch (triple.getOS()) {
+        case llvm::Triple::Darwin: // Deprecated, but still support Darwin for
+        // historical reasons
+        case llvm::Triple::IOS: // This is the right triple value for iOS
+          // debugging
+          break;
+
         default:
-            break;
+          create = false;
+          break;
         }
+      }
+    } break;
+    default:
+      break;
     }
+  }
 
-    if (create) {
-        if (log)
-            LLDB_LOGF(log, "PlatformRemoteiOS::%s() creating platform", __FUNCTION__);
-
-        return lldb::PlatformSP(new PlatformRemoteiOS());
-    }
-
+  if (create) {
     if (log)
-        LLDB_LOGF(log, "PlatformRemoteiOS::%s() aborting creation of platform",
-                  __FUNCTION__);
+      LLDB_LOGF(log, "PlatformRemoteiOS::%s() creating platform", __FUNCTION__);
 
-    return lldb::PlatformSP();
+    return lldb::PlatformSP(new PlatformRemoteiOS());
+  }
+
+  if (log)
+    LLDB_LOGF(log, "PlatformRemoteiOS::%s() aborting creation of platform",
+              __FUNCTION__);
+
+  return lldb::PlatformSP();
 }
 
 lldb_private::ConstString PlatformRemoteiOS::GetPluginNameStatic() {
-    static ConstString g_name("remote-ios");
-    return g_name;
+  static ConstString g_name("remote-ios");
+  return g_name;
 }
 
 const char *PlatformRemoteiOS::GetDescriptionStatic() {
-    return "Remote iOS platform plug-in.";
+  return "Remote iOS platform plug-in.";
 }
 
 /// Default Constructor
-PlatformRemoteiOS::PlatformRemoteiOS()
-    : PlatformRemoteDarwinDevice() {}
+PlatformRemoteiOS::PlatformRemoteiOS() : PlatformRemoteDarwinDevice() {}
 
 bool PlatformRemoteiOS::GetSupportedArchitectureAtIndex(uint32_t idx,
-        ArchSpec &arch) {
-    return ARMGetSupportedArchitectureAtIndex(idx, arch);
+                                                        ArchSpec &arch) {
+  return ARMGetSupportedArchitectureAtIndex(idx, arch);
 }
 
 llvm::StringRef PlatformRemoteiOS::GetDeviceSupportDirectoryName() {
-    return "iOS DeviceSupport";
+  return "iOS DeviceSupport";
 }
 
 llvm::StringRef PlatformRemoteiOS::GetPlatformName() {
-    return "iPhoneOS.platform";
+  return "iPhoneOS.platform";
 }

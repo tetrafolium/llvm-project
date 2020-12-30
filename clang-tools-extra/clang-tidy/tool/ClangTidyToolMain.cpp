@@ -17,5 +17,5 @@
 #include "ClangTidyMain.h"
 
 int main(int argc, const char **argv) {
-    return clang::tidy::clangTidyMain(argc, argv);
+  return clang::tidy::clangTidyMain(argc, argv);
 }

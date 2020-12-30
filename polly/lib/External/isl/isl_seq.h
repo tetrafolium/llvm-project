@@ -10,9 +10,9 @@
 #ifndef ISL_SEQ_H
 #define ISL_SEQ_H
 
-#include <sys/types.h>
-#include <isl_int.h>
 #include <isl/ctx.h>
+#include <isl_int.h>
+#include <sys/types.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -33,8 +33,8 @@ void isl_seq_scale_down(isl_int *dst, isl_int *src, isl_int f, unsigned len);
 void isl_seq_cdiv_q(isl_int *dst, isl_int *src, isl_int m, unsigned len);
 void isl_seq_fdiv_q(isl_int *dst, isl_int *src, isl_int m, unsigned len);
 void isl_seq_fdiv_r(isl_int *dst, isl_int *src, isl_int m, unsigned len);
-void isl_seq_combine(isl_int *dst, isl_int m1, isl_int *src1,
-                     isl_int m2, isl_int *src2, unsigned len);
+void isl_seq_combine(isl_int *dst, isl_int m1, isl_int *src1, isl_int m2,
+                     isl_int *src2, unsigned len);
 void isl_seq_elim(isl_int *dst, isl_int *src, unsigned pos, unsigned len,
                   isl_int *m);
 void isl_seq_abs_max(isl_int *p, unsigned len, isl_int *max);
@@ -50,8 +50,8 @@ int isl_seq_eq(isl_int *p1, isl_int *p2, unsigned len);
 int isl_seq_cmp(isl_int *p1, isl_int *p2, unsigned len);
 int isl_seq_is_neg(isl_int *p1, isl_int *p2, unsigned len);
 
-void isl_seq_substitute(isl_int *p, int pos, isl_int *subs,
-                        int p_len, int subs_len, isl_int v);
+void isl_seq_substitute(isl_int *p, int pos, isl_int *subs, int p_len,
+                        int subs_len, isl_int v);
 
 uint32_t isl_seq_get_hash(isl_int *p, unsigned len);
 uint32_t isl_seq_get_hash_bits(isl_int *p, unsigned len, unsigned bits);

@@ -21,20 +21,20 @@ class NativeProcessFreeBSD;
 class NativeRegisterContextFreeBSD
     : public virtual NativeRegisterContextRegisterInfo {
 public:
-    // This function is implemented in the NativeRegisterContextFreeBSD_*
-    // subclasses to create a new instance of the host specific
-    // NativeRegisterContextFreeBSD. The implementations can't collide as only one
-    // NativeRegisterContextFreeBSD_* variant should be compiled into the final
-    // executable.
-    static NativeRegisterContextFreeBSD *
-    CreateHostNativeRegisterContextFreeBSD(const ArchSpec &target_arch,
-                                           NativeThreadProtocol &native_thread);
-    virtual llvm::Error
-    CopyHardwareWatchpointsFrom(NativeRegisterContextFreeBSD &source) = 0;
+  // This function is implemented in the NativeRegisterContextFreeBSD_*
+  // subclasses to create a new instance of the host specific
+  // NativeRegisterContextFreeBSD. The implementations can't collide as only one
+  // NativeRegisterContextFreeBSD_* variant should be compiled into the final
+  // executable.
+  static NativeRegisterContextFreeBSD *
+  CreateHostNativeRegisterContextFreeBSD(const ArchSpec &target_arch,
+                                         NativeThreadProtocol &native_thread);
+  virtual llvm::Error
+  CopyHardwareWatchpointsFrom(NativeRegisterContextFreeBSD &source) = 0;
 
 protected:
-    virtual NativeProcessFreeBSD &GetProcess();
-    virtual ::pid_t GetProcessPid();
+  virtual NativeProcessFreeBSD &GetProcess();
+  virtual ::pid_t GetProcessPid();
 };
 
 } // namespace process_freebsd

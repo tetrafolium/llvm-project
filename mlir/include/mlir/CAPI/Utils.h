@@ -27,25 +27,23 @@ namespace detail {
 /// user-supplied callback together with opaque user-supplied data.
 class CallbackOstream : public llvm::raw_ostream {
 public:
-    CallbackOstream(std::function<void(MlirStringRef, void *)> callback,
-                    void *opaqueData)
-        : raw_ostream(/*unbuffered=*/true), callback(callback),
-          opaqueData(opaqueData), pos(0u) {}
+  CallbackOstream(std::function<void(MlirStringRef, void *)> callback,
+                  void *opaqueData)
+      : raw_ostream(/*unbuffered=*/true), callback(callback),
+        opaqueData(opaqueData), pos(0u) {}
 
-    void write_impl(const char *ptr, size_t size) override {
-        MlirStringRef string = mlirStringRefCreate(ptr, size);
-        callback(string, opaqueData);
-        pos += size;
-    }
+  void write_impl(const char *ptr, size_t size) override {
+    MlirStringRef string = mlirStringRefCreate(ptr, size);
+    callback(string, opaqueData);
+    pos += size;
+  }
 
-    uint64_t current_pos() const override {
-        return pos;
-    }
+  uint64_t current_pos() const override { return pos; }
 
 private:
-    std::function<void(MlirStringRef, void *)> callback;
-    void *opaqueData;
-    uint64_t pos;
+  std::function<void(MlirStringRef, void *)> callback;
+  void *opaqueData;
+  uint64_t pos;
 };
 } // end namespace detail
 } // end namespace mlir

@@ -23,34 +23,34 @@ class TargetLibraryInfo;
 
 /// Describes the type of Parameters
 enum class VFParamKind {
-    Vector,            // No semantic information.
-    OMP_Linear,        // declare simd linear(i)
-    OMP_LinearRef,     // declare simd linear(ref(i))
-    OMP_LinearVal,     // declare simd linear(val(i))
-    OMP_LinearUVal,    // declare simd linear(uval(i))
-    OMP_LinearPos,     // declare simd linear(i:c) uniform(c)
-    OMP_LinearValPos,  // declare simd linear(val(i:c)) uniform(c)
-    OMP_LinearRefPos,  // declare simd linear(ref(i:c)) uniform(c)
-    OMP_LinearUValPos, // declare simd linear(uval(i:c)) uniform(c
-    OMP_Uniform,       // declare simd uniform(i)
-    GlobalPredicate,   // Global logical predicate that acts on all lanes
-    // of the input and output mask concurrently. For
-    // example, it is implied by the `M` token in the
-    // Vector Function ABI mangled name.
-    Unknown
+  Vector,            // No semantic information.
+  OMP_Linear,        // declare simd linear(i)
+  OMP_LinearRef,     // declare simd linear(ref(i))
+  OMP_LinearVal,     // declare simd linear(val(i))
+  OMP_LinearUVal,    // declare simd linear(uval(i))
+  OMP_LinearPos,     // declare simd linear(i:c) uniform(c)
+  OMP_LinearValPos,  // declare simd linear(val(i:c)) uniform(c)
+  OMP_LinearRefPos,  // declare simd linear(ref(i:c)) uniform(c)
+  OMP_LinearUValPos, // declare simd linear(uval(i:c)) uniform(c
+  OMP_Uniform,       // declare simd uniform(i)
+  GlobalPredicate,   // Global logical predicate that acts on all lanes
+  // of the input and output mask concurrently. For
+  // example, it is implied by the `M` token in the
+  // Vector Function ABI mangled name.
+  Unknown
 };
 
 /// Describes the type of Instruction Set Architecture
 enum class VFISAKind {
-    AdvancedSIMD, // AArch64 Advanced SIMD (NEON)
-    SVE,          // AArch64 Scalable Vector Extension
-    SSE,          // x86 SSE
-    AVX,          // x86 AVX
-    AVX2,         // x86 AVX2
-    AVX512,       // x86 AVX512
-    LLVM,         // LLVM internal ISA for functions that are not
-    // attached to an existing ABI via name mangling.
-    Unknown // Unknown ISA
+  AdvancedSIMD, // AArch64 Advanced SIMD (NEON)
+  SVE,          // AArch64 Scalable Vector Extension
+  SSE,          // x86 SSE
+  AVX,          // x86 AVX
+  AVX2,         // x86 AVX2
+  AVX512,       // x86 AVX512
+  LLVM,         // LLVM internal ISA for functions that are not
+  // attached to an existing ABI via name mangling.
+  Unknown // Unknown ISA
 };
 
 /// Encapsulates information needed to describe a parameter.
@@ -60,17 +60,17 @@ enum class VFISAKind {
 /// is extendible to handle other paradigms that describe vector
 /// functions and their parameters.
 struct VFParameter {
-    unsigned ParamPos;         // Parameter Position in Scalar Function.
-    VFParamKind ParamKind;     // Kind of Parameter.
-    int LinearStepOrPos = 0;   // Step or Position of the Parameter.
-    Align Alignment = Align(); // Optional alignment in bytes, defaulted to 1.
+  unsigned ParamPos;         // Parameter Position in Scalar Function.
+  VFParamKind ParamKind;     // Kind of Parameter.
+  int LinearStepOrPos = 0;   // Step or Position of the Parameter.
+  Align Alignment = Align(); // Optional alignment in bytes, defaulted to 1.
 
-    // Comparison operator.
-    bool operator==(const VFParameter &Other) const {
-        return std::tie(ParamPos, ParamKind, LinearStepOrPos, Alignment) ==
-               std::tie(Other.ParamPos, Other.ParamKind, Other.LinearStepOrPos,
-                        Other.Alignment);
-    }
+  // Comparison operator.
+  bool operator==(const VFParameter &Other) const {
+    return std::tie(ParamPos, ParamKind, LinearStepOrPos, Alignment) ==
+           std::tie(Other.ParamPos, Other.ParamKind, Other.LinearStepOrPos,
+                    Other.Alignment);
+  }
 };
 
 /// Contains the information about the kind of vectorization
@@ -80,59 +80,59 @@ struct VFParameter {
 /// represent vector functions. in particular, it is not attached to
 /// any target-specific ABI.
 struct VFShape {
-    unsigned VF;     // Vectorization factor.
-    bool IsScalable; // True if the function is a scalable function.
-    SmallVector<VFParameter, 8> Parameters; // List of parameter information.
-    // Comparison operator.
-    bool operator==(const VFShape &Other) const {
-        return std::tie(VF, IsScalable, Parameters) ==
-               std::tie(Other.VF, Other.IsScalable, Other.Parameters);
-    }
+  unsigned VF;     // Vectorization factor.
+  bool IsScalable; // True if the function is a scalable function.
+  SmallVector<VFParameter, 8> Parameters; // List of parameter information.
+  // Comparison operator.
+  bool operator==(const VFShape &Other) const {
+    return std::tie(VF, IsScalable, Parameters) ==
+           std::tie(Other.VF, Other.IsScalable, Other.Parameters);
+  }
 
-    /// Update the parameter in position P.ParamPos to P.
-    void updateParam(VFParameter P) {
-        assert(P.ParamPos < Parameters.size() && "Invalid parameter position.");
-        Parameters[P.ParamPos] = P;
-        assert(hasValidParameterList() && "Invalid parameter list");
-    }
+  /// Update the parameter in position P.ParamPos to P.
+  void updateParam(VFParameter P) {
+    assert(P.ParamPos < Parameters.size() && "Invalid parameter position.");
+    Parameters[P.ParamPos] = P;
+    assert(hasValidParameterList() && "Invalid parameter list");
+  }
 
-    // Retrieve the VFShape that can be used to map a (scalar) function to itself,
-    // with VF = 1.
-    static VFShape getScalarShape(const CallInst &CI) {
-        return VFShape::get(CI, ElementCount::getFixed(1),
-                            /*HasGlobalPredicate*/ false);
-    }
+  // Retrieve the VFShape that can be used to map a (scalar) function to itself,
+  // with VF = 1.
+  static VFShape getScalarShape(const CallInst &CI) {
+    return VFShape::get(CI, ElementCount::getFixed(1),
+                        /*HasGlobalPredicate*/ false);
+  }
 
-    // Retrieve the basic vectorization shape of the function, where all
-    // parameters are mapped to VFParamKind::Vector with \p EC
-    // lanes. Specifies whether the function has a Global Predicate
-    // argument via \p HasGlobalPred.
-    static VFShape get(const CallInst &CI, ElementCount EC, bool HasGlobalPred) {
-        SmallVector<VFParameter, 8> Parameters;
-        for (unsigned I = 0; I < CI.arg_size(); ++I)
-            Parameters.push_back(VFParameter({I, VFParamKind::Vector}));
-        if (HasGlobalPred)
-            Parameters.push_back(
-                VFParameter({CI.arg_size(), VFParamKind::GlobalPredicate}));
+  // Retrieve the basic vectorization shape of the function, where all
+  // parameters are mapped to VFParamKind::Vector with \p EC
+  // lanes. Specifies whether the function has a Global Predicate
+  // argument via \p HasGlobalPred.
+  static VFShape get(const CallInst &CI, ElementCount EC, bool HasGlobalPred) {
+    SmallVector<VFParameter, 8> Parameters;
+    for (unsigned I = 0; I < CI.arg_size(); ++I)
+      Parameters.push_back(VFParameter({I, VFParamKind::Vector}));
+    if (HasGlobalPred)
+      Parameters.push_back(
+          VFParameter({CI.arg_size(), VFParamKind::GlobalPredicate}));
 
-        return {EC.getKnownMinValue(), EC.isScalable(), Parameters};
-    }
-    /// Sanity check on the Parameters in the VFShape.
-    bool hasValidParameterList() const;
+    return {EC.getKnownMinValue(), EC.isScalable(), Parameters};
+  }
+  /// Sanity check on the Parameters in the VFShape.
+  bool hasValidParameterList() const;
 };
 
 /// Holds the VFShape for a specific scalar to vector function mapping.
 struct VFInfo {
-    VFShape Shape;          /// Classification of the vector function.
-    std::string ScalarName; /// Scalar Function Name.
-    std::string VectorName; /// Vector Function Name associated to this VFInfo.
-    VFISAKind ISA;          /// Instruction Set Architecture.
+  VFShape Shape;          /// Classification of the vector function.
+  std::string ScalarName; /// Scalar Function Name.
+  std::string VectorName; /// Vector Function Name associated to this VFInfo.
+  VFISAKind ISA;          /// Instruction Set Architecture.
 
-    // Comparison operator.
-    bool operator==(const VFInfo &Other) const {
-        return std::tie(Shape, ScalarName, VectorName, ISA) ==
-               std::tie(Shape, Other.ScalarName, Other.VectorName, Other.ISA);
-    }
+  // Comparison operator.
+  bool operator==(const VFInfo &Other) const {
+    return std::tie(Shape, ScalarName, VectorName, ISA) ==
+           std::tie(Shape, Other.ScalarName, Other.VectorName, Other.ISA);
+  }
 };
 
 namespace VFABI {
@@ -213,76 +213,76 @@ void getVectorVariantNames(const CallInst &CI,
 /// Helper class used to find the vector functions associated to a
 /// scalar CallInst.
 class VFDatabase {
-    /// The Module of the CallInst CI.
-    const Module *M;
-    /// The CallInst instance being queried for scalar to vector mappings.
-    const CallInst &CI;
-    /// List of vector functions descriptors associated to the call
-    /// instruction.
-    const SmallVector<VFInfo, 8> ScalarToVectorMappings;
+  /// The Module of the CallInst CI.
+  const Module *M;
+  /// The CallInst instance being queried for scalar to vector mappings.
+  const CallInst &CI;
+  /// List of vector functions descriptors associated to the call
+  /// instruction.
+  const SmallVector<VFInfo, 8> ScalarToVectorMappings;
 
-    /// Retrieve the scalar-to-vector mappings associated to the rule of
-    /// a vector Function ABI.
-    static void getVFABIMappings(const CallInst &CI,
-                                 SmallVectorImpl<VFInfo> &Mappings) {
-        if (!CI.getCalledFunction())
-            return;
+  /// Retrieve the scalar-to-vector mappings associated to the rule of
+  /// a vector Function ABI.
+  static void getVFABIMappings(const CallInst &CI,
+                               SmallVectorImpl<VFInfo> &Mappings) {
+    if (!CI.getCalledFunction())
+      return;
 
-        const StringRef ScalarName = CI.getCalledFunction()->getName();
+    const StringRef ScalarName = CI.getCalledFunction()->getName();
 
-        SmallVector<std::string, 8> ListOfStrings;
-        // The check for the vector-function-abi-variant attribute is done when
-        // retrieving the vector variant names here.
-        VFABI::getVectorVariantNames(CI, ListOfStrings);
-        if (ListOfStrings.empty())
-            return;
-        for (const auto &MangledName : ListOfStrings) {
-            const Optional<VFInfo> Shape =
-                VFABI::tryDemangleForVFABI(MangledName, *(CI.getModule()));
-            // A match is found via scalar and vector names, and also by
-            // ensuring that the variant described in the attribute has a
-            // corresponding definition or declaration of the vector
-            // function in the Module M.
-            if (Shape.hasValue() && (Shape.getValue().ScalarName == ScalarName)) {
-                assert(CI.getModule()->getFunction(Shape.getValue().VectorName) &&
-                       "Vector function is missing.");
-                Mappings.push_back(Shape.getValue());
-            }
-        }
+    SmallVector<std::string, 8> ListOfStrings;
+    // The check for the vector-function-abi-variant attribute is done when
+    // retrieving the vector variant names here.
+    VFABI::getVectorVariantNames(CI, ListOfStrings);
+    if (ListOfStrings.empty())
+      return;
+    for (const auto &MangledName : ListOfStrings) {
+      const Optional<VFInfo> Shape =
+          VFABI::tryDemangleForVFABI(MangledName, *(CI.getModule()));
+      // A match is found via scalar and vector names, and also by
+      // ensuring that the variant described in the attribute has a
+      // corresponding definition or declaration of the vector
+      // function in the Module M.
+      if (Shape.hasValue() && (Shape.getValue().ScalarName == ScalarName)) {
+        assert(CI.getModule()->getFunction(Shape.getValue().VectorName) &&
+               "Vector function is missing.");
+        Mappings.push_back(Shape.getValue());
+      }
     }
+  }
 
 public:
-    /// Retrieve all the VFInfo instances associated to the CallInst CI.
-    static SmallVector<VFInfo, 8> getMappings(const CallInst &CI) {
-        SmallVector<VFInfo, 8> Ret;
+  /// Retrieve all the VFInfo instances associated to the CallInst CI.
+  static SmallVector<VFInfo, 8> getMappings(const CallInst &CI) {
+    SmallVector<VFInfo, 8> Ret;
 
-        // Get mappings from the Vector Function ABI variants.
-        getVFABIMappings(CI, Ret);
+    // Get mappings from the Vector Function ABI variants.
+    getVFABIMappings(CI, Ret);
 
-        // Other non-VFABI variants should be retrieved here.
+    // Other non-VFABI variants should be retrieved here.
 
-        return Ret;
-    }
+    return Ret;
+  }
 
-    /// Constructor, requires a CallInst instance.
-    VFDatabase(CallInst &CI)
-        : M(CI.getModule()), CI(CI),
-          ScalarToVectorMappings(VFDatabase::getMappings(CI)) {}
-    /// \defgroup VFDatabase query interface.
-    ///
-    /// @{
-    /// Retrieve the Function with VFShape \p Shape.
-    Function *getVectorizedFunction(const VFShape &Shape) const {
-        if (Shape == VFShape::getScalarShape(CI))
-            return CI.getCalledFunction();
+  /// Constructor, requires a CallInst instance.
+  VFDatabase(CallInst &CI)
+      : M(CI.getModule()), CI(CI),
+        ScalarToVectorMappings(VFDatabase::getMappings(CI)) {}
+  /// \defgroup VFDatabase query interface.
+  ///
+  /// @{
+  /// Retrieve the Function with VFShape \p Shape.
+  Function *getVectorizedFunction(const VFShape &Shape) const {
+    if (Shape == VFShape::getScalarShape(CI))
+      return CI.getCalledFunction();
 
-        for (const auto &Info : ScalarToVectorMappings)
-            if (Info.Shape == Shape)
-                return M->getFunction(Info.VectorName);
+    for (const auto &Info : ScalarToVectorMappings)
+      if (Info.Shape == Shape)
+        return M->getFunction(Info.VectorName);
 
-        return nullptr;
-    }
-    /// @}
+    return nullptr;
+  }
+  /// @}
 };
 
 template <typename T> class ArrayRef;
@@ -304,13 +304,13 @@ typedef unsigned ID;
 /// the incoming type is void, we return void. If the EC represents a
 /// scalar, we return the scalar type.
 inline Type *ToVectorTy(Type *Scalar, ElementCount EC) {
-    if (Scalar->isVoidTy() || EC.isScalar())
-        return Scalar;
-    return VectorType::get(Scalar, EC);
+  if (Scalar->isVoidTy() || EC.isScalar())
+    return Scalar;
+  return VectorType::get(Scalar, EC);
 }
 
 inline Type *ToVectorTy(Type *Scalar, unsigned VF) {
-    return ToVectorTy(Scalar, ElementCount::getFixed(VF));
+  return ToVectorTy(Scalar, ElementCount::getFixed(VF));
 }
 
 /// Identify if the intrinsic is trivially vectorizable.
@@ -326,7 +326,7 @@ bool hasVectorInstrinsicScalarOpd(Intrinsic::ID ID, unsigned ScalarOpdIdx);
 /// For the input call instruction it finds mapping intrinsic and returns
 /// its intrinsic ID, in case it does not found it return not_intrinsic.
 Intrinsic::ID getVectorIntrinsicIDForCall(const CallInst *CI,
-        const TargetLibraryInfo *TLI);
+                                          const TargetLibraryInfo *TLI);
 
 /// Find the operand of the GEP that should be checked for consecutive
 /// stores. This ignores trailing indices that have no effect on the final
@@ -434,10 +434,9 @@ bool widenShuffleMaskElts(int Scale, ArrayRef<int> Mask,
 ///
 /// If the optional TargetTransformInfo is provided, this function tries harder
 /// to do less work by only looking at illegal types.
-MapVector<Instruction*, uint64_t>
-computeMinimumValueSizes(ArrayRef<BasicBlock*> Blocks,
-                         DemandedBits &DB,
-                         const TargetTransformInfo *TTI=nullptr);
+MapVector<Instruction *, uint64_t>
+computeMinimumValueSizes(ArrayRef<BasicBlock *> Blocks, DemandedBits &DB,
+                         const TargetTransformInfo *TTI = nullptr);
 
 /// Compute the union of two access-group lists.
 ///
@@ -491,7 +490,7 @@ Constant *createBitMaskForGaps(IRBuilderBase &Builder, unsigned VF,
 ///
 ///   <0,0,0,1,1,1,2,2,2,3,3,3>
 llvm::SmallVector<int, 16> createReplicatedMask(unsigned ReplicationFactor,
-        unsigned VF);
+                                                unsigned VF);
 
 /// Create an interleave shuffle mask.
 ///
@@ -519,7 +518,7 @@ llvm::SmallVector<int, 16> createInterleaveMask(unsigned VF, unsigned NumVecs);
 ///
 ///   <0, 2, 4, 6>
 llvm::SmallVector<int, 16> createStrideMask(unsigned Start, unsigned Stride,
-        unsigned VF);
+                                            unsigned VF);
 
 /// Create a sequential shuffle mask.
 ///
@@ -586,153 +585,141 @@ APInt possiblyDemandedEltsInMask(Value *Mask);
 /// the interleaved store group doesn't allow gaps.
 template <typename InstTy> class InterleaveGroup {
 public:
-    InterleaveGroup(uint32_t Factor, bool Reverse, Align Alignment)
-        : Factor(Factor), Reverse(Reverse), Alignment(Alignment),
-          InsertPos(nullptr) {}
+  InterleaveGroup(uint32_t Factor, bool Reverse, Align Alignment)
+      : Factor(Factor), Reverse(Reverse), Alignment(Alignment),
+        InsertPos(nullptr) {}
 
-    InterleaveGroup(InstTy *Instr, int32_t Stride, Align Alignment)
-        : Alignment(Alignment), InsertPos(Instr) {
-        Factor = std::abs(Stride);
-        assert(Factor > 1 && "Invalid interleave factor");
+  InterleaveGroup(InstTy *Instr, int32_t Stride, Align Alignment)
+      : Alignment(Alignment), InsertPos(Instr) {
+    Factor = std::abs(Stride);
+    assert(Factor > 1 && "Invalid interleave factor");
 
-        Reverse = Stride < 0;
-        Members[0] = Instr;
+    Reverse = Stride < 0;
+    Members[0] = Instr;
+  }
+
+  bool isReverse() const { return Reverse; }
+  uint32_t getFactor() const { return Factor; }
+  LLVM_ATTRIBUTE_DEPRECATED(uint32_t getAlignment() const,
+                            "Use getAlign instead.") {
+    return Alignment.value();
+  }
+  Align getAlign() const { return Alignment; }
+  uint32_t getNumMembers() const { return Members.size(); }
+
+  /// Try to insert a new member \p Instr with index \p Index and
+  /// alignment \p NewAlign. The index is related to the leader and it could be
+  /// negative if it is the new leader.
+  ///
+  /// \returns false if the instruction doesn't belong to the group.
+  bool insertMember(InstTy *Instr, int32_t Index, Align NewAlign) {
+    // Make sure the key fits in an int32_t.
+    Optional<int32_t> MaybeKey = checkedAdd(Index, SmallestKey);
+    if (!MaybeKey)
+      return false;
+    int32_t Key = *MaybeKey;
+
+    // Skip if there is already a member with the same index.
+    if (Members.find(Key) != Members.end())
+      return false;
+
+    if (Key > LargestKey) {
+      // The largest index is always less than the interleave factor.
+      if (Index >= static_cast<int32_t>(Factor))
+        return false;
+
+      LargestKey = Key;
+    } else if (Key < SmallestKey) {
+
+      // Make sure the largest index fits in an int32_t.
+      Optional<int32_t> MaybeLargestIndex = checkedSub(LargestKey, Key);
+      if (!MaybeLargestIndex)
+        return false;
+
+      // The largest index is always less than the interleave factor.
+      if (*MaybeLargestIndex >= static_cast<int64_t>(Factor))
+        return false;
+
+      SmallestKey = Key;
     }
 
-    bool isReverse() const {
-        return Reverse;
-    }
-    uint32_t getFactor() const {
-        return Factor;
-    }
-    LLVM_ATTRIBUTE_DEPRECATED(uint32_t getAlignment() const,
-                              "Use getAlign instead.") {
-        return Alignment.value();
-    }
-    Align getAlign() const {
-        return Alignment;
-    }
-    uint32_t getNumMembers() const {
-        return Members.size();
-    }
+    // It's always safe to select the minimum alignment.
+    Alignment = std::min(Alignment, NewAlign);
+    Members[Key] = Instr;
+    return true;
+  }
 
-    /// Try to insert a new member \p Instr with index \p Index and
-    /// alignment \p NewAlign. The index is related to the leader and it could be
-    /// negative if it is the new leader.
-    ///
-    /// \returns false if the instruction doesn't belong to the group.
-    bool insertMember(InstTy *Instr, int32_t Index, Align NewAlign) {
-        // Make sure the key fits in an int32_t.
-        Optional<int32_t> MaybeKey = checkedAdd(Index, SmallestKey);
-        if (!MaybeKey)
-            return false;
-        int32_t Key = *MaybeKey;
+  /// Get the member with the given index \p Index
+  ///
+  /// \returns nullptr if contains no such member.
+  InstTy *getMember(uint32_t Index) const {
+    int32_t Key = SmallestKey + Index;
+    auto Member = Members.find(Key);
+    if (Member == Members.end())
+      return nullptr;
 
-        // Skip if there is already a member with the same index.
-        if (Members.find(Key) != Members.end())
-            return false;
+    return Member->second;
+  }
 
-        if (Key > LargestKey) {
-            // The largest index is always less than the interleave factor.
-            if (Index >= static_cast<int32_t>(Factor))
-                return false;
-
-            LargestKey = Key;
-        } else if (Key < SmallestKey) {
-
-            // Make sure the largest index fits in an int32_t.
-            Optional<int32_t> MaybeLargestIndex = checkedSub(LargestKey, Key);
-            if (!MaybeLargestIndex)
-                return false;
-
-            // The largest index is always less than the interleave factor.
-            if (*MaybeLargestIndex >= static_cast<int64_t>(Factor))
-                return false;
-
-            SmallestKey = Key;
-        }
-
-        // It's always safe to select the minimum alignment.
-        Alignment = std::min(Alignment, NewAlign);
-        Members[Key] = Instr;
-        return true;
+  /// Get the index for the given member. Unlike the key in the member
+  /// map, the index starts from 0.
+  uint32_t getIndex(const InstTy *Instr) const {
+    for (auto I : Members) {
+      if (I.second == Instr)
+        return I.first - SmallestKey;
     }
 
-    /// Get the member with the given index \p Index
-    ///
-    /// \returns nullptr if contains no such member.
-    InstTy *getMember(uint32_t Index) const {
-        int32_t Key = SmallestKey + Index;
-        auto Member = Members.find(Key);
-        if (Member == Members.end())
-            return nullptr;
+    llvm_unreachable("InterleaveGroup contains no such member");
+  }
 
-        return Member->second;
-    }
+  InstTy *getInsertPos() const { return InsertPos; }
+  void setInsertPos(InstTy *Inst) { InsertPos = Inst; }
 
-    /// Get the index for the given member. Unlike the key in the member
-    /// map, the index starts from 0.
-    uint32_t getIndex(const InstTy *Instr) const {
-        for (auto I : Members) {
-            if (I.second == Instr)
-                return I.first - SmallestKey;
-        }
+  /// Add metadata (e.g. alias info) from the instructions in this group to \p
+  /// NewInst.
+  ///
+  /// FIXME: this function currently does not add noalias metadata a'la
+  /// addNewMedata.  To do that we need to compute the intersection of the
+  /// noalias info from all members.
+  void addMetadata(InstTy *NewInst) const;
 
-        llvm_unreachable("InterleaveGroup contains no such member");
-    }
+  /// Returns true if this Group requires a scalar iteration to handle gaps.
+  bool requiresScalarEpilogue() const {
+    // If the last member of the Group exists, then a scalar epilog is not
+    // needed for this group.
+    if (getMember(getFactor() - 1))
+      return false;
 
-    InstTy *getInsertPos() const {
-        return InsertPos;
-    }
-    void setInsertPos(InstTy *Inst) {
-        InsertPos = Inst;
-    }
+    // We have a group with gaps. It therefore cannot be a group of stores,
+    // and it can't be a reversed access, because such groups get invalidated.
+    assert(!getMember(0)->mayWriteToMemory() &&
+           "Group should have been invalidated");
+    assert(!isReverse() && "Group should have been invalidated");
 
-    /// Add metadata (e.g. alias info) from the instructions in this group to \p
-    /// NewInst.
-    ///
-    /// FIXME: this function currently does not add noalias metadata a'la
-    /// addNewMedata.  To do that we need to compute the intersection of the
-    /// noalias info from all members.
-    void addMetadata(InstTy *NewInst) const;
-
-    /// Returns true if this Group requires a scalar iteration to handle gaps.
-    bool requiresScalarEpilogue() const {
-        // If the last member of the Group exists, then a scalar epilog is not
-        // needed for this group.
-        if (getMember(getFactor() - 1))
-            return false;
-
-        // We have a group with gaps. It therefore cannot be a group of stores,
-        // and it can't be a reversed access, because such groups get invalidated.
-        assert(!getMember(0)->mayWriteToMemory() &&
-               "Group should have been invalidated");
-        assert(!isReverse() && "Group should have been invalidated");
-
-        // This is a group of loads, with gaps, and without a last-member
-        return true;
-    }
+    // This is a group of loads, with gaps, and without a last-member
+    return true;
+  }
 
 private:
-    uint32_t Factor; // Interleave Factor.
-    bool Reverse;
-    Align Alignment;
-    DenseMap<int32_t, InstTy *> Members;
-    int32_t SmallestKey = 0;
-    int32_t LargestKey = 0;
+  uint32_t Factor; // Interleave Factor.
+  bool Reverse;
+  Align Alignment;
+  DenseMap<int32_t, InstTy *> Members;
+  int32_t SmallestKey = 0;
+  int32_t LargestKey = 0;
 
-    // To avoid breaking dependences, vectorized instructions of an interleave
-    // group should be inserted at either the first load or the last store in
-    // program order.
-    //
-    // E.g. %even = load i32             // Insert Position
-    //      %add = add i32 %even         // Use of %even
-    //      %odd = load i32
-    //
-    //      store i32 %even
-    //      %odd = add i32               // Def of %odd
-    //      store i32 %odd               // Insert Position
-    InstTy *InsertPos;
+  // To avoid breaking dependences, vectorized instructions of an interleave
+  // group should be inserted at either the first load or the last store in
+  // program order.
+  //
+  // E.g. %even = load i32             // Insert Position
+  //      %add = add i32 %even         // Use of %even
+  //      %odd = load i32
+  //
+  //      store i32 %even
+  //      %odd = add i32               // Def of %odd
+  //      store i32 %odd               // Insert Position
+  InstTy *InsertPos;
 };
 
 /// Drive the analysis of interleaved memory accesses in the loop.
@@ -745,226 +732,222 @@ private:
 /// between the member and the group in a map.
 class InterleavedAccessInfo {
 public:
-    InterleavedAccessInfo(PredicatedScalarEvolution &PSE, Loop *L,
-                          DominatorTree *DT, LoopInfo *LI,
-                          const LoopAccessInfo *LAI)
-        : PSE(PSE), TheLoop(L), DT(DT), LI(LI), LAI(LAI) {}
+  InterleavedAccessInfo(PredicatedScalarEvolution &PSE, Loop *L,
+                        DominatorTree *DT, LoopInfo *LI,
+                        const LoopAccessInfo *LAI)
+      : PSE(PSE), TheLoop(L), DT(DT), LI(LI), LAI(LAI) {}
 
-    ~InterleavedAccessInfo() {
-        invalidateGroups();
+  ~InterleavedAccessInfo() { invalidateGroups(); }
+
+  /// Analyze the interleaved accesses and collect them in interleave
+  /// groups. Substitute symbolic strides using \p Strides.
+  /// Consider also predicated loads/stores in the analysis if
+  /// \p EnableMaskedInterleavedGroup is true.
+  void analyzeInterleaving(bool EnableMaskedInterleavedGroup);
+
+  /// Invalidate groups, e.g., in case all blocks in loop will be predicated
+  /// contrary to original assumption. Although we currently prevent group
+  /// formation for predicated accesses, we may be able to relax this limitation
+  /// in the future once we handle more complicated blocks. Returns true if any
+  /// groups were invalidated.
+  bool invalidateGroups() {
+    if (InterleaveGroups.empty()) {
+      assert(
+          !RequiresScalarEpilogue &&
+          "RequiresScalarEpilog should not be set without interleave groups");
+      return false;
     }
 
-    /// Analyze the interleaved accesses and collect them in interleave
-    /// groups. Substitute symbolic strides using \p Strides.
-    /// Consider also predicated loads/stores in the analysis if
-    /// \p EnableMaskedInterleavedGroup is true.
-    void analyzeInterleaving(bool EnableMaskedInterleavedGroup);
+    InterleaveGroupMap.clear();
+    for (auto *Ptr : InterleaveGroups)
+      delete Ptr;
+    InterleaveGroups.clear();
+    RequiresScalarEpilogue = false;
+    return true;
+  }
 
-    /// Invalidate groups, e.g., in case all blocks in loop will be predicated
-    /// contrary to original assumption. Although we currently prevent group
-    /// formation for predicated accesses, we may be able to relax this limitation
-    /// in the future once we handle more complicated blocks. Returns true if any
-    /// groups were invalidated.
-    bool invalidateGroups() {
-        if (InterleaveGroups.empty()) {
-            assert(
-                !RequiresScalarEpilogue &&
-                "RequiresScalarEpilog should not be set without interleave groups");
-            return false;
-        }
+  /// Check if \p Instr belongs to any interleave group.
+  bool isInterleaved(Instruction *Instr) const {
+    return InterleaveGroupMap.find(Instr) != InterleaveGroupMap.end();
+  }
 
-        InterleaveGroupMap.clear();
-        for (auto *Ptr : InterleaveGroups)
-            delete Ptr;
-        InterleaveGroups.clear();
-        RequiresScalarEpilogue = false;
-        return true;
-    }
+  /// Get the interleave group that \p Instr belongs to.
+  ///
+  /// \returns nullptr if doesn't have such group.
+  InterleaveGroup<Instruction> *
+  getInterleaveGroup(const Instruction *Instr) const {
+    if (InterleaveGroupMap.count(Instr))
+      return InterleaveGroupMap.find(Instr)->second;
+    return nullptr;
+  }
 
-    /// Check if \p Instr belongs to any interleave group.
-    bool isInterleaved(Instruction *Instr) const {
-        return InterleaveGroupMap.find(Instr) != InterleaveGroupMap.end();
-    }
+  iterator_range<SmallPtrSetIterator<llvm::InterleaveGroup<Instruction> *>>
+  getInterleaveGroups() {
+    return make_range(InterleaveGroups.begin(), InterleaveGroups.end());
+  }
 
-    /// Get the interleave group that \p Instr belongs to.
-    ///
-    /// \returns nullptr if doesn't have such group.
-    InterleaveGroup<Instruction> *
-    getInterleaveGroup(const Instruction *Instr) const {
-        if (InterleaveGroupMap.count(Instr))
-            return InterleaveGroupMap.find(Instr)->second;
-        return nullptr;
-    }
+  /// Returns true if an interleaved group that may access memory
+  /// out-of-bounds requires a scalar epilogue iteration for correctness.
+  bool requiresScalarEpilogue() const { return RequiresScalarEpilogue; }
 
-    iterator_range<SmallPtrSetIterator<llvm::InterleaveGroup<Instruction> *>>
-    getInterleaveGroups() {
-        return make_range(InterleaveGroups.begin(), InterleaveGroups.end());
-    }
-
-    /// Returns true if an interleaved group that may access memory
-    /// out-of-bounds requires a scalar epilogue iteration for correctness.
-    bool requiresScalarEpilogue() const {
-        return RequiresScalarEpilogue;
-    }
-
-    /// Invalidate groups that require a scalar epilogue (due to gaps). This can
-    /// happen when optimizing for size forbids a scalar epilogue, and the gap
-    /// cannot be filtered by masking the load/store.
-    void invalidateGroupsRequiringScalarEpilogue();
+  /// Invalidate groups that require a scalar epilogue (due to gaps). This can
+  /// happen when optimizing for size forbids a scalar epilogue, and the gap
+  /// cannot be filtered by masking the load/store.
+  void invalidateGroupsRequiringScalarEpilogue();
 
 private:
-    /// A wrapper around ScalarEvolution, used to add runtime SCEV checks.
-    /// Simplifies SCEV expressions in the context of existing SCEV assumptions.
-    /// The interleaved access analysis can also add new predicates (for example
-    /// by versioning strides of pointers).
-    PredicatedScalarEvolution &PSE;
+  /// A wrapper around ScalarEvolution, used to add runtime SCEV checks.
+  /// Simplifies SCEV expressions in the context of existing SCEV assumptions.
+  /// The interleaved access analysis can also add new predicates (for example
+  /// by versioning strides of pointers).
+  PredicatedScalarEvolution &PSE;
 
-    Loop *TheLoop;
-    DominatorTree *DT;
-    LoopInfo *LI;
-    const LoopAccessInfo *LAI;
+  Loop *TheLoop;
+  DominatorTree *DT;
+  LoopInfo *LI;
+  const LoopAccessInfo *LAI;
 
-    /// True if the loop may contain non-reversed interleaved groups with
-    /// out-of-bounds accesses. We ensure we don't speculatively access memory
-    /// out-of-bounds by executing at least one scalar epilogue iteration.
-    bool RequiresScalarEpilogue = false;
+  /// True if the loop may contain non-reversed interleaved groups with
+  /// out-of-bounds accesses. We ensure we don't speculatively access memory
+  /// out-of-bounds by executing at least one scalar epilogue iteration.
+  bool RequiresScalarEpilogue = false;
 
-    /// Holds the relationships between the members and the interleave group.
-    DenseMap<Instruction *, InterleaveGroup<Instruction> *> InterleaveGroupMap;
+  /// Holds the relationships between the members and the interleave group.
+  DenseMap<Instruction *, InterleaveGroup<Instruction> *> InterleaveGroupMap;
 
-    SmallPtrSet<InterleaveGroup<Instruction> *, 4> InterleaveGroups;
+  SmallPtrSet<InterleaveGroup<Instruction> *, 4> InterleaveGroups;
 
-    /// Holds dependences among the memory accesses in the loop. It maps a source
-    /// access to a set of dependent sink accesses.
-    DenseMap<Instruction *, SmallPtrSet<Instruction *, 2>> Dependences;
+  /// Holds dependences among the memory accesses in the loop. It maps a source
+  /// access to a set of dependent sink accesses.
+  DenseMap<Instruction *, SmallPtrSet<Instruction *, 2>> Dependences;
 
-    /// The descriptor for a strided memory access.
-    struct StrideDescriptor {
-        StrideDescriptor() = default;
-        StrideDescriptor(int64_t Stride, const SCEV *Scev, uint64_t Size,
-                         Align Alignment)
-            : Stride(Stride), Scev(Scev), Size(Size), Alignment(Alignment) {}
+  /// The descriptor for a strided memory access.
+  struct StrideDescriptor {
+    StrideDescriptor() = default;
+    StrideDescriptor(int64_t Stride, const SCEV *Scev, uint64_t Size,
+                     Align Alignment)
+        : Stride(Stride), Scev(Scev), Size(Size), Alignment(Alignment) {}
 
-        // The access's stride. It is negative for a reverse access.
-        int64_t Stride = 0;
+    // The access's stride. It is negative for a reverse access.
+    int64_t Stride = 0;
 
-        // The scalar expression of this access.
-        const SCEV *Scev = nullptr;
+    // The scalar expression of this access.
+    const SCEV *Scev = nullptr;
 
-        // The size of the memory object.
-        uint64_t Size = 0;
+    // The size of the memory object.
+    uint64_t Size = 0;
 
-        // The alignment of this access.
-        Align Alignment;
-    };
+    // The alignment of this access.
+    Align Alignment;
+  };
 
-    /// A type for holding instructions and their stride descriptors.
-    using StrideEntry = std::pair<Instruction *, StrideDescriptor>;
+  /// A type for holding instructions and their stride descriptors.
+  using StrideEntry = std::pair<Instruction *, StrideDescriptor>;
 
-    /// Create a new interleave group with the given instruction \p Instr,
-    /// stride \p Stride and alignment \p Align.
-    ///
-    /// \returns the newly created interleave group.
-    InterleaveGroup<Instruction> *
-    createInterleaveGroup(Instruction *Instr, int Stride, Align Alignment) {
-        assert(!InterleaveGroupMap.count(Instr) &&
-               "Already in an interleaved access group");
-        InterleaveGroupMap[Instr] =
-            new InterleaveGroup<Instruction>(Instr, Stride, Alignment);
-        InterleaveGroups.insert(InterleaveGroupMap[Instr]);
-        return InterleaveGroupMap[Instr];
-    }
+  /// Create a new interleave group with the given instruction \p Instr,
+  /// stride \p Stride and alignment \p Align.
+  ///
+  /// \returns the newly created interleave group.
+  InterleaveGroup<Instruction> *
+  createInterleaveGroup(Instruction *Instr, int Stride, Align Alignment) {
+    assert(!InterleaveGroupMap.count(Instr) &&
+           "Already in an interleaved access group");
+    InterleaveGroupMap[Instr] =
+        new InterleaveGroup<Instruction>(Instr, Stride, Alignment);
+    InterleaveGroups.insert(InterleaveGroupMap[Instr]);
+    return InterleaveGroupMap[Instr];
+  }
 
-    /// Release the group and remove all the relationships.
-    void releaseGroup(InterleaveGroup<Instruction> *Group) {
-        for (unsigned i = 0; i < Group->getFactor(); i++)
-            if (Instruction *Member = Group->getMember(i))
-                InterleaveGroupMap.erase(Member);
+  /// Release the group and remove all the relationships.
+  void releaseGroup(InterleaveGroup<Instruction> *Group) {
+    for (unsigned i = 0; i < Group->getFactor(); i++)
+      if (Instruction *Member = Group->getMember(i))
+        InterleaveGroupMap.erase(Member);
 
-        InterleaveGroups.erase(Group);
-        delete Group;
-    }
+    InterleaveGroups.erase(Group);
+    delete Group;
+  }
 
-    /// Collect all the accesses with a constant stride in program order.
-    void collectConstStrideAccesses(
-        MapVector<Instruction *, StrideDescriptor> &AccessStrideInfo,
-        const ValueToValueMap &Strides);
+  /// Collect all the accesses with a constant stride in program order.
+  void collectConstStrideAccesses(
+      MapVector<Instruction *, StrideDescriptor> &AccessStrideInfo,
+      const ValueToValueMap &Strides);
 
-    /// Returns true if \p Stride is allowed in an interleaved group.
-    static bool isStrided(int Stride);
+  /// Returns true if \p Stride is allowed in an interleaved group.
+  static bool isStrided(int Stride);
 
-    /// Returns true if \p BB is a predicated block.
-    bool isPredicated(BasicBlock *BB) const {
-        return LoopAccessInfo::blockNeedsPredication(BB, TheLoop, DT);
-    }
+  /// Returns true if \p BB is a predicated block.
+  bool isPredicated(BasicBlock *BB) const {
+    return LoopAccessInfo::blockNeedsPredication(BB, TheLoop, DT);
+  }
 
-    /// Returns true if LoopAccessInfo can be used for dependence queries.
-    bool areDependencesValid() const {
-        return LAI && LAI->getDepChecker().getDependences();
-    }
+  /// Returns true if LoopAccessInfo can be used for dependence queries.
+  bool areDependencesValid() const {
+    return LAI && LAI->getDepChecker().getDependences();
+  }
 
-    /// Returns true if memory accesses \p A and \p B can be reordered, if
-    /// necessary, when constructing interleaved groups.
-    ///
-    /// \p A must precede \p B in program order. We return false if reordering is
-    /// not necessary or is prevented because \p A and \p B may be dependent.
-    bool canReorderMemAccessesForInterleavedGroups(StrideEntry *A,
-            StrideEntry *B) const {
-        // Code motion for interleaved accesses can potentially hoist strided loads
-        // and sink strided stores. The code below checks the legality of the
-        // following two conditions:
-        //
-        // 1. Potentially moving a strided load (B) before any store (A) that
-        //    precedes B, or
-        //
-        // 2. Potentially moving a strided store (A) after any load or store (B)
-        //    that A precedes.
-        //
-        // It's legal to reorder A and B if we know there isn't a dependence from A
-        // to B. Note that this determination is conservative since some
-        // dependences could potentially be reordered safely.
+  /// Returns true if memory accesses \p A and \p B can be reordered, if
+  /// necessary, when constructing interleaved groups.
+  ///
+  /// \p A must precede \p B in program order. We return false if reordering is
+  /// not necessary or is prevented because \p A and \p B may be dependent.
+  bool canReorderMemAccessesForInterleavedGroups(StrideEntry *A,
+                                                 StrideEntry *B) const {
+    // Code motion for interleaved accesses can potentially hoist strided loads
+    // and sink strided stores. The code below checks the legality of the
+    // following two conditions:
+    //
+    // 1. Potentially moving a strided load (B) before any store (A) that
+    //    precedes B, or
+    //
+    // 2. Potentially moving a strided store (A) after any load or store (B)
+    //    that A precedes.
+    //
+    // It's legal to reorder A and B if we know there isn't a dependence from A
+    // to B. Note that this determination is conservative since some
+    // dependences could potentially be reordered safely.
 
-        // A is potentially the source of a dependence.
-        auto *Src = A->first;
-        auto SrcDes = A->second;
+    // A is potentially the source of a dependence.
+    auto *Src = A->first;
+    auto SrcDes = A->second;
 
-        // B is potentially the sink of a dependence.
-        auto *Sink = B->first;
-        auto SinkDes = B->second;
+    // B is potentially the sink of a dependence.
+    auto *Sink = B->first;
+    auto SinkDes = B->second;
 
-        // Code motion for interleaved accesses can't violate WAR dependences.
-        // Thus, reordering is legal if the source isn't a write.
-        if (!Src->mayWriteToMemory())
-            return true;
+    // Code motion for interleaved accesses can't violate WAR dependences.
+    // Thus, reordering is legal if the source isn't a write.
+    if (!Src->mayWriteToMemory())
+      return true;
 
-        // At least one of the accesses must be strided.
-        if (!isStrided(SrcDes.Stride) && !isStrided(SinkDes.Stride))
-            return true;
+    // At least one of the accesses must be strided.
+    if (!isStrided(SrcDes.Stride) && !isStrided(SinkDes.Stride))
+      return true;
 
-        // If dependence information is not available from LoopAccessInfo,
-        // conservatively assume the instructions can't be reordered.
-        if (!areDependencesValid())
-            return false;
+    // If dependence information is not available from LoopAccessInfo,
+    // conservatively assume the instructions can't be reordered.
+    if (!areDependencesValid())
+      return false;
 
-        // If we know there is a dependence from source to sink, assume the
-        // instructions can't be reordered. Otherwise, reordering is legal.
-        return Dependences.find(Src) == Dependences.end() ||
-               !Dependences.lookup(Src).count(Sink);
-    }
+    // If we know there is a dependence from source to sink, assume the
+    // instructions can't be reordered. Otherwise, reordering is legal.
+    return Dependences.find(Src) == Dependences.end() ||
+           !Dependences.lookup(Src).count(Sink);
+  }
 
-    /// Collect the dependences from LoopAccessInfo.
-    ///
-    /// We process the dependences once during the interleaved access analysis to
-    /// enable constant-time dependence queries.
-    void collectDependences() {
-        if (!areDependencesValid())
-            return;
-        auto *Deps = LAI->getDepChecker().getDependences();
-        for (auto Dep : *Deps)
-            Dependences[Dep.getSource(*LAI)].insert(Dep.getDestination(*LAI));
-    }
+  /// Collect the dependences from LoopAccessInfo.
+  ///
+  /// We process the dependences once during the interleaved access analysis to
+  /// enable constant-time dependence queries.
+  void collectDependences() {
+    if (!areDependencesValid())
+      return;
+    auto *Deps = LAI->getDepChecker().getDependences();
+    for (auto Dep : *Deps)
+      Dependences[Dep.getSource(*LAI)].insert(Dep.getDestination(*LAI));
+  }
 };
 
-} // llvm namespace
+} // namespace llvm
 
 #endif

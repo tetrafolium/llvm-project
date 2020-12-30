@@ -32,30 +32,28 @@ class Symbol;
  */
 class SymbolTable {
 public:
-    Symbol *addDefined(StringRef name, InputSection *isec, uint32_t value,
-                       bool isWeakDef, bool isPrivateExtern);
+  Symbol *addDefined(StringRef name, InputSection *isec, uint32_t value,
+                     bool isWeakDef, bool isPrivateExtern);
 
-    Symbol *addUndefined(StringRef name, bool isWeakRef);
+  Symbol *addUndefined(StringRef name, bool isWeakRef);
 
-    Symbol *addCommon(StringRef name, InputFile *, uint64_t size, uint32_t align,
-                      bool isPrivateExtern);
+  Symbol *addCommon(StringRef name, InputFile *, uint64_t size, uint32_t align,
+                    bool isPrivateExtern);
 
-    Symbol *addDylib(StringRef name, DylibFile *file, bool isWeakDef, bool isTlv);
+  Symbol *addDylib(StringRef name, DylibFile *file, bool isWeakDef, bool isTlv);
 
-    Symbol *addLazy(StringRef name, ArchiveFile *file,
-                    const llvm::object::Archive::Symbol &sym);
+  Symbol *addLazy(StringRef name, ArchiveFile *file,
+                  const llvm::object::Archive::Symbol &sym);
 
-    Symbol *addDSOHandle(const MachHeaderSection *);
+  Symbol *addDSOHandle(const MachHeaderSection *);
 
-    ArrayRef<Symbol *> getSymbols() const {
-        return symVector;
-    }
-    Symbol *find(StringRef name);
+  ArrayRef<Symbol *> getSymbols() const { return symVector; }
+  Symbol *find(StringRef name);
 
 private:
-    std::pair<Symbol *, bool> insert(StringRef name);
-    llvm::DenseMap<llvm::CachedHashStringRef, int> symMap;
-    std::vector<Symbol *> symVector;
+  std::pair<Symbol *, bool> insert(StringRef name);
+  llvm::DenseMap<llvm::CachedHashStringRef, int> symMap;
+  std::vector<Symbol *> symVector;
 };
 
 extern void treatUndefinedSymbol(StringRef symbolName, StringRef fileName);

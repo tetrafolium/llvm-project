@@ -20,8 +20,8 @@
 #include "CloexecInotifyInitCheck.h"
 #include "CloexecMemfdCreateCheck.h"
 #include "CloexecOpenCheck.h"
-#include "CloexecPipeCheck.h"
 #include "CloexecPipe2Check.h"
+#include "CloexecPipeCheck.h"
 #include "CloexecSocketCheck.h"
 #include "ComparisonInTempFailureRetryCheck.h"
 
@@ -34,34 +34,35 @@ namespace android {
 /// This module is for Android specific checks.
 class AndroidModule : public ClangTidyModule {
 public:
-    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-        CheckFactories.registerCheck<CloexecAccept4Check>("android-cloexec-accept4");
-        CheckFactories.registerCheck<CloexecAcceptCheck>("android-cloexec-accept");
-        CheckFactories.registerCheck<CloexecCreatCheck>("android-cloexec-creat");
-        CheckFactories.registerCheck<CloexecDupCheck>("android-cloexec-dup");
-        CheckFactories.registerCheck<CloexecEpollCreate1Check>(
-            "android-cloexec-epoll-create1");
-        CheckFactories.registerCheck<CloexecEpollCreateCheck>(
-            "android-cloexec-epoll-create");
-        CheckFactories.registerCheck<CloexecFopenCheck>("android-cloexec-fopen");
-        CheckFactories.registerCheck<CloexecInotifyInit1Check>(
-            "android-cloexec-inotify-init1");
-        CheckFactories.registerCheck<CloexecInotifyInitCheck>(
-            "android-cloexec-inotify-init");
-        CheckFactories.registerCheck<CloexecMemfdCreateCheck>(
-            "android-cloexec-memfd-create");
-        CheckFactories.registerCheck<CloexecOpenCheck>("android-cloexec-open");
-        CheckFactories.registerCheck<CloexecPipeCheck>("android-cloexec-pipe");
-        CheckFactories.registerCheck<CloexecPipe2Check>("android-cloexec-pipe2");
-        CheckFactories.registerCheck<CloexecSocketCheck>("android-cloexec-socket");
-        CheckFactories.registerCheck<ComparisonInTempFailureRetryCheck>(
-            "android-comparison-in-temp-failure-retry");
-    }
+  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<CloexecAccept4Check>(
+        "android-cloexec-accept4");
+    CheckFactories.registerCheck<CloexecAcceptCheck>("android-cloexec-accept");
+    CheckFactories.registerCheck<CloexecCreatCheck>("android-cloexec-creat");
+    CheckFactories.registerCheck<CloexecDupCheck>("android-cloexec-dup");
+    CheckFactories.registerCheck<CloexecEpollCreate1Check>(
+        "android-cloexec-epoll-create1");
+    CheckFactories.registerCheck<CloexecEpollCreateCheck>(
+        "android-cloexec-epoll-create");
+    CheckFactories.registerCheck<CloexecFopenCheck>("android-cloexec-fopen");
+    CheckFactories.registerCheck<CloexecInotifyInit1Check>(
+        "android-cloexec-inotify-init1");
+    CheckFactories.registerCheck<CloexecInotifyInitCheck>(
+        "android-cloexec-inotify-init");
+    CheckFactories.registerCheck<CloexecMemfdCreateCheck>(
+        "android-cloexec-memfd-create");
+    CheckFactories.registerCheck<CloexecOpenCheck>("android-cloexec-open");
+    CheckFactories.registerCheck<CloexecPipeCheck>("android-cloexec-pipe");
+    CheckFactories.registerCheck<CloexecPipe2Check>("android-cloexec-pipe2");
+    CheckFactories.registerCheck<CloexecSocketCheck>("android-cloexec-socket");
+    CheckFactories.registerCheck<ComparisonInTempFailureRetryCheck>(
+        "android-comparison-in-temp-failure-retry");
+  }
 };
 
 // Register the AndroidTidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<AndroidModule>
-X("android-module", "Adds Android platform checks.");
+    X("android-module", "Adds Android platform checks.");
 
 } // namespace android
 

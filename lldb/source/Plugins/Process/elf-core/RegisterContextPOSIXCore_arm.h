@@ -16,38 +16,38 @@
 
 class RegisterContextCorePOSIX_arm : public RegisterContextPOSIX_arm {
 public:
-    RegisterContextCorePOSIX_arm(
-        lldb_private::Thread &thread,
-        std::unique_ptr<RegisterInfoPOSIX_arm> register_info,
-        const lldb_private::DataExtractor &gpregset,
-        llvm::ArrayRef<lldb_private::CoreNote> notes);
+  RegisterContextCorePOSIX_arm(
+      lldb_private::Thread &thread,
+      std::unique_ptr<RegisterInfoPOSIX_arm> register_info,
+      const lldb_private::DataExtractor &gpregset,
+      llvm::ArrayRef<lldb_private::CoreNote> notes);
 
-    ~RegisterContextCorePOSIX_arm() override;
+  ~RegisterContextCorePOSIX_arm() override;
 
-    bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
-                      lldb_private::RegisterValue &value) override;
+  bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
+                    lldb_private::RegisterValue &value) override;
 
-    bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
-                       const lldb_private::RegisterValue &value) override;
+  bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
+                     const lldb_private::RegisterValue &value) override;
 
-    bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+  bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-    bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+  bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-    bool HardwareSingleStep(bool enable) override;
+  bool HardwareSingleStep(bool enable) override;
 
 protected:
-    bool ReadGPR() override;
+  bool ReadGPR() override;
 
-    bool ReadFPR() override;
+  bool ReadFPR() override;
 
-    bool WriteGPR() override;
+  bool WriteGPR() override;
 
-    bool WriteFPR() override;
+  bool WriteFPR() override;
 
 private:
-    lldb::DataBufferSP m_gpr_buffer;
-    lldb_private::DataExtractor m_gpr;
+  lldb::DataBufferSP m_gpr_buffer;
+  lldb_private::DataExtractor m_gpr;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_ELF_CORE_REGISTERCONTEXTPOSIXCORE_ARM_H

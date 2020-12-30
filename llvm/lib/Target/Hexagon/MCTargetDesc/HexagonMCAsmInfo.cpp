@@ -18,21 +18,21 @@ using namespace llvm;
 void HexagonMCAsmInfo::anchor() {}
 
 HexagonMCAsmInfo::HexagonMCAsmInfo(const Triple &TT) {
-    Data16bitsDirective = "\t.half\t";
-    Data32bitsDirective = "\t.word\t";
-    Data64bitsDirective = nullptr;  // .xword is only supported by V9.
-    CommentString = "//";
-    SupportsDebugInformation = true;
+  Data16bitsDirective = "\t.half\t";
+  Data32bitsDirective = "\t.word\t";
+  Data64bitsDirective = nullptr; // .xword is only supported by V9.
+  CommentString = "//";
+  SupportsDebugInformation = true;
 
-    LCOMMDirectiveAlignmentType = LCOMM::ByteAlignment;
-    InlineAsmStart = "# InlineAsm Start";
-    InlineAsmEnd = "# InlineAsm End";
-    ZeroDirective = "\t.space\t";
-    AscizDirective = "\t.string\t";
+  LCOMMDirectiveAlignmentType = LCOMM::ByteAlignment;
+  InlineAsmStart = "# InlineAsm Start";
+  InlineAsmEnd = "# InlineAsm End";
+  ZeroDirective = "\t.space\t";
+  AscizDirective = "\t.string\t";
 
-    MinInstAlignment = 4;
-    UsesELFSectionDirectiveForBSS  = true;
-    ExceptionsType = ExceptionHandling::DwarfCFI;
-    UseLogicalShr = false;
-    UseIntegratedAssembler = false;
+  MinInstAlignment = 4;
+  UsesELFSectionDirectiveForBSS = true;
+  ExceptionsType = ExceptionHandling::DwarfCFI;
+  UseLogicalShr = false;
+  UseIntegratedAssembler = false;
 }

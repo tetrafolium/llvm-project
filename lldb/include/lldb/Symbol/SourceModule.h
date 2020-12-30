@@ -16,10 +16,10 @@ namespace lldb_private {
 
 /// Information needed to import a source-language module.
 struct SourceModule {
-    /// Something like "Module.Submodule".
-    std::vector<ConstString> path;
-    ConstString search_path;
-    ConstString sysroot;
+  /// Something like "Module.Submodule".
+  std::vector<ConstString> path;
+  ConstString search_path;
+  ConstString sysroot;
 };
 
 } // namespace lldb_private

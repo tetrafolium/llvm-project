@@ -24,41 +24,31 @@ TargetSubtargetInfo::TargetSubtargetInfo(
 
 TargetSubtargetInfo::~TargetSubtargetInfo() = default;
 
-bool TargetSubtargetInfo::enableAtomicExpand() const {
-    return true;
-}
+bool TargetSubtargetInfo::enableAtomicExpand() const { return true; }
 
-bool TargetSubtargetInfo::enableIndirectBrExpand() const {
-    return false;
-}
+bool TargetSubtargetInfo::enableIndirectBrExpand() const { return false; }
 
-bool TargetSubtargetInfo::enableMachineScheduler() const {
-    return false;
-}
+bool TargetSubtargetInfo::enableMachineScheduler() const { return false; }
 
 bool TargetSubtargetInfo::enableJoinGlobalCopies() const {
-    return enableMachineScheduler();
+  return enableMachineScheduler();
 }
 
 bool TargetSubtargetInfo::enableRALocalReassignment(
     CodeGenOpt::Level OptLevel) const {
-    return true;
+  return true;
 }
 
-bool TargetSubtargetInfo::enableAdvancedRASplitCost() const {
-    return false;
-}
+bool TargetSubtargetInfo::enableAdvancedRASplitCost() const { return false; }
 
 bool TargetSubtargetInfo::enablePostRAScheduler() const {
-    return getSchedModel().PostRAScheduler;
+  return getSchedModel().PostRAScheduler;
 }
 
 bool TargetSubtargetInfo::enablePostRAMachineScheduler() const {
-    return enableMachineScheduler() && enablePostRAScheduler();
+  return enableMachineScheduler() && enablePostRAScheduler();
 }
 
-bool TargetSubtargetInfo::useAA() const {
-    return false;
-}
+bool TargetSubtargetInfo::useAA() const { return false; }
 
-void TargetSubtargetInfo::mirFileLoaded(MachineFunction &MF) const { }
+void TargetSubtargetInfo::mirFileLoaded(MachineFunction &MF) const {}

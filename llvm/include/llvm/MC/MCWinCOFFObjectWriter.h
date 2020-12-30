@@ -21,32 +21,26 @@ class MCValue;
 class raw_pwrite_stream;
 
 class MCWinCOFFObjectTargetWriter : public MCObjectTargetWriter {
-    virtual void anchor();
+  virtual void anchor();
 
-    const unsigned Machine;
+  const unsigned Machine;
 
 protected:
-    MCWinCOFFObjectTargetWriter(unsigned Machine_);
+  MCWinCOFFObjectTargetWriter(unsigned Machine_);
 
 public:
-    virtual ~MCWinCOFFObjectTargetWriter() = default;
+  virtual ~MCWinCOFFObjectTargetWriter() = default;
 
-    Triple::ObjectFormatType getFormat() const override {
-        return Triple::COFF;
-    }
-    static bool classof(const MCObjectTargetWriter *W) {
-        return W->getFormat() == Triple::COFF;
-    }
+  Triple::ObjectFormatType getFormat() const override { return Triple::COFF; }
+  static bool classof(const MCObjectTargetWriter *W) {
+    return W->getFormat() == Triple::COFF;
+  }
 
-    unsigned getMachine() const {
-        return Machine;
-    }
-    virtual unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
-                                  const MCFixup &Fixup, bool IsCrossSection,
-                                  const MCAsmBackend &MAB) const = 0;
-    virtual bool recordRelocation(const MCFixup &) const {
-        return true;
-    }
+  unsigned getMachine() const { return Machine; }
+  virtual unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
+                                const MCFixup &Fixup, bool IsCrossSection,
+                                const MCAsmBackend &MAB) const = 0;
+  virtual bool recordRelocation(const MCFixup &) const { return true; }
 };
 
 /// Construct a new Win COFF writer instance.

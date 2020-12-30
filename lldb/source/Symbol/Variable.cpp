@@ -52,697 +52,688 @@ Variable::Variable(lldb::user_id_t uid, const char *name, const char *mangled,
 Variable::~Variable() {}
 
 lldb::LanguageType Variable::GetLanguage() const {
-    lldb::LanguageType lang = m_mangled.GuessLanguage();
-    if (lang != lldb::eLanguageTypeUnknown)
-        return lang;
+  lldb::LanguageType lang = m_mangled.GuessLanguage();
+  if (lang != lldb::eLanguageTypeUnknown)
+    return lang;
 
-    if (auto *func = m_owner_scope->CalculateSymbolContextFunction()) {
-        if ((lang = func->GetLanguage()) != lldb::eLanguageTypeUnknown)
-            return lang;
-    } else if (auto *comp_unit =
-                   m_owner_scope->CalculateSymbolContextCompileUnit()) {
-        if ((lang = comp_unit->GetLanguage()) != lldb::eLanguageTypeUnknown)
-            return lang;
-    }
+  if (auto *func = m_owner_scope->CalculateSymbolContextFunction()) {
+    if ((lang = func->GetLanguage()) != lldb::eLanguageTypeUnknown)
+      return lang;
+  } else if (auto *comp_unit =
+                 m_owner_scope->CalculateSymbolContextCompileUnit()) {
+    if ((lang = comp_unit->GetLanguage()) != lldb::eLanguageTypeUnknown)
+      return lang;
+  }
 
-    return lldb::eLanguageTypeUnknown;
+  return lldb::eLanguageTypeUnknown;
 }
 
 ConstString Variable::GetName() const {
-    ConstString name = m_mangled.GetName();
-    if (name)
-        return name;
-    return m_name;
+  ConstString name = m_mangled.GetName();
+  if (name)
+    return name;
+  return m_name;
 }
 
-ConstString Variable::GetUnqualifiedName() const {
-    return m_name;
-}
+ConstString Variable::GetUnqualifiedName() const { return m_name; }
 
 bool Variable::NameMatches(ConstString name) const {
-    if (m_name == name)
-        return true;
-    SymbolContext variable_sc;
-    m_owner_scope->CalculateSymbolContext(&variable_sc);
+  if (m_name == name)
+    return true;
+  SymbolContext variable_sc;
+  m_owner_scope->CalculateSymbolContext(&variable_sc);
 
-    return m_mangled.NameMatches(name);
+  return m_mangled.NameMatches(name);
 }
 bool Variable::NameMatches(const RegularExpression &regex) const {
-    if (regex.Execute(m_name.AsCString()))
-        return true;
-    if (m_mangled)
-        return m_mangled.NameMatches(regex);
-    return false;
+  if (regex.Execute(m_name.AsCString()))
+    return true;
+  if (m_mangled)
+    return m_mangled.NameMatches(regex);
+  return false;
 }
 
 Type *Variable::GetType() {
-    if (m_symfile_type_sp)
-        return m_symfile_type_sp->GetType();
-    return nullptr;
+  if (m_symfile_type_sp)
+    return m_symfile_type_sp->GetType();
+  return nullptr;
 }
 
 void Variable::Dump(Stream *s, bool show_context) const {
-    s->Printf("%p: ", static_cast<const void *>(this));
-    s->Indent();
-    *s << "Variable" << (const UserID &)*this;
+  s->Printf("%p: ", static_cast<const void *>(this));
+  s->Indent();
+  *s << "Variable" << (const UserID &)*this;
 
-    if (m_name)
-        *s << ", name = \"" << m_name << "\"";
+  if (m_name)
+    *s << ", name = \"" << m_name << "\"";
 
-    if (m_symfile_type_sp) {
-        Type *type = m_symfile_type_sp->GetType();
-        if (type) {
-            s->Format(", type = {{{0:x-16}} {1} (", type->GetID(), type);
-            type->DumpTypeName(s);
-            s->PutChar(')');
-        }
+  if (m_symfile_type_sp) {
+    Type *type = m_symfile_type_sp->GetType();
+    if (type) {
+      s->Format(", type = {{{0:x-16}} {1} (", type->GetID(), type);
+      type->DumpTypeName(s);
+      s->PutChar(')');
     }
+  }
 
-    if (m_scope != eValueTypeInvalid) {
-        s->PutCString(", scope = ");
-        switch (m_scope) {
-        case eValueTypeVariableGlobal:
-            s->PutCString(m_external ? "global" : "static");
-            break;
-        case eValueTypeVariableArgument:
-            s->PutCString("parameter");
-            break;
-        case eValueTypeVariableLocal:
-            s->PutCString("local");
-            break;
-        case eValueTypeVariableThreadLocal:
-            s->PutCString("thread local");
-            break;
-        default:
-            s->AsRawOstream() << "??? (" << m_scope << ')';
-        }
+  if (m_scope != eValueTypeInvalid) {
+    s->PutCString(", scope = ");
+    switch (m_scope) {
+    case eValueTypeVariableGlobal:
+      s->PutCString(m_external ? "global" : "static");
+      break;
+    case eValueTypeVariableArgument:
+      s->PutCString("parameter");
+      break;
+    case eValueTypeVariableLocal:
+      s->PutCString("local");
+      break;
+    case eValueTypeVariableThreadLocal:
+      s->PutCString("thread local");
+      break;
+    default:
+      s->AsRawOstream() << "??? (" << m_scope << ')';
     }
+  }
 
-    if (show_context && m_owner_scope != nullptr) {
-        s->PutCString(", context = ( ");
-        m_owner_scope->DumpSymbolContext(s);
-        s->PutCString(" )");
+  if (show_context && m_owner_scope != nullptr) {
+    s->PutCString(", context = ( ");
+    m_owner_scope->DumpSymbolContext(s);
+    s->PutCString(" )");
+  }
+
+  bool show_fullpaths = false;
+  m_declaration.Dump(s, show_fullpaths);
+
+  if (m_location.IsValid()) {
+    s->PutCString(", location = ");
+    lldb::addr_t loclist_base_addr = LLDB_INVALID_ADDRESS;
+    if (m_location.IsLocationList()) {
+      SymbolContext variable_sc;
+      m_owner_scope->CalculateSymbolContext(&variable_sc);
+      if (variable_sc.function)
+        loclist_base_addr = variable_sc.function->GetAddressRange()
+                                .GetBaseAddress()
+                                .GetFileAddress();
     }
-
-    bool show_fullpaths = false;
-    m_declaration.Dump(s, show_fullpaths);
-
-    if (m_location.IsValid()) {
-        s->PutCString(", location = ");
-        lldb::addr_t loclist_base_addr = LLDB_INVALID_ADDRESS;
-        if (m_location.IsLocationList()) {
-            SymbolContext variable_sc;
-            m_owner_scope->CalculateSymbolContext(&variable_sc);
-            if (variable_sc.function)
-                loclist_base_addr = variable_sc.function->GetAddressRange()
-                                    .GetBaseAddress()
-                                    .GetFileAddress();
-        }
-        ABISP abi;
-        if (m_owner_scope) {
-            ModuleSP module_sp(m_owner_scope->CalculateSymbolContextModule());
-            if (module_sp)
-                abi = ABI::FindPlugin(ProcessSP(), module_sp->GetArchitecture());
-        }
-        m_location.GetDescription(s, lldb::eDescriptionLevelBrief,
-                                  loclist_base_addr, abi.get());
+    ABISP abi;
+    if (m_owner_scope) {
+      ModuleSP module_sp(m_owner_scope->CalculateSymbolContextModule());
+      if (module_sp)
+        abi = ABI::FindPlugin(ProcessSP(), module_sp->GetArchitecture());
     }
+    m_location.GetDescription(s, lldb::eDescriptionLevelBrief,
+                              loclist_base_addr, abi.get());
+  }
 
-    if (m_external)
-        s->PutCString(", external");
+  if (m_external)
+    s->PutCString(", external");
 
-    if (m_artificial)
-        s->PutCString(", artificial");
+  if (m_artificial)
+    s->PutCString(", artificial");
 
-    s->EOL();
+  s->EOL();
 }
 
 bool Variable::DumpDeclaration(Stream *s, bool show_fullpaths,
                                bool show_module) {
-    bool dumped_declaration_info = false;
-    if (m_owner_scope) {
-        SymbolContext sc;
-        m_owner_scope->CalculateSymbolContext(&sc);
-        sc.block = nullptr;
-        sc.line_entry.Clear();
-        bool show_inlined_frames = false;
-        const bool show_function_arguments = true;
-        const bool show_function_name = true;
+  bool dumped_declaration_info = false;
+  if (m_owner_scope) {
+    SymbolContext sc;
+    m_owner_scope->CalculateSymbolContext(&sc);
+    sc.block = nullptr;
+    sc.line_entry.Clear();
+    bool show_inlined_frames = false;
+    const bool show_function_arguments = true;
+    const bool show_function_name = true;
 
-        dumped_declaration_info = sc.DumpStopContext(
-                                      s, nullptr, Address(), show_fullpaths, show_module, show_inlined_frames,
-                                      show_function_arguments, show_function_name);
+    dumped_declaration_info = sc.DumpStopContext(
+        s, nullptr, Address(), show_fullpaths, show_module, show_inlined_frames,
+        show_function_arguments, show_function_name);
 
-        if (sc.function)
-            s->PutChar(':');
-    }
-    if (m_declaration.DumpStopContext(s, false))
-        dumped_declaration_info = true;
-    return dumped_declaration_info;
+    if (sc.function)
+      s->PutChar(':');
+  }
+  if (m_declaration.DumpStopContext(s, false))
+    dumped_declaration_info = true;
+  return dumped_declaration_info;
 }
 
-size_t Variable::MemorySize() const {
-    return sizeof(Variable);
-}
+size_t Variable::MemorySize() const { return sizeof(Variable); }
 
 CompilerDeclContext Variable::GetDeclContext() {
-    Type *type = GetType();
-    if (type)
-        return type->GetSymbolFile()->GetDeclContextContainingUID(GetID());
-    return CompilerDeclContext();
+  Type *type = GetType();
+  if (type)
+    return type->GetSymbolFile()->GetDeclContextContainingUID(GetID());
+  return CompilerDeclContext();
 }
 
 CompilerDecl Variable::GetDecl() {
-    Type *type = GetType();
-    return type ? type->GetSymbolFile()->GetDeclForUID(GetID()) : CompilerDecl();
+  Type *type = GetType();
+  return type ? type->GetSymbolFile()->GetDeclForUID(GetID()) : CompilerDecl();
 }
 
 void Variable::CalculateSymbolContext(SymbolContext *sc) {
-    if (m_owner_scope) {
-        m_owner_scope->CalculateSymbolContext(sc);
-        sc->variable = this;
-    } else
-        sc->Clear(false);
+  if (m_owner_scope) {
+    m_owner_scope->CalculateSymbolContext(sc);
+    sc->variable = this;
+  } else
+    sc->Clear(false);
 }
 
 bool Variable::LocationIsValidForFrame(StackFrame *frame) {
-    // Is the variable is described by a single location?
-    if (!m_location.IsLocationList()) {
-        // Yes it is, the location is valid.
-        return true;
-    }
+  // Is the variable is described by a single location?
+  if (!m_location.IsLocationList()) {
+    // Yes it is, the location is valid.
+    return true;
+  }
 
-    if (frame) {
-        Function *function =
-            frame->GetSymbolContext(eSymbolContextFunction).function;
-        if (function) {
-            TargetSP target_sp(frame->CalculateTarget());
+  if (frame) {
+    Function *function =
+        frame->GetSymbolContext(eSymbolContextFunction).function;
+    if (function) {
+      TargetSP target_sp(frame->CalculateTarget());
 
-            addr_t loclist_base_load_addr =
-                function->GetAddressRange().GetBaseAddress().GetLoadAddress(
-                    target_sp.get());
-            if (loclist_base_load_addr == LLDB_INVALID_ADDRESS)
-                return false;
-            // It is a location list. We just need to tell if the location list
-            // contains the current address when converted to a load address
-            return m_location.LocationListContainsAddress(
-                       loclist_base_load_addr,
-                       frame->GetFrameCodeAddress().GetLoadAddress(target_sp.get()));
-        }
+      addr_t loclist_base_load_addr =
+          function->GetAddressRange().GetBaseAddress().GetLoadAddress(
+              target_sp.get());
+      if (loclist_base_load_addr == LLDB_INVALID_ADDRESS)
+        return false;
+      // It is a location list. We just need to tell if the location list
+      // contains the current address when converted to a load address
+      return m_location.LocationListContainsAddress(
+          loclist_base_load_addr,
+          frame->GetFrameCodeAddress().GetLoadAddress(target_sp.get()));
     }
-    return false;
+  }
+  return false;
 }
 
 bool Variable::LocationIsValidForAddress(const Address &address) {
-    // Be sure to resolve the address to section offset prior to calling this
-    // function.
-    if (address.IsSectionOffset()) {
-        SymbolContext sc;
-        CalculateSymbolContext(&sc);
-        if (sc.module_sp == address.GetModule()) {
-            // Is the variable is described by a single location?
-            if (!m_location.IsLocationList()) {
-                // Yes it is, the location is valid.
-                return true;
-            }
+  // Be sure to resolve the address to section offset prior to calling this
+  // function.
+  if (address.IsSectionOffset()) {
+    SymbolContext sc;
+    CalculateSymbolContext(&sc);
+    if (sc.module_sp == address.GetModule()) {
+      // Is the variable is described by a single location?
+      if (!m_location.IsLocationList()) {
+        // Yes it is, the location is valid.
+        return true;
+      }
 
-            if (sc.function) {
-                addr_t loclist_base_file_addr =
-                    sc.function->GetAddressRange().GetBaseAddress().GetFileAddress();
-                if (loclist_base_file_addr == LLDB_INVALID_ADDRESS)
-                    return false;
-                // It is a location list. We just need to tell if the location list
-                // contains the current address when converted to a load address
-                return m_location.LocationListContainsAddress(loclist_base_file_addr,
-                        address.GetFileAddress());
-            }
-        }
+      if (sc.function) {
+        addr_t loclist_base_file_addr =
+            sc.function->GetAddressRange().GetBaseAddress().GetFileAddress();
+        if (loclist_base_file_addr == LLDB_INVALID_ADDRESS)
+          return false;
+        // It is a location list. We just need to tell if the location list
+        // contains the current address when converted to a load address
+        return m_location.LocationListContainsAddress(loclist_base_file_addr,
+                                                      address.GetFileAddress());
+      }
     }
-    return false;
+  }
+  return false;
 }
 
 bool Variable::IsInScope(StackFrame *frame) {
-    switch (m_scope) {
-    case eValueTypeRegister:
-    case eValueTypeRegisterSet:
-        return frame != nullptr;
+  switch (m_scope) {
+  case eValueTypeRegister:
+  case eValueTypeRegisterSet:
+    return frame != nullptr;
 
-    case eValueTypeConstResult:
-    case eValueTypeVariableGlobal:
-    case eValueTypeVariableStatic:
-    case eValueTypeVariableThreadLocal:
-        return true;
+  case eValueTypeConstResult:
+  case eValueTypeVariableGlobal:
+  case eValueTypeVariableStatic:
+  case eValueTypeVariableThreadLocal:
+    return true;
 
-    case eValueTypeVariableArgument:
-    case eValueTypeVariableLocal:
-        if (frame) {
-            // We don't have a location list, we just need to see if the block that
-            // this variable was defined in is currently
-            Block *deepest_frame_block =
-                frame->GetSymbolContext(eSymbolContextBlock).block;
-            if (deepest_frame_block) {
-                SymbolContext variable_sc;
-                CalculateSymbolContext(&variable_sc);
+  case eValueTypeVariableArgument:
+  case eValueTypeVariableLocal:
+    if (frame) {
+      // We don't have a location list, we just need to see if the block that
+      // this variable was defined in is currently
+      Block *deepest_frame_block =
+          frame->GetSymbolContext(eSymbolContextBlock).block;
+      if (deepest_frame_block) {
+        SymbolContext variable_sc;
+        CalculateSymbolContext(&variable_sc);
 
-                // Check for static or global variable defined at the compile unit
-                // level that wasn't defined in a block
-                if (variable_sc.block == nullptr)
-                    return true;
+        // Check for static or global variable defined at the compile unit
+        // level that wasn't defined in a block
+        if (variable_sc.block == nullptr)
+          return true;
 
-                // Check if the variable is valid in the current block
-                if (variable_sc.block != deepest_frame_block &&
-                        !variable_sc.block->Contains(deepest_frame_block))
-                    return false;
+        // Check if the variable is valid in the current block
+        if (variable_sc.block != deepest_frame_block &&
+            !variable_sc.block->Contains(deepest_frame_block))
+          return false;
 
-                // If no scope range is specified then it means that the scope is the
-                // same as the scope of the enclosing lexical block.
-                if (m_scope_range.IsEmpty())
-                    return true;
+        // If no scope range is specified then it means that the scope is the
+        // same as the scope of the enclosing lexical block.
+        if (m_scope_range.IsEmpty())
+          return true;
 
-                addr_t file_address = frame->GetFrameCodeAddress().GetFileAddress();
-                return m_scope_range.FindEntryThatContains(file_address) != nullptr;
-            }
-        }
-        break;
-
-    default:
-        break;
+        addr_t file_address = frame->GetFrameCodeAddress().GetFileAddress();
+        return m_scope_range.FindEntryThatContains(file_address) != nullptr;
+      }
     }
-    return false;
+    break;
+
+  default:
+    break;
+  }
+  return false;
 }
 
 Status Variable::GetValuesForVariableExpressionPath(
     llvm::StringRef variable_expr_path, ExecutionContextScope *scope,
     GetVariableCallback callback, void *baton, VariableList &variable_list,
     ValueObjectList &valobj_list) {
-    Status error;
-    if (!callback || variable_expr_path.empty()) {
-        error.SetErrorString("unknown error");
-        return error;
-    }
-
-    switch (variable_expr_path.front()) {
-    case '*':
-        error = Variable::GetValuesForVariableExpressionPath(
-                    variable_expr_path.drop_front(), scope, callback, baton, variable_list,
-                    valobj_list);
-        if (error.Fail()) {
-            error.SetErrorString("unknown error");
-            return error;
-        }
-        for (uint32_t i = 0; i < valobj_list.GetSize();) {
-            Status tmp_error;
-            ValueObjectSP valobj_sp(
-                valobj_list.GetValueObjectAtIndex(i)->Dereference(tmp_error));
-            if (tmp_error.Fail()) {
-                variable_list.RemoveVariableAtIndex(i);
-                valobj_list.RemoveValueObjectAtIndex(i);
-            } else {
-                valobj_list.SetValueObjectAtIndex(i, valobj_sp);
-                ++i;
-            }
-        }
-        return error;
-    case '&': {
-        error = Variable::GetValuesForVariableExpressionPath(
-                    variable_expr_path.drop_front(), scope, callback, baton, variable_list,
-                    valobj_list);
-        if (error.Success()) {
-            for (uint32_t i = 0; i < valobj_list.GetSize();) {
-                Status tmp_error;
-                ValueObjectSP valobj_sp(
-                    valobj_list.GetValueObjectAtIndex(i)->AddressOf(tmp_error));
-                if (tmp_error.Fail()) {
-                    variable_list.RemoveVariableAtIndex(i);
-                    valobj_list.RemoveValueObjectAtIndex(i);
-                } else {
-                    valobj_list.SetValueObjectAtIndex(i, valobj_sp);
-                    ++i;
-                }
-            }
-        } else {
-            error.SetErrorString("unknown error");
-        }
-        return error;
-    }
-    break;
-
-    default: {
-        static RegularExpression g_regex(
-            llvm::StringRef("^([A-Za-z_:][A-Za-z_0-9:]*)(.*)"));
-        llvm::SmallVector<llvm::StringRef, 2> matches;
-        variable_list.Clear();
-        if (!g_regex.Execute(variable_expr_path, &matches)) {
-            error.SetErrorStringWithFormat(
-                "unable to extract a variable name from '%s'",
-                variable_expr_path.str().c_str());
-            return error;
-        }
-        std::string variable_name = matches[1].str();
-        if (!callback(baton, variable_name.c_str(), variable_list)) {
-            error.SetErrorString("unknown error");
-            return error;
-        }
-        uint32_t i = 0;
-        while (i < variable_list.GetSize()) {
-            VariableSP var_sp(variable_list.GetVariableAtIndex(i));
-            ValueObjectSP valobj_sp;
-            if (!var_sp) {
-                variable_list.RemoveVariableAtIndex(i);
-                continue;
-            }
-            ValueObjectSP variable_valobj_sp(
-                ValueObjectVariable::Create(scope, var_sp));
-            if (!variable_valobj_sp) {
-                variable_list.RemoveVariableAtIndex(i);
-                continue;
-            }
-
-            llvm::StringRef variable_sub_expr_path =
-                variable_expr_path.drop_front(variable_name.size());
-            if (!variable_sub_expr_path.empty()) {
-                valobj_sp = variable_valobj_sp->GetValueForExpressionPath(
-                                variable_sub_expr_path);
-                if (!valobj_sp) {
-                    error.SetErrorStringWithFormat(
-                        "invalid expression path '%s' for variable '%s'",
-                        variable_sub_expr_path.str().c_str(),
-                        var_sp->GetName().GetCString());
-                    variable_list.RemoveVariableAtIndex(i);
-                    continue;
-                }
-            } else {
-                // Just the name of a variable with no extras
-                valobj_sp = variable_valobj_sp;
-            }
-
-            valobj_list.Append(valobj_sp);
-            ++i;
-        }
-
-        if (variable_list.GetSize() > 0) {
-            error.Clear();
-            return error;
-        }
-    }
-    break;
-    }
+  Status error;
+  if (!callback || variable_expr_path.empty()) {
     error.SetErrorString("unknown error");
     return error;
+  }
+
+  switch (variable_expr_path.front()) {
+  case '*':
+    error = Variable::GetValuesForVariableExpressionPath(
+        variable_expr_path.drop_front(), scope, callback, baton, variable_list,
+        valobj_list);
+    if (error.Fail()) {
+      error.SetErrorString("unknown error");
+      return error;
+    }
+    for (uint32_t i = 0; i < valobj_list.GetSize();) {
+      Status tmp_error;
+      ValueObjectSP valobj_sp(
+          valobj_list.GetValueObjectAtIndex(i)->Dereference(tmp_error));
+      if (tmp_error.Fail()) {
+        variable_list.RemoveVariableAtIndex(i);
+        valobj_list.RemoveValueObjectAtIndex(i);
+      } else {
+        valobj_list.SetValueObjectAtIndex(i, valobj_sp);
+        ++i;
+      }
+    }
+    return error;
+  case '&': {
+    error = Variable::GetValuesForVariableExpressionPath(
+        variable_expr_path.drop_front(), scope, callback, baton, variable_list,
+        valobj_list);
+    if (error.Success()) {
+      for (uint32_t i = 0; i < valobj_list.GetSize();) {
+        Status tmp_error;
+        ValueObjectSP valobj_sp(
+            valobj_list.GetValueObjectAtIndex(i)->AddressOf(tmp_error));
+        if (tmp_error.Fail()) {
+          variable_list.RemoveVariableAtIndex(i);
+          valobj_list.RemoveValueObjectAtIndex(i);
+        } else {
+          valobj_list.SetValueObjectAtIndex(i, valobj_sp);
+          ++i;
+        }
+      }
+    } else {
+      error.SetErrorString("unknown error");
+    }
+    return error;
+  } break;
+
+  default: {
+    static RegularExpression g_regex(
+        llvm::StringRef("^([A-Za-z_:][A-Za-z_0-9:]*)(.*)"));
+    llvm::SmallVector<llvm::StringRef, 2> matches;
+    variable_list.Clear();
+    if (!g_regex.Execute(variable_expr_path, &matches)) {
+      error.SetErrorStringWithFormat(
+          "unable to extract a variable name from '%s'",
+          variable_expr_path.str().c_str());
+      return error;
+    }
+    std::string variable_name = matches[1].str();
+    if (!callback(baton, variable_name.c_str(), variable_list)) {
+      error.SetErrorString("unknown error");
+      return error;
+    }
+    uint32_t i = 0;
+    while (i < variable_list.GetSize()) {
+      VariableSP var_sp(variable_list.GetVariableAtIndex(i));
+      ValueObjectSP valobj_sp;
+      if (!var_sp) {
+        variable_list.RemoveVariableAtIndex(i);
+        continue;
+      }
+      ValueObjectSP variable_valobj_sp(
+          ValueObjectVariable::Create(scope, var_sp));
+      if (!variable_valobj_sp) {
+        variable_list.RemoveVariableAtIndex(i);
+        continue;
+      }
+
+      llvm::StringRef variable_sub_expr_path =
+          variable_expr_path.drop_front(variable_name.size());
+      if (!variable_sub_expr_path.empty()) {
+        valobj_sp = variable_valobj_sp->GetValueForExpressionPath(
+            variable_sub_expr_path);
+        if (!valobj_sp) {
+          error.SetErrorStringWithFormat(
+              "invalid expression path '%s' for variable '%s'",
+              variable_sub_expr_path.str().c_str(),
+              var_sp->GetName().GetCString());
+          variable_list.RemoveVariableAtIndex(i);
+          continue;
+        }
+      } else {
+        // Just the name of a variable with no extras
+        valobj_sp = variable_valobj_sp;
+      }
+
+      valobj_list.Append(valobj_sp);
+      ++i;
+    }
+
+    if (variable_list.GetSize() > 0) {
+      error.Clear();
+      return error;
+    }
+  } break;
+  }
+  error.SetErrorString("unknown error");
+  return error;
 }
 
 bool Variable::DumpLocationForAddress(Stream *s, const Address &address) {
-    // Be sure to resolve the address to section offset prior to calling this
-    // function.
-    if (address.IsSectionOffset()) {
-        SymbolContext sc;
-        CalculateSymbolContext(&sc);
-        if (sc.module_sp == address.GetModule()) {
-            ABISP abi;
-            if (m_owner_scope) {
-                ModuleSP module_sp(m_owner_scope->CalculateSymbolContextModule());
-                if (module_sp)
-                    abi = ABI::FindPlugin(ProcessSP(), module_sp->GetArchitecture());
-            }
+  // Be sure to resolve the address to section offset prior to calling this
+  // function.
+  if (address.IsSectionOffset()) {
+    SymbolContext sc;
+    CalculateSymbolContext(&sc);
+    if (sc.module_sp == address.GetModule()) {
+      ABISP abi;
+      if (m_owner_scope) {
+        ModuleSP module_sp(m_owner_scope->CalculateSymbolContextModule());
+        if (module_sp)
+          abi = ABI::FindPlugin(ProcessSP(), module_sp->GetArchitecture());
+      }
 
-            const addr_t file_addr = address.GetFileAddress();
-            if (sc.function) {
-                if (sc.function->GetAddressRange().ContainsFileAddress(address)) {
-                    addr_t loclist_base_file_addr =
-                        sc.function->GetAddressRange().GetBaseAddress().GetFileAddress();
-                    if (loclist_base_file_addr == LLDB_INVALID_ADDRESS)
-                        return false;
-                    return m_location.DumpLocationForAddress(s, eDescriptionLevelBrief,
-                            loclist_base_file_addr,
-                            file_addr, abi.get());
-                }
-            }
-            return m_location.DumpLocationForAddress(s, eDescriptionLevelBrief,
-                    LLDB_INVALID_ADDRESS, file_addr,
-                    abi.get());
+      const addr_t file_addr = address.GetFileAddress();
+      if (sc.function) {
+        if (sc.function->GetAddressRange().ContainsFileAddress(address)) {
+          addr_t loclist_base_file_addr =
+              sc.function->GetAddressRange().GetBaseAddress().GetFileAddress();
+          if (loclist_base_file_addr == LLDB_INVALID_ADDRESS)
+            return false;
+          return m_location.DumpLocationForAddress(s, eDescriptionLevelBrief,
+                                                   loclist_base_file_addr,
+                                                   file_addr, abi.get());
         }
+      }
+      return m_location.DumpLocationForAddress(s, eDescriptionLevelBrief,
+                                               LLDB_INVALID_ADDRESS, file_addr,
+                                               abi.get());
     }
-    return false;
+  }
+  return false;
 }
 
 static void PrivateAutoComplete(
     StackFrame *frame, llvm::StringRef partial_path,
     const llvm::Twine
-    &prefix_path, // Anything that has been resolved already will be in here
+        &prefix_path, // Anything that has been resolved already will be in here
     const CompilerType &compiler_type, CompletionRequest &request);
 
 static void PrivateAutoCompleteMembers(
     StackFrame *frame, const std::string &partial_member_name,
     llvm::StringRef partial_path,
     const llvm::Twine
-    &prefix_path, // Anything that has been resolved already will be in here
+        &prefix_path, // Anything that has been resolved already will be in here
     const CompilerType &compiler_type, CompletionRequest &request) {
 
-    // We are in a type parsing child members
-    const uint32_t num_bases = compiler_type.GetNumDirectBaseClasses();
+  // We are in a type parsing child members
+  const uint32_t num_bases = compiler_type.GetNumDirectBaseClasses();
 
-    if (num_bases > 0) {
-        for (uint32_t i = 0; i < num_bases; ++i) {
-            CompilerType base_class_type =
-                compiler_type.GetDirectBaseClassAtIndex(i, nullptr);
+  if (num_bases > 0) {
+    for (uint32_t i = 0; i < num_bases; ++i) {
+      CompilerType base_class_type =
+          compiler_type.GetDirectBaseClassAtIndex(i, nullptr);
 
-            PrivateAutoCompleteMembers(frame, partial_member_name, partial_path,
-                                       prefix_path,
-                                       base_class_type.GetCanonicalType(), request);
-        }
+      PrivateAutoCompleteMembers(frame, partial_member_name, partial_path,
+                                 prefix_path,
+                                 base_class_type.GetCanonicalType(), request);
     }
+  }
 
-    const uint32_t num_vbases = compiler_type.GetNumVirtualBaseClasses();
+  const uint32_t num_vbases = compiler_type.GetNumVirtualBaseClasses();
 
-    if (num_vbases > 0) {
-        for (uint32_t i = 0; i < num_vbases; ++i) {
-            CompilerType vbase_class_type =
-                compiler_type.GetVirtualBaseClassAtIndex(i, nullptr);
+  if (num_vbases > 0) {
+    for (uint32_t i = 0; i < num_vbases; ++i) {
+      CompilerType vbase_class_type =
+          compiler_type.GetVirtualBaseClassAtIndex(i, nullptr);
 
-            PrivateAutoCompleteMembers(frame, partial_member_name, partial_path,
-                                       prefix_path,
-                                       vbase_class_type.GetCanonicalType(), request);
-        }
+      PrivateAutoCompleteMembers(frame, partial_member_name, partial_path,
+                                 prefix_path,
+                                 vbase_class_type.GetCanonicalType(), request);
     }
+  }
 
-    // We are in a type parsing child members
-    const uint32_t num_fields = compiler_type.GetNumFields();
+  // We are in a type parsing child members
+  const uint32_t num_fields = compiler_type.GetNumFields();
 
-    if (num_fields > 0) {
-        for (uint32_t i = 0; i < num_fields; ++i) {
-            std::string member_name;
+  if (num_fields > 0) {
+    for (uint32_t i = 0; i < num_fields; ++i) {
+      std::string member_name;
 
-            CompilerType member_compiler_type = compiler_type.GetFieldAtIndex(
-                                                    i, member_name, nullptr, nullptr, nullptr);
+      CompilerType member_compiler_type = compiler_type.GetFieldAtIndex(
+          i, member_name, nullptr, nullptr, nullptr);
 
-            if (partial_member_name.empty() ||
-                    llvm::StringRef(member_name).startswith(partial_member_name)) {
-                if (member_name == partial_member_name) {
-                    PrivateAutoComplete(
-                        frame, partial_path,
-                        prefix_path + member_name, // Anything that has been resolved
-                        // already will be in here
-                        member_compiler_type.GetCanonicalType(), request);
-                } else {
-                    request.AddCompletion((prefix_path + member_name).str());
-                }
-            }
+      if (partial_member_name.empty() ||
+          llvm::StringRef(member_name).startswith(partial_member_name)) {
+        if (member_name == partial_member_name) {
+          PrivateAutoComplete(
+              frame, partial_path,
+              prefix_path + member_name, // Anything that has been resolved
+              // already will be in here
+              member_compiler_type.GetCanonicalType(), request);
+        } else {
+          request.AddCompletion((prefix_path + member_name).str());
         }
+      }
     }
+  }
 }
 
 static void PrivateAutoComplete(
     StackFrame *frame, llvm::StringRef partial_path,
     const llvm::Twine
-    &prefix_path, // Anything that has been resolved already will be in here
+        &prefix_path, // Anything that has been resolved already will be in here
     const CompilerType &compiler_type, CompletionRequest &request) {
-    //    printf ("\nPrivateAutoComplete()\n\tprefix_path = '%s'\n\tpartial_path =
-    //    '%s'\n", prefix_path.c_str(), partial_path.c_str());
-    std::string remaining_partial_path;
+  //    printf ("\nPrivateAutoComplete()\n\tprefix_path = '%s'\n\tpartial_path =
+  //    '%s'\n", prefix_path.c_str(), partial_path.c_str());
+  std::string remaining_partial_path;
 
-    const lldb::TypeClass type_class = compiler_type.GetTypeClass();
-    if (partial_path.empty()) {
-        if (compiler_type.IsValid()) {
-            switch (type_class) {
-            default:
-            case eTypeClassArray:
-            case eTypeClassBlockPointer:
-            case eTypeClassBuiltin:
-            case eTypeClassComplexFloat:
-            case eTypeClassComplexInteger:
-            case eTypeClassEnumeration:
-            case eTypeClassFunction:
-            case eTypeClassMemberPointer:
-            case eTypeClassReference:
-            case eTypeClassTypedef:
-            case eTypeClassVector: {
-                request.AddCompletion(prefix_path.str());
-            }
-            break;
+  const lldb::TypeClass type_class = compiler_type.GetTypeClass();
+  if (partial_path.empty()) {
+    if (compiler_type.IsValid()) {
+      switch (type_class) {
+      default:
+      case eTypeClassArray:
+      case eTypeClassBlockPointer:
+      case eTypeClassBuiltin:
+      case eTypeClassComplexFloat:
+      case eTypeClassComplexInteger:
+      case eTypeClassEnumeration:
+      case eTypeClassFunction:
+      case eTypeClassMemberPointer:
+      case eTypeClassReference:
+      case eTypeClassTypedef:
+      case eTypeClassVector: {
+        request.AddCompletion(prefix_path.str());
+      } break;
 
-            case eTypeClassClass:
-            case eTypeClassStruct:
-            case eTypeClassUnion:
-                if (prefix_path.str().back() != '.')
-                    request.AddCompletion((prefix_path + ".").str());
-                break;
+      case eTypeClassClass:
+      case eTypeClassStruct:
+      case eTypeClassUnion:
+        if (prefix_path.str().back() != '.')
+          request.AddCompletion((prefix_path + ".").str());
+        break;
 
-            case eTypeClassObjCObject:
-            case eTypeClassObjCInterface:
-                break;
-            case eTypeClassObjCObjectPointer:
-            case eTypeClassPointer: {
-                bool omit_empty_base_classes = true;
-                if (compiler_type.GetNumChildren(omit_empty_base_classes, nullptr) > 0)
-                    request.AddCompletion((prefix_path + "->").str());
-                else {
-                    request.AddCompletion(prefix_path.str());
-                }
-            }
-            break;
-            }
-        } else {
-            if (frame) {
-                const bool get_file_globals = true;
-
-                VariableList *variable_list = frame->GetVariableList(get_file_globals);
-
-                if (variable_list) {
-                    for (const VariableSP &var_sp : *variable_list)
-                        request.AddCompletion(var_sp->GetName().AsCString());
-                }
-            }
+      case eTypeClassObjCObject:
+      case eTypeClassObjCInterface:
+        break;
+      case eTypeClassObjCObjectPointer:
+      case eTypeClassPointer: {
+        bool omit_empty_base_classes = true;
+        if (compiler_type.GetNumChildren(omit_empty_base_classes, nullptr) > 0)
+          request.AddCompletion((prefix_path + "->").str());
+        else {
+          request.AddCompletion(prefix_path.str());
         }
+      } break;
+      }
     } else {
-        const char ch = partial_path[0];
-        switch (ch) {
-        case '*':
-            if (prefix_path.str().empty()) {
-                PrivateAutoComplete(frame, partial_path.substr(1), "*", compiler_type,
-                                    request);
-            }
-            break;
+      if (frame) {
+        const bool get_file_globals = true;
 
-        case '&':
-            if (prefix_path.isTriviallyEmpty()) {
-                PrivateAutoComplete(frame, partial_path.substr(1), std::string("&"),
-                                    compiler_type, request);
-            }
-            break;
+        VariableList *variable_list = frame->GetVariableList(get_file_globals);
 
-        case '-':
-            if (partial_path.size() > 1 && partial_path[1] == '>' &&
-                    !prefix_path.str().empty()) {
-                switch (type_class) {
-                case lldb::eTypeClassPointer: {
-                    CompilerType pointee_type(compiler_type.GetPointeeType());
-                    if (partial_path.size() > 2 && partial_path[2]) {
-                        // If there is more after the "->", then search deeper
-                        PrivateAutoComplete(frame, partial_path.substr(2),
-                                            prefix_path + "->",
-                                            pointee_type.GetCanonicalType(), request);
-                    } else {
-                        // Nothing after the "->", so list all members
-                        PrivateAutoCompleteMembers(
-                            frame, std::string(), std::string(), prefix_path + "->",
-                            pointee_type.GetCanonicalType(), request);
-                    }
-                }
-                break;
-                default:
-                    break;
-                }
-            }
-            break;
-
-        case '.':
-            if (compiler_type.IsValid()) {
-                switch (type_class) {
-                case lldb::eTypeClassUnion:
-                case lldb::eTypeClassStruct:
-                case lldb::eTypeClassClass:
-                    if (partial_path.size() > 1 && partial_path[1]) {
-                        // If there is more after the ".", then search deeper
-                        PrivateAutoComplete(frame, partial_path.substr(1),
-                                            prefix_path + ".", compiler_type, request);
-
-                    } else {
-                        // Nothing after the ".", so list all members
-                        PrivateAutoCompleteMembers(frame, std::string(), partial_path,
-                                                   prefix_path + ".", compiler_type,
-                                                   request);
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-            break;
-        default:
-            if (isalpha(ch) || ch == '_' || ch == '$') {
-                const size_t partial_path_len = partial_path.size();
-                size_t pos = 1;
-                while (pos < partial_path_len) {
-                    const char curr_ch = partial_path[pos];
-                    if (isalnum(curr_ch) || curr_ch == '_' || curr_ch == '$') {
-                        ++pos;
-                        continue;
-                    }
-                    break;
-                }
-
-                std::string token(std::string(partial_path), 0, pos);
-                remaining_partial_path = std::string(partial_path.substr(pos));
-
-                if (compiler_type.IsValid()) {
-                    PrivateAutoCompleteMembers(frame, token, remaining_partial_path,
-                                               prefix_path, compiler_type, request);
-                } else if (frame) {
-                    // We haven't found our variable yet
-                    const bool get_file_globals = true;
-
-                    VariableList *variable_list =
-                        frame->GetVariableList(get_file_globals);
-
-                    if (!variable_list)
-                        break;
-
-                    for (VariableSP var_sp : *variable_list) {
-
-                        if (!var_sp)
-                            continue;
-
-                        llvm::StringRef variable_name = var_sp->GetName().GetStringRef();
-                        if (variable_name.startswith(token)) {
-                            if (variable_name == token) {
-                                Type *variable_type = var_sp->GetType();
-                                if (variable_type) {
-                                    CompilerType variable_compiler_type(
-                                        variable_type->GetForwardCompilerType());
-                                    PrivateAutoComplete(
-                                        frame, remaining_partial_path,
-                                        prefix_path + token, // Anything that has been resolved
-                                        // already will be in here
-                                        variable_compiler_type.GetCanonicalType(), request);
-                                } else {
-                                    request.AddCompletion((prefix_path + variable_name).str());
-                                }
-                            } else if (remaining_partial_path.empty()) {
-                                request.AddCompletion((prefix_path + variable_name).str());
-                            }
-                        }
-                    }
-                }
-            }
-            break;
+        if (variable_list) {
+          for (const VariableSP &var_sp : *variable_list)
+            request.AddCompletion(var_sp->GetName().AsCString());
         }
+      }
     }
+  } else {
+    const char ch = partial_path[0];
+    switch (ch) {
+    case '*':
+      if (prefix_path.str().empty()) {
+        PrivateAutoComplete(frame, partial_path.substr(1), "*", compiler_type,
+                            request);
+      }
+      break;
+
+    case '&':
+      if (prefix_path.isTriviallyEmpty()) {
+        PrivateAutoComplete(frame, partial_path.substr(1), std::string("&"),
+                            compiler_type, request);
+      }
+      break;
+
+    case '-':
+      if (partial_path.size() > 1 && partial_path[1] == '>' &&
+          !prefix_path.str().empty()) {
+        switch (type_class) {
+        case lldb::eTypeClassPointer: {
+          CompilerType pointee_type(compiler_type.GetPointeeType());
+          if (partial_path.size() > 2 && partial_path[2]) {
+            // If there is more after the "->", then search deeper
+            PrivateAutoComplete(frame, partial_path.substr(2),
+                                prefix_path + "->",
+                                pointee_type.GetCanonicalType(), request);
+          } else {
+            // Nothing after the "->", so list all members
+            PrivateAutoCompleteMembers(
+                frame, std::string(), std::string(), prefix_path + "->",
+                pointee_type.GetCanonicalType(), request);
+          }
+        } break;
+        default:
+          break;
+        }
+      }
+      break;
+
+    case '.':
+      if (compiler_type.IsValid()) {
+        switch (type_class) {
+        case lldb::eTypeClassUnion:
+        case lldb::eTypeClassStruct:
+        case lldb::eTypeClassClass:
+          if (partial_path.size() > 1 && partial_path[1]) {
+            // If there is more after the ".", then search deeper
+            PrivateAutoComplete(frame, partial_path.substr(1),
+                                prefix_path + ".", compiler_type, request);
+
+          } else {
+            // Nothing after the ".", so list all members
+            PrivateAutoCompleteMembers(frame, std::string(), partial_path,
+                                       prefix_path + ".", compiler_type,
+                                       request);
+          }
+          break;
+        default:
+          break;
+        }
+      }
+      break;
+    default:
+      if (isalpha(ch) || ch == '_' || ch == '$') {
+        const size_t partial_path_len = partial_path.size();
+        size_t pos = 1;
+        while (pos < partial_path_len) {
+          const char curr_ch = partial_path[pos];
+          if (isalnum(curr_ch) || curr_ch == '_' || curr_ch == '$') {
+            ++pos;
+            continue;
+          }
+          break;
+        }
+
+        std::string token(std::string(partial_path), 0, pos);
+        remaining_partial_path = std::string(partial_path.substr(pos));
+
+        if (compiler_type.IsValid()) {
+          PrivateAutoCompleteMembers(frame, token, remaining_partial_path,
+                                     prefix_path, compiler_type, request);
+        } else if (frame) {
+          // We haven't found our variable yet
+          const bool get_file_globals = true;
+
+          VariableList *variable_list =
+              frame->GetVariableList(get_file_globals);
+
+          if (!variable_list)
+            break;
+
+          for (VariableSP var_sp : *variable_list) {
+
+            if (!var_sp)
+              continue;
+
+            llvm::StringRef variable_name = var_sp->GetName().GetStringRef();
+            if (variable_name.startswith(token)) {
+              if (variable_name == token) {
+                Type *variable_type = var_sp->GetType();
+                if (variable_type) {
+                  CompilerType variable_compiler_type(
+                      variable_type->GetForwardCompilerType());
+                  PrivateAutoComplete(
+                      frame, remaining_partial_path,
+                      prefix_path + token, // Anything that has been resolved
+                      // already will be in here
+                      variable_compiler_type.GetCanonicalType(), request);
+                } else {
+                  request.AddCompletion((prefix_path + variable_name).str());
+                }
+              } else if (remaining_partial_path.empty()) {
+                request.AddCompletion((prefix_path + variable_name).str());
+              }
+            }
+          }
+        }
+      }
+      break;
+    }
+  }
 }
 
 void Variable::AutoComplete(const ExecutionContext &exe_ctx,
                             CompletionRequest &request) {
-    CompilerType compiler_type;
+  CompilerType compiler_type;
 
-    PrivateAutoComplete(exe_ctx.GetFramePtr(), request.GetCursorArgumentPrefix(),
-                        "", compiler_type, request);
+  PrivateAutoComplete(exe_ctx.GetFramePtr(), request.GetCursorArgumentPrefix(),
+                      "", compiler_type, request);
 }

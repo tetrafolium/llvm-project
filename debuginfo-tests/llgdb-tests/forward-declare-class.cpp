@@ -13,15 +13,14 @@
 class A;
 class B {
 public:
-    void foo(const A *p);
+  void foo(const A *p);
 };
 
 B iEntry;
 
 class A {
 public:
-    int MyData;
+  int MyData;
 };
 
 A irp;
-

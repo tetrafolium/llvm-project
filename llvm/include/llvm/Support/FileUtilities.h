@@ -29,75 +29,71 @@ namespace llvm {
 /// option, it will set the string to an error message if an error occurs, or
 /// if the files are different.
 ///
-int DiffFilesWithTolerance(StringRef FileA,
-                           StringRef FileB,
-                           double AbsTol, double RelTol,
-                           std::string *Error = nullptr);
-
+int DiffFilesWithTolerance(StringRef FileA, StringRef FileB, double AbsTol,
+                           double RelTol, std::string *Error = nullptr);
 
 /// FileRemover - This class is a simple object meant to be stack allocated.
 /// If an exception is thrown from a region, the object removes the filename
 /// specified (if deleteIt is true).
 ///
 class FileRemover {
-    SmallString<128> Filename;
-    bool DeleteIt;
+  SmallString<128> Filename;
+  bool DeleteIt;
+
 public:
-    FileRemover() : DeleteIt(false) {}
+  FileRemover() : DeleteIt(false) {}
 
-    explicit FileRemover(const Twine& filename, bool deleteIt = true)
-        : DeleteIt(deleteIt) {
-        filename.toVector(Filename);
+  explicit FileRemover(const Twine &filename, bool deleteIt = true)
+      : DeleteIt(deleteIt) {
+    filename.toVector(Filename);
+  }
+
+  ~FileRemover() {
+    if (DeleteIt) {
+      // Ignore problems deleting the file.
+      sys::fs::remove(Filename);
+    }
+  }
+
+  /// setFile - Give ownership of the file to the FileRemover so it will
+  /// be removed when the object is destroyed.  If the FileRemover already
+  /// had ownership of a file, remove it first.
+  void setFile(const Twine &filename, bool deleteIt = true) {
+    if (DeleteIt) {
+      // Ignore problems deleting the file.
+      sys::fs::remove(Filename);
     }
 
-    ~FileRemover() {
-        if (DeleteIt) {
-            // Ignore problems deleting the file.
-            sys::fs::remove(Filename);
-        }
-    }
+    Filename.clear();
+    filename.toVector(Filename);
+    DeleteIt = deleteIt;
+  }
 
-    /// setFile - Give ownership of the file to the FileRemover so it will
-    /// be removed when the object is destroyed.  If the FileRemover already
-    /// had ownership of a file, remove it first.
-    void setFile(const Twine& filename, bool deleteIt = true) {
-        if (DeleteIt) {
-            // Ignore problems deleting the file.
-            sys::fs::remove(Filename);
-        }
-
-        Filename.clear();
-        filename.toVector(Filename);
-        DeleteIt = deleteIt;
-    }
-
-    /// releaseFile - Take ownership of the file away from the FileRemover so it
-    /// will not be removed when the object is destroyed.
-    void releaseFile() {
-        DeleteIt = false;
-    }
+  /// releaseFile - Take ownership of the file away from the FileRemover so it
+  /// will not be removed when the object is destroyed.
+  void releaseFile() { DeleteIt = false; }
 };
 
 enum class atomic_write_error {
-    failed_to_create_uniq_file = 0,
-    output_stream_error,
-    failed_to_rename_temp_file
+  failed_to_create_uniq_file = 0,
+  output_stream_error,
+  failed_to_rename_temp_file
 };
 
 class AtomicFileWriteError : public llvm::ErrorInfo<AtomicFileWriteError> {
 public:
-    AtomicFileWriteError(atomic_write_error Error) : Error(Error) {}
+  AtomicFileWriteError(atomic_write_error Error) : Error(Error) {}
 
-    void log(raw_ostream &OS) const override;
+  void log(raw_ostream &OS) const override;
 
-    const atomic_write_error Error;
-    static char ID;
+  const atomic_write_error Error;
+  static char ID;
 
 private:
-    // Users are not expected to use error_code.
-    std::error_code convertToErrorCode() const override {
-        return llvm::inconvertibleErrorCode();
-    }
+  // Users are not expected to use error_code.
+  std::error_code convertToErrorCode() const override {
+    return llvm::inconvertibleErrorCode();
+  }
 };
 
 // atomic_write_error + whatever the Writer can return
@@ -112,6 +108,6 @@ llvm::Error writeFileAtomically(StringRef TempPathModel, StringRef FinalPath,
 llvm::Error
 writeFileAtomically(StringRef TempPathModel, StringRef FinalPath,
                     std::function<llvm::Error(llvm::raw_ostream &)> Writer);
-} // End llvm namespace
+} // namespace llvm
 
 #endif

@@ -24,7 +24,7 @@ class IntegerType;
 class Type;
 class StructType;
 class VectorType;
-}
+} // namespace llvm
 
 namespace clang {
 class Decl;
@@ -39,89 +39,86 @@ class CGFunctionInfo;
 namespace swiftcall {
 
 class SwiftAggLowering {
-    CodeGenModule &CGM;
+  CodeGenModule &CGM;
 
-    struct StorageEntry {
-        CharUnits Begin;
-        CharUnits End;
-        llvm::Type *Type;
+  struct StorageEntry {
+    CharUnits Begin;
+    CharUnits End;
+    llvm::Type *Type;
 
-        CharUnits getWidth() const {
-            return End - Begin;
-        }
-    };
-    SmallVector<StorageEntry, 4> Entries;
-    bool Finished = false;
+    CharUnits getWidth() const { return End - Begin; }
+  };
+  SmallVector<StorageEntry, 4> Entries;
+  bool Finished = false;
 
 public:
-    SwiftAggLowering(CodeGenModule &CGM) : CGM(CGM) {}
+  SwiftAggLowering(CodeGenModule &CGM) : CGM(CGM) {}
 
-    void addOpaqueData(CharUnits begin, CharUnits end) {
-        addEntry(nullptr, begin, end);
-    }
+  void addOpaqueData(CharUnits begin, CharUnits end) {
+    addEntry(nullptr, begin, end);
+  }
 
-    void addTypedData(QualType type, CharUnits begin);
-    void addTypedData(const RecordDecl *record, CharUnits begin);
-    void addTypedData(const RecordDecl *record, CharUnits begin,
-                      const ASTRecordLayout &layout);
-    void addTypedData(llvm::Type *type, CharUnits begin);
-    void addTypedData(llvm::Type *type, CharUnits begin, CharUnits end);
+  void addTypedData(QualType type, CharUnits begin);
+  void addTypedData(const RecordDecl *record, CharUnits begin);
+  void addTypedData(const RecordDecl *record, CharUnits begin,
+                    const ASTRecordLayout &layout);
+  void addTypedData(llvm::Type *type, CharUnits begin);
+  void addTypedData(llvm::Type *type, CharUnits begin, CharUnits end);
 
-    void finish();
+  void finish();
 
-    /// Does this lowering require passing any data?
-    bool empty() const {
-        assert(Finished && "didn't finish lowering before calling empty()");
-        return Entries.empty();
-    }
+  /// Does this lowering require passing any data?
+  bool empty() const {
+    assert(Finished && "didn't finish lowering before calling empty()");
+    return Entries.empty();
+  }
 
-    /// According to the target Swift ABI, should a value with this lowering
-    /// be passed indirectly?
-    ///
-    /// Note that this decision is based purely on the data layout of the
-    /// value and does not consider whether the type is address-only,
-    /// must be passed indirectly to match a function abstraction pattern, or
-    /// anything else that is expected to be handled by high-level lowering.
-    ///
-    /// \param asReturnValue - if true, answer whether it should be passed
-    ///   indirectly as a return value; if false, answer whether it should be
-    ///   passed indirectly as an argument
-    bool shouldPassIndirectly(bool asReturnValue) const;
+  /// According to the target Swift ABI, should a value with this lowering
+  /// be passed indirectly?
+  ///
+  /// Note that this decision is based purely on the data layout of the
+  /// value and does not consider whether the type is address-only,
+  /// must be passed indirectly to match a function abstraction pattern, or
+  /// anything else that is expected to be handled by high-level lowering.
+  ///
+  /// \param asReturnValue - if true, answer whether it should be passed
+  ///   indirectly as a return value; if false, answer whether it should be
+  ///   passed indirectly as an argument
+  bool shouldPassIndirectly(bool asReturnValue) const;
 
-    using EnumerationCallback =
-        llvm::function_ref<void(CharUnits offset, CharUnits end, llvm::Type *type)>;
+  using EnumerationCallback = llvm::function_ref<void(
+      CharUnits offset, CharUnits end, llvm::Type *type)>;
 
-    /// Enumerate the expanded components of this type.
-    ///
-    /// The component types will always be legal vector, floating-point,
-    /// integer, or pointer types.
-    void enumerateComponents(EnumerationCallback callback) const;
+  /// Enumerate the expanded components of this type.
+  ///
+  /// The component types will always be legal vector, floating-point,
+  /// integer, or pointer types.
+  void enumerateComponents(EnumerationCallback callback) const;
 
-    /// Return the types for a coerce-and-expand operation.
-    ///
-    /// The first type matches the memory layout of the data that's been
-    /// added to this structure, including explicit [N x i8] arrays for any
-    /// internal padding.
-    ///
-    /// The second type removes any internal padding members and, if only
-    /// one element remains, is simply that element type.
-    std::pair<llvm::StructType*, llvm::Type*> getCoerceAndExpandTypes() const;
+  /// Return the types for a coerce-and-expand operation.
+  ///
+  /// The first type matches the memory layout of the data that's been
+  /// added to this structure, including explicit [N x i8] arrays for any
+  /// internal padding.
+  ///
+  /// The second type removes any internal padding members and, if only
+  /// one element remains, is simply that element type.
+  std::pair<llvm::StructType *, llvm::Type *> getCoerceAndExpandTypes() const;
 
 private:
-    void addBitFieldData(const FieldDecl *field, CharUnits begin,
-                         uint64_t bitOffset);
-    void addLegalTypedData(llvm::Type *type, CharUnits begin, CharUnits end);
-    void addEntry(llvm::Type *type, CharUnits begin, CharUnits end);
-    void splitVectorEntry(unsigned index);
-    static bool shouldMergeEntries(const StorageEntry &first,
-                                   const StorageEntry &second,
-                                   CharUnits chunkSize);
+  void addBitFieldData(const FieldDecl *field, CharUnits begin,
+                       uint64_t bitOffset);
+  void addLegalTypedData(llvm::Type *type, CharUnits begin, CharUnits end);
+  void addEntry(llvm::Type *type, CharUnits begin, CharUnits end);
+  void splitVectorEntry(unsigned index);
+  static bool shouldMergeEntries(const StorageEntry &first,
+                                 const StorageEntry &second,
+                                 CharUnits chunkSize);
 };
 
 /// Should an aggregate which expands to the given type sequence
 /// be passed/returned indirectly under swiftcall?
-bool shouldPassIndirectly(CodeGenModule &CGM,
-                          ArrayRef<llvm::Type*> types,
+bool shouldPassIndirectly(CodeGenModule &CGM, ArrayRef<llvm::Type *> types,
                           bool asReturnValue);
 
 /// Return the maximum voluntary integer size for the current target.
@@ -142,7 +139,7 @@ bool isLegalVectorType(CodeGenModule &CGM, CharUnits vectorSize,
                        llvm::Type *eltTy, unsigned numElts);
 
 /// Minimally split a legal vector type.
-std::pair<llvm::Type*, unsigned>
+std::pair<llvm::Type *, unsigned>
 splitLegalVectorType(CodeGenModule &CGM, CharUnits vectorSize,
                      llvm::VectorType *vectorTy);
 
@@ -152,7 +149,7 @@ splitLegalVectorType(CodeGenModule &CGM, CharUnits vectorSize,
 /// types will equal the data size of the vector type.
 void legalizeVectorType(CodeGenModule &CGM, CharUnits vectorSize,
                         llvm::VectorType *vectorTy,
-                        llvm::SmallVectorImpl<llvm::Type*> &types);
+                        llvm::SmallVectorImpl<llvm::Type *> &types);
 
 /// Is the given record type required to be passed and returned indirectly
 /// because of language restrictions?

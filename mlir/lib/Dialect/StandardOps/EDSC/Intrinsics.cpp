@@ -13,13 +13,13 @@ using namespace mlir;
 using namespace mlir::edsc;
 
 BranchOp mlir::edsc::intrinsics::std_br(Block *block, ValueRange operands) {
-    return OperationBuilder<BranchOp>(block, operands);
+  return OperationBuilder<BranchOp>(block, operands);
 }
 
 CondBranchOp mlir::edsc::intrinsics::std_cond_br(Value cond, Block *trueBranch,
-        ValueRange trueOperands,
-        Block *falseBranch,
-        ValueRange falseOperands) {
-    return OperationBuilder<CondBranchOp>(cond, trueBranch, trueOperands,
-                                          falseBranch, falseOperands);
+                                                 ValueRange trueOperands,
+                                                 Block *falseBranch,
+                                                 ValueRange falseOperands) {
+  return OperationBuilder<CondBranchOp>(cond, trueBranch, trueOperands,
+                                        falseBranch, falseOperands);
 }

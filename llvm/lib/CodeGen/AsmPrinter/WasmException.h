@@ -21,20 +21,20 @@ namespace llvm {
 
 class LLVM_LIBRARY_VISIBILITY WasmException : public EHStreamer {
 public:
-    WasmException(AsmPrinter *A) : EHStreamer(A) {}
+  WasmException(AsmPrinter *A) : EHStreamer(A) {}
 
-    void endModule() override;
-    void beginFunction(const MachineFunction *MF) override {}
-    virtual void markFunctionEnd() override;
-    void endFunction(const MachineFunction *MF) override;
+  void endModule() override;
+  void beginFunction(const MachineFunction *MF) override {}
+  virtual void markFunctionEnd() override;
+  void endFunction(const MachineFunction *MF) override;
 
 protected:
-    // Compute the call site table for wasm EH.
-    void computeCallSiteTable(
-        SmallVectorImpl<CallSiteEntry> &CallSites,
-        SmallVectorImpl<CallSiteRange> &CallSiteRanges,
-        const SmallVectorImpl<const LandingPadInfo *> &LandingPads,
-        const SmallVectorImpl<unsigned> &FirstActions) override;
+  // Compute the call site table for wasm EH.
+  void computeCallSiteTable(
+      SmallVectorImpl<CallSiteEntry> &CallSites,
+      SmallVectorImpl<CallSiteRange> &CallSiteRanges,
+      const SmallVectorImpl<const LandingPadInfo *> &LandingPads,
+      const SmallVectorImpl<unsigned> &FirstActions) override;
 };
 
 } // End of namespace llvm

@@ -32,9 +32,9 @@ class Scope;
 // its characteristics are known because it is a subroutine or function
 // defined at the top level in the same source file.
 void CheckArguments(const evaluate::characteristics::Procedure &,
-                    evaluate::ActualArguments &, evaluate::FoldingContext &, const Scope &,
-                    bool treatingExternalAsImplicit,
-                    const evaluate::SpecificIntrinsic *intrinsic);
+    evaluate::ActualArguments &, evaluate::FoldingContext &, const Scope &,
+    bool treatingExternalAsImplicit,
+    const evaluate::SpecificIntrinsic *intrinsic);
 
 // Checks actual arguments against a procedure with an explicit interface.
 // Reports a buffer of errors when not compatible.
@@ -45,6 +45,6 @@ parser::Messages CheckExplicitInterface(
 
 // Checks actual arguments for the purpose of resolving a generic interface.
 bool CheckInterfaceForGeneric(const evaluate::characteristics::Procedure &,
-                              evaluate::ActualArguments &, const evaluate::FoldingContext &);
+    evaluate::ActualArguments &, const evaluate::FoldingContext &);
 } // namespace Fortran::semantics
 #endif

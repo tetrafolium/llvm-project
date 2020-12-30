@@ -20,9 +20,7 @@
 
 using namespace llvm;
 
-bool BPFFrameLowering::hasFP(const MachineFunction &MF) const {
-    return true;
-}
+bool BPFFrameLowering::hasFP(const MachineFunction &MF) const { return true; }
 
 void BPFFrameLowering::emitPrologue(MachineFunction &MF,
                                     MachineBasicBlock &MBB) const {}
@@ -31,11 +29,11 @@ void BPFFrameLowering::emitEpilogue(MachineFunction &MF,
                                     MachineBasicBlock &MBB) const {}
 
 void BPFFrameLowering::determineCalleeSaves(MachineFunction &MF,
-        BitVector &SavedRegs,
-        RegScavenger *RS) const {
-    TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
-    SavedRegs.reset(BPF::R6);
-    SavedRegs.reset(BPF::R7);
-    SavedRegs.reset(BPF::R8);
-    SavedRegs.reset(BPF::R9);
+                                            BitVector &SavedRegs,
+                                            RegScavenger *RS) const {
+  TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
+  SavedRegs.reset(BPF::R6);
+  SavedRegs.reset(BPF::R7);
+  SavedRegs.reset(BPF::R8);
+  SavedRegs.reset(BPF::R9);
 }

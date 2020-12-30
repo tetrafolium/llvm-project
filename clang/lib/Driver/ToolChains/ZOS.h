@@ -18,27 +18,19 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY ZOS : public ToolChain {
 public:
-    ZOS(const Driver &D, const llvm::Triple &Triple,
-        const llvm::opt::ArgList &Args);
-    ~ZOS() override;
+  ZOS(const Driver &D, const llvm::Triple &Triple,
+      const llvm::opt::ArgList &Args);
+  ~ZOS() override;
 
-    bool isPICDefault() const override {
-        return false;
-    }
-    bool isPIEDefault() const override {
-        return false;
-    }
-    bool isPICDefaultForced() const override {
-        return false;
-    }
+  bool isPICDefault() const override { return false; }
+  bool isPIEDefault() const override { return false; }
+  bool isPICDefaultForced() const override { return false; }
 
-    bool IsIntegratedAssemblerDefault() const override {
-        return true;
-    }
+  bool IsIntegratedAssemblerDefault() const override { return true; }
 
-    void addClangTargetOptions(
-        const llvm::opt::ArgList &DriverArgs, llvm::opt::ArgStringList &CC1Args,
-        Action::OffloadKind DeviceOffloadingKind) const override;
+  void addClangTargetOptions(
+      const llvm::opt::ArgList &DriverArgs, llvm::opt::ArgStringList &CC1Args,
+      Action::OffloadKind DeviceOffloadingKind) const override;
 };
 
 } // end namespace toolchains

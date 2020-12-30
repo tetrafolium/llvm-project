@@ -28,7 +28,7 @@ namespace xray {
 //   static CommandRegistration Unused(&MySubCommand, [] { ... });
 //
 struct CommandRegistration {
-    CommandRegistration(cl::SubCommand *SC, std::function<Error()> Command);
+  CommandRegistration(cl::SubCommand *SC, std::function<Error()> Command);
 };
 
 // Requires that |SC| is not null and has an associated function to it.

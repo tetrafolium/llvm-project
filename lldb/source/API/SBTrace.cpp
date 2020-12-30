@@ -19,133 +19,128 @@ using namespace lldb_private;
 
 class TraceImpl {
 public:
-    lldb::user_id_t uid;
+  lldb::user_id_t uid;
 };
 
-lldb::ProcessSP SBTrace::GetSP() const {
-    return m_opaque_wp.lock();
-}
+lldb::ProcessSP SBTrace::GetSP() const { return m_opaque_wp.lock(); }
 
 size_t SBTrace::GetTraceData(SBError &error, void *buf, size_t size,
                              size_t offset, lldb::tid_t thread_id) {
-    LLDB_RECORD_DUMMY(size_t, SBTrace, GetTraceData,
-                      (lldb::SBError &, void *, size_t, size_t, lldb::tid_t),
-                      error, buf, size, offset, thread_id);
+  LLDB_RECORD_DUMMY(size_t, SBTrace, GetTraceData,
+                    (lldb::SBError &, void *, size_t, size_t, lldb::tid_t),
+                    error, buf, size, offset, thread_id);
 
-    ProcessSP process_sp(GetSP());
-    llvm::MutableArrayRef<uint8_t> buffer(static_cast<uint8_t *>(buf), size);
-    error.Clear();
+  ProcessSP process_sp(GetSP());
+  llvm::MutableArrayRef<uint8_t> buffer(static_cast<uint8_t *>(buf), size);
+  error.Clear();
 
-    if (!process_sp) {
-        error.SetErrorString("invalid process");
-    } else {
-        error.SetError(
-            process_sp->GetData(GetTraceUID(), thread_id, buffer, offset));
-    }
-    return buffer.size();
+  if (!process_sp) {
+    error.SetErrorString("invalid process");
+  } else {
+    error.SetError(
+        process_sp->GetData(GetTraceUID(), thread_id, buffer, offset));
+  }
+  return buffer.size();
 }
 
 size_t SBTrace::GetMetaData(SBError &error, void *buf, size_t size,
                             size_t offset, lldb::tid_t thread_id) {
-    LLDB_RECORD_DUMMY(size_t, SBTrace, GetMetaData,
-                      (lldb::SBError &, void *, size_t, size_t, lldb::tid_t),
-                      error, buf, size, offset, thread_id);
+  LLDB_RECORD_DUMMY(size_t, SBTrace, GetMetaData,
+                    (lldb::SBError &, void *, size_t, size_t, lldb::tid_t),
+                    error, buf, size, offset, thread_id);
 
-    ProcessSP process_sp(GetSP());
-    llvm::MutableArrayRef<uint8_t> buffer(static_cast<uint8_t *>(buf), size);
-    error.Clear();
+  ProcessSP process_sp(GetSP());
+  llvm::MutableArrayRef<uint8_t> buffer(static_cast<uint8_t *>(buf), size);
+  error.Clear();
 
-    if (!process_sp) {
-        error.SetErrorString("invalid process");
-    } else {
-        error.SetError(
-            process_sp->GetMetaData(GetTraceUID(), thread_id, buffer, offset));
-    }
-    return buffer.size();
+  if (!process_sp) {
+    error.SetErrorString("invalid process");
+  } else {
+    error.SetError(
+        process_sp->GetMetaData(GetTraceUID(), thread_id, buffer, offset));
+  }
+  return buffer.size();
 }
 
 void SBTrace::StopTrace(SBError &error, lldb::tid_t thread_id) {
-    LLDB_RECORD_METHOD(void, SBTrace, StopTrace, (lldb::SBError &, lldb::tid_t),
-                       error, thread_id);
+  LLDB_RECORD_METHOD(void, SBTrace, StopTrace, (lldb::SBError &, lldb::tid_t),
+                     error, thread_id);
 
-    ProcessSP process_sp(GetSP());
-    error.Clear();
+  ProcessSP process_sp(GetSP());
+  error.Clear();
 
-    if (!process_sp) {
-        error.SetErrorString("invalid process");
-        return;
-    }
-    error.SetError(process_sp->StopTrace(GetTraceUID(), thread_id));
+  if (!process_sp) {
+    error.SetErrorString("invalid process");
+    return;
+  }
+  error.SetError(process_sp->StopTrace(GetTraceUID(), thread_id));
 }
 
 void SBTrace::GetTraceConfig(SBTraceOptions &options, SBError &error) {
-    LLDB_RECORD_METHOD(void, SBTrace, GetTraceConfig,
-                       (lldb::SBTraceOptions &, lldb::SBError &), options, error);
+  LLDB_RECORD_METHOD(void, SBTrace, GetTraceConfig,
+                     (lldb::SBTraceOptions &, lldb::SBError &), options, error);
 
-    ProcessSP process_sp(GetSP());
-    error.Clear();
+  ProcessSP process_sp(GetSP());
+  error.Clear();
 
-    if (!process_sp) {
-        error.SetErrorString("invalid process");
-    } else {
-        error.SetError(process_sp->GetTraceConfig(GetTraceUID(),
-                       *(options.m_traceoptions_sp)));
-    }
+  if (!process_sp) {
+    error.SetErrorString("invalid process");
+  } else {
+    error.SetError(process_sp->GetTraceConfig(GetTraceUID(),
+                                              *(options.m_traceoptions_sp)));
+  }
 }
 
 lldb::user_id_t SBTrace::GetTraceUID() {
-    LLDB_RECORD_METHOD_NO_ARGS(lldb::user_id_t, SBTrace, GetTraceUID);
+  LLDB_RECORD_METHOD_NO_ARGS(lldb::user_id_t, SBTrace, GetTraceUID);
 
-    if (m_trace_impl_sp)
-        return m_trace_impl_sp->uid;
-    return LLDB_INVALID_UID;
+  if (m_trace_impl_sp)
+    return m_trace_impl_sp->uid;
+  return LLDB_INVALID_UID;
 }
 
 void SBTrace::SetTraceUID(lldb::user_id_t uid) {
-    if (m_trace_impl_sp)
-        m_trace_impl_sp->uid = uid;
+  if (m_trace_impl_sp)
+    m_trace_impl_sp->uid = uid;
 }
 
 SBTrace::SBTrace() {
-    LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBTrace);
+  LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBTrace);
 
-    m_trace_impl_sp = std::make_shared<TraceImpl>();
-    if (m_trace_impl_sp)
-        m_trace_impl_sp->uid = LLDB_INVALID_UID;
+  m_trace_impl_sp = std::make_shared<TraceImpl>();
+  if (m_trace_impl_sp)
+    m_trace_impl_sp->uid = LLDB_INVALID_UID;
 }
 
-void SBTrace::SetSP(const ProcessSP &process_sp) {
-    m_opaque_wp = process_sp;
-}
+void SBTrace::SetSP(const ProcessSP &process_sp) { m_opaque_wp = process_sp; }
 
 bool SBTrace::IsValid() {
-    LLDB_RECORD_METHOD_NO_ARGS(bool, SBTrace, IsValid);
-    return this->operator bool();
+  LLDB_RECORD_METHOD_NO_ARGS(bool, SBTrace, IsValid);
+  return this->operator bool();
 }
 SBTrace::operator bool() const {
-    LLDB_RECORD_METHOD_CONST_NO_ARGS(bool, SBTrace, operator bool);
+  LLDB_RECORD_METHOD_CONST_NO_ARGS(bool, SBTrace, operator bool);
 
-    if (!m_trace_impl_sp)
-        return false;
-    if (!GetSP())
-        return false;
-    return true;
+  if (!m_trace_impl_sp)
+    return false;
+  if (!GetSP())
+    return false;
+  return true;
 }
 
 namespace lldb_private {
 namespace repro {
 
-template <>
-void RegisterMethods<SBTrace>(Registry &R) {
-    LLDB_REGISTER_METHOD(void, SBTrace, StopTrace,
-                         (lldb::SBError &, lldb::tid_t));
-    LLDB_REGISTER_METHOD(void, SBTrace, GetTraceConfig,
-                         (lldb::SBTraceOptions &, lldb::SBError &));
-    LLDB_REGISTER_METHOD(lldb::user_id_t, SBTrace, GetTraceUID, ());
-    LLDB_REGISTER_CONSTRUCTOR(SBTrace, ());
-    LLDB_REGISTER_METHOD(bool, SBTrace, IsValid, ());
-    LLDB_REGISTER_METHOD_CONST(bool, SBTrace, operator bool, ());
+template <> void RegisterMethods<SBTrace>(Registry &R) {
+  LLDB_REGISTER_METHOD(void, SBTrace, StopTrace,
+                       (lldb::SBError &, lldb::tid_t));
+  LLDB_REGISTER_METHOD(void, SBTrace, GetTraceConfig,
+                       (lldb::SBTraceOptions &, lldb::SBError &));
+  LLDB_REGISTER_METHOD(lldb::user_id_t, SBTrace, GetTraceUID, ());
+  LLDB_REGISTER_CONSTRUCTOR(SBTrace, ());
+  LLDB_REGISTER_METHOD(bool, SBTrace, IsValid, ());
+  LLDB_REGISTER_METHOD_CONST(bool, SBTrace, operator bool,());
 }
 
-}
-}
+} // namespace repro
+} // namespace lldb_private

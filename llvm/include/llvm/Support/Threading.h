@@ -98,7 +98,7 @@ enum InitStatus { Uninitialized = 0, Wait = 1, Done = 2 };
 /// This structure must be used as an opaque object. It is a struct to force
 /// autoinitialization and behave like std::once_flag.
 struct once_flag {
-    volatile sys::cas_flag status = Uninitialized;
+  volatile sys::cas_flag status = Uninitialized;
 };
 
 #endif
@@ -118,62 +118,63 @@ struct once_flag {
 template <typename Function, typename... Args>
 void call_once(once_flag &flag, Function &&F, Args &&... ArgList) {
 #if LLVM_THREADING_USE_STD_CALL_ONCE
-    std::call_once(flag, std::forward<Function>(F),
-                   std::forward<Args>(ArgList)...);
+  std::call_once(flag, std::forward<Function>(F),
+                 std::forward<Args>(ArgList)...);
 #else
-    // For other platforms we use a generic (if brittle) version based on our
-    // atomics.
-    sys::cas_flag old_val = sys::CompareAndSwap(&flag.status, Wait, Uninitialized);
-    if (old_val == Uninitialized) {
-        std::forward<Function>(F)(std::forward<Args>(ArgList)...);
-        sys::MemoryFence();
-        TsanIgnoreWritesBegin();
-        TsanHappensBefore(&flag.status);
-        flag.status = Done;
-        TsanIgnoreWritesEnd();
-    } else {
-        // Wait until any thread doing the call has finished.
-        sys::cas_flag tmp = flag.status;
-        sys::MemoryFence();
-        while (tmp != Done) {
-            tmp = flag.status;
-            sys::MemoryFence();
-        }
+  // For other platforms we use a generic (if brittle) version based on our
+  // atomics.
+  sys::cas_flag old_val =
+      sys::CompareAndSwap(&flag.status, Wait, Uninitialized);
+  if (old_val == Uninitialized) {
+    std::forward<Function>(F)(std::forward<Args>(ArgList)...);
+    sys::MemoryFence();
+    TsanIgnoreWritesBegin();
+    TsanHappensBefore(&flag.status);
+    flag.status = Done;
+    TsanIgnoreWritesEnd();
+  } else {
+    // Wait until any thread doing the call has finished.
+    sys::cas_flag tmp = flag.status;
+    sys::MemoryFence();
+    while (tmp != Done) {
+      tmp = flag.status;
+      sys::MemoryFence();
     }
-    TsanHappensAfter(&flag.status);
+  }
+  TsanHappensAfter(&flag.status);
 #endif
 }
 
 /// This tells how a thread pool will be used
 class ThreadPoolStrategy {
 public:
-    // The default value (0) means all available threads should be used,
-    // taking the affinity mask into account. If set, this value only represents
-    // a suggested high bound, the runtime might choose a lower value (not
-    // higher).
-    unsigned ThreadsRequested = 0;
+  // The default value (0) means all available threads should be used,
+  // taking the affinity mask into account. If set, this value only represents
+  // a suggested high bound, the runtime might choose a lower value (not
+  // higher).
+  unsigned ThreadsRequested = 0;
 
-    // If SMT is active, use hyper threads. If false, there will be only one
-    // std::thread per core.
-    bool UseHyperThreads = true;
+  // If SMT is active, use hyper threads. If false, there will be only one
+  // std::thread per core.
+  bool UseHyperThreads = true;
 
-    // If set, will constrain 'ThreadsRequested' to the number of hardware
-    // threads, or hardware cores.
-    bool Limit = false;
+  // If set, will constrain 'ThreadsRequested' to the number of hardware
+  // threads, or hardware cores.
+  bool Limit = false;
 
-    /// Retrieves the max available threads for the current strategy. This
-    /// accounts for affinity masks and takes advantage of all CPU sockets.
-    unsigned compute_thread_count() const;
+  /// Retrieves the max available threads for the current strategy. This
+  /// accounts for affinity masks and takes advantage of all CPU sockets.
+  unsigned compute_thread_count() const;
 
-    /// Assign the current thread to an ideal hardware CPU or NUMA node. In a
-    /// multi-socket system, this ensures threads are assigned to all CPU
-    /// sockets. \p ThreadPoolNum represents a number bounded by [0,
-    /// compute_thread_count()).
-    void apply_thread_strategy(unsigned ThreadPoolNum) const;
+  /// Assign the current thread to an ideal hardware CPU or NUMA node. In a
+  /// multi-socket system, this ensures threads are assigned to all CPU
+  /// sockets. \p ThreadPoolNum represents a number bounded by [0,
+  /// compute_thread_count()).
+  void apply_thread_strategy(unsigned ThreadPoolNum) const;
 
-    /// Finds the CPU socket where a thread should go. Returns 'None' if the
-    /// thread shall remain on the actual CPU socket.
-    Optional<unsigned> compute_cpu_socket(unsigned ThreadPoolNum) const;
+  /// Finds the CPU socket where a thread should go. Returns 'None' if the
+  /// thread shall remain on the actual CPU socket.
+  Optional<unsigned> compute_cpu_socket(unsigned ThreadPoolNum) const;
 };
 
 /// Build a strategy from a number of threads as a string provided in \p Num.
@@ -192,10 +193,10 @@ get_threadpool_strategy(StringRef Num, ThreadPoolStrategy Default = {});
 /// LLVM_ENABLE_THREADS = OFF.
 inline ThreadPoolStrategy
 heavyweight_hardware_concurrency(unsigned ThreadCount = 0) {
-    ThreadPoolStrategy S;
-    S.UseHyperThreads = false;
-    S.ThreadsRequested = ThreadCount;
-    return S;
+  ThreadPoolStrategy S;
+  S.UseHyperThreads = false;
+  S.ThreadsRequested = ThreadCount;
+  return S;
 }
 
 /// Like heavyweight_hardware_concurrency() above, but builds a strategy
@@ -203,11 +204,11 @@ heavyweight_hardware_concurrency(unsigned ThreadCount = 0) {
 /// If \p Num is invalid, returns a default strategy where one thread per
 /// hardware core is used.
 inline ThreadPoolStrategy heavyweight_hardware_concurrency(StringRef Num) {
-    Optional<ThreadPoolStrategy> S =
-        get_threadpool_strategy(Num, heavyweight_hardware_concurrency());
-    if (S)
-        return *S;
-    return heavyweight_hardware_concurrency();
+  Optional<ThreadPoolStrategy> S =
+      get_threadpool_strategy(Num, heavyweight_hardware_concurrency());
+  if (S)
+    return *S;
+  return heavyweight_hardware_concurrency();
 }
 
 /// Returns a default thread strategy where all available hardware resources
@@ -215,19 +216,19 @@ inline ThreadPoolStrategy heavyweight_hardware_concurrency(StringRef Num) {
 /// This function takes affinity into consideration. Returns 1 when LLVM is
 /// configured with LLVM_ENABLE_THREADS=OFF.
 inline ThreadPoolStrategy hardware_concurrency(unsigned ThreadCount = 0) {
-    ThreadPoolStrategy S;
-    S.ThreadsRequested = ThreadCount;
-    return S;
+  ThreadPoolStrategy S;
+  S.ThreadsRequested = ThreadCount;
+  return S;
 }
 
 /// Returns an optimal thread strategy to execute specified amount of tasks.
 /// This strategy should prevent us from creating too many threads if we
 /// occasionaly have an unexpectedly small amount of tasks.
 inline ThreadPoolStrategy optimal_concurrency(unsigned TaskCount = 0) {
-    ThreadPoolStrategy S;
-    S.Limit = true;
-    S.ThreadsRequested = TaskCount;
-    return S;
+  ThreadPoolStrategy S;
+  S.Limit = true;
+  S.ThreadsRequested = TaskCount;
+  return S;
 }
 
 /// Return the current thread id, as used in various OS system calls.
@@ -265,8 +266,8 @@ llvm::BitVector get_thread_affinity_mask();
 unsigned get_cpus();
 
 enum class ThreadPriority {
-    Background = 0,
-    Default = 1,
+  Background = 0,
+  Default = 1,
 };
 /// If priority is Background tries to lower current threads priority such
 /// that it does not affect foreground tasks significantly. Can be used for
@@ -276,6 +277,6 @@ enum class ThreadPriority {
 /// default scheduling priority.
 enum class SetThreadPriorityResult { FAILURE, SUCCESS };
 SetThreadPriorityResult set_thread_priority(ThreadPriority Priority);
-}
+} // namespace llvm
 
 #endif

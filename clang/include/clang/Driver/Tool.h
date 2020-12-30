@@ -15,7 +15,7 @@ namespace llvm {
 namespace opt {
 class ArgList;
 }
-}
+} // namespace llvm
 
 namespace clang {
 namespace driver {
@@ -30,80 +30,64 @@ typedef SmallVector<InputInfo, 4> InputInfoList;
 
 /// Tool - Information on a specific compilation tool.
 class Tool {
-    /// The tool name (for debugging).
-    const char *Name;
+  /// The tool name (for debugging).
+  const char *Name;
 
-    /// The human readable name for the tool, for use in diagnostics.
-    const char *ShortName;
+  /// The human readable name for the tool, for use in diagnostics.
+  const char *ShortName;
 
-    /// The tool chain this tool is a part of.
-    const ToolChain &TheToolChain;
-
-public:
-    Tool(const char *Name, const char *ShortName, const ToolChain &TC);
+  /// The tool chain this tool is a part of.
+  const ToolChain &TheToolChain;
 
 public:
-    virtual ~Tool();
+  Tool(const char *Name, const char *ShortName, const ToolChain &TC);
 
-    const char *getName() const {
-        return Name;
-    }
+public:
+  virtual ~Tool();
 
-    const char *getShortName() const {
-        return ShortName;
-    }
+  const char *getName() const { return Name; }
 
-    const ToolChain &getToolChain() const {
-        return TheToolChain;
-    }
+  const char *getShortName() const { return ShortName; }
 
-    virtual bool hasIntegratedAssembler() const {
-        return false;
-    }
-    virtual bool canEmitIR() const {
-        return false;
-    }
-    virtual bool hasIntegratedCPP() const = 0;
-    virtual bool isLinkJob() const {
-        return false;
-    }
-    virtual bool isDsymutilJob() const {
-        return false;
-    }
+  const ToolChain &getToolChain() const { return TheToolChain; }
 
-    /// Does this tool have "good" standardized diagnostics, or should the
-    /// driver add an additional "command failed" diagnostic on failures.
-    virtual bool hasGoodDiagnostics() const {
-        return false;
-    }
+  virtual bool hasIntegratedAssembler() const { return false; }
+  virtual bool canEmitIR() const { return false; }
+  virtual bool hasIntegratedCPP() const = 0;
+  virtual bool isLinkJob() const { return false; }
+  virtual bool isDsymutilJob() const { return false; }
 
-    /// ConstructJob - Construct jobs to perform the action \p JA,
-    /// writing to \p Output and with \p Inputs, and add the jobs to
-    /// \p C.
-    ///
-    /// \param TCArgs - The argument list for this toolchain, with any
-    /// tool chain specific translations applied.
-    /// \param LinkingOutput - If this output will eventually feed the
-    /// linker, then this is the final output name of the linked image.
-    virtual void ConstructJob(Compilation &C, const JobAction &JA,
-                              const InputInfo &Output,
-                              const InputInfoList &Inputs,
-                              const llvm::opt::ArgList &TCArgs,
-                              const char *LinkingOutput) const = 0;
-    /// Construct jobs to perform the action \p JA, writing to the \p Outputs and
-    /// with \p Inputs, and add the jobs to \p C. The default implementation
-    /// assumes a single output and is expected to be overloaded for the tools
-    /// that support multiple inputs.
-    ///
-    /// \param TCArgs The argument list for this toolchain, with any
-    /// tool chain specific translations applied.
-    /// \param LinkingOutput If this output will eventually feed the
-    /// linker, then this is the final output name of the linked image.
-    virtual void ConstructJobMultipleOutputs(Compilation &C, const JobAction &JA,
-            const InputInfoList &Outputs,
-            const InputInfoList &Inputs,
-            const llvm::opt::ArgList &TCArgs,
-            const char *LinkingOutput) const;
+  /// Does this tool have "good" standardized diagnostics, or should the
+  /// driver add an additional "command failed" diagnostic on failures.
+  virtual bool hasGoodDiagnostics() const { return false; }
+
+  /// ConstructJob - Construct jobs to perform the action \p JA,
+  /// writing to \p Output and with \p Inputs, and add the jobs to
+  /// \p C.
+  ///
+  /// \param TCArgs - The argument list for this toolchain, with any
+  /// tool chain specific translations applied.
+  /// \param LinkingOutput - If this output will eventually feed the
+  /// linker, then this is the final output name of the linked image.
+  virtual void ConstructJob(Compilation &C, const JobAction &JA,
+                            const InputInfo &Output,
+                            const InputInfoList &Inputs,
+                            const llvm::opt::ArgList &TCArgs,
+                            const char *LinkingOutput) const = 0;
+  /// Construct jobs to perform the action \p JA, writing to the \p Outputs and
+  /// with \p Inputs, and add the jobs to \p C. The default implementation
+  /// assumes a single output and is expected to be overloaded for the tools
+  /// that support multiple inputs.
+  ///
+  /// \param TCArgs The argument list for this toolchain, with any
+  /// tool chain specific translations applied.
+  /// \param LinkingOutput If this output will eventually feed the
+  /// linker, then this is the final output name of the linked image.
+  virtual void ConstructJobMultipleOutputs(Compilation &C, const JobAction &JA,
+                                           const InputInfoList &Outputs,
+                                           const InputInfoList &Inputs,
+                                           const llvm::opt::ArgList &TCArgs,
+                                           const char *LinkingOutput) const;
 };
 
 } // end namespace driver

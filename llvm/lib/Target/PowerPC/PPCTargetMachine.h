@@ -24,47 +24,46 @@ namespace llvm {
 ///
 class PPCTargetMachine final : public LLVMTargetMachine {
 public:
-    enum PPCABI { PPC_ABI_UNKNOWN, PPC_ABI_ELFv1, PPC_ABI_ELFv2 };
-private:
-    std::unique_ptr<TargetLoweringObjectFile> TLOF;
-    PPCABI TargetABI;
+  enum PPCABI { PPC_ABI_UNKNOWN, PPC_ABI_ELFv1, PPC_ABI_ELFv2 };
 
-    mutable StringMap<std::unique_ptr<PPCSubtarget>> SubtargetMap;
+private:
+  std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  PPCABI TargetABI;
+
+  mutable StringMap<std::unique_ptr<PPCSubtarget>> SubtargetMap;
 
 public:
-    PPCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                     StringRef FS, const TargetOptions &Options,
-                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                     CodeGenOpt::Level OL, bool JIT);
+  PPCTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                   StringRef FS, const TargetOptions &Options,
+                   Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                   CodeGenOpt::Level OL, bool JIT);
 
-    ~PPCTargetMachine() override;
+  ~PPCTargetMachine() override;
 
-    const PPCSubtarget *getSubtargetImpl(const Function &F) const override;
-    // DO NOT IMPLEMENT: There is no such thing as a valid default subtarget,
-    // subtargets are per-function entities based on the target-specific
-    // attributes of each function.
-    const PPCSubtarget *getSubtargetImpl() const = delete;
+  const PPCSubtarget *getSubtargetImpl(const Function &F) const override;
+  // DO NOT IMPLEMENT: There is no such thing as a valid default subtarget,
+  // subtargets are per-function entities based on the target-specific
+  // attributes of each function.
+  const PPCSubtarget *getSubtargetImpl() const = delete;
 
-    // Pass Pipeline Configuration
-    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+  // Pass Pipeline Configuration
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-    TargetLoweringObjectFile *getObjFileLowering() const override {
-        return TLOF.get();
-    }
-    bool isELFv2ABI() const {
-        return TargetABI == PPC_ABI_ELFv2;
-    }
-    bool isPPC64() const {
-        const Triple &TT = getTargetTriple();
-        return (TT.getArch() == Triple::ppc64 || TT.getArch() == Triple::ppc64le);
-    };
+  TargetLoweringObjectFile *getObjFileLowering() const override {
+    return TLOF.get();
+  }
+  bool isELFv2ABI() const { return TargetABI == PPC_ABI_ELFv2; }
+  bool isPPC64() const {
+    const Triple &TT = getTargetTriple();
+    return (TT.getArch() == Triple::ppc64 || TT.getArch() == Triple::ppc64le);
+  };
 
-    bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override {
-        // Addrspacecasts are always noops.
-        return true;
-    }
+  bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override {
+    // Addrspacecasts are always noops.
+    return true;
+  }
 };
 } // end namespace llvm
 

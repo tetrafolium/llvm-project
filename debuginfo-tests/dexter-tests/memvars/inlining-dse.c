@@ -9,26 +9,21 @@
 //// Check that once-escaped variable 'param' can still be read after we
 //// perform inlining + mem2reg, and that we see the DSE'd value 255.
 
-
 int g;
-__attribute__((__always_inline__))
-static void use(int* p) {
-    g = *p;
-    *p = 255;
-    volatile int step = 0;  // DexLabel('use1')
+__attribute__((__always_inline__)) static void use(int *p) {
+  g = *p;
+  *p = 255;
+  volatile int step = 0; // DexLabel('use1')
 }
 
-__attribute__((__noinline__))
-void fun(int param) {
-    //// Make sure first step is in 'fun'.
-    volatile int step = 0;  // DexLabel('fun1')
-    use(&param);
-    return;                 // DexLabel('fun2')
+__attribute__((__noinline__)) void fun(int param) {
+  //// Make sure first step is in 'fun'.
+  volatile int step = 0; // DexLabel('fun1')
+  use(&param);
+  return; // DexLabel('fun2')
 }
 
-int main() {
-    fun(5);
-}
+int main() { fun(5); }
 
 /*
 # Expect param == 5 before stepping through inlined 'use'.

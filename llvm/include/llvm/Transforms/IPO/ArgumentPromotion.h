@@ -22,24 +22,24 @@ class TargetTransformInfo;
 /// transform it and all of its callers to replace indirect arguments with
 /// direct (by-value) arguments.
 class ArgumentPromotionPass : public PassInfoMixin<ArgumentPromotionPass> {
-    unsigned MaxElements;
+  unsigned MaxElements;
 
 public:
-    ArgumentPromotionPass(unsigned MaxElements = 3u) : MaxElements(MaxElements) {}
+  ArgumentPromotionPass(unsigned MaxElements = 3u) : MaxElements(MaxElements) {}
 
-    /// Check if callers and the callee \p F agree how promoted arguments would be
-    /// passed. The ones that they do not agree on are eliminated from the sets but
-    /// the return value has to be observed as well.
-    static bool areFunctionArgsABICompatible(
-        const Function &F, const TargetTransformInfo &TTI,
-        SmallPtrSetImpl<Argument *> &ArgsToPromote,
-        SmallPtrSetImpl<Argument *> &ByValArgsToTransform);
+  /// Check if callers and the callee \p F agree how promoted arguments would be
+  /// passed. The ones that they do not agree on are eliminated from the sets
+  /// but the return value has to be observed as well.
+  static bool areFunctionArgsABICompatible(
+      const Function &F, const TargetTransformInfo &TTI,
+      SmallPtrSetImpl<Argument *> &ArgsToPromote,
+      SmallPtrSetImpl<Argument *> &ByValArgsToTransform);
 
-    /// Checks if a type could have padding bytes.
-    static bool isDenselyPacked(Type *type, const DataLayout &DL);
+  /// Checks if a type could have padding bytes.
+  static bool isDenselyPacked(Type *type, const DataLayout &DL);
 
-    PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
-                          LazyCallGraph &CG, CGSCCUpdateResult &UR);
+  PreservedAnalyses run(LazyCallGraph::SCC &C, CGSCCAnalysisManager &AM,
+                        LazyCallGraph &CG, CGSCCUpdateResult &UR);
 };
 
 } // end namespace llvm

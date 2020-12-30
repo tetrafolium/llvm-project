@@ -30,221 +30,201 @@ class MachineFunction;
 class TargetRegisterInfo;
 
 class LLVM_LIBRARY_VISIBILITY InterferenceCache {
-    /// BlockInterference - information about the interference in a single basic
-    /// block.
-    struct BlockInterference {
-        unsigned Tag = 0;
-        SlotIndex First;
-        SlotIndex Last;
+  /// BlockInterference - information about the interference in a single basic
+  /// block.
+  struct BlockInterference {
+    unsigned Tag = 0;
+    SlotIndex First;
+    SlotIndex Last;
 
-        BlockInterference() {}
+    BlockInterference() {}
+  };
+
+  /// Entry - A cache entry containing interference information for all aliases
+  /// of PhysReg in all basic blocks.
+  class Entry {
+    /// PhysReg - The register currently represented.
+    MCRegister PhysReg = 0;
+
+    /// Tag - Cache tag is changed when any of the underlying LiveIntervalUnions
+    /// change.
+    unsigned Tag = 0;
+
+    /// RefCount - The total number of Cursor instances referring to this Entry.
+    unsigned RefCount = 0;
+
+    /// MF - The current function.
+    MachineFunction *MF;
+
+    /// Indexes - Mapping block numbers to SlotIndex ranges.
+    SlotIndexes *Indexes = nullptr;
+
+    /// LIS - Used for accessing register mask interference maps.
+    LiveIntervals *LIS = nullptr;
+
+    /// PrevPos - The previous position the iterators were moved to.
+    SlotIndex PrevPos;
+
+    /// RegUnitInfo - Information tracked about each RegUnit in PhysReg.
+    /// When PrevPos is set, the iterators are valid as if advanceTo(PrevPos)
+    /// had just been called.
+    struct RegUnitInfo {
+      /// Iterator pointing into the LiveIntervalUnion containing virtual
+      /// register interference.
+      LiveIntervalUnion::SegmentIter VirtI;
+
+      /// Tag of the LIU last time we looked.
+      unsigned VirtTag;
+
+      /// Fixed interference in RegUnit.
+      LiveRange *Fixed = nullptr;
+
+      /// Iterator pointing into the fixed RegUnit interference.
+      LiveInterval::iterator FixedI;
+
+      RegUnitInfo(LiveIntervalUnion &LIU) : VirtTag(LIU.getTag()) {
+        VirtI.setMap(LIU.getMap());
+      }
     };
 
-    /// Entry - A cache entry containing interference information for all aliases
-    /// of PhysReg in all basic blocks.
-    class Entry {
-        /// PhysReg - The register currently represented.
-        MCRegister PhysReg = 0;
+    /// Info for each RegUnit in PhysReg. It is very rare ofr a PHysReg to have
+    /// more than 4 RegUnits.
+    SmallVector<RegUnitInfo, 4> RegUnits;
 
-        /// Tag - Cache tag is changed when any of the underlying LiveIntervalUnions
-        /// change.
-        unsigned Tag = 0;
+    /// Blocks - Interference for each block in the function.
+    SmallVector<BlockInterference, 8> Blocks;
 
-        /// RefCount - The total number of Cursor instances referring to this Entry.
-        unsigned RefCount = 0;
+    /// update - Recompute Blocks[MBBNum]
+    void update(unsigned MBBNum);
 
-        /// MF - The current function.
-        MachineFunction *MF;
+  public:
+    Entry() = default;
 
-        /// Indexes - Mapping block numbers to SlotIndex ranges.
-        SlotIndexes *Indexes = nullptr;
+    void clear(MachineFunction *mf, SlotIndexes *indexes, LiveIntervals *lis) {
+      assert(!hasRefs() && "Cannot clear cache entry with references");
+      PhysReg = MCRegister::NoRegister;
+      MF = mf;
+      Indexes = indexes;
+      LIS = lis;
+    }
 
-        /// LIS - Used for accessing register mask interference maps.
-        LiveIntervals *LIS = nullptr;
+    MCRegister getPhysReg() const { return PhysReg; }
 
-        /// PrevPos - The previous position the iterators were moved to.
-        SlotIndex PrevPos;
+    void addRef(int Delta) { RefCount += Delta; }
 
-        /// RegUnitInfo - Information tracked about each RegUnit in PhysReg.
-        /// When PrevPos is set, the iterators are valid as if advanceTo(PrevPos)
-        /// had just been called.
-        struct RegUnitInfo {
-            /// Iterator pointing into the LiveIntervalUnion containing virtual
-            /// register interference.
-            LiveIntervalUnion::SegmentIter VirtI;
+    bool hasRefs() const { return RefCount > 0; }
 
-            /// Tag of the LIU last time we looked.
-            unsigned VirtTag;
+    void revalidate(LiveIntervalUnion *LIUArray, const TargetRegisterInfo *TRI);
 
-            /// Fixed interference in RegUnit.
-            LiveRange *Fixed = nullptr;
+    /// valid - Return true if this is a valid entry for physReg.
+    bool valid(LiveIntervalUnion *LIUArray, const TargetRegisterInfo *TRI);
 
-            /// Iterator pointing into the fixed RegUnit interference.
-            LiveInterval::iterator FixedI;
+    /// reset - Initialize entry to represent physReg's aliases.
+    void reset(MCRegister physReg, LiveIntervalUnion *LIUArray,
+               const TargetRegisterInfo *TRI, const MachineFunction *MF);
 
-            RegUnitInfo(LiveIntervalUnion &LIU) : VirtTag(LIU.getTag()) {
-                VirtI.setMap(LIU.getMap());
-            }
-        };
+    /// get - Return an up to date BlockInterference.
+    BlockInterference *get(unsigned MBBNum) {
+      if (Blocks[MBBNum].Tag != Tag)
+        update(MBBNum);
+      return &Blocks[MBBNum];
+    }
+  };
 
-        /// Info for each RegUnit in PhysReg. It is very rare ofr a PHysReg to have
-        /// more than 4 RegUnits.
-        SmallVector<RegUnitInfo, 4> RegUnits;
+  // We don't keep a cache entry for every physical register, that would use too
+  // much memory. Instead, a fixed number of cache entries are used in a round-
+  // robin manner.
+  enum { CacheEntries = 32 };
 
-        /// Blocks - Interference for each block in the function.
-        SmallVector<BlockInterference, 8> Blocks;
+  const TargetRegisterInfo *TRI = nullptr;
+  LiveIntervalUnion *LIUArray = nullptr;
+  MachineFunction *MF = nullptr;
 
-        /// update - Recompute Blocks[MBBNum]
-        void update(unsigned MBBNum);
+  // Point to an entry for each physreg. The entry pointed to may not be up to
+  // date, and it may have been reused for a different physreg.
+  unsigned char *PhysRegEntries = nullptr;
+  size_t PhysRegEntriesCount = 0;
 
-    public:
-        Entry() = default;
+  // Next round-robin entry to be picked.
+  unsigned RoundRobin = 0;
 
-        void clear(MachineFunction *mf, SlotIndexes *indexes, LiveIntervals *lis) {
-            assert(!hasRefs() && "Cannot clear cache entry with references");
-            PhysReg = MCRegister::NoRegister;
-            MF = mf;
-            Indexes = indexes;
-            LIS = lis;
-        }
+  // The actual cache entries.
+  Entry Entries[CacheEntries];
 
-        MCRegister getPhysReg() const {
-            return PhysReg;
-        }
-
-        void addRef(int Delta) {
-            RefCount += Delta;
-        }
-
-        bool hasRefs() const {
-            return RefCount > 0;
-        }
-
-        void revalidate(LiveIntervalUnion *LIUArray, const TargetRegisterInfo *TRI);
-
-        /// valid - Return true if this is a valid entry for physReg.
-        bool valid(LiveIntervalUnion *LIUArray, const TargetRegisterInfo *TRI);
-
-        /// reset - Initialize entry to represent physReg's aliases.
-        void reset(MCRegister physReg, LiveIntervalUnion *LIUArray,
-                   const TargetRegisterInfo *TRI, const MachineFunction *MF);
-
-        /// get - Return an up to date BlockInterference.
-        BlockInterference *get(unsigned MBBNum) {
-            if (Blocks[MBBNum].Tag != Tag)
-                update(MBBNum);
-            return &Blocks[MBBNum];
-        }
-    };
-
-    // We don't keep a cache entry for every physical register, that would use too
-    // much memory. Instead, a fixed number of cache entries are used in a round-
-    // robin manner.
-    enum { CacheEntries = 32 };
-
-    const TargetRegisterInfo *TRI = nullptr;
-    LiveIntervalUnion *LIUArray = nullptr;
-    MachineFunction *MF = nullptr;
-
-    // Point to an entry for each physreg. The entry pointed to may not be up to
-    // date, and it may have been reused for a different physreg.
-    unsigned char* PhysRegEntries = nullptr;
-    size_t PhysRegEntriesCount = 0;
-
-    // Next round-robin entry to be picked.
-    unsigned RoundRobin = 0;
-
-    // The actual cache entries.
-    Entry Entries[CacheEntries];
-
-    // get - Get a valid entry for PhysReg.
-    Entry *get(MCRegister PhysReg);
+  // get - Get a valid entry for PhysReg.
+  Entry *get(MCRegister PhysReg);
 
 public:
-    InterferenceCache() = default;
+  InterferenceCache() = default;
 
-    ~InterferenceCache() {
-        free(PhysRegEntries);
+  ~InterferenceCache() { free(PhysRegEntries); }
+
+  void reinitPhysRegEntries();
+
+  /// init - Prepare cache for a new function.
+  void init(MachineFunction *mf, LiveIntervalUnion *liuarray,
+            SlotIndexes *indexes, LiveIntervals *lis,
+            const TargetRegisterInfo *tri);
+
+  /// getMaxCursors - Return the maximum number of concurrent cursors that can
+  /// be supported.
+  unsigned getMaxCursors() const { return CacheEntries; }
+
+  /// Cursor - The primary query interface for the block interference cache.
+  class Cursor {
+    Entry *CacheEntry = nullptr;
+    const BlockInterference *Current = nullptr;
+    static const BlockInterference NoInterference;
+
+    void setEntry(Entry *E) {
+      Current = nullptr;
+      // Update reference counts. Nothing happens when RefCount reaches 0, so
+      // we don't have to check for E == CacheEntry etc.
+      if (CacheEntry)
+        CacheEntry->addRef(-1);
+      CacheEntry = E;
+      if (CacheEntry)
+        CacheEntry->addRef(+1);
     }
 
-    void reinitPhysRegEntries();
+  public:
+    /// Cursor - Create a dangling cursor.
+    Cursor() = default;
 
-    /// init - Prepare cache for a new function.
-    void init(MachineFunction *mf, LiveIntervalUnion *liuarray,
-              SlotIndexes *indexes, LiveIntervals *lis,
-              const TargetRegisterInfo *tri);
+    Cursor(const Cursor &O) { setEntry(O.CacheEntry); }
 
-    /// getMaxCursors - Return the maximum number of concurrent cursors that can
-    /// be supported.
-    unsigned getMaxCursors() const {
-        return CacheEntries;
+    Cursor &operator=(const Cursor &O) {
+      setEntry(O.CacheEntry);
+      return *this;
     }
 
-    /// Cursor - The primary query interface for the block interference cache.
-    class Cursor {
-        Entry *CacheEntry = nullptr;
-        const BlockInterference *Current = nullptr;
-        static const BlockInterference NoInterference;
+    ~Cursor() { setEntry(nullptr); }
 
-        void setEntry(Entry *E) {
-            Current = nullptr;
-            // Update reference counts. Nothing happens when RefCount reaches 0, so
-            // we don't have to check for E == CacheEntry etc.
-            if (CacheEntry)
-                CacheEntry->addRef(-1);
-            CacheEntry = E;
-            if (CacheEntry)
-                CacheEntry->addRef(+1);
-        }
+    /// setPhysReg - Point this cursor to PhysReg's interference.
+    void setPhysReg(InterferenceCache &Cache, MCRegister PhysReg) {
+      // Release reference before getting a new one. That guarantees we can
+      // actually have CacheEntries live cursors.
+      setEntry(nullptr);
+      if (PhysReg.isValid())
+        setEntry(Cache.get(PhysReg));
+    }
 
-    public:
-        /// Cursor - Create a dangling cursor.
-        Cursor() = default;
+    /// moveTo - Move cursor to basic block MBBNum.
+    void moveToBlock(unsigned MBBNum) {
+      Current = CacheEntry ? CacheEntry->get(MBBNum) : &NoInterference;
+    }
 
-        Cursor(const Cursor &O) {
-            setEntry(O.CacheEntry);
-        }
+    /// hasInterference - Return true if the current block has any interference.
+    bool hasInterference() { return Current->First.isValid(); }
 
-        Cursor &operator=(const Cursor &O) {
-            setEntry(O.CacheEntry);
-            return *this;
-        }
+    /// first - Return the starting index of the first interfering range in the
+    /// current block.
+    SlotIndex first() { return Current->First; }
 
-        ~Cursor() {
-            setEntry(nullptr);
-        }
-
-        /// setPhysReg - Point this cursor to PhysReg's interference.
-        void setPhysReg(InterferenceCache &Cache, MCRegister PhysReg) {
-            // Release reference before getting a new one. That guarantees we can
-            // actually have CacheEntries live cursors.
-            setEntry(nullptr);
-            if (PhysReg.isValid())
-                setEntry(Cache.get(PhysReg));
-        }
-
-        /// moveTo - Move cursor to basic block MBBNum.
-        void moveToBlock(unsigned MBBNum) {
-            Current = CacheEntry ? CacheEntry->get(MBBNum) : &NoInterference;
-        }
-
-        /// hasInterference - Return true if the current block has any interference.
-        bool hasInterference() {
-            return Current->First.isValid();
-        }
-
-        /// first - Return the starting index of the first interfering range in the
-        /// current block.
-        SlotIndex first() {
-            return Current->First;
-        }
-
-        /// last - Return the ending index of the last interfering range in the
-        /// current block.
-        SlotIndex last() {
-            return Current->Last;
-        }
-    };
+    /// last - Return the ending index of the last interfering range in the
+    /// current block.
+    SlotIndex last() { return Current->Last; }
+  };
 };
 
 } // end namespace llvm

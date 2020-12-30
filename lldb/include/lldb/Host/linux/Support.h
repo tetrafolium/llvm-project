@@ -16,13 +16,13 @@
 namespace lldb_private {
 
 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-        getProcFile(::pid_t pid, ::pid_t tid, const llvm::Twine &file);
+getProcFile(::pid_t pid, ::pid_t tid, const llvm::Twine &file);
 
 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-        getProcFile(::pid_t pid, const llvm::Twine &file);
+getProcFile(::pid_t pid, const llvm::Twine &file);
 
 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>
-        getProcFile(const llvm::Twine &file);
+getProcFile(const llvm::Twine &file);
 
 } // namespace lldb_private
 

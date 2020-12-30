@@ -101,8 +101,8 @@ namespace llvm {
 /// here are relatively simple ones around execution and codesize cost, without
 /// any need to consider simplifications or other transformations.
 struct SpeculateAroundPHIsPass : PassInfoMixin<SpeculateAroundPHIsPass> {
-    /// Run the pass over the function.
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  /// Run the pass over the function.
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

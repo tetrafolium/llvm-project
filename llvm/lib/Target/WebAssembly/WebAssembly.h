@@ -83,14 +83,14 @@ void initializeWebAssemblyPeepholePass(PassRegistry &);
 
 namespace WebAssembly {
 enum TargetIndex {
-    // Followed by a local index (ULEB).
-    TI_LOCAL,
-    // Followed by an absolute global index (ULEB). DEPRECATED.
-    TI_GLOBAL_FIXED,
-    TI_OPERAND_STACK,
-    // Followed by a compilation unit relative global index (uint32_t)
-    // that will have an associated relocation.
-    TI_GLOBAL_RELOC
+  // Followed by a local index (ULEB).
+  TI_LOCAL,
+  // Followed by an absolute global index (ULEB). DEPRECATED.
+  TI_GLOBAL_FIXED,
+  TI_OPERAND_STACK,
+  // Followed by a compilation unit relative global index (uint32_t)
+  // that will have an associated relocation.
+  TI_GLOBAL_RELOC
 };
 } // end namespace WebAssembly
 

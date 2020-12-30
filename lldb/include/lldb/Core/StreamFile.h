@@ -21,43 +21,35 @@ namespace lldb_private {
 
 class StreamFile : public Stream {
 public:
-    StreamFile(uint32_t flags, uint32_t addr_size, lldb::ByteOrder byte_order);
+  StreamFile(uint32_t flags, uint32_t addr_size, lldb::ByteOrder byte_order);
 
-    StreamFile(int fd, bool transfer_ownership);
+  StreamFile(int fd, bool transfer_ownership);
 
-    StreamFile(const char *path, File::OpenOptions options,
-               uint32_t permissions = lldb::eFilePermissionsFileDefault);
+  StreamFile(const char *path, File::OpenOptions options,
+             uint32_t permissions = lldb::eFilePermissionsFileDefault);
 
-    StreamFile(FILE *fh, bool transfer_ownership);
+  StreamFile(FILE *fh, bool transfer_ownership);
 
-    StreamFile(std::shared_ptr<File> file) : m_file_sp(file) {
-        assert(file);
-    };
+  StreamFile(std::shared_ptr<File> file) : m_file_sp(file) { assert(file); };
 
-    ~StreamFile() override;
+  ~StreamFile() override;
 
-    File &GetFile() {
-        return *m_file_sp;
-    }
+  File &GetFile() { return *m_file_sp; }
 
-    const File &GetFile() const {
-        return *m_file_sp;
-    }
+  const File &GetFile() const { return *m_file_sp; }
 
-    std::shared_ptr<File> GetFileSP() {
-        return m_file_sp;
-    }
+  std::shared_ptr<File> GetFileSP() { return m_file_sp; }
 
-    void Flush() override;
+  void Flush() override;
 
 protected:
-    // Classes that inherit from StreamFile can see and modify these
-    std::shared_ptr<File> m_file_sp; // never NULL
-    size_t WriteImpl(const void *s, size_t length) override;
+  // Classes that inherit from StreamFile can see and modify these
+  std::shared_ptr<File> m_file_sp; // never NULL
+  size_t WriteImpl(const void *s, size_t length) override;
 
 private:
-    StreamFile(const StreamFile &) = delete;
-    const StreamFile &operator=(const StreamFile &) = delete;
+  StreamFile(const StreamFile &) = delete;
+  const StreamFile &operator=(const StreamFile &) = delete;
 };
 
 } // namespace lldb_private

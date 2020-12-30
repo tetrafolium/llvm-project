@@ -26,7 +26,7 @@ namespace llvm {
 namespace pdb {
 class TpiStream;
 class GlobalsStream;
-}
+} // namespace pdb
 } // namespace llvm
 
 namespace lldb_private {
@@ -37,28 +37,28 @@ class PdbAstBuilder;
 class PdbIndex;
 
 class UdtRecordCompleter : public llvm::codeview::TypeVisitorCallbacks {
-    using IndexedBase =
-        std::pair<uint64_t, std::unique_ptr<clang::CXXBaseSpecifier>>;
+  using IndexedBase =
+      std::pair<uint64_t, std::unique_ptr<clang::CXXBaseSpecifier>>;
 
-    union UdtTagRecord {
-        UdtTagRecord() {}
-        llvm::codeview::UnionRecord ur;
-        llvm::codeview::ClassRecord cr;
-        llvm::codeview::EnumRecord er;
-    } m_cvr;
+  union UdtTagRecord {
+    UdtTagRecord() {}
+    llvm::codeview::UnionRecord ur;
+    llvm::codeview::ClassRecord cr;
+    llvm::codeview::EnumRecord er;
+  } m_cvr;
 
-    PdbTypeSymId m_id;
-    CompilerType &m_derived_ct;
-    clang::TagDecl &m_tag_decl;
-    PdbAstBuilder &m_ast_builder;
-    PdbIndex &m_index;
-    std::vector<IndexedBase> m_bases;
-    ClangASTImporter::LayoutInfo m_layout;
+  PdbTypeSymId m_id;
+  CompilerType &m_derived_ct;
+  clang::TagDecl &m_tag_decl;
+  PdbAstBuilder &m_ast_builder;
+  PdbIndex &m_index;
+  std::vector<IndexedBase> m_bases;
+  ClangASTImporter::LayoutInfo m_layout;
 
 public:
-    UdtRecordCompleter(PdbTypeSymId id, CompilerType &derived_ct,
-                       clang::TagDecl &tag_decl, PdbAstBuilder &ast_builder,
-                       PdbIndex &index);
+  UdtRecordCompleter(PdbTypeSymId id, CompilerType &derived_ct,
+                     clang::TagDecl &tag_decl, PdbAstBuilder &ast_builder,
+                     PdbIndex &index);
 
 #define MEMBER_RECORD(EnumName, EnumVal, Name)                                 \
   llvm::Error visitKnownMember(llvm::codeview::CVMemberRecord &CVR,            \
@@ -66,16 +66,16 @@ public:
 #define MEMBER_RECORD_ALIAS(EnumName, EnumVal, Name, AliasName)
 #include "llvm/DebugInfo/CodeView/CodeViewTypes.def"
 
-    void complete();
+  void complete();
 
 private:
-    clang::QualType AddBaseClassForTypeIndex(
-        llvm::codeview::TypeIndex ti, llvm::codeview::MemberAccess access,
-        llvm::Optional<uint64_t> vtable_idx = llvm::Optional<uint64_t>());
-    void AddMethod(llvm::StringRef name, llvm::codeview::TypeIndex type_idx,
-                   llvm::codeview::MemberAccess access,
-                   llvm::codeview::MethodOptions options,
-                   llvm::codeview::MemberAttributes attrs);
+  clang::QualType AddBaseClassForTypeIndex(
+      llvm::codeview::TypeIndex ti, llvm::codeview::MemberAccess access,
+      llvm::Optional<uint64_t> vtable_idx = llvm::Optional<uint64_t>());
+  void AddMethod(llvm::StringRef name, llvm::codeview::TypeIndex type_idx,
+                 llvm::codeview::MemberAccess access,
+                 llvm::codeview::MethodOptions options,
+                 llvm::codeview::MemberAttributes attrs);
 };
 
 } // namespace npdb

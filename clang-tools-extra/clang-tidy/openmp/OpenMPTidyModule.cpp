@@ -19,17 +19,17 @@ namespace openmp {
 /// This module is for OpenMP-specific checks.
 class OpenMPModule : public ClangTidyModule {
 public:
-    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-        CheckFactories.registerCheck<ExceptionEscapeCheck>(
-            "openmp-exception-escape");
-        CheckFactories.registerCheck<UseDefaultNoneCheck>(
-            "openmp-use-default-none");
-    }
+  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<ExceptionEscapeCheck>(
+        "openmp-exception-escape");
+    CheckFactories.registerCheck<UseDefaultNoneCheck>(
+        "openmp-use-default-none");
+  }
 };
 
 // Register the OpenMPTidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<OpenMPModule>
-X("openmp-module", "Adds OpenMP-specific checks.");
+    X("openmp-module", "Adds OpenMP-specific checks.");
 
 } // namespace openmp
 

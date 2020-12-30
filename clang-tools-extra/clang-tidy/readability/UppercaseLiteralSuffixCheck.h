@@ -24,17 +24,17 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-uppercase-literal-suffix.html
 class UppercaseLiteralSuffixCheck : public ClangTidyCheck {
 public:
-    UppercaseLiteralSuffixCheck(StringRef Name, ClangTidyContext *Context);
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  UppercaseLiteralSuffixCheck(StringRef Name, ClangTidyContext *Context);
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-    template <typename LiteralType>
-    bool checkBoundMatch(const ast_matchers::MatchFinder::MatchResult &Result);
+  template <typename LiteralType>
+  bool checkBoundMatch(const ast_matchers::MatchFinder::MatchResult &Result);
 
-    const std::vector<std::string> NewSuffixes;
-    const bool IgnoreMacros;
+  const std::vector<std::string> NewSuffixes;
+  const bool IgnoreMacros;
 };
 
 } // namespace readability

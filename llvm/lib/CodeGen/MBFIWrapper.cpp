@@ -17,45 +17,42 @@
 using namespace llvm;
 
 BlockFrequency MBFIWrapper::getBlockFreq(const MachineBasicBlock *MBB) const {
-    auto I = MergedBBFreq.find(MBB);
+  auto I = MergedBBFreq.find(MBB);
 
-    if (I != MergedBBFreq.end())
-        return I->second;
+  if (I != MergedBBFreq.end())
+    return I->second;
 
-    return MBFI.getBlockFreq(MBB);
+  return MBFI.getBlockFreq(MBB);
 }
 
-void MBFIWrapper::setBlockFreq(const MachineBasicBlock *MBB,
-                               BlockFrequency F) {
-    MergedBBFreq[MBB] = F;
+void MBFIWrapper::setBlockFreq(const MachineBasicBlock *MBB, BlockFrequency F) {
+  MergedBBFreq[MBB] = F;
 }
 
 Optional<uint64_t>
 MBFIWrapper::getBlockProfileCount(const MachineBasicBlock *MBB) const {
-    auto I = MergedBBFreq.find(MBB);
+  auto I = MergedBBFreq.find(MBB);
 
-    // Modified block frequency also impacts profile count. So we should compute
-    // profile count from new block frequency if it has been changed.
-    if (I != MergedBBFreq.end())
-        return MBFI.getProfileCountFromFreq(I->second.getFrequency());
+  // Modified block frequency also impacts profile count. So we should compute
+  // profile count from new block frequency if it has been changed.
+  if (I != MergedBBFreq.end())
+    return MBFI.getProfileCountFromFreq(I->second.getFrequency());
 
-    return MBFI.getBlockProfileCount(MBB);
+  return MBFI.getBlockProfileCount(MBB);
 }
 
-raw_ostream & MBFIWrapper::printBlockFreq(raw_ostream &OS,
-        const MachineBasicBlock *MBB) const {
-    return MBFI.printBlockFreq(OS, getBlockFreq(MBB));
+raw_ostream &MBFIWrapper::printBlockFreq(raw_ostream &OS,
+                                         const MachineBasicBlock *MBB) const {
+  return MBFI.printBlockFreq(OS, getBlockFreq(MBB));
 }
 
-raw_ostream & MBFIWrapper::printBlockFreq(raw_ostream &OS,
-        const BlockFrequency Freq) const {
-    return MBFI.printBlockFreq(OS, Freq);
+raw_ostream &MBFIWrapper::printBlockFreq(raw_ostream &OS,
+                                         const BlockFrequency Freq) const {
+  return MBFI.printBlockFreq(OS, Freq);
 }
 
 void MBFIWrapper::view(const Twine &Name, bool isSimple) {
-    MBFI.view(Name, isSimple);
+  MBFI.view(Name, isSimple);
 }
 
-uint64_t MBFIWrapper::getEntryFreq() const {
-    return MBFI.getEntryFreq();
-}
+uint64_t MBFIWrapper::getEntryFreq() const { return MBFI.getEntryFreq(); }

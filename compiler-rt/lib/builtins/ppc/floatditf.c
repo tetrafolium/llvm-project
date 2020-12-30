@@ -9,25 +9,25 @@
 
 long double __floatditf(int64_t a) {
 
-    static const double twop32 = 0x1.0p32;
-    static const double twop52 = 0x1.0p52;
+  static const double twop32 = 0x1.0p32;
+  static const double twop52 = 0x1.0p52;
 
-    doublebits low = {.d = twop52};
-    low.x |= a & UINT64_C(0x00000000ffffffff); // 0x1.0p52 + low 32 bits of a.
+  doublebits low = {.d = twop52};
+  low.x |= a & UINT64_C(0x00000000ffffffff); // 0x1.0p52 + low 32 bits of a.
 
-    const double high_addend = (double)((int32_t)(a >> 32)) * twop32 - twop52;
+  const double high_addend = (double)((int32_t)(a >> 32)) * twop32 - twop52;
 
-    // At this point, we have two double precision numbers
-    // high_addend and low.d, and we wish to return their sum
-    // as a canonicalized long double:
+  // At this point, we have two double precision numbers
+  // high_addend and low.d, and we wish to return their sum
+  // as a canonicalized long double:
 
-    // This implementation sets the inexact flag spuriously.
-    // This could be avoided, but at some substantial cost.
+  // This implementation sets the inexact flag spuriously.
+  // This could be avoided, but at some substantial cost.
 
-    DD result;
+  DD result;
 
-    result.s.hi = high_addend + low.d;
-    result.s.lo = (high_addend - result.s.hi) + low.d;
+  result.s.hi = high_addend + low.d;
+  result.s.lo = (high_addend - result.s.hi) + low.d;
 
-    return result.ld;
+  return result.ld;
 }

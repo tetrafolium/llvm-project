@@ -28,39 +28,39 @@ namespace {
 
 class SIOptimizeExecMaskingPreRA : public MachineFunctionPass {
 private:
-    const SIRegisterInfo *TRI;
-    const SIInstrInfo *TII;
-    MachineRegisterInfo *MRI;
-    LiveIntervals *LIS;
+  const SIRegisterInfo *TRI;
+  const SIInstrInfo *TII;
+  MachineRegisterInfo *MRI;
+  LiveIntervals *LIS;
 
-    unsigned AndOpc;
-    unsigned Andn2Opc;
-    unsigned OrSaveExecOpc;
-    unsigned XorTermrOpc;
-    MCRegister CondReg;
-    MCRegister ExecReg;
+  unsigned AndOpc;
+  unsigned Andn2Opc;
+  unsigned OrSaveExecOpc;
+  unsigned XorTermrOpc;
+  MCRegister CondReg;
+  MCRegister ExecReg;
 
-    Register optimizeVcndVcmpPair(MachineBasicBlock &MBB);
-    bool optimizeElseBranch(MachineBasicBlock &MBB);
+  Register optimizeVcndVcmpPair(MachineBasicBlock &MBB);
+  bool optimizeElseBranch(MachineBasicBlock &MBB);
 
 public:
-    static char ID;
+  static char ID;
 
-    SIOptimizeExecMaskingPreRA() : MachineFunctionPass(ID) {
-        initializeSIOptimizeExecMaskingPreRAPass(*PassRegistry::getPassRegistry());
-    }
+  SIOptimizeExecMaskingPreRA() : MachineFunctionPass(ID) {
+    initializeSIOptimizeExecMaskingPreRAPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    StringRef getPassName() const override {
-        return "SI optimize exec mask operations pre-RA";
-    }
+  StringRef getPassName() const override {
+    return "SI optimize exec mask operations pre-RA";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<LiveIntervals>();
-        AU.setPreservesAll();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<LiveIntervals>();
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 };
 
 } // End anonymous namespace.
@@ -76,33 +76,33 @@ char SIOptimizeExecMaskingPreRA::ID = 0;
 char &llvm::SIOptimizeExecMaskingPreRAID = SIOptimizeExecMaskingPreRA::ID;
 
 FunctionPass *llvm::createSIOptimizeExecMaskingPreRAPass() {
-    return new SIOptimizeExecMaskingPreRA();
+  return new SIOptimizeExecMaskingPreRA();
 }
 
 // See if there is a def between \p AndIdx and \p SelIdx that needs to live
 // beyond \p AndIdx.
 static bool isDefBetween(const LiveRange &LR, SlotIndex AndIdx,
                          SlotIndex SelIdx) {
-    LiveQueryResult AndLRQ = LR.Query(AndIdx);
-    return (!AndLRQ.isKill() && AndLRQ.valueIn() != LR.Query(SelIdx).valueOut());
+  LiveQueryResult AndLRQ = LR.Query(AndIdx);
+  return (!AndLRQ.isKill() && AndLRQ.valueIn() != LR.Query(SelIdx).valueOut());
 }
 
 // FIXME: Why do we bother trying to handle physical registers here?
-static bool isDefBetween(const SIRegisterInfo &TRI,
-                         LiveIntervals *LIS, Register Reg,
-                         const MachineInstr &Sel, const MachineInstr &And) {
-    SlotIndex AndIdx = LIS->getInstructionIndex(And);
-    SlotIndex SelIdx = LIS->getInstructionIndex(Sel);
+static bool isDefBetween(const SIRegisterInfo &TRI, LiveIntervals *LIS,
+                         Register Reg, const MachineInstr &Sel,
+                         const MachineInstr &And) {
+  SlotIndex AndIdx = LIS->getInstructionIndex(And);
+  SlotIndex SelIdx = LIS->getInstructionIndex(Sel);
 
-    if (Reg.isVirtual())
-        return isDefBetween(LIS->getInterval(Reg), AndIdx, SelIdx);
+  if (Reg.isVirtual())
+    return isDefBetween(LIS->getInterval(Reg), AndIdx, SelIdx);
 
-    for (MCRegUnitIterator UI(Reg.asMCReg(), &TRI); UI.isValid(); ++UI) {
-        if (isDefBetween(LIS->getRegUnit(*UI), AndIdx, SelIdx))
-            return true;
-    }
+  for (MCRegUnitIterator UI(Reg.asMCReg(), &TRI); UI.isValid(); ++UI) {
+    if (isDefBetween(LIS->getRegUnit(*UI), AndIdx, SelIdx))
+      return true;
+  }
 
-    return false;
+  return false;
 }
 
 // Optimize sequence
@@ -123,109 +123,109 @@ static bool isDefBetween(const SIRegisterInfo &TRI,
 // Returns %cc register on success.
 Register
 SIOptimizeExecMaskingPreRA::optimizeVcndVcmpPair(MachineBasicBlock &MBB) {
-    auto I = llvm::find_if(MBB.terminators(), [](const MachineInstr &MI) {
-        unsigned Opc = MI.getOpcode();
-        return Opc == AMDGPU::S_CBRANCH_VCCZ ||
-               Opc == AMDGPU::S_CBRANCH_VCCNZ;
-    });
-    if (I == MBB.terminators().end())
-        return Register();
+  auto I = llvm::find_if(MBB.terminators(), [](const MachineInstr &MI) {
+    unsigned Opc = MI.getOpcode();
+    return Opc == AMDGPU::S_CBRANCH_VCCZ || Opc == AMDGPU::S_CBRANCH_VCCNZ;
+  });
+  if (I == MBB.terminators().end())
+    return Register();
 
-    auto *And =
-        TRI->findReachingDef(CondReg, AMDGPU::NoSubRegister, *I, *MRI, LIS);
-    if (!And || And->getOpcode() != AndOpc ||
-            !And->getOperand(1).isReg() || !And->getOperand(2).isReg())
-        return Register();
+  auto *And =
+      TRI->findReachingDef(CondReg, AMDGPU::NoSubRegister, *I, *MRI, LIS);
+  if (!And || And->getOpcode() != AndOpc || !And->getOperand(1).isReg() ||
+      !And->getOperand(2).isReg())
+    return Register();
 
-    MachineOperand *AndCC = &And->getOperand(1);
-    Register CmpReg = AndCC->getReg();
-    unsigned CmpSubReg = AndCC->getSubReg();
-    if (CmpReg == Register(ExecReg)) {
-        AndCC = &And->getOperand(2);
-        CmpReg = AndCC->getReg();
-        CmpSubReg = AndCC->getSubReg();
-    } else if (And->getOperand(2).getReg() != Register(ExecReg)) {
-        return Register();
+  MachineOperand *AndCC = &And->getOperand(1);
+  Register CmpReg = AndCC->getReg();
+  unsigned CmpSubReg = AndCC->getSubReg();
+  if (CmpReg == Register(ExecReg)) {
+    AndCC = &And->getOperand(2);
+    CmpReg = AndCC->getReg();
+    CmpSubReg = AndCC->getSubReg();
+  } else if (And->getOperand(2).getReg() != Register(ExecReg)) {
+    return Register();
+  }
+
+  auto *Cmp = TRI->findReachingDef(CmpReg, CmpSubReg, *And, *MRI, LIS);
+  if (!Cmp ||
+      !(Cmp->getOpcode() == AMDGPU::V_CMP_NE_U32_e32 ||
+        Cmp->getOpcode() == AMDGPU::V_CMP_NE_U32_e64) ||
+      Cmp->getParent() != And->getParent())
+    return Register();
+
+  MachineOperand *Op1 = TII->getNamedOperand(*Cmp, AMDGPU::OpName::src0);
+  MachineOperand *Op2 = TII->getNamedOperand(*Cmp, AMDGPU::OpName::src1);
+  if (Op1->isImm() && Op2->isReg())
+    std::swap(Op1, Op2);
+  if (!Op1->isReg() || !Op2->isImm() || Op2->getImm() != 1)
+    return Register();
+
+  Register SelReg = Op1->getReg();
+  auto *Sel = TRI->findReachingDef(SelReg, Op1->getSubReg(), *Cmp, *MRI, LIS);
+  if (!Sel || Sel->getOpcode() != AMDGPU::V_CNDMASK_B32_e64)
+    return Register();
+
+  if (TII->hasModifiersSet(*Sel, AMDGPU::OpName::src0_modifiers) ||
+      TII->hasModifiersSet(*Sel, AMDGPU::OpName::src1_modifiers))
+    return Register();
+
+  Op1 = TII->getNamedOperand(*Sel, AMDGPU::OpName::src0);
+  Op2 = TII->getNamedOperand(*Sel, AMDGPU::OpName::src1);
+  MachineOperand *CC = TII->getNamedOperand(*Sel, AMDGPU::OpName::src2);
+  if (!Op1->isImm() || !Op2->isImm() || !CC->isReg() || Op1->getImm() != 0 ||
+      Op2->getImm() != 1)
+    return Register();
+
+  Register CCReg = CC->getReg();
+
+  // If there was a def between the select and the and, we would need to move it
+  // to fold this.
+  if (isDefBetween(*TRI, LIS, CCReg, *Sel, *And))
+    return Register();
+
+  LLVM_DEBUG(dbgs() << "Folding sequence:\n\t" << *Sel << '\t' << *Cmp << '\t'
+                    << *And);
+
+  LIS->RemoveMachineInstrFromMaps(*And);
+  MachineInstr *Andn2 =
+      BuildMI(MBB, *And, And->getDebugLoc(), TII->get(Andn2Opc),
+              And->getOperand(0).getReg())
+          .addReg(ExecReg)
+          .addReg(CCReg, getUndefRegState(CC->isUndef()), CC->getSubReg());
+  MachineOperand &AndSCC = And->getOperand(3);
+  assert(AndSCC.getReg() == AMDGPU::SCC);
+  MachineOperand &Andn2SCC = Andn2->getOperand(3);
+  assert(Andn2SCC.getReg() == AMDGPU::SCC);
+  Andn2SCC.setIsDead(AndSCC.isDead());
+  And->eraseFromParent();
+  LIS->InsertMachineInstrInMaps(*Andn2);
+
+  LLVM_DEBUG(dbgs() << "=>\n\t" << *Andn2 << '\n');
+
+  // Try to remove compare. Cmp value should not used in between of cmp
+  // and s_and_b64 if VCC or just unused if any other register.
+  if ((CmpReg.isVirtual() && MRI->use_nodbg_empty(CmpReg)) ||
+      (CmpReg == Register(CondReg) &&
+       std::none_of(std::next(Cmp->getIterator()), Andn2->getIterator(),
+                    [&](const MachineInstr &MI) {
+                      return MI.readsRegister(CondReg, TRI);
+                    }))) {
+    LLVM_DEBUG(dbgs() << "Erasing: " << *Cmp << '\n');
+
+    LIS->RemoveMachineInstrFromMaps(*Cmp);
+    Cmp->eraseFromParent();
+
+    // Try to remove v_cndmask_b32.
+    if (SelReg.isVirtual() && MRI->use_nodbg_empty(SelReg)) {
+      LLVM_DEBUG(dbgs() << "Erasing: " << *Sel << '\n');
+
+      LIS->RemoveMachineInstrFromMaps(*Sel);
+      Sel->eraseFromParent();
     }
+  }
 
-    auto *Cmp = TRI->findReachingDef(CmpReg, CmpSubReg, *And, *MRI, LIS);
-    if (!Cmp || !(Cmp->getOpcode() == AMDGPU::V_CMP_NE_U32_e32 ||
-                  Cmp->getOpcode() == AMDGPU::V_CMP_NE_U32_e64) ||
-            Cmp->getParent() != And->getParent())
-        return Register();
-
-    MachineOperand *Op1 = TII->getNamedOperand(*Cmp, AMDGPU::OpName::src0);
-    MachineOperand *Op2 = TII->getNamedOperand(*Cmp, AMDGPU::OpName::src1);
-    if (Op1->isImm() && Op2->isReg())
-        std::swap(Op1, Op2);
-    if (!Op1->isReg() || !Op2->isImm() || Op2->getImm() != 1)
-        return Register();
-
-    Register SelReg = Op1->getReg();
-    auto *Sel = TRI->findReachingDef(SelReg, Op1->getSubReg(), *Cmp, *MRI, LIS);
-    if (!Sel || Sel->getOpcode() != AMDGPU::V_CNDMASK_B32_e64)
-        return Register();
-
-    if (TII->hasModifiersSet(*Sel, AMDGPU::OpName::src0_modifiers) ||
-            TII->hasModifiersSet(*Sel, AMDGPU::OpName::src1_modifiers))
-        return Register();
-
-    Op1 = TII->getNamedOperand(*Sel, AMDGPU::OpName::src0);
-    Op2 = TII->getNamedOperand(*Sel, AMDGPU::OpName::src1);
-    MachineOperand *CC = TII->getNamedOperand(*Sel, AMDGPU::OpName::src2);
-    if (!Op1->isImm() || !Op2->isImm() || !CC->isReg() ||
-            Op1->getImm() != 0 || Op2->getImm() != 1)
-        return Register();
-
-    Register CCReg = CC->getReg();
-
-    // If there was a def between the select and the and, we would need to move it
-    // to fold this.
-    if (isDefBetween(*TRI, LIS, CCReg, *Sel, *And))
-        return Register();
-
-    LLVM_DEBUG(dbgs() << "Folding sequence:\n\t" << *Sel << '\t' << *Cmp << '\t'
-               << *And);
-
-    LIS->RemoveMachineInstrFromMaps(*And);
-    MachineInstr *Andn2 =
-        BuildMI(MBB, *And, And->getDebugLoc(), TII->get(Andn2Opc),
-                And->getOperand(0).getReg())
-        .addReg(ExecReg)
-        .addReg(CCReg, getUndefRegState(CC->isUndef()), CC->getSubReg());
-    MachineOperand &AndSCC = And->getOperand(3);
-    assert(AndSCC.getReg() == AMDGPU::SCC);
-    MachineOperand &Andn2SCC = Andn2->getOperand(3);
-    assert(Andn2SCC.getReg() == AMDGPU::SCC);
-    Andn2SCC.setIsDead(AndSCC.isDead());
-    And->eraseFromParent();
-    LIS->InsertMachineInstrInMaps(*Andn2);
-
-    LLVM_DEBUG(dbgs() << "=>\n\t" << *Andn2 << '\n');
-
-    // Try to remove compare. Cmp value should not used in between of cmp
-    // and s_and_b64 if VCC or just unused if any other register.
-    if ((CmpReg.isVirtual() && MRI->use_nodbg_empty(CmpReg)) ||
-            (CmpReg == Register(CondReg) &&
-             std::none_of(std::next(Cmp->getIterator()), Andn2->getIterator(),
-    [&](const MachineInstr &MI) {
-    return MI.readsRegister(CondReg, TRI);
-    }))) {
-        LLVM_DEBUG(dbgs() << "Erasing: " << *Cmp << '\n');
-
-        LIS->RemoveMachineInstrFromMaps(*Cmp);
-        Cmp->eraseFromParent();
-
-        // Try to remove v_cndmask_b32.
-        if (SelReg.isVirtual() && MRI->use_nodbg_empty(SelReg)) {
-            LLVM_DEBUG(dbgs() << "Erasing: " << *Sel << '\n');
-
-            LIS->RemoveMachineInstrFromMaps(*Sel);
-            Sel->eraseFromParent();
-        }
-    }
-
-    return CCReg;
+  return CCReg;
 }
 
 // Optimize sequence
@@ -243,206 +243,206 @@ SIOptimizeExecMaskingPreRA::optimizeVcndVcmpPair(MachineBasicBlock &MBB) {
 //
 // Return whether any changes were made to MBB.
 bool SIOptimizeExecMaskingPreRA::optimizeElseBranch(MachineBasicBlock &MBB) {
-    if (MBB.empty())
-        return false;
+  if (MBB.empty())
+    return false;
 
-    // Check this is an else block.
-    auto First = MBB.begin();
-    MachineInstr &SaveExecMI = *First;
-    if (SaveExecMI.getOpcode() != OrSaveExecOpc)
-        return false;
+  // Check this is an else block.
+  auto First = MBB.begin();
+  MachineInstr &SaveExecMI = *First;
+  if (SaveExecMI.getOpcode() != OrSaveExecOpc)
+    return false;
 
-    auto I = llvm::find_if(MBB.terminators(), [this](const MachineInstr &MI) {
-        return MI.getOpcode() == XorTermrOpc;
-    });
-    if (I == MBB.terminators().end())
-        return false;
+  auto I = llvm::find_if(MBB.terminators(), [this](const MachineInstr &MI) {
+    return MI.getOpcode() == XorTermrOpc;
+  });
+  if (I == MBB.terminators().end())
+    return false;
 
-    MachineInstr &XorTermMI = *I;
-    if (XorTermMI.getOperand(1).getReg() != Register(ExecReg))
-        return false;
+  MachineInstr &XorTermMI = *I;
+  if (XorTermMI.getOperand(1).getReg() != Register(ExecReg))
+    return false;
 
-    Register SavedExecReg = SaveExecMI.getOperand(0).getReg();
-    Register DstReg = XorTermMI.getOperand(2).getReg();
+  Register SavedExecReg = SaveExecMI.getOperand(0).getReg();
+  Register DstReg = XorTermMI.getOperand(2).getReg();
 
-    // Find potentially unnecessary S_AND
-    MachineInstr *AndExecMI = nullptr;
+  // Find potentially unnecessary S_AND
+  MachineInstr *AndExecMI = nullptr;
+  I--;
+  while (I != First && !AndExecMI) {
+    if (I->getOpcode() == AndOpc && I->getOperand(0).getReg() == DstReg &&
+        I->getOperand(1).getReg() == Register(ExecReg))
+      AndExecMI = &*I;
     I--;
-    while (I != First && !AndExecMI) {
-        if (I->getOpcode() == AndOpc && I->getOperand(0).getReg() == DstReg &&
-                I->getOperand(1).getReg() == Register(ExecReg))
-            AndExecMI = &*I;
-        I--;
-    }
-    if (!AndExecMI)
-        return false;
+  }
+  if (!AndExecMI)
+    return false;
 
-    // Check for exec modifying instructions.
-    // Note: exec defs do not create live ranges beyond the
-    // instruction so isDefBetween cannot be used.
-    // Instead just check that the def segments are adjacent.
-    SlotIndex StartIdx = LIS->getInstructionIndex(SaveExecMI);
-    SlotIndex EndIdx = LIS->getInstructionIndex(*AndExecMI);
-    for (MCRegUnitIterator UI(ExecReg, TRI); UI.isValid(); ++UI) {
-        LiveRange &RegUnit = LIS->getRegUnit(*UI);
-        if (RegUnit.find(StartIdx) != std::prev(RegUnit.find(EndIdx)))
-            return false;
-    }
+  // Check for exec modifying instructions.
+  // Note: exec defs do not create live ranges beyond the
+  // instruction so isDefBetween cannot be used.
+  // Instead just check that the def segments are adjacent.
+  SlotIndex StartIdx = LIS->getInstructionIndex(SaveExecMI);
+  SlotIndex EndIdx = LIS->getInstructionIndex(*AndExecMI);
+  for (MCRegUnitIterator UI(ExecReg, TRI); UI.isValid(); ++UI) {
+    LiveRange &RegUnit = LIS->getRegUnit(*UI);
+    if (RegUnit.find(StartIdx) != std::prev(RegUnit.find(EndIdx)))
+      return false;
+  }
 
-    // Remove unnecessary S_AND
-    LIS->removeInterval(SavedExecReg);
-    LIS->removeInterval(DstReg);
+  // Remove unnecessary S_AND
+  LIS->removeInterval(SavedExecReg);
+  LIS->removeInterval(DstReg);
 
-    SaveExecMI.getOperand(0).setReg(DstReg);
+  SaveExecMI.getOperand(0).setReg(DstReg);
 
-    LIS->RemoveMachineInstrFromMaps(*AndExecMI);
-    AndExecMI->eraseFromParent();
+  LIS->RemoveMachineInstrFromMaps(*AndExecMI);
+  AndExecMI->eraseFromParent();
 
-    LIS->createAndComputeVirtRegInterval(DstReg);
+  LIS->createAndComputeVirtRegInterval(DstReg);
 
-    return true;
+  return true;
 }
 
 bool SIOptimizeExecMaskingPreRA::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
-    TRI = ST.getRegisterInfo();
-    TII = ST.getInstrInfo();
-    MRI = &MF.getRegInfo();
-    LIS = &getAnalysis<LiveIntervals>();
+  const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
+  TRI = ST.getRegisterInfo();
+  TII = ST.getInstrInfo();
+  MRI = &MF.getRegInfo();
+  LIS = &getAnalysis<LiveIntervals>();
 
-    const bool Wave32 = ST.isWave32();
-    AndOpc = Wave32 ? AMDGPU::S_AND_B32 : AMDGPU::S_AND_B64;
-    Andn2Opc = Wave32 ? AMDGPU::S_ANDN2_B32 : AMDGPU::S_ANDN2_B64;
-    OrSaveExecOpc =
-        Wave32 ? AMDGPU::S_OR_SAVEEXEC_B32 : AMDGPU::S_OR_SAVEEXEC_B64;
-    XorTermrOpc = Wave32 ? AMDGPU::S_XOR_B32_term : AMDGPU::S_XOR_B64_term;
-    CondReg = MCRegister::from(Wave32 ? AMDGPU::VCC_LO : AMDGPU::VCC);
-    ExecReg = MCRegister::from(Wave32 ? AMDGPU::EXEC_LO : AMDGPU::EXEC);
+  const bool Wave32 = ST.isWave32();
+  AndOpc = Wave32 ? AMDGPU::S_AND_B32 : AMDGPU::S_AND_B64;
+  Andn2Opc = Wave32 ? AMDGPU::S_ANDN2_B32 : AMDGPU::S_ANDN2_B64;
+  OrSaveExecOpc =
+      Wave32 ? AMDGPU::S_OR_SAVEEXEC_B32 : AMDGPU::S_OR_SAVEEXEC_B64;
+  XorTermrOpc = Wave32 ? AMDGPU::S_XOR_B32_term : AMDGPU::S_XOR_B64_term;
+  CondReg = MCRegister::from(Wave32 ? AMDGPU::VCC_LO : AMDGPU::VCC);
+  ExecReg = MCRegister::from(Wave32 ? AMDGPU::EXEC_LO : AMDGPU::EXEC);
 
-    DenseSet<Register> RecalcRegs({AMDGPU::EXEC_LO, AMDGPU::EXEC_HI});
-    bool Changed = false;
+  DenseSet<Register> RecalcRegs({AMDGPU::EXEC_LO, AMDGPU::EXEC_HI});
+  bool Changed = false;
 
-    for (MachineBasicBlock &MBB : MF) {
+  for (MachineBasicBlock &MBB : MF) {
 
-        if (optimizeElseBranch(MBB)) {
-            RecalcRegs.insert(AMDGPU::SCC);
-            Changed = true;
-        }
+    if (optimizeElseBranch(MBB)) {
+      RecalcRegs.insert(AMDGPU::SCC);
+      Changed = true;
+    }
 
-        if (Register Reg = optimizeVcndVcmpPair(MBB)) {
-            RecalcRegs.insert(Reg);
-            RecalcRegs.insert(AMDGPU::VCC_LO);
-            RecalcRegs.insert(AMDGPU::VCC_HI);
-            RecalcRegs.insert(AMDGPU::SCC);
-            Changed = true;
-        }
+    if (Register Reg = optimizeVcndVcmpPair(MBB)) {
+      RecalcRegs.insert(Reg);
+      RecalcRegs.insert(AMDGPU::VCC_LO);
+      RecalcRegs.insert(AMDGPU::VCC_HI);
+      RecalcRegs.insert(AMDGPU::SCC);
+      Changed = true;
+    }
 
-        // Try to remove unneeded instructions before s_endpgm.
-        if (MBB.succ_empty()) {
-            if (MBB.empty())
-                continue;
+    // Try to remove unneeded instructions before s_endpgm.
+    if (MBB.succ_empty()) {
+      if (MBB.empty())
+        continue;
 
-            // Skip this if the endpgm has any implicit uses, otherwise we would need
-            // to be careful to update / remove them.
-            // S_ENDPGM always has a single imm operand that is not used other than to
-            // end up in the encoding
-            MachineInstr &Term = MBB.back();
-            if (Term.getOpcode() != AMDGPU::S_ENDPGM || Term.getNumOperands() != 1)
-                continue;
+      // Skip this if the endpgm has any implicit uses, otherwise we would need
+      // to be careful to update / remove them.
+      // S_ENDPGM always has a single imm operand that is not used other than to
+      // end up in the encoding
+      MachineInstr &Term = MBB.back();
+      if (Term.getOpcode() != AMDGPU::S_ENDPGM || Term.getNumOperands() != 1)
+        continue;
 
-            SmallVector<MachineBasicBlock*, 4> Blocks({&MBB});
+      SmallVector<MachineBasicBlock *, 4> Blocks({&MBB});
 
-            while (!Blocks.empty()) {
-                auto CurBB = Blocks.pop_back_val();
-                auto I = CurBB->rbegin(), E = CurBB->rend();
-                if (I != E) {
-                    if (I->isUnconditionalBranch() || I->getOpcode() == AMDGPU::S_ENDPGM)
-                        ++I;
-                    else if (I->isBranch())
-                        continue;
-                }
-
-                while (I != E) {
-                    if (I->isDebugInstr()) {
-                        I = std::next(I);
-                        continue;
-                    }
-
-                    if (I->mayStore() || I->isBarrier() || I->isCall() ||
-                            I->hasUnmodeledSideEffects() || I->hasOrderedMemoryRef())
-                        break;
-
-                    LLVM_DEBUG(dbgs()
-                               << "Removing no effect instruction: " << *I << '\n');
-
-                    for (auto &Op : I->operands()) {
-                        if (Op.isReg())
-                            RecalcRegs.insert(Op.getReg());
-                    }
-
-                    auto Next = std::next(I);
-                    LIS->RemoveMachineInstrFromMaps(*I);
-                    I->eraseFromParent();
-                    I = Next;
-
-                    Changed = true;
-                }
-
-                if (I != E)
-                    continue;
-
-                // Try to ascend predecessors.
-                for (auto *Pred : CurBB->predecessors()) {
-                    if (Pred->succ_size() == 1)
-                        Blocks.push_back(Pred);
-                }
-            }
+      while (!Blocks.empty()) {
+        auto CurBB = Blocks.pop_back_val();
+        auto I = CurBB->rbegin(), E = CurBB->rend();
+        if (I != E) {
+          if (I->isUnconditionalBranch() || I->getOpcode() == AMDGPU::S_ENDPGM)
+            ++I;
+          else if (I->isBranch())
             continue;
         }
 
-        // If the only user of a logical operation is move to exec, fold it now
-        // to prevent forming of saveexec. I.e:
-        //
-        //    %0:sreg_64 = COPY $exec
-        //    %1:sreg_64 = S_AND_B64 %0:sreg_64, %2:sreg_64
-        // =>
-        //    %1 = S_AND_B64 $exec, %2:sreg_64
-        unsigned ScanThreshold = 10;
-        for (auto I = MBB.rbegin(), E = MBB.rend(); I != E
-                && ScanThreshold--; ++I) {
-            // Continue scanning if this is not a full exec copy
-            if (!(I->isFullCopy() && I->getOperand(1).getReg() == Register(ExecReg)))
-                continue;
+        while (I != E) {
+          if (I->isDebugInstr()) {
+            I = std::next(I);
+            continue;
+          }
 
-            Register SavedExec = I->getOperand(0).getReg();
-            if (SavedExec.isVirtual() && MRI->hasOneNonDBGUse(SavedExec) &&
-                    MRI->use_instr_nodbg_begin(SavedExec)->getParent() ==
-                    I->getParent()) {
-                LLVM_DEBUG(dbgs() << "Redundant EXEC COPY: " << *I << '\n');
-                LIS->RemoveMachineInstrFromMaps(*I);
-                I->eraseFromParent();
-                MRI->replaceRegWith(SavedExec, ExecReg);
-                LIS->removeInterval(SavedExec);
-                Changed = true;
-            }
+          if (I->mayStore() || I->isBarrier() || I->isCall() ||
+              I->hasUnmodeledSideEffects() || I->hasOrderedMemoryRef())
             break;
+
+          LLVM_DEBUG(dbgs()
+                     << "Removing no effect instruction: " << *I << '\n');
+
+          for (auto &Op : I->operands()) {
+            if (Op.isReg())
+              RecalcRegs.insert(Op.getReg());
+          }
+
+          auto Next = std::next(I);
+          LIS->RemoveMachineInstrFromMaps(*I);
+          I->eraseFromParent();
+          I = Next;
+
+          Changed = true;
         }
+
+        if (I != E)
+          continue;
+
+        // Try to ascend predecessors.
+        for (auto *Pred : CurBB->predecessors()) {
+          if (Pred->succ_size() == 1)
+            Blocks.push_back(Pred);
+        }
+      }
+      continue;
     }
 
-    if (Changed) {
-        for (auto Reg : RecalcRegs) {
-            if (Reg.isVirtual()) {
-                LIS->removeInterval(Reg);
-                if (!MRI->reg_empty(Reg))
-                    LIS->createAndComputeVirtRegInterval(Reg);
-            } else {
-                LIS->removeAllRegUnitsForPhysReg(Reg);
-            }
-        }
-    }
+    // If the only user of a logical operation is move to exec, fold it now
+    // to prevent forming of saveexec. I.e:
+    //
+    //    %0:sreg_64 = COPY $exec
+    //    %1:sreg_64 = S_AND_B64 %0:sreg_64, %2:sreg_64
+    // =>
+    //    %1 = S_AND_B64 $exec, %2:sreg_64
+    unsigned ScanThreshold = 10;
+    for (auto I = MBB.rbegin(), E = MBB.rend(); I != E && ScanThreshold--;
+         ++I) {
+      // Continue scanning if this is not a full exec copy
+      if (!(I->isFullCopy() && I->getOperand(1).getReg() == Register(ExecReg)))
+        continue;
 
-    return Changed;
+      Register SavedExec = I->getOperand(0).getReg();
+      if (SavedExec.isVirtual() && MRI->hasOneNonDBGUse(SavedExec) &&
+          MRI->use_instr_nodbg_begin(SavedExec)->getParent() ==
+              I->getParent()) {
+        LLVM_DEBUG(dbgs() << "Redundant EXEC COPY: " << *I << '\n');
+        LIS->RemoveMachineInstrFromMaps(*I);
+        I->eraseFromParent();
+        MRI->replaceRegWith(SavedExec, ExecReg);
+        LIS->removeInterval(SavedExec);
+        Changed = true;
+      }
+      break;
+    }
+  }
+
+  if (Changed) {
+    for (auto Reg : RecalcRegs) {
+      if (Reg.isVirtual()) {
+        LIS->removeInterval(Reg);
+        if (!MRI->reg_empty(Reg))
+          LIS->createAndComputeVirtRegInterval(Reg);
+      } else {
+        LIS->removeAllRegUnitsForPhysReg(Reg);
+      }
+    }
+  }
+
+  return Changed;
 }

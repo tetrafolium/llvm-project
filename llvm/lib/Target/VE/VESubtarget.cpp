@@ -26,19 +26,19 @@ using namespace llvm;
 void VESubtarget::anchor() {}
 
 VESubtarget &VESubtarget::initializeSubtargetDependencies(StringRef CPU,
-        StringRef FS) {
-    // Default feature settings
-    EnableVPU = false;
+                                                          StringRef FS) {
+  // Default feature settings
+  EnableVPU = false;
 
-    // Determine default and user specified characteristics
-    std::string CPUName = std::string(CPU);
-    if (CPUName.empty())
-        CPUName = "ve";
+  // Determine default and user specified characteristics
+  std::string CPUName = std::string(CPU);
+  if (CPUName.empty())
+    CPUName = "ve";
 
-    // Parse features string.
-    ParseSubtargetFeatures(CPUName, /*TuneCPU=*/CPU, FS);
+  // Parse features string.
+  ParseSubtargetFeatures(CPUName, /*TuneCPU=*/CPU, FS);
 
-    return *this;
+  return *this;
 }
 
 VESubtarget::VESubtarget(const Triple &TT, const std::string &CPU,
@@ -48,16 +48,14 @@ VESubtarget::VESubtarget(const Triple &TT, const std::string &CPU,
       FrameLowering(*this) {}
 
 uint64_t VESubtarget::getAdjustedFrameSize(uint64_t FrameSize) const {
-    // Calculate adjusted frame size by adding the size of RSA frame,
-    // return address, and frame poitner as described in VEFrameLowering.cpp.
-    const VEFrameLowering *TFL = getFrameLowering();
+  // Calculate adjusted frame size by adding the size of RSA frame,
+  // return address, and frame poitner as described in VEFrameLowering.cpp.
+  const VEFrameLowering *TFL = getFrameLowering();
 
-    FrameSize += getRsaSize();
-    FrameSize = alignTo(FrameSize, TFL->getStackAlign());
+  FrameSize += getRsaSize();
+  FrameSize = alignTo(FrameSize, TFL->getStackAlign());
 
-    return FrameSize;
+  return FrameSize;
 }
 
-bool VESubtarget::enableMachineScheduler() const {
-    return true;
-}
+bool VESubtarget::enableMachineScheduler() const { return true; }

@@ -29,25 +29,27 @@ using namespace llvm;
 
 void RISCVSubtarget::anchor() {}
 
-RISCVSubtarget &RISCVSubtarget::initializeSubtargetDependencies(
-    const Triple &TT, StringRef CPU, StringRef TuneCPU, StringRef FS, StringRef ABIName) {
-    // Determine default and user-specified characteristics
-    bool Is64Bit = TT.isArch64Bit();
-    std::string CPUName = std::string(CPU);
-    std::string TuneCPUName = std::string(TuneCPU);
-    if (CPUName.empty())
-        CPUName = Is64Bit ? "generic-rv64" : "generic-rv32";
-    if (TuneCPUName.empty())
-        TuneCPUName = CPUName;
-    ParseSubtargetFeatures(CPUName, TuneCPUName, FS);
-    if (Is64Bit) {
-        XLenVT = MVT::i64;
-        XLen = 64;
-    }
+RISCVSubtarget &
+RISCVSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
+                                                StringRef TuneCPU, StringRef FS,
+                                                StringRef ABIName) {
+  // Determine default and user-specified characteristics
+  bool Is64Bit = TT.isArch64Bit();
+  std::string CPUName = std::string(CPU);
+  std::string TuneCPUName = std::string(TuneCPU);
+  if (CPUName.empty())
+    CPUName = Is64Bit ? "generic-rv64" : "generic-rv32";
+  if (TuneCPUName.empty())
+    TuneCPUName = CPUName;
+  ParseSubtargetFeatures(CPUName, TuneCPUName, FS);
+  if (Is64Bit) {
+    XLenVT = MVT::i64;
+    XLen = 64;
+  }
 
-    TargetABI = RISCVABI::computeTargetABI(TT, getFeatureBits(), ABIName);
-    RISCVFeatures::validate(TT, getFeatureBits());
-    return *this;
+  TargetABI = RISCVABI::computeTargetABI(TT, getFeatureBits(), ABIName);
+  RISCVFeatures::validate(TT, getFeatureBits());
+  return *this;
 }
 
 RISCVSubtarget::RISCVSubtarget(const Triple &TT, StringRef CPU,
@@ -55,29 +57,30 @@ RISCVSubtarget::RISCVSubtarget(const Triple &TT, StringRef CPU,
                                StringRef ABIName, const TargetMachine &TM)
     : RISCVGenSubtargetInfo(TT, CPU, TuneCPU, FS),
       UserReservedRegister(RISCV::NUM_TARGET_REGS),
-      FrameLowering(initializeSubtargetDependencies(TT, CPU, TuneCPU, FS, ABIName)),
+      FrameLowering(
+          initializeSubtargetDependencies(TT, CPU, TuneCPU, FS, ABIName)),
       InstrInfo(*this), RegInfo(getHwMode()), TLInfo(TM, *this) {
-    CallLoweringInfo.reset(new RISCVCallLowering(*getTargetLowering()));
-    Legalizer.reset(new RISCVLegalizerInfo(*this));
+  CallLoweringInfo.reset(new RISCVCallLowering(*getTargetLowering()));
+  Legalizer.reset(new RISCVLegalizerInfo(*this));
 
-    auto *RBI = new RISCVRegisterBankInfo(*getRegisterInfo());
-    RegBankInfo.reset(RBI);
-    InstSelector.reset(createRISCVInstructionSelector(
-                           *static_cast<const RISCVTargetMachine *>(&TM), *this, *RBI));
+  auto *RBI = new RISCVRegisterBankInfo(*getRegisterInfo());
+  RegBankInfo.reset(RBI);
+  InstSelector.reset(createRISCVInstructionSelector(
+      *static_cast<const RISCVTargetMachine *>(&TM), *this, *RBI));
 }
 
 const CallLowering *RISCVSubtarget::getCallLowering() const {
-    return CallLoweringInfo.get();
+  return CallLoweringInfo.get();
 }
 
 InstructionSelector *RISCVSubtarget::getInstructionSelector() const {
-    return InstSelector.get();
+  return InstSelector.get();
 }
 
 const LegalizerInfo *RISCVSubtarget::getLegalizerInfo() const {
-    return Legalizer.get();
+  return Legalizer.get();
 }
 
 const RegisterBankInfo *RISCVSubtarget::getRegBankInfo() const {
-    return RegBankInfo.get();
+  return RegBankInfo.get();
 }

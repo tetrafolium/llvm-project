@@ -24,24 +24,24 @@ struct RuntimeFunction;
 
 class PECallFrameInfo : public virtual lldb_private::CallFrameInfo {
 public:
-    explicit PECallFrameInfo(ObjectFilePECOFF &object_file,
-                             uint32_t exception_dir_rva,
-                             uint32_t exception_dir_size);
+  explicit PECallFrameInfo(ObjectFilePECOFF &object_file,
+                           uint32_t exception_dir_rva,
+                           uint32_t exception_dir_size);
 
-    bool GetAddressRange(lldb_private::Address addr,
-                         lldb_private::AddressRange &range) override;
+  bool GetAddressRange(lldb_private::Address addr,
+                       lldb_private::AddressRange &range) override;
 
-    bool GetUnwindPlan(const lldb_private::Address &addr,
-                       lldb_private::UnwindPlan &unwind_plan) override;
-    bool GetUnwindPlan(const lldb_private::AddressRange &range,
-                       lldb_private::UnwindPlan &unwind_plan) override;
+  bool GetUnwindPlan(const lldb_private::Address &addr,
+                     lldb_private::UnwindPlan &unwind_plan) override;
+  bool GetUnwindPlan(const lldb_private::AddressRange &range,
+                     lldb_private::UnwindPlan &unwind_plan) override;
 
 private:
-    const llvm::Win64EH::RuntimeFunction *FindRuntimeFunctionIntersectsWithRange(
-        const lldb_private::AddressRange &range) const;
+  const llvm::Win64EH::RuntimeFunction *FindRuntimeFunctionIntersectsWithRange(
+      const lldb_private::AddressRange &range) const;
 
-    ObjectFilePECOFF &m_object_file;
-    lldb_private::DataExtractor m_exception_dir;
+  ObjectFilePECOFF &m_object_file;
+  lldb_private::DataExtractor m_exception_dir;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_OBJECTFILE_PECOFF_PECALLFRAMEINFO_H

@@ -24,8 +24,8 @@ namespace mlir {
 /// RegionKindInterface, then any regions it contains are assumed to be
 /// SSACFG regions.
 enum class RegionKind {
-    SSACFG,
-    Graph,
+  SSACFG,
+  Graph,
 };
 
 } // namespace mlir

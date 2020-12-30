@@ -16,8 +16,8 @@ namespace llvm {
 class raw_ostream;
 enum class FloatStyle { Exponent, ExponentUpper, Fixed, Percent };
 enum class IntegerStyle {
-    Integer,
-    Number,
+  Integer,
+  Number,
 };
 enum class HexPrintStyle { Upper, Lower, PrefixUpper, PrefixLower };
 
@@ -41,7 +41,6 @@ void write_hex(raw_ostream &S, uint64_t N, HexPrintStyle Style,
                Optional<size_t> Width = None);
 void write_double(raw_ostream &S, double D, FloatStyle Style,
                   Optional<size_t> Precision = None);
-}
+} // namespace llvm
 
 #endif
-

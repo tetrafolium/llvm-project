@@ -21,14 +21,14 @@
 using namespace mlir;
 
 void arm_sve::ArmSVEDialect::initialize() {
-    addOperations<
+  addOperations<
 #define GET_OP_LIST
 #include "mlir/Dialect/ArmSVE/ArmSVE.cpp.inc"
-    >();
-    addTypes<
+      >();
+  addTypes<
 #define GET_TYPEDEF_LIST
 #include "mlir/Dialect/ArmSVE/ArmSVETypes.cpp.inc"
-    >();
+      >();
 }
 
 #define GET_OP_CLASSES
@@ -42,15 +42,15 @@ void arm_sve::ArmSVEDialect::initialize() {
 //===----------------------------------------------------------------------===//
 
 Type arm_sve::ArmSVEDialect::parseType(DialectAsmParser &parser) const {
-    llvm::SMLoc typeLoc = parser.getCurrentLocation();
-    auto genType = generatedTypeParser(getContext(), parser, "vector");
-    if (genType != Type())
-        return genType;
-    parser.emitError(typeLoc, "unknown type in ArmSVE dialect");
-    return Type();
+  llvm::SMLoc typeLoc = parser.getCurrentLocation();
+  auto genType = generatedTypeParser(getContext(), parser, "vector");
+  if (genType != Type())
+    return genType;
+  parser.emitError(typeLoc, "unknown type in ArmSVE dialect");
+  return Type();
 }
 
 void arm_sve::ArmSVEDialect::printType(Type type, DialectAsmPrinter &os) const {
-    if (failed(generatedTypePrinter(type, os)))
-        llvm_unreachable("unexpected 'arm_sve' type kind");
+  if (failed(generatedTypePrinter(type, os)))
+    llvm_unreachable("unexpected 'arm_sve' type kind");
 }

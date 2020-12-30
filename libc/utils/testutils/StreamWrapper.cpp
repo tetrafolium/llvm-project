@@ -15,15 +15,13 @@
 namespace __llvm_libc {
 namespace testutils {
 
-StreamWrapper outs() {
-    return {std::addressof(std::cout)};
-}
+StreamWrapper outs() { return {std::addressof(std::cout)}; }
 
 template <typename T> StreamWrapper &StreamWrapper::operator<<(T t) {
-    assert(OS);
-    std::ostream &Stream = *reinterpret_cast<std::ostream *>(OS);
-    Stream << t;
-    return *this;
+  assert(OS);
+  std::ostream &Stream = *reinterpret_cast<std::ostream *>(OS);
+  Stream << t;
+  return *this;
 }
 
 template StreamWrapper &StreamWrapper::operator<<<void *>(void *t);
@@ -35,14 +33,14 @@ template StreamWrapper &StreamWrapper::operator<<<int>(int t);
 template StreamWrapper &StreamWrapper::operator<<<long>(long t);
 template StreamWrapper &StreamWrapper::operator<<<long long>(long long t);
 template StreamWrapper &
-StreamWrapper::operator<<<unsigned char>(unsigned char t);
+    StreamWrapper::operator<<<unsigned char>(unsigned char t);
 template StreamWrapper &
-StreamWrapper::operator<<<unsigned short>(unsigned short t);
+    StreamWrapper::operator<<<unsigned short>(unsigned short t);
 template StreamWrapper &StreamWrapper::operator<<<unsigned int>(unsigned int t);
 template StreamWrapper &
-StreamWrapper::operator<<<unsigned long>(unsigned long t);
+    StreamWrapper::operator<<<unsigned long>(unsigned long t);
 template StreamWrapper &
-StreamWrapper::operator<<<unsigned long long>(unsigned long long t);
+    StreamWrapper::operator<<<unsigned long long>(unsigned long long t);
 template StreamWrapper &StreamWrapper::operator<<<bool>(bool t);
 template StreamWrapper &StreamWrapper::operator<<<std::string>(std::string t);
 

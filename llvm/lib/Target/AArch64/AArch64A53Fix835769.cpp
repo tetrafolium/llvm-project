@@ -37,72 +37,71 @@ STATISTIC(NumNopsAdded, "Number of Nops added to work around erratum 835769");
 // Is the instruction a match for the instruction that comes first in the
 // sequence of instructions that can trigger the erratum?
 static bool isFirstInstructionInSequence(MachineInstr *MI) {
-    // Must return true if this instruction is a load, a store or a prefetch.
-    switch (MI->getOpcode()) {
-    case AArch64::PRFMl:
-    case AArch64::PRFMroW:
-    case AArch64::PRFMroX:
-    case AArch64::PRFMui:
-    case AArch64::PRFUMi:
-        return true;
-    default:
-        return MI->mayLoadOrStore();
-    }
+  // Must return true if this instruction is a load, a store or a prefetch.
+  switch (MI->getOpcode()) {
+  case AArch64::PRFMl:
+  case AArch64::PRFMroW:
+  case AArch64::PRFMroX:
+  case AArch64::PRFMui:
+  case AArch64::PRFUMi:
+    return true;
+  default:
+    return MI->mayLoadOrStore();
+  }
 }
 
 // Is the instruction a match for the instruction that comes second in the
 // sequence that can trigger the erratum?
 static bool isSecondInstructionInSequence(MachineInstr *MI) {
-    // Must return true for non-SIMD integer multiply-accumulates, writing
-    // to a 64-bit register.
-    switch (MI->getOpcode()) {
-    // Erratum cannot be triggered when the destination register is 32 bits,
-    // therefore only include the following.
-    case AArch64::MSUBXrrr:
-    case AArch64::MADDXrrr:
-    case AArch64::SMADDLrrr:
-    case AArch64::SMSUBLrrr:
-    case AArch64::UMADDLrrr:
-    case AArch64::UMSUBLrrr:
-        // Erratum can only be triggered by multiply-adds, not by regular
-        // non-accumulating multiplies, i.e. when Ra=XZR='11111'
-        return MI->getOperand(3).getReg() != AArch64::XZR;
-    default:
-        return false;
-    }
+  // Must return true for non-SIMD integer multiply-accumulates, writing
+  // to a 64-bit register.
+  switch (MI->getOpcode()) {
+  // Erratum cannot be triggered when the destination register is 32 bits,
+  // therefore only include the following.
+  case AArch64::MSUBXrrr:
+  case AArch64::MADDXrrr:
+  case AArch64::SMADDLrrr:
+  case AArch64::SMSUBLrrr:
+  case AArch64::UMADDLrrr:
+  case AArch64::UMSUBLrrr:
+    // Erratum can only be triggered by multiply-adds, not by regular
+    // non-accumulating multiplies, i.e. when Ra=XZR='11111'
+    return MI->getOperand(3).getReg() != AArch64::XZR;
+  default:
+    return false;
+  }
 }
-
 
 //===----------------------------------------------------------------------===//
 
 namespace {
 class AArch64A53Fix835769 : public MachineFunctionPass {
-    const TargetInstrInfo *TII;
+  const TargetInstrInfo *TII;
 
 public:
-    static char ID;
-    explicit AArch64A53Fix835769() : MachineFunctionPass(ID) {
-        initializeAArch64A53Fix835769Pass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  explicit AArch64A53Fix835769() : MachineFunctionPass(ID) {
+    initializeAArch64A53Fix835769Pass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &F) override;
+  bool runOnMachineFunction(MachineFunction &F) override;
 
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::NoVRegs);
-    }
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoVRegs);
+  }
 
-    StringRef getPassName() const override {
-        return "Workaround A53 erratum 835769 pass";
-    }
+  StringRef getPassName() const override {
+    return "Workaround A53 erratum 835769 pass";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
 private:
-    bool runOnBasicBlock(MachineBasicBlock &MBB);
+  bool runOnBasicBlock(MachineBasicBlock &MBB);
 };
 char AArch64A53Fix835769::ID = 0;
 
@@ -113,39 +112,38 @@ INITIALIZE_PASS(AArch64A53Fix835769, "aarch64-fix-cortex-a53-835769-pass",
 
 //===----------------------------------------------------------------------===//
 
-bool
-AArch64A53Fix835769::runOnMachineFunction(MachineFunction &F) {
-    LLVM_DEBUG(dbgs() << "***** AArch64A53Fix835769 *****\n");
-    bool Changed = false;
-    TII = F.getSubtarget().getInstrInfo();
+bool AArch64A53Fix835769::runOnMachineFunction(MachineFunction &F) {
+  LLVM_DEBUG(dbgs() << "***** AArch64A53Fix835769 *****\n");
+  bool Changed = false;
+  TII = F.getSubtarget().getInstrInfo();
 
-    for (auto &MBB : F) {
-        Changed |= runOnBasicBlock(MBB);
-    }
-    return Changed;
+  for (auto &MBB : F) {
+    Changed |= runOnBasicBlock(MBB);
+  }
+  return Changed;
 }
 
 // Return the block that was fallen through to get to MBB, if any,
 // otherwise nullptr.
 static MachineBasicBlock *getBBFallenThrough(MachineBasicBlock *MBB,
-        const TargetInstrInfo *TII) {
-    // Get the previous machine basic block in the function.
-    MachineFunction::iterator MBBI(MBB);
+                                             const TargetInstrInfo *TII) {
+  // Get the previous machine basic block in the function.
+  MachineFunction::iterator MBBI(MBB);
 
-    // Can't go off top of function.
-    if (MBBI == MBB->getParent()->begin())
-        return nullptr;
-
-    MachineBasicBlock *TBB = nullptr, *FBB = nullptr;
-    SmallVector<MachineOperand, 2> Cond;
-
-    MachineBasicBlock *PrevBB = &*std::prev(MBBI);
-    for (MachineBasicBlock *S : MBB->predecessors())
-        if (S == PrevBB && !TII->analyzeBranch(*PrevBB, TBB, FBB, Cond) && !TBB &&
-                !FBB)
-            return S;
-
+  // Can't go off top of function.
+  if (MBBI == MBB->getParent()->begin())
     return nullptr;
+
+  MachineBasicBlock *TBB = nullptr, *FBB = nullptr;
+  SmallVector<MachineOperand, 2> Cond;
+
+  MachineBasicBlock *PrevBB = &*std::prev(MBBI);
+  for (MachineBasicBlock *S : MBB->predecessors())
+    if (S == PrevBB && !TII->analyzeBranch(*PrevBB, TBB, FBB, Cond) && !TBB &&
+        !FBB)
+      return S;
+
+  return nullptr;
 }
 
 // Iterate through fallen through blocks trying to find a previous non-pseudo if
@@ -154,91 +152,89 @@ static MachineBasicBlock *getBBFallenThrough(MachineBasicBlock *MBB,
 // previous blocks.
 static MachineInstr *getLastNonPseudo(MachineBasicBlock &MBB,
                                       const TargetInstrInfo *TII) {
-    MachineBasicBlock *FMBB = &MBB;
+  MachineBasicBlock *FMBB = &MBB;
 
-    // If there is no non-pseudo in the current block, loop back around and try
-    // the previous block (if there is one).
-    while ((FMBB = getBBFallenThrough(FMBB, TII))) {
-        for (MachineInstr &I : make_range(FMBB->rbegin(), FMBB->rend()))
-            if (!I.isPseudo())
-                return &I;
-    }
+  // If there is no non-pseudo in the current block, loop back around and try
+  // the previous block (if there is one).
+  while ((FMBB = getBBFallenThrough(FMBB, TII))) {
+    for (MachineInstr &I : make_range(FMBB->rbegin(), FMBB->rend()))
+      if (!I.isPseudo())
+        return &I;
+  }
 
-    // There was no previous non-pseudo in the fallen through blocks
-    return nullptr;
+  // There was no previous non-pseudo in the fallen through blocks
+  return nullptr;
 }
 
-static void insertNopBeforeInstruction(MachineBasicBlock &MBB, MachineInstr* MI,
+static void insertNopBeforeInstruction(MachineBasicBlock &MBB, MachineInstr *MI,
                                        const TargetInstrInfo *TII) {
-    // If we are the first instruction of the block, put the NOP at the end of
-    // the previous fallthrough block
-    if (MI == &MBB.front()) {
-        MachineInstr *I = getLastNonPseudo(MBB, TII);
-        assert(I && "Expected instruction");
-        DebugLoc DL = I->getDebugLoc();
-        BuildMI(I->getParent(), DL, TII->get(AArch64::HINT)).addImm(0);
-    }
-    else {
-        DebugLoc DL = MI->getDebugLoc();
-        BuildMI(MBB, MI, DL, TII->get(AArch64::HINT)).addImm(0);
-    }
+  // If we are the first instruction of the block, put the NOP at the end of
+  // the previous fallthrough block
+  if (MI == &MBB.front()) {
+    MachineInstr *I = getLastNonPseudo(MBB, TII);
+    assert(I && "Expected instruction");
+    DebugLoc DL = I->getDebugLoc();
+    BuildMI(I->getParent(), DL, TII->get(AArch64::HINT)).addImm(0);
+  } else {
+    DebugLoc DL = MI->getDebugLoc();
+    BuildMI(MBB, MI, DL, TII->get(AArch64::HINT)).addImm(0);
+  }
 
-    ++NumNopsAdded;
+  ++NumNopsAdded;
 }
 
-bool
-AArch64A53Fix835769::runOnBasicBlock(MachineBasicBlock &MBB) {
-    bool Changed = false;
-    LLVM_DEBUG(dbgs() << "Running on MBB: " << MBB
-               << " - scanning instructions...\n");
+bool AArch64A53Fix835769::runOnBasicBlock(MachineBasicBlock &MBB) {
+  bool Changed = false;
+  LLVM_DEBUG(dbgs() << "Running on MBB: " << MBB
+                    << " - scanning instructions...\n");
 
-    // First, scan the basic block, looking for a sequence of 2 instructions
-    // that match the conditions under which the erratum may trigger.
+  // First, scan the basic block, looking for a sequence of 2 instructions
+  // that match the conditions under which the erratum may trigger.
 
-    // List of terminating instructions in matching sequences
-    std::vector<MachineInstr*> Sequences;
-    unsigned Idx = 0;
-    MachineInstr *PrevInstr = nullptr;
+  // List of terminating instructions in matching sequences
+  std::vector<MachineInstr *> Sequences;
+  unsigned Idx = 0;
+  MachineInstr *PrevInstr = nullptr;
 
-    // Try and find the last non-pseudo instruction in any fallen through blocks,
-    // if there isn't one, then we use nullptr to represent that.
-    PrevInstr = getLastNonPseudo(MBB, TII);
+  // Try and find the last non-pseudo instruction in any fallen through blocks,
+  // if there isn't one, then we use nullptr to represent that.
+  PrevInstr = getLastNonPseudo(MBB, TII);
 
-    for (auto &MI : MBB) {
-        MachineInstr *CurrInstr = &MI;
-        LLVM_DEBUG(dbgs() << "  Examining: " << MI);
-        if (PrevInstr) {
-            LLVM_DEBUG(dbgs() << "    PrevInstr: " << *PrevInstr
-                       << "    CurrInstr: " << *CurrInstr
-                       << "    isFirstInstructionInSequence(PrevInstr): "
-                       << isFirstInstructionInSequence(PrevInstr) << "\n"
-                       << "    isSecondInstructionInSequence(CurrInstr): "
-                       << isSecondInstructionInSequence(CurrInstr) << "\n");
-            if (isFirstInstructionInSequence(PrevInstr) &&
-                    isSecondInstructionInSequence(CurrInstr)) {
-                LLVM_DEBUG(dbgs() << "   ** pattern found at Idx " << Idx << "!\n");
-                Sequences.push_back(CurrInstr);
-            }
-        }
-        if (!CurrInstr->isPseudo())
-            PrevInstr = CurrInstr;
-        ++Idx;
+  for (auto &MI : MBB) {
+    MachineInstr *CurrInstr = &MI;
+    LLVM_DEBUG(dbgs() << "  Examining: " << MI);
+    if (PrevInstr) {
+      LLVM_DEBUG(dbgs() << "    PrevInstr: " << *PrevInstr
+                        << "    CurrInstr: " << *CurrInstr
+                        << "    isFirstInstructionInSequence(PrevInstr): "
+                        << isFirstInstructionInSequence(PrevInstr) << "\n"
+                        << "    isSecondInstructionInSequence(CurrInstr): "
+                        << isSecondInstructionInSequence(CurrInstr) << "\n");
+      if (isFirstInstructionInSequence(PrevInstr) &&
+          isSecondInstructionInSequence(CurrInstr)) {
+        LLVM_DEBUG(dbgs() << "   ** pattern found at Idx " << Idx << "!\n");
+        Sequences.push_back(CurrInstr);
+      }
     }
+    if (!CurrInstr->isPseudo())
+      PrevInstr = CurrInstr;
+    ++Idx;
+  }
 
-    LLVM_DEBUG(dbgs() << "Scan complete, " << Sequences.size()
-               << " occurrences of pattern found.\n");
+  LLVM_DEBUG(dbgs() << "Scan complete, " << Sequences.size()
+                    << " occurrences of pattern found.\n");
 
-    // Then update the basic block, inserting nops between the detected sequences.
-    for (auto &MI : Sequences) {
-        Changed = true;
-        insertNopBeforeInstruction(MBB, MI, TII);
-    }
+  // Then update the basic block, inserting nops between the detected sequences.
+  for (auto &MI : Sequences) {
+    Changed = true;
+    insertNopBeforeInstruction(MBB, MI, TII);
+  }
 
-    return Changed;
+  return Changed;
 }
 
 // Factory function used by AArch64TargetMachine to add the pass to
 // the passmanager.
 FunctionPass *llvm::createAArch64A53Fix835769() {
-    return new AArch64A53Fix835769();
+  return new AArch64A53Fix835769();
 }

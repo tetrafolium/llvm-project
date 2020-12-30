@@ -49,9 +49,9 @@ namespace quant {
 /// this function takes the attributes discretely vs taking a reference to the
 /// originating op.
 UniformQuantizedType fakeQuantAttrsToType(Location loc, unsigned numBits,
-        double rmin, double rmax,
-        bool narrowRange, Type expressedType,
-        bool isSigned = false);
+                                          double rmin, double rmax,
+                                          bool narrowRange, Type expressedType,
+                                          bool isSigned = false);
 
 /// Converts per-channel FakeQuant attributes to the corresponding type.
 /// In the event that the parameters cannot be converted, returns a nullptr

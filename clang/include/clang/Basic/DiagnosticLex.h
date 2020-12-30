@@ -20,7 +20,7 @@ enum {
 #define LEXSTART
 #include "clang/Basic/DiagnosticLexKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_LEX_DIAGNOSTICS
+  NUM_BUILTIN_LEX_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

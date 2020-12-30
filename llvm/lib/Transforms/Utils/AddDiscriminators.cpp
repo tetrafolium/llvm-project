@@ -87,13 +87,13 @@ namespace {
 
 // The legacy pass of AddDiscriminators.
 struct AddDiscriminatorsLegacyPass : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
+  static char ID; // Pass identification, replacement for typeid
 
-    AddDiscriminatorsLegacyPass() : FunctionPass(ID) {
-        initializeAddDiscriminatorsLegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  AddDiscriminatorsLegacyPass() : FunctionPass(ID) {
+    initializeAddDiscriminatorsLegacyPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 };
 
 } // end anonymous namespace
@@ -107,11 +107,11 @@ INITIALIZE_PASS_END(AddDiscriminatorsLegacyPass, "add-discriminators",
 
 // Create the legacy AddDiscriminatorsPass.
 FunctionPass *llvm::createAddDiscriminatorsPass() {
-    return new AddDiscriminatorsLegacyPass();
+  return new AddDiscriminatorsLegacyPass();
 }
 
 static bool shouldHaveDiscriminator(const Instruction *I) {
-    return !isa<IntrinsicInst>(I) || isa<MemIntrinsic>(I);
+  return !isa<IntrinsicInst>(I) || isa<MemIntrinsic>(I);
 }
 
 /// Assign DWARF discriminators.
@@ -166,112 +166,112 @@ static bool shouldHaveDiscriminator(const Instruction *I) {
 /// file and line location as I2. This new lexical block will have a
 /// different discriminator number than I1.
 static bool addDiscriminators(Function &F) {
-    // If the function has debug information, but the user has disabled
-    // discriminators, do nothing.
-    // Simlarly, if the function has no debug info, do nothing.
-    if (NoDiscriminators || !F.getSubprogram())
-        return false;
+  // If the function has debug information, but the user has disabled
+  // discriminators, do nothing.
+  // Simlarly, if the function has no debug info, do nothing.
+  if (NoDiscriminators || !F.getSubprogram())
+    return false;
 
-    bool Changed = false;
+  bool Changed = false;
 
-    using Location = std::pair<StringRef, unsigned>;
-    using BBSet = DenseSet<const BasicBlock *>;
-    using LocationBBMap = DenseMap<Location, BBSet>;
-    using LocationDiscriminatorMap = DenseMap<Location, unsigned>;
-    using LocationSet = DenseSet<Location>;
+  using Location = std::pair<StringRef, unsigned>;
+  using BBSet = DenseSet<const BasicBlock *>;
+  using LocationBBMap = DenseMap<Location, BBSet>;
+  using LocationDiscriminatorMap = DenseMap<Location, unsigned>;
+  using LocationSet = DenseSet<Location>;
 
-    LocationBBMap LBM;
-    LocationDiscriminatorMap LDM;
+  LocationBBMap LBM;
+  LocationDiscriminatorMap LDM;
 
-    // Traverse all instructions in the function. If the source line location
-    // of the instruction appears in other basic block, assign a new
-    // discriminator for this instruction.
-    for (BasicBlock &B : F) {
-        for (auto &I : B.getInstList()) {
-            // Not all intrinsic calls should have a discriminator.
-            // We want to avoid a non-deterministic assignment of discriminators at
-            // different debug levels. We still allow discriminators on memory
-            // intrinsic calls because those can be early expanded by SROA into
-            // pairs of loads and stores, and the expanded load/store instructions
-            // should have a valid discriminator.
-            if (!shouldHaveDiscriminator(&I))
-                continue;
-            const DILocation *DIL = I.getDebugLoc();
-            if (!DIL)
-                continue;
-            Location L = std::make_pair(DIL->getFilename(), DIL->getLine());
-            auto &BBMap = LBM[L];
-            auto R = BBMap.insert(&B);
-            if (BBMap.size() == 1)
-                continue;
-            // If we could insert more than one block with the same line+file, a
-            // discriminator is needed to distinguish both instructions.
-            // Only the lowest 7 bits are used to represent a discriminator to fit
-            // it in 1 byte ULEB128 representation.
-            unsigned Discriminator = R.second ? ++LDM[L] : LDM[L];
-            auto NewDIL = DIL->cloneWithBaseDiscriminator(Discriminator);
-            if (!NewDIL) {
-                LLVM_DEBUG(dbgs() << "Could not encode discriminator: "
-                           << DIL->getFilename() << ":" << DIL->getLine() << ":"
-                           << DIL->getColumn() << ":" << Discriminator << " "
-                           << I << "\n");
-            } else {
-                I.setDebugLoc(NewDIL.getValue());
-                LLVM_DEBUG(dbgs() << DIL->getFilename() << ":" << DIL->getLine() << ":"
-                           << DIL->getColumn() << ":" << Discriminator << " " << I
-                           << "\n");
-            }
-            Changed = true;
-        }
+  // Traverse all instructions in the function. If the source line location
+  // of the instruction appears in other basic block, assign a new
+  // discriminator for this instruction.
+  for (BasicBlock &B : F) {
+    for (auto &I : B.getInstList()) {
+      // Not all intrinsic calls should have a discriminator.
+      // We want to avoid a non-deterministic assignment of discriminators at
+      // different debug levels. We still allow discriminators on memory
+      // intrinsic calls because those can be early expanded by SROA into
+      // pairs of loads and stores, and the expanded load/store instructions
+      // should have a valid discriminator.
+      if (!shouldHaveDiscriminator(&I))
+        continue;
+      const DILocation *DIL = I.getDebugLoc();
+      if (!DIL)
+        continue;
+      Location L = std::make_pair(DIL->getFilename(), DIL->getLine());
+      auto &BBMap = LBM[L];
+      auto R = BBMap.insert(&B);
+      if (BBMap.size() == 1)
+        continue;
+      // If we could insert more than one block with the same line+file, a
+      // discriminator is needed to distinguish both instructions.
+      // Only the lowest 7 bits are used to represent a discriminator to fit
+      // it in 1 byte ULEB128 representation.
+      unsigned Discriminator = R.second ? ++LDM[L] : LDM[L];
+      auto NewDIL = DIL->cloneWithBaseDiscriminator(Discriminator);
+      if (!NewDIL) {
+        LLVM_DEBUG(dbgs() << "Could not encode discriminator: "
+                          << DIL->getFilename() << ":" << DIL->getLine() << ":"
+                          << DIL->getColumn() << ":" << Discriminator << " "
+                          << I << "\n");
+      } else {
+        I.setDebugLoc(NewDIL.getValue());
+        LLVM_DEBUG(dbgs() << DIL->getFilename() << ":" << DIL->getLine() << ":"
+                          << DIL->getColumn() << ":" << Discriminator << " "
+                          << I << "\n");
+      }
+      Changed = true;
     }
+  }
 
-    // Traverse all instructions and assign new discriminators to call
-    // instructions with the same lineno that are in the same basic block.
-    // Sample base profile needs to distinguish different function calls within
-    // a same source line for correct profile annotation.
-    for (BasicBlock &B : F) {
-        LocationSet CallLocations;
-        for (auto &I : B.getInstList()) {
-            // We bypass intrinsic calls for the following two reasons:
-            //  1) We want to avoid a non-deterministic assignment of
-            //     discriminators.
-            //  2) We want to minimize the number of base discriminators used.
-            if (!isa<InvokeInst>(I) && (!isa<CallInst>(I) || isa<IntrinsicInst>(I)))
-                continue;
+  // Traverse all instructions and assign new discriminators to call
+  // instructions with the same lineno that are in the same basic block.
+  // Sample base profile needs to distinguish different function calls within
+  // a same source line for correct profile annotation.
+  for (BasicBlock &B : F) {
+    LocationSet CallLocations;
+    for (auto &I : B.getInstList()) {
+      // We bypass intrinsic calls for the following two reasons:
+      //  1) We want to avoid a non-deterministic assignment of
+      //     discriminators.
+      //  2) We want to minimize the number of base discriminators used.
+      if (!isa<InvokeInst>(I) && (!isa<CallInst>(I) || isa<IntrinsicInst>(I)))
+        continue;
 
-            DILocation *CurrentDIL = I.getDebugLoc();
-            if (!CurrentDIL)
-                continue;
-            Location L =
-                std::make_pair(CurrentDIL->getFilename(), CurrentDIL->getLine());
-            if (!CallLocations.insert(L).second) {
-                unsigned Discriminator = ++LDM[L];
-                auto NewDIL = CurrentDIL->cloneWithBaseDiscriminator(Discriminator);
-                if (!NewDIL) {
-                    LLVM_DEBUG(dbgs()
-                               << "Could not encode discriminator: "
-                               << CurrentDIL->getFilename() << ":"
-                               << CurrentDIL->getLine() << ":" << CurrentDIL->getColumn()
-                               << ":" << Discriminator << " " << I << "\n");
-                } else {
-                    I.setDebugLoc(NewDIL.getValue());
-                    Changed = true;
-                }
-            }
+      DILocation *CurrentDIL = I.getDebugLoc();
+      if (!CurrentDIL)
+        continue;
+      Location L =
+          std::make_pair(CurrentDIL->getFilename(), CurrentDIL->getLine());
+      if (!CallLocations.insert(L).second) {
+        unsigned Discriminator = ++LDM[L];
+        auto NewDIL = CurrentDIL->cloneWithBaseDiscriminator(Discriminator);
+        if (!NewDIL) {
+          LLVM_DEBUG(dbgs()
+                     << "Could not encode discriminator: "
+                     << CurrentDIL->getFilename() << ":"
+                     << CurrentDIL->getLine() << ":" << CurrentDIL->getColumn()
+                     << ":" << Discriminator << " " << I << "\n");
+        } else {
+          I.setDebugLoc(NewDIL.getValue());
+          Changed = true;
         }
+      }
     }
-    return Changed;
+  }
+  return Changed;
 }
 
 bool AddDiscriminatorsLegacyPass::runOnFunction(Function &F) {
-    return addDiscriminators(F);
+  return addDiscriminators(F);
 }
 
 PreservedAnalyses AddDiscriminatorsPass::run(Function &F,
-        FunctionAnalysisManager &AM) {
-    if (!addDiscriminators(F))
-        return PreservedAnalyses::all();
+                                             FunctionAnalysisManager &AM) {
+  if (!addDiscriminators(F))
+    return PreservedAnalyses::all();
 
-    // FIXME: should be all()
-    return PreservedAnalyses::none();
+  // FIXME: should be all()
+  return PreservedAnalyses::none();
 }

@@ -31,50 +31,50 @@ StringsAndChecksumsRef::StringsAndChecksumsRef(
 
 void StringsAndChecksumsRef::initializeStrings(
     const DebugSubsectionRecord &SR) {
-    assert(SR.kind() == DebugSubsectionKind::StringTable);
-    assert(!Strings && "Found a string table even though we already have one!");
+  assert(SR.kind() == DebugSubsectionKind::StringTable);
+  assert(!Strings && "Found a string table even though we already have one!");
 
-    OwnedStrings = std::make_shared<DebugStringTableSubsectionRef>();
-    consumeError(OwnedStrings->initialize(SR.getRecordData()));
-    Strings = OwnedStrings.get();
+  OwnedStrings = std::make_shared<DebugStringTableSubsectionRef>();
+  consumeError(OwnedStrings->initialize(SR.getRecordData()));
+  Strings = OwnedStrings.get();
 }
 
 void StringsAndChecksumsRef::reset() {
-    resetStrings();
-    resetChecksums();
+  resetStrings();
+  resetChecksums();
 }
 
 void StringsAndChecksumsRef::resetStrings() {
-    OwnedStrings.reset();
-    Strings = nullptr;
+  OwnedStrings.reset();
+  Strings = nullptr;
 }
 
 void StringsAndChecksumsRef::resetChecksums() {
-    OwnedChecksums.reset();
-    Checksums = nullptr;
+  OwnedChecksums.reset();
+  Checksums = nullptr;
 }
 
 void StringsAndChecksumsRef::setStrings(
     const DebugStringTableSubsectionRef &StringsRef) {
-    OwnedStrings = std::make_shared<DebugStringTableSubsectionRef>();
-    *OwnedStrings = StringsRef;
-    Strings = OwnedStrings.get();
+  OwnedStrings = std::make_shared<DebugStringTableSubsectionRef>();
+  *OwnedStrings = StringsRef;
+  Strings = OwnedStrings.get();
 }
 
 void StringsAndChecksumsRef::setChecksums(
     const DebugChecksumsSubsectionRef &CS) {
-    OwnedChecksums = std::make_shared<DebugChecksumsSubsectionRef>();
-    *OwnedChecksums = CS;
-    Checksums = OwnedChecksums.get();
+  OwnedChecksums = std::make_shared<DebugChecksumsSubsectionRef>();
+  *OwnedChecksums = CS;
+  Checksums = OwnedChecksums.get();
 }
 
 void StringsAndChecksumsRef::initializeChecksums(
     const DebugSubsectionRecord &FCR) {
-    assert(FCR.kind() == DebugSubsectionKind::FileChecksums);
-    if (Checksums)
-        return;
+  assert(FCR.kind() == DebugSubsectionKind::FileChecksums);
+  if (Checksums)
+    return;
 
-    OwnedChecksums = std::make_shared<DebugChecksumsSubsectionRef>();
-    consumeError(OwnedChecksums->initialize(FCR.getRecordData()));
-    Checksums = OwnedChecksums.get();
+  OwnedChecksums = std::make_shared<DebugChecksumsSubsectionRef>();
+  consumeError(OwnedChecksums->initialize(FCR.getRecordData()));
+  Checksums = OwnedChecksums.get();
 }

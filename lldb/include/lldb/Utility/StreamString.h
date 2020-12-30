@@ -22,33 +22,31 @@ namespace lldb_private {
 
 class StreamString : public Stream {
 public:
-    StreamString();
+  StreamString();
 
-    StreamString(uint32_t flags, uint32_t addr_size, lldb::ByteOrder byte_order);
+  StreamString(uint32_t flags, uint32_t addr_size, lldb::ByteOrder byte_order);
 
-    ~StreamString() override;
+  ~StreamString() override;
 
-    void Flush() override;
+  void Flush() override;
 
-    void Clear();
+  void Clear();
 
-    bool Empty() const;
+  bool Empty() const;
 
-    size_t GetSize() const;
+  size_t GetSize() const;
 
-    size_t GetSizeOfLastLine() const;
+  size_t GetSizeOfLastLine() const;
 
-    llvm::StringRef GetString() const;
+  llvm::StringRef GetString() const;
 
-    const char *GetData() const {
-        return m_packet.c_str();
-    }
+  const char *GetData() const { return m_packet.c_str(); }
 
-    void FillLastLineToColumn(uint32_t column, char fill_char);
+  void FillLastLineToColumn(uint32_t column, char fill_char);
 
 protected:
-    std::string m_packet;
-    size_t WriteImpl(const void *s, size_t length) override;
+  std::string m_packet;
+  size_t WriteImpl(const void *s, size_t length) override;
 };
 
 } // namespace lldb_private

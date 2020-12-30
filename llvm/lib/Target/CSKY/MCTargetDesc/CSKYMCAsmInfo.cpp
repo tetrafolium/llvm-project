@@ -19,7 +19,7 @@ using namespace llvm;
 void CSKYMCAsmInfo::anchor() {}
 
 CSKYMCAsmInfo::CSKYMCAsmInfo(const Triple &TargetTriple) {
-    AlignmentIsInBytes = false;
-    SupportsDebugInformation = true;
-    CommentString = "#";
+  AlignmentIsInBytes = false;
+  SupportsDebugInformation = true;
+  CommentString = "#";
 }

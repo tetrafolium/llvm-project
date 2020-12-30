@@ -23,31 +23,31 @@ DebugMacroEntry::DebugMacroEntry(EntryType type,
       m_debug_macros_sp(debug_macros_sp) {}
 
 const FileSpec &DebugMacroEntry::GetFileSpec(CompileUnit *comp_unit) const {
-    return comp_unit->GetSupportFiles().GetFileSpecAtIndex(m_debug_line_file_idx);
+  return comp_unit->GetSupportFiles().GetFileSpecAtIndex(m_debug_line_file_idx);
 }
 
 DebugMacroEntry DebugMacroEntry::CreateDefineEntry(uint32_t line,
-        const char *str) {
-    return DebugMacroEntry(DebugMacroEntry::DEFINE, line, 0, str);
+                                                   const char *str) {
+  return DebugMacroEntry(DebugMacroEntry::DEFINE, line, 0, str);
 }
 
 DebugMacroEntry DebugMacroEntry::CreateUndefEntry(uint32_t line,
-        const char *str) {
-    return DebugMacroEntry(DebugMacroEntry::UNDEF, line, 0, str);
+                                                  const char *str) {
+  return DebugMacroEntry(DebugMacroEntry::UNDEF, line, 0, str);
 }
 
 DebugMacroEntry
 DebugMacroEntry::CreateStartFileEntry(uint32_t line,
                                       uint32_t debug_line_file_idx) {
-    return DebugMacroEntry(DebugMacroEntry::START_FILE, line, debug_line_file_idx,
-                           nullptr);
+  return DebugMacroEntry(DebugMacroEntry::START_FILE, line, debug_line_file_idx,
+                         nullptr);
 }
 
 DebugMacroEntry DebugMacroEntry::CreateEndFileEntry() {
-    return DebugMacroEntry(DebugMacroEntry::END_FILE, 0, 0, nullptr);
+  return DebugMacroEntry(DebugMacroEntry::END_FILE, 0, 0, nullptr);
 }
 
 DebugMacroEntry
 DebugMacroEntry::CreateIndirectEntry(const DebugMacrosSP &debug_macros_sp) {
-    return DebugMacroEntry(DebugMacroEntry::INDIRECT, debug_macros_sp);
+  return DebugMacroEntry(DebugMacroEntry::INDIRECT, debug_macros_sp);
 }

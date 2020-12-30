@@ -28,28 +28,28 @@ class MCSubtargetInfo;
 // Insn bundle shuffler.
 class HexagonMCShuffler : public HexagonShuffler {
 public:
-    HexagonMCShuffler(MCContext &Context, bool Fatal, MCInstrInfo const &MCII,
-                      MCSubtargetInfo const &STI, MCInst &MCB)
-        : HexagonShuffler(Context, Fatal, MCII, STI) {
-        init(MCB);
-    }
+  HexagonMCShuffler(MCContext &Context, bool Fatal, MCInstrInfo const &MCII,
+                    MCSubtargetInfo const &STI, MCInst &MCB)
+      : HexagonShuffler(Context, Fatal, MCII, STI) {
+    init(MCB);
+  }
 
-    HexagonMCShuffler(MCContext &Context, bool Fatal, MCInstrInfo const &MCII,
-                      MCSubtargetInfo const &STI, MCInst &MCB,
-                      MCInst const &AddMI, bool InsertAtFront)
-        : HexagonShuffler(Context, Fatal, MCII, STI) {
-        init(MCB, AddMI, InsertAtFront);
-    }
+  HexagonMCShuffler(MCContext &Context, bool Fatal, MCInstrInfo const &MCII,
+                    MCSubtargetInfo const &STI, MCInst &MCB,
+                    MCInst const &AddMI, bool InsertAtFront)
+      : HexagonShuffler(Context, Fatal, MCII, STI) {
+    init(MCB, AddMI, InsertAtFront);
+  }
 
-    // Copy reordered bundle to another.
-    void copyTo(MCInst &MCB);
+  // Copy reordered bundle to another.
+  void copyTo(MCInst &MCB);
 
-    // Reorder and copy result to another.
-    bool reshuffleTo(MCInst &MCB);
+  // Reorder and copy result to another.
+  bool reshuffleTo(MCInst &MCB);
 
 private:
-    void init(MCInst &MCB);
-    void init(MCInst &MCB, MCInst const &AddMI, bool InsertAtFront);
+  void init(MCInst &MCB);
+  void init(MCInst &MCB, MCInst const &AddMI, bool InsertAtFront);
 };
 
 // Invocation of the shuffler.

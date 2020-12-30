@@ -18,28 +18,28 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY Hurd : public Generic_ELF {
 public:
-    Hurd(const Driver &D, const llvm::Triple &Triple,
-         const llvm::opt::ArgList &Args);
+  Hurd(const Driver &D, const llvm::Triple &Triple,
+       const llvm::opt::ArgList &Args);
 
-    bool HasNativeLLVMSupport() const override;
+  bool HasNativeLLVMSupport() const override;
 
-    void
-    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                              llvm::opt::ArgStringList &CC1Args) const override;
+  void
+  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                            llvm::opt::ArgStringList &CC1Args) const override;
 
-    std::string getDynamicLinker(const llvm::opt::ArgList &Args) const override;
+  std::string getDynamicLinker(const llvm::opt::ArgList &Args) const override;
 
-    void addExtraOpts(llvm::opt::ArgStringList &CmdArgs) const override;
+  void addExtraOpts(llvm::opt::ArgStringList &CmdArgs) const override;
 
-    std::vector<std::string> ExtraOpts;
+  std::vector<std::string> ExtraOpts;
 
 protected:
-    Tool *buildAssembler() const override;
-    Tool *buildLinker() const override;
+  Tool *buildAssembler() const override;
+  Tool *buildLinker() const override;
 
-    std::string getMultiarchTriple(const Driver &D,
-                                   const llvm::Triple &TargetTriple,
-                                   StringRef SysRoot) const override;
+  std::string getMultiarchTriple(const Driver &D,
+                                 const llvm::Triple &TargetTriple,
+                                 StringRef SysRoot) const override;
 };
 
 } // end namespace toolchains

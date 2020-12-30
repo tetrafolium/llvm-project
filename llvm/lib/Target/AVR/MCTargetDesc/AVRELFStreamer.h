@@ -16,11 +16,11 @@ namespace llvm {
 /// A target streamer for an AVR ELF object file.
 class AVRELFStreamer : public AVRTargetStreamer {
 public:
-    AVRELFStreamer(MCStreamer &S, const MCSubtargetInfo &STI);
+  AVRELFStreamer(MCStreamer &S, const MCSubtargetInfo &STI);
 
-    MCELFStreamer &getStreamer() {
-        return static_cast<MCELFStreamer &>(Streamer);
-    }
+  MCELFStreamer &getStreamer() {
+    return static_cast<MCELFStreamer &>(Streamer);
+  }
 };
 
 } // end namespace llvm

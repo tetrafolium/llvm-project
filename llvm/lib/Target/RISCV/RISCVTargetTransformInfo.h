@@ -25,32 +25,28 @@
 namespace llvm {
 
 class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
-    using BaseT = BasicTTIImplBase<RISCVTTIImpl>;
-    using TTI = TargetTransformInfo;
+  using BaseT = BasicTTIImplBase<RISCVTTIImpl>;
+  using TTI = TargetTransformInfo;
 
-    friend BaseT;
+  friend BaseT;
 
-    const RISCVSubtarget *ST;
-    const RISCVTargetLowering *TLI;
+  const RISCVSubtarget *ST;
+  const RISCVTargetLowering *TLI;
 
-    const RISCVSubtarget *getST() const {
-        return ST;
-    }
-    const RISCVTargetLowering *getTLI() const {
-        return TLI;
-    }
+  const RISCVSubtarget *getST() const { return ST; }
+  const RISCVTargetLowering *getTLI() const { return TLI; }
 
 public:
-    explicit RISCVTTIImpl(const RISCVTargetMachine *TM, const Function &F)
-        : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
-          TLI(ST->getTargetLowering()) {}
+  explicit RISCVTTIImpl(const RISCVTargetMachine *TM, const Function &F)
+      : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
+        TLI(ST->getTargetLowering()) {}
 
-    int getIntImmCost(const APInt &Imm, Type *Ty, TTI::TargetCostKind CostKind);
-    int getIntImmCostInst(unsigned Opcode, unsigned Idx, const APInt &Imm,
-                          Type *Ty, TTI::TargetCostKind CostKind,
-                          Instruction *Inst = nullptr);
-    int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
-                            Type *Ty, TTI::TargetCostKind CostKind);
+  int getIntImmCost(const APInt &Imm, Type *Ty, TTI::TargetCostKind CostKind);
+  int getIntImmCostInst(unsigned Opcode, unsigned Idx, const APInt &Imm,
+                        Type *Ty, TTI::TargetCostKind CostKind,
+                        Instruction *Inst = nullptr);
+  int getIntImmCostIntrin(Intrinsic::ID IID, unsigned Idx, const APInt &Imm,
+                          Type *Ty, TTI::TargetCostKind CostKind);
 };
 
 } // end namespace llvm

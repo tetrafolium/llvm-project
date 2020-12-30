@@ -15,13 +15,13 @@ namespace llvm {
 namespace pdb {
 class IPDBTable {
 public:
-    virtual ~IPDBTable();
+  virtual ~IPDBTable();
 
-    virtual std::string getName() const = 0;
-    virtual uint32_t getItemCount() const = 0;
-    virtual PDB_TableType getTableType() const = 0;
+  virtual std::string getName() const = 0;
+  virtual uint32_t getItemCount() const = 0;
+  virtual PDB_TableType getTableType() const = 0;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif // LLVM_DEBUGINFO_PDB_IPDBTABLE_H

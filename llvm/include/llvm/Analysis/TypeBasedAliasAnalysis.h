@@ -29,63 +29,59 @@ class MemoryLocation;
 
 /// A simple AA result that uses TBAA metadata to answer queries.
 class TypeBasedAAResult : public AAResultBase<TypeBasedAAResult> {
-    friend AAResultBase<TypeBasedAAResult>;
+  friend AAResultBase<TypeBasedAAResult>;
 
 public:
-    /// Handle invalidation events from the new pass manager.
-    ///
-    /// By definition, this result is stateless and so remains valid.
-    bool invalidate(Function &, const PreservedAnalyses &,
-                    FunctionAnalysisManager::Invalidator &) {
-        return false;
-    }
+  /// Handle invalidation events from the new pass manager.
+  ///
+  /// By definition, this result is stateless and so remains valid.
+  bool invalidate(Function &, const PreservedAnalyses &,
+                  FunctionAnalysisManager::Invalidator &) {
+    return false;
+  }
 
-    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                      AAQueryInfo &AAQI);
-    bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
-                                bool OrLocal);
-    FunctionModRefBehavior getModRefBehavior(const CallBase *Call);
-    FunctionModRefBehavior getModRefBehavior(const Function *F);
-    ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
-                             AAQueryInfo &AAQI);
-    ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
-                             AAQueryInfo &AAQI);
+  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                    AAQueryInfo &AAQI);
+  bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
+                              bool OrLocal);
+  FunctionModRefBehavior getModRefBehavior(const CallBase *Call);
+  FunctionModRefBehavior getModRefBehavior(const Function *F);
+  ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
+                           AAQueryInfo &AAQI);
+  ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
+                           AAQueryInfo &AAQI);
 
 private:
-    bool Aliases(const MDNode *A, const MDNode *B) const;
+  bool Aliases(const MDNode *A, const MDNode *B) const;
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class TypeBasedAA : public AnalysisInfoMixin<TypeBasedAA> {
-    friend AnalysisInfoMixin<TypeBasedAA>;
+  friend AnalysisInfoMixin<TypeBasedAA>;
 
-    static AnalysisKey Key;
+  static AnalysisKey Key;
 
 public:
-    using Result = TypeBasedAAResult;
+  using Result = TypeBasedAAResult;
 
-    TypeBasedAAResult run(Function &F, FunctionAnalysisManager &AM);
+  TypeBasedAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the TypeBasedAAResult object.
 class TypeBasedAAWrapperPass : public ImmutablePass {
-    std::unique_ptr<TypeBasedAAResult> Result;
+  std::unique_ptr<TypeBasedAAResult> Result;
 
 public:
-    static char ID;
+  static char ID;
 
-    TypeBasedAAWrapperPass();
+  TypeBasedAAWrapperPass();
 
-    TypeBasedAAResult &getResult() {
-        return *Result;
-    }
-    const TypeBasedAAResult &getResult() const {
-        return *Result;
-    }
+  TypeBasedAAResult &getResult() { return *Result; }
+  const TypeBasedAAResult &getResult() const { return *Result; }
 
-    bool doInitialization(Module &M) override;
-    bool doFinalization(Module &M) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool doInitialization(Module &M) override;
+  bool doFinalization(Module &M) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 //===--------------------------------------------------------------------===//

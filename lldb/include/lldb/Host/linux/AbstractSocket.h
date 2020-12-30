@@ -14,12 +14,12 @@
 namespace lldb_private {
 class AbstractSocket : public DomainSocket {
 public:
-    AbstractSocket(bool child_processes_inherit);
+  AbstractSocket(bool child_processes_inherit);
 
 protected:
-    size_t GetNameOffset() const override;
-    void DeleteSocketFile(llvm::StringRef name) override;
+  size_t GetNameOffset() const override;
+  void DeleteSocketFile(llvm::StringRef name) override;
 };
-}
+} // namespace lldb_private
 
 #endif // ifndef liblldb_AbstractSocket_h_

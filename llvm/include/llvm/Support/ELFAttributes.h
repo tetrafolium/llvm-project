@@ -15,8 +15,8 @@
 namespace llvm {
 
 struct TagNameItem {
-    unsigned attr;
-    StringRef tagName;
+  unsigned attr;
+  StringRef tagName;
 };
 
 using TagNameMap = ArrayRef<TagNameItem>;

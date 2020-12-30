@@ -31,18 +31,16 @@ namespace clang {
 /// ref count drops to zero, it is delete[]'d.  This is primarily managed
 /// through the RopePiece class below.
 struct RopeRefCountString {
-    unsigned RefCount;
-    char Data[1];  //  Variable sized.
+  unsigned RefCount;
+  char Data[1]; //  Variable sized.
 
-    void Retain() {
-        ++RefCount;
-    }
+  void Retain() { ++RefCount; }
 
-    void Release() {
-        assert(RefCount > 0 && "Reference count is already zero.");
-        if (--RefCount == 0)
-            delete [] (char*)this;
-    }
+  void Release() {
+    assert(RefCount > 0 && "Reference count is already zero.");
+    if (--RefCount == 0)
+      delete[](char *) this;
+  }
 };
 
 //===--------------------------------------------------------------------===//
@@ -58,25 +56,23 @@ struct RopeRefCountString {
 /// that both refer to the same underlying RopeRefCountString (just with
 /// different offsets) which is a nice constant time operation.
 struct RopePiece {
-    llvm::IntrusiveRefCntPtr<RopeRefCountString> StrData;
-    unsigned StartOffs = 0;
-    unsigned EndOffs = 0;
+  llvm::IntrusiveRefCntPtr<RopeRefCountString> StrData;
+  unsigned StartOffs = 0;
+  unsigned EndOffs = 0;
 
-    RopePiece() = default;
-    RopePiece(llvm::IntrusiveRefCntPtr<RopeRefCountString> Str, unsigned Start,
-              unsigned End)
-        : StrData(std::move(Str)), StartOffs(Start), EndOffs(End) {}
+  RopePiece() = default;
+  RopePiece(llvm::IntrusiveRefCntPtr<RopeRefCountString> Str, unsigned Start,
+            unsigned End)
+      : StrData(std::move(Str)), StartOffs(Start), EndOffs(End) {}
 
-    const char &operator[](unsigned Offset) const {
-        return StrData->Data[Offset+StartOffs];
-    }
-    char &operator[](unsigned Offset) {
-        return StrData->Data[Offset+StartOffs];
-    }
+  const char &operator[](unsigned Offset) const {
+    return StrData->Data[Offset + StartOffs];
+  }
+  char &operator[](unsigned Offset) {
+    return StrData->Data[Offset + StartOffs];
+  }
 
-    unsigned size() const {
-        return EndOffs-StartOffs;
-    }
+  unsigned size() const { return EndOffs - StartOffs; }
 };
 
 //===--------------------------------------------------------------------===//
@@ -87,52 +83,50 @@ struct RopePiece {
 /// over bytes that are in a RopePieceBTree.  This first iterates over bytes
 /// in a RopePiece, then iterates over RopePiece's in a RopePieceBTreeLeaf,
 /// then iterates over RopePieceBTreeLeaf's in a RopePieceBTree.
-class RopePieceBTreeIterator :
-    public std::iterator<std::forward_iterator_tag, const char, ptrdiff_t> {
-    /// CurNode - The current B+Tree node that we are inspecting.
-    const void /*RopePieceBTreeLeaf*/ *CurNode = nullptr;
+class RopePieceBTreeIterator
+    : public std::iterator<std::forward_iterator_tag, const char, ptrdiff_t> {
+  /// CurNode - The current B+Tree node that we are inspecting.
+  const void /*RopePieceBTreeLeaf*/ *CurNode = nullptr;
 
-    /// CurPiece - The current RopePiece in the B+Tree node that we're
-    /// inspecting.
-    const RopePiece *CurPiece = nullptr;
+  /// CurPiece - The current RopePiece in the B+Tree node that we're
+  /// inspecting.
+  const RopePiece *CurPiece = nullptr;
 
-    /// CurChar - The current byte in the RopePiece we are pointing to.
-    unsigned CurChar = 0;
+  /// CurChar - The current byte in the RopePiece we are pointing to.
+  unsigned CurChar = 0;
 
 public:
-    RopePieceBTreeIterator() = default;
-    RopePieceBTreeIterator(const void /*RopePieceBTreeNode*/ *N);
+  RopePieceBTreeIterator() = default;
+  RopePieceBTreeIterator(const void /*RopePieceBTreeNode*/ *N);
 
-    char operator*() const {
-        return (*CurPiece)[CurChar];
-    }
+  char operator*() const { return (*CurPiece)[CurChar]; }
 
-    bool operator==(const RopePieceBTreeIterator &RHS) const {
-        return CurPiece == RHS.CurPiece && CurChar == RHS.CurChar;
-    }
-    bool operator!=(const RopePieceBTreeIterator &RHS) const {
-        return !operator==(RHS);
-    }
+  bool operator==(const RopePieceBTreeIterator &RHS) const {
+    return CurPiece == RHS.CurPiece && CurChar == RHS.CurChar;
+  }
+  bool operator!=(const RopePieceBTreeIterator &RHS) const {
+    return !operator==(RHS);
+  }
 
-    RopePieceBTreeIterator& operator++() {   // Preincrement
-        if (CurChar+1 < CurPiece->size())
-            ++CurChar;
-        else
-            MoveToNextPiece();
-        return *this;
-    }
+  RopePieceBTreeIterator &operator++() { // Preincrement
+    if (CurChar + 1 < CurPiece->size())
+      ++CurChar;
+    else
+      MoveToNextPiece();
+    return *this;
+  }
 
-    RopePieceBTreeIterator operator++(int) { // Postincrement
-        RopePieceBTreeIterator tmp = *this;
-        ++*this;
-        return tmp;
-    }
+  RopePieceBTreeIterator operator++(int) { // Postincrement
+    RopePieceBTreeIterator tmp = *this;
+    ++*this;
+    return tmp;
+  }
 
-    llvm::StringRef piece() const {
-        return llvm::StringRef(&(*CurPiece)[0], CurPiece->size());
-    }
+  llvm::StringRef piece() const {
+    return llvm::StringRef(&(*CurPiece)[0], CurPiece->size());
+  }
 
-    void MoveToNextPiece();
+  void MoveToNextPiece();
 };
 
 //===--------------------------------------------------------------------===//
@@ -140,32 +134,26 @@ public:
 //===--------------------------------------------------------------------===//
 
 class RopePieceBTree {
-    void /*RopePieceBTreeNode*/ *Root;
+  void /*RopePieceBTreeNode*/ *Root;
 
 public:
-    RopePieceBTree();
-    RopePieceBTree(const RopePieceBTree &RHS);
-    RopePieceBTree &operator=(const RopePieceBTree &) = delete;
-    ~RopePieceBTree();
+  RopePieceBTree();
+  RopePieceBTree(const RopePieceBTree &RHS);
+  RopePieceBTree &operator=(const RopePieceBTree &) = delete;
+  ~RopePieceBTree();
 
-    using iterator = RopePieceBTreeIterator;
+  using iterator = RopePieceBTreeIterator;
 
-    iterator begin() const {
-        return iterator(Root);
-    }
-    iterator end() const {
-        return iterator();
-    }
-    unsigned size() const;
-    unsigned empty() const {
-        return size() == 0;
-    }
+  iterator begin() const { return iterator(Root); }
+  iterator end() const { return iterator(); }
+  unsigned size() const;
+  unsigned empty() const { return size() == 0; }
 
-    void clear();
+  void clear();
 
-    void insert(unsigned Offset, const RopePiece &R);
+  void insert(unsigned Offset, const RopePiece &R);
 
-    void erase(unsigned Offset, unsigned NumBytes);
+  void erase(unsigned Offset, unsigned NumBytes);
 };
 
 //===--------------------------------------------------------------------===//
@@ -176,55 +164,49 @@ public:
 /// efficient insertions and deletions into the middle of it, even for
 /// ridiculously long strings.
 class RewriteRope {
-    RopePieceBTree Chunks;
+  RopePieceBTree Chunks;
 
-    /// We allocate space for string data out of a buffer of size AllocChunkSize.
-    /// This keeps track of how much space is left.
-    llvm::IntrusiveRefCntPtr<RopeRefCountString> AllocBuffer;
-    enum { AllocChunkSize = 4080 };
-    unsigned AllocOffs = AllocChunkSize;
+  /// We allocate space for string data out of a buffer of size AllocChunkSize.
+  /// This keeps track of how much space is left.
+  llvm::IntrusiveRefCntPtr<RopeRefCountString> AllocBuffer;
+  enum { AllocChunkSize = 4080 };
+  unsigned AllocOffs = AllocChunkSize;
 
 public:
-    RewriteRope() = default;
-    RewriteRope(const RewriteRope &RHS) : Chunks(RHS.Chunks) {}
+  RewriteRope() = default;
+  RewriteRope(const RewriteRope &RHS) : Chunks(RHS.Chunks) {}
 
-    using iterator = RopePieceBTree::iterator;
-    using const_iterator = RopePieceBTree::iterator;
+  using iterator = RopePieceBTree::iterator;
+  using const_iterator = RopePieceBTree::iterator;
 
-    iterator begin() const {
-        return Chunks.begin();
-    }
-    iterator end() const {
-        return Chunks.end();
-    }
-    unsigned size() const {
-        return Chunks.size();
-    }
+  iterator begin() const { return Chunks.begin(); }
+  iterator end() const { return Chunks.end(); }
+  unsigned size() const { return Chunks.size(); }
 
-    void clear() {
-        Chunks.clear();
-    }
+  void clear() { Chunks.clear(); }
 
-    void assign(const char *Start, const char *End) {
-        clear();
-        if (Start != End)
-            Chunks.insert(0, MakeRopeString(Start, End));
-    }
+  void assign(const char *Start, const char *End) {
+    clear();
+    if (Start != End)
+      Chunks.insert(0, MakeRopeString(Start, End));
+  }
 
-    void insert(unsigned Offset, const char *Start, const char *End) {
-        assert(Offset <= size() && "Invalid position to insert!");
-        if (Start == End) return;
-        Chunks.insert(Offset, MakeRopeString(Start, End));
-    }
+  void insert(unsigned Offset, const char *Start, const char *End) {
+    assert(Offset <= size() && "Invalid position to insert!");
+    if (Start == End)
+      return;
+    Chunks.insert(Offset, MakeRopeString(Start, End));
+  }
 
-    void erase(unsigned Offset, unsigned NumBytes) {
-        assert(Offset+NumBytes <= size() && "Invalid region to erase!");
-        if (NumBytes == 0) return;
-        Chunks.erase(Offset, NumBytes);
-    }
+  void erase(unsigned Offset, unsigned NumBytes) {
+    assert(Offset + NumBytes <= size() && "Invalid region to erase!");
+    if (NumBytes == 0)
+      return;
+    Chunks.erase(Offset, NumBytes);
+  }
 
 private:
-    RopePiece MakeRopeString(const char *Start, const char *End);
+  RopePiece MakeRopeString(const char *Start, const char *End);
 };
 
 } // namespace clang

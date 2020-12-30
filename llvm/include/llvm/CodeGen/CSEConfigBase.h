@@ -16,13 +16,11 @@ namespace llvm {
 // so that the derived classes in GISel can reference generic opcodes.
 class CSEConfigBase {
 public:
-    virtual ~CSEConfigBase() = default;
-    // Hook for defining which Generic instructions should be CSEd.
-    // GISelCSEInfo currently only calls this hook when dealing with generic
-    // opcodes.
-    virtual bool shouldCSEOpc(unsigned Opc) {
-        return false;
-    }
+  virtual ~CSEConfigBase() = default;
+  // Hook for defining which Generic instructions should be CSEd.
+  // GISelCSEInfo currently only calls this hook when dealing with generic
+  // opcodes.
+  virtual bool shouldCSEOpc(unsigned Opc) { return false; }
 };
 
 } // namespace llvm

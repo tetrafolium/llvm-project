@@ -34,12 +34,12 @@ template <typename> class Expr;
 // Potential conversion overflows are reported by the HostRuntimeWrapper in the
 // FoldingContext.
 using HostRuntimeWrapper = std::function<Expr<SomeType>(
-                               FoldingContext &, std::vector<Expr<SomeType>> &&)>;
+    FoldingContext &, std::vector<Expr<SomeType>> &&)>;
 
 // Returns the folder using host runtime given the intrinsic function name,
 // result and argument types. Nullopt if no host runtime is available for such
 // intrinsic function.
 std::optional<HostRuntimeWrapper> GetHostRuntimeWrapper(const std::string &name,
-        DynamicType resultType, const std::vector<DynamicType> &argTypes);
+    DynamicType resultType, const std::vector<DynamicType> &argTypes);
 } // namespace Fortran::evaluate
 #endif // FORTRAN_EVALUATE_INTRINSICS_LIBRARY_H_

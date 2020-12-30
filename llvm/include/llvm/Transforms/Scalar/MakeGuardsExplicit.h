@@ -38,9 +38,9 @@
 namespace llvm {
 
 struct MakeGuardsExplicitPass : public PassInfoMixin<MakeGuardsExplicitPass> {
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // namespace llvm
 
-#endif //LLVM_TRANSFORMS_SCALAR_MAKEGUARDSEXPLICIT_H
+#endif // LLVM_TRANSFORMS_SCALAR_MAKEGUARDSEXPLICIT_H

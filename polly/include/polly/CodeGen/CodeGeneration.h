@@ -16,9 +16,9 @@
 namespace polly {
 
 enum VectorizerChoice {
-    VECTORIZER_NONE,
-    VECTORIZER_STRIPMINE,
-    VECTORIZER_POLLY,
+  VECTORIZER_NONE,
+  VECTORIZER_STRIPMINE,
+  VECTORIZER_POLLY,
 };
 extern VectorizerChoice PollyVectorizerChoice;
 
@@ -29,8 +29,8 @@ extern VectorizerChoice PollyVectorizerChoice;
 void markBlockUnreachable(BasicBlock &Block, PollyIRBuilder &Builder);
 
 struct CodeGenerationPass : public PassInfoMixin<CodeGenerationPass> {
-    PreservedAnalyses run(Scop &S, ScopAnalysisManager &SAM,
-                          ScopStandardAnalysisResults &AR, SPMUpdater &U);
+  PreservedAnalyses run(Scop &S, ScopAnalysisManager &SAM,
+                        ScopStandardAnalysisResults &AR, SPMUpdater &U);
 };
 
 extern bool PerfMonitoring;

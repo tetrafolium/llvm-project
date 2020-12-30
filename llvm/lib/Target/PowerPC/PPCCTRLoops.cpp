@@ -50,21 +50,21 @@ namespace {
 
 struct PPCCTRLoopsVerify : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
-    PPCCTRLoopsVerify() : MachineFunctionPass(ID) {
-        initializePPCCTRLoopsVerifyPass(*PassRegistry::getPassRegistry());
-    }
+  PPCCTRLoopsVerify() : MachineFunctionPass(ID) {
+    initializePPCCTRLoopsVerifyPass(*PassRegistry::getPassRegistry());
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<MachineDominatorTree>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<MachineDominatorTree>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
 private:
-    MachineDominatorTree *MDT;
+  MachineDominatorTree *MDT;
 };
 
 char PPCCTRLoopsVerify::ID = 0;
@@ -77,114 +77,115 @@ INITIALIZE_PASS_END(PPCCTRLoopsVerify, "ppc-ctr-loops-verify",
                     "PowerPC CTR Loops Verify", false, false)
 
 FunctionPass *llvm::createPPCCTRLoopsVerify() {
-    return new PPCCTRLoopsVerify();
+  return new PPCCTRLoopsVerify();
 }
 
 static bool clobbersCTR(const MachineInstr &MI) {
-    for (unsigned i = 0, e = MI.getNumOperands(); i != e; ++i) {
-        const MachineOperand &MO = MI.getOperand(i);
-        if (MO.isReg()) {
-            if (MO.isDef() && (MO.getReg() == PPC::CTR || MO.getReg() == PPC::CTR8))
-                return true;
-        } else if (MO.isRegMask()) {
-            if (MO.clobbersPhysReg(PPC::CTR) || MO.clobbersPhysReg(PPC::CTR8))
-                return true;
-        }
+  for (unsigned i = 0, e = MI.getNumOperands(); i != e; ++i) {
+    const MachineOperand &MO = MI.getOperand(i);
+    if (MO.isReg()) {
+      if (MO.isDef() && (MO.getReg() == PPC::CTR || MO.getReg() == PPC::CTR8))
+        return true;
+    } else if (MO.isRegMask()) {
+      if (MO.clobbersPhysReg(PPC::CTR) || MO.clobbersPhysReg(PPC::CTR8))
+        return true;
     }
+  }
 
-    return false;
+  return false;
 }
 
 static bool verifyCTRBranch(MachineBasicBlock *MBB,
                             MachineBasicBlock::iterator I) {
-    MachineBasicBlock::iterator BI = I;
-    SmallSet<MachineBasicBlock *, 16>   Visited;
-    SmallVector<MachineBasicBlock *, 8> Preds;
-    bool CheckPreds;
+  MachineBasicBlock::iterator BI = I;
+  SmallSet<MachineBasicBlock *, 16> Visited;
+  SmallVector<MachineBasicBlock *, 8> Preds;
+  bool CheckPreds;
 
-    if (I == MBB->begin()) {
-        Visited.insert(MBB);
-        goto queue_preds;
-    } else
-        --I;
+  if (I == MBB->begin()) {
+    Visited.insert(MBB);
+    goto queue_preds;
+  } else
+    --I;
 
 check_block:
-    Visited.insert(MBB);
-    if (I == MBB->end())
-        goto queue_preds;
+  Visited.insert(MBB);
+  if (I == MBB->end())
+    goto queue_preds;
 
-    CheckPreds = true;
-    for (MachineBasicBlock::iterator IE = MBB->begin();; --I) {
-        unsigned Opc = I->getOpcode();
-        if (Opc == PPC::MTCTRloop || Opc == PPC::MTCTR8loop) {
-            CheckPreds = false;
-            break;
-        }
-
-        if (I != BI && clobbersCTR(*I)) {
-            LLVM_DEBUG(dbgs() << printMBBReference(*MBB) << " (" << MBB->getFullName()
-                       << ") instruction " << *I
-                       << " clobbers CTR, invalidating "
-                       << printMBBReference(*BI->getParent()) << " ("
-                       << BI->getParent()->getFullName() << ") instruction "
-                       << *BI << "\n");
-            return false;
-        }
-
-        if (I == IE)
-            break;
+  CheckPreds = true;
+  for (MachineBasicBlock::iterator IE = MBB->begin();; --I) {
+    unsigned Opc = I->getOpcode();
+    if (Opc == PPC::MTCTRloop || Opc == PPC::MTCTR8loop) {
+      CheckPreds = false;
+      break;
     }
 
-    if (!CheckPreds && Preds.empty())
-        return true;
-
-    if (CheckPreds) {
-queue_preds:
-        if (MachineFunction::iterator(MBB) == MBB->getParent()->begin()) {
-            LLVM_DEBUG(dbgs() << "Unable to find a MTCTR instruction for "
-                       << printMBBReference(*BI->getParent()) << " ("
-                       << BI->getParent()->getFullName() << ") instruction "
-                       << *BI << "\n");
-            return false;
-        }
-
-        for (MachineBasicBlock::pred_iterator PI = MBB->pred_begin(),
-                PIE = MBB->pred_end(); PI != PIE; ++PI)
-            Preds.push_back(*PI);
+    if (I != BI && clobbersCTR(*I)) {
+      LLVM_DEBUG(dbgs() << printMBBReference(*MBB) << " (" << MBB->getFullName()
+                        << ") instruction " << *I
+                        << " clobbers CTR, invalidating "
+                        << printMBBReference(*BI->getParent()) << " ("
+                        << BI->getParent()->getFullName() << ") instruction "
+                        << *BI << "\n");
+      return false;
     }
 
-    do {
-        MBB = Preds.pop_back_val();
-        if (!Visited.count(MBB)) {
-            I = MBB->getLastNonDebugInstr();
-            goto check_block;
-        }
-    } while (!Preds.empty());
+    if (I == IE)
+      break;
+  }
 
+  if (!CheckPreds && Preds.empty())
     return true;
+
+  if (CheckPreds) {
+  queue_preds:
+    if (MachineFunction::iterator(MBB) == MBB->getParent()->begin()) {
+      LLVM_DEBUG(dbgs() << "Unable to find a MTCTR instruction for "
+                        << printMBBReference(*BI->getParent()) << " ("
+                        << BI->getParent()->getFullName() << ") instruction "
+                        << *BI << "\n");
+      return false;
+    }
+
+    for (MachineBasicBlock::pred_iterator PI = MBB->pred_begin(),
+                                          PIE = MBB->pred_end();
+         PI != PIE; ++PI)
+      Preds.push_back(*PI);
+  }
+
+  do {
+    MBB = Preds.pop_back_val();
+    if (!Visited.count(MBB)) {
+      I = MBB->getLastNonDebugInstr();
+      goto check_block;
+    }
+  } while (!Preds.empty());
+
+  return true;
 }
 
 bool PPCCTRLoopsVerify::runOnMachineFunction(MachineFunction &MF) {
-    MDT = &getAnalysis<MachineDominatorTree>();
+  MDT = &getAnalysis<MachineDominatorTree>();
 
-    // Verify that all bdnz/bdz instructions are dominated by a loop mtctr before
-    // any other instructions that might clobber the ctr register.
-    for (MachineFunction::iterator I = MF.begin(), IE = MF.end();
-            I != IE; ++I) {
-        MachineBasicBlock *MBB = &*I;
-        if (!MDT->isReachableFromEntry(MBB))
-            continue;
+  // Verify that all bdnz/bdz instructions are dominated by a loop mtctr before
+  // any other instructions that might clobber the ctr register.
+  for (MachineFunction::iterator I = MF.begin(), IE = MF.end(); I != IE; ++I) {
+    MachineBasicBlock *MBB = &*I;
+    if (!MDT->isReachableFromEntry(MBB))
+      continue;
 
-        for (MachineBasicBlock::iterator MII = MBB->getFirstTerminator(),
-                MIIE = MBB->end(); MII != MIIE; ++MII) {
-            unsigned Opc = MII->getOpcode();
-            if (Opc == PPC::BDNZ8 || Opc == PPC::BDNZ ||
-                    Opc == PPC::BDZ8  || Opc == PPC::BDZ)
-                if (!verifyCTRBranch(MBB, MII))
-                    llvm_unreachable("Invalid PPC CTR loop!");
-        }
+    for (MachineBasicBlock::iterator MII = MBB->getFirstTerminator(),
+                                     MIIE = MBB->end();
+         MII != MIIE; ++MII) {
+      unsigned Opc = MII->getOpcode();
+      if (Opc == PPC::BDNZ8 || Opc == PPC::BDNZ || Opc == PPC::BDZ8 ||
+          Opc == PPC::BDZ)
+        if (!verifyCTRBranch(MBB, MII))
+          llvm_unreachable("Invalid PPC CTR loop!");
     }
+  }
 
-    return false;
+  return false;
 }
 #endif // NDEBUG

@@ -18,59 +18,58 @@ namespace tidy {
 namespace bugprone {
 
 void SuspiciousSemicolonCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        stmt(anyOf(ifStmt(hasThen(nullStmt().bind("semi")),
-                          unless(hasElse(stmt())),
-                          unless(isConstexpr())),
-                   forStmt(hasBody(nullStmt().bind("semi"))),
-                   cxxForRangeStmt(hasBody(nullStmt().bind("semi"))),
-                   whileStmt(hasBody(nullStmt().bind("semi")))))
-        .bind("stmt"),
-        this);
+  Finder->addMatcher(
+      stmt(anyOf(ifStmt(hasThen(nullStmt().bind("semi")),
+                        unless(hasElse(stmt())), unless(isConstexpr())),
+                 forStmt(hasBody(nullStmt().bind("semi"))),
+                 cxxForRangeStmt(hasBody(nullStmt().bind("semi"))),
+                 whileStmt(hasBody(nullStmt().bind("semi")))))
+          .bind("stmt"),
+      this);
 }
 
 void SuspiciousSemicolonCheck::check(const MatchFinder::MatchResult &Result) {
-    if (Result.Context->getDiagnostics().hasUncompilableErrorOccurred())
-        return;
+  if (Result.Context->getDiagnostics().hasUncompilableErrorOccurred())
+    return;
 
-    const auto *Semicolon = Result.Nodes.getNodeAs<NullStmt>("semi");
-    SourceLocation LocStart = Semicolon->getBeginLoc();
+  const auto *Semicolon = Result.Nodes.getNodeAs<NullStmt>("semi");
+  SourceLocation LocStart = Semicolon->getBeginLoc();
 
-    if (LocStart.isMacroID())
-        return;
+  if (LocStart.isMacroID())
+    return;
 
-    ASTContext &Ctxt = *Result.Context;
-    auto Token = utils::lexer::getPreviousToken(LocStart, Ctxt.getSourceManager(),
-                 Ctxt.getLangOpts());
-    auto &SM = *Result.SourceManager;
-    unsigned SemicolonLine = SM.getSpellingLineNumber(LocStart);
+  ASTContext &Ctxt = *Result.Context;
+  auto Token = utils::lexer::getPreviousToken(LocStart, Ctxt.getSourceManager(),
+                                              Ctxt.getLangOpts());
+  auto &SM = *Result.SourceManager;
+  unsigned SemicolonLine = SM.getSpellingLineNumber(LocStart);
 
-    const auto *Statement = Result.Nodes.getNodeAs<Stmt>("stmt");
-    const bool IsIfStmt = isa<IfStmt>(Statement);
+  const auto *Statement = Result.Nodes.getNodeAs<Stmt>("stmt");
+  const bool IsIfStmt = isa<IfStmt>(Statement);
 
-    if (!IsIfStmt &&
-            SM.getSpellingLineNumber(Token.getLocation()) != SemicolonLine)
-        return;
+  if (!IsIfStmt &&
+      SM.getSpellingLineNumber(Token.getLocation()) != SemicolonLine)
+    return;
 
-    SourceLocation LocEnd = Semicolon->getEndLoc();
-    FileID FID = SM.getFileID(LocEnd);
-    llvm::MemoryBufferRef Buffer = SM.getBufferOrFake(FID, LocEnd);
-    Lexer Lexer(SM.getLocForStartOfFile(FID), Ctxt.getLangOpts(),
-                Buffer.getBufferStart(), SM.getCharacterData(LocEnd) + 1,
-                Buffer.getBufferEnd());
-    if (Lexer.LexFromRawLexer(Token))
-        return;
+  SourceLocation LocEnd = Semicolon->getEndLoc();
+  FileID FID = SM.getFileID(LocEnd);
+  llvm::MemoryBufferRef Buffer = SM.getBufferOrFake(FID, LocEnd);
+  Lexer Lexer(SM.getLocForStartOfFile(FID), Ctxt.getLangOpts(),
+              Buffer.getBufferStart(), SM.getCharacterData(LocEnd) + 1,
+              Buffer.getBufferEnd());
+  if (Lexer.LexFromRawLexer(Token))
+    return;
 
-    unsigned BaseIndent = SM.getSpellingColumnNumber(Statement->getBeginLoc());
-    unsigned NewTokenIndent = SM.getSpellingColumnNumber(Token.getLocation());
-    unsigned NewTokenLine = SM.getSpellingLineNumber(Token.getLocation());
+  unsigned BaseIndent = SM.getSpellingColumnNumber(Statement->getBeginLoc());
+  unsigned NewTokenIndent = SM.getSpellingColumnNumber(Token.getLocation());
+  unsigned NewTokenLine = SM.getSpellingLineNumber(Token.getLocation());
 
-    if (!IsIfStmt && NewTokenIndent <= BaseIndent &&
-            Token.getKind() != tok::l_brace && NewTokenLine != SemicolonLine)
-        return;
+  if (!IsIfStmt && NewTokenIndent <= BaseIndent &&
+      Token.getKind() != tok::l_brace && NewTokenLine != SemicolonLine)
+    return;
 
-    diag(LocStart, "potentially unintended semicolon")
-            << FixItHint::CreateRemoval(SourceRange(LocStart, LocEnd));
+  diag(LocStart, "potentially unintended semicolon")
+      << FixItHint::CreateRemoval(SourceRange(LocStart, LocEnd));
 }
 
 } // namespace bugprone

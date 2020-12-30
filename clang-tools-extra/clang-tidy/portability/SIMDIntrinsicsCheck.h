@@ -23,18 +23,18 @@ namespace portability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/portability-simd-intrinsics.html
 class SIMDIntrinsicsCheck : public ClangTidyCheck {
 public:
-    SIMDIntrinsicsCheck(StringRef Name, ClangTidyContext *Context);
+  SIMDIntrinsicsCheck(StringRef Name, ClangTidyContext *Context);
 
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    llvm::SmallString<32> Std;
-    const bool Suggest;
+  llvm::SmallString<32> Std;
+  const bool Suggest;
 };
 
 } // namespace portability

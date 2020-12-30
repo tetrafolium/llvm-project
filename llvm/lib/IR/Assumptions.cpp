@@ -16,17 +16,17 @@ using namespace llvm;
 
 bool llvm::hasAssumption(Function &F,
                          const KnownAssumptionString &AssumptionStr) {
-    const Attribute &A = F.getFnAttribute(AssumptionAttrKey);
-    if (!A.isValid())
-        return false;
-    assert(A.isStringAttribute() && "Expected a string attribute!");
+  const Attribute &A = F.getFnAttribute(AssumptionAttrKey);
+  if (!A.isValid())
+    return false;
+  assert(A.isStringAttribute() && "Expected a string attribute!");
 
-    SmallVector<StringRef, 8> Strings;
-    A.getValueAsString().split(Strings, ",");
+  SmallVector<StringRef, 8> Strings;
+  A.getValueAsString().split(Strings, ",");
 
-    return llvm::any_of(Strings, [=](StringRef Assumption) {
-        return Assumption == AssumptionStr;
-    });
+  return llvm::any_of(Strings, [=](StringRef Assumption) {
+    return Assumption == AssumptionStr;
+  });
 }
 
 StringSet<> llvm::KnownAssumptionStrings({

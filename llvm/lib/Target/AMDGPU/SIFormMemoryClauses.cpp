@@ -32,211 +32,209 @@ using namespace llvm;
 // Clauses longer then 15 instructions would overflow one of the counters
 // and stall. They can stall even earlier if there are outstanding counters.
 static cl::opt<unsigned>
-MaxClause("amdgpu-max-memory-clause", cl::Hidden, cl::init(15),
-          cl::desc("Maximum length of a memory clause, instructions"));
+    MaxClause("amdgpu-max-memory-clause", cl::Hidden, cl::init(15),
+              cl::desc("Maximum length of a memory clause, instructions"));
 
 namespace {
 
 class SIFormMemoryClauses : public MachineFunctionPass {
-    typedef DenseMap<unsigned, std::pair<unsigned, LaneBitmask>> RegUse;
+  typedef DenseMap<unsigned, std::pair<unsigned, LaneBitmask>> RegUse;
 
 public:
-    static char ID;
+  static char ID;
 
 public:
-    SIFormMemoryClauses() : MachineFunctionPass(ID) {
-        initializeSIFormMemoryClausesPass(*PassRegistry::getPassRegistry());
-    }
+  SIFormMemoryClauses() : MachineFunctionPass(ID) {
+    initializeSIFormMemoryClausesPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    StringRef getPassName() const override {
-        return "SI Form memory clauses";
-    }
+  StringRef getPassName() const override { return "SI Form memory clauses"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<LiveIntervals>();
-        AU.setPreservesAll();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<LiveIntervals>();
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
 private:
-    template <typename Callable>
-    void forAllLanes(Register Reg, LaneBitmask LaneMask, Callable Func) const;
+  template <typename Callable>
+  void forAllLanes(Register Reg, LaneBitmask LaneMask, Callable Func) const;
 
-    bool canBundle(const MachineInstr &MI, RegUse &Defs, RegUse &Uses) const;
-    bool checkPressure(const MachineInstr &MI, GCNDownwardRPTracker &RPT);
-    void collectRegUses(const MachineInstr &MI, RegUse &Defs, RegUse &Uses) const;
-    bool processRegUses(const MachineInstr &MI, RegUse &Defs, RegUse &Uses,
-                        GCNDownwardRPTracker &RPT);
+  bool canBundle(const MachineInstr &MI, RegUse &Defs, RegUse &Uses) const;
+  bool checkPressure(const MachineInstr &MI, GCNDownwardRPTracker &RPT);
+  void collectRegUses(const MachineInstr &MI, RegUse &Defs, RegUse &Uses) const;
+  bool processRegUses(const MachineInstr &MI, RegUse &Defs, RegUse &Uses,
+                      GCNDownwardRPTracker &RPT);
 
-    const GCNSubtarget *ST;
-    const SIRegisterInfo *TRI;
-    const MachineRegisterInfo *MRI;
-    SIMachineFunctionInfo *MFI;
+  const GCNSubtarget *ST;
+  const SIRegisterInfo *TRI;
+  const MachineRegisterInfo *MRI;
+  SIMachineFunctionInfo *MFI;
 
-    unsigned LastRecordedOccupancy;
-    unsigned MaxVGPRs;
-    unsigned MaxSGPRs;
+  unsigned LastRecordedOccupancy;
+  unsigned MaxVGPRs;
+  unsigned MaxSGPRs;
 };
 
 } // End anonymous namespace.
 
-INITIALIZE_PASS_BEGIN(SIFormMemoryClauses, DEBUG_TYPE,
-                      "SI Form memory clauses", false, false)
+INITIALIZE_PASS_BEGIN(SIFormMemoryClauses, DEBUG_TYPE, "SI Form memory clauses",
+                      false, false)
 INITIALIZE_PASS_DEPENDENCY(LiveIntervals)
-INITIALIZE_PASS_END(SIFormMemoryClauses, DEBUG_TYPE,
-                    "SI Form memory clauses", false, false)
-
+INITIALIZE_PASS_END(SIFormMemoryClauses, DEBUG_TYPE, "SI Form memory clauses",
+                    false, false)
 
 char SIFormMemoryClauses::ID = 0;
 
 char &llvm::SIFormMemoryClausesID = SIFormMemoryClauses::ID;
 
 FunctionPass *llvm::createSIFormMemoryClausesPass() {
-    return new SIFormMemoryClauses();
+  return new SIFormMemoryClauses();
 }
 
 static bool isVMEMClauseInst(const MachineInstr &MI) {
-    return SIInstrInfo::isFLAT(MI) || SIInstrInfo::isVMEM(MI);
+  return SIInstrInfo::isFLAT(MI) || SIInstrInfo::isVMEM(MI);
 }
 
 static bool isSMEMClauseInst(const MachineInstr &MI) {
-    return SIInstrInfo::isSMRD(MI);
+  return SIInstrInfo::isSMRD(MI);
 }
 
 // There no sense to create store clauses, they do not define anything,
 // thus there is nothing to set early-clobber.
 static bool isValidClauseInst(const MachineInstr &MI, bool IsVMEMClause) {
-    if (MI.isDebugValue() || MI.isBundled())
+  if (MI.isDebugValue() || MI.isBundled())
+    return false;
+  if (!MI.mayLoad() || MI.mayStore())
+    return false;
+  if (AMDGPU::getAtomicNoRetOp(MI.getOpcode()) != -1 ||
+      AMDGPU::getAtomicRetOp(MI.getOpcode()) != -1)
+    return false;
+  if (IsVMEMClause && !isVMEMClauseInst(MI))
+    return false;
+  if (!IsVMEMClause && !isSMEMClauseInst(MI))
+    return false;
+  // If this is a load instruction where the result has been coalesced with an
+  // operand, then we cannot clause it.
+  for (const MachineOperand &ResMO : MI.defs()) {
+    Register ResReg = ResMO.getReg();
+    for (const MachineOperand &MO : MI.uses()) {
+      if (!MO.isReg() || MO.isDef())
+        continue;
+      if (MO.getReg() == ResReg)
         return false;
-    if (!MI.mayLoad() || MI.mayStore())
-        return false;
-    if (AMDGPU::getAtomicNoRetOp(MI.getOpcode()) != -1 ||
-            AMDGPU::getAtomicRetOp(MI.getOpcode()) != -1)
-        return false;
-    if (IsVMEMClause && !isVMEMClauseInst(MI))
-        return false;
-    if (!IsVMEMClause && !isSMEMClauseInst(MI))
-        return false;
-    // If this is a load instruction where the result has been coalesced with an operand, then we cannot clause it.
-    for (const MachineOperand &ResMO : MI.defs()) {
-        Register ResReg = ResMO.getReg();
-        for (const MachineOperand &MO : MI.uses()) {
-            if (!MO.isReg() || MO.isDef())
-                continue;
-            if (MO.getReg() == ResReg)
-                return false;
-        }
-        break; // Only check the first def.
     }
-    return true;
+    break; // Only check the first def.
+  }
+  return true;
 }
 
 static unsigned getMopState(const MachineOperand &MO) {
-    unsigned S = 0;
-    if (MO.isImplicit())
-        S |= RegState::Implicit;
-    if (MO.isDead())
-        S |= RegState::Dead;
-    if (MO.isUndef())
-        S |= RegState::Undef;
-    if (MO.isKill())
-        S |= RegState::Kill;
-    if (MO.isEarlyClobber())
-        S |= RegState::EarlyClobber;
-    if (MO.getReg().isPhysical() && MO.isRenamable())
-        S |= RegState::Renamable;
-    return S;
+  unsigned S = 0;
+  if (MO.isImplicit())
+    S |= RegState::Implicit;
+  if (MO.isDead())
+    S |= RegState::Dead;
+  if (MO.isUndef())
+    S |= RegState::Undef;
+  if (MO.isKill())
+    S |= RegState::Kill;
+  if (MO.isEarlyClobber())
+    S |= RegState::EarlyClobber;
+  if (MO.getReg().isPhysical() && MO.isRenamable())
+    S |= RegState::Renamable;
+  return S;
 }
 
 template <typename Callable>
 void SIFormMemoryClauses::forAllLanes(Register Reg, LaneBitmask LaneMask,
                                       Callable Func) const {
-    if (LaneMask.all() || Reg.isPhysical() ||
-            LaneMask == MRI->getMaxLaneMaskForVReg(Reg)) {
-        Func(0);
-        return;
+  if (LaneMask.all() || Reg.isPhysical() ||
+      LaneMask == MRI->getMaxLaneMaskForVReg(Reg)) {
+    Func(0);
+    return;
+  }
+
+  const TargetRegisterClass *RC = MRI->getRegClass(Reg);
+  unsigned E = TRI->getNumSubRegIndices();
+  SmallVector<unsigned, AMDGPU::NUM_TARGET_SUBREGS> CoveringSubregs;
+  for (unsigned Idx = 1; Idx < E; ++Idx) {
+    // Is this index even compatible with the given class?
+    if (TRI->getSubClassWithSubReg(RC, Idx) != RC)
+      continue;
+    LaneBitmask SubRegMask = TRI->getSubRegIndexLaneMask(Idx);
+    // Early exit if we found a perfect match.
+    if (SubRegMask == LaneMask) {
+      Func(Idx);
+      return;
     }
 
-    const TargetRegisterClass *RC = MRI->getRegClass(Reg);
-    unsigned E = TRI->getNumSubRegIndices();
-    SmallVector<unsigned, AMDGPU::NUM_TARGET_SUBREGS> CoveringSubregs;
-    for (unsigned Idx = 1; Idx < E; ++Idx) {
-        // Is this index even compatible with the given class?
-        if (TRI->getSubClassWithSubReg(RC, Idx) != RC)
-            continue;
-        LaneBitmask SubRegMask = TRI->getSubRegIndexLaneMask(Idx);
-        // Early exit if we found a perfect match.
-        if (SubRegMask == LaneMask) {
-            Func(Idx);
-            return;
-        }
+    if ((SubRegMask & ~LaneMask).any() || (SubRegMask & LaneMask).none())
+      continue;
 
-        if ((SubRegMask & ~LaneMask).any() || (SubRegMask & LaneMask).none())
-            continue;
+    CoveringSubregs.push_back(Idx);
+  }
 
-        CoveringSubregs.push_back(Idx);
-    }
+  llvm::sort(CoveringSubregs, [this](unsigned A, unsigned B) {
+    LaneBitmask MaskA = TRI->getSubRegIndexLaneMask(A);
+    LaneBitmask MaskB = TRI->getSubRegIndexLaneMask(B);
+    unsigned NA = MaskA.getNumLanes();
+    unsigned NB = MaskB.getNumLanes();
+    if (NA != NB)
+      return NA > NB;
+    return MaskA.getHighestLane() > MaskB.getHighestLane();
+  });
 
-    llvm::sort(CoveringSubregs, [this](unsigned A, unsigned B) {
-        LaneBitmask MaskA = TRI->getSubRegIndexLaneMask(A);
-        LaneBitmask MaskB = TRI->getSubRegIndexLaneMask(B);
-        unsigned NA = MaskA.getNumLanes();
-        unsigned NB = MaskB.getNumLanes();
-        if (NA != NB)
-            return NA > NB;
-        return MaskA.getHighestLane() > MaskB.getHighestLane();
-    });
+  for (unsigned Idx : CoveringSubregs) {
+    LaneBitmask SubRegMask = TRI->getSubRegIndexLaneMask(Idx);
+    if ((SubRegMask & ~LaneMask).any() || (SubRegMask & LaneMask).none())
+      continue;
 
-    for (unsigned Idx : CoveringSubregs) {
-        LaneBitmask SubRegMask = TRI->getSubRegIndexLaneMask(Idx);
-        if ((SubRegMask & ~LaneMask).any() || (SubRegMask & LaneMask).none())
-            continue;
+    Func(Idx);
+    LaneMask &= ~SubRegMask;
+    if (LaneMask.none())
+      return;
+  }
 
-        Func(Idx);
-        LaneMask &= ~SubRegMask;
-        if (LaneMask.none())
-            return;
-    }
-
-    llvm_unreachable("Failed to find all subregs to cover lane mask");
+  llvm_unreachable("Failed to find all subregs to cover lane mask");
 }
 
 // Returns false if there is a use of a def already in the map.
 // In this case we must break the clause.
-bool SIFormMemoryClauses::canBundle(const MachineInstr &MI,
-                                    RegUse &Defs, RegUse &Uses) const {
-    // Check interference with defs.
-    for (const MachineOperand &MO : MI.operands()) {
-        // TODO: Prologue/Epilogue Insertion pass does not process bundled
-        //       instructions.
-        if (MO.isFI())
-            return false;
+bool SIFormMemoryClauses::canBundle(const MachineInstr &MI, RegUse &Defs,
+                                    RegUse &Uses) const {
+  // Check interference with defs.
+  for (const MachineOperand &MO : MI.operands()) {
+    // TODO: Prologue/Epilogue Insertion pass does not process bundled
+    //       instructions.
+    if (MO.isFI())
+      return false;
 
-        if (!MO.isReg())
-            continue;
+    if (!MO.isReg())
+      continue;
 
-        Register Reg = MO.getReg();
+    Register Reg = MO.getReg();
 
-        // If it is tied we will need to write same register as we read.
-        if (MO.isTied())
-            return false;
+    // If it is tied we will need to write same register as we read.
+    if (MO.isTied())
+      return false;
 
-        RegUse &Map = MO.isDef() ? Uses : Defs;
-        auto Conflict = Map.find(Reg);
-        if (Conflict == Map.end())
-            continue;
+    RegUse &Map = MO.isDef() ? Uses : Defs;
+    auto Conflict = Map.find(Reg);
+    if (Conflict == Map.end())
+      continue;
 
-        if (Reg.isPhysical())
-            return false;
+    if (Reg.isPhysical())
+      return false;
 
-        LaneBitmask Mask = TRI->getSubRegIndexLaneMask(MO.getSubReg());
-        if ((Conflict->second.second & Mask).any())
-            return false;
-    }
+    LaneBitmask Mask = TRI->getSubRegIndexLaneMask(MO.getSubReg());
+    if ((Conflict->second.second & Mask).any())
+      return false;
+  }
 
-    return true;
+  return true;
 }
 
 // Since all defs in the clause are early clobber we can run out of registers.
@@ -244,167 +242,167 @@ bool SIFormMemoryClauses::canBundle(const MachineInstr &MI,
 // bundled into a memory clause.
 bool SIFormMemoryClauses::checkPressure(const MachineInstr &MI,
                                         GCNDownwardRPTracker &RPT) {
-    // NB: skip advanceBeforeNext() call. Since all defs will be marked
-    // early-clobber they will all stay alive at least to the end of the
-    // clause. Therefor we should not decrease pressure even if load
-    // pointer becomes dead and could otherwise be reused for destination.
-    RPT.advanceToNext();
-    GCNRegPressure MaxPressure = RPT.moveMaxPressure();
-    unsigned Occupancy = MaxPressure.getOccupancy(*ST);
-    if (Occupancy >= MFI->getMinAllowedOccupancy() &&
-            MaxPressure.getVGPRNum() <= MaxVGPRs &&
-            MaxPressure.getSGPRNum() <= MaxSGPRs) {
-        LastRecordedOccupancy = Occupancy;
-        return true;
-    }
-    return false;
+  // NB: skip advanceBeforeNext() call. Since all defs will be marked
+  // early-clobber they will all stay alive at least to the end of the
+  // clause. Therefor we should not decrease pressure even if load
+  // pointer becomes dead and could otherwise be reused for destination.
+  RPT.advanceToNext();
+  GCNRegPressure MaxPressure = RPT.moveMaxPressure();
+  unsigned Occupancy = MaxPressure.getOccupancy(*ST);
+  if (Occupancy >= MFI->getMinAllowedOccupancy() &&
+      MaxPressure.getVGPRNum() <= MaxVGPRs &&
+      MaxPressure.getSGPRNum() <= MaxSGPRs) {
+    LastRecordedOccupancy = Occupancy;
+    return true;
+  }
+  return false;
 }
 
 // Collect register defs and uses along with their lane masks and states.
-void SIFormMemoryClauses::collectRegUses(const MachineInstr &MI,
-        RegUse &Defs, RegUse &Uses) const {
-    for (const MachineOperand &MO : MI.operands()) {
-        if (!MO.isReg())
-            continue;
-        Register Reg = MO.getReg();
-        if (!Reg)
-            continue;
+void SIFormMemoryClauses::collectRegUses(const MachineInstr &MI, RegUse &Defs,
+                                         RegUse &Uses) const {
+  for (const MachineOperand &MO : MI.operands()) {
+    if (!MO.isReg())
+      continue;
+    Register Reg = MO.getReg();
+    if (!Reg)
+      continue;
 
-        LaneBitmask Mask = Reg.isVirtual()
+    LaneBitmask Mask = Reg.isVirtual()
                            ? TRI->getSubRegIndexLaneMask(MO.getSubReg())
                            : LaneBitmask::getAll();
-        RegUse &Map = MO.isDef() ? Defs : Uses;
+    RegUse &Map = MO.isDef() ? Defs : Uses;
 
-        auto Loc = Map.find(Reg);
-        unsigned State = getMopState(MO);
-        if (Loc == Map.end()) {
-            Map[Reg] = std::make_pair(State, Mask);
-        } else {
-            Loc->second.first |= State;
-            Loc->second.second |= Mask;
-        }
+    auto Loc = Map.find(Reg);
+    unsigned State = getMopState(MO);
+    if (Loc == Map.end()) {
+      Map[Reg] = std::make_pair(State, Mask);
+    } else {
+      Loc->second.first |= State;
+      Loc->second.second |= Mask;
     }
+  }
 }
 
 // Check register def/use conflicts, occupancy limits and collect def/use maps.
 // Return true if instruction can be bundled with previous. It it cannot
 // def/use maps are not updated.
-bool SIFormMemoryClauses::processRegUses(const MachineInstr &MI,
-        RegUse &Defs, RegUse &Uses,
-        GCNDownwardRPTracker &RPT) {
-    if (!canBundle(MI, Defs, Uses))
-        return false;
+bool SIFormMemoryClauses::processRegUses(const MachineInstr &MI, RegUse &Defs,
+                                         RegUse &Uses,
+                                         GCNDownwardRPTracker &RPT) {
+  if (!canBundle(MI, Defs, Uses))
+    return false;
 
-    if (!checkPressure(MI, RPT))
-        return false;
+  if (!checkPressure(MI, RPT))
+    return false;
 
-    collectRegUses(MI, Defs, Uses);
-    return true;
+  collectRegUses(MI, Defs, Uses);
+  return true;
 }
 
 bool SIFormMemoryClauses::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    ST = &MF.getSubtarget<GCNSubtarget>();
-    if (!ST->isXNACKEnabled())
-        return false;
+  ST = &MF.getSubtarget<GCNSubtarget>();
+  if (!ST->isXNACKEnabled())
+    return false;
 
-    const SIInstrInfo *TII = ST->getInstrInfo();
-    TRI = ST->getRegisterInfo();
-    MRI = &MF.getRegInfo();
-    MFI = MF.getInfo<SIMachineFunctionInfo>();
-    LiveIntervals *LIS = &getAnalysis<LiveIntervals>();
-    SlotIndexes *Ind = LIS->getSlotIndexes();
-    bool Changed = false;
+  const SIInstrInfo *TII = ST->getInstrInfo();
+  TRI = ST->getRegisterInfo();
+  MRI = &MF.getRegInfo();
+  MFI = MF.getInfo<SIMachineFunctionInfo>();
+  LiveIntervals *LIS = &getAnalysis<LiveIntervals>();
+  SlotIndexes *Ind = LIS->getSlotIndexes();
+  bool Changed = false;
 
-    MaxVGPRs = TRI->getAllocatableSet(MF, &AMDGPU::VGPR_32RegClass).count();
-    MaxSGPRs = TRI->getAllocatableSet(MF, &AMDGPU::SGPR_32RegClass).count();
-    unsigned FuncMaxClause = AMDGPU::getIntegerAttribute(
-                                 MF.getFunction(), "amdgpu-max-memory-clause", MaxClause);
+  MaxVGPRs = TRI->getAllocatableSet(MF, &AMDGPU::VGPR_32RegClass).count();
+  MaxSGPRs = TRI->getAllocatableSet(MF, &AMDGPU::SGPR_32RegClass).count();
+  unsigned FuncMaxClause = AMDGPU::getIntegerAttribute(
+      MF.getFunction(), "amdgpu-max-memory-clause", MaxClause);
 
-    for (MachineBasicBlock &MBB : MF) {
-        MachineBasicBlock::instr_iterator Next;
-        for (auto I = MBB.instr_begin(), E = MBB.instr_end(); I != E; I = Next) {
-            MachineInstr &MI = *I;
-            Next = std::next(I);
+  for (MachineBasicBlock &MBB : MF) {
+    MachineBasicBlock::instr_iterator Next;
+    for (auto I = MBB.instr_begin(), E = MBB.instr_end(); I != E; I = Next) {
+      MachineInstr &MI = *I;
+      Next = std::next(I);
 
-            bool IsVMEM = isVMEMClauseInst(MI);
+      bool IsVMEM = isVMEMClauseInst(MI);
 
-            if (!isValidClauseInst(MI, IsVMEM))
-                continue;
+      if (!isValidClauseInst(MI, IsVMEM))
+        continue;
 
-            RegUse Defs, Uses;
-            GCNDownwardRPTracker RPT(*LIS);
-            RPT.reset(MI);
+      RegUse Defs, Uses;
+      GCNDownwardRPTracker RPT(*LIS);
+      RPT.reset(MI);
 
-            if (!processRegUses(MI, Defs, Uses, RPT))
-                continue;
+      if (!processRegUses(MI, Defs, Uses, RPT))
+        continue;
 
-            unsigned Length = 1;
-            for ( ; Next != E && Length < FuncMaxClause; ++Next) {
-                if (!isValidClauseInst(*Next, IsVMEM))
-                    break;
+      unsigned Length = 1;
+      for (; Next != E && Length < FuncMaxClause; ++Next) {
+        if (!isValidClauseInst(*Next, IsVMEM))
+          break;
 
-                // A load from pointer which was loaded inside the same bundle is an
-                // impossible clause because we will need to write and read the same
-                // register inside. In this case processRegUses will return false.
-                if (!processRegUses(*Next, Defs, Uses, RPT))
-                    break;
+        // A load from pointer which was loaded inside the same bundle is an
+        // impossible clause because we will need to write and read the same
+        // register inside. In this case processRegUses will return false.
+        if (!processRegUses(*Next, Defs, Uses, RPT))
+          break;
 
-                ++Length;
-            }
-            if (Length < 2)
-                continue;
+        ++Length;
+      }
+      if (Length < 2)
+        continue;
 
-            Changed = true;
-            MFI->limitOccupancy(LastRecordedOccupancy);
+      Changed = true;
+      MFI->limitOccupancy(LastRecordedOccupancy);
 
-            auto B = BuildMI(MBB, I, DebugLoc(), TII->get(TargetOpcode::BUNDLE));
-            Ind->insertMachineInstrInMaps(*B);
+      auto B = BuildMI(MBB, I, DebugLoc(), TII->get(TargetOpcode::BUNDLE));
+      Ind->insertMachineInstrInMaps(*B);
 
-            for (auto BI = I; BI != Next; ++BI) {
-                BI->bundleWithPred();
-                Ind->removeSingleMachineInstrFromMaps(*BI);
+      for (auto BI = I; BI != Next; ++BI) {
+        BI->bundleWithPred();
+        Ind->removeSingleMachineInstrFromMaps(*BI);
 
-                for (MachineOperand &MO : BI->defs())
-                    if (MO.readsReg())
-                        MO.setIsInternalRead(true);
-            }
+        for (MachineOperand &MO : BI->defs())
+          if (MO.readsReg())
+            MO.setIsInternalRead(true);
+      }
 
-            for (auto &&R : Defs) {
-                forAllLanes(R.first, R.second.second, [&R, &B](unsigned SubReg) {
-                    unsigned S = R.second.first | RegState::EarlyClobber;
-                    if (!SubReg)
-                        S &= ~(RegState::Undef | RegState::Dead);
-                    B.addDef(R.first, S, SubReg);
-                });
-            }
+      for (auto &&R : Defs) {
+        forAllLanes(R.first, R.second.second, [&R, &B](unsigned SubReg) {
+          unsigned S = R.second.first | RegState::EarlyClobber;
+          if (!SubReg)
+            S &= ~(RegState::Undef | RegState::Dead);
+          B.addDef(R.first, S, SubReg);
+        });
+      }
 
-            for (auto &&R : Uses) {
-                forAllLanes(R.first, R.second.second, [&R, &B](unsigned SubReg) {
-                    B.addUse(R.first, R.second.first & ~RegState::Kill, SubReg);
-                });
-            }
+      for (auto &&R : Uses) {
+        forAllLanes(R.first, R.second.second, [&R, &B](unsigned SubReg) {
+          B.addUse(R.first, R.second.first & ~RegState::Kill, SubReg);
+        });
+      }
 
-            for (auto &&R : Defs) {
-                Register Reg = R.first;
-                Uses.erase(Reg);
-                if (Reg.isPhysical())
-                    continue;
-                LIS->removeInterval(Reg);
-                LIS->createAndComputeVirtRegInterval(Reg);
-            }
+      for (auto &&R : Defs) {
+        Register Reg = R.first;
+        Uses.erase(Reg);
+        if (Reg.isPhysical())
+          continue;
+        LIS->removeInterval(Reg);
+        LIS->createAndComputeVirtRegInterval(Reg);
+      }
 
-            for (auto &&R : Uses) {
-                Register Reg = R.first;
-                if (Reg.isPhysical())
-                    continue;
-                LIS->removeInterval(Reg);
-                LIS->createAndComputeVirtRegInterval(Reg);
-            }
-        }
+      for (auto &&R : Uses) {
+        Register Reg = R.first;
+        if (Reg.isPhysical())
+          continue;
+        LIS->removeInterval(Reg);
+        LIS->createAndComputeVirtRegInterval(Reg);
+      }
     }
+  }
 
-    return Changed;
+  return Changed;
 }

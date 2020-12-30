@@ -23,31 +23,31 @@ namespace tblgen {
 //===----------------------------------------------------------------------===//
 class PassOption {
 public:
-    explicit PassOption(const llvm::Record *def) : def(def) {}
+  explicit PassOption(const llvm::Record *def) : def(def) {}
 
-    /// Return the name for the C++ option variable.
-    StringRef getCppVariableName() const;
+  /// Return the name for the C++ option variable.
+  StringRef getCppVariableName() const;
 
-    /// Return the command line argument to use for this option.
-    StringRef getArgument() const;
+  /// Return the command line argument to use for this option.
+  StringRef getArgument() const;
 
-    /// Return the C++ type of the option.
-    StringRef getType() const;
+  /// Return the C++ type of the option.
+  StringRef getType() const;
 
-    /// Return the default value of the option.
-    Optional<StringRef> getDefaultValue() const;
+  /// Return the default value of the option.
+  Optional<StringRef> getDefaultValue() const;
 
-    /// Return the description for this option.
-    StringRef getDescription() const;
+  /// Return the description for this option.
+  StringRef getDescription() const;
 
-    /// Return the additional flags passed to the option constructor.
-    Optional<StringRef> getAdditionalFlags() const;
+  /// Return the additional flags passed to the option constructor.
+  Optional<StringRef> getAdditionalFlags() const;
 
-    /// Flag indicating if this is a list option.
-    bool isListOption() const;
+  /// Flag indicating if this is a list option.
+  bool isListOption() const;
 
 private:
-    const llvm::Record *def;
+  const llvm::Record *def;
 };
 
 //===----------------------------------------------------------------------===//
@@ -55,19 +55,19 @@ private:
 //===----------------------------------------------------------------------===//
 class PassStatistic {
 public:
-    explicit PassStatistic(const llvm::Record *def) : def(def) {}
+  explicit PassStatistic(const llvm::Record *def) : def(def) {}
 
-    /// Return the name for the C++ statistic variable.
-    StringRef getCppVariableName() const;
+  /// Return the name for the C++ statistic variable.
+  StringRef getCppVariableName() const;
 
-    /// Return the name of the statistic.
-    StringRef getName() const;
+  /// Return the name of the statistic.
+  StringRef getName() const;
 
-    /// Return the description for this statistic.
-    StringRef getDescription() const;
+  /// Return the description for this statistic.
+  StringRef getDescription() const;
 
 private:
-    const llvm::Record *def;
+  const llvm::Record *def;
 };
 
 //===----------------------------------------------------------------------===//
@@ -77,41 +77,39 @@ private:
 /// Wrapper class providing helper methods for Passes defined in TableGen.
 class Pass {
 public:
-    explicit Pass(const llvm::Record *def);
+  explicit Pass(const llvm::Record *def);
 
-    /// Return the command line argument of the pass.
-    StringRef getArgument() const;
+  /// Return the command line argument of the pass.
+  StringRef getArgument() const;
 
-    /// Return the name for the C++ base class.
-    StringRef getBaseClass() const;
+  /// Return the name for the C++ base class.
+  StringRef getBaseClass() const;
 
-    /// Return the short 1-line summary of the pass.
-    StringRef getSummary() const;
+  /// Return the short 1-line summary of the pass.
+  StringRef getSummary() const;
 
-    /// Return the description of the pass.
-    StringRef getDescription() const;
+  /// Return the description of the pass.
+  StringRef getDescription() const;
 
-    /// Return the C++ constructor call to create an instance of this pass.
-    StringRef getConstructor() const;
+  /// Return the C++ constructor call to create an instance of this pass.
+  StringRef getConstructor() const;
 
-    /// Return the dialects this pass needs to be registered.
-    ArrayRef<StringRef> getDependentDialects() const;
+  /// Return the dialects this pass needs to be registered.
+  ArrayRef<StringRef> getDependentDialects() const;
 
-    /// Return the options provided by this pass.
-    ArrayRef<PassOption> getOptions() const;
+  /// Return the options provided by this pass.
+  ArrayRef<PassOption> getOptions() const;
 
-    /// Return the statistics provided by this pass.
-    ArrayRef<PassStatistic> getStatistics() const;
+  /// Return the statistics provided by this pass.
+  ArrayRef<PassStatistic> getStatistics() const;
 
-    const llvm::Record *getDef() const {
-        return def;
-    }
+  const llvm::Record *getDef() const { return def; }
 
 private:
-    const llvm::Record *def;
-    std::vector<StringRef> dependentDialects;
-    std::vector<PassOption> options;
-    std::vector<PassStatistic> statistics;
+  const llvm::Record *def;
+  std::vector<StringRef> dependentDialects;
+  std::vector<PassOption> options;
+  std::vector<PassStatistic> statistics;
 };
 
 } // end namespace tblgen

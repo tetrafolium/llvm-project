@@ -18,7 +18,7 @@
 
 namespace llvm {
 struct BlockExtractorPass : PassInfoMixin<BlockExtractorPass> {
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 } // namespace llvm
 

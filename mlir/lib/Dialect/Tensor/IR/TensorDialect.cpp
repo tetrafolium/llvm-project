@@ -18,22 +18,22 @@ using namespace mlir::tensor;
 
 namespace {
 struct TensorInlinerInterface : public DialectInlinerInterface {
-    using DialectInlinerInterface::DialectInlinerInterface;
-    bool isLegalToInline(Region *dest, Region *src, bool wouldBeCloned,
-                         BlockAndValueMapping &valueMapping) const final {
-        return true;
-    }
-    bool isLegalToInline(Operation *, Region *, bool wouldBeCloned,
-                         BlockAndValueMapping &) const final {
-        return true;
-    }
+  using DialectInlinerInterface::DialectInlinerInterface;
+  bool isLegalToInline(Region *dest, Region *src, bool wouldBeCloned,
+                       BlockAndValueMapping &valueMapping) const final {
+    return true;
+  }
+  bool isLegalToInline(Operation *, Region *, bool wouldBeCloned,
+                       BlockAndValueMapping &) const final {
+    return true;
+  }
 };
 } // end anonymous namespace
 
 void TensorDialect::initialize() {
-    addOperations<
+  addOperations<
 #define GET_OP_LIST
 #include "mlir/Dialect/Tensor/IR/TensorOps.cpp.inc"
-    >();
-    addInterfaces<TensorInlinerInterface>();
+      >();
+  addInterfaces<TensorInlinerInterface>();
 }

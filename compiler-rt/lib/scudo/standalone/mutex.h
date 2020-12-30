@@ -22,56 +22,50 @@ namespace scudo {
 
 class HybridMutex {
 public:
-    void init() {
-        M = {};
-    }
-    bool tryLock();
-    NOINLINE void lock() {
-        if (LIKELY(tryLock()))
-            return;
-        // The compiler may try to fully unroll the loop, ending up in a
-        // NumberOfTries*NumberOfYields block of pauses mixed with tryLocks. This
-        // is large, ugly and unneeded, a compact loop is better for our purpose
-        // here. Use a pragma to tell the compiler not to unroll the loop.
+  void init() { M = {}; }
+  bool tryLock();
+  NOINLINE void lock() {
+    if (LIKELY(tryLock()))
+      return;
+      // The compiler may try to fully unroll the loop, ending up in a
+      // NumberOfTries*NumberOfYields block of pauses mixed with tryLocks. This
+      // is large, ugly and unneeded, a compact loop is better for our purpose
+      // here. Use a pragma to tell the compiler not to unroll the loop.
 #ifdef __clang__
 #pragma nounroll
 #endif
-        for (u8 I = 0U; I < NumberOfTries; I++) {
-            yieldProcessor(NumberOfYields);
-            if (tryLock())
-                return;
-        }
-        lockSlow();
+    for (u8 I = 0U; I < NumberOfTries; I++) {
+      yieldProcessor(NumberOfYields);
+      if (tryLock())
+        return;
     }
-    void unlock();
+    lockSlow();
+  }
+  void unlock();
 
 private:
-    static constexpr u8 NumberOfTries = 8U;
-    static constexpr u8 NumberOfYields = 8U;
+  static constexpr u8 NumberOfTries = 8U;
+  static constexpr u8 NumberOfYields = 8U;
 
 #if SCUDO_LINUX
-    atomic_u32 M;
+  atomic_u32 M;
 #elif SCUDO_FUCHSIA
-    sync_mutex_t M;
+  sync_mutex_t M;
 #endif
 
-    void lockSlow();
+  void lockSlow();
 };
 
 class ScopedLock {
 public:
-    explicit ScopedLock(HybridMutex &M) : Mutex(M) {
-        Mutex.lock();
-    }
-    ~ScopedLock() {
-        Mutex.unlock();
-    }
+  explicit ScopedLock(HybridMutex &M) : Mutex(M) { Mutex.lock(); }
+  ~ScopedLock() { Mutex.unlock(); }
 
 private:
-    HybridMutex &Mutex;
+  HybridMutex &Mutex;
 
-    ScopedLock(const ScopedLock &) = delete;
-    void operator=(const ScopedLock &) = delete;
+  ScopedLock(const ScopedLock &) = delete;
+  void operator=(const ScopedLock &) = delete;
 };
 
 } // namespace scudo

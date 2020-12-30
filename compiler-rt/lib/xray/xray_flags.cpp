@@ -43,42 +43,42 @@ void registerXRayFlags(FlagParser *P, Flags *F) XRAY_NEVER_INSTRUMENT {
 // compile-time using the XRAY_DEFAULT_OPTIONS macro.
 const char *useCompilerDefinedFlags() XRAY_NEVER_INSTRUMENT {
 #ifdef XRAY_DEFAULT_OPTIONS
-    // Do the double-layered string conversion to prevent badly crafted strings
-    // provided through the XRAY_DEFAULT_OPTIONS from causing compilation issues
-    // (or changing the semantics of the implementation through the macro). This
-    // ensures that we convert whatever XRAY_DEFAULT_OPTIONS is defined as a
-    // string literal.
-    return SANITIZER_STRINGIFY(XRAY_DEFAULT_OPTIONS);
+  // Do the double-layered string conversion to prevent badly crafted strings
+  // provided through the XRAY_DEFAULT_OPTIONS from causing compilation issues
+  // (or changing the semantics of the implementation through the macro). This
+  // ensures that we convert whatever XRAY_DEFAULT_OPTIONS is defined as a
+  // string literal.
+  return SANITIZER_STRINGIFY(XRAY_DEFAULT_OPTIONS);
 #else
-    return "";
+  return "";
 #endif
 }
 
 void initializeFlags() XRAY_NEVER_INSTRUMENT {
-    SetCommonFlagsDefaults();
-    auto *F = flags();
-    F->setDefaults();
+  SetCommonFlagsDefaults();
+  auto *F = flags();
+  F->setDefaults();
 
-    FlagParser XRayParser;
-    registerXRayFlags(&XRayParser, F);
-    RegisterCommonFlags(&XRayParser);
+  FlagParser XRayParser;
+  registerXRayFlags(&XRayParser, F);
+  RegisterCommonFlags(&XRayParser);
 
-    // Use options defaulted at compile-time for the runtime.
-    const char *XRayCompileFlags = useCompilerDefinedFlags();
-    XRayParser.ParseString(XRayCompileFlags);
+  // Use options defaulted at compile-time for the runtime.
+  const char *XRayCompileFlags = useCompilerDefinedFlags();
+  XRayParser.ParseString(XRayCompileFlags);
 
-    // Override from environment variables.
-    XRayParser.ParseStringFromEnv("XRAY_OPTIONS");
+  // Override from environment variables.
+  XRayParser.ParseStringFromEnv("XRAY_OPTIONS");
 
-    // Override from command line.
-    InitializeCommonFlags();
+  // Override from command line.
+  InitializeCommonFlags();
 
-    if (Verbosity())
-        ReportUnrecognizedFlags();
+  if (Verbosity())
+    ReportUnrecognizedFlags();
 
-    if (common_flags()->help) {
-        XRayParser.PrintFlagDescriptions();
-    }
+  if (common_flags()->help) {
+    XRayParser.PrintFlagDescriptions();
+  }
 }
 
 } // namespace __xray

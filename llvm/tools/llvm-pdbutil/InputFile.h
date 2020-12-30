@@ -38,121 +38,115 @@ class SymbolGroupIterator;
 class SymbolGroup;
 
 class InputFile {
-    InputFile();
+  InputFile();
 
-    std::unique_ptr<NativeSession> PdbSession;
-    object::OwningBinary<object::Binary> CoffObject;
-    std::unique_ptr<MemoryBuffer> UnknownFile;
-    PointerUnion<PDBFile *, object::COFFObjectFile *, MemoryBuffer *> PdbOrObj;
+  std::unique_ptr<NativeSession> PdbSession;
+  object::OwningBinary<object::Binary> CoffObject;
+  std::unique_ptr<MemoryBuffer> UnknownFile;
+  PointerUnion<PDBFile *, object::COFFObjectFile *, MemoryBuffer *> PdbOrObj;
 
-    using TypeCollectionPtr = std::unique_ptr<codeview::LazyRandomTypeCollection>;
+  using TypeCollectionPtr = std::unique_ptr<codeview::LazyRandomTypeCollection>;
 
-    TypeCollectionPtr Types;
-    TypeCollectionPtr Ids;
+  TypeCollectionPtr Types;
+  TypeCollectionPtr Ids;
 
-    enum TypeCollectionKind { kTypes, kIds };
-    codeview::LazyRandomTypeCollection &
-    getOrCreateTypeCollection(TypeCollectionKind Kind);
+  enum TypeCollectionKind { kTypes, kIds };
+  codeview::LazyRandomTypeCollection &
+  getOrCreateTypeCollection(TypeCollectionKind Kind);
 
 public:
-    ~InputFile();
-    InputFile(InputFile &&Other) = default;
+  ~InputFile();
+  InputFile(InputFile &&Other) = default;
 
-    static Expected<InputFile> open(StringRef Path,
-                                    bool AllowUnknownFile = false);
+  static Expected<InputFile> open(StringRef Path,
+                                  bool AllowUnknownFile = false);
 
-    PDBFile &pdb();
-    const PDBFile &pdb() const;
-    object::COFFObjectFile &obj();
-    const object::COFFObjectFile &obj() const;
-    MemoryBuffer &unknown();
-    const MemoryBuffer &unknown() const;
+  PDBFile &pdb();
+  const PDBFile &pdb() const;
+  object::COFFObjectFile &obj();
+  const object::COFFObjectFile &obj() const;
+  MemoryBuffer &unknown();
+  const MemoryBuffer &unknown() const;
 
-    StringRef getFilePath() const;
+  StringRef getFilePath() const;
 
-    bool hasTypes() const;
-    bool hasIds() const;
+  bool hasTypes() const;
+  bool hasIds() const;
 
-    codeview::LazyRandomTypeCollection &types();
-    codeview::LazyRandomTypeCollection &ids();
+  codeview::LazyRandomTypeCollection &types();
+  codeview::LazyRandomTypeCollection &ids();
 
-    iterator_range<SymbolGroupIterator> symbol_groups();
-    SymbolGroupIterator symbol_groups_begin();
-    SymbolGroupIterator symbol_groups_end();
+  iterator_range<SymbolGroupIterator> symbol_groups();
+  SymbolGroupIterator symbol_groups_begin();
+  SymbolGroupIterator symbol_groups_end();
 
-    bool isPdb() const;
-    bool isObj() const;
-    bool isUnknown() const;
+  bool isPdb() const;
+  bool isObj() const;
+  bool isUnknown() const;
 };
 
 class SymbolGroup {
-    friend class SymbolGroupIterator;
+  friend class SymbolGroupIterator;
 
 public:
-    explicit SymbolGroup(InputFile *File, uint32_t GroupIndex = 0);
+  explicit SymbolGroup(InputFile *File, uint32_t GroupIndex = 0);
 
-    Expected<StringRef> getNameFromStringTable(uint32_t Offset) const;
+  Expected<StringRef> getNameFromStringTable(uint32_t Offset) const;
 
-    void formatFromFileName(LinePrinter &Printer, StringRef File,
-                            bool Append = false) const;
+  void formatFromFileName(LinePrinter &Printer, StringRef File,
+                          bool Append = false) const;
 
-    void formatFromChecksumsOffset(LinePrinter &Printer, uint32_t Offset,
-                                   bool Append = false) const;
+  void formatFromChecksumsOffset(LinePrinter &Printer, uint32_t Offset,
+                                 bool Append = false) const;
 
-    StringRef name() const;
+  StringRef name() const;
 
-    codeview::DebugSubsectionArray getDebugSubsections() const {
-        return Subsections;
-    }
-    const ModuleDebugStreamRef &getPdbModuleStream() const;
+  codeview::DebugSubsectionArray getDebugSubsections() const {
+    return Subsections;
+  }
+  const ModuleDebugStreamRef &getPdbModuleStream() const;
 
-    const InputFile &getFile() const {
-        return *File;
-    }
-    InputFile &getFile() {
-        return *File;
-    }
+  const InputFile &getFile() const { return *File; }
+  InputFile &getFile() { return *File; }
 
-    bool hasDebugStream() const {
-        return DebugStream != nullptr;
-    }
+  bool hasDebugStream() const { return DebugStream != nullptr; }
 
 private:
-    void initializeForPdb(uint32_t Modi);
-    void updatePdbModi(uint32_t Modi);
-    void updateDebugS(const codeview::DebugSubsectionArray &SS);
+  void initializeForPdb(uint32_t Modi);
+  void updatePdbModi(uint32_t Modi);
+  void updateDebugS(const codeview::DebugSubsectionArray &SS);
 
-    void rebuildChecksumMap();
-    InputFile *File = nullptr;
-    StringRef Name;
-    codeview::DebugSubsectionArray Subsections;
-    std::shared_ptr<ModuleDebugStreamRef> DebugStream;
-    codeview::StringsAndChecksumsRef SC;
-    StringMap<codeview::FileChecksumEntry> ChecksumsByFile;
+  void rebuildChecksumMap();
+  InputFile *File = nullptr;
+  StringRef Name;
+  codeview::DebugSubsectionArray Subsections;
+  std::shared_ptr<ModuleDebugStreamRef> DebugStream;
+  codeview::StringsAndChecksumsRef SC;
+  StringMap<codeview::FileChecksumEntry> ChecksumsByFile;
 };
 
 class SymbolGroupIterator
     : public iterator_facade_base<SymbolGroupIterator,
-      std::forward_iterator_tag, SymbolGroup> {
+                                  std::forward_iterator_tag, SymbolGroup> {
 public:
-    SymbolGroupIterator();
-    explicit SymbolGroupIterator(InputFile &File);
-    SymbolGroupIterator(const SymbolGroupIterator &Other) = default;
-    SymbolGroupIterator &operator=(const SymbolGroupIterator &R) = default;
+  SymbolGroupIterator();
+  explicit SymbolGroupIterator(InputFile &File);
+  SymbolGroupIterator(const SymbolGroupIterator &Other) = default;
+  SymbolGroupIterator &operator=(const SymbolGroupIterator &R) = default;
 
-    const SymbolGroup &operator*() const;
-    SymbolGroup &operator*();
+  const SymbolGroup &operator*() const;
+  SymbolGroup &operator*();
 
-    bool operator==(const SymbolGroupIterator &R) const;
-    SymbolGroupIterator &operator++();
+  bool operator==(const SymbolGroupIterator &R) const;
+  SymbolGroupIterator &operator++();
 
 private:
-    void scanToNextDebugS();
-    bool isEnd() const;
+  void scanToNextDebugS();
+  bool isEnd() const;
 
-    uint32_t Index = 0;
-    Optional<object::section_iterator> SectionIter;
-    SymbolGroup Value;
+  uint32_t Index = 0;
+  Optional<object::section_iterator> SectionIter;
+  SymbolGroup Value;
 };
 
 } // namespace pdb

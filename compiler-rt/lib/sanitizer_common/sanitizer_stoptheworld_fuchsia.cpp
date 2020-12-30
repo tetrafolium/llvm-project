@@ -25,17 +25,17 @@ namespace __sanitizer {
 // SuspendedThreadsList argument.  This is enough for ASan's use case,
 // and LSan does not use this API on Fuchsia.
 void StopTheWorld(StopTheWorldCallback callback, void *argument) {
-    struct Params {
-        StopTheWorldCallback callback;
-        void *argument;
-    } params = {callback, argument};
-    __sanitizer_memory_snapshot(
-        nullptr, nullptr, nullptr, nullptr,
-    [](zx_status_t, void *data) {
+  struct Params {
+    StopTheWorldCallback callback;
+    void *argument;
+  } params = {callback, argument};
+  __sanitizer_memory_snapshot(
+      nullptr, nullptr, nullptr, nullptr,
+      [](zx_status_t, void *data) {
         auto params = reinterpret_cast<Params *>(data);
         params->callback(SuspendedThreadsListFuchsia(), params->argument);
-    },
-    &params);
+      },
+      &params);
 }
 
 }  // namespace __sanitizer

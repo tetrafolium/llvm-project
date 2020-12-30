@@ -31,9 +31,9 @@ extern "C" {
 using namespace fuzzer;
 
 static void CheckFnPtr(void *FnPtr, const char *FnName, bool WarnIfMissing) {
-    if (FnPtr == nullptr && WarnIfMissing) {
-        Printf("WARNING: Failed to find function \"%s\".\n", FnName);
-    }
+  if (FnPtr == nullptr && WarnIfMissing) {
+    Printf("WARNING: Failed to find function \"%s\".\n", FnName);
+  }
 }
 
 namespace fuzzer {

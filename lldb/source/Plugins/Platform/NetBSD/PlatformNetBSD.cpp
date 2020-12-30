@@ -38,78 +38,77 @@ LLDB_PLUGIN_DEFINE(PlatformNetBSD)
 
 static uint32_t g_initialize_count = 0;
 
-
 PlatformSP PlatformNetBSD::CreateInstance(bool force, const ArchSpec *arch) {
-    Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
-    LLDB_LOG(log, "force = {0}, arch=({1}, {2})", force,
-             arch ? arch->GetArchitectureName() : "<null>",
-             arch ? arch->GetTriple().getTriple() : "<null>");
+  Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_PLATFORM));
+  LLDB_LOG(log, "force = {0}, arch=({1}, {2})", force,
+           arch ? arch->GetArchitectureName() : "<null>",
+           arch ? arch->GetTriple().getTriple() : "<null>");
 
-    bool create = force;
-    if (!create && arch && arch->IsValid()) {
-        const llvm::Triple &triple = arch->GetTriple();
-        switch (triple.getOS()) {
-        case llvm::Triple::NetBSD:
-            create = true;
-            break;
+  bool create = force;
+  if (!create && arch && arch->IsValid()) {
+    const llvm::Triple &triple = arch->GetTriple();
+    switch (triple.getOS()) {
+    case llvm::Triple::NetBSD:
+      create = true;
+      break;
 
-        default:
-            break;
-        }
+    default:
+      break;
     }
+  }
 
-    LLDB_LOG(log, "create = {0}", create);
-    if (create) {
-        return PlatformSP(new PlatformNetBSD(false));
-    }
-    return PlatformSP();
+  LLDB_LOG(log, "create = {0}", create);
+  if (create) {
+    return PlatformSP(new PlatformNetBSD(false));
+  }
+  return PlatformSP();
 }
 
 ConstString PlatformNetBSD::GetPluginNameStatic(bool is_host) {
-    if (is_host) {
-        static ConstString g_host_name(Platform::GetHostPlatformName());
-        return g_host_name;
-    } else {
-        static ConstString g_remote_name("remote-netbsd");
-        return g_remote_name;
-    }
+  if (is_host) {
+    static ConstString g_host_name(Platform::GetHostPlatformName());
+    return g_host_name;
+  } else {
+    static ConstString g_remote_name("remote-netbsd");
+    return g_remote_name;
+  }
 }
 
 const char *PlatformNetBSD::GetPluginDescriptionStatic(bool is_host) {
-    if (is_host)
-        return "Local NetBSD user platform plug-in.";
-    else
-        return "Remote NetBSD user platform plug-in.";
+  if (is_host)
+    return "Local NetBSD user platform plug-in.";
+  else
+    return "Remote NetBSD user platform plug-in.";
 }
 
 ConstString PlatformNetBSD::GetPluginName() {
-    return GetPluginNameStatic(IsHost());
+  return GetPluginNameStatic(IsHost());
 }
 
 void PlatformNetBSD::Initialize() {
-    PlatformPOSIX::Initialize();
+  PlatformPOSIX::Initialize();
 
-    if (g_initialize_count++ == 0) {
+  if (g_initialize_count++ == 0) {
 #if defined(__NetBSD__)
-        PlatformSP default_platform_sp(new PlatformNetBSD(true));
-        default_platform_sp->SetSystemArchitecture(HostInfo::GetArchitecture());
-        Platform::SetHostPlatform(default_platform_sp);
+    PlatformSP default_platform_sp(new PlatformNetBSD(true));
+    default_platform_sp->SetSystemArchitecture(HostInfo::GetArchitecture());
+    Platform::SetHostPlatform(default_platform_sp);
 #endif
-        PluginManager::RegisterPlugin(
-            PlatformNetBSD::GetPluginNameStatic(false),
-            PlatformNetBSD::GetPluginDescriptionStatic(false),
-            PlatformNetBSD::CreateInstance, nullptr);
-    }
+    PluginManager::RegisterPlugin(
+        PlatformNetBSD::GetPluginNameStatic(false),
+        PlatformNetBSD::GetPluginDescriptionStatic(false),
+        PlatformNetBSD::CreateInstance, nullptr);
+  }
 }
 
 void PlatformNetBSD::Terminate() {
-    if (g_initialize_count > 0) {
-        if (--g_initialize_count == 0) {
-            PluginManager::UnregisterPlugin(PlatformNetBSD::CreateInstance);
-        }
+  if (g_initialize_count > 0) {
+    if (--g_initialize_count == 0) {
+      PluginManager::UnregisterPlugin(PlatformNetBSD::CreateInstance);
     }
+  }
 
-    PlatformPOSIX::Terminate();
+  PlatformPOSIX::Terminate();
 }
 
 /// Default Constructor
@@ -118,132 +117,132 @@ PlatformNetBSD::PlatformNetBSD(bool is_host)
 {}
 
 bool PlatformNetBSD::GetSupportedArchitectureAtIndex(uint32_t idx,
-        ArchSpec &arch) {
-    if (IsHost()) {
-        ArchSpec hostArch = HostInfo::GetArchitecture(HostInfo::eArchKindDefault);
-        if (hostArch.GetTriple().isOSNetBSD()) {
-            if (idx == 0) {
-                arch = hostArch;
-                return arch.IsValid();
-            } else if (idx == 1) {
-                // If the default host architecture is 64-bit, look for a 32-bit
-                // variant
-                if (hostArch.IsValid() && hostArch.GetTriple().isArch64Bit()) {
-                    arch = HostInfo::GetArchitecture(HostInfo::eArchKind32);
-                    return arch.IsValid();
-                }
-            }
+                                                     ArchSpec &arch) {
+  if (IsHost()) {
+    ArchSpec hostArch = HostInfo::GetArchitecture(HostInfo::eArchKindDefault);
+    if (hostArch.GetTriple().isOSNetBSD()) {
+      if (idx == 0) {
+        arch = hostArch;
+        return arch.IsValid();
+      } else if (idx == 1) {
+        // If the default host architecture is 64-bit, look for a 32-bit
+        // variant
+        if (hostArch.IsValid() && hostArch.GetTriple().isArch64Bit()) {
+          arch = HostInfo::GetArchitecture(HostInfo::eArchKind32);
+          return arch.IsValid();
         }
-    } else {
-        if (m_remote_platform_sp)
-            return m_remote_platform_sp->GetSupportedArchitectureAtIndex(idx, arch);
-
-        llvm::Triple triple;
-        // Set the OS to NetBSD
-        triple.setOS(llvm::Triple::NetBSD);
-        // Set the architecture
-        switch (idx) {
-        case 0:
-            triple.setArchName("x86_64");
-            break;
-        case 1:
-            triple.setArchName("i386");
-            break;
-        default:
-            return false;
-        }
-        // Leave the vendor as "llvm::Triple:UnknownVendor" and don't specify the
-        // vendor by calling triple.SetVendorName("unknown") so that it is a
-        // "unspecified unknown". This means when someone calls
-        // triple.GetVendorName() it will return an empty string which indicates
-        // that the vendor can be set when two architectures are merged
-
-        // Now set the triple into "arch" and return true
-        arch.SetTriple(triple);
-        return true;
+      }
     }
-    return false;
+  } else {
+    if (m_remote_platform_sp)
+      return m_remote_platform_sp->GetSupportedArchitectureAtIndex(idx, arch);
+
+    llvm::Triple triple;
+    // Set the OS to NetBSD
+    triple.setOS(llvm::Triple::NetBSD);
+    // Set the architecture
+    switch (idx) {
+    case 0:
+      triple.setArchName("x86_64");
+      break;
+    case 1:
+      triple.setArchName("i386");
+      break;
+    default:
+      return false;
+    }
+    // Leave the vendor as "llvm::Triple:UnknownVendor" and don't specify the
+    // vendor by calling triple.SetVendorName("unknown") so that it is a
+    // "unspecified unknown". This means when someone calls
+    // triple.GetVendorName() it will return an empty string which indicates
+    // that the vendor can be set when two architectures are merged
+
+    // Now set the triple into "arch" and return true
+    arch.SetTriple(triple);
+    return true;
+  }
+  return false;
 }
 
 void PlatformNetBSD::GetStatus(Stream &strm) {
-    Platform::GetStatus(strm);
+  Platform::GetStatus(strm);
 
 #if LLDB_ENABLE_POSIX
-    // Display local kernel information only when we are running in host mode.
-    // Otherwise, we would end up printing non-NetBSD information (when running
-    // on Mac OS for example).
-    if (IsHost()) {
-        struct utsname un;
+  // Display local kernel information only when we are running in host mode.
+  // Otherwise, we would end up printing non-NetBSD information (when running
+  // on Mac OS for example).
+  if (IsHost()) {
+    struct utsname un;
 
-        if (uname(&un))
-            return;
+    if (uname(&un))
+      return;
 
-        strm.Printf("    Kernel: %s\n", un.sysname);
-        strm.Printf("   Release: %s\n", un.release);
-        strm.Printf("   Version: %s\n", un.version);
-    }
+    strm.Printf("    Kernel: %s\n", un.sysname);
+    strm.Printf("   Release: %s\n", un.release);
+    strm.Printf("   Version: %s\n", un.version);
+  }
 #endif
 }
 
 uint32_t
 PlatformNetBSD::GetResumeCountForLaunchInfo(ProcessLaunchInfo &launch_info) {
-    uint32_t resume_count = 0;
+  uint32_t resume_count = 0;
 
-    // Always resume past the initial stop when we use eLaunchFlagDebug
-    if (launch_info.GetFlags().Test(eLaunchFlagDebug)) {
-        // Resume past the stop for the final exec into the true inferior.
-        ++resume_count;
-    }
-
-    // If we're not launching a shell, we're done.
-    const FileSpec &shell = launch_info.GetShell();
-    if (!shell)
-        return resume_count;
-
-    std::string shell_string = shell.GetPath();
-    // We're in a shell, so for sure we have to resume past the shell exec.
+  // Always resume past the initial stop when we use eLaunchFlagDebug
+  if (launch_info.GetFlags().Test(eLaunchFlagDebug)) {
+    // Resume past the stop for the final exec into the true inferior.
     ++resume_count;
+  }
 
-    // Figure out what shell we're planning on using.
-    const char *shell_name = strrchr(shell_string.c_str(), '/');
-    if (shell_name == nullptr)
-        shell_name = shell_string.c_str();
-    else
-        shell_name++;
-
-    if (strcmp(shell_name, "csh") == 0 || strcmp(shell_name, "tcsh") == 0 ||
-            strcmp(shell_name, "zsh") == 0 || strcmp(shell_name, "sh") == 0) {
-        // These shells seem to re-exec themselves.  Add another resume.
-        ++resume_count;
-    }
-
+  // If we're not launching a shell, we're done.
+  const FileSpec &shell = launch_info.GetShell();
+  if (!shell)
     return resume_count;
+
+  std::string shell_string = shell.GetPath();
+  // We're in a shell, so for sure we have to resume past the shell exec.
+  ++resume_count;
+
+  // Figure out what shell we're planning on using.
+  const char *shell_name = strrchr(shell_string.c_str(), '/');
+  if (shell_name == nullptr)
+    shell_name = shell_string.c_str();
+  else
+    shell_name++;
+
+  if (strcmp(shell_name, "csh") == 0 || strcmp(shell_name, "tcsh") == 0 ||
+      strcmp(shell_name, "zsh") == 0 || strcmp(shell_name, "sh") == 0) {
+    // These shells seem to re-exec themselves.  Add another resume.
+    ++resume_count;
+  }
+
+  return resume_count;
 }
 
 bool PlatformNetBSD::CanDebugProcess() {
-    if (IsHost()) {
-        return true;
-    } else {
-        // If we're connected, we can debug.
-        return IsConnected();
-    }
+  if (IsHost()) {
+    return true;
+  } else {
+    // If we're connected, we can debug.
+    return IsConnected();
+  }
 }
 
 void PlatformNetBSD::CalculateTrapHandlerSymbolNames() {
-    m_trap_handlers.push_back(ConstString("_sigtramp"));
+  m_trap_handlers.push_back(ConstString("_sigtramp"));
 }
 
 MmapArgList PlatformNetBSD::GetMmapArgumentList(const ArchSpec &arch,
-        addr_t addr, addr_t length,
-        unsigned prot, unsigned flags,
-        addr_t fd, addr_t offset) {
-    uint64_t flags_platform = 0;
+                                                addr_t addr, addr_t length,
+                                                unsigned prot, unsigned flags,
+                                                addr_t fd, addr_t offset) {
+  uint64_t flags_platform = 0;
 
-    if (flags & eMmapFlagsPrivate)
-        flags_platform |= MAP_PRIVATE;
-    if (flags & eMmapFlagsAnon)
-        flags_platform |= MAP_ANON;
+  if (flags & eMmapFlagsPrivate)
+    flags_platform |= MAP_PRIVATE;
+  if (flags & eMmapFlagsAnon)
+    flags_platform |= MAP_ANON;
 
-    MmapArgList args({addr, length, prot, flags_platform, fd, offset});
-    return args;
+  MmapArgList args({addr, length, prot, flags_platform, fd, offset});
+  return args;
 }

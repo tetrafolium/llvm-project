@@ -26,35 +26,35 @@ using namespace llvm;
 void BPFSubtarget::anchor() {}
 
 BPFSubtarget &BPFSubtarget::initializeSubtargetDependencies(StringRef CPU,
-        StringRef FS) {
-    initializeEnvironment();
-    initSubtargetFeatures(CPU, FS);
-    ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
-    return *this;
+                                                            StringRef FS) {
+  initializeEnvironment();
+  initSubtargetFeatures(CPU, FS);
+  ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
+  return *this;
 }
 
 void BPFSubtarget::initializeEnvironment() {
-    HasJmpExt = false;
-    HasJmp32 = false;
-    HasAlu32 = false;
-    UseDwarfRIS = false;
+  HasJmpExt = false;
+  HasJmp32 = false;
+  HasAlu32 = false;
+  UseDwarfRIS = false;
 }
 
 void BPFSubtarget::initSubtargetFeatures(StringRef CPU, StringRef FS) {
-    if (CPU == "probe")
-        CPU = sys::detail::getHostCPUNameForBPF();
-    if (CPU == "generic" || CPU == "v1")
-        return;
-    if (CPU == "v2") {
-        HasJmpExt = true;
-        return;
-    }
-    if (CPU == "v3") {
-        HasJmpExt = true;
-        HasJmp32 = true;
-        HasAlu32 = true;
-        return;
-    }
+  if (CPU == "probe")
+    CPU = sys::detail::getHostCPUNameForBPF();
+  if (CPU == "generic" || CPU == "v1")
+    return;
+  if (CPU == "v2") {
+    HasJmpExt = true;
+    return;
+  }
+  if (CPU == "v3") {
+    HasJmpExt = true;
+    HasJmp32 = true;
+    HasAlu32 = true;
+    return;
+  }
 }
 
 BPFSubtarget::BPFSubtarget(const Triple &TT, const std::string &CPU,

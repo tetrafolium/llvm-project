@@ -22,34 +22,29 @@ namespace lldb_private {
 
 class ClangDiagnostic : public Diagnostic {
 public:
-    typedef std::vector<clang::FixItHint> FixItList;
+  typedef std::vector<clang::FixItHint> FixItList;
 
-    static inline bool classof(const ClangDiagnostic *) {
-        return true;
-    }
-    static inline bool classof(const Diagnostic *diag) {
-        return diag->getKind() == eDiagnosticOriginClang;
-    }
+  static inline bool classof(const ClangDiagnostic *) { return true; }
+  static inline bool classof(const Diagnostic *diag) {
+    return diag->getKind() == eDiagnosticOriginClang;
+  }
 
-    ClangDiagnostic(llvm::StringRef message, DiagnosticSeverity severity,
-                    uint32_t compiler_id)
-        : Diagnostic(message, severity, eDiagnosticOriginClang, compiler_id) {}
+  ClangDiagnostic(llvm::StringRef message, DiagnosticSeverity severity,
+                  uint32_t compiler_id)
+      : Diagnostic(message, severity, eDiagnosticOriginClang, compiler_id) {}
 
-    ~ClangDiagnostic() override = default;
+  ~ClangDiagnostic() override = default;
 
-    bool HasFixIts() const override {
-        return !m_fixit_vec.empty();
-    }
+  bool HasFixIts() const override { return !m_fixit_vec.empty(); }
 
-    void AddFixitHint(const clang::FixItHint &fixit) {
-        m_fixit_vec.push_back(fixit);
-    }
+  void AddFixitHint(const clang::FixItHint &fixit) {
+    m_fixit_vec.push_back(fixit);
+  }
 
-    const FixItList &FixIts() const {
-        return m_fixit_vec;
-    }
+  const FixItList &FixIts() const { return m_fixit_vec; }
+
 private:
-    FixItList m_fixit_vec;
+  FixItList m_fixit_vec;
 };
 
 } // namespace lldb_private

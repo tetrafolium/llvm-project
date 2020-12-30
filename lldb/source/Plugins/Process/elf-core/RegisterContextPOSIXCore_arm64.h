@@ -18,53 +18,51 @@
 
 class RegisterContextCorePOSIX_arm64 : public RegisterContextPOSIX_arm64 {
 public:
-    RegisterContextCorePOSIX_arm64(
-        lldb_private::Thread &thread,
-        std::unique_ptr<RegisterInfoPOSIX_arm64> register_info,
-        const lldb_private::DataExtractor &gpregset,
-        llvm::ArrayRef<lldb_private::CoreNote> notes);
+  RegisterContextCorePOSIX_arm64(
+      lldb_private::Thread &thread,
+      std::unique_ptr<RegisterInfoPOSIX_arm64> register_info,
+      const lldb_private::DataExtractor &gpregset,
+      llvm::ArrayRef<lldb_private::CoreNote> notes);
 
-    ~RegisterContextCorePOSIX_arm64() override;
+  ~RegisterContextCorePOSIX_arm64() override;
 
-    bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
-                      lldb_private::RegisterValue &value) override;
+  bool ReadRegister(const lldb_private::RegisterInfo *reg_info,
+                    lldb_private::RegisterValue &value) override;
 
-    bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
-                       const lldb_private::RegisterValue &value) override;
+  bool WriteRegister(const lldb_private::RegisterInfo *reg_info,
+                     const lldb_private::RegisterValue &value) override;
 
-    bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+  bool ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-    bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+  bool WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-    bool HardwareSingleStep(bool enable) override;
+  bool HardwareSingleStep(bool enable) override;
 
 protected:
-    bool ReadGPR() override;
+  bool ReadGPR() override;
 
-    bool ReadFPR() override;
+  bool ReadFPR() override;
 
-    bool WriteGPR() override;
+  bool WriteGPR() override;
 
-    bool WriteFPR() override;
+  bool WriteFPR() override;
 
 private:
-    lldb::DataBufferSP m_gpr_buffer;
-    lldb_private::DataExtractor m_gpr;
-    lldb_private::DataExtractor m_fpregset;
-    lldb_private::DataExtractor m_sveregset;
+  lldb::DataBufferSP m_gpr_buffer;
+  lldb_private::DataExtractor m_gpr;
+  lldb_private::DataExtractor m_fpregset;
+  lldb_private::DataExtractor m_sveregset;
 
-    SVEState m_sve_state;
-    uint16_t m_sve_vector_length = 0;
+  SVEState m_sve_state;
+  uint16_t m_sve_vector_length = 0;
 
-    const uint8_t *GetSVEBuffer(uint64_t offset = 0);
+  const uint8_t *GetSVEBuffer(uint64_t offset = 0);
 
-    void ConfigureRegisterContext();
+  void ConfigureRegisterContext();
 
-    uint32_t CalculateSVEOffset(const lldb_private::RegisterInfo *reg_info);
+  uint32_t CalculateSVEOffset(const lldb_private::RegisterInfo *reg_info);
 
-    uint64_t GetSVERegVG() {
-        return m_sve_vector_length / 8;
-    }
+  uint64_t GetSVERegVG() { return m_sve_vector_length / 8; }
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_ELF_CORE_REGISTERCONTEXTPOSIXCORE_ARM64_H

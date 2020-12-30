@@ -21,7 +21,7 @@ __attribute__((visibility("hidden")))
 COMPILER_RT_ABI void
 __eprintf(const char *format, const char *assertion_expression,
           const char *line, const char *file) {
-    fprintf(stderr, format, assertion_expression, line, file);
-    fflush(stderr);
-    compilerrt_abort();
+  fprintf(stderr, format, assertion_expression, line, file);
+  fflush(stderr);
+  compilerrt_abort();
 }

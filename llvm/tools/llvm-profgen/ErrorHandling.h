@@ -21,28 +21,28 @@ using namespace llvm;
 LLVM_ATTRIBUTE_NORETURN inline void
 exitWithError(const Twine &Message, StringRef Whence = StringRef(),
               StringRef Hint = StringRef()) {
-    WithColor::error(errs(), "llvm-profgen");
-    if (!Whence.empty())
-        errs() << Whence.str() << ": ";
-    errs() << Message << "\n";
-    if (!Hint.empty())
-        WithColor::note() << Hint.str() << "\n";
-    ::exit(EXIT_FAILURE);
+  WithColor::error(errs(), "llvm-profgen");
+  if (!Whence.empty())
+    errs() << Whence.str() << ": ";
+  errs() << Message << "\n";
+  if (!Hint.empty())
+    WithColor::note() << Hint.str() << "\n";
+  ::exit(EXIT_FAILURE);
 }
 
 LLVM_ATTRIBUTE_NORETURN inline void
 exitWithError(std::error_code EC, StringRef Whence = StringRef()) {
-    exitWithError(EC.message(), Whence);
+  exitWithError(EC.message(), Whence);
 }
 
 LLVM_ATTRIBUTE_NORETURN inline void exitWithError(Error E, StringRef Whence) {
-    exitWithError(errorToErrorCode(std::move(E)), Whence);
+  exitWithError(errorToErrorCode(std::move(E)), Whence);
 }
 
 template <typename T, typename... Ts>
 T unwrapOrError(Expected<T> EO, Ts &&... Args) {
-    if (EO)
-        return std::move(*EO);
-    exitWithError(EO.takeError(), std::forward<Ts>(Args)...);
+  if (EO)
+    return std::move(*EO);
+  exitWithError(EO.takeError(), std::forward<Ts>(Args)...);
 }
 #endif

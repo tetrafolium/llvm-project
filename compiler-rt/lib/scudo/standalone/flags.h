@@ -25,7 +25,7 @@ struct Flags {
 #undef GWP_ASAN_OPTION
 #endif // GWP_ASAN_HOOKS
 
-    void setDefaults();
+  void setDefaults();
 };
 
 Flags *getFlags();

@@ -19,17 +19,17 @@ namespace llvm {
 
 class AArch64ExternalSymbolizer : public MCExternalSymbolizer {
 public:
-    AArch64ExternalSymbolizer(MCContext &Ctx,
-                              std::unique_ptr<MCRelocationInfo> RelInfo,
-                              LLVMOpInfoCallback GetOpInfo,
-                              LLVMSymbolLookupCallback SymbolLookUp,
-                              void *DisInfo)
-        : MCExternalSymbolizer(Ctx, std::move(RelInfo), GetOpInfo, SymbolLookUp,
-                               DisInfo) {}
+  AArch64ExternalSymbolizer(MCContext &Ctx,
+                            std::unique_ptr<MCRelocationInfo> RelInfo,
+                            LLVMOpInfoCallback GetOpInfo,
+                            LLVMSymbolLookupCallback SymbolLookUp,
+                            void *DisInfo)
+      : MCExternalSymbolizer(Ctx, std::move(RelInfo), GetOpInfo, SymbolLookUp,
+                             DisInfo) {}
 
-    bool tryAddingSymbolicOperand(MCInst &MI, raw_ostream &CommentStream,
-                                  int64_t Value, uint64_t Address, bool IsBranch,
-                                  uint64_t Offset, uint64_t InstSize) override;
+  bool tryAddingSymbolicOperand(MCInst &MI, raw_ostream &CommentStream,
+                                int64_t Value, uint64_t Address, bool IsBranch,
+                                uint64_t Offset, uint64_t InstSize) override;
 };
 
 } // namespace llvm

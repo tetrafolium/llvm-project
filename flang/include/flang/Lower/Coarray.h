@@ -55,21 +55,21 @@ void genFormTeamStatement(AbstractConverter &, pft::Evaluation &eval,
 /// message-passing runtime to access another image's data.
 class CoarrayExprHelper {
 public:
-    explicit CoarrayExprHelper(AbstractConverter &converter, mlir::Location loc,
-                               SymMap &syms)
-        : converter{converter}, symMap{syms}, loc{loc} {}
-    CoarrayExprHelper(const CoarrayExprHelper &) = delete;
+  explicit CoarrayExprHelper(AbstractConverter &converter, mlir::Location loc,
+                             SymMap &syms)
+      : converter{converter}, symMap{syms}, loc{loc} {}
+  CoarrayExprHelper(const CoarrayExprHelper &) = delete;
 
-    /// Generate the address of a co-array expression.
-    fir::ExtendedValue genAddr(const evaluate::CoarrayRef &expr);
+  /// Generate the address of a co-array expression.
+  fir::ExtendedValue genAddr(const evaluate::CoarrayRef &expr);
 
-    /// Generate the value of a co-array expression.
-    fir::ExtendedValue genValue(const evaluate::CoarrayRef &expr);
+  /// Generate the value of a co-array expression.
+  fir::ExtendedValue genValue(const evaluate::CoarrayRef &expr);
 
 private:
-    AbstractConverter &converter;
-    SymMap &symMap;
-    mlir::Location loc;
+  AbstractConverter &converter;
+  SymMap &symMap;
+  mlir::Location loc;
 };
 
 } // namespace lower

@@ -30,44 +30,38 @@ class Module;
 template <typename ValueSubClass> class SymbolTableListTraits;
 
 class GlobalIFunc final : public GlobalIndirectSymbol,
-    public ilist_node<GlobalIFunc> {
-    friend class SymbolTableListTraits<GlobalIFunc>;
+                          public ilist_node<GlobalIFunc> {
+  friend class SymbolTableListTraits<GlobalIFunc>;
 
-    GlobalIFunc(Type *Ty, unsigned AddressSpace, LinkageTypes Linkage,
-                const Twine &Name, Constant *Resolver, Module *Parent);
+  GlobalIFunc(Type *Ty, unsigned AddressSpace, LinkageTypes Linkage,
+              const Twine &Name, Constant *Resolver, Module *Parent);
 
 public:
-    GlobalIFunc(const GlobalIFunc &) = delete;
-    GlobalIFunc &operator=(const GlobalIFunc &) = delete;
+  GlobalIFunc(const GlobalIFunc &) = delete;
+  GlobalIFunc &operator=(const GlobalIFunc &) = delete;
 
-    /// If a parent module is specified, the ifunc is automatically inserted into
-    /// the end of the specified module's ifunc list.
-    static GlobalIFunc *create(Type *Ty, unsigned AddressSpace,
-                               LinkageTypes Linkage, const Twine &Name,
-                               Constant *Resolver, Module *Parent);
+  /// If a parent module is specified, the ifunc is automatically inserted into
+  /// the end of the specified module's ifunc list.
+  static GlobalIFunc *create(Type *Ty, unsigned AddressSpace,
+                             LinkageTypes Linkage, const Twine &Name,
+                             Constant *Resolver, Module *Parent);
 
-    /// This method unlinks 'this' from the containing module, but does not
-    /// delete it.
-    void removeFromParent();
+  /// This method unlinks 'this' from the containing module, but does not
+  /// delete it.
+  void removeFromParent();
 
-    /// This method unlinks 'this' from the containing module and deletes it.
-    void eraseFromParent();
+  /// This method unlinks 'this' from the containing module and deletes it.
+  void eraseFromParent();
 
-    /// These methods retrieve and set ifunc resolver function.
-    void setResolver(Constant *Resolver) {
-        setIndirectSymbol(Resolver);
-    }
-    const Constant *getResolver() const {
-        return getIndirectSymbol();
-    }
-    Constant *getResolver() {
-        return getIndirectSymbol();
-    }
+  /// These methods retrieve and set ifunc resolver function.
+  void setResolver(Constant *Resolver) { setIndirectSymbol(Resolver); }
+  const Constant *getResolver() const { return getIndirectSymbol(); }
+  Constant *getResolver() { return getIndirectSymbol(); }
 
-    // Methods for support type inquiry through isa, cast, and dyn_cast:
-    static bool classof(const Value *V) {
-        return V->getValueID() == Value::GlobalIFuncVal;
-    }
+  // Methods for support type inquiry through isa, cast, and dyn_cast:
+  static bool classof(const Value *V) {
+    return V->getValueID() == Value::GlobalIFuncVal;
+  }
 };
 
 } // end namespace llvm

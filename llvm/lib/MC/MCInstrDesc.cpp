@@ -20,35 +20,35 @@ using namespace llvm;
 
 bool MCInstrDesc::mayAffectControlFlow(const MCInst &MI,
                                        const MCRegisterInfo &RI) const {
-    if (isBranch() || isCall() || isReturn() || isIndirectBranch())
-        return true;
-    unsigned PC = RI.getProgramCounter();
-    if (PC == 0)
-        return false;
-    if (hasDefOfPhysReg(MI, PC, RI))
-        return true;
+  if (isBranch() || isCall() || isReturn() || isIndirectBranch())
+    return true;
+  unsigned PC = RI.getProgramCounter();
+  if (PC == 0)
     return false;
+  if (hasDefOfPhysReg(MI, PC, RI))
+    return true;
+  return false;
 }
 
 bool MCInstrDesc::hasImplicitDefOfPhysReg(unsigned Reg,
-        const MCRegisterInfo *MRI) const {
-    if (const MCPhysReg *ImpDefs = ImplicitDefs)
-        for (; *ImpDefs; ++ImpDefs)
-            if (*ImpDefs == Reg || (MRI && MRI->isSubRegister(Reg, *ImpDefs)))
-                return true;
-    return false;
+                                          const MCRegisterInfo *MRI) const {
+  if (const MCPhysReg *ImpDefs = ImplicitDefs)
+    for (; *ImpDefs; ++ImpDefs)
+      if (*ImpDefs == Reg || (MRI && MRI->isSubRegister(Reg, *ImpDefs)))
+        return true;
+  return false;
 }
 
 bool MCInstrDesc::hasDefOfPhysReg(const MCInst &MI, unsigned Reg,
                                   const MCRegisterInfo &RI) const {
-    for (int i = 0, e = NumDefs; i != e; ++i)
-        if (MI.getOperand(i).isReg() &&
-                RI.isSubRegisterEq(Reg, MI.getOperand(i).getReg()))
-            return true;
-    if (variadicOpsAreDefs())
-        for (int i = NumOperands - 1, e = MI.getNumOperands(); i != e; ++i)
-            if (MI.getOperand(i).isReg() &&
-                    RI.isSubRegisterEq(Reg, MI.getOperand(i).getReg()))
-                return true;
-    return hasImplicitDefOfPhysReg(Reg, &RI);
+  for (int i = 0, e = NumDefs; i != e; ++i)
+    if (MI.getOperand(i).isReg() &&
+        RI.isSubRegisterEq(Reg, MI.getOperand(i).getReg()))
+      return true;
+  if (variadicOpsAreDefs())
+    for (int i = NumOperands - 1, e = MI.getNumOperands(); i != e; ++i)
+      if (MI.getOperand(i).isReg() &&
+          RI.isSubRegisterEq(Reg, MI.getOperand(i).getReg()))
+        return true;
+  return hasImplicitDefOfPhysReg(Reg, &RI);
 }

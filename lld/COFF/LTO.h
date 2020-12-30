@@ -31,7 +31,7 @@ namespace llvm {
 namespace lto {
 class LTO;
 }
-}
+} // namespace llvm
 
 namespace lld {
 namespace coff {
@@ -41,20 +41,20 @@ class InputFile;
 
 class BitcodeCompiler {
 public:
-    BitcodeCompiler();
-    ~BitcodeCompiler();
+  BitcodeCompiler();
+  ~BitcodeCompiler();
 
-    void add(BitcodeFile &f);
-    std::vector<InputFile *> compile();
+  void add(BitcodeFile &f);
+  std::vector<InputFile *> compile();
 
 private:
-    std::unique_ptr<llvm::lto::LTO> ltoObj;
-    std::vector<SmallString<0>> buf;
-    std::vector<std::unique_ptr<MemoryBuffer>> files;
-    std::unique_ptr<llvm::raw_fd_ostream> indexFile;
-    llvm::DenseSet<StringRef> thinIndices;
+  std::unique_ptr<llvm::lto::LTO> ltoObj;
+  std::vector<SmallString<0>> buf;
+  std::vector<std::unique_ptr<MemoryBuffer>> files;
+  std::unique_ptr<llvm::raw_fd_ostream> indexFile;
+  llvm::DenseSet<StringRef> thinIndices;
 };
-}
-}
+} // namespace coff
+} // namespace lld
 
 #endif

@@ -29,22 +29,16 @@ namespace __lsan {
 
 void InitializePlatformSpecificModules() {}
 
-LoadedModule *GetLinker() {
-    return nullptr;
-}
+LoadedModule *GetLinker() { return nullptr; }
 
 __attribute__((tls_model("initial-exec"))) THREADLOCAL int disable_counter;
-bool DisabledInThisThread() {
-    return disable_counter > 0;
-}
-void DisableInThisThread() {
-    disable_counter++;
-}
+bool DisabledInThisThread() { return disable_counter > 0; }
+void DisableInThisThread() { disable_counter++; }
 void EnableInThisThread() {
-    if (disable_counter == 0) {
-        DisableCounterUnderflow();
-    }
-    disable_counter--;
+  if (disable_counter == 0) {
+    DisableCounterUnderflow();
+  }
+  disable_counter--;
 }
 
 // There is nothing left to do after the globals callbacks.
@@ -59,86 +53,86 @@ void ProcessPlatformSpecificAllocations(Frontier *frontier) {}
 void HandleLeaks() {}
 
 int ExitHook(int status) {
-    return status == 0 && HasReportedLeaks() ? common_flags()->exitcode : status;
+  return status == 0 && HasReportedLeaks() ? common_flags()->exitcode : status;
 }
 
 void LockStuffAndStopTheWorld(StopTheWorldCallback callback,
                               CheckForLeaksParam *argument) {
-    LockThreadRegistry();
-    LockAllocator();
+  LockThreadRegistry();
+  LockAllocator();
 
-    struct Params {
-        InternalMmapVector<uptr> allocator_caches;
-        StopTheWorldCallback callback;
-        CheckForLeaksParam *argument;
-    } params = {{}, callback, argument};
+  struct Params {
+    InternalMmapVector<uptr> allocator_caches;
+    StopTheWorldCallback callback;
+    CheckForLeaksParam *argument;
+  } params = {{}, callback, argument};
 
-    // Callback from libc for globals (data/bss modulo relro), when enabled.
-    auto globals = +[](void *chunk, size_t size, void *data) {
-        auto params = static_cast<const Params *>(data);
-        uptr begin = reinterpret_cast<uptr>(chunk);
-        uptr end = begin + size;
-        ScanGlobalRange(begin, end, &params->argument->frontier);
-    };
+  // Callback from libc for globals (data/bss modulo relro), when enabled.
+  auto globals = +[](void *chunk, size_t size, void *data) {
+    auto params = static_cast<const Params *>(data);
+    uptr begin = reinterpret_cast<uptr>(chunk);
+    uptr end = begin + size;
+    ScanGlobalRange(begin, end, &params->argument->frontier);
+  };
 
-    // Callback from libc for thread stacks.
-    auto stacks = +[](void *chunk, size_t size, void *data) {
-        auto params = static_cast<const Params *>(data);
-        uptr begin = reinterpret_cast<uptr>(chunk);
-        uptr end = begin + size;
-        ScanRangeForPointers(begin, end, &params->argument->frontier, "STACK",
-                             kReachable);
-    };
+  // Callback from libc for thread stacks.
+  auto stacks = +[](void *chunk, size_t size, void *data) {
+    auto params = static_cast<const Params *>(data);
+    uptr begin = reinterpret_cast<uptr>(chunk);
+    uptr end = begin + size;
+    ScanRangeForPointers(begin, end, &params->argument->frontier, "STACK",
+                         kReachable);
+  };
 
-    // Callback from libc for thread registers.
-    auto registers = +[](void *chunk, size_t size, void *data) {
-        auto params = static_cast<const Params *>(data);
-        uptr begin = reinterpret_cast<uptr>(chunk);
-        uptr end = begin + size;
-        ScanRangeForPointers(begin, end, &params->argument->frontier, "REGISTERS",
-                             kReachable);
-    };
+  // Callback from libc for thread registers.
+  auto registers = +[](void *chunk, size_t size, void *data) {
+    auto params = static_cast<const Params *>(data);
+    uptr begin = reinterpret_cast<uptr>(chunk);
+    uptr end = begin + size;
+    ScanRangeForPointers(begin, end, &params->argument->frontier, "REGISTERS",
+                         kReachable);
+  };
 
-    if (flags()->use_tls) {
-        // Collect the allocator cache range from each thread so these
-        // can all be excluded from the reported TLS ranges.
-        GetAllThreadAllocatorCachesLocked(&params.allocator_caches);
-        __sanitizer::Sort(params.allocator_caches.data(),
-                          params.allocator_caches.size());
+  if (flags()->use_tls) {
+    // Collect the allocator cache range from each thread so these
+    // can all be excluded from the reported TLS ranges.
+    GetAllThreadAllocatorCachesLocked(&params.allocator_caches);
+    __sanitizer::Sort(params.allocator_caches.data(),
+                      params.allocator_caches.size());
+  }
+
+  // Callback from libc for TLS regions.  This includes thread_local
+  // variables as well as C11 tss_set and POSIX pthread_setspecific.
+  auto tls = +[](void *chunk, size_t size, void *data) {
+    auto params = static_cast<const Params *>(data);
+    uptr begin = reinterpret_cast<uptr>(chunk);
+    uptr end = begin + size;
+    auto i = __sanitizer::InternalLowerBound(params->allocator_caches, 0,
+                                             params->allocator_caches.size(),
+                                             begin, CompareLess<uptr>());
+    if (i < params->allocator_caches.size() &&
+        params->allocator_caches[i] >= begin &&
+        end - params->allocator_caches[i] <= sizeof(AllocatorCache)) {
+      // Split the range in two and omit the allocator cache within.
+      ScanRangeForPointers(begin, params->allocator_caches[i],
+                           &params->argument->frontier, "TLS", kReachable);
+      uptr begin2 = params->allocator_caches[i] + sizeof(AllocatorCache);
+      ScanRangeForPointers(begin2, end, &params->argument->frontier, "TLS",
+                           kReachable);
+    } else {
+      ScanRangeForPointers(begin, end, &params->argument->frontier, "TLS",
+                           kReachable);
     }
+  };
 
-    // Callback from libc for TLS regions.  This includes thread_local
-    // variables as well as C11 tss_set and POSIX pthread_setspecific.
-    auto tls = +[](void *chunk, size_t size, void *data) {
-        auto params = static_cast<const Params *>(data);
-        uptr begin = reinterpret_cast<uptr>(chunk);
-        uptr end = begin + size;
-        auto i = __sanitizer::InternalLowerBound(params->allocator_caches, 0,
-                 params->allocator_caches.size(),
-                 begin, CompareLess<uptr>());
-        if (i < params->allocator_caches.size() &&
-                params->allocator_caches[i] >= begin &&
-                end - params->allocator_caches[i] <= sizeof(AllocatorCache)) {
-            // Split the range in two and omit the allocator cache within.
-            ScanRangeForPointers(begin, params->allocator_caches[i],
-                                 &params->argument->frontier, "TLS", kReachable);
-            uptr begin2 = params->allocator_caches[i] + sizeof(AllocatorCache);
-            ScanRangeForPointers(begin2, end, &params->argument->frontier, "TLS",
-                                 kReachable);
-        } else {
-            ScanRangeForPointers(begin, end, &params->argument->frontier, "TLS",
-                                 kReachable);
-        }
-    };
-
-    // This stops the world and then makes callbacks for various memory regions.
-    // The final callback is the last thing before the world starts up again.
-    __sanitizer_memory_snapshot(
-        flags()->use_globals ? globals : nullptr,
-        flags()->use_stacks ? stacks : nullptr,
-        flags()->use_registers ? registers : nullptr,
-        flags()->use_tls ? tls : nullptr,
-    [](zx_status_t, void *data) {
+  // This stops the world and then makes callbacks for various memory regions.
+  // The final callback is the last thing before the world starts up again.
+  __sanitizer_memory_snapshot(
+      flags()->use_globals ? globals : nullptr,
+      flags()->use_stacks ? stacks : nullptr,
+      flags()->use_registers ? registers : nullptr,
+      flags()->use_tls ? tls : nullptr,
+      [](zx_status_t, void *data) {
         auto params = static_cast<const Params *>(data);
 
         // We don't use the thread registry at all for enumerating the threads
@@ -146,20 +140,20 @@ void LockStuffAndStopTheWorld(StopTheWorldCallback callback,
         // just for the allocator cache, and to call ForEachExtraStackRange,
         // which ASan needs.
         if (flags()->use_stacks) {
-            GetThreadRegistryLocked()->RunCallbackForEachThreadLocked(
-            [](ThreadContextBase *tctx, void *arg) {
+          GetThreadRegistryLocked()->RunCallbackForEachThreadLocked(
+              [](ThreadContextBase *tctx, void *arg) {
                 ForEachExtraStackRange(tctx->os_id, ForEachExtraStackRangeCb,
                                        arg);
-            },
-            &params->argument->frontier);
+              },
+              &params->argument->frontier);
         }
 
         params->callback(SuspendedThreadsListFuchsia(), params->argument);
-    },
-    &params);
+      },
+      &params);
 
-    UnlockAllocator();
-    UnlockThreadRegistry();
+  UnlockAllocator();
+  UnlockThreadRegistry();
 }
 
 }  // namespace __lsan
@@ -167,7 +161,7 @@ void LockStuffAndStopTheWorld(StopTheWorldCallback callback,
 // This is declared (in extern "C") by <zircon/sanitizer.h>.
 // _Exit calls this directly to intercept and change the status value.
 int __sanitizer_process_exit_hook(int status) {
-    return __lsan::ExitHook(status);
+  return __lsan::ExitHook(status);
 }
 
 #endif

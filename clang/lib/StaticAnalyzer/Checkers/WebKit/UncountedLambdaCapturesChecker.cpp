@@ -22,90 +22,86 @@ namespace {
 class UncountedLambdaCapturesChecker
     : public Checker<check::ASTDecl<TranslationUnitDecl>> {
 private:
-    BugType Bug{this, "Lambda capture of uncounted variable",
-        "WebKit coding guidelines"};
-    mutable BugReporter *BR;
+  BugType Bug{this, "Lambda capture of uncounted variable",
+              "WebKit coding guidelines"};
+  mutable BugReporter *BR;
 
 public:
-    void checkASTDecl(const TranslationUnitDecl *TUD, AnalysisManager &MGR,
-                      BugReporter &BRArg) const {
-        BR = &BRArg;
+  void checkASTDecl(const TranslationUnitDecl *TUD, AnalysisManager &MGR,
+                    BugReporter &BRArg) const {
+    BR = &BRArg;
 
-        // The calls to checkAST* from AnalysisConsumer don't
-        // visit template instantiations or lambda classes. We
-        // want to visit those, so we make our own RecursiveASTVisitor.
-        struct LocalVisitor : public RecursiveASTVisitor<LocalVisitor> {
-            const UncountedLambdaCapturesChecker *Checker;
-            explicit LocalVisitor(const UncountedLambdaCapturesChecker *Checker)
-                : Checker(Checker) {
-                assert(Checker);
-            }
+    // The calls to checkAST* from AnalysisConsumer don't
+    // visit template instantiations or lambda classes. We
+    // want to visit those, so we make our own RecursiveASTVisitor.
+    struct LocalVisitor : public RecursiveASTVisitor<LocalVisitor> {
+      const UncountedLambdaCapturesChecker *Checker;
+      explicit LocalVisitor(const UncountedLambdaCapturesChecker *Checker)
+          : Checker(Checker) {
+        assert(Checker);
+      }
 
-            bool shouldVisitTemplateInstantiations() const {
-                return true;
-            }
-            bool shouldVisitImplicitCode() const {
-                return false;
-            }
+      bool shouldVisitTemplateInstantiations() const { return true; }
+      bool shouldVisitImplicitCode() const { return false; }
 
-            bool VisitLambdaExpr(LambdaExpr *L) {
-                Checker->visitLambdaExpr(L);
-                return true;
-            }
-        };
+      bool VisitLambdaExpr(LambdaExpr *L) {
+        Checker->visitLambdaExpr(L);
+        return true;
+      }
+    };
 
-        LocalVisitor visitor(this);
-        visitor.TraverseDecl(const_cast<TranslationUnitDecl *>(TUD));
+    LocalVisitor visitor(this);
+    visitor.TraverseDecl(const_cast<TranslationUnitDecl *>(TUD));
+  }
+
+  void visitLambdaExpr(LambdaExpr *L) const {
+    for (const LambdaCapture &C : L->captures()) {
+      if (C.capturesVariable()) {
+        VarDecl *CapturedVar = C.getCapturedVar();
+        if (auto *CapturedVarType = CapturedVar->getType().getTypePtrOrNull()) {
+          Optional<bool> IsUncountedPtr = isUncountedPtr(CapturedVarType);
+          if (IsUncountedPtr && *IsUncountedPtr) {
+            reportBug(C, CapturedVar, CapturedVarType);
+          }
+        }
+      }
+    }
+  }
+
+  void reportBug(const LambdaCapture &Capture, VarDecl *CapturedVar,
+                 const Type *T) const {
+    assert(CapturedVar);
+
+    SmallString<100> Buf;
+    llvm::raw_svector_ostream Os(Buf);
+
+    if (Capture.isExplicit()) {
+      Os << "Captured ";
+    } else {
+      Os << "Implicitly captured ";
+    }
+    if (T->isPointerType()) {
+      Os << "raw-pointer ";
+    } else {
+      assert(T->isReferenceType());
+      Os << "reference ";
     }
 
-    void visitLambdaExpr(LambdaExpr *L) const {
-        for (const LambdaCapture &C : L->captures()) {
-            if (C.capturesVariable()) {
-                VarDecl *CapturedVar = C.getCapturedVar();
-                if (auto *CapturedVarType = CapturedVar->getType().getTypePtrOrNull()) {
-                    Optional<bool> IsUncountedPtr = isUncountedPtr(CapturedVarType);
-                    if (IsUncountedPtr && *IsUncountedPtr) {
-                        reportBug(C, CapturedVar, CapturedVarType);
-                    }
-                }
-            }
-        }
-    }
+    printQuotedQualifiedName(Os, Capture.getCapturedVar());
+    Os << " to uncounted type is unsafe.";
 
-    void reportBug(const LambdaCapture &Capture, VarDecl *CapturedVar,
-                   const Type *T) const {
-        assert(CapturedVar);
-
-        SmallString<100> Buf;
-        llvm::raw_svector_ostream Os(Buf);
-
-        if (Capture.isExplicit()) {
-            Os << "Captured ";
-        } else {
-            Os << "Implicitly captured ";
-        }
-        if (T->isPointerType()) {
-            Os << "raw-pointer ";
-        } else {
-            assert(T->isReferenceType());
-            Os << "reference ";
-        }
-
-        printQuotedQualifiedName(Os, Capture.getCapturedVar());
-        Os << " to uncounted type is unsafe.";
-
-        PathDiagnosticLocation BSLoc(Capture.getLocation(), BR->getSourceManager());
-        auto Report = std::make_unique<BasicBugReport>(Bug, Os.str(), BSLoc);
-        BR->emitReport(std::move(Report));
-    }
+    PathDiagnosticLocation BSLoc(Capture.getLocation(), BR->getSourceManager());
+    auto Report = std::make_unique<BasicBugReport>(Bug, Os.str(), BSLoc);
+    BR->emitReport(std::move(Report));
+  }
 };
 } // namespace
 
 void ento::registerUncountedLambdaCapturesChecker(CheckerManager &Mgr) {
-    Mgr.registerChecker<UncountedLambdaCapturesChecker>();
+  Mgr.registerChecker<UncountedLambdaCapturesChecker>();
 }
 
 bool ento::shouldRegisterUncountedLambdaCapturesChecker(
     const CheckerManager &mgr) {
-    return true;
+  return true;
 }

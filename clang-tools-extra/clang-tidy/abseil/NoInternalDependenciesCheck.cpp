@@ -18,31 +18,32 @@ namespace tidy {
 namespace abseil {
 
 void NoInternalDependenciesCheck::registerMatchers(MatchFinder *Finder) {
-    // TODO: refactor matcher to be configurable or just match on any internal
-    // access from outside the enclosing namespace.
+  // TODO: refactor matcher to be configurable or just match on any internal
+  // access from outside the enclosing namespace.
 
-    Finder->addMatcher(
-        nestedNameSpecifierLoc(loc(specifiesNamespace(namespaceDecl(
-                                       matchesName("internal"),
-                                       hasParent(namespaceDecl(hasName("absl")))))),
-                               unless(isInAbseilFile()))
-        .bind("InternalDep"),
-        this);
+  Finder->addMatcher(
+      nestedNameSpecifierLoc(loc(specifiesNamespace(namespaceDecl(
+                                 matchesName("internal"),
+                                 hasParent(namespaceDecl(hasName("absl")))))),
+                             unless(isInAbseilFile()))
+          .bind("InternalDep"),
+      this);
 }
 
-void NoInternalDependenciesCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *InternalDependency =
-        Result.Nodes.getNodeAs<NestedNameSpecifierLoc>("InternalDep");
+void NoInternalDependenciesCheck::check(
+    const MatchFinder::MatchResult &Result) {
+  const auto *InternalDependency =
+      Result.Nodes.getNodeAs<NestedNameSpecifierLoc>("InternalDep");
 
-    SourceLocation LocAtFault =
-        Result.SourceManager->getSpellingLoc(InternalDependency->getBeginLoc());
+  SourceLocation LocAtFault =
+      Result.SourceManager->getSpellingLoc(InternalDependency->getBeginLoc());
 
-    if (!LocAtFault.isValid())
-        return;
+  if (!LocAtFault.isValid())
+    return;
 
-    diag(LocAtFault,
-         "do not reference any 'internal' namespaces; those implementation "
-         "details are reserved to Abseil");
+  diag(LocAtFault,
+       "do not reference any 'internal' namespaces; those implementation "
+       "details are reserved to Abseil");
 }
 
 } // namespace abseil

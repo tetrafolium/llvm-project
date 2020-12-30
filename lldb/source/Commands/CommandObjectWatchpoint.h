@@ -18,12 +18,12 @@ namespace lldb_private {
 
 class CommandObjectMultiwordWatchpoint : public CommandObjectMultiword {
 public:
-    CommandObjectMultiwordWatchpoint(CommandInterpreter &interpreter);
+  CommandObjectMultiwordWatchpoint(CommandInterpreter &interpreter);
 
-    ~CommandObjectMultiwordWatchpoint() override;
+  ~CommandObjectMultiwordWatchpoint() override;
 
-    static bool VerifyWatchpointIDs(Target *target, Args &args,
-                                    std::vector<uint32_t> &wp_ids);
+  static bool VerifyWatchpointIDs(Target *target, Args &args,
+                                  std::vector<uint32_t> &wp_ids);
 };
 
 } // namespace lldb_private

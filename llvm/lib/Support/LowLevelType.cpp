@@ -16,33 +16,33 @@
 using namespace llvm;
 
 LLT::LLT(MVT VT) {
-    if (VT.isVector()) {
-        init(/*IsPointer=*/false, VT.getVectorNumElements() > 1,
-                           VT.getVectorNumElements(), VT.getVectorElementType().getSizeInBits(),
-                           /*AddressSpace=*/0);
-    } else if (VT.isValid()) {
-        // Aggregates are no different from real scalars as far as GlobalISel is
-        // concerned.
-        assert(VT.getSizeInBits().isNonZero() && "invalid zero-sized type");
-        init(/*IsPointer=*/false, /*IsVector=*/false, /*NumElements=*/0,
-                           VT.getSizeInBits(), /*AddressSpace=*/0);
-    } else {
-        IsPointer = false;
-        IsVector = false;
-        RawData = 0;
-    }
+  if (VT.isVector()) {
+    init(/*IsPointer=*/false, VT.getVectorNumElements() > 1,
+         VT.getVectorNumElements(), VT.getVectorElementType().getSizeInBits(),
+         /*AddressSpace=*/0);
+  } else if (VT.isValid()) {
+    // Aggregates are no different from real scalars as far as GlobalISel is
+    // concerned.
+    assert(VT.getSizeInBits().isNonZero() && "invalid zero-sized type");
+    init(/*IsPointer=*/false, /*IsVector=*/false, /*NumElements=*/0,
+         VT.getSizeInBits(), /*AddressSpace=*/0);
+  } else {
+    IsPointer = false;
+    IsVector = false;
+    RawData = 0;
+  }
 }
 
 void LLT::print(raw_ostream &OS) const {
-    if (isVector())
-        OS << "<" << getNumElements() << " x " << getElementType() << ">";
-    else if (isPointer())
-        OS << "p" << getAddressSpace();
-    else if (isValid()) {
-        assert(isScalar() && "unexpected type");
-        OS << "s" << getScalarSizeInBits();
-    } else
-        OS << "LLT_invalid";
+  if (isVector())
+    OS << "<" << getNumElements() << " x " << getElementType() << ">";
+  else if (isPointer())
+    OS << "p" << getAddressSpace();
+  else if (isValid()) {
+    assert(isScalar() && "unexpected type");
+    OS << "s" << getScalarSizeInBits();
+  } else
+    OS << "LLT_invalid";
 }
 
 const constexpr LLT::BitFieldInfo LLT::ScalarSizeFieldInfo;

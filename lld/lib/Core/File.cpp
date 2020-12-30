@@ -19,10 +19,10 @@ File::AtomVector<SharedLibraryAtom> File::_noSharedLibraryAtoms;
 File::AtomVector<AbsoluteAtom> File::_noAbsoluteAtoms;
 
 std::error_code File::parse() {
-    std::lock_guard<std::mutex> lock(_parseMutex);
-    if (!_lastError.hasValue())
-        _lastError = doParse();
-    return _lastError.getValue();
+  std::lock_guard<std::mutex> lock(_parseMutex);
+  if (!_lastError.hasValue())
+    _lastError = doParse();
+  return _lastError.getValue();
 }
 
 } // end namespace lld

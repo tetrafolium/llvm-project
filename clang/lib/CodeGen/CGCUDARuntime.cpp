@@ -24,22 +24,22 @@ using namespace CodeGen;
 CGCUDARuntime::~CGCUDARuntime() {}
 
 RValue CGCUDARuntime::EmitCUDAKernelCallExpr(CodeGenFunction &CGF,
-        const CUDAKernelCallExpr *E,
-        ReturnValueSlot ReturnValue) {
-    llvm::BasicBlock *ConfigOKBlock = CGF.createBasicBlock("kcall.configok");
-    llvm::BasicBlock *ContBlock = CGF.createBasicBlock("kcall.end");
+                                             const CUDAKernelCallExpr *E,
+                                             ReturnValueSlot ReturnValue) {
+  llvm::BasicBlock *ConfigOKBlock = CGF.createBasicBlock("kcall.configok");
+  llvm::BasicBlock *ContBlock = CGF.createBasicBlock("kcall.end");
 
-    CodeGenFunction::ConditionalEvaluation eval(CGF);
-    CGF.EmitBranchOnBoolExpr(E->getConfig(), ContBlock, ConfigOKBlock,
-                             /*TrueCount=*/0);
+  CodeGenFunction::ConditionalEvaluation eval(CGF);
+  CGF.EmitBranchOnBoolExpr(E->getConfig(), ContBlock, ConfigOKBlock,
+                           /*TrueCount=*/0);
 
-    eval.begin(CGF);
-    CGF.EmitBlock(ConfigOKBlock);
-    CGF.EmitSimpleCallExpr(E, ReturnValue);
-    CGF.EmitBranch(ContBlock);
+  eval.begin(CGF);
+  CGF.EmitBlock(ConfigOKBlock);
+  CGF.EmitSimpleCallExpr(E, ReturnValue);
+  CGF.EmitBranch(ContBlock);
 
-    CGF.EmitBlock(ContBlock);
-    eval.end(CGF);
+  CGF.EmitBlock(ContBlock);
+  eval.end(CGF);
 
-    return RValue::get(nullptr);
+  return RValue::get(nullptr);
 }

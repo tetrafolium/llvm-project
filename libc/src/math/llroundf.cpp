@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long long LLVM_LIBC_ENTRYPOINT(llroundf)(float x) {
-    return fputil::roundToSignedInteger<float, long long>(x);
+  return fputil::roundToSignedInteger<float, long long>(x);
 }
 
 } // namespace __llvm_libc

@@ -24,5 +24,5 @@ uint64_t llvm::hashing::detail::fixed_seed_override = 0;
 // Implement the function for forced setting of the fixed seed.
 // FIXME: Use atomic operations here so that there is no data race.
 void llvm::set_fixed_execution_hash_seed(uint64_t fixed_value) {
-    hashing::detail::fixed_seed_override = fixed_value;
+  hashing::detail::fixed_seed_override = fixed_value;
 }

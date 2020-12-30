@@ -14,9 +14,9 @@
 #ifndef LLVM_TRANSFORMS_UTILS_ASSUMEBUNDLEQUERIES_H
 #define LLVM_TRANSFORMS_UTILS_ASSUMEBUNDLEQUERIES_H
 
+#include "llvm/ADT/DenseMap.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/Instructions.h"
-#include "llvm/ADT/DenseMap.h"
 
 namespace llvm {
 class IntrinsicInst;
@@ -27,8 +27,8 @@ class DominatorTree;
 /// If the element exist it is guaranteed to be what is specified in this enum
 /// but it may not exist.
 enum AssumeBundleArg {
-    ABA_WasOn = 0,
-    ABA_Argument = 1,
+  ABA_WasOn = 0,
+  ABA_Argument = 1,
 };
 
 /// Query the operand bundle of an llvm.assume to find a single attribute of
@@ -44,23 +44,21 @@ bool hasAttributeInAssume(CallInst &AssumeCI, Value *IsOn, StringRef AttrName,
 inline bool hasAttributeInAssume(CallInst &AssumeCI, Value *IsOn,
                                  Attribute::AttrKind Kind,
                                  uint64_t *ArgVal = nullptr) {
-    return hasAttributeInAssume(AssumeCI, IsOn,
-                                Attribute::getNameFromAttrKind(Kind), ArgVal);
+  return hasAttributeInAssume(AssumeCI, IsOn,
+                              Attribute::getNameFromAttrKind(Kind), ArgVal);
 }
 
-template<> struct DenseMapInfo<Attribute::AttrKind> {
-    static Attribute::AttrKind getEmptyKey() {
-        return Attribute::EmptyKey;
-    }
-    static Attribute::AttrKind getTombstoneKey() {
-        return Attribute::TombstoneKey;
-    }
-    static unsigned getHashValue(Attribute::AttrKind AK) {
-        return hash_combine(AK);
-    }
-    static bool isEqual(Attribute::AttrKind LHS, Attribute::AttrKind RHS) {
-        return LHS == RHS;
-    }
+template <> struct DenseMapInfo<Attribute::AttrKind> {
+  static Attribute::AttrKind getEmptyKey() { return Attribute::EmptyKey; }
+  static Attribute::AttrKind getTombstoneKey() {
+    return Attribute::TombstoneKey;
+  }
+  static unsigned getHashValue(Attribute::AttrKind AK) {
+    return hash_combine(AK);
+  }
+  static bool isEqual(Attribute::AttrKind LHS, Attribute::AttrKind RHS) {
+    return LHS == RHS;
+  }
 };
 
 /// The map Key contains the Value on for which the attribute is valid and
@@ -69,8 +67,8 @@ template<> struct DenseMapInfo<Attribute::AttrKind> {
 using RetainedKnowledgeKey = std::pair<Value *, Attribute::AttrKind>;
 
 struct MinMax {
-    unsigned Min;
-    unsigned Max;
+  unsigned Min;
+  unsigned Max;
 };
 
 /// A mapping from intrinsics (=`llvm.assume` calls) to a value range
@@ -98,34 +96,28 @@ void fillMapFromAssume(CallInst &AssumeCI, RetainedKnowledgeMap &Result);
 ///  - WasOn will be %P.
 ///  - ArgValue will be 4.
 struct RetainedKnowledge {
-    Attribute::AttrKind AttrKind = Attribute::None;
-    unsigned ArgValue = 0;
-    Value *WasOn = nullptr;
-    bool operator==(RetainedKnowledge Other) const {
-        return AttrKind == Other.AttrKind && WasOn == Other.WasOn &&
-               ArgValue == Other.ArgValue;
-    }
-    bool operator!=(RetainedKnowledge Other) const {
-        return !(*this == Other);
-    }
-    operator bool() const {
-        return AttrKind != Attribute::None;
-    }
-    static RetainedKnowledge none() {
-        return RetainedKnowledge{};
-    }
+  Attribute::AttrKind AttrKind = Attribute::None;
+  unsigned ArgValue = 0;
+  Value *WasOn = nullptr;
+  bool operator==(RetainedKnowledge Other) const {
+    return AttrKind == Other.AttrKind && WasOn == Other.WasOn &&
+           ArgValue == Other.ArgValue;
+  }
+  bool operator!=(RetainedKnowledge Other) const { return !(*this == Other); }
+  operator bool() const { return AttrKind != Attribute::None; }
+  static RetainedKnowledge none() { return RetainedKnowledge{}; }
 };
 
 /// Retreive the information help by Assume on the operand at index Idx.
 /// Assume should be an llvm.assume and Idx should be in the operand bundle.
 RetainedKnowledge getKnowledgeFromOperandInAssume(CallInst &Assume,
-        unsigned Idx);
+                                                  unsigned Idx);
 
 /// Retreive the information help by the Use U of an llvm.assume. the use should
 /// be in the operand bundle.
 inline RetainedKnowledge getKnowledgeFromUseInAssume(const Use *U) {
-    return getKnowledgeFromOperandInAssume(*cast<CallInst>(U->getUser()),
-                                           U->getOperandNo());
+  return getKnowledgeFromOperandInAssume(*cast<CallInst>(U->getUser()),
+                                         U->getOperandNo());
 }
 
 /// Tag in operand bundle indicating that this bundle should be ignored.
@@ -153,9 +145,7 @@ RetainedKnowledge getKnowledgeForValue(
     AssumptionCache *AC = nullptr,
     function_ref<bool(RetainedKnowledge, Instruction *,
                       const CallBase::BundleOpInfo *)>
-Filter = [](auto...) {
-    return true;
-});
+        Filter = [](auto...) { return true; });
 
 /// Return a valid Knowledge associated to the Value V if its Attribute kind is
 /// in AttrKinds and the knowledge is suitable to be used in the context of
@@ -168,7 +158,7 @@ RetainedKnowledge getKnowledgeValidInContext(
 /// This extracts the Knowledge from an element of an operand bundle.
 /// This is mostly for use in the assume builder.
 RetainedKnowledge getKnowledgeFromBundle(CallInst &Assume,
-        const CallBase::BundleOpInfo &BOI);
+                                         const CallBase::BundleOpInfo &BOI);
 
 } // namespace llvm
 

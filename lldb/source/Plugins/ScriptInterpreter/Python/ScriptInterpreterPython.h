@@ -26,35 +26,35 @@
 namespace lldb_private {
 /// Abstract interface for the Python script interpreter.
 class ScriptInterpreterPython : public ScriptInterpreter,
-    public IOHandlerDelegateMultiline {
+                                public IOHandlerDelegateMultiline {
 public:
-    class CommandDataPython : public BreakpointOptions::CommandData {
-    public:
-        CommandDataPython() : BreakpointOptions::CommandData() {
-            interpreter = lldb::eScriptLanguagePython;
-        }
-        CommandDataPython(StructuredData::ObjectSP extra_args_sp) :
-            BreakpointOptions::CommandData(),
-            m_extra_args_up(new StructuredDataImpl()) {
-            interpreter = lldb::eScriptLanguagePython;
-            m_extra_args_up->SetObjectSP(extra_args_sp);
-        }
-        lldb::StructuredDataImplUP m_extra_args_up;
-    };
+  class CommandDataPython : public BreakpointOptions::CommandData {
+  public:
+    CommandDataPython() : BreakpointOptions::CommandData() {
+      interpreter = lldb::eScriptLanguagePython;
+    }
+    CommandDataPython(StructuredData::ObjectSP extra_args_sp)
+        : BreakpointOptions::CommandData(),
+          m_extra_args_up(new StructuredDataImpl()) {
+      interpreter = lldb::eScriptLanguagePython;
+      m_extra_args_up->SetObjectSP(extra_args_sp);
+    }
+    lldb::StructuredDataImplUP m_extra_args_up;
+  };
 
-    ScriptInterpreterPython(Debugger &debugger)
-        : ScriptInterpreter(debugger, lldb::eScriptLanguagePython),
-          IOHandlerDelegateMultiline("DONE") {}
+  ScriptInterpreterPython(Debugger &debugger)
+      : ScriptInterpreter(debugger, lldb::eScriptLanguagePython),
+        IOHandlerDelegateMultiline("DONE") {}
 
-    static void Initialize();
-    static void Terminate();
-    static lldb_private::ConstString GetPluginNameStatic();
-    static const char *GetPluginDescriptionStatic();
-    static FileSpec GetPythonDir();
+  static void Initialize();
+  static void Terminate();
+  static lldb_private::ConstString GetPluginNameStatic();
+  static const char *GetPluginDescriptionStatic();
+  static FileSpec GetPythonDir();
 
 protected:
-    static void ComputePythonDirForApple(llvm::SmallVectorImpl<char> &path);
-    static void ComputePythonDir(llvm::SmallVectorImpl<char> &path);
+  static void ComputePythonDirForApple(llvm::SmallVectorImpl<char> &path);
+  static void ComputePythonDir(llvm::SmallVectorImpl<char> &path);
 };
 } // namespace lldb_private
 

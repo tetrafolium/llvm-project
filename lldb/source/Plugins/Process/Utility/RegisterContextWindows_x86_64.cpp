@@ -17,30 +17,30 @@ using namespace lldb;
 
 namespace {
 typedef struct _GPR {
-    uint64_t rax;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rbx;
-    uint64_t rsp;
-    uint64_t rbp;
-    uint64_t rsi;
-    uint64_t rdi;
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-    uint64_t rip;
-    uint64_t rflags;
-    uint16_t cs;
-    uint16_t fs;
-    uint16_t gs;
-    uint16_t ss;
-    uint16_t ds;
-    uint16_t es;
+  uint64_t rax;
+  uint64_t rcx;
+  uint64_t rdx;
+  uint64_t rbx;
+  uint64_t rsp;
+  uint64_t rbp;
+  uint64_t rsi;
+  uint64_t rdi;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+  uint64_t r12;
+  uint64_t r13;
+  uint64_t r14;
+  uint64_t r15;
+  uint64_t rip;
+  uint64_t rflags;
+  uint16_t cs;
+  uint16_t fs;
+  uint16_t gs;
+  uint16_t ss;
+  uint16_t ds;
+  uint16_t es;
 } GPR;
 
 #define GPR_OFFSET(regname) (LLVM_EXTENSION offsetof(GPR, regname))
@@ -53,22 +53,22 @@ typedef struct _GPR {
   }
 
 typedef struct _FPReg {
-    XMMReg xmm0;
-    XMMReg xmm1;
-    XMMReg xmm2;
-    XMMReg xmm3;
-    XMMReg xmm4;
-    XMMReg xmm5;
-    XMMReg xmm6;
-    XMMReg xmm7;
-    XMMReg xmm8;
-    XMMReg xmm9;
-    XMMReg xmm10;
-    XMMReg xmm11;
-    XMMReg xmm12;
-    XMMReg xmm13;
-    XMMReg xmm14;
-    XMMReg xmm15;
+  XMMReg xmm0;
+  XMMReg xmm1;
+  XMMReg xmm2;
+  XMMReg xmm3;
+  XMMReg xmm4;
+  XMMReg xmm5;
+  XMMReg xmm6;
+  XMMReg xmm7;
+  XMMReg xmm8;
+  XMMReg xmm9;
+  XMMReg xmm10;
+  XMMReg xmm11;
+  XMMReg xmm12;
+  XMMReg xmm13;
+  XMMReg xmm14;
+  XMMReg xmm15;
 } FPReg;
 
 #define FPR_OFFSET(regname)                                                    \
@@ -134,21 +134,19 @@ static RegisterInfo g_register_infos_x86_64[] = {
 RegisterContextWindows_x86_64::RegisterContextWindows_x86_64(
     const ArchSpec &target_arch)
     : lldb_private::RegisterInfoInterface(target_arch) {
-    assert(target_arch.GetMachine() == llvm::Triple::x86_64);
+  assert(target_arch.GetMachine() == llvm::Triple::x86_64);
 }
 
 const RegisterInfo *RegisterContextWindows_x86_64::GetRegisterInfo() const {
-    return g_register_infos_x86_64;
+  return g_register_infos_x86_64;
 }
 
 uint32_t RegisterContextWindows_x86_64::GetRegisterCount() const {
-    return llvm::array_lengthof(g_register_infos_x86_64);
+  return llvm::array_lengthof(g_register_infos_x86_64);
 }
 
 uint32_t RegisterContextWindows_x86_64::GetUserRegisterCount() const {
-    return llvm::array_lengthof(g_register_infos_x86_64);
+  return llvm::array_lengthof(g_register_infos_x86_64);
 }
 
-size_t RegisterContextWindows_x86_64::GetGPRSize() const {
-    return sizeof(GPR);
-}
+size_t RegisterContextWindows_x86_64::GetGPRSize() const { return sizeof(GPR); }

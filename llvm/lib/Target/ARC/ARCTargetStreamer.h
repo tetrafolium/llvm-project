@@ -15,8 +15,8 @@ namespace llvm {
 
 class ARCTargetStreamer : public MCTargetStreamer {
 public:
-    ARCTargetStreamer(MCStreamer &S);
-    ~ARCTargetStreamer() override;
+  ARCTargetStreamer(MCStreamer &S);
+  ~ARCTargetStreamer() override;
 };
 
 } // end namespace llvm

@@ -49,7 +49,7 @@ llvm::Pass *createIslAstInfoWrapperPassPass();
 llvm::Pass *createCodeGenerationPass();
 #ifdef GPU_CODEGEN
 llvm::Pass *createPPCGCodeGenerationPass(GPUArch Arch = GPUArch::NVPTX64,
-        GPURuntime Runtime = GPURuntime::CUDA);
+                                         GPURuntime Runtime = GPURuntime::CUDA);
 
 llvm::Pass *
 createManagedMemoryRewritePassPass(GPUArch Arch = GPUArch::NVPTX64,
@@ -65,41 +65,41 @@ extern char &CodePreparationID;
 
 namespace {
 struct PollyForcePassLinking {
-    PollyForcePassLinking() {
-        // We must reference the passes in such a way that compilers will not
-        // delete it all as dead code, even with whole program optimization,
-        // yet is effectively a NO-OP. As the compiler isn't smart enough
-        // to know that getenv() never returns -1, this will do the job.
-        if (std::getenv("bar") != (char *)-1)
-            return;
+  PollyForcePassLinking() {
+    // We must reference the passes in such a way that compilers will not
+    // delete it all as dead code, even with whole program optimization,
+    // yet is effectively a NO-OP. As the compiler isn't smart enough
+    // to know that getenv() never returns -1, this will do the job.
+    if (std::getenv("bar") != (char *)-1)
+      return;
 
-        polly::createCodePreparationPass();
-        polly::createDeadCodeElimPass();
-        polly::createDependenceInfoPass();
-        polly::createDOTOnlyPrinterPass();
-        polly::createDOTOnlyViewerPass();
-        polly::createDOTPrinterPass();
-        polly::createDOTViewerPass();
-        polly::createJSONExporterPass();
-        polly::createJSONImporterPass();
-        polly::createScopDetectionWrapperPassPass();
-        polly::createScopInfoRegionPassPass();
-        polly::createPollyCanonicalizePass();
-        polly::createPolyhedralInfoPass();
-        polly::createIslAstInfoWrapperPassPass();
-        polly::createCodeGenerationPass();
+    polly::createCodePreparationPass();
+    polly::createDeadCodeElimPass();
+    polly::createDependenceInfoPass();
+    polly::createDOTOnlyPrinterPass();
+    polly::createDOTOnlyViewerPass();
+    polly::createDOTPrinterPass();
+    polly::createDOTViewerPass();
+    polly::createJSONExporterPass();
+    polly::createJSONImporterPass();
+    polly::createScopDetectionWrapperPassPass();
+    polly::createScopInfoRegionPassPass();
+    polly::createPollyCanonicalizePass();
+    polly::createPolyhedralInfoPass();
+    polly::createIslAstInfoWrapperPassPass();
+    polly::createCodeGenerationPass();
 #ifdef GPU_CODEGEN
-        polly::createPPCGCodeGenerationPass();
-        polly::createManagedMemoryRewritePassPass();
+    polly::createPPCGCodeGenerationPass();
+    polly::createManagedMemoryRewritePassPass();
 #endif
-        polly::createIslScheduleOptimizerPass();
-        polly::createMaximalStaticExpansionPass();
-        polly::createFlattenSchedulePass();
-        polly::createDeLICMPass();
-        polly::createDumpModulePass("", true);
-        polly::createSimplifyPass();
-        polly::createPruneUnprofitablePass();
-    }
+    polly::createIslScheduleOptimizerPass();
+    polly::createMaximalStaticExpansionPass();
+    polly::createFlattenSchedulePass();
+    polly::createDeLICMPass();
+    polly::createDumpModulePass("", true);
+    polly::createSimplifyPass();
+    polly::createPruneUnprofitablePass();
+  }
 } PollyForcePassLinking; // Force link by creating a global definition.
 } // namespace
 

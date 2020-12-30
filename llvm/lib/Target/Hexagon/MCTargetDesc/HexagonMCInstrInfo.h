@@ -33,31 +33,31 @@ class MCSubtargetInfo;
 
 class DuplexCandidate {
 public:
-    unsigned packetIndexI, packetIndexJ, iClass;
+  unsigned packetIndexI, packetIndexJ, iClass;
 
-    DuplexCandidate(unsigned i, unsigned j, unsigned iClass)
-        : packetIndexI(i), packetIndexJ(j), iClass(iClass) {}
+  DuplexCandidate(unsigned i, unsigned j, unsigned iClass)
+      : packetIndexI(i), packetIndexJ(j), iClass(iClass) {}
 };
 
 namespace Hexagon {
 
 class PacketIterator {
-    MCInstrInfo const &MCII;
-    MCInst::const_iterator BundleCurrent;
-    MCInst::const_iterator BundleEnd;
-    MCInst::const_iterator DuplexCurrent;
-    MCInst::const_iterator DuplexEnd;
+  MCInstrInfo const &MCII;
+  MCInst::const_iterator BundleCurrent;
+  MCInst::const_iterator BundleEnd;
+  MCInst::const_iterator DuplexCurrent;
+  MCInst::const_iterator DuplexEnd;
 
 public:
-    PacketIterator(MCInstrInfo const &MCII, MCInst const &Inst);
-    PacketIterator(MCInstrInfo const &MCII, MCInst const &Inst, std::nullptr_t);
+  PacketIterator(MCInstrInfo const &MCII, MCInst const &Inst);
+  PacketIterator(MCInstrInfo const &MCII, MCInst const &Inst, std::nullptr_t);
 
-    PacketIterator &operator++();
-    MCInst const &operator*() const;
-    bool operator==(PacketIterator const &Other) const;
-    bool operator!=(PacketIterator const &Other) const {
-        return !(*this == Other);
-    }
+  PacketIterator &operator++();
+  MCInst const &operator*() const;
+  bool operator==(PacketIterator const &Other) const;
+  bool operator!=(PacketIterator const &Other) const {
+    return !(*this == Other);
+  }
 };
 
 } // end namespace Hexagon
@@ -168,8 +168,7 @@ MCOperand const &getNewValueOperand2(MCInstrInfo const &MCII,
 unsigned getType(MCInstrInfo const &MCII, MCInst const &MCI);
 
 /// Return the resources used by this instruction
-unsigned getCVIResources(MCInstrInfo const &MCII,
-                         MCSubtargetInfo const &STI,
+unsigned getCVIResources(MCInstrInfo const &MCII, MCSubtargetInfo const &STI,
                          MCInst const &MCI);
 
 /// Return the slots used by the insn.
@@ -193,14 +192,14 @@ unsigned iClassOfDuplexPair(unsigned Ga, unsigned Gb);
 int64_t minConstant(MCInst const &MCI, size_t Index);
 template <unsigned N, unsigned S>
 bool inRange(MCInst const &MCI, size_t Index) {
-    return isShiftedUInt<N, S>(minConstant(MCI, Index));
+  return isShiftedUInt<N, S>(minConstant(MCI, Index));
 }
 template <unsigned N, unsigned S>
 bool inSRange(MCInst const &MCI, size_t Index) {
-    return isShiftedInt<N, S>(minConstant(MCI, Index));
+  return isShiftedInt<N, S>(minConstant(MCI, Index));
 }
 template <unsigned N> bool inRange(MCInst const &MCI, size_t Index) {
-    return isUInt<N>(minConstant(MCI, Index));
+  return isUInt<N>(minConstant(MCI, Index));
 }
 
 // Return the instruction at Index
@@ -316,18 +315,17 @@ unsigned packetSizeSlots(MCSubtargetInfo const &STI);
 unsigned slotsConsumed(MCInstrInfo const &MCII, MCSubtargetInfo const &STI,
                        MCInst const &MCI);
 
-
 // Pad the bundle with nops to satisfy endloop requirements
 void padEndloop(MCInst &MCI, MCContext &Context);
 class PredicateInfo {
 public:
-    PredicateInfo() : Register(0), Operand(0), PredicatedTrue(false) {}
-    PredicateInfo(unsigned Register, unsigned Operand, bool PredicatedTrue)
-        : Register(Register), Operand(Operand), PredicatedTrue(PredicatedTrue) {}
-    bool isPredicated() const;
-    unsigned Register;
-    unsigned Operand;
-    bool PredicatedTrue;
+  PredicateInfo() : Register(0), Operand(0), PredicatedTrue(false) {}
+  PredicateInfo(unsigned Register, unsigned Operand, bool PredicatedTrue)
+      : Register(Register), Operand(Operand), PredicatedTrue(PredicatedTrue) {}
+  bool isPredicated() const;
+  unsigned Register;
+  unsigned Operand;
+  bool PredicatedTrue;
 };
 PredicateInfo predicateInfo(MCInstrInfo const &MCII, MCInst const &MCI);
 bool prefersSlot3(MCInstrInfo const &MCII, MCInst const &MCI);

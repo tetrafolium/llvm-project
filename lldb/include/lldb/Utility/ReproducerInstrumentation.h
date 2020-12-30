@@ -23,55 +23,55 @@
 template <typename T,
           typename std::enable_if<std::is_fundamental<T>::value, int>::type = 0>
 inline void stringify_append(llvm::raw_string_ostream &ss, const T &t) {
-    ss << t;
+  ss << t;
 }
 
 template <typename T, typename std::enable_if<!std::is_fundamental<T>::value,
-          int>::type = 0>
+                                              int>::type = 0>
 inline void stringify_append(llvm::raw_string_ostream &ss, const T &t) {
-    ss << &t;
+  ss << &t;
 }
 
 template <typename T>
 inline void stringify_append(llvm::raw_string_ostream &ss, T *t) {
-    ss << reinterpret_cast<void *>(t);
+  ss << reinterpret_cast<void *>(t);
 }
 
 template <typename T>
 inline void stringify_append(llvm::raw_string_ostream &ss, const T *t) {
-    ss << reinterpret_cast<const void *>(t);
+  ss << reinterpret_cast<const void *>(t);
 }
 
 template <>
 inline void stringify_append<char>(llvm::raw_string_ostream &ss,
                                    const char *t) {
-    ss << '\"' << t << '\"';
+  ss << '\"' << t << '\"';
 }
 
 template <>
 inline void stringify_append<std::nullptr_t>(llvm::raw_string_ostream &ss,
-        const std::nullptr_t &t) {
-    ss << "\"nullptr\"";
+                                             const std::nullptr_t &t) {
+  ss << "\"nullptr\"";
 }
 
 template <typename Head>
 inline void stringify_helper(llvm::raw_string_ostream &ss, const Head &head) {
-    stringify_append(ss, head);
+  stringify_append(ss, head);
 }
 
 template <typename Head, typename... Tail>
 inline void stringify_helper(llvm::raw_string_ostream &ss, const Head &head,
                              const Tail &... tail) {
-    stringify_append(ss, head);
-    ss << ", ";
-    stringify_helper(ss, tail...);
+  stringify_append(ss, head);
+  ss << ", ";
+  stringify_helper(ss, tail...);
 }
 
 template <typename... Ts> inline std::string stringify_args(const Ts &... ts) {
-    std::string buffer;
-    llvm::raw_string_ostream ss(buffer);
-    stringify_helper(ss, ts...);
-    return ss.str();
+  std::string buffer;
+  llvm::raw_string_ostream ss(buffer);
+  stringify_helper(ss, ts...);
+  return ss.str();
 }
 
 // Define LLDB_REPRO_INSTR_TRACE to trace to stderr instead of LLDB's log
@@ -81,8 +81,8 @@ template <typename... Ts> inline std::string stringify_args(const Ts &... ts) {
 
 #ifdef LLDB_REPRO_INSTR_TRACE
 inline llvm::raw_ostream &this_thread_id() {
-    size_t tid = std::hash<std::thread::id> {}(std::this_thread::get_id());
-    return llvm::errs().write_hex(tid) << " :: ";
+  size_t tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+  return llvm::errs().write_hex(tid) << " :: ";
 }
 #endif
 
@@ -225,7 +225,7 @@ namespace repro {
 template <class T>
 struct is_trivially_serializable
     : std::integral_constant<bool, std::is_fundamental<T>::value ||
-      std::is_enum<T>::value> {};
+                                       std::is_enum<T>::value> {};
 
 /// Mapping between serialized indices and their corresponding objects.
 ///
@@ -240,43 +240,43 @@ struct is_trivially_serializable
 /// replay code is in place and the actual object is ignored.
 class IndexToObject {
 public:
-    /// Returns an object as a pointer for the given index or nullptr if not
-    /// present in the map.
-    template <typename T> T *GetObjectForIndex(unsigned idx) {
-        assert(idx != 0 && "Cannot get object for sentinel");
-        void *object = GetObjectForIndexImpl(idx);
-        return static_cast<T *>(object);
-    }
+  /// Returns an object as a pointer for the given index or nullptr if not
+  /// present in the map.
+  template <typename T> T *GetObjectForIndex(unsigned idx) {
+    assert(idx != 0 && "Cannot get object for sentinel");
+    void *object = GetObjectForIndexImpl(idx);
+    return static_cast<T *>(object);
+  }
 
-    /// Adds a pointer to an object to the mapping for the given index.
-    template <typename T> T *AddObjectForIndex(unsigned idx, T *object) {
-        AddObjectForIndexImpl(
-            idx, static_cast<void *>(
-                const_cast<typename std::remove_const<T>::type *>(object)));
-        return object;
-    }
+  /// Adds a pointer to an object to the mapping for the given index.
+  template <typename T> T *AddObjectForIndex(unsigned idx, T *object) {
+    AddObjectForIndexImpl(
+        idx, static_cast<void *>(
+                 const_cast<typename std::remove_const<T>::type *>(object)));
+    return object;
+  }
 
-    /// Adds a reference to an object to the mapping for the given index.
-    template <typename T> T &AddObjectForIndex(unsigned idx, T &object) {
-        AddObjectForIndexImpl(
-            idx, static_cast<void *>(
-                const_cast<typename std::remove_const<T>::type *>(&object)));
-        return object;
-    }
+  /// Adds a reference to an object to the mapping for the given index.
+  template <typename T> T &AddObjectForIndex(unsigned idx, T &object) {
+    AddObjectForIndexImpl(
+        idx, static_cast<void *>(
+                 const_cast<typename std::remove_const<T>::type *>(&object)));
+    return object;
+  }
 
-    /// Get all objects sorted by their index.
-    std::vector<void *> GetAllObjects() const;
+  /// Get all objects sorted by their index.
+  std::vector<void *> GetAllObjects() const;
 
 private:
-    /// Helper method that does the actual lookup. The void* result is later cast
-    /// by the caller.
-    void *GetObjectForIndexImpl(unsigned idx);
+  /// Helper method that does the actual lookup. The void* result is later cast
+  /// by the caller.
+  void *GetObjectForIndexImpl(unsigned idx);
 
-    /// Helper method that does the actual insertion.
-    void AddObjectForIndexImpl(unsigned idx, void *object);
+  /// Helper method that does the actual insertion.
+  void AddObjectForIndexImpl(unsigned idx, void *object);
 
-    /// Keeps a mapping between indices and their corresponding object.
-    llvm::DenseMap<unsigned, void *> m_mapping;
+  /// Keeps a mapping between indices and their corresponding object.
+  llvm::DenseMap<unsigned, void *> m_mapping;
 };
 
 /// We need to differentiate between pointers to fundamental and
@@ -290,18 +290,18 @@ struct FundamentalReferenceTag {};
 
 /// Return the deserialization tag for the given type T.
 template <class T> struct serializer_tag {
-    typedef typename std::conditional<std::is_trivially_copyable<T>::value,
-            ValueTag, ReferenceTag>::type type;
+  typedef typename std::conditional<std::is_trivially_copyable<T>::value,
+                                    ValueTag, ReferenceTag>::type type;
 };
 template <class T> struct serializer_tag<T *> {
-    typedef
-    typename std::conditional<std::is_fundamental<T>::value,
-             FundamentalPointerTag, PointerTag>::type type;
+  typedef
+      typename std::conditional<std::is_fundamental<T>::value,
+                                FundamentalPointerTag, PointerTag>::type type;
 };
 template <class T> struct serializer_tag<T &> {
-    typedef typename std::conditional<std::is_fundamental<T>::value,
-            FundamentalReferenceTag, ReferenceTag>::type
-            type;
+  typedef typename std::conditional<std::is_fundamental<T>::value,
+                                    FundamentalReferenceTag, ReferenceTag>::type
+      type;
 };
 
 /// Deserializes data from a buffer. It is used to deserialize function indices
@@ -317,120 +317,118 @@ template <class T> struct serializer_tag<T &> {
 /// its index. This is the job of HandleReplayResult(Void).
 class Deserializer {
 public:
-    Deserializer(llvm::StringRef buffer) : m_buffer(buffer) {}
+  Deserializer(llvm::StringRef buffer) : m_buffer(buffer) {}
 
-    /// Returns true when the buffer has unread data.
-    bool HasData(unsigned size) {
-        return size <= m_buffer.size();
-    }
+  /// Returns true when the buffer has unread data.
+  bool HasData(unsigned size) { return size <= m_buffer.size(); }
 
-    /// Deserialize and interpret value as T.
-    template <typename T> T Deserialize() {
-        T t = Read<T>(typename serializer_tag<T>::type());
+  /// Deserialize and interpret value as T.
+  template <typename T> T Deserialize() {
+    T t = Read<T>(typename serializer_tag<T>::type());
 #ifdef LLDB_REPRO_INSTR_TRACE
-        llvm::errs() << "Deserializing with " << LLVM_PRETTY_FUNCTION << " -> "
-                     << stringify_args(t) << "\n";
+    llvm::errs() << "Deserializing with " << LLVM_PRETTY_FUNCTION << " -> "
+                 << stringify_args(t) << "\n";
 #endif
-        return t;
-    }
+    return t;
+  }
 
-    template <typename T> const T &HandleReplayResult(const T &t) {
-        CheckSequence(Deserialize<unsigned>());
-        unsigned result = Deserialize<unsigned>();
-        if (is_trivially_serializable<T>::value)
-            return t;
-        // We need to make a copy as the original object might go out of scope.
-        return *m_index_to_object.AddObjectForIndex(result, new T(t));
-    }
+  template <typename T> const T &HandleReplayResult(const T &t) {
+    CheckSequence(Deserialize<unsigned>());
+    unsigned result = Deserialize<unsigned>();
+    if (is_trivially_serializable<T>::value)
+      return t;
+    // We need to make a copy as the original object might go out of scope.
+    return *m_index_to_object.AddObjectForIndex(result, new T(t));
+  }
 
-    /// Store the returned value in the index-to-object mapping.
-    template <typename T> T &HandleReplayResult(T &t) {
-        CheckSequence(Deserialize<unsigned>());
-        unsigned result = Deserialize<unsigned>();
-        if (is_trivially_serializable<T>::value)
-            return t;
-        // We need to make a copy as the original object might go out of scope.
-        return *m_index_to_object.AddObjectForIndex(result, new T(t));
-    }
+  /// Store the returned value in the index-to-object mapping.
+  template <typename T> T &HandleReplayResult(T &t) {
+    CheckSequence(Deserialize<unsigned>());
+    unsigned result = Deserialize<unsigned>();
+    if (is_trivially_serializable<T>::value)
+      return t;
+    // We need to make a copy as the original object might go out of scope.
+    return *m_index_to_object.AddObjectForIndex(result, new T(t));
+  }
 
-    /// Store the returned value in the index-to-object mapping.
-    template <typename T> T *HandleReplayResult(T *t) {
-        CheckSequence(Deserialize<unsigned>());
-        unsigned result = Deserialize<unsigned>();
-        if (is_trivially_serializable<T>::value)
-            return t;
-        return m_index_to_object.AddObjectForIndex(result, t);
-    }
+  /// Store the returned value in the index-to-object mapping.
+  template <typename T> T *HandleReplayResult(T *t) {
+    CheckSequence(Deserialize<unsigned>());
+    unsigned result = Deserialize<unsigned>();
+    if (is_trivially_serializable<T>::value)
+      return t;
+    return m_index_to_object.AddObjectForIndex(result, t);
+  }
 
-    /// All returned types are recorded, even when the function returns a void.
-    /// The latter requires special handling.
-    void HandleReplayResultVoid() {
-        CheckSequence(Deserialize<unsigned>());
-        unsigned result = Deserialize<unsigned>();
-        assert(result == 0);
-        (void)result;
-    }
+  /// All returned types are recorded, even when the function returns a void.
+  /// The latter requires special handling.
+  void HandleReplayResultVoid() {
+    CheckSequence(Deserialize<unsigned>());
+    unsigned result = Deserialize<unsigned>();
+    assert(result == 0);
+    (void)result;
+  }
 
-    std::vector<void *> GetAllObjects() const {
-        return m_index_to_object.GetAllObjects();
-    }
+  std::vector<void *> GetAllObjects() const {
+    return m_index_to_object.GetAllObjects();
+  }
 
-    void SetExpectedSequence(unsigned sequence) {
-        m_expected_sequence = sequence;
-    }
+  void SetExpectedSequence(unsigned sequence) {
+    m_expected_sequence = sequence;
+  }
 
 private:
-    template <typename T> T Read(ValueTag) {
-        assert(HasData(sizeof(T)));
-        T t;
-        std::memcpy(reinterpret_cast<char *>(&t), m_buffer.data(), sizeof(T));
-        m_buffer = m_buffer.drop_front(sizeof(T));
-        return t;
-    }
+  template <typename T> T Read(ValueTag) {
+    assert(HasData(sizeof(T)));
+    T t;
+    std::memcpy(reinterpret_cast<char *>(&t), m_buffer.data(), sizeof(T));
+    m_buffer = m_buffer.drop_front(sizeof(T));
+    return t;
+  }
 
-    template <typename T> T Read(PointerTag) {
-        typedef typename std::remove_pointer<T>::type UnderlyingT;
-        return m_index_to_object.template GetObjectForIndex<UnderlyingT>(
-                   Deserialize<unsigned>());
-    }
+  template <typename T> T Read(PointerTag) {
+    typedef typename std::remove_pointer<T>::type UnderlyingT;
+    return m_index_to_object.template GetObjectForIndex<UnderlyingT>(
+        Deserialize<unsigned>());
+  }
 
-    template <typename T> T Read(ReferenceTag) {
-        typedef typename std::remove_reference<T>::type UnderlyingT;
-        // If this is a reference to a fundamental type we just read its value.
-        return *m_index_to_object.template GetObjectForIndex<UnderlyingT>(
-                   Deserialize<unsigned>());
-    }
+  template <typename T> T Read(ReferenceTag) {
+    typedef typename std::remove_reference<T>::type UnderlyingT;
+    // If this is a reference to a fundamental type we just read its value.
+    return *m_index_to_object.template GetObjectForIndex<UnderlyingT>(
+        Deserialize<unsigned>());
+  }
 
-    /// This method is used to parse references to fundamental types. Because
-    /// they're not recorded in the object table we have serialized their value.
-    /// We read its value, allocate a copy on the heap, and return a pointer to
-    /// the copy.
-    template <typename T> T Read(FundamentalPointerTag) {
-        typedef typename std::remove_pointer<T>::type UnderlyingT;
-        return new UnderlyingT(Deserialize<UnderlyingT>());
-    }
+  /// This method is used to parse references to fundamental types. Because
+  /// they're not recorded in the object table we have serialized their value.
+  /// We read its value, allocate a copy on the heap, and return a pointer to
+  /// the copy.
+  template <typename T> T Read(FundamentalPointerTag) {
+    typedef typename std::remove_pointer<T>::type UnderlyingT;
+    return new UnderlyingT(Deserialize<UnderlyingT>());
+  }
 
-    /// This method is used to parse references to fundamental types. Because
-    /// they're not recorded in the object table we have serialized their value.
-    /// We read its value, allocate a copy on the heap, and return a reference to
-    /// the copy.
-    template <typename T> T Read(FundamentalReferenceTag) {
-        // If this is a reference to a fundamental type we just read its value.
-        typedef typename std::remove_reference<T>::type UnderlyingT;
-        return *(new UnderlyingT(Deserialize<UnderlyingT>()));
-    }
+  /// This method is used to parse references to fundamental types. Because
+  /// they're not recorded in the object table we have serialized their value.
+  /// We read its value, allocate a copy on the heap, and return a reference to
+  /// the copy.
+  template <typename T> T Read(FundamentalReferenceTag) {
+    // If this is a reference to a fundamental type we just read its value.
+    typedef typename std::remove_reference<T>::type UnderlyingT;
+    return *(new UnderlyingT(Deserialize<UnderlyingT>()));
+  }
 
-    /// Verify that the given sequence number matches what we expect.
-    void CheckSequence(unsigned sequence);
+  /// Verify that the given sequence number matches what we expect.
+  void CheckSequence(unsigned sequence);
 
-    /// Mapping of indices to objects.
-    IndexToObject m_index_to_object;
+  /// Mapping of indices to objects.
+  IndexToObject m_index_to_object;
 
-    /// Buffer containing the serialized data.
-    llvm::StringRef m_buffer;
+  /// Buffer containing the serialized data.
+  llvm::StringRef m_buffer;
 
-    /// The result's expected sequence number.
-    llvm::Optional<unsigned> m_expected_sequence;
+  /// The result's expected sequence number.
+  llvm::Optional<unsigned> m_expected_sequence;
 };
 
 /// Partial specialization for C-style strings. We read the string value
@@ -449,68 +447,68 @@ template <typename... Remaining> struct DeserializationHelper;
 
 template <typename Head, typename... Tail>
 struct DeserializationHelper<Head, Tail...> {
-    template <typename Result, typename... Deserialized> struct deserialized {
-        static Result doit(Deserializer &deserializer,
-                           Result (*f)(Deserialized..., Head, Tail...),
-                           Deserialized... d) {
-            return DeserializationHelper<Tail...>::
-                   template deserialized<Result, Deserialized..., Head>::doit(
-                       deserializer, f, d..., deserializer.Deserialize<Head>());
-        }
-    };
+  template <typename Result, typename... Deserialized> struct deserialized {
+    static Result doit(Deserializer &deserializer,
+                       Result (*f)(Deserialized..., Head, Tail...),
+                       Deserialized... d) {
+      return DeserializationHelper<Tail...>::
+          template deserialized<Result, Deserialized..., Head>::doit(
+              deserializer, f, d..., deserializer.Deserialize<Head>());
+    }
+  };
 };
 
 template <> struct DeserializationHelper<> {
-    template <typename Result, typename... Deserialized> struct deserialized {
-        static Result doit(Deserializer &deserializer, Result (*f)(Deserialized...),
-                           Deserialized... d) {
-            return f(d...);
-        }
-    };
+  template <typename Result, typename... Deserialized> struct deserialized {
+    static Result doit(Deserializer &deserializer, Result (*f)(Deserialized...),
+                       Deserialized... d) {
+      return f(d...);
+    }
+  };
 };
 
 /// The replayer interface.
 struct Replayer {
-    virtual ~Replayer() {}
-    virtual void operator()(Deserializer &deserializer) const = 0;
+  virtual ~Replayer() {}
+  virtual void operator()(Deserializer &deserializer) const = 0;
 };
 
 /// The default replayer deserializes the arguments and calls the function.
 template <typename Signature> struct DefaultReplayer;
 template <typename Result, typename... Args>
 struct DefaultReplayer<Result(Args...)> : public Replayer {
-    DefaultReplayer(Result (*f)(Args...)) : Replayer(), f(f) {}
+  DefaultReplayer(Result (*f)(Args...)) : Replayer(), f(f) {}
 
-    void operator()(Deserializer &deserializer) const override {
-        Replay(deserializer);
-    }
+  void operator()(Deserializer &deserializer) const override {
+    Replay(deserializer);
+  }
 
-    Result Replay(Deserializer &deserializer) const {
-        return deserializer.HandleReplayResult(
-                   DeserializationHelper<Args...>::template deserialized<Result>::doit(
-                       deserializer, f));
-    }
+  Result Replay(Deserializer &deserializer) const {
+    return deserializer.HandleReplayResult(
+        DeserializationHelper<Args...>::template deserialized<Result>::doit(
+            deserializer, f));
+  }
 
-    Result (*f)(Args...);
+  Result (*f)(Args...);
 };
 
 /// Partial specialization for function returning a void type. It ignores the
 /// (absent) return value.
 template <typename... Args>
 struct DefaultReplayer<void(Args...)> : public Replayer {
-    DefaultReplayer(void (*f)(Args...)) : Replayer(), f(f) {}
+  DefaultReplayer(void (*f)(Args...)) : Replayer(), f(f) {}
 
-    void operator()(Deserializer &deserializer) const override {
-        Replay(deserializer);
-    }
+  void operator()(Deserializer &deserializer) const override {
+    Replay(deserializer);
+  }
 
-    void Replay(Deserializer &deserializer) const {
-        DeserializationHelper<Args...>::template deserialized<void>::doit(
-            deserializer, f);
-        deserializer.HandleReplayResultVoid();
-    }
+  void Replay(Deserializer &deserializer) const {
+    DeserializationHelper<Args...>::template deserialized<void>::doit(
+        deserializer, f);
+    deserializer.HandleReplayResultVoid();
+  }
 
-    void (*f)(Args...);
+  void (*f)(Args...);
 };
 
 /// The registry contains a unique mapping between functions and their ID. The
@@ -518,73 +516,73 @@ struct DefaultReplayer<void(Args...)> : public Replayer {
 /// to be registered with the registry for this to work.
 class Registry {
 private:
-    struct SignatureStr {
-        SignatureStr(llvm::StringRef result = {}, llvm::StringRef scope = {},
-                     llvm::StringRef name = {}, llvm::StringRef args = {})
-            : result(result), scope(scope), name(name), args(args) {}
+  struct SignatureStr {
+    SignatureStr(llvm::StringRef result = {}, llvm::StringRef scope = {},
+                 llvm::StringRef name = {}, llvm::StringRef args = {})
+        : result(result), scope(scope), name(name), args(args) {}
 
-        std::string ToString() const;
+    std::string ToString() const;
 
-        llvm::StringRef result;
-        llvm::StringRef scope;
-        llvm::StringRef name;
-        llvm::StringRef args;
-    };
+    llvm::StringRef result;
+    llvm::StringRef scope;
+    llvm::StringRef name;
+    llvm::StringRef args;
+  };
 
 public:
-    Registry() = default;
-    virtual ~Registry() = default;
+  Registry() = default;
+  virtual ~Registry() = default;
 
-    /// Register a default replayer for a function.
-    template <typename Signature>
-    void Register(Signature *f, llvm::StringRef result = {},
-                  llvm::StringRef scope = {}, llvm::StringRef name = {},
-                  llvm::StringRef args = {}) {
-        DoRegister(uintptr_t(f), std::make_unique<DefaultReplayer<Signature>>(f),
-                   SignatureStr(result, scope, name, args));
-    }
+  /// Register a default replayer for a function.
+  template <typename Signature>
+  void Register(Signature *f, llvm::StringRef result = {},
+                llvm::StringRef scope = {}, llvm::StringRef name = {},
+                llvm::StringRef args = {}) {
+    DoRegister(uintptr_t(f), std::make_unique<DefaultReplayer<Signature>>(f),
+               SignatureStr(result, scope, name, args));
+  }
 
-    /// Register a replayer that invokes a custom function with the same
-    /// signature as the replayed function.
-    template <typename Signature>
-    void Register(Signature *f, Signature *g, llvm::StringRef result = {},
-                  llvm::StringRef scope = {}, llvm::StringRef name = {},
-                  llvm::StringRef args = {}) {
-        DoRegister(uintptr_t(f), std::make_unique<DefaultReplayer<Signature>>(g),
-                   SignatureStr(result, scope, name, args));
-    }
+  /// Register a replayer that invokes a custom function with the same
+  /// signature as the replayed function.
+  template <typename Signature>
+  void Register(Signature *f, Signature *g, llvm::StringRef result = {},
+                llvm::StringRef scope = {}, llvm::StringRef name = {},
+                llvm::StringRef args = {}) {
+    DoRegister(uintptr_t(f), std::make_unique<DefaultReplayer<Signature>>(g),
+               SignatureStr(result, scope, name, args));
+  }
 
-    /// Replay functions from a file.
-    bool Replay(const FileSpec &file);
+  /// Replay functions from a file.
+  bool Replay(const FileSpec &file);
 
-    /// Replay functions from a buffer.
-    bool Replay(llvm::StringRef buffer);
+  /// Replay functions from a buffer.
+  bool Replay(llvm::StringRef buffer);
 
-    /// Replay functions from a deserializer.
-    bool Replay(Deserializer &deserializer);
+  /// Replay functions from a deserializer.
+  bool Replay(Deserializer &deserializer);
 
-    /// Returns the ID for a given function address.
-    unsigned GetID(uintptr_t addr);
+  /// Returns the ID for a given function address.
+  unsigned GetID(uintptr_t addr);
 
-    /// Get the replayer matching the given ID.
-    Replayer *GetReplayer(unsigned id);
+  /// Get the replayer matching the given ID.
+  Replayer *GetReplayer(unsigned id);
 
-    std::string GetSignature(unsigned id);
+  std::string GetSignature(unsigned id);
 
-    void CheckID(unsigned expected, unsigned actual);
+  void CheckID(unsigned expected, unsigned actual);
 
 protected:
-    /// Register the given replayer for a function (and the ID mapping).
-    void DoRegister(uintptr_t RunID, std::unique_ptr<Replayer> replayer,
-                    SignatureStr signature);
+  /// Register the given replayer for a function (and the ID mapping).
+  void DoRegister(uintptr_t RunID, std::unique_ptr<Replayer> replayer,
+                  SignatureStr signature);
 
 private:
-    /// Mapping of function addresses to replayers and their ID.
-    std::map<uintptr_t, std::pair<std::unique_ptr<Replayer>, unsigned>>
-            m_replayers;
+  /// Mapping of function addresses to replayers and their ID.
+  std::map<uintptr_t, std::pair<std::unique_ptr<Replayer>, unsigned>>
+      m_replayers;
 
-    /// Mapping of IDs to replayer instances.
-    std::map<unsigned, std::pair<Replayer *, SignatureStr>> m_ids;
+  /// Mapping of IDs to replayer instances.
+  std::map<unsigned, std::pair<Replayer *, SignatureStr>> m_ids;
 };
 
 /// Maps an object to an index for serialization. Indices are unique and
@@ -594,151 +592,143 @@ private:
 /// the serialized buffer.
 class ObjectToIndex {
 public:
-    template <typename T> unsigned GetIndexForObject(T *t) {
-        return GetIndexForObjectImpl(static_cast<const void *>(t));
-    }
+  template <typename T> unsigned GetIndexForObject(T *t) {
+    return GetIndexForObjectImpl(static_cast<const void *>(t));
+  }
 
 private:
-    unsigned GetIndexForObjectImpl(const void *object);
+  unsigned GetIndexForObjectImpl(const void *object);
 
-    llvm::DenseMap<const void *, unsigned> m_mapping;
+  llvm::DenseMap<const void *, unsigned> m_mapping;
 };
 
 /// Serializes functions, their arguments and their return type to a stream.
 class Serializer {
 public:
-    Serializer(llvm::raw_ostream &stream = llvm::outs()) : m_stream(stream) {}
+  Serializer(llvm::raw_ostream &stream = llvm::outs()) : m_stream(stream) {}
 
-    /// Recursively serialize all the given arguments.
-    template <typename Head, typename... Tail>
-    void SerializeAll(const Head &head, const Tail &... tail) {
-        Serialize(head);
-        SerializeAll(tail...);
-    }
+  /// Recursively serialize all the given arguments.
+  template <typename Head, typename... Tail>
+  void SerializeAll(const Head &head, const Tail &... tail) {
+    Serialize(head);
+    SerializeAll(tail...);
+  }
 
-    void SerializeAll() {
-        m_stream.flush();
-    }
+  void SerializeAll() { m_stream.flush(); }
 
 private:
-    /// Serialize pointers. We need to differentiate between pointers to
-    /// fundamental types (in which case we serialize its value) and pointer to
-    /// objects (in which case we serialize their index).
-    template <typename T> void Serialize(T *t) {
+  /// Serialize pointers. We need to differentiate between pointers to
+  /// fundamental types (in which case we serialize its value) and pointer to
+  /// objects (in which case we serialize their index).
+  template <typename T> void Serialize(T *t) {
 #ifdef LLDB_REPRO_INSTR_TRACE
-        this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
-                         << stringify_args(t) << "\n";
+    this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
+                     << stringify_args(t) << "\n";
 #endif
-        if (std::is_fundamental<T>::value) {
-            Serialize(*t);
-        } else {
-            unsigned idx = m_tracker.GetIndexForObject(t);
-            Serialize(idx);
-        }
+    if (std::is_fundamental<T>::value) {
+      Serialize(*t);
+    } else {
+      unsigned idx = m_tracker.GetIndexForObject(t);
+      Serialize(idx);
     }
+  }
 
-    /// Serialize references. We need to differentiate between references to
-    /// fundamental types (in which case we serialize its value) and references
-    /// to objects (in which case we serialize their index).
-    template <typename T> void Serialize(T &t) {
+  /// Serialize references. We need to differentiate between references to
+  /// fundamental types (in which case we serialize its value) and references
+  /// to objects (in which case we serialize their index).
+  template <typename T> void Serialize(T &t) {
 #ifdef LLDB_REPRO_INSTR_TRACE
-        this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
-                         << stringify_args(t) << "\n";
+    this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
+                     << stringify_args(t) << "\n";
 #endif
-        if (is_trivially_serializable<T>::value) {
-            m_stream.write(reinterpret_cast<const char *>(&t), sizeof(T));
-        } else {
-            unsigned idx = m_tracker.GetIndexForObject(&t);
-            Serialize(idx);
-        }
+    if (is_trivially_serializable<T>::value) {
+      m_stream.write(reinterpret_cast<const char *>(&t), sizeof(T));
+    } else {
+      unsigned idx = m_tracker.GetIndexForObject(&t);
+      Serialize(idx);
     }
+  }
 
-    void Serialize(const void *v) {
-        // FIXME: Support void*
-    }
+  void Serialize(const void *v) {
+    // FIXME: Support void*
+  }
 
-    void Serialize(void *v) {
-        // FIXME: Support void*
-    }
+  void Serialize(void *v) {
+    // FIXME: Support void*
+  }
 
-    void Serialize(const char *t) {
+  void Serialize(const char *t) {
 #ifdef LLDB_REPRO_INSTR_TRACE
-        this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
-                         << stringify_args(t) << "\n";
+    this_thread_id() << "Serializing with " << LLVM_PRETTY_FUNCTION << " -> "
+                     << stringify_args(t) << "\n";
 #endif
-        const size_t size = t ? strlen(t) : std::numeric_limits<size_t>::max();
-        Serialize(size);
-        if (t) {
-            m_stream << t;
-            m_stream.write(0x0);
-        }
+    const size_t size = t ? strlen(t) : std::numeric_limits<size_t>::max();
+    Serialize(size);
+    if (t) {
+      m_stream << t;
+      m_stream.write(0x0);
+    }
+  }
+
+  void Serialize(const char **t) {
+    size_t size = 0;
+    if (!t) {
+      Serialize(size);
+      return;
     }
 
-    void Serialize(const char **t) {
-        size_t size = 0;
-        if (!t) {
-            Serialize(size);
-            return;
-        }
+    // Compute the size of the array.
+    const char *const *temp = t;
+    while (*temp++)
+      size++;
+    Serialize(size);
 
-        // Compute the size of the array.
-        const char *const *temp = t;
-        while (*temp++)
-            size++;
-        Serialize(size);
+    // Serialize the content of the array.
+    while (*t)
+      Serialize(*t++);
+  }
 
-        // Serialize the content of the array.
-        while (*t)
-            Serialize(*t++);
-    }
+  /// Serialization stream.
+  llvm::raw_ostream &m_stream;
 
-    /// Serialization stream.
-    llvm::raw_ostream &m_stream;
-
-    /// Mapping of objects to indices.
-    ObjectToIndex m_tracker;
+  /// Mapping of objects to indices.
+  ObjectToIndex m_tracker;
 }; // namespace repro
 
 class InstrumentationData {
 public:
-    Serializer *GetSerializer() {
-        return m_serializer;
-    }
-    Deserializer *GetDeserializer() {
-        return m_deserializer;
-    }
-    Registry &GetRegistry() {
-        return *m_registry;
-    }
+  Serializer *GetSerializer() { return m_serializer; }
+  Deserializer *GetDeserializer() { return m_deserializer; }
+  Registry &GetRegistry() { return *m_registry; }
 
-    operator bool() {
-        return (m_serializer != nullptr || m_deserializer != nullptr) &&
-               m_registry != nullptr;
-    }
+  operator bool() {
+    return (m_serializer != nullptr || m_deserializer != nullptr) &&
+           m_registry != nullptr;
+  }
 
-    static void Initialize(Serializer &serializer, Registry &registry);
-    static void Initialize(Deserializer &serializer, Registry &registry);
-    static InstrumentationData &Instance();
+  static void Initialize(Serializer &serializer, Registry &registry);
+  static void Initialize(Deserializer &serializer, Registry &registry);
+  static InstrumentationData &Instance();
 
 protected:
-    friend llvm::optional_detail::OptionalStorage<InstrumentationData, true>;
-    friend llvm::Optional<InstrumentationData>;
+  friend llvm::optional_detail::OptionalStorage<InstrumentationData, true>;
+  friend llvm::Optional<InstrumentationData>;
 
-    InstrumentationData()
-        : m_serializer(nullptr), m_deserializer(nullptr), m_registry(nullptr) {}
-    InstrumentationData(Serializer &serializer, Registry &registry)
-        : m_serializer(&serializer), m_deserializer(nullptr),
-          m_registry(&registry) {}
-    InstrumentationData(Deserializer &deserializer, Registry &registry)
-        : m_serializer(nullptr), m_deserializer(&deserializer),
-          m_registry(&registry) {}
+  InstrumentationData()
+      : m_serializer(nullptr), m_deserializer(nullptr), m_registry(nullptr) {}
+  InstrumentationData(Serializer &serializer, Registry &registry)
+      : m_serializer(&serializer), m_deserializer(nullptr),
+        m_registry(&registry) {}
+  InstrumentationData(Deserializer &deserializer, Registry &registry)
+      : m_serializer(nullptr), m_deserializer(&deserializer),
+        m_registry(&registry) {}
 
 private:
-    static llvm::Optional<InstrumentationData> &InstanceImpl();
+  static llvm::Optional<InstrumentationData> &InstanceImpl();
 
-    Serializer *m_serializer;
-    Deserializer *m_deserializer;
-    Registry *m_registry;
+  Serializer *m_serializer;
+  Deserializer *m_deserializer;
+  Registry *m_registry;
 };
 
 struct EmptyArg {};
@@ -757,215 +747,207 @@ struct EmptyArg {};
 /// this class is also used for logging.
 class Recorder {
 public:
-    Recorder();
-    Recorder(llvm::StringRef pretty_func, std::string &&pretty_args = {});
-    ~Recorder();
+  Recorder();
+  Recorder(llvm::StringRef pretty_func, std::string &&pretty_args = {});
+  ~Recorder();
 
-    /// Records a single function call.
-    template <typename Result, typename... FArgs, typename... RArgs>
-    void Record(Serializer &serializer, Registry &registry, Result (*f)(FArgs...),
-                const RArgs &... args) {
-        m_serializer = &serializer;
-        if (!ShouldCapture())
-            return;
+  /// Records a single function call.
+  template <typename Result, typename... FArgs, typename... RArgs>
+  void Record(Serializer &serializer, Registry &registry, Result (*f)(FArgs...),
+              const RArgs &... args) {
+    m_serializer = &serializer;
+    if (!ShouldCapture())
+      return;
 
-        std::lock_guard<std::mutex> lock(g_mutex);
-        unsigned sequence = GetSequenceNumber();
-        unsigned id = registry.GetID(uintptr_t(f));
-
-#ifdef LLDB_REPRO_INSTR_TRACE
-        Log(id);
-#endif
-
-        serializer.SerializeAll(sequence);
-        serializer.SerializeAll(id);
-        serializer.SerializeAll(args...);
-
-        if (std::is_class<typename std::remove_pointer<
-                typename std::remove_reference<Result>::type>::type>::value) {
-            m_result_recorded = false;
-        } else {
-            serializer.SerializeAll(sequence);
-            serializer.SerializeAll(0);
-            m_result_recorded = true;
-        }
-    }
-
-    /// Records a single function call.
-    template <typename... Args>
-    void Record(Serializer &serializer, Registry &registry, void (*f)(Args...),
-                const Args &... args) {
-        m_serializer = &serializer;
-        if (!ShouldCapture())
-            return;
-
-        std::lock_guard<std::mutex> lock(g_mutex);
-        unsigned sequence = GetSequenceNumber();
-        unsigned id = registry.GetID(uintptr_t(f));
+    std::lock_guard<std::mutex> lock(g_mutex);
+    unsigned sequence = GetSequenceNumber();
+    unsigned id = registry.GetID(uintptr_t(f));
 
 #ifdef LLDB_REPRO_INSTR_TRACE
-        Log(id);
+    Log(id);
 #endif
 
-        serializer.SerializeAll(sequence);
-        serializer.SerializeAll(id);
-        serializer.SerializeAll(args...);
+    serializer.SerializeAll(sequence);
+    serializer.SerializeAll(id);
+    serializer.SerializeAll(args...);
 
-        // Record result.
-        serializer.SerializeAll(sequence);
-        serializer.SerializeAll(0);
-        m_result_recorded = true;
+    if (std::is_class<typename std::remove_pointer<
+            typename std::remove_reference<Result>::type>::type>::value) {
+      m_result_recorded = false;
+    } else {
+      serializer.SerializeAll(sequence);
+      serializer.SerializeAll(0);
+      m_result_recorded = true;
     }
+  }
 
-    /// Specializations for the no-argument methods. These are passed an empty
-    /// dummy argument so the same variadic macro can be used. These methods
-    /// strip the arguments before forwarding them.
-    template <typename Result>
-    void Record(Serializer &serializer, Registry &registry, Result (*f)(),
-                const EmptyArg &arg) {
-        Record(serializer, registry, f);
-    }
+  /// Records a single function call.
+  template <typename... Args>
+  void Record(Serializer &serializer, Registry &registry, void (*f)(Args...),
+              const Args &... args) {
+    m_serializer = &serializer;
+    if (!ShouldCapture())
+      return;
 
-    /// Record the result of a function call.
-    template <typename Result>
-    Result RecordResult(Result &&r, bool update_boundary) {
-        // When recording the result from the LLDB_RECORD_RESULT macro, we need to
-        // update the boundary so we capture the copy constructor. However, when
-        // called to record the this pointer of the (copy) constructor, the
-        // boundary should not be toggled, because it is called from the
-        // LLDB_RECORD_CONSTRUCTOR macro, which might be followed by other API
-        // calls.
-        if (update_boundary)
-            UpdateBoundary();
-        if (m_serializer && ShouldCapture()) {
-            std::lock_guard<std::mutex> lock(g_mutex);
-            assert(!m_result_recorded);
-            m_serializer->SerializeAll(GetSequenceNumber());
-            m_serializer->SerializeAll(r);
-            m_result_recorded = true;
-        }
-        return std::forward<Result>(r);
-    }
+    std::lock_guard<std::mutex> lock(g_mutex);
+    unsigned sequence = GetSequenceNumber();
+    unsigned id = registry.GetID(uintptr_t(f));
 
-    template <typename Result, typename T>
-    Result Replay(Deserializer &deserializer, Registry &registry, uintptr_t addr,
-                  bool update_boundary) {
-        deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
-        unsigned actual_id = registry.GetID(addr);
-        unsigned id = deserializer.Deserialize<unsigned>();
-        registry.CheckID(id, actual_id);
-        return ReplayResult<Result>(
-                   static_cast<DefaultReplayer<T> *>(registry.GetReplayer(id))
-                   ->Replay(deserializer),
-                   update_boundary);
-    }
+#ifdef LLDB_REPRO_INSTR_TRACE
+    Log(id);
+#endif
 
-    void Replay(Deserializer &deserializer, Registry &registry, uintptr_t addr) {
-        deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
-        unsigned actual_id = registry.GetID(addr);
-        unsigned id = deserializer.Deserialize<unsigned>();
-        registry.CheckID(id, actual_id);
-        registry.GetReplayer(id)->operator()(deserializer);
-    }
+    serializer.SerializeAll(sequence);
+    serializer.SerializeAll(id);
+    serializer.SerializeAll(args...);
 
-    template <typename Result>
-    Result ReplayResult(Result &&r, bool update_boundary) {
-        if (update_boundary)
-            UpdateBoundary();
-        return std::forward<Result>(r);
-    }
+    // Record result.
+    serializer.SerializeAll(sequence);
+    serializer.SerializeAll(0);
+    m_result_recorded = true;
+  }
 
-    bool ShouldCapture() {
-        return m_local_boundary;
-    }
+  /// Specializations for the no-argument methods. These are passed an empty
+  /// dummy argument so the same variadic macro can be used. These methods
+  /// strip the arguments before forwarding them.
+  template <typename Result>
+  void Record(Serializer &serializer, Registry &registry, Result (*f)(),
+              const EmptyArg &arg) {
+    Record(serializer, registry, f);
+  }
 
-    /// Mark the current thread as a private thread and pretend that everything
-    /// on this thread is behind happening behind the API boundary.
-    static void PrivateThread() {
-        g_global_boundary = true;
+  /// Record the result of a function call.
+  template <typename Result>
+  Result RecordResult(Result &&r, bool update_boundary) {
+    // When recording the result from the LLDB_RECORD_RESULT macro, we need to
+    // update the boundary so we capture the copy constructor. However, when
+    // called to record the this pointer of the (copy) constructor, the
+    // boundary should not be toggled, because it is called from the
+    // LLDB_RECORD_CONSTRUCTOR macro, which might be followed by other API
+    // calls.
+    if (update_boundary)
+      UpdateBoundary();
+    if (m_serializer && ShouldCapture()) {
+      std::lock_guard<std::mutex> lock(g_mutex);
+      assert(!m_result_recorded);
+      m_serializer->SerializeAll(GetSequenceNumber());
+      m_serializer->SerializeAll(r);
+      m_result_recorded = true;
     }
+    return std::forward<Result>(r);
+  }
+
+  template <typename Result, typename T>
+  Result Replay(Deserializer &deserializer, Registry &registry, uintptr_t addr,
+                bool update_boundary) {
+    deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
+    unsigned actual_id = registry.GetID(addr);
+    unsigned id = deserializer.Deserialize<unsigned>();
+    registry.CheckID(id, actual_id);
+    return ReplayResult<Result>(
+        static_cast<DefaultReplayer<T> *>(registry.GetReplayer(id))
+            ->Replay(deserializer),
+        update_boundary);
+  }
+
+  void Replay(Deserializer &deserializer, Registry &registry, uintptr_t addr) {
+    deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
+    unsigned actual_id = registry.GetID(addr);
+    unsigned id = deserializer.Deserialize<unsigned>();
+    registry.CheckID(id, actual_id);
+    registry.GetReplayer(id)->operator()(deserializer);
+  }
+
+  template <typename Result>
+  Result ReplayResult(Result &&r, bool update_boundary) {
+    if (update_boundary)
+      UpdateBoundary();
+    return std::forward<Result>(r);
+  }
+
+  bool ShouldCapture() { return m_local_boundary; }
+
+  /// Mark the current thread as a private thread and pretend that everything
+  /// on this thread is behind happening behind the API boundary.
+  static void PrivateThread() { g_global_boundary = true; }
 
 private:
-    static unsigned GetNextSequenceNumber() {
-        return g_sequence++;
-    }
-    unsigned GetSequenceNumber() const;
+  static unsigned GetNextSequenceNumber() { return g_sequence++; }
+  unsigned GetSequenceNumber() const;
 
-    template <typename T> friend struct replay;
-    void UpdateBoundary() {
-        if (m_local_boundary)
-            g_global_boundary = false;
-    }
+  template <typename T> friend struct replay;
+  void UpdateBoundary() {
+    if (m_local_boundary)
+      g_global_boundary = false;
+  }
 
 #ifdef LLDB_REPRO_INSTR_TRACE
-    void Log(unsigned id) {
-        this_thread_id() << "Recording " << id << ": " << m_pretty_func << " ("
-                         << m_pretty_args << ")\n";
-    }
+  void Log(unsigned id) {
+    this_thread_id() << "Recording " << id << ": " << m_pretty_func << " ("
+                     << m_pretty_args << ")\n";
+  }
 #endif
 
-    Serializer *m_serializer;
+  Serializer *m_serializer;
 
-    /// Pretty function for logging.
-    llvm::StringRef m_pretty_func;
-    std::string m_pretty_args;
+  /// Pretty function for logging.
+  llvm::StringRef m_pretty_func;
+  std::string m_pretty_args;
 
-    /// Whether this function call was the one crossing the API boundary.
-    bool m_local_boundary;
+  /// Whether this function call was the one crossing the API boundary.
+  bool m_local_boundary;
 
-    /// Whether the return value was recorded explicitly.
-    bool m_result_recorded;
+  /// Whether the return value was recorded explicitly.
+  bool m_result_recorded;
 
-    /// The sequence number for this pair of function and result.
-    unsigned m_sequence;
+  /// The sequence number for this pair of function and result.
+  unsigned m_sequence;
 
-    /// Whether we're currently across the API boundary.
-    static thread_local bool g_global_boundary;
+  /// Whether we're currently across the API boundary.
+  static thread_local bool g_global_boundary;
 
-    /// Global mutex to protect concurrent access.
-    static std::mutex g_mutex;
+  /// Global mutex to protect concurrent access.
+  static std::mutex g_mutex;
 
-    /// Unique, monotonically increasing sequence number.
-    static std::atomic<unsigned> g_sequence;
+  /// Unique, monotonically increasing sequence number.
+  static std::atomic<unsigned> g_sequence;
 };
 
 /// To be used as the "Runtime ID" of a constructor. It also invokes the
 /// constructor when called.
 template <typename Signature> struct construct;
 template <typename Class, typename... Args> struct construct<Class(Args...)> {
-    static Class *handle(lldb_private::repro::InstrumentationData data,
-                         lldb_private::repro::Recorder &recorder, Class *c,
-                         const EmptyArg &) {
-        return handle(data, recorder, c);
+  static Class *handle(lldb_private::repro::InstrumentationData data,
+                       lldb_private::repro::Recorder &recorder, Class *c,
+                       const EmptyArg &) {
+    return handle(data, recorder, c);
+  }
+
+  static Class *handle(lldb_private::repro::InstrumentationData data,
+                       lldb_private::repro::Recorder &recorder, Class *c,
+                       Args... args) {
+    if (!data)
+      return nullptr;
+
+    if (Serializer *serializer = data.GetSerializer()) {
+      recorder.Record(*serializer, data.GetRegistry(), &record, args...);
+      recorder.RecordResult(c, false);
+    } else if (Deserializer *deserializer = data.GetDeserializer()) {
+      if (recorder.ShouldCapture()) {
+        replay(recorder, *deserializer, data.GetRegistry());
+      }
     }
 
-    static Class *handle(lldb_private::repro::InstrumentationData data,
-                         lldb_private::repro::Recorder &recorder, Class *c,
-                         Args... args) {
-        if (!data)
-            return nullptr;
+    return nullptr;
+  }
 
-        if (Serializer *serializer = data.GetSerializer()) {
-            recorder.Record(*serializer, data.GetRegistry(), &record, args...);
-            recorder.RecordResult(c, false);
-        } else if (Deserializer *deserializer = data.GetDeserializer()) {
-            if (recorder.ShouldCapture()) {
-                replay(recorder, *deserializer, data.GetRegistry());
-            }
-        }
+  static Class *record(Args... args) { return new Class(args...); }
 
-        return nullptr;
-    }
-
-    static Class *record(Args... args) {
-        return new Class(args...);
-    }
-
-    static Class *replay(Recorder &recorder, Deserializer &deserializer,
-                         Registry &registry) {
-        return recorder.Replay<Class *, Class *(Args...)>(
-                   deserializer, registry, uintptr_t(&record), false);
-    }
+  static Class *replay(Recorder &recorder, Deserializer &deserializer,
+                       Registry &registry) {
+    return recorder.Replay<Class *, Class *(Args...)>(
+        deserializer, registry, uintptr_t(&record), false);
+  }
 };
 
 /// To be used as the "Runtime ID" of a member function. It also invokes the
@@ -973,90 +955,78 @@ template <typename Class, typename... Args> struct construct<Class(Args...)> {
 template <typename Signature> struct invoke;
 template <typename Result, typename Class, typename... Args>
 struct invoke<Result (Class::*)(Args...)> {
-    template <Result (Class::*m)(Args...)> struct method {
-        static Result record(Class *c, Args... args) {
-            return (c->*m)(args...);
-        }
+  template <Result (Class::*m)(Args...)> struct method {
+    static Result record(Class *c, Args... args) { return (c->*m)(args...); }
 
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry) {
-            return recorder.Replay<Result, Result(Class *, Args...)>(
-                       deserializer, registry, uintptr_t(&record), true);
-        }
-    };
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry) {
+      return recorder.Replay<Result, Result(Class *, Args...)>(
+          deserializer, registry, uintptr_t(&record), true);
+    }
+  };
 };
 
 template <typename Class, typename... Args>
 struct invoke<void (Class::*)(Args...)> {
-    template <void (Class::*m)(Args...)> struct method {
-        static void record(Class *c, Args... args) {
-            (c->*m)(args...);
-        }
-        static void replay(Recorder &recorder, Deserializer &deserializer,
-                           Registry &registry) {
-            recorder.Replay(deserializer, registry, uintptr_t(&record));
-        }
-    };
+  template <void (Class::*m)(Args...)> struct method {
+    static void record(Class *c, Args... args) { (c->*m)(args...); }
+    static void replay(Recorder &recorder, Deserializer &deserializer,
+                       Registry &registry) {
+      recorder.Replay(deserializer, registry, uintptr_t(&record));
+    }
+  };
 };
 
 template <typename Result, typename Class, typename... Args>
 struct invoke<Result (Class::*)(Args...) const> {
-    template <Result (Class::*m)(Args...) const> struct method {
-        static Result record(Class *c, Args... args) {
-            return (c->*m)(args...);
-        }
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry) {
-            return recorder.Replay<Result, Result(Class *, Args...)>(
-                       deserializer, registry, uintptr_t(&record), true);
-        }
-    };
+  template <Result (Class::*m)(Args...) const> struct method {
+    static Result record(Class *c, Args... args) { return (c->*m)(args...); }
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry) {
+      return recorder.Replay<Result, Result(Class *, Args...)>(
+          deserializer, registry, uintptr_t(&record), true);
+    }
+  };
 };
 
 template <typename Class, typename... Args>
 struct invoke<void (Class::*)(Args...) const> {
-    template <void (Class::*m)(Args...) const> struct method {
-        static void record(Class *c, Args... args) {
-            return (c->*m)(args...);
-        }
-        static void replay(Recorder &recorder, Deserializer &deserializer,
-                           Registry &registry) {
-            recorder.Replay(deserializer, registry, uintptr_t(&record));
-        }
-    };
+  template <void (Class::*m)(Args...) const> struct method {
+    static void record(Class *c, Args... args) { return (c->*m)(args...); }
+    static void replay(Recorder &recorder, Deserializer &deserializer,
+                       Registry &registry) {
+      recorder.Replay(deserializer, registry, uintptr_t(&record));
+    }
+  };
 };
 
 template <typename Signature> struct replay;
 
 template <typename Result, typename Class, typename... Args>
 struct replay<Result (Class::*)(Args...)> {
-    template <Result (Class::*m)(Args...)> struct method {};
+  template <Result (Class::*m)(Args...)> struct method {};
 };
 
 template <typename Result, typename... Args>
 struct invoke<Result (*)(Args...)> {
-    template <Result (*m)(Args...)> struct method {
-        static Result record(Args... args) {
-            return (*m)(args...);
-        }
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry) {
-            return recorder.Replay<Result, Result(Args...)>(deserializer, registry,
-                    uintptr_t(&record), true);
-        }
-    };
+  template <Result (*m)(Args...)> struct method {
+    static Result record(Args... args) { return (*m)(args...); }
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry) {
+      return recorder.Replay<Result, Result(Args...)>(deserializer, registry,
+                                                      uintptr_t(&record), true);
+    }
+  };
 };
 
 template <typename... Args> struct invoke<void (*)(Args...)> {
-    template <void (*m)(Args...)> struct method {
-        static void record(Args... args) {
-            return (*m)(args...);
-        }
-        static void replay(Recorder &recorder, Deserializer &deserializer,
-                           Registry &registry) {
-            recorder.Replay(deserializer, registry, uintptr_t(&record));
-        }
-    };
+  template <void (*m)(Args...)> struct method {
+    static void record(Args... args) { return (*m)(args...); }
+    static void replay(Recorder &recorder, Deserializer &deserializer,
+                       Registry &registry) {
+      recorder.Replay(deserializer, registry, uintptr_t(&record));
+    }
+  };
 };
 
 /// Special handling for functions returning strings as (char*, size_t).
@@ -1074,65 +1044,65 @@ template <typename... Args> struct invoke<void (*)(Args...)> {
 template <typename Signature> struct invoke_char_ptr;
 template <typename Result, typename Class, typename... Args>
 struct invoke_char_ptr<Result (Class::*)(Args...) const> {
-    template <Result (Class::*m)(Args...) const> struct method {
-        static Result record(Class *c, char *s, size_t l) {
-            char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
-            return (c->*m)(buffer, l);
-        }
+  template <Result (Class::*m)(Args...) const> struct method {
+    static Result record(Class *c, char *s, size_t l) {
+      char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
+      return (c->*m)(buffer, l);
+    }
 
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry, char *str) {
-            deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
-            deserializer.Deserialize<unsigned>();
-            Class *c = deserializer.Deserialize<Class *>();
-            deserializer.Deserialize<const char *>();
-            size_t l = deserializer.Deserialize<size_t>();
-            return recorder.ReplayResult(
-                       std::move(deserializer.HandleReplayResult((c->*m)(str, l))), true);
-        }
-    };
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry, char *str) {
+      deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
+      deserializer.Deserialize<unsigned>();
+      Class *c = deserializer.Deserialize<Class *>();
+      deserializer.Deserialize<const char *>();
+      size_t l = deserializer.Deserialize<size_t>();
+      return recorder.ReplayResult(
+          std::move(deserializer.HandleReplayResult((c->*m)(str, l))), true);
+    }
+  };
 };
 
 template <typename Signature> struct invoke_char_ptr;
 template <typename Result, typename Class, typename... Args>
 struct invoke_char_ptr<Result (Class::*)(Args...)> {
-    template <Result (Class::*m)(Args...)> struct method {
-        static Result record(Class *c, char *s, size_t l) {
-            char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
-            return (c->*m)(buffer, l);
-        }
+  template <Result (Class::*m)(Args...)> struct method {
+    static Result record(Class *c, char *s, size_t l) {
+      char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
+      return (c->*m)(buffer, l);
+    }
 
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry, char *str) {
-            deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
-            deserializer.Deserialize<unsigned>();
-            Class *c = deserializer.Deserialize<Class *>();
-            deserializer.Deserialize<const char *>();
-            size_t l = deserializer.Deserialize<size_t>();
-            return recorder.ReplayResult(
-                       std::move(deserializer.HandleReplayResult((c->*m)(str, l))), true);
-        }
-    };
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry, char *str) {
+      deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
+      deserializer.Deserialize<unsigned>();
+      Class *c = deserializer.Deserialize<Class *>();
+      deserializer.Deserialize<const char *>();
+      size_t l = deserializer.Deserialize<size_t>();
+      return recorder.ReplayResult(
+          std::move(deserializer.HandleReplayResult((c->*m)(str, l))), true);
+    }
+  };
 };
 
 template <typename Result, typename... Args>
 struct invoke_char_ptr<Result (*)(Args...)> {
-    template <Result (*m)(Args...)> struct method {
-        static Result record(char *s, size_t l) {
-            char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
-            return (*m)(buffer, l);
-        }
+  template <Result (*m)(Args...)> struct method {
+    static Result record(char *s, size_t l) {
+      char *buffer = reinterpret_cast<char *>(calloc(l, sizeof(char)));
+      return (*m)(buffer, l);
+    }
 
-        static Result replay(Recorder &recorder, Deserializer &deserializer,
-                             Registry &registry, char *str) {
-            deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
-            deserializer.Deserialize<unsigned>();
-            deserializer.Deserialize<const char *>();
-            size_t l = deserializer.Deserialize<size_t>();
-            return recorder.ReplayResult(
-                       std::move(deserializer.HandleReplayResult((*m)(str, l))), true);
-        }
-    };
+    static Result replay(Recorder &recorder, Deserializer &deserializer,
+                         Registry &registry, char *str) {
+      deserializer.SetExpectedSequence(deserializer.Deserialize<unsigned>());
+      deserializer.Deserialize<unsigned>();
+      deserializer.Deserialize<const char *>();
+      size_t l = deserializer.Deserialize<size_t>();
+      return recorder.ReplayResult(
+          std::move(deserializer.HandleReplayResult((*m)(str, l))), true);
+    }
+  };
 };
 /// }
 

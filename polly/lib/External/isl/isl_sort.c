@@ -23,9 +23,9 @@
  */
 
 #include <errno.h>
-#include <string.h>
-#include <stdlib.h>
 #include <isl_sort.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MID(lo, hi) (lo + ((hi - lo) >> 1))
 
@@ -49,109 +49,106 @@
  * proven to be beneficial.
  */
 
-static void
-msort (void *array, void *buf, size_t low, size_t high, size_t size,
-       int (* compare) (const void *, const void *, void *), void *arg)
-{
-    char *a1, *al, *am, *ah, *ls, *hs, *lo, *hi, *b;
-    size_t copied = 0;
-    size_t mid;
+static void msort(void *array, void *buf, size_t low, size_t high, size_t size,
+                  int (*compare)(const void *, const void *, void *),
+                  void *arg) {
+  char *a1, *al, *am, *ah, *ls, *hs, *lo, *hi, *b;
+  size_t copied = 0;
+  size_t mid;
 
-    mid = MID (low, high);
+  mid = MID(low, high);
 
-    if (mid + 1 < high)
-        msort (array, buf, mid + 1, high, size, compare, arg);
+  if (mid + 1 < high)
+    msort(array, buf, mid + 1, high, size, compare, arg);
 
-    if (mid > low)
-        msort (array, buf, low, mid, size, compare, arg);
+  if (mid > low)
+    msort(array, buf, low, mid, size, compare, arg);
 
-    ah = ((char *) array) + ((high + 1) * size);
-    am = ((char *) array) + ((mid + 1) * size);
-    a1 = al = ((char *) array) + (low * size);
+  ah = ((char *)array) + ((high + 1) * size);
+  am = ((char *)array) + ((mid + 1) * size);
+  a1 = al = ((char *)array) + (low * size);
 
-    b = (char *) buf;
-    lo = al;
-    hi = am;
+  b = (char *)buf;
+  lo = al;
+  hi = am;
 
-    do {
-        ls = lo;
-        hs = hi;
+  do {
+    ls = lo;
+    hs = hi;
 
-        if (lo > al || hi > am) {
-            /* our last loop already compared lo & hi and found lo <= hi */
-            lo += size;
-        }
+    if (lo > al || hi > am) {
+      /* our last loop already compared lo & hi and found lo <= hi */
+      lo += size;
+    }
 
-        while (lo < am && compare (lo, hi, arg) <= 0)
-            lo += size;
-
-        if (lo < am) {
-            if (copied == 0) {
-                /* avoid copying the leading items */
-                a1 = lo;
-                ls = lo;
-            }
-
-            /* our last compare tells us hi < lo */
-            hi += size;
-
-            while (hi < ah && compare (hi, lo, arg) < 0)
-                hi += size;
-
-            if (lo > ls) {
-                memcpy (b, ls, lo - ls);
-                copied += (lo - ls);
-                b += (lo - ls);
-            }
-
-            memcpy (b, hs, hi - hs);
-            copied += (hi - hs);
-            b += (hi - hs);
-        } else if (copied) {
-            memcpy (b, ls, lo - ls);
-            copied += (lo - ls);
-            b += (lo - ls);
-
-            /* copy everything we needed to re-order back into array */
-            memcpy (a1, buf, copied);
-            return;
-        } else {
-            /* everything already in order */
-            return;
-        }
-    } while (hi < ah);
+    while (lo < am && compare(lo, hi, arg) <= 0)
+      lo += size;
 
     if (lo < am) {
-        memcpy (b, lo, am - lo);
-        copied += (am - lo);
-    }
+      if (copied == 0) {
+        /* avoid copying the leading items */
+        a1 = lo;
+        ls = lo;
+      }
 
-    memcpy (a1, buf, copied);
+      /* our last compare tells us hi < lo */
+      hi += size;
+
+      while (hi < ah && compare(hi, lo, arg) < 0)
+        hi += size;
+
+      if (lo > ls) {
+        memcpy(b, ls, lo - ls);
+        copied += (lo - ls);
+        b += (lo - ls);
+      }
+
+      memcpy(b, hs, hi - hs);
+      copied += (hi - hs);
+      b += (hi - hs);
+    } else if (copied) {
+      memcpy(b, ls, lo - ls);
+      copied += (lo - ls);
+      b += (lo - ls);
+
+      /* copy everything we needed to re-order back into array */
+      memcpy(a1, buf, copied);
+      return;
+    } else {
+      /* everything already in order */
+      return;
+    }
+  } while (hi < ah);
+
+  if (lo < am) {
+    memcpy(b, lo, am - lo);
+    copied += (am - lo);
+  }
+
+  memcpy(a1, buf, copied);
 }
 
-static int
-MergeSort (void *base, size_t nmemb, size_t size,
-           int (* compare) (const void *, const void *, void *), void *arg)
-{
-    void *tmp;
+static int MergeSort(void *base, size_t nmemb, size_t size,
+                     int (*compare)(const void *, const void *, void *),
+                     void *arg) {
+  void *tmp;
 
-    if (nmemb < 2)
-        return 0;
-
-    if (!(tmp = malloc (nmemb * size))) {
-        errno = ENOMEM;
-        return -1;
-    }
-
-    msort (base, tmp, 0, nmemb - 1, size, compare, arg);
-
-    free (tmp);
-
+  if (nmemb < 2)
     return 0;
+
+  if (!(tmp = malloc(nmemb * size))) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  msort(base, tmp, 0, nmemb - 1, size, compare, arg);
+
+  free(tmp);
+
+  return 0;
 }
 
 int isl_sort(void *const pbase, size_t total_elems, size_t size,
-             int (*cmp)(const void *, const void *, void *arg), void *arg)
-{
-    return MergeSort (pbase, total_elems, size, cmp, arg);
+             int (*cmp)(const void *, const void *, void *arg), void *arg) {
+  return MergeSort(pbase, total_elems, size, cmp, arg);
 }

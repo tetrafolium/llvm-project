@@ -30,56 +30,54 @@ using namespace llvm;
 namespace {
 class PseudoProbeInserter : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
-    PseudoProbeInserter() : MachineFunctionPass(ID) {
-        initializePseudoProbeInserterPass(*PassRegistry::getPassRegistry());
-    }
+  PseudoProbeInserter() : MachineFunctionPass(ID) {
+    initializePseudoProbeInserterPass(*PassRegistry::getPassRegistry());
+  }
 
-    StringRef getPassName() const override {
-        return "Pseudo Probe Inserter";
-    }
+  StringRef getPassName() const override { return "Pseudo Probe Inserter"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override {
-        const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
-        bool Changed = false;
-        for (MachineBasicBlock &MBB : MF) {
-            for (MachineInstr &MI : MBB) {
-                if (MI.isCall()) {
-                    if (DILocation *DL = MI.getDebugLoc()) {
-                        auto Value = DL->getDiscriminator();
-                        if (DILocation::isPseudoProbeDiscriminator(Value)) {
-                            BuildMI(MBB, MI, DL, TII->get(TargetOpcode::PSEUDO_PROBE))
-                            .addImm(getFuncGUID(MF.getFunction().getParent(), DL))
-                            .addImm(
-                                PseudoProbeDwarfDiscriminator::extractProbeIndex(Value))
-                            .addImm(
-                                PseudoProbeDwarfDiscriminator::extractProbeType(Value))
-                            .addImm(PseudoProbeDwarfDiscriminator::extractProbeAttributes(
-                                        Value));
-                            Changed = true;
-                        }
-                    }
-                }
+  bool runOnMachineFunction(MachineFunction &MF) override {
+    const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+    bool Changed = false;
+    for (MachineBasicBlock &MBB : MF) {
+      for (MachineInstr &MI : MBB) {
+        if (MI.isCall()) {
+          if (DILocation *DL = MI.getDebugLoc()) {
+            auto Value = DL->getDiscriminator();
+            if (DILocation::isPseudoProbeDiscriminator(Value)) {
+              BuildMI(MBB, MI, DL, TII->get(TargetOpcode::PSEUDO_PROBE))
+                  .addImm(getFuncGUID(MF.getFunction().getParent(), DL))
+                  .addImm(
+                      PseudoProbeDwarfDiscriminator::extractProbeIndex(Value))
+                  .addImm(
+                      PseudoProbeDwarfDiscriminator::extractProbeType(Value))
+                  .addImm(PseudoProbeDwarfDiscriminator::extractProbeAttributes(
+                      Value));
+              Changed = true;
             }
+          }
         }
-
-        return Changed;
+      }
     }
+
+    return Changed;
+  }
 
 private:
-    uint64_t getFuncGUID(Module *M, DILocation *DL) {
-        auto *SP = DL->getScope()->getSubprogram();
-        auto Name = SP->getLinkageName();
-        if (Name.empty())
-            Name = SP->getName();
-        return Function::getGUID(Name);
-    }
+  uint64_t getFuncGUID(Module *M, DILocation *DL) {
+    auto *SP = DL->getScope()->getSubprogram();
+    auto Name = SP->getLinkageName();
+    if (Name.empty())
+      Name = SP->getName();
+    return Function::getGUID(Name);
+  }
 };
 } // namespace
 
@@ -93,5 +91,5 @@ INITIALIZE_PASS_END(PseudoProbeInserter, DEBUG_TYPE,
                     false, false)
 
 FunctionPass *llvm::createPseudoProbeInserter() {
-    return new PseudoProbeInserter();
+  return new PseudoProbeInserter();
 }

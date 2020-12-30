@@ -18,14 +18,10 @@ using namespace llvm;
 //  raw_os_ostream
 //===----------------------------------------------------------------------===//
 
-raw_os_ostream::~raw_os_ostream() {
-    flush();
-}
+raw_os_ostream::~raw_os_ostream() { flush(); }
 
 void raw_os_ostream::write_impl(const char *Ptr, size_t Size) {
-    OS.write(Ptr, Size);
+  OS.write(Ptr, Size);
 }
 
-uint64_t raw_os_ostream::current_pos() const {
-    return OS.tellp();
-}
+uint64_t raw_os_ostream::current_pos() const { return OS.tellp(); }

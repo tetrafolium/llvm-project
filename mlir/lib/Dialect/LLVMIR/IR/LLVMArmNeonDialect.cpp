@@ -21,10 +21,10 @@
 using namespace mlir;
 
 void LLVM::LLVMArmNeonDialect::initialize() {
-    addOperations<
+  addOperations<
 #define GET_OP_LIST
 #include "mlir/Dialect/LLVMIR/LLVMArmNeon.cpp.inc"
-    >();
+      >();
 }
 
 #define GET_OP_CLASSES

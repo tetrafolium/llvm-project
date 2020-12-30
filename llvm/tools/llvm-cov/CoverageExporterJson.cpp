@@ -62,187 +62,184 @@ using namespace llvm;
 
 namespace {
 
-// The JSON library accepts int64_t, but profiling counts are stored as uint64_t.
-// Therefore we need to explicitly convert from unsigned to signed, since a naive
-// cast is implementation-defined behavior when the unsigned value cannot be
-// represented as a signed value. We choose to clamp the values to preserve the
-// invariant that counts are always >= 0.
+// The JSON library accepts int64_t, but profiling counts are stored as
+// uint64_t. Therefore we need to explicitly convert from unsigned to signed,
+// since a naive cast is implementation-defined behavior when the unsigned value
+// cannot be represented as a signed value. We choose to clamp the values to
+// preserve the invariant that counts are always >= 0.
 int64_t clamp_uint64_to_int64(uint64_t u) {
-    return std::min(u, static_cast<uint64_t>(std::numeric_limits<int64_t>::max()));
+  return std::min(u,
+                  static_cast<uint64_t>(std::numeric_limits<int64_t>::max()));
 }
 
 json::Array renderSegment(const coverage::CoverageSegment &Segment) {
-    return json::Array({Segment.Line, Segment.Col,
-                        clamp_uint64_to_int64(Segment.Count), Segment.HasCount,
-                        Segment.IsRegionEntry, Segment.IsGapRegion});
+  return json::Array({Segment.Line, Segment.Col,
+                      clamp_uint64_to_int64(Segment.Count), Segment.HasCount,
+                      Segment.IsRegionEntry, Segment.IsGapRegion});
 }
 
 json::Array renderRegion(const coverage::CountedRegion &Region) {
-    return json::Array({Region.LineStart, Region.ColumnStart, Region.LineEnd,
-                        Region.ColumnEnd, clamp_uint64_to_int64(Region.ExecutionCount),
-                        Region.FileID, Region.ExpandedFileID,
-                        int64_t(Region.Kind)});
+  return json::Array(
+      {Region.LineStart, Region.ColumnStart, Region.LineEnd, Region.ColumnEnd,
+       clamp_uint64_to_int64(Region.ExecutionCount), Region.FileID,
+       Region.ExpandedFileID, int64_t(Region.Kind)});
 }
 
 json::Array renderRegions(ArrayRef<coverage::CountedRegion> Regions) {
-    json::Array RegionArray;
-    for (const auto &Region : Regions)
-        RegionArray.push_back(renderRegion(Region));
-    return RegionArray;
+  json::Array RegionArray;
+  for (const auto &Region : Regions)
+    RegionArray.push_back(renderRegion(Region));
+  return RegionArray;
 }
 
 json::Object renderExpansion(const coverage::ExpansionRecord &Expansion) {
-    return json::Object(
-    {   {"filenames", json::Array(Expansion.Function.Filenames)},
-        // Mark the beginning and end of this expansion in the source file.
-        {"source_region", renderRegion(Expansion.Region)},
-        // Enumerate the coverage information for the expansion.
-        {"target_regions", renderRegions(Expansion.Function.CountedRegions)}});
+  return json::Object(
+      {{"filenames", json::Array(Expansion.Function.Filenames)},
+       // Mark the beginning and end of this expansion in the source file.
+       {"source_region", renderRegion(Expansion.Region)},
+       // Enumerate the coverage information for the expansion.
+       {"target_regions", renderRegions(Expansion.Function.CountedRegions)}});
 }
 
 json::Object renderSummary(const FileCoverageSummary &Summary) {
-    return json::Object(
-    {   {   "lines",
-            json::Object({{"count", int64_t(Summary.LineCoverage.getNumLines())},
-                {"covered", int64_t(Summary.LineCoverage.getCovered())},
-                {"percent", Summary.LineCoverage.getPercentCovered()}})
-        },
-        {   "functions",
-            json::Object(
-            {   {"count", int64_t(Summary.FunctionCoverage.getNumFunctions())},
-                {"covered", int64_t(Summary.FunctionCoverage.getExecuted())},
-                {"percent", Summary.FunctionCoverage.getPercentCovered()}})
-        },
-        {   "instantiations",
-            json::Object(
-            {   {   "count",
-                    int64_t(Summary.InstantiationCoverage.getNumFunctions())
-                },
-                {"covered", int64_t(Summary.InstantiationCoverage.getExecuted())},
-                {"percent", Summary.InstantiationCoverage.getPercentCovered()}})
-        },
-        {   "regions",
-            json::Object(
-            {   {"count", int64_t(Summary.RegionCoverage.getNumRegions())},
-                {"covered", int64_t(Summary.RegionCoverage.getCovered())},
-                {   "notcovered", int64_t(Summary.RegionCoverage.getNumRegions() -
-                                          Summary.RegionCoverage.getCovered())
-                },
-                {"percent", Summary.RegionCoverage.getPercentCovered()}})
-        }});
+  return json::Object(
+      {{"lines",
+        json::Object({{"count", int64_t(Summary.LineCoverage.getNumLines())},
+                      {"covered", int64_t(Summary.LineCoverage.getCovered())},
+                      {"percent", Summary.LineCoverage.getPercentCovered()}})},
+       {"functions",
+        json::Object(
+            {{"count", int64_t(Summary.FunctionCoverage.getNumFunctions())},
+             {"covered", int64_t(Summary.FunctionCoverage.getExecuted())},
+             {"percent", Summary.FunctionCoverage.getPercentCovered()}})},
+       {"instantiations",
+        json::Object(
+            {{"count",
+              int64_t(Summary.InstantiationCoverage.getNumFunctions())},
+             {"covered", int64_t(Summary.InstantiationCoverage.getExecuted())},
+             {"percent", Summary.InstantiationCoverage.getPercentCovered()}})},
+       {"regions",
+        json::Object(
+            {{"count", int64_t(Summary.RegionCoverage.getNumRegions())},
+             {"covered", int64_t(Summary.RegionCoverage.getCovered())},
+             {"notcovered", int64_t(Summary.RegionCoverage.getNumRegions() -
+                                    Summary.RegionCoverage.getCovered())},
+             {"percent", Summary.RegionCoverage.getPercentCovered()}})}});
 }
 
 json::Array renderFileExpansions(const coverage::CoverageData &FileCoverage,
                                  const FileCoverageSummary &FileReport) {
-    json::Array ExpansionArray;
-    for (const auto &Expansion : FileCoverage.getExpansions())
-        ExpansionArray.push_back(renderExpansion(Expansion));
-    return ExpansionArray;
+  json::Array ExpansionArray;
+  for (const auto &Expansion : FileCoverage.getExpansions())
+    ExpansionArray.push_back(renderExpansion(Expansion));
+  return ExpansionArray;
 }
 
 json::Array renderFileSegments(const coverage::CoverageData &FileCoverage,
                                const FileCoverageSummary &FileReport) {
-    json::Array SegmentArray;
-    for (const auto &Segment : FileCoverage)
-        SegmentArray.push_back(renderSegment(Segment));
-    return SegmentArray;
+  json::Array SegmentArray;
+  for (const auto &Segment : FileCoverage)
+    SegmentArray.push_back(renderSegment(Segment));
+  return SegmentArray;
 }
 
 json::Object renderFile(const coverage::CoverageMapping &Coverage,
                         const std::string &Filename,
                         const FileCoverageSummary &FileReport,
                         const CoverageViewOptions &Options) {
-    json::Object File({{"filename", Filename}});
-    if (!Options.ExportSummaryOnly) {
-        // Calculate and render detailed coverage information for given file.
-        auto FileCoverage = Coverage.getCoverageForFile(Filename);
-        File["segments"] = renderFileSegments(FileCoverage, FileReport);
-        if (!Options.SkipExpansions) {
-            File["expansions"] = renderFileExpansions(FileCoverage, FileReport);
-        }
+  json::Object File({{"filename", Filename}});
+  if (!Options.ExportSummaryOnly) {
+    // Calculate and render detailed coverage information for given file.
+    auto FileCoverage = Coverage.getCoverageForFile(Filename);
+    File["segments"] = renderFileSegments(FileCoverage, FileReport);
+    if (!Options.SkipExpansions) {
+      File["expansions"] = renderFileExpansions(FileCoverage, FileReport);
     }
-    File["summary"] = renderSummary(FileReport);
-    return File;
+  }
+  File["summary"] = renderSummary(FileReport);
+  return File;
 }
 
 json::Array renderFiles(const coverage::CoverageMapping &Coverage,
                         ArrayRef<std::string> SourceFiles,
                         ArrayRef<FileCoverageSummary> FileReports,
                         const CoverageViewOptions &Options) {
-    ThreadPoolStrategy S = hardware_concurrency(Options.NumThreads);
-    if (Options.NumThreads == 0) {
-        // If NumThreads is not specified, create one thread for each input, up to
-        // the number of hardware cores.
-        S = heavyweight_hardware_concurrency(SourceFiles.size());
-        S.Limit = true;
-    }
-    ThreadPool Pool(S);
-    json::Array FileArray;
-    std::mutex FileArrayMutex;
+  ThreadPoolStrategy S = hardware_concurrency(Options.NumThreads);
+  if (Options.NumThreads == 0) {
+    // If NumThreads is not specified, create one thread for each input, up to
+    // the number of hardware cores.
+    S = heavyweight_hardware_concurrency(SourceFiles.size());
+    S.Limit = true;
+  }
+  ThreadPool Pool(S);
+  json::Array FileArray;
+  std::mutex FileArrayMutex;
 
-    for (unsigned I = 0, E = SourceFiles.size(); I < E; ++I) {
-        auto &SourceFile = SourceFiles[I];
-        auto &FileReport = FileReports[I];
-        Pool.async([&] {
-            auto File = renderFile(Coverage, SourceFile, FileReport, Options);
-            {
-                std::lock_guard<std::mutex> Lock(FileArrayMutex);
-                FileArray.push_back(std::move(File));
-            }
-        });
-    }
-    Pool.wait();
-    return FileArray;
+  for (unsigned I = 0, E = SourceFiles.size(); I < E; ++I) {
+    auto &SourceFile = SourceFiles[I];
+    auto &FileReport = FileReports[I];
+    Pool.async([&] {
+      auto File = renderFile(Coverage, SourceFile, FileReport, Options);
+      {
+        std::lock_guard<std::mutex> Lock(FileArrayMutex);
+        FileArray.push_back(std::move(File));
+      }
+    });
+  }
+  Pool.wait();
+  return FileArray;
 }
 
 json::Array renderFunctions(
     const iterator_range<coverage::FunctionRecordIterator> &Functions) {
-    json::Array FunctionArray;
-    for (const auto &F : Functions)
-        FunctionArray.push_back(
+  json::Array FunctionArray;
+  for (const auto &F : Functions)
+    FunctionArray.push_back(
         json::Object({{"name", F.Name},
-        {"count", clamp_uint64_to_int64(F.ExecutionCount)},
-        {"regions", renderRegions(F.CountedRegions)},
-        {"filenames", json::Array(F.Filenames)}}));
-    return FunctionArray;
+                      {"count", clamp_uint64_to_int64(F.ExecutionCount)},
+                      {"regions", renderRegions(F.CountedRegions)},
+                      {"filenames", json::Array(F.Filenames)}}));
+  return FunctionArray;
 }
 
 } // end anonymous namespace
 
 void CoverageExporterJson::renderRoot(const CoverageFilters &IgnoreFilters) {
-    std::vector<std::string> SourceFiles;
-    for (StringRef SF : Coverage.getUniqueSourceFiles()) {
-        if (!IgnoreFilters.matchesFilename(SF))
-            SourceFiles.emplace_back(SF);
-    }
-    renderRoot(SourceFiles);
+  std::vector<std::string> SourceFiles;
+  for (StringRef SF : Coverage.getUniqueSourceFiles()) {
+    if (!IgnoreFilters.matchesFilename(SF))
+      SourceFiles.emplace_back(SF);
+  }
+  renderRoot(SourceFiles);
 }
 
 void CoverageExporterJson::renderRoot(ArrayRef<std::string> SourceFiles) {
-    FileCoverageSummary Totals = FileCoverageSummary("Totals");
-    auto FileReports = CoverageReport::prepareFileReports(Coverage, Totals,
-                       SourceFiles, Options);
-    auto Files = renderFiles(Coverage, SourceFiles, FileReports, Options);
-    // Sort files in order of their names.
-    std::sort(Files.begin(), Files.end(),
-    [](const json::Value &A, const json::Value &B) {
-        const json::Object *ObjA = A.getAsObject();
-        const json::Object *ObjB = B.getAsObject();
-        assert(ObjA != nullptr && "Value A was not an Object");
-        assert(ObjB != nullptr && "Value B was not an Object");
-        const StringRef FilenameA = ObjA->getString("filename").getValue();
-        const StringRef FilenameB = ObjB->getString("filename").getValue();
-        return FilenameA.compare(FilenameB) < 0;
-    });
-    auto Export = json::Object(
-    {{"files", std::move(Files)}, {"totals", renderSummary(Totals)}});
-    // Skip functions-level information  if necessary.
-    if (!Options.ExportSummaryOnly && !Options.SkipFunctions)
-        Export["functions"] = renderFunctions(Coverage.getCoveredFunctions());
+  FileCoverageSummary Totals = FileCoverageSummary("Totals");
+  auto FileReports = CoverageReport::prepareFileReports(Coverage, Totals,
+                                                        SourceFiles, Options);
+  auto Files = renderFiles(Coverage, SourceFiles, FileReports, Options);
+  // Sort files in order of their names.
+  std::sort(Files.begin(), Files.end(),
+            [](const json::Value &A, const json::Value &B) {
+              const json::Object *ObjA = A.getAsObject();
+              const json::Object *ObjB = B.getAsObject();
+              assert(ObjA != nullptr && "Value A was not an Object");
+              assert(ObjB != nullptr && "Value B was not an Object");
+              const StringRef FilenameA =
+                  ObjA->getString("filename").getValue();
+              const StringRef FilenameB =
+                  ObjB->getString("filename").getValue();
+              return FilenameA.compare(FilenameB) < 0;
+            });
+  auto Export = json::Object(
+      {{"files", std::move(Files)}, {"totals", renderSummary(Totals)}});
+  // Skip functions-level information  if necessary.
+  if (!Options.ExportSummaryOnly && !Options.SkipFunctions)
+    Export["functions"] = renderFunctions(Coverage.getCoveredFunctions());
 
-    auto ExportArray = json::Array({std::move(Export)});
+  auto ExportArray = json::Array({std::move(Export)});
 
-    OS << json::Object({{"version", LLVM_COVERAGE_EXPORT_JSON_STR},
-        {"type", LLVM_COVERAGE_EXPORT_JSON_TYPE_STR},
-        {"data", std::move(ExportArray)}});
+  OS << json::Object({{"version", LLVM_COVERAGE_EXPORT_JSON_STR},
+                      {"type", LLVM_COVERAGE_EXPORT_JSON_TYPE_STR},
+                      {"data", std::move(ExportArray)}});
 }

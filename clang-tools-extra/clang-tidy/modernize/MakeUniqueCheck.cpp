@@ -21,24 +21,24 @@ MakeUniqueCheck::MakeUniqueCheck(StringRef Name,
 
 MakeUniqueCheck::SmartPtrTypeMatcher
 MakeUniqueCheck::getSmartPointerTypeMatcher() const {
-    return qualType(hasUnqualifiedDesugaredType(
-                        recordType(hasDeclaration(classTemplateSpecializationDecl(
-                                       hasName("::std::unique_ptr"), templateArgumentCountIs(2),
-                                       hasTemplateArgument(
-                                           0, templateArgument(refersToType(qualType().bind(PointerType)))),
-                                       hasTemplateArgument(
-                                           1, templateArgument(refersToType(
-                                                   qualType(hasDeclaration(classTemplateSpecializationDecl(
-                                                           hasName("::std::default_delete"),
-                                                           templateArgumentCountIs(1),
-                                                           hasTemplateArgument(
-                                                                   0, templateArgument(refersToType(qualType(
-                                                                           equalsBoundNode(PointerType))))))))))))))));
+  return qualType(hasUnqualifiedDesugaredType(
+      recordType(hasDeclaration(classTemplateSpecializationDecl(
+          hasName("::std::unique_ptr"), templateArgumentCountIs(2),
+          hasTemplateArgument(
+              0, templateArgument(refersToType(qualType().bind(PointerType)))),
+          hasTemplateArgument(
+              1, templateArgument(refersToType(
+                     qualType(hasDeclaration(classTemplateSpecializationDecl(
+                         hasName("::std::default_delete"),
+                         templateArgumentCountIs(1),
+                         hasTemplateArgument(
+                             0, templateArgument(refersToType(qualType(
+                                    equalsBoundNode(PointerType))))))))))))))));
 }
 
 bool MakeUniqueCheck::isLanguageVersionSupported(
     const LangOptions &LangOpts) const {
-    return RequireCPlusPlus14 ? LangOpts.CPlusPlus14 : LangOpts.CPlusPlus11;
+  return RequireCPlusPlus14 ? LangOpts.CPlusPlus14 : LangOpts.CPlusPlus11;
 }
 
 // FixItHint is done by MakeSmartPtrCheck

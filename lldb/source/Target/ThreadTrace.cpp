@@ -20,24 +20,20 @@ using namespace lldb_private;
 void ThreadTrace::RefreshStateAfterStop() {}
 
 RegisterContextSP ThreadTrace::GetRegisterContext() {
-    if (!m_reg_context_sp)
-        m_reg_context_sp = CreateRegisterContextForFrame(nullptr);
+  if (!m_reg_context_sp)
+    m_reg_context_sp = CreateRegisterContextForFrame(nullptr);
 
-    return m_reg_context_sp;
+  return m_reg_context_sp;
 }
 
 RegisterContextSP
 ThreadTrace::CreateRegisterContextForFrame(StackFrame *frame) {
-    // Eventually this will calculate the register context based on the current
-    // trace position.
-    return std::make_shared<RegisterContextHistory>(
-               *this, 0, GetProcess()->GetAddressByteSize(), LLDB_INVALID_ADDRESS);
+  // Eventually this will calculate the register context based on the current
+  // trace position.
+  return std::make_shared<RegisterContextHistory>(
+      *this, 0, GetProcess()->GetAddressByteSize(), LLDB_INVALID_ADDRESS);
 }
 
-bool ThreadTrace::CalculateStopInfo() {
-    return false;
-}
+bool ThreadTrace::CalculateStopInfo() { return false; }
 
-const FileSpec &ThreadTrace::GetTraceFile() const {
-    return m_trace_file;
-}
+const FileSpec &ThreadTrace::GetTraceFile() const { return m_trace_file; }

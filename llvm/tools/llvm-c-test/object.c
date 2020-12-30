@@ -12,86 +12,86 @@
 |*                                                                            *|
 \*===----------------------------------------------------------------------===*/
 
-#include "llvm-c-test.h"
 #include "llvm-c/Object.h"
+#include "llvm-c-test.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 int llvm_object_list_sections(void) {
-    LLVMMemoryBufferRef MB;
-    LLVMBinaryRef O;
-    LLVMSectionIteratorRef sect;
+  LLVMMemoryBufferRef MB;
+  LLVMBinaryRef O;
+  LLVMSectionIteratorRef sect;
 
-    char *outBufferErr = NULL;
-    if (LLVMCreateMemoryBufferWithSTDIN(&MB, &outBufferErr)) {
-        fprintf(stderr, "Error reading file: %s\n", outBufferErr);
-        free(outBufferErr);
-        exit(1);
-    }
+  char *outBufferErr = NULL;
+  if (LLVMCreateMemoryBufferWithSTDIN(&MB, &outBufferErr)) {
+    fprintf(stderr, "Error reading file: %s\n", outBufferErr);
+    free(outBufferErr);
+    exit(1);
+  }
 
-    char *outBinaryErr = NULL;
-    O = LLVMCreateBinary(MB, LLVMGetGlobalContext(), &outBinaryErr);
-    if (!O || outBinaryErr) {
-        fprintf(stderr, "Error reading object: %s\n", outBinaryErr);
-        free(outBinaryErr);
-        exit(1);
-    }
+  char *outBinaryErr = NULL;
+  O = LLVMCreateBinary(MB, LLVMGetGlobalContext(), &outBinaryErr);
+  if (!O || outBinaryErr) {
+    fprintf(stderr, "Error reading object: %s\n", outBinaryErr);
+    free(outBinaryErr);
+    exit(1);
+  }
 
-    sect = LLVMObjectFileCopySectionIterator(O);
-    while (sect && !LLVMObjectFileIsSectionIteratorAtEnd(O, sect)) {
-        printf("'%s': @0x%08" PRIx64 " +%" PRIu64 "\n", LLVMGetSectionName(sect),
-               LLVMGetSectionAddress(sect), LLVMGetSectionSize(sect));
+  sect = LLVMObjectFileCopySectionIterator(O);
+  while (sect && !LLVMObjectFileIsSectionIteratorAtEnd(O, sect)) {
+    printf("'%s': @0x%08" PRIx64 " +%" PRIu64 "\n", LLVMGetSectionName(sect),
+           LLVMGetSectionAddress(sect), LLVMGetSectionSize(sect));
 
-        LLVMMoveToNextSection(sect);
-    }
+    LLVMMoveToNextSection(sect);
+  }
 
-    LLVMDisposeSectionIterator(sect);
+  LLVMDisposeSectionIterator(sect);
 
-    LLVMDisposeBinary(O);
+  LLVMDisposeBinary(O);
 
-    LLVMDisposeMemoryBuffer(MB);
+  LLVMDisposeMemoryBuffer(MB);
 
-    return 0;
+  return 0;
 }
 
 int llvm_object_list_symbols(void) {
-    LLVMMemoryBufferRef MB;
-    LLVMBinaryRef O;
-    LLVMSectionIteratorRef sect;
-    LLVMSymbolIteratorRef sym;
+  LLVMMemoryBufferRef MB;
+  LLVMBinaryRef O;
+  LLVMSectionIteratorRef sect;
+  LLVMSymbolIteratorRef sym;
 
-    char *outBufferErr = NULL;
-    if (LLVMCreateMemoryBufferWithSTDIN(&MB, &outBufferErr)) {
-        fprintf(stderr, "Error reading file: %s\n", outBufferErr);
-        free(outBufferErr);
-        exit(1);
-    }
+  char *outBufferErr = NULL;
+  if (LLVMCreateMemoryBufferWithSTDIN(&MB, &outBufferErr)) {
+    fprintf(stderr, "Error reading file: %s\n", outBufferErr);
+    free(outBufferErr);
+    exit(1);
+  }
 
-    char *outBinaryErr = NULL;
-    O = LLVMCreateBinary(MB, LLVMGetGlobalContext(), &outBinaryErr);
-    if (!O || outBinaryErr) {
-        fprintf(stderr, "Error reading object: %s\n", outBinaryErr);
-        free(outBinaryErr);
-        exit(1);
-    }
+  char *outBinaryErr = NULL;
+  O = LLVMCreateBinary(MB, LLVMGetGlobalContext(), &outBinaryErr);
+  if (!O || outBinaryErr) {
+    fprintf(stderr, "Error reading object: %s\n", outBinaryErr);
+    free(outBinaryErr);
+    exit(1);
+  }
 
-    sect = LLVMObjectFileCopySectionIterator(O);
-    sym = LLVMObjectFileCopySymbolIterator(O);
-    while (sect && sym && !LLVMObjectFileIsSymbolIteratorAtEnd(O, sym)) {
+  sect = LLVMObjectFileCopySectionIterator(O);
+  sym = LLVMObjectFileCopySymbolIterator(O);
+  while (sect && sym && !LLVMObjectFileIsSymbolIteratorAtEnd(O, sym)) {
 
-        LLVMMoveToContainingSection(sect, sym);
-        printf("%s @0x%08" PRIx64 " +%" PRIu64 " (%s)\n", LLVMGetSymbolName(sym),
-               LLVMGetSymbolAddress(sym), LLVMGetSymbolSize(sym),
-               LLVMGetSectionName(sect));
+    LLVMMoveToContainingSection(sect, sym);
+    printf("%s @0x%08" PRIx64 " +%" PRIu64 " (%s)\n", LLVMGetSymbolName(sym),
+           LLVMGetSymbolAddress(sym), LLVMGetSymbolSize(sym),
+           LLVMGetSectionName(sect));
 
-        LLVMMoveToNextSymbol(sym);
-    }
+    LLVMMoveToNextSymbol(sym);
+  }
 
-    LLVMDisposeSymbolIterator(sym);
+  LLVMDisposeSymbolIterator(sym);
 
-    LLVMDisposeBinary(O);
+  LLVMDisposeBinary(O);
 
-    LLVMDisposeMemoryBuffer(MB);
+  LLVMDisposeMemoryBuffer(MB);
 
-    return 0;
+  return 0;
 }

@@ -30,7 +30,7 @@ class TargetMachine;
 class TargetRegisterClass;
 class raw_ostream;
 
-} // End llvm namespace
+} // namespace llvm
 
 /// List of target independent CodeGen pass IDs.
 namespace llvm {
@@ -58,7 +58,7 @@ MachineFunctionPass *createMachineFunctionSplitterPass();
 /// the given stream as a debugging tool.
 MachineFunctionPass *
 createMachineFunctionPrinterPass(raw_ostream &OS,
-                                 const std::string &Banner ="");
+                                 const std::string &Banner = "");
 
 /// MIRPrinting pass - this pass prints out the LLVM IR into the given stream
 /// using the MIR serialization format.
@@ -70,7 +70,7 @@ MachineFunctionPass *createPrintMIRPass(raw_ostream &OS);
 /// DiagnosticInfoISelFallback for every MachineFunction it resets.
 /// If AbortOnFailedISel is true, abort compilation instead of resetting.
 MachineFunctionPass *createResetMachineFunctionPass(bool EmitFallbackDiag,
-        bool AbortOnFailedISel);
+                                                    bool AbortOnFailedISel);
 
 /// createCodeGenPreparePass - Transform the code to expose more pattern
 /// matching during instruction selection.
@@ -249,8 +249,8 @@ extern char &StackColoringID;
 /// IfConverter - This pass performs machine code if conversion.
 extern char &IfConverterID;
 
-FunctionPass *createIfConverter(
-    std::function<bool(const MachineFunction &)> Ftor);
+FunctionPass *
+createIfConverter(std::function<bool(const MachineFunction &)> Ftor);
 
 /// MachineBlockPlacement - This pass places basic blocks based on branch
 /// probabilities.
@@ -337,7 +337,7 @@ FunctionPass *createStackProtectorPass();
 /// createMachineVerifierPass - This pass verifies cenerated machine code
 /// instructions for correctness.
 ///
-FunctionPass *createMachineVerifierPass(const std::string& Banner);
+FunctionPass *createMachineVerifierPass(const std::string &Banner);
 
 /// createDwarfEHPass - This pass mulches exception handling code into a form
 /// adapted to code generation.  Required if using dwarf exception handling.
@@ -492,6 +492,6 @@ extern char &FixupStatepointCallerSavedID;
 /// The pass transform load/store <256 x i32> to AMX load/store intrinsics
 /// or split the data to two <128 x i32>.
 FunctionPass *createX86LowerAMXTypePass();
-} // End llvm namespace
+} // namespace llvm
 
 #endif

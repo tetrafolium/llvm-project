@@ -20,8 +20,8 @@ namespace clang {
 namespace clangd {
 
 enum class RelationKind : uint8_t {
-    BaseOf,
-    OverriddenBy,
+  BaseOf,
+  OverriddenBy,
 };
 
 /// Represents a relation between two symbols.
@@ -32,75 +32,65 @@ enum class RelationKind : uint8_t {
 ///     { Subject = Base::Foo, Predicate = OverriddenBy, Object = Derived::Foo
 ///     }.
 struct Relation {
-    SymbolID Subject;
-    RelationKind Predicate;
-    SymbolID Object;
+  SymbolID Subject;
+  RelationKind Predicate;
+  SymbolID Object;
 
-    bool operator==(const Relation &Other) const {
-        return std::tie(Subject, Predicate, Object) ==
-               std::tie(Other.Subject, Other.Predicate, Other.Object);
-    }
-    // SPO order
-    bool operator<(const Relation &Other) const {
-        return std::tie(Subject, Predicate, Object) <
-               std::tie(Other.Subject, Other.Predicate, Other.Object);
-    }
+  bool operator==(const Relation &Other) const {
+    return std::tie(Subject, Predicate, Object) ==
+           std::tie(Other.Subject, Other.Predicate, Other.Object);
+  }
+  // SPO order
+  bool operator<(const Relation &Other) const {
+    return std::tie(Subject, Predicate, Object) <
+           std::tie(Other.Subject, Other.Predicate, Other.Object);
+  }
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const RelationKind R);
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Relation &R);
 
 class RelationSlab {
 public:
-    using value_type = Relation;
-    using const_iterator = std::vector<value_type>::const_iterator;
-    using iterator = const_iterator;
+  using value_type = Relation;
+  using const_iterator = std::vector<value_type>::const_iterator;
+  using iterator = const_iterator;
 
-    RelationSlab() = default;
-    RelationSlab(RelationSlab &&Slab) = default;
-    RelationSlab &operator=(RelationSlab &&RHS) = default;
+  RelationSlab() = default;
+  RelationSlab(RelationSlab &&Slab) = default;
+  RelationSlab &operator=(RelationSlab &&RHS) = default;
 
-    const_iterator begin() const {
-        return Relations.begin();
-    }
-    const_iterator end() const {
-        return Relations.end();
-    }
-    size_t size() const {
-        return Relations.size();
-    }
-    bool empty() const {
-        return Relations.empty();
-    }
+  const_iterator begin() const { return Relations.begin(); }
+  const_iterator end() const { return Relations.end(); }
+  size_t size() const { return Relations.size(); }
+  bool empty() const { return Relations.empty(); }
 
-    size_t bytes() const {
-        return sizeof(*this) + sizeof(value_type) * Relations.capacity();
-    }
+  size_t bytes() const {
+    return sizeof(*this) + sizeof(value_type) * Relations.capacity();
+  }
 
-    /// Lookup all relations matching the given subject and predicate.
-    llvm::iterator_range<iterator> lookup(const SymbolID &Subject,
-                                          RelationKind Predicate) const;
+  /// Lookup all relations matching the given subject and predicate.
+  llvm::iterator_range<iterator> lookup(const SymbolID &Subject,
+                                        RelationKind Predicate) const;
 
-    /// RelationSlab::Builder is a mutable container that can 'freeze' to
-    /// RelationSlab.
-    class Builder {
-    public:
-        /// Adds a relation to the slab.
-        void insert(const Relation &R) {
-            Relations.push_back(R);
-        }
+  /// RelationSlab::Builder is a mutable container that can 'freeze' to
+  /// RelationSlab.
+  class Builder {
+  public:
+    /// Adds a relation to the slab.
+    void insert(const Relation &R) { Relations.push_back(R); }
 
-        /// Consumes the builder to finalize the slab.
-        RelationSlab build() &&;
+    /// Consumes the builder to finalize the slab.
+    RelationSlab build() &&;
 
-    private:
-        std::vector<Relation> Relations;
-    };
+  private:
+    std::vector<Relation> Relations;
+  };
 
 private:
-    RelationSlab(std::vector<Relation> Relations)
-        : Relations(std::move(Relations)) {}
+  RelationSlab(std::vector<Relation> Relations)
+      : Relations(std::move(Relations)) {}
 
-    std::vector<Relation> Relations;
+  std::vector<Relation> Relations;
 };
 
 } // namespace clangd

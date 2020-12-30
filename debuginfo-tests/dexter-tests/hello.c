@@ -5,9 +5,9 @@
 
 #include <stdio.h>
 int main() {
-    printf("hello world\n");
-    int x = 42;
-    __debugbreak(); // DexLabel('stop')
+  printf("hello world\n");
+  int x = 42;
+  __debugbreak(); // DexLabel('stop')
 }
 
 // DexExpectWatchValue('x', 42, on_line='stop')

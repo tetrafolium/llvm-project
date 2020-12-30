@@ -46,7 +46,7 @@ namespace mlir {
 
 // Add all the MLIR dialects to the provided registry.
 inline void registerAllDialects(DialectRegistry &registry) {
-    // clang-format off
+  // clang-format off
     registry.insert<acc::OpenACCDialect,
                     AffineDialect,
                     arm_neon::ArmNeonDialect,
@@ -73,7 +73,7 @@ inline void registerAllDialects(DialectRegistry &registry) {
                     shape::ShapeDialect,
                     tensor::TensorDialect,
                     tosa::TosaDialect>();
-    // clang-format on
+  // clang-format on
 }
 
 } // namespace mlir

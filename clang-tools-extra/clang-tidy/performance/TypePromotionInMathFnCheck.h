@@ -27,16 +27,16 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-type-promotion-in-math-fn.html
 class TypePromotionInMathFnCheck : public ClangTidyCheck {
 public:
-    TypePromotionInMathFnCheck(StringRef Name, ClangTidyContext *Context);
+  TypePromotionInMathFnCheck(StringRef Name, ClangTidyContext *Context);
 
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    utils::IncludeInserter IncludeInserter;
+  utils::IncludeInserter IncludeInserter;
 };
 
 } // namespace performance

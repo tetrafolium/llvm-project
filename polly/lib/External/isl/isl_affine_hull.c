@@ -12,58 +12,55 @@
  * and Ecole Normale Superieure, 45 rue d'Ulm, 75230 Paris, France
  */
 
-#include <isl_ctx_private.h>
-#include <isl_map_private.h>
-#include <isl_seq.h>
-#include <isl/set.h>
-#include <isl/lp.h>
-#include <isl/map.h>
 #include "isl_equalities.h"
 #include "isl_sample.h"
 #include "isl_tab.h"
+#include <isl/lp.h>
+#include <isl/map.h>
+#include <isl/set.h>
+#include <isl_ctx_private.h>
+#include <isl_map_private.h>
 #include <isl_mat_private.h>
+#include <isl_seq.h>
 #include <isl_vec_private.h>
 
-#include <bset_to_bmap.c>
 #include <bset_from_bmap.c>
-#include <set_to_map.c>
+#include <bset_to_bmap.c>
 #include <set_from_map.c>
+#include <set_to_map.c>
 
-__isl_give isl_basic_map *isl_basic_map_implicit_equalities(
-    __isl_take isl_basic_map *bmap)
-{
-    struct isl_tab *tab;
+__isl_give isl_basic_map *
+isl_basic_map_implicit_equalities(__isl_take isl_basic_map *bmap) {
+  struct isl_tab *tab;
 
-    if (!bmap)
-        return bmap;
-
-    bmap = isl_basic_map_gauss(bmap, NULL);
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY))
-        return bmap;
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_NO_IMPLICIT))
-        return bmap;
-    if (bmap->n_ineq <= 1)
-        return bmap;
-
-    tab = isl_tab_from_basic_map(bmap, 0);
-    if (isl_tab_detect_implicit_equalities(tab) < 0)
-        goto error;
-    bmap = isl_basic_map_update_from_tab(bmap, tab);
-    isl_tab_free(tab);
-    bmap = isl_basic_map_gauss(bmap, NULL);
-    ISL_F_SET(bmap, ISL_BASIC_MAP_NO_IMPLICIT);
+  if (!bmap)
     return bmap;
+
+  bmap = isl_basic_map_gauss(bmap, NULL);
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY))
+    return bmap;
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_NO_IMPLICIT))
+    return bmap;
+  if (bmap->n_ineq <= 1)
+    return bmap;
+
+  tab = isl_tab_from_basic_map(bmap, 0);
+  if (isl_tab_detect_implicit_equalities(tab) < 0)
+    goto error;
+  bmap = isl_basic_map_update_from_tab(bmap, tab);
+  isl_tab_free(tab);
+  bmap = isl_basic_map_gauss(bmap, NULL);
+  ISL_F_SET(bmap, ISL_BASIC_MAP_NO_IMPLICIT);
+  return bmap;
 error:
-    isl_tab_free(tab);
-    isl_basic_map_free(bmap);
-    return NULL;
+  isl_tab_free(tab);
+  isl_basic_map_free(bmap);
+  return NULL;
 }
 
-__isl_give isl_basic_set *isl_basic_set_implicit_equalities(
-    __isl_take isl_basic_set *bset)
-{
-    return bset_from_bmap(
-               isl_basic_map_implicit_equalities(bset_to_bmap(bset)));
+__isl_give isl_basic_set *
+isl_basic_set_implicit_equalities(__isl_take isl_basic_set *bset) {
+  return bset_from_bmap(isl_basic_map_implicit_equalities(bset_to_bmap(bset)));
 }
 
 /* Make eq[row][col] of both bmaps equal so we can add the row
@@ -71,38 +68,36 @@ __isl_give isl_basic_set *isl_basic_set_implicit_equalities(
  * Note that because of the echelon form, the columns of row row
  * after column col are zero.
  */
-static void set_common_multiple(
-    struct isl_basic_set *bset1, struct isl_basic_set *bset2,
-    unsigned row, unsigned col)
-{
-    isl_int m, c;
+static void set_common_multiple(struct isl_basic_set *bset1,
+                                struct isl_basic_set *bset2, unsigned row,
+                                unsigned col) {
+  isl_int m, c;
 
-    if (isl_int_eq(bset1->eq[row][col], bset2->eq[row][col]))
-        return;
+  if (isl_int_eq(bset1->eq[row][col], bset2->eq[row][col]))
+    return;
 
-    isl_int_init(c);
-    isl_int_init(m);
-    isl_int_lcm(m, bset1->eq[row][col], bset2->eq[row][col]);
-    isl_int_divexact(c, m, bset1->eq[row][col]);
-    isl_seq_scale(bset1->eq[row], bset1->eq[row], c, col+1);
-    isl_int_divexact(c, m, bset2->eq[row][col]);
-    isl_seq_scale(bset2->eq[row], bset2->eq[row], c, col+1);
-    isl_int_clear(c);
-    isl_int_clear(m);
+  isl_int_init(c);
+  isl_int_init(m);
+  isl_int_lcm(m, bset1->eq[row][col], bset2->eq[row][col]);
+  isl_int_divexact(c, m, bset1->eq[row][col]);
+  isl_seq_scale(bset1->eq[row], bset1->eq[row], c, col + 1);
+  isl_int_divexact(c, m, bset2->eq[row][col]);
+  isl_seq_scale(bset2->eq[row], bset2->eq[row], c, col + 1);
+  isl_int_clear(c);
+  isl_int_clear(m);
 }
 
 /* Delete a given equality, moving all the following equalities one up.
  */
-static void delete_row(__isl_keep isl_basic_set *bset, unsigned row)
-{
-    isl_int *t;
-    int r;
+static void delete_row(__isl_keep isl_basic_set *bset, unsigned row) {
+  isl_int *t;
+  int r;
 
-    t = bset->eq[row];
-    bset->n_eq--;
-    for (r = row; r < bset->n_eq; ++r)
-        bset->eq[r] = bset->eq[r+1];
-    bset->eq[bset->n_eq] = t;
+  t = bset->eq[row];
+  bset->n_eq--;
+  for (r = row; r < bset->n_eq; ++r)
+    bset->eq[r] = bset->eq[r + 1];
+  bset->eq[bset->n_eq] = t;
 }
 
 /* Make first row entries in column col of bset1 identical to
@@ -114,36 +109,35 @@ static void delete_row(__isl_keep isl_basic_set *bset, unsigned row)
  * so that
  *		A[i][col] = B[i][col] = a * old(B[i][col])
  */
-static isl_stat construct_column(
-    __isl_keep isl_basic_set *bset1, __isl_keep isl_basic_set *bset2,
-    unsigned row, unsigned col)
-{
-    int r;
-    isl_int a;
-    isl_int b;
-    isl_size total;
+static isl_stat construct_column(__isl_keep isl_basic_set *bset1,
+                                 __isl_keep isl_basic_set *bset2, unsigned row,
+                                 unsigned col) {
+  int r;
+  isl_int a;
+  isl_int b;
+  isl_size total;
 
-    total = isl_basic_set_dim(bset1, isl_dim_set);
-    if (total < 0)
-        return isl_stat_error;
+  total = isl_basic_set_dim(bset1, isl_dim_set);
+  if (total < 0)
+    return isl_stat_error;
 
-    isl_int_init(a);
-    isl_int_init(b);
-    for (r = 0; r < row; ++r) {
-        if (isl_int_is_zero(bset2->eq[r][col]))
-            continue;
-        isl_int_gcd(b, bset2->eq[r][col], bset1->eq[row][col]);
-        isl_int_divexact(a, bset1->eq[row][col], b);
-        isl_int_divexact(b, bset2->eq[r][col], b);
-        isl_seq_combine(bset1->eq[r], a, bset1->eq[r],
-                        b, bset1->eq[row], 1 + total);
-        isl_seq_scale(bset2->eq[r], bset2->eq[r], a, 1 + total);
-    }
-    isl_int_clear(a);
-    isl_int_clear(b);
-    delete_row(bset1, row);
+  isl_int_init(a);
+  isl_int_init(b);
+  for (r = 0; r < row; ++r) {
+    if (isl_int_is_zero(bset2->eq[r][col]))
+      continue;
+    isl_int_gcd(b, bset2->eq[r][col], bset1->eq[row][col]);
+    isl_int_divexact(a, bset1->eq[row][col], b);
+    isl_int_divexact(b, bset2->eq[r][col], b);
+    isl_seq_combine(bset1->eq[r], a, bset1->eq[r], b, bset1->eq[row],
+                    1 + total);
+    isl_seq_scale(bset2->eq[r], bset2->eq[r], a, 1 + total);
+  }
+  isl_int_clear(a);
+  isl_int_clear(b);
+  delete_row(bset1, row);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Make first row entries in column col of bset1 identical to
@@ -155,43 +149,40 @@ static isl_stat construct_column(
  * so that
  *	A[i][col] = B[i][col] = old(A[t][col]*B[i][col]-A[i][col]*B[t][col])
  */
-static isl_bool transform_column(
-    __isl_keep isl_basic_set *bset1, __isl_keep isl_basic_set *bset2,
-    unsigned row, unsigned col)
-{
-    int i, t;
-    isl_int a, b, g;
-    isl_size total;
+static isl_bool transform_column(__isl_keep isl_basic_set *bset1,
+                                 __isl_keep isl_basic_set *bset2, unsigned row,
+                                 unsigned col) {
+  int i, t;
+  isl_int a, b, g;
+  isl_size total;
 
-    for (t = row-1; t >= 0; --t)
-        if (isl_int_ne(bset1->eq[t][col], bset2->eq[t][col]))
-            break;
-    if (t < 0)
-        return isl_bool_false;
+  for (t = row - 1; t >= 0; --t)
+    if (isl_int_ne(bset1->eq[t][col], bset2->eq[t][col]))
+      break;
+  if (t < 0)
+    return isl_bool_false;
 
-    total = isl_basic_set_dim(bset1, isl_dim_set);
-    if (total < 0)
-        return isl_bool_error;
-    isl_int_init(a);
-    isl_int_init(b);
-    isl_int_init(g);
-    isl_int_sub(b, bset1->eq[t][col], bset2->eq[t][col]);
-    for (i = 0; i < t; ++i) {
-        isl_int_sub(a, bset2->eq[i][col], bset1->eq[i][col]);
-        isl_int_gcd(g, a, b);
-        isl_int_divexact(a, a, g);
-        isl_int_divexact(g, b, g);
-        isl_seq_combine(bset1->eq[i], g, bset1->eq[i], a, bset1->eq[t],
-                        1 + total);
-        isl_seq_combine(bset2->eq[i], g, bset2->eq[i], a, bset2->eq[t],
-                        1 + total);
-    }
-    isl_int_clear(a);
-    isl_int_clear(b);
-    isl_int_clear(g);
-    delete_row(bset1, t);
-    delete_row(bset2, t);
-    return isl_bool_true;
+  total = isl_basic_set_dim(bset1, isl_dim_set);
+  if (total < 0)
+    return isl_bool_error;
+  isl_int_init(a);
+  isl_int_init(b);
+  isl_int_init(g);
+  isl_int_sub(b, bset1->eq[t][col], bset2->eq[t][col]);
+  for (i = 0; i < t; ++i) {
+    isl_int_sub(a, bset2->eq[i][col], bset1->eq[i][col]);
+    isl_int_gcd(g, a, b);
+    isl_int_divexact(a, a, g);
+    isl_int_divexact(g, b, g);
+    isl_seq_combine(bset1->eq[i], g, bset1->eq[i], a, bset1->eq[t], 1 + total);
+    isl_seq_combine(bset2->eq[i], g, bset2->eq[i], a, bset2->eq[t], 1 + total);
+  }
+  isl_int_clear(a);
+  isl_int_clear(b);
+  isl_int_clear(g);
+  delete_row(bset1, t);
+  delete_row(bset2, t);
+  return isl_bool_true;
 }
 
 /* The implementation is based on Section 5.2 of Michael Karr,
@@ -199,53 +190,50 @@ static isl_bool transform_column(
  * except that the echelon form we use starts from the last column
  * and that we are dealing with integer coefficients.
  */
-static __isl_give isl_basic_set *affine_hull(
-    __isl_take isl_basic_set *bset1, __isl_take isl_basic_set *bset2)
-{
-    isl_size dim;
-    unsigned total;
-    int col;
-    int row;
+static __isl_give isl_basic_set *affine_hull(__isl_take isl_basic_set *bset1,
+                                             __isl_take isl_basic_set *bset2) {
+  isl_size dim;
+  unsigned total;
+  int col;
+  int row;
 
-    dim = isl_basic_set_dim(bset1, isl_dim_set);
-    if (dim < 0 || !bset2)
+  dim = isl_basic_set_dim(bset1, isl_dim_set);
+  if (dim < 0 || !bset2)
+    goto error;
+
+  total = 1 + dim;
+
+  row = 0;
+  for (col = total - 1; col >= 0; --col) {
+    int is_zero1 = row >= bset1->n_eq || isl_int_is_zero(bset1->eq[row][col]);
+    int is_zero2 = row >= bset2->n_eq || isl_int_is_zero(bset2->eq[row][col]);
+    if (!is_zero1 && !is_zero2) {
+      set_common_multiple(bset1, bset2, row, col);
+      ++row;
+    } else if (!is_zero1 && is_zero2) {
+      if (construct_column(bset1, bset2, row, col) < 0)
         goto error;
+    } else if (is_zero1 && !is_zero2) {
+      if (construct_column(bset2, bset1, row, col) < 0)
+        goto error;
+    } else {
+      isl_bool transform;
 
-    total = 1 + dim;
-
-    row = 0;
-    for (col = total-1; col >= 0; --col) {
-        int is_zero1 = row >= bset1->n_eq ||
-                       isl_int_is_zero(bset1->eq[row][col]);
-        int is_zero2 = row >= bset2->n_eq ||
-                       isl_int_is_zero(bset2->eq[row][col]);
-        if (!is_zero1 && !is_zero2) {
-            set_common_multiple(bset1, bset2, row, col);
-            ++row;
-        } else if (!is_zero1 && is_zero2) {
-            if (construct_column(bset1, bset2, row, col) < 0)
-                goto error;
-        } else if (is_zero1 && !is_zero2) {
-            if (construct_column(bset2, bset1, row, col) < 0)
-                goto error;
-        } else {
-            isl_bool transform;
-
-            transform = transform_column(bset1, bset2, row, col);
-            if (transform < 0)
-                goto error;
-            if (transform)
-                --row;
-        }
+      transform = transform_column(bset1, bset2, row, col);
+      if (transform < 0)
+        goto error;
+      if (transform)
+        --row;
     }
-    isl_assert(bset1->ctx, row == bset1->n_eq, goto error);
-    isl_basic_set_free(bset2);
-    bset1 = isl_basic_set_normalize_constraints(bset1);
-    return bset1;
+  }
+  isl_assert(bset1->ctx, row == bset1->n_eq, goto error);
+  isl_basic_set_free(bset2);
+  bset1 = isl_basic_set_normalize_constraints(bset1);
+  return bset1;
 error:
-    isl_basic_set_free(bset1);
-    isl_basic_set_free(bset2);
-    return NULL;
+  isl_basic_set_free(bset1);
+  isl_basic_set_free(bset2);
+  return NULL;
 }
 
 /* Find an integer point in the set represented by "tab"
@@ -264,91 +252,87 @@ error:
  * that tab->basis and tab->n_unbounded have been set appropriately.
  */
 static __isl_give isl_vec *outside_point(struct isl_tab *tab, isl_int *eq,
-        int up)
-{
-    struct isl_ctx *ctx;
-    struct isl_vec *sample = NULL;
-    struct isl_tab_undo *snap;
-    unsigned dim;
+                                         int up) {
+  struct isl_ctx *ctx;
+  struct isl_vec *sample = NULL;
+  struct isl_tab_undo *snap;
+  unsigned dim;
 
-    if (!tab)
-        return NULL;
-    ctx = tab->mat->ctx;
-
-    dim = tab->n_var;
-    sample = isl_vec_alloc(ctx, 1 + dim);
-    if (!sample)
-        return NULL;
-    isl_int_set_si(sample->el[0], 1);
-    isl_seq_combine(sample->el + 1,
-                    ctx->one, tab->bmap->sample->el + 1,
-                    up ? ctx->one : ctx->negone, eq + 1, dim);
-    if (isl_basic_map_contains(tab->bmap, sample))
-        return sample;
-    isl_vec_free(sample);
-    sample = NULL;
-
-    snap = isl_tab_snap(tab);
-
-    if (!up)
-        isl_seq_neg(eq, eq, 1 + dim);
-    isl_int_sub_ui(eq[0], eq[0], 1);
-
-    if (isl_tab_extend_cons(tab, 1) < 0)
-        goto error;
-    if (isl_tab_add_ineq(tab, eq) < 0)
-        goto error;
-
-    sample = isl_tab_sample(tab);
-
-    isl_int_add_ui(eq[0], eq[0], 1);
-    if (!up)
-        isl_seq_neg(eq, eq, 1 + dim);
-
-    if (sample && isl_tab_rollback(tab, snap) < 0)
-        goto error;
-
-    return sample;
-error:
-    isl_vec_free(sample);
+  if (!tab)
     return NULL;
+  ctx = tab->mat->ctx;
+
+  dim = tab->n_var;
+  sample = isl_vec_alloc(ctx, 1 + dim);
+  if (!sample)
+    return NULL;
+  isl_int_set_si(sample->el[0], 1);
+  isl_seq_combine(sample->el + 1, ctx->one, tab->bmap->sample->el + 1,
+                  up ? ctx->one : ctx->negone, eq + 1, dim);
+  if (isl_basic_map_contains(tab->bmap, sample))
+    return sample;
+  isl_vec_free(sample);
+  sample = NULL;
+
+  snap = isl_tab_snap(tab);
+
+  if (!up)
+    isl_seq_neg(eq, eq, 1 + dim);
+  isl_int_sub_ui(eq[0], eq[0], 1);
+
+  if (isl_tab_extend_cons(tab, 1) < 0)
+    goto error;
+  if (isl_tab_add_ineq(tab, eq) < 0)
+    goto error;
+
+  sample = isl_tab_sample(tab);
+
+  isl_int_add_ui(eq[0], eq[0], 1);
+  if (!up)
+    isl_seq_neg(eq, eq, 1 + dim);
+
+  if (sample && isl_tab_rollback(tab, snap) < 0)
+    goto error;
+
+  return sample;
+error:
+  isl_vec_free(sample);
+  return NULL;
 }
 
-__isl_give isl_basic_set *isl_basic_set_recession_cone(
-    __isl_take isl_basic_set *bset)
-{
-    int i;
-    isl_bool empty;
+__isl_give isl_basic_set *
+isl_basic_set_recession_cone(__isl_take isl_basic_set *bset) {
+  int i;
+  isl_bool empty;
 
-    empty = isl_basic_set_plain_is_empty(bset);
-    if (empty < 0)
-        return isl_basic_set_free(bset);
-    if (empty)
-        return bset;
+  empty = isl_basic_set_plain_is_empty(bset);
+  if (empty < 0)
+    return isl_basic_set_free(bset);
+  if (empty)
+    return bset;
 
-    bset = isl_basic_set_cow(bset);
-    if (isl_basic_set_check_no_locals(bset) < 0)
-        return isl_basic_set_free(bset);
+  bset = isl_basic_set_cow(bset);
+  if (isl_basic_set_check_no_locals(bset) < 0)
+    return isl_basic_set_free(bset);
 
-    for (i = 0; i < bset->n_eq; ++i)
-        isl_int_set_si(bset->eq[i][0], 0);
+  for (i = 0; i < bset->n_eq; ++i)
+    isl_int_set_si(bset->eq[i][0], 0);
 
-    for (i = 0; i < bset->n_ineq; ++i)
-        isl_int_set_si(bset->ineq[i][0], 0);
+  for (i = 0; i < bset->n_ineq; ++i)
+    isl_int_set_si(bset->ineq[i][0], 0);
 
-    ISL_F_CLR(bset, ISL_BASIC_SET_NO_IMPLICIT);
-    return isl_basic_set_implicit_equalities(bset);
+  ISL_F_CLR(bset, ISL_BASIC_SET_NO_IMPLICIT);
+  return isl_basic_set_implicit_equalities(bset);
 }
 
 /* Move "sample" to a point that is one up (or down) from the original
  * point in dimension "pos".
  */
-static void adjacent_point(__isl_keep isl_vec *sample, int pos, int up)
-{
-    if (up)
-        isl_int_add_ui(sample->el[1 + pos], sample->el[1 + pos], 1);
-    else
-        isl_int_sub_ui(sample->el[1 + pos], sample->el[1 + pos], 1);
+static void adjacent_point(__isl_keep isl_vec *sample, int pos, int up) {
+  if (up)
+    isl_int_add_ui(sample->el[1 + pos], sample->el[1 + pos], 1);
+  else
+    isl_int_sub_ui(sample->el[1 + pos], sample->el[1 + pos], 1);
 }
 
 /* Check if any points that are adjacent to "sample" also belong to "bset".
@@ -358,51 +342,49 @@ static void adjacent_point(__isl_keep isl_vec *sample, int pos, int up)
  * check whether it already belongs to "hull" as this test is typically
  * much cheaper.
  */
-static __isl_give isl_basic_set *add_adjacent_points(
-    __isl_take isl_basic_set *hull, __isl_take isl_vec *sample,
-    __isl_keep isl_basic_set *bset)
-{
-    int i, up;
-    isl_size dim;
+static __isl_give isl_basic_set *
+add_adjacent_points(__isl_take isl_basic_set *hull, __isl_take isl_vec *sample,
+                    __isl_keep isl_basic_set *bset) {
+  int i, up;
+  isl_size dim;
 
-    dim = isl_basic_set_dim(hull, isl_dim_set);
-    if (!sample || dim < 0)
+  dim = isl_basic_set_dim(hull, isl_dim_set);
+  if (!sample || dim < 0)
+    goto error;
+
+  for (i = 0; i < dim; ++i) {
+    for (up = 0; up <= 1; ++up) {
+      int contains;
+      isl_basic_set *point;
+
+      adjacent_point(sample, i, up);
+      contains = isl_basic_set_contains(hull, sample);
+      if (contains < 0)
         goto error;
-
-    for (i = 0; i < dim; ++i) {
-        for (up = 0; up <= 1; ++up) {
-            int contains;
-            isl_basic_set *point;
-
-            adjacent_point(sample, i, up);
-            contains = isl_basic_set_contains(hull, sample);
-            if (contains < 0)
-                goto error;
-            if (contains) {
-                adjacent_point(sample, i, !up);
-                continue;
-            }
-            contains = isl_basic_set_contains(bset, sample);
-            if (contains < 0)
-                goto error;
-            if (contains) {
-                point = isl_basic_set_from_vec(
-                            isl_vec_copy(sample));
-                hull = affine_hull(hull, point);
-            }
-            adjacent_point(sample, i, !up);
-            if (contains)
-                break;
-        }
+      if (contains) {
+        adjacent_point(sample, i, !up);
+        continue;
+      }
+      contains = isl_basic_set_contains(bset, sample);
+      if (contains < 0)
+        goto error;
+      if (contains) {
+        point = isl_basic_set_from_vec(isl_vec_copy(sample));
+        hull = affine_hull(hull, point);
+      }
+      adjacent_point(sample, i, !up);
+      if (contains)
+        break;
     }
+  }
 
-    isl_vec_free(sample);
+  isl_vec_free(sample);
 
-    return hull;
+  return hull;
 error:
-    isl_vec_free(sample);
-    isl_basic_set_free(hull);
-    return NULL;
+  isl_vec_free(sample);
+  isl_basic_set_free(hull);
+  return NULL;
 }
 
 /* Extend an initial (under-)approximation of the affine hull of basic
@@ -418,72 +400,69 @@ error:
  * If "bset" is not NULL, we check for any point we find if any
  * of its adjacent points also belong to "bset".
  */
-static __isl_give isl_basic_set *extend_affine_hull(struct isl_tab *tab,
-        __isl_take isl_basic_set *hull, __isl_keep isl_basic_set *bset)
-{
-    int i, j;
-    unsigned dim;
+static __isl_give isl_basic_set *
+extend_affine_hull(struct isl_tab *tab, __isl_take isl_basic_set *hull,
+                   __isl_keep isl_basic_set *bset) {
+  int i, j;
+  unsigned dim;
 
-    if (!tab || !hull)
+  if (!tab || !hull)
+    goto error;
+
+  dim = tab->n_var;
+
+  if (isl_tab_extend_cons(tab, 2 * dim + 1) < 0)
+    goto error;
+
+  for (i = 0; i < dim; ++i) {
+    struct isl_vec *sample;
+    struct isl_basic_set *point;
+    for (j = 0; j < hull->n_eq; ++j) {
+      sample = outside_point(tab, hull->eq[j], 1);
+      if (!sample)
         goto error;
-
-    dim = tab->n_var;
-
-    if (isl_tab_extend_cons(tab, 2 * dim + 1) < 0)
+      if (sample->size > 0)
+        break;
+      isl_vec_free(sample);
+      sample = outside_point(tab, hull->eq[j], 0);
+      if (!sample)
         goto error;
+      if (sample->size > 0)
+        break;
+      isl_vec_free(sample);
 
-    for (i = 0; i < dim; ++i) {
-        struct isl_vec *sample;
-        struct isl_basic_set *point;
-        for (j = 0; j < hull->n_eq; ++j) {
-            sample = outside_point(tab, hull->eq[j], 1);
-            if (!sample)
-                goto error;
-            if (sample->size > 0)
-                break;
-            isl_vec_free(sample);
-            sample = outside_point(tab, hull->eq[j], 0);
-            if (!sample)
-                goto error;
-            if (sample->size > 0)
-                break;
-            isl_vec_free(sample);
-
-            if (isl_tab_add_eq(tab, hull->eq[j]) < 0)
-                goto error;
-        }
-        if (j == hull->n_eq)
-            break;
-        if (tab->samples &&
-                isl_tab_add_sample(tab, isl_vec_copy(sample)) < 0)
-            hull = isl_basic_set_free(hull);
-        if (bset)
-            hull = add_adjacent_points(hull, isl_vec_copy(sample),
-                                       bset);
-        point = isl_basic_set_from_vec(sample);
-        hull = affine_hull(hull, point);
-        if (!hull)
-            return NULL;
+      if (isl_tab_add_eq(tab, hull->eq[j]) < 0)
+        goto error;
     }
+    if (j == hull->n_eq)
+      break;
+    if (tab->samples && isl_tab_add_sample(tab, isl_vec_copy(sample)) < 0)
+      hull = isl_basic_set_free(hull);
+    if (bset)
+      hull = add_adjacent_points(hull, isl_vec_copy(sample), bset);
+    point = isl_basic_set_from_vec(sample);
+    hull = affine_hull(hull, point);
+    if (!hull)
+      return NULL;
+  }
 
-    return hull;
+  return hull;
 error:
-    isl_basic_set_free(hull);
-    return NULL;
+  isl_basic_set_free(hull);
+  return NULL;
 }
 
 /* Construct an initial underapproximation of the hull of "bset"
  * from "sample" and any of its adjacent points that also belong to "bset".
  */
 static __isl_give isl_basic_set *initialize_hull(__isl_keep isl_basic_set *bset,
-        __isl_take isl_vec *sample)
-{
-    isl_basic_set *hull;
+                                                 __isl_take isl_vec *sample) {
+  isl_basic_set *hull;
 
-    hull = isl_basic_set_from_vec(isl_vec_copy(sample));
-    hull = add_adjacent_points(hull, sample, bset);
+  hull = isl_basic_set_from_vec(isl_vec_copy(sample));
+  hull = add_adjacent_points(hull, sample, bset);
 
-    return hull;
+  return hull;
 }
 
 /* Look for all equalities satisfied by the integer points in bset,
@@ -495,74 +474,73 @@ static __isl_give isl_basic_set *initialize_hull(__isl_keep isl_basic_set *bset,
  * we check if there is any point on a hyperplane parallel to the
  * corresponding hyperplane shifted by at least one (in either direction).
  */
-static __isl_give isl_basic_set *uset_affine_hull_bounded(
-    __isl_take isl_basic_set *bset)
-{
-    struct isl_vec *sample = NULL;
-    struct isl_basic_set *hull;
-    struct isl_tab *tab = NULL;
-    isl_size dim;
+static __isl_give isl_basic_set *
+uset_affine_hull_bounded(__isl_take isl_basic_set *bset) {
+  struct isl_vec *sample = NULL;
+  struct isl_basic_set *hull;
+  struct isl_tab *tab = NULL;
+  isl_size dim;
 
-    if (isl_basic_set_plain_is_empty(bset))
+  if (isl_basic_set_plain_is_empty(bset))
+    return bset;
+
+  dim = isl_basic_set_dim(bset, isl_dim_set);
+  if (dim < 0)
+    return isl_basic_set_free(bset);
+
+  if (bset->sample && bset->sample->size == 1 + dim) {
+    int contains = isl_basic_set_contains(bset, bset->sample);
+    if (contains < 0)
+      goto error;
+    if (contains) {
+      if (dim == 0)
         return bset;
-
-    dim = isl_basic_set_dim(bset, isl_dim_set);
-    if (dim < 0)
-        return isl_basic_set_free(bset);
-
-    if (bset->sample && bset->sample->size == 1 + dim) {
-        int contains = isl_basic_set_contains(bset, bset->sample);
-        if (contains < 0)
-            goto error;
-        if (contains) {
-            if (dim == 0)
-                return bset;
-            sample = isl_vec_copy(bset->sample);
-        } else {
-            isl_vec_free(bset->sample);
-            bset->sample = NULL;
-        }
+      sample = isl_vec_copy(bset->sample);
+    } else {
+      isl_vec_free(bset->sample);
+      bset->sample = NULL;
     }
+  }
 
-    tab = isl_tab_from_basic_set(bset, 1);
-    if (!tab)
-        goto error;
-    if (tab->empty) {
-        isl_tab_free(tab);
-        isl_vec_free(sample);
-        return isl_basic_set_set_to_empty(bset);
-    }
-
-    if (!sample) {
-        struct isl_tab_undo *snap;
-        snap = isl_tab_snap(tab);
-        sample = isl_tab_sample(tab);
-        if (isl_tab_rollback(tab, snap) < 0)
-            goto error;
-        isl_vec_free(tab->bmap->sample);
-        tab->bmap->sample = isl_vec_copy(sample);
-    }
-
-    if (!sample)
-        goto error;
-    if (sample->size == 0) {
-        isl_tab_free(tab);
-        isl_vec_free(sample);
-        return isl_basic_set_set_to_empty(bset);
-    }
-
-    hull = initialize_hull(bset, sample);
-
-    hull = extend_affine_hull(tab, hull, bset);
-    isl_basic_set_free(bset);
+  tab = isl_tab_from_basic_set(bset, 1);
+  if (!tab)
+    goto error;
+  if (tab->empty) {
     isl_tab_free(tab);
-
-    return hull;
-error:
     isl_vec_free(sample);
+    return isl_basic_set_set_to_empty(bset);
+  }
+
+  if (!sample) {
+    struct isl_tab_undo *snap;
+    snap = isl_tab_snap(tab);
+    sample = isl_tab_sample(tab);
+    if (isl_tab_rollback(tab, snap) < 0)
+      goto error;
+    isl_vec_free(tab->bmap->sample);
+    tab->bmap->sample = isl_vec_copy(sample);
+  }
+
+  if (!sample)
+    goto error;
+  if (sample->size == 0) {
     isl_tab_free(tab);
-    isl_basic_set_free(bset);
-    return NULL;
+    isl_vec_free(sample);
+    return isl_basic_set_set_to_empty(bset);
+  }
+
+  hull = initialize_hull(bset, sample);
+
+  hull = extend_affine_hull(tab, hull, bset);
+  isl_basic_set_free(bset);
+  isl_tab_free(tab);
+
+  return hull;
+error:
+  isl_vec_free(sample);
+  isl_tab_free(tab);
+  isl_basic_set_free(bset);
+  return NULL;
 }
 
 /* Given an unbounded tableau and an integer point satisfying the tableau,
@@ -573,42 +551,40 @@ error:
  * which is assumed to have been initialized appropriately.
  */
 static __isl_give isl_basic_set *initial_hull(struct isl_tab *tab,
-        __isl_take isl_vec *vec)
-{
-    int i;
-    int k;
-    struct isl_basic_set *bset = NULL;
-    struct isl_ctx *ctx;
-    isl_size dim;
+                                              __isl_take isl_vec *vec) {
+  int i;
+  int k;
+  struct isl_basic_set *bset = NULL;
+  struct isl_ctx *ctx;
+  isl_size dim;
 
-    if (!vec || !tab)
-        return NULL;
-    ctx = vec->ctx;
-    isl_assert(ctx, vec->size != 0, goto error);
-
-    bset = isl_basic_set_alloc(ctx, 0, vec->size - 1, 0, vec->size - 1, 0);
-    dim = isl_basic_set_dim(bset, isl_dim_set);
-    if (dim < 0)
-        goto error;
-    dim -= tab->n_unbounded;
-    for (i = 0; i < dim; ++i) {
-        k = isl_basic_set_alloc_equality(bset);
-        if (k < 0)
-            goto error;
-        isl_seq_cpy(bset->eq[k] + 1, tab->basis->row[1 + i] + 1,
-                    vec->size - 1);
-        isl_seq_inner_product(bset->eq[k] + 1, vec->el +1,
-                              vec->size - 1, &bset->eq[k][0]);
-        isl_int_neg(bset->eq[k][0], bset->eq[k][0]);
-    }
-    bset->sample = vec;
-    bset = isl_basic_set_gauss(bset, NULL);
-
-    return bset;
-error:
-    isl_basic_set_free(bset);
-    isl_vec_free(vec);
+  if (!vec || !tab)
     return NULL;
+  ctx = vec->ctx;
+  isl_assert(ctx, vec->size != 0, goto error);
+
+  bset = isl_basic_set_alloc(ctx, 0, vec->size - 1, 0, vec->size - 1, 0);
+  dim = isl_basic_set_dim(bset, isl_dim_set);
+  if (dim < 0)
+    goto error;
+  dim -= tab->n_unbounded;
+  for (i = 0; i < dim; ++i) {
+    k = isl_basic_set_alloc_equality(bset);
+    if (k < 0)
+      goto error;
+    isl_seq_cpy(bset->eq[k] + 1, tab->basis->row[1 + i] + 1, vec->size - 1);
+    isl_seq_inner_product(bset->eq[k] + 1, vec->el + 1, vec->size - 1,
+                          &bset->eq[k][0]);
+    isl_int_neg(bset->eq[k][0], bset->eq[k][0]);
+  }
+  bset->sample = vec;
+  bset = isl_basic_set_gauss(bset, NULL);
+
+  return bset;
+error:
+  isl_basic_set_free(bset);
+  isl_vec_free(vec);
+  return NULL;
 }
 
 /* Given a tableau of a set and a tableau of the corresponding
@@ -622,78 +598,76 @@ error:
  * any constraints were added and then add the equalities back in.
  */
 struct isl_tab *isl_tab_detect_equalities(struct isl_tab *tab,
-        struct isl_tab *tab_cone)
-{
-    int j;
-    struct isl_vec *sample;
-    struct isl_basic_set *hull = NULL;
-    struct isl_tab_undo *snap;
+                                          struct isl_tab *tab_cone) {
+  int j;
+  struct isl_vec *sample;
+  struct isl_basic_set *hull = NULL;
+  struct isl_tab_undo *snap;
 
-    if (!tab || !tab_cone)
-        goto error;
+  if (!tab || !tab_cone)
+    goto error;
 
-    snap = isl_tab_snap(tab);
+  snap = isl_tab_snap(tab);
 
-    isl_mat_free(tab->basis);
-    tab->basis = NULL;
+  isl_mat_free(tab->basis);
+  tab->basis = NULL;
 
-    isl_assert(tab->mat->ctx, tab->bmap, goto error);
-    isl_assert(tab->mat->ctx, tab->samples, goto error);
-    isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, goto error);
-    isl_assert(tab->mat->ctx, tab->n_sample > tab->n_outside, goto error);
+  isl_assert(tab->mat->ctx, tab->bmap, goto error);
+  isl_assert(tab->mat->ctx, tab->samples, goto error);
+  isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, goto error);
+  isl_assert(tab->mat->ctx, tab->n_sample > tab->n_outside, goto error);
 
-    if (isl_tab_set_initial_basis_with_cone(tab, tab_cone) < 0)
-        goto error;
+  if (isl_tab_set_initial_basis_with_cone(tab, tab_cone) < 0)
+    goto error;
 
-    sample = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_var);
-    if (!sample)
-        goto error;
+  sample = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_var);
+  if (!sample)
+    goto error;
 
-    isl_seq_cpy(sample->el, tab->samples->row[tab->n_outside], sample->size);
+  isl_seq_cpy(sample->el, tab->samples->row[tab->n_outside], sample->size);
 
-    isl_vec_free(tab->bmap->sample);
-    tab->bmap->sample = isl_vec_copy(sample);
+  isl_vec_free(tab->bmap->sample);
+  tab->bmap->sample = isl_vec_copy(sample);
 
-    if (tab->n_unbounded == 0)
-        hull = isl_basic_set_from_vec(isl_vec_copy(sample));
-    else
-        hull = initial_hull(tab, isl_vec_copy(sample));
+  if (tab->n_unbounded == 0)
+    hull = isl_basic_set_from_vec(isl_vec_copy(sample));
+  else
+    hull = initial_hull(tab, isl_vec_copy(sample));
 
-    for (j = tab->n_outside + 1; j < tab->n_sample; ++j) {
-        isl_seq_cpy(sample->el, tab->samples->row[j], sample->size);
-        hull = affine_hull(hull,
-                           isl_basic_set_from_vec(isl_vec_copy(sample)));
-    }
+  for (j = tab->n_outside + 1; j < tab->n_sample; ++j) {
+    isl_seq_cpy(sample->el, tab->samples->row[j], sample->size);
+    hull = affine_hull(hull, isl_basic_set_from_vec(isl_vec_copy(sample)));
+  }
 
-    isl_vec_free(sample);
+  isl_vec_free(sample);
 
-    hull = extend_affine_hull(tab, hull, NULL);
-    if (!hull)
-        goto error;
+  hull = extend_affine_hull(tab, hull, NULL);
+  if (!hull)
+    goto error;
 
-    if (tab->n_unbounded == 0) {
-        isl_basic_set_free(hull);
-        return tab;
-    }
-
-    if (isl_tab_rollback(tab, snap) < 0)
-        goto error;
-
-    if (hull->n_eq > tab->n_zero) {
-        for (j = 0; j < hull->n_eq; ++j) {
-            isl_seq_normalize(tab->mat->ctx, hull->eq[j], 1 + tab->n_var);
-            if (isl_tab_add_eq(tab, hull->eq[j]) < 0)
-                goto error;
-        }
-    }
-
+  if (tab->n_unbounded == 0) {
     isl_basic_set_free(hull);
-
     return tab;
+  }
+
+  if (isl_tab_rollback(tab, snap) < 0)
+    goto error;
+
+  if (hull->n_eq > tab->n_zero) {
+    for (j = 0; j < hull->n_eq; ++j) {
+      isl_seq_normalize(tab->mat->ctx, hull->eq[j], 1 + tab->n_var);
+      if (isl_tab_add_eq(tab, hull->eq[j]) < 0)
+        goto error;
+    }
+  }
+
+  isl_basic_set_free(hull);
+
+  return tab;
 error:
-    isl_basic_set_free(hull);
-    isl_tab_free(tab);
-    return NULL;
+  isl_basic_set_free(hull);
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Compute the affine hull of "bset", where "cone" is the recession cone
@@ -727,66 +701,66 @@ error:
  * The affine hull in the original space is then obtained as
  * A = preimage(A'', Q_1).
  */
-static __isl_give isl_basic_set *affine_hull_with_cone(
-    __isl_take isl_basic_set *bset, __isl_take isl_basic_set *cone)
-{
-    isl_size total;
-    unsigned cone_dim;
-    struct isl_basic_set *hull;
-    struct isl_mat *M, *U, *Q;
+static __isl_give isl_basic_set *
+affine_hull_with_cone(__isl_take isl_basic_set *bset,
+                      __isl_take isl_basic_set *cone) {
+  isl_size total;
+  unsigned cone_dim;
+  struct isl_basic_set *hull;
+  struct isl_mat *M, *U, *Q;
 
-    total = isl_basic_set_dim(cone, isl_dim_all);
-    if (!bset || total < 0)
-        goto error;
+  total = isl_basic_set_dim(cone, isl_dim_all);
+  if (!bset || total < 0)
+    goto error;
 
-    cone_dim = total - cone->n_eq;
+  cone_dim = total - cone->n_eq;
 
-    M = isl_mat_sub_alloc6(bset->ctx, cone->eq, 0, cone->n_eq, 1, total);
-    M = isl_mat_left_hermite(M, 0, &U, &Q);
-    if (!M)
-        goto error;
-    isl_mat_free(M);
+  M = isl_mat_sub_alloc6(bset->ctx, cone->eq, 0, cone->n_eq, 1, total);
+  M = isl_mat_left_hermite(M, 0, &U, &Q);
+  if (!M)
+    goto error;
+  isl_mat_free(M);
 
-    U = isl_mat_lin_to_aff(U);
-    bset = isl_basic_set_preimage(bset, isl_mat_copy(U));
+  U = isl_mat_lin_to_aff(U);
+  bset = isl_basic_set_preimage(bset, isl_mat_copy(U));
 
-    bset = isl_basic_set_drop_constraints_involving(bset, total - cone_dim,
-            cone_dim);
-    bset = isl_basic_set_drop_dims(bset, total - cone_dim, cone_dim);
+  bset = isl_basic_set_drop_constraints_involving(bset, total - cone_dim,
+                                                  cone_dim);
+  bset = isl_basic_set_drop_dims(bset, total - cone_dim, cone_dim);
 
-    Q = isl_mat_lin_to_aff(Q);
-    Q = isl_mat_drop_rows(Q, 1 + total - cone_dim, cone_dim);
+  Q = isl_mat_lin_to_aff(Q);
+  Q = isl_mat_drop_rows(Q, 1 + total - cone_dim, cone_dim);
 
-    if (bset && bset->sample && bset->sample->size == 1 + total)
-        bset->sample = isl_mat_vec_product(isl_mat_copy(Q), bset->sample);
+  if (bset && bset->sample && bset->sample->size == 1 + total)
+    bset->sample = isl_mat_vec_product(isl_mat_copy(Q), bset->sample);
 
-    hull = uset_affine_hull_bounded(bset);
+  hull = uset_affine_hull_bounded(bset);
 
-    if (!hull) {
-        isl_mat_free(Q);
-        isl_mat_free(U);
-    } else {
-        struct isl_vec *sample = isl_vec_copy(hull->sample);
-        U = isl_mat_drop_cols(U, 1 + total - cone_dim, cone_dim);
-        if (sample && sample->size > 0)
-            sample = isl_mat_vec_product(U, sample);
-        else
-            isl_mat_free(U);
-        hull = isl_basic_set_preimage(hull, Q);
-        if (hull) {
-            isl_vec_free(hull->sample);
-            hull->sample = sample;
-        } else
-            isl_vec_free(sample);
-    }
+  if (!hull) {
+    isl_mat_free(Q);
+    isl_mat_free(U);
+  } else {
+    struct isl_vec *sample = isl_vec_copy(hull->sample);
+    U = isl_mat_drop_cols(U, 1 + total - cone_dim, cone_dim);
+    if (sample && sample->size > 0)
+      sample = isl_mat_vec_product(U, sample);
+    else
+      isl_mat_free(U);
+    hull = isl_basic_set_preimage(hull, Q);
+    if (hull) {
+      isl_vec_free(hull->sample);
+      hull->sample = sample;
+    } else
+      isl_vec_free(sample);
+  }
 
-    isl_basic_set_free(cone);
+  isl_basic_set_free(cone);
 
-    return hull;
+  return hull;
 error:
-    isl_basic_set_free(bset);
-    isl_basic_set_free(cone);
-    return NULL;
+  isl_basic_set_free(bset);
+  isl_basic_set_free(cone);
+  return NULL;
 }
 
 /* Look for all equalities satisfied by the integer points in bset,
@@ -805,37 +779,36 @@ error:
  * In particular, if the recession cone is full-dimensional, then
  * the affine hull is simply the whole universe.
  */
-static __isl_give isl_basic_set *uset_affine_hull(
-    __isl_take isl_basic_set *bset)
-{
-    struct isl_basic_set *cone;
-    isl_size total;
+static __isl_give isl_basic_set *
+uset_affine_hull(__isl_take isl_basic_set *bset) {
+  struct isl_basic_set *cone;
+  isl_size total;
 
-    if (isl_basic_set_plain_is_empty(bset))
-        return bset;
+  if (isl_basic_set_plain_is_empty(bset))
+    return bset;
 
-    cone = isl_basic_set_recession_cone(isl_basic_set_copy(bset));
-    if (!cone)
-        goto error;
-    if (cone->n_eq == 0) {
-        isl_space *space;
-        space = isl_basic_set_get_space(bset);
-        isl_basic_set_free(cone);
-        isl_basic_set_free(bset);
-        return isl_basic_set_universe(space);
-    }
-
-    total = isl_basic_set_dim(cone, isl_dim_all);
-    if (total < 0)
-        bset = isl_basic_set_free(bset);
-    if (cone->n_eq < total)
-        return affine_hull_with_cone(bset, cone);
-
+  cone = isl_basic_set_recession_cone(isl_basic_set_copy(bset));
+  if (!cone)
+    goto error;
+  if (cone->n_eq == 0) {
+    isl_space *space;
+    space = isl_basic_set_get_space(bset);
     isl_basic_set_free(cone);
-    return uset_affine_hull_bounded(bset);
-error:
     isl_basic_set_free(bset);
-    return NULL;
+    return isl_basic_set_universe(space);
+  }
+
+  total = isl_basic_set_dim(cone, isl_dim_all);
+  if (total < 0)
+    bset = isl_basic_set_free(bset);
+  if (cone->n_eq < total)
+    return affine_hull_with_cone(bset, cone);
+
+  isl_basic_set_free(cone);
+  return uset_affine_hull_bounded(bset);
+error:
+  isl_basic_set_free(bset);
+  return NULL;
 }
 
 /* Look for all equalities satisfied by the integer points in bmap
@@ -851,158 +824,148 @@ error:
  * In particular, dimensions that correspond to existential variables
  * in bmap and that are found to be fixed are not removed.
  */
-static __isl_give isl_basic_set *equalities_in_underlying_set(
-    __isl_take isl_basic_map *bmap)
-{
-    struct isl_mat *T1 = NULL;
-    struct isl_mat *T2 = NULL;
-    struct isl_basic_set *bset = NULL;
-    struct isl_basic_set *hull = NULL;
+static __isl_give isl_basic_set *
+equalities_in_underlying_set(__isl_take isl_basic_map *bmap) {
+  struct isl_mat *T1 = NULL;
+  struct isl_mat *T2 = NULL;
+  struct isl_basic_set *bset = NULL;
+  struct isl_basic_set *hull = NULL;
 
-    bset = isl_basic_map_underlying_set(bmap);
-    if (!bset)
-        return NULL;
-    if (bset->n_eq)
-        bset = isl_basic_set_remove_equalities(bset, &T1, &T2);
-    if (!bset)
-        goto error;
+  bset = isl_basic_map_underlying_set(bmap);
+  if (!bset)
+    return NULL;
+  if (bset->n_eq)
+    bset = isl_basic_set_remove_equalities(bset, &T1, &T2);
+  if (!bset)
+    goto error;
 
-    hull = uset_affine_hull(bset);
-    if (!T2)
-        return hull;
-
-    if (!hull) {
-        isl_mat_free(T1);
-        isl_mat_free(T2);
-    } else {
-        struct isl_vec *sample = isl_vec_copy(hull->sample);
-        if (sample && sample->size > 0)
-            sample = isl_mat_vec_product(T1, sample);
-        else
-            isl_mat_free(T1);
-        hull = isl_basic_set_preimage(hull, T2);
-        if (hull) {
-            isl_vec_free(hull->sample);
-            hull->sample = sample;
-        } else
-            isl_vec_free(sample);
-    }
-
+  hull = uset_affine_hull(bset);
+  if (!T2)
     return hull;
-error:
+
+  if (!hull) {
     isl_mat_free(T1);
     isl_mat_free(T2);
-    isl_basic_set_free(bset);
-    isl_basic_set_free(hull);
-    return NULL;
+  } else {
+    struct isl_vec *sample = isl_vec_copy(hull->sample);
+    if (sample && sample->size > 0)
+      sample = isl_mat_vec_product(T1, sample);
+    else
+      isl_mat_free(T1);
+    hull = isl_basic_set_preimage(hull, T2);
+    if (hull) {
+      isl_vec_free(hull->sample);
+      hull->sample = sample;
+    } else
+      isl_vec_free(sample);
+  }
+
+  return hull;
+error:
+  isl_mat_free(T1);
+  isl_mat_free(T2);
+  isl_basic_set_free(bset);
+  isl_basic_set_free(hull);
+  return NULL;
 }
 
 /* Detect and make explicit all equalities satisfied by the (integer)
  * points in bmap.
  */
-__isl_give isl_basic_map *isl_basic_map_detect_equalities(
-    __isl_take isl_basic_map *bmap)
-{
-    int i, j;
-    isl_size total;
-    struct isl_basic_set *hull = NULL;
+__isl_give isl_basic_map *
+isl_basic_map_detect_equalities(__isl_take isl_basic_map *bmap) {
+  int i, j;
+  isl_size total;
+  struct isl_basic_set *hull = NULL;
 
-    if (!bmap)
-        return NULL;
-    if (bmap->n_ineq == 0)
-        return bmap;
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY))
-        return bmap;
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_ALL_EQUALITIES))
-        return bmap;
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL))
-        return isl_basic_map_implicit_equalities(bmap);
-
-    hull = equalities_in_underlying_set(isl_basic_map_copy(bmap));
-    if (!hull)
-        goto error;
-    if (ISL_F_ISSET(hull, ISL_BASIC_SET_EMPTY)) {
-        isl_basic_set_free(hull);
-        return isl_basic_map_set_to_empty(bmap);
-    }
-    bmap = isl_basic_map_extend(bmap, 0, hull->n_eq, 0);
-    total = isl_basic_set_dim(hull, isl_dim_all);
-    if (total < 0)
-        goto error;
-    for (i = 0; i < hull->n_eq; ++i) {
-        j = isl_basic_map_alloc_equality(bmap);
-        if (j < 0)
-            goto error;
-        isl_seq_cpy(bmap->eq[j], hull->eq[i], 1 + total);
-    }
-    isl_vec_free(bmap->sample);
-    bmap->sample = isl_vec_copy(hull->sample);
-    isl_basic_set_free(hull);
-    ISL_F_SET(bmap, ISL_BASIC_MAP_NO_IMPLICIT | ISL_BASIC_MAP_ALL_EQUALITIES);
-    bmap = isl_basic_map_simplify(bmap);
-    return isl_basic_map_finalize(bmap);
-error:
-    isl_basic_set_free(hull);
-    isl_basic_map_free(bmap);
+  if (!bmap)
     return NULL;
+  if (bmap->n_ineq == 0)
+    return bmap;
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY))
+    return bmap;
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_ALL_EQUALITIES))
+    return bmap;
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL))
+    return isl_basic_map_implicit_equalities(bmap);
+
+  hull = equalities_in_underlying_set(isl_basic_map_copy(bmap));
+  if (!hull)
+    goto error;
+  if (ISL_F_ISSET(hull, ISL_BASIC_SET_EMPTY)) {
+    isl_basic_set_free(hull);
+    return isl_basic_map_set_to_empty(bmap);
+  }
+  bmap = isl_basic_map_extend(bmap, 0, hull->n_eq, 0);
+  total = isl_basic_set_dim(hull, isl_dim_all);
+  if (total < 0)
+    goto error;
+  for (i = 0; i < hull->n_eq; ++i) {
+    j = isl_basic_map_alloc_equality(bmap);
+    if (j < 0)
+      goto error;
+    isl_seq_cpy(bmap->eq[j], hull->eq[i], 1 + total);
+  }
+  isl_vec_free(bmap->sample);
+  bmap->sample = isl_vec_copy(hull->sample);
+  isl_basic_set_free(hull);
+  ISL_F_SET(bmap, ISL_BASIC_MAP_NO_IMPLICIT | ISL_BASIC_MAP_ALL_EQUALITIES);
+  bmap = isl_basic_map_simplify(bmap);
+  return isl_basic_map_finalize(bmap);
+error:
+  isl_basic_set_free(hull);
+  isl_basic_map_free(bmap);
+  return NULL;
 }
 
-__isl_give isl_basic_set *isl_basic_set_detect_equalities(
-    __isl_take isl_basic_set *bset)
-{
-    return bset_from_bmap(
-               isl_basic_map_detect_equalities(bset_to_bmap(bset)));
+__isl_give isl_basic_set *
+isl_basic_set_detect_equalities(__isl_take isl_basic_set *bset) {
+  return bset_from_bmap(isl_basic_map_detect_equalities(bset_to_bmap(bset)));
 }
 
-__isl_give isl_map *isl_map_detect_equalities(__isl_take isl_map *map)
-{
-    return isl_map_inline_foreach_basic_map(map,
-                                            &isl_basic_map_detect_equalities);
+__isl_give isl_map *isl_map_detect_equalities(__isl_take isl_map *map) {
+  return isl_map_inline_foreach_basic_map(map,
+                                          &isl_basic_map_detect_equalities);
 }
 
-__isl_give isl_set *isl_set_detect_equalities(__isl_take isl_set *set)
-{
-    return set_from_map(isl_map_detect_equalities(set_to_map(set)));
+__isl_give isl_set *isl_set_detect_equalities(__isl_take isl_set *set) {
+  return set_from_map(isl_map_detect_equalities(set_to_map(set)));
 }
 
 /* Return the superset of "bmap" described by the equalities
  * satisfied by "bmap" that are already known.
  */
-__isl_give isl_basic_map *isl_basic_map_plain_affine_hull(
-    __isl_take isl_basic_map *bmap)
-{
-    bmap = isl_basic_map_cow(bmap);
-    if (bmap)
-        isl_basic_map_free_inequality(bmap, bmap->n_ineq);
-    bmap = isl_basic_map_finalize(bmap);
-    return bmap;
+__isl_give isl_basic_map *
+isl_basic_map_plain_affine_hull(__isl_take isl_basic_map *bmap) {
+  bmap = isl_basic_map_cow(bmap);
+  if (bmap)
+    isl_basic_map_free_inequality(bmap, bmap->n_ineq);
+  bmap = isl_basic_map_finalize(bmap);
+  return bmap;
 }
 
 /* Return the superset of "bset" described by the equalities
  * satisfied by "bset" that are already known.
  */
-__isl_give isl_basic_set *isl_basic_set_plain_affine_hull(
-    __isl_take isl_basic_set *bset)
-{
-    return isl_basic_map_plain_affine_hull(bset);
+__isl_give isl_basic_set *
+isl_basic_set_plain_affine_hull(__isl_take isl_basic_set *bset) {
+  return isl_basic_map_plain_affine_hull(bset);
 }
 
 /* After computing the rational affine hull (by detecting the implicit
  * equalities), we compute the additional equalities satisfied by
  * the integer points (if any) and add the original equalities back in.
  */
-__isl_give isl_basic_map *isl_basic_map_affine_hull(
-    __isl_take isl_basic_map *bmap)
-{
-    bmap = isl_basic_map_detect_equalities(bmap);
-    bmap = isl_basic_map_plain_affine_hull(bmap);
-    return bmap;
+__isl_give isl_basic_map *
+isl_basic_map_affine_hull(__isl_take isl_basic_map *bmap) {
+  bmap = isl_basic_map_detect_equalities(bmap);
+  bmap = isl_basic_map_plain_affine_hull(bmap);
+  return bmap;
 }
 
-__isl_give isl_basic_set *isl_basic_set_affine_hull(
-    __isl_take isl_basic_set *bset)
-{
-    return bset_from_bmap(isl_basic_map_affine_hull(bset_to_bmap(bset)));
+__isl_give isl_basic_set *
+isl_basic_set_affine_hull(__isl_take isl_basic_set *bset) {
+  return bset_from_bmap(isl_basic_map_affine_hull(bset_to_bmap(bset)));
 }
 
 /* Given a rational affine matrix "M", add stride constraints to "bmap"
@@ -1024,40 +987,39 @@ __isl_give isl_basic_set *isl_basic_set_affine_hull(
  * This function is similar to add_strides in isl_morph.c
  */
 static __isl_give isl_basic_map *add_strides(__isl_take isl_basic_map *bmap,
-        __isl_keep isl_mat *M, int n_known)
-{
-    int i, div, k;
-    isl_int gcd;
+                                             __isl_keep isl_mat *M,
+                                             int n_known) {
+  int i, div, k;
+  isl_int gcd;
 
-    if (isl_int_is_one(M->row[0][0]))
-        return bmap;
-
-    bmap = isl_basic_map_extend(bmap, M->n_row - 1, M->n_row - 1, 0);
-
-    isl_int_init(gcd);
-    for (i = 1; i < M->n_row; ++i) {
-        isl_seq_gcd(M->row[i], M->n_col, &gcd);
-        if (isl_int_is_divisible_by(gcd, M->row[0][0]))
-            continue;
-        div = isl_basic_map_alloc_div(bmap);
-        if (div < 0)
-            goto error;
-        isl_int_set_si(bmap->div[div][0], 0);
-        k = isl_basic_map_alloc_equality(bmap);
-        if (k < 0)
-            goto error;
-        isl_seq_cpy(bmap->eq[k], M->row[i], M->n_col);
-        isl_seq_clr(bmap->eq[k] + M->n_col, bmap->n_div - n_known);
-        isl_int_set(bmap->eq[k][M->n_col - n_known + div],
-                    M->row[0][0]);
-    }
-    isl_int_clear(gcd);
-
+  if (isl_int_is_one(M->row[0][0]))
     return bmap;
+
+  bmap = isl_basic_map_extend(bmap, M->n_row - 1, M->n_row - 1, 0);
+
+  isl_int_init(gcd);
+  for (i = 1; i < M->n_row; ++i) {
+    isl_seq_gcd(M->row[i], M->n_col, &gcd);
+    if (isl_int_is_divisible_by(gcd, M->row[0][0]))
+      continue;
+    div = isl_basic_map_alloc_div(bmap);
+    if (div < 0)
+      goto error;
+    isl_int_set_si(bmap->div[div][0], 0);
+    k = isl_basic_map_alloc_equality(bmap);
+    if (k < 0)
+      goto error;
+    isl_seq_cpy(bmap->eq[k], M->row[i], M->n_col);
+    isl_seq_clr(bmap->eq[k] + M->n_col, bmap->n_div - n_known);
+    isl_int_set(bmap->eq[k][M->n_col - n_known + div], M->row[0][0]);
+  }
+  isl_int_clear(gcd);
+
+  return bmap;
 error:
-    isl_int_clear(gcd);
-    isl_basic_map_free(bmap);
-    return NULL;
+  isl_int_clear(gcd);
+  isl_basic_map_free(bmap);
+  return NULL;
 }
 
 /* If there are any equalities that involve (multiple) unknown divs,
@@ -1087,56 +1049,55 @@ error:
  *
  * in add_strides, with alpha fresh existentially quantified variables.
  */
-static __isl_give isl_basic_map *isl_basic_map_make_strides_explicit(
-    __isl_take isl_basic_map *bmap)
-{
-    isl_bool known;
-    int n_known;
-    int n, n_col;
-    isl_size v_div;
-    isl_ctx *ctx;
-    isl_mat *A, *B, *M;
+static __isl_give isl_basic_map *
+isl_basic_map_make_strides_explicit(__isl_take isl_basic_map *bmap) {
+  isl_bool known;
+  int n_known;
+  int n, n_col;
+  isl_size v_div;
+  isl_ctx *ctx;
+  isl_mat *A, *B, *M;
 
-    known = isl_basic_map_divs_known(bmap);
-    if (known < 0)
-        return isl_basic_map_free(bmap);
-    if (known)
-        return bmap;
-    bmap = isl_basic_map_sort_divs(bmap);
-    bmap = isl_basic_map_gauss(bmap, NULL);
-    if (!bmap)
-        return NULL;
-
-    for (n_known = 0; n_known < bmap->n_div; ++n_known)
-        if (isl_int_is_zero(bmap->div[n_known][0]))
-            break;
-    v_div = isl_basic_map_var_offset(bmap, isl_dim_div);
-    if (v_div < 0)
-        return isl_basic_map_free(bmap);
-    for (n = 0; n < bmap->n_eq; ++n)
-        if (isl_seq_first_non_zero(bmap->eq[n] + 1 + v_div + n_known,
-                                   bmap->n_div - n_known) == -1)
-            break;
-    if (n == 0)
-        return bmap;
-    ctx = isl_basic_map_get_ctx(bmap);
-    B = isl_mat_sub_alloc6(ctx, bmap->eq, 0, n, 0, 1 + v_div + n_known);
-    n_col = bmap->n_div - n_known;
-    A = isl_mat_sub_alloc6(ctx, bmap->eq, 0, n, 1 + v_div + n_known, n_col);
-    A = isl_mat_left_hermite(A, 0, NULL, NULL);
-    A = isl_mat_drop_cols(A, n, n_col - n);
-    A = isl_mat_lin_to_aff(A);
-    A = isl_mat_right_inverse(A);
-    B = isl_mat_insert_zero_rows(B, 0, 1);
-    B = isl_mat_set_element_si(B, 0, 0, 1);
-    M = isl_mat_product(A, B);
-    if (!M)
-        return isl_basic_map_free(bmap);
-    bmap = add_strides(bmap, M, n_known);
-    bmap = isl_basic_map_gauss(bmap, NULL);
-    isl_mat_free(M);
-
+  known = isl_basic_map_divs_known(bmap);
+  if (known < 0)
+    return isl_basic_map_free(bmap);
+  if (known)
     return bmap;
+  bmap = isl_basic_map_sort_divs(bmap);
+  bmap = isl_basic_map_gauss(bmap, NULL);
+  if (!bmap)
+    return NULL;
+
+  for (n_known = 0; n_known < bmap->n_div; ++n_known)
+    if (isl_int_is_zero(bmap->div[n_known][0]))
+      break;
+  v_div = isl_basic_map_var_offset(bmap, isl_dim_div);
+  if (v_div < 0)
+    return isl_basic_map_free(bmap);
+  for (n = 0; n < bmap->n_eq; ++n)
+    if (isl_seq_first_non_zero(bmap->eq[n] + 1 + v_div + n_known,
+                               bmap->n_div - n_known) == -1)
+      break;
+  if (n == 0)
+    return bmap;
+  ctx = isl_basic_map_get_ctx(bmap);
+  B = isl_mat_sub_alloc6(ctx, bmap->eq, 0, n, 0, 1 + v_div + n_known);
+  n_col = bmap->n_div - n_known;
+  A = isl_mat_sub_alloc6(ctx, bmap->eq, 0, n, 1 + v_div + n_known, n_col);
+  A = isl_mat_left_hermite(A, 0, NULL, NULL);
+  A = isl_mat_drop_cols(A, n, n_col - n);
+  A = isl_mat_lin_to_aff(A);
+  A = isl_mat_right_inverse(A);
+  B = isl_mat_insert_zero_rows(B, 0, 1);
+  B = isl_mat_set_element_si(B, 0, 0, 1);
+  M = isl_mat_product(A, B);
+  if (!M)
+    return isl_basic_map_free(bmap);
+  bmap = add_strides(bmap, M, n_known);
+  bmap = isl_basic_map_gauss(bmap, NULL);
+  isl_mat_free(M);
+
+  return bmap;
 }
 
 /* Compute the affine hull of each basic map in "map" separately
@@ -1151,40 +1112,37 @@ static __isl_give isl_basic_map *isl_basic_map_make_strides_explicit(
  * is encoded through multiple unknown divs then we need to make
  * some extra effort in isl_basic_map_make_strides_explicit.
  */
-static __isl_give isl_map *isl_map_local_affine_hull(__isl_take isl_map *map)
-{
-    int i;
+static __isl_give isl_map *isl_map_local_affine_hull(__isl_take isl_map *map) {
+  int i;
 
-    map = isl_map_cow(map);
-    if (!map)
-        return NULL;
+  map = isl_map_cow(map);
+  if (!map)
+    return NULL;
 
-    for (i = 0; i < map->n; ++i) {
-        map->p[i] = isl_basic_map_affine_hull(map->p[i]);
-        map->p[i] = isl_basic_map_gauss(map->p[i], NULL);
-        map->p[i] = isl_basic_map_make_strides_explicit(map->p[i]);
-        if (!map->p[i])
-            return isl_map_free(map);
-    }
+  for (i = 0; i < map->n; ++i) {
+    map->p[i] = isl_basic_map_affine_hull(map->p[i]);
+    map->p[i] = isl_basic_map_gauss(map->p[i], NULL);
+    map->p[i] = isl_basic_map_make_strides_explicit(map->p[i]);
+    if (!map->p[i])
+      return isl_map_free(map);
+  }
 
-    return map;
+  return map;
 }
 
-static __isl_give isl_set *isl_set_local_affine_hull(__isl_take isl_set *set)
-{
-    return isl_map_local_affine_hull(set);
+static __isl_give isl_set *isl_set_local_affine_hull(__isl_take isl_set *set) {
+  return isl_map_local_affine_hull(set);
 }
 
 /* Return an empty basic map living in the same space as "map".
  */
-static __isl_give isl_basic_map *replace_map_by_empty_basic_map(
-    __isl_take isl_map *map)
-{
-    isl_space *space;
+static __isl_give isl_basic_map *
+replace_map_by_empty_basic_map(__isl_take isl_map *map) {
+  isl_space *space;
 
-    space = isl_map_get_space(map);
-    isl_map_free(map);
-    return isl_basic_map_empty(space);
+  space = isl_map_get_space(map);
+  isl_map_free(map);
+  return isl_basic_map_empty(space);
 }
 
 /* Compute the affine hull of "map".
@@ -1206,47 +1164,45 @@ static __isl_give isl_basic_map *replace_map_by_empty_basic_map(
  * Finally, we combine the individual affine hulls into a single
  * affine hull.
  */
-__isl_give isl_basic_map *isl_map_affine_hull(__isl_take isl_map *map)
-{
-    struct isl_basic_map *model = NULL;
-    struct isl_basic_map *hull = NULL;
-    struct isl_set *set;
-    isl_basic_set *bset;
+__isl_give isl_basic_map *isl_map_affine_hull(__isl_take isl_map *map) {
+  struct isl_basic_map *model = NULL;
+  struct isl_basic_map *hull = NULL;
+  struct isl_set *set;
+  isl_basic_set *bset;
 
-    map = isl_map_detect_equalities(map);
-    map = isl_map_local_affine_hull(map);
-    map = isl_map_remove_empty_parts(map);
-    map = isl_map_remove_unknown_divs(map);
-    map = isl_map_align_divs_internal(map);
+  map = isl_map_detect_equalities(map);
+  map = isl_map_local_affine_hull(map);
+  map = isl_map_remove_empty_parts(map);
+  map = isl_map_remove_unknown_divs(map);
+  map = isl_map_align_divs_internal(map);
 
-    if (!map)
-        return NULL;
-
-    if (map->n == 0)
-        return replace_map_by_empty_basic_map(map);
-
-    model = isl_basic_map_copy(map->p[0]);
-    set = isl_map_underlying_set(map);
-    set = isl_set_cow(set);
-    set = isl_set_local_affine_hull(set);
-    if (!set)
-        goto error;
-
-    while (set->n > 1)
-        set->p[0] = affine_hull(set->p[0], set->p[--set->n]);
-
-    bset = isl_basic_set_copy(set->p[0]);
-    hull = isl_basic_map_overlying_set(bset, model);
-    isl_set_free(set);
-    hull = isl_basic_map_simplify(hull);
-    return isl_basic_map_finalize(hull);
-error:
-    isl_basic_map_free(model);
-    isl_set_free(set);
+  if (!map)
     return NULL;
+
+  if (map->n == 0)
+    return replace_map_by_empty_basic_map(map);
+
+  model = isl_basic_map_copy(map->p[0]);
+  set = isl_map_underlying_set(map);
+  set = isl_set_cow(set);
+  set = isl_set_local_affine_hull(set);
+  if (!set)
+    goto error;
+
+  while (set->n > 1)
+    set->p[0] = affine_hull(set->p[0], set->p[--set->n]);
+
+  bset = isl_basic_set_copy(set->p[0]);
+  hull = isl_basic_map_overlying_set(bset, model);
+  isl_set_free(set);
+  hull = isl_basic_map_simplify(hull);
+  return isl_basic_map_finalize(hull);
+error:
+  isl_basic_map_free(model);
+  isl_set_free(set);
+  return NULL;
 }
 
-__isl_give isl_basic_set *isl_set_affine_hull(__isl_take isl_set *set)
-{
-    return bset_from_bmap(isl_map_affine_hull(set_to_map(set)));
+__isl_give isl_basic_set *isl_set_affine_hull(__isl_take isl_set *set) {
+  return bset_from_bmap(isl_map_affine_hull(set_to_map(set)));
 }

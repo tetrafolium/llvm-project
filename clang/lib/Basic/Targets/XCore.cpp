@@ -28,10 +28,10 @@ const Builtin::Info XCoreTargetInfo::BuiltinInfo[] = {
 
 void XCoreTargetInfo::getTargetDefines(const LangOptions &Opts,
                                        MacroBuilder &Builder) const {
-    Builder.defineMacro("__XS1B__");
+  Builder.defineMacro("__XS1B__");
 }
 
 ArrayRef<Builtin::Info> XCoreTargetInfo::getTargetBuiltins() const {
-    return llvm::makeArrayRef(BuiltinInfo, clang::XCore::LastTSBuiltin -
-                              Builtin::FirstTSBuiltin);
+  return llvm::makeArrayRef(BuiltinInfo, clang::XCore::LastTSBuiltin -
+                                             Builtin::FirstTSBuiltin);
 }

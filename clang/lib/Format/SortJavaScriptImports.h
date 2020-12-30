@@ -25,9 +25,9 @@ namespace format {
 // Sort JavaScript ES6 imports/exports in ``Code``. The generated replacements
 // only monotonically increase the length of the given code.
 tooling::Replacements sortJavaScriptImports(const FormatStyle &Style,
-        StringRef Code,
-        ArrayRef<tooling::Range> Ranges,
-        StringRef FileName);
+                                            StringRef Code,
+                                            ArrayRef<tooling::Range> Ranges,
+                                            StringRef FileName);
 
 } // end namespace format
 } // end namespace clang

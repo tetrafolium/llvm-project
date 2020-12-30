@@ -17,41 +17,41 @@ namespace lldb_private {
 
 class ThreadPlanStepInstruction : public ThreadPlan {
 public:
-    ThreadPlanStepInstruction(Thread &thread, bool step_over, bool stop_others,
-                              Vote stop_vote, Vote run_vote);
+  ThreadPlanStepInstruction(Thread &thread, bool step_over, bool stop_others,
+                            Vote stop_vote, Vote run_vote);
 
-    ~ThreadPlanStepInstruction() override;
+  ~ThreadPlanStepInstruction() override;
 
-    void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
-    bool ValidatePlan(Stream *error) override;
-    bool ShouldStop(Event *event_ptr) override;
-    bool StopOthers() override;
-    lldb::StateType GetPlanRunState() override;
-    bool WillStop() override;
-    bool MischiefManaged() override;
-    bool IsPlanStale() override;
+  void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
+  bool ValidatePlan(Stream *error) override;
+  bool ShouldStop(Event *event_ptr) override;
+  bool StopOthers() override;
+  lldb::StateType GetPlanRunState() override;
+  bool WillStop() override;
+  bool MischiefManaged() override;
+  bool IsPlanStale() override;
 
 protected:
-    bool DoPlanExplainsStop(Event *event_ptr) override;
+  bool DoPlanExplainsStop(Event *event_ptr) override;
 
-    void SetUpState();
+  void SetUpState();
 
 private:
-    friend lldb::ThreadPlanSP Thread::QueueThreadPlanForStepSingleInstruction(
-        bool step_over, bool abort_other_plans, bool stop_other_threads,
-        Status &status);
+  friend lldb::ThreadPlanSP Thread::QueueThreadPlanForStepSingleInstruction(
+      bool step_over, bool abort_other_plans, bool stop_other_threads,
+      Status &status);
 
-    lldb::addr_t m_instruction_addr;
-    bool m_stop_other_threads;
-    bool m_step_over;
-    // These two are used only for the step over case.
-    bool m_start_has_symbol;
-    StackID m_stack_id;
-    StackID m_parent_frame_id;
+  lldb::addr_t m_instruction_addr;
+  bool m_stop_other_threads;
+  bool m_step_over;
+  // These two are used only for the step over case.
+  bool m_start_has_symbol;
+  StackID m_stack_id;
+  StackID m_parent_frame_id;
 
-    ThreadPlanStepInstruction(const ThreadPlanStepInstruction &) = delete;
-    const ThreadPlanStepInstruction &
-    operator=(const ThreadPlanStepInstruction &) = delete;
+  ThreadPlanStepInstruction(const ThreadPlanStepInstruction &) = delete;
+  const ThreadPlanStepInstruction &
+  operator=(const ThreadPlanStepInstruction &) = delete;
 };
 
 } // namespace lldb_private

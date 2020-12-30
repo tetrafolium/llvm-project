@@ -37,8 +37,8 @@ using MatchConsumer =
 /// Creates an error that signals that a `MatchConsumer` expected a certain node
 /// to be bound by AST matchers, but it was not actually bound.
 inline llvm::Error notBoundError(llvm::StringRef Id) {
-    return llvm::make_error<llvm::StringError>(llvm::errc::invalid_argument,
-            "Id not bound: " + Id);
+  return llvm::make_error<llvm::StringError>(llvm::errc::invalid_argument,
+                                             "Id not bound: " + Id);
 }
 
 /// Chooses between the two consumers, based on whether \p ID is bound in the
@@ -46,10 +46,10 @@ inline llvm::Error notBoundError(llvm::StringRef Id) {
 template <typename T>
 MatchConsumer<T> ifBound(std::string ID, MatchConsumer<T> TrueC,
                          MatchConsumer<T> FalseC) {
-    return [=](const ast_matchers::MatchFinder::MatchResult &Result) {
-        auto &Map = Result.Nodes.getMap();
-        return (Map.find(ID) != Map.end() ? TrueC : FalseC)(Result);
-    };
+  return [=](const ast_matchers::MatchFinder::MatchResult &Result) {
+    auto &Map = Result.Nodes.getMap();
+    return (Map.find(ID) != Map.end() ? TrueC : FalseC)(Result);
+  };
 }
 
 /// A failable computation over nodes bound by AST matchers, with (limited)
@@ -63,40 +63,40 @@ MatchConsumer<T> ifBound(std::string ID, MatchConsumer<T> TrueC,
 /// generalization of `MatchConsumer` and intended to replace it.
 template <typename T> class MatchComputation {
 public:
-    virtual ~MatchComputation() = default;
+  virtual ~MatchComputation() = default;
 
-    /// Evaluates the computation and (potentially) updates the accumulator \c
-    /// Result.  \c Result is undefined in the case of an error. `Result` is an
-    /// out parameter to optimize case where the computation involves composing
-    /// the result of sub-computation evaluations.
-    virtual llvm::Error eval(const ast_matchers::MatchFinder::MatchResult &Match,
-                             T *Result) const = 0;
+  /// Evaluates the computation and (potentially) updates the accumulator \c
+  /// Result.  \c Result is undefined in the case of an error. `Result` is an
+  /// out parameter to optimize case where the computation involves composing
+  /// the result of sub-computation evaluations.
+  virtual llvm::Error eval(const ast_matchers::MatchFinder::MatchResult &Match,
+                           T *Result) const = 0;
 
-    /// Convenience version of `eval`, for the case where the computation is being
-    /// evaluated on its own.
-    llvm::Expected<T> eval(const ast_matchers::MatchFinder::MatchResult &R) const;
+  /// Convenience version of `eval`, for the case where the computation is being
+  /// evaluated on its own.
+  llvm::Expected<T> eval(const ast_matchers::MatchFinder::MatchResult &R) const;
 
-    /// Constructs a string representation of the computation, for informational
-    /// purposes. The representation must be deterministic, but is not required to
-    /// be unique.
-    virtual std::string toString() const = 0;
+  /// Constructs a string representation of the computation, for informational
+  /// purposes. The representation must be deterministic, but is not required to
+  /// be unique.
+  virtual std::string toString() const = 0;
 
 protected:
-    MatchComputation() = default;
+  MatchComputation() = default;
 
-    // Since this is an abstract class, copying/assigning only make sense for
-    // derived classes implementing `clone()`.
-    MatchComputation(const MatchComputation &) = default;
-    MatchComputation &operator=(const MatchComputation &) = default;
+  // Since this is an abstract class, copying/assigning only make sense for
+  // derived classes implementing `clone()`.
+  MatchComputation(const MatchComputation &) = default;
+  MatchComputation &operator=(const MatchComputation &) = default;
 };
 
 template <typename T>
 llvm::Expected<T> MatchComputation<T>::eval(
     const ast_matchers::MatchFinder::MatchResult &R) const {
-    T Output;
-    if (auto Err = eval(R, &Output))
-        return std::move(Err);
-    return Output;
+  T Output;
+  if (auto Err = eval(R, &Output))
+    return std::move(Err);
+  return Output;
 }
 } // namespace transformer
 } // namespace clang

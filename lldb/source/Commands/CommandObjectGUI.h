@@ -17,12 +17,12 @@ namespace lldb_private {
 
 class CommandObjectGUI : public CommandObjectParsed {
 public:
-    CommandObjectGUI(CommandInterpreter &interpreter);
+  CommandObjectGUI(CommandInterpreter &interpreter);
 
-    ~CommandObjectGUI() override;
+  ~CommandObjectGUI() override;
 
 protected:
-    bool DoExecute(Args &args, CommandReturnObject &result) override;
+  bool DoExecute(Args &args, CommandReturnObject &result) override;
 };
 
 } // namespace lldb_private

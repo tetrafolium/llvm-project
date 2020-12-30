@@ -64,9 +64,9 @@ cl::opt<bool> Inplace("i", cl::desc("Inplace edit <file>s, if specified."),
                       cl::cat(ChangeNamespaceCategory));
 
 cl::opt<bool>
-DumpYAML("dump_result",
-         cl::desc("Dump new file contents in YAML, if specified."),
-         cl::cat(ChangeNamespaceCategory));
+    DumpYAML("dump_result",
+             cl::desc("Dump new file contents in YAML, if specified."),
+             cl::cat(ChangeNamespaceCategory));
 
 cl::opt<std::string> Style("style",
                            cl::desc("The style name used for reformatting."),
@@ -79,99 +79,99 @@ cl::opt<std::string> AllowedFile(
     cl::init(""), cl::cat(ChangeNamespaceCategory));
 
 llvm::ErrorOr<std::vector<std::string>> GetAllowedSymbolPatterns() {
-    std::vector<std::string> Patterns;
-    if (AllowedFile.empty())
-        return Patterns;
-
-    llvm::SmallVector<StringRef, 8> Lines;
-    llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> File =
-                llvm::MemoryBuffer::getFile(AllowedFile);
-    if (!File)
-        return File.getError();
-    llvm::StringRef Content = File.get()->getBuffer();
-    Content.split(Lines, '\n', /*MaxSplit=*/-1, /*KeepEmpty=*/false);
-    for (auto Line : Lines)
-        Patterns.push_back(std::string(Line.trim()));
+  std::vector<std::string> Patterns;
+  if (AllowedFile.empty())
     return Patterns;
+
+  llvm::SmallVector<StringRef, 8> Lines;
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> File =
+      llvm::MemoryBuffer::getFile(AllowedFile);
+  if (!File)
+    return File.getError();
+  llvm::StringRef Content = File.get()->getBuffer();
+  Content.split(Lines, '\n', /*MaxSplit=*/-1, /*KeepEmpty=*/false);
+  for (auto Line : Lines)
+    Patterns.push_back(std::string(Line.trim()));
+  return Patterns;
 }
 
 } // anonymous namespace
 
 int main(int argc, const char **argv) {
-    llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
-    tooling::CommonOptionsParser OptionsParser(argc, argv,
-            ChangeNamespaceCategory);
-    const auto &Files = OptionsParser.getSourcePathList();
-    tooling::RefactoringTool Tool(OptionsParser.getCompilations(), Files);
-    llvm::ErrorOr<std::vector<std::string>> AllowedPatterns =
-            GetAllowedSymbolPatterns();
-    if (!AllowedPatterns) {
-        llvm::errs() << "Failed to open allow file " << AllowedFile << ". "
-                     << AllowedPatterns.getError().message() << "\n";
-        return 1;
-    }
-    change_namespace::ChangeNamespaceTool NamespaceTool(
-        OldNamespace, NewNamespace, FilePattern, *AllowedPatterns,
-        &Tool.getReplacements(), Style);
-    ast_matchers::MatchFinder Finder;
-    NamespaceTool.registerMatchers(&Finder);
-    std::unique_ptr<tooling::FrontendActionFactory> Factory =
-        tooling::newFrontendActionFactory(&Finder);
+  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+  tooling::CommonOptionsParser OptionsParser(argc, argv,
+                                             ChangeNamespaceCategory);
+  const auto &Files = OptionsParser.getSourcePathList();
+  tooling::RefactoringTool Tool(OptionsParser.getCompilations(), Files);
+  llvm::ErrorOr<std::vector<std::string>> AllowedPatterns =
+      GetAllowedSymbolPatterns();
+  if (!AllowedPatterns) {
+    llvm::errs() << "Failed to open allow file " << AllowedFile << ". "
+                 << AllowedPatterns.getError().message() << "\n";
+    return 1;
+  }
+  change_namespace::ChangeNamespaceTool NamespaceTool(
+      OldNamespace, NewNamespace, FilePattern, *AllowedPatterns,
+      &Tool.getReplacements(), Style);
+  ast_matchers::MatchFinder Finder;
+  NamespaceTool.registerMatchers(&Finder);
+  std::unique_ptr<tooling::FrontendActionFactory> Factory =
+      tooling::newFrontendActionFactory(&Finder);
 
-    if (int Result = Tool.run(Factory.get()))
-        return Result;
-    LangOptions DefaultLangOptions;
-    IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
-    clang::TextDiagnosticPrinter DiagnosticPrinter(errs(), &*DiagOpts);
-    DiagnosticsEngine Diagnostics(
-        IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()), &*DiagOpts,
-        &DiagnosticPrinter, false);
-    auto &FileMgr = Tool.getFiles();
-    SourceManager Sources(Diagnostics, FileMgr);
-    Rewriter Rewrite(Sources, DefaultLangOptions);
+  if (int Result = Tool.run(Factory.get()))
+    return Result;
+  LangOptions DefaultLangOptions;
+  IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts = new DiagnosticOptions();
+  clang::TextDiagnosticPrinter DiagnosticPrinter(errs(), &*DiagOpts);
+  DiagnosticsEngine Diagnostics(
+      IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()), &*DiagOpts,
+      &DiagnosticPrinter, false);
+  auto &FileMgr = Tool.getFiles();
+  SourceManager Sources(Diagnostics, FileMgr);
+  Rewriter Rewrite(Sources, DefaultLangOptions);
 
-    if (!formatAndApplyAllReplacements(Tool.getReplacements(), Rewrite, Style)) {
-        llvm::errs() << "Failed applying all replacements.\n";
-        return 1;
-    }
-    if (Inplace)
-        return Rewrite.overwriteChangedFiles();
+  if (!formatAndApplyAllReplacements(Tool.getReplacements(), Rewrite, Style)) {
+    llvm::errs() << "Failed applying all replacements.\n";
+    return 1;
+  }
+  if (Inplace)
+    return Rewrite.overwriteChangedFiles();
 
-    std::set<llvm::StringRef> ChangedFiles;
-    for (const auto &it : Tool.getReplacements())
-        ChangedFiles.insert(it.first);
+  std::set<llvm::StringRef> ChangedFiles;
+  for (const auto &it : Tool.getReplacements())
+    ChangedFiles.insert(it.first);
 
-    if (DumpYAML) {
-        auto WriteToYAML = [&](llvm::raw_ostream &OS) {
-            OS << "[\n";
-            for (auto I = ChangedFiles.begin(), E = ChangedFiles.end(); I != E; ++I) {
-                OS << "  {\n";
-                OS << "    \"FilePath\": \"" << *I << "\",\n";
-                const auto Entry = FileMgr.getFile(*I);
-                auto ID = Sources.getOrCreateFileID(*Entry, SrcMgr::C_User);
-                std::string Content;
-                llvm::raw_string_ostream ContentStream(Content);
-                Rewrite.getEditBuffer(ID).write(ContentStream);
-                OS << "    \"SourceText\": \""
-                   << llvm::yaml::escape(ContentStream.str()) << "\"\n";
-                OS << "  }";
-                if (I != std::prev(E))
-                    OS << ",\n";
-            }
-            OS << "\n]\n";
-        };
-        WriteToYAML(llvm::outs());
-        return 0;
-    }
-
-    for (const auto &File : ChangedFiles) {
-        const auto Entry = FileMgr.getFile(File);
-
+  if (DumpYAML) {
+    auto WriteToYAML = [&](llvm::raw_ostream &OS) {
+      OS << "[\n";
+      for (auto I = ChangedFiles.begin(), E = ChangedFiles.end(); I != E; ++I) {
+        OS << "  {\n";
+        OS << "    \"FilePath\": \"" << *I << "\",\n";
+        const auto Entry = FileMgr.getFile(*I);
         auto ID = Sources.getOrCreateFileID(*Entry, SrcMgr::C_User);
-        outs() << "============== " << File << " ==============\n";
-        Rewrite.getEditBuffer(ID).write(llvm::outs());
-        outs() << "\n============================================\n";
-    }
-
+        std::string Content;
+        llvm::raw_string_ostream ContentStream(Content);
+        Rewrite.getEditBuffer(ID).write(ContentStream);
+        OS << "    \"SourceText\": \""
+           << llvm::yaml::escape(ContentStream.str()) << "\"\n";
+        OS << "  }";
+        if (I != std::prev(E))
+          OS << ",\n";
+      }
+      OS << "\n]\n";
+    };
+    WriteToYAML(llvm::outs());
     return 0;
+  }
+
+  for (const auto &File : ChangedFiles) {
+    const auto Entry = FileMgr.getFile(File);
+
+    auto ID = Sources.getOrCreateFileID(*Entry, SrcMgr::C_User);
+    outs() << "============== " << File << " ==============\n";
+    Rewrite.getEditBuffer(ID).write(llvm::outs());
+    outs() << "\n============================================\n";
+  }
+
+  return 0;
 }

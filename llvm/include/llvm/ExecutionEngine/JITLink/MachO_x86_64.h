@@ -21,26 +21,26 @@ namespace jitlink {
 namespace MachO_x86_64_Edges {
 
 enum MachOX86RelocationKind : Edge::Kind {
-    Branch32 = Edge::FirstRelocation,
-    Branch32ToStub,
-    Pointer32,
-    Pointer64,
-    Pointer64Anon,
-    PCRel32,
-    PCRel32Minus1,
-    PCRel32Minus2,
-    PCRel32Minus4,
-    PCRel32Anon,
-    PCRel32Minus1Anon,
-    PCRel32Minus2Anon,
-    PCRel32Minus4Anon,
-    PCRel32GOTLoad,
-    PCRel32GOT,
-    PCRel32TLV,
-    Delta32,
-    Delta64,
-    NegDelta32,
-    NegDelta64,
+  Branch32 = Edge::FirstRelocation,
+  Branch32ToStub,
+  Pointer32,
+  Pointer64,
+  Pointer64Anon,
+  PCRel32,
+  PCRel32Minus1,
+  PCRel32Minus2,
+  PCRel32Minus4,
+  PCRel32Anon,
+  PCRel32Minus1Anon,
+  PCRel32Minus2Anon,
+  PCRel32Minus4Anon,
+  PCRel32GOTLoad,
+  PCRel32GOT,
+  PCRel32TLV,
+  Delta32,
+  Delta64,
+  NegDelta32,
+  NegDelta64,
 };
 
 } // namespace MachO_x86_64_Edges
@@ -51,7 +51,7 @@ enum MachOX86RelocationKind : Edge::Kind {
 /// its contents. The caller is responsible for ensuring that the object buffer
 /// outlives the graph.
 Expected<std::unique_ptr<LinkGraph>>
-                                  createLinkGraphFromMachOObject_x86_64(MemoryBufferRef ObjectBuffer);
+createLinkGraphFromMachOObject_x86_64(MemoryBufferRef ObjectBuffer);
 
 /// jit-link the given LinkGraph.
 ///

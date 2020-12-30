@@ -30,27 +30,23 @@ namespace codeview {
 /// does not own the underlying storage for the buffer.
 class DebugStringTableSubsectionRef : public DebugSubsectionRef {
 public:
-    DebugStringTableSubsectionRef();
+  DebugStringTableSubsectionRef();
 
-    static bool classof(const DebugSubsectionRef *S) {
-        return S->kind() == DebugSubsectionKind::StringTable;
-    }
+  static bool classof(const DebugSubsectionRef *S) {
+    return S->kind() == DebugSubsectionKind::StringTable;
+  }
 
-    Error initialize(BinaryStreamRef Contents);
-    Error initialize(BinaryStreamReader &Reader);
+  Error initialize(BinaryStreamRef Contents);
+  Error initialize(BinaryStreamReader &Reader);
 
-    Expected<StringRef> getString(uint32_t Offset) const;
+  Expected<StringRef> getString(uint32_t Offset) const;
 
-    bool valid() const {
-        return Stream.valid();
-    }
+  bool valid() const { return Stream.valid(); }
 
-    BinaryStreamRef getBuffer() const {
-        return Stream;
-    }
+  BinaryStreamRef getBuffer() const { return Stream; }
 
 private:
-    BinaryStreamRef Stream;
+  BinaryStreamRef Stream;
 };
 
 /// Represents a read-write view of a CodeView string table.
@@ -59,40 +55,38 @@ private:
 /// DebugStringTableSubsectionRef.
 class DebugStringTableSubsection : public DebugSubsection {
 public:
-    DebugStringTableSubsection();
+  DebugStringTableSubsection();
 
-    static bool classof(const DebugSubsection *S) {
-        return S->kind() == DebugSubsectionKind::StringTable;
-    }
+  static bool classof(const DebugSubsection *S) {
+    return S->kind() == DebugSubsectionKind::StringTable;
+  }
 
-    // If string S does not exist in the string table, insert it.
-    // Returns the ID for S.
-    uint32_t insert(StringRef S);
+  // If string S does not exist in the string table, insert it.
+  // Returns the ID for S.
+  uint32_t insert(StringRef S);
 
-    // Return the ID for string S.  Assumes S exists in the table.
-    uint32_t getIdForString(StringRef S) const;
+  // Return the ID for string S.  Assumes S exists in the table.
+  uint32_t getIdForString(StringRef S) const;
 
-    StringRef getStringForId(uint32_t Id) const;
+  StringRef getStringForId(uint32_t Id) const;
 
-    uint32_t calculateSerializedSize() const override;
-    Error commit(BinaryStreamWriter &Writer) const override;
+  uint32_t calculateSerializedSize() const override;
+  Error commit(BinaryStreamWriter &Writer) const override;
 
-    uint32_t size() const;
+  uint32_t size() const;
 
-    StringMap<uint32_t>::const_iterator begin() const {
-        return StringToId.begin();
-    }
+  StringMap<uint32_t>::const_iterator begin() const {
+    return StringToId.begin();
+  }
 
-    StringMap<uint32_t>::const_iterator end() const {
-        return StringToId.end();
-    }
+  StringMap<uint32_t>::const_iterator end() const { return StringToId.end(); }
 
-    std::vector<uint32_t> sortedIds() const;
+  std::vector<uint32_t> sortedIds() const;
 
 private:
-    DenseMap<uint32_t, StringRef> IdToString;
-    StringMap<uint32_t> StringToId;
-    uint32_t StringSize = 1;
+  DenseMap<uint32_t, StringRef> IdToString;
+  StringMap<uint32_t> StringToId;
+  uint32_t StringSize = 1;
 };
 
 } // end namespace codeview

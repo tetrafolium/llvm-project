@@ -22,25 +22,25 @@
 
 static const lldb_private::RegisterInfo *
 GetRegisterInfoPtr(const lldb_private::ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::ppc64le:
-        return g_register_infos_ppc64le;
-    default:
-        assert(false && "Unhandled target architecture.");
-        return nullptr;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::ppc64le:
+    return g_register_infos_ppc64le;
+  default:
+    assert(false && "Unhandled target architecture.");
+    return nullptr;
+  }
 }
 
 static uint32_t
 GetRegisterInfoCount(const lldb_private::ArchSpec &target_arch) {
-    switch (target_arch.GetMachine()) {
-    case llvm::Triple::ppc64le:
-        return static_cast<uint32_t>(sizeof(g_register_infos_ppc64le) /
-                                     sizeof(g_register_infos_ppc64le[0]));
-    default:
-        assert(false && "Unhandled target architecture.");
-        return 0;
-    }
+  switch (target_arch.GetMachine()) {
+  case llvm::Triple::ppc64le:
+    return static_cast<uint32_t>(sizeof(g_register_infos_ppc64le) /
+                                 sizeof(g_register_infos_ppc64le[0]));
+  default:
+    assert(false && "Unhandled target architecture.");
+    return 0;
+  }
 }
 
 RegisterInfoPOSIX_ppc64le::RegisterInfoPOSIX_ppc64le(
@@ -49,15 +49,13 @@ RegisterInfoPOSIX_ppc64le::RegisterInfoPOSIX_ppc64le(
       m_register_info_p(GetRegisterInfoPtr(target_arch)),
       m_register_info_count(GetRegisterInfoCount(target_arch)) {}
 
-size_t RegisterInfoPOSIX_ppc64le::GetGPRSize() const {
-    return sizeof(GPR);
-}
+size_t RegisterInfoPOSIX_ppc64le::GetGPRSize() const { return sizeof(GPR); }
 
 const lldb_private::RegisterInfo *
 RegisterInfoPOSIX_ppc64le::GetRegisterInfo() const {
-    return m_register_info_p;
+  return m_register_info_p;
 }
 
 uint32_t RegisterInfoPOSIX_ppc64le::GetRegisterCount() const {
-    return m_register_info_count;
+  return m_register_info_count;
 }

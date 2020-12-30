@@ -19,73 +19,67 @@
 #include "llvm/ADT/GraphTraits.h"
 
 namespace llvm {
-template <> struct GraphTraits<mlir::Block *> {
-    using ChildIteratorType = mlir::Block::succ_iterator;
-    using Node = mlir::Block;
-    using NodeRef = Node *;
+template <>
+struct GraphTraits<mlir::Block *> {
+  using ChildIteratorType = mlir::Block::succ_iterator;
+  using Node = mlir::Block;
+  using NodeRef = Node *;
 
-    static NodeRef getEntryNode(NodeRef bb) {
-        return bb;
-    }
+  static NodeRef getEntryNode(NodeRef bb) { return bb; }
 
-    static ChildIteratorType child_begin(NodeRef node) {
-        return node->succ_begin();
-    }
-    static ChildIteratorType child_end(NodeRef node) {
-        return node->succ_end();
-    }
+  static ChildIteratorType child_begin(NodeRef node) {
+    return node->succ_begin();
+  }
+  static ChildIteratorType child_end(NodeRef node) { return node->succ_end(); }
 };
 
-template <> struct GraphTraits<Inverse<mlir::Block *>> {
-    using ChildIteratorType = mlir::Block::pred_iterator;
-    using Node = mlir::Block;
-    using NodeRef = Node *;
-    static NodeRef getEntryNode(Inverse<NodeRef> inverseGraph) {
-        return inverseGraph.Graph;
-    }
-    static inline ChildIteratorType child_begin(NodeRef node) {
-        return node->pred_begin();
-    }
-    static inline ChildIteratorType child_end(NodeRef node) {
-        return node->pred_end();
-    }
+template <>
+struct GraphTraits<Inverse<mlir::Block *>> {
+  using ChildIteratorType = mlir::Block::pred_iterator;
+  using Node = mlir::Block;
+  using NodeRef = Node *;
+  static NodeRef getEntryNode(Inverse<NodeRef> inverseGraph) {
+    return inverseGraph.Graph;
+  }
+  static inline ChildIteratorType child_begin(NodeRef node) {
+    return node->pred_begin();
+  }
+  static inline ChildIteratorType child_end(NodeRef node) {
+    return node->pred_end();
+  }
 };
 
 template <>
 struct GraphTraits<mlir::Region *> : public GraphTraits<mlir::Block *> {
-    using GraphType = mlir::Region *;
-    using NodeRef = mlir::Block *;
+  using GraphType = mlir::Region *;
+  using NodeRef = mlir::Block *;
 
-    static NodeRef getEntryNode(GraphType fn) {
-        return &fn->front();
-    }
+  static NodeRef getEntryNode(GraphType fn) { return &fn->front(); }
 
-    using nodes_iterator = pointer_iterator<mlir::Region::iterator>;
-    static nodes_iterator nodes_begin(GraphType fn) {
-        return nodes_iterator(fn->begin());
-    }
-    static nodes_iterator nodes_end(GraphType fn) {
-        return nodes_iterator(fn->end());
-    }
+  using nodes_iterator = pointer_iterator<mlir::Region::iterator>;
+  static nodes_iterator nodes_begin(GraphType fn) {
+    return nodes_iterator(fn->begin());
+  }
+  static nodes_iterator nodes_end(GraphType fn) {
+    return nodes_iterator(fn->end());
+  }
 };
 
 template <>
 struct GraphTraits<Inverse<mlir::Region *>>
-            : public GraphTraits<Inverse<mlir::Block *>> {
-    using GraphType = Inverse<mlir::Region *>;
-    using NodeRef = NodeRef;
+    : public GraphTraits<Inverse<mlir::Block *>> {
+  using GraphType = Inverse<mlir::Region *>;
+  using NodeRef = NodeRef;
 
-    static NodeRef getEntryNode(GraphType fn) {
-        return &fn.Graph->front();
-    }
+  static NodeRef getEntryNode(GraphType fn) { return &fn.Graph->front(); }
 
-    using nodes_iterator = pointer_iterator<mlir::Region::iterator>;
-    static nodes_iterator nodes_begin(GraphType fn) {
-        return nodes_iterator(fn.Graph->begin());
-    }
-    static nodes_iterator nodes_end(GraphType fn) {
-        return nodes_iterator(fn.Graph->end());
-    }
+  using nodes_iterator = pointer_iterator<mlir::Region::iterator>;
+  static nodes_iterator nodes_begin(GraphType fn) {
+    return nodes_iterator(fn.Graph->begin());
+  }
+  static nodes_iterator nodes_end(GraphType fn) {
+    return nodes_iterator(fn.Graph->end());
+  }
 };
 
 } // namespace llvm

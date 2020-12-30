@@ -37,35 +37,35 @@ ENUM_CLASS(StmtType, CYCLE, EXIT)
 // Perform semantic checks on DO and FORALL constructs and statements.
 class DoForallChecker : public virtual BaseChecker {
 public:
-    explicit DoForallChecker(SemanticsContext &context) : context_{context} {}
-    void Leave(const parser::AssignmentStmt &);
-    void Leave(const parser::CallStmt &);
-    void Leave(const parser::ConnectSpec &);
-    void Enter(const parser::CycleStmt &);
-    void Enter(const parser::DoConstruct &);
-    void Leave(const parser::DoConstruct &);
-    void Enter(const parser::ForallConstruct &);
-    void Leave(const parser::ForallConstruct &);
-    void Enter(const parser::ForallStmt &);
-    void Leave(const parser::ForallStmt &);
-    void Leave(const parser::ForallAssignmentStmt &s);
-    void Enter(const parser::ExitStmt &);
-    void Enter(const parser::Expr &);
-    void Leave(const parser::Expr &);
-    void Leave(const parser::InquireSpec &);
-    void Leave(const parser::IoControlSpec &);
-    void Leave(const parser::OutputImpliedDo &);
-    void Leave(const parser::StatVariable &);
+  explicit DoForallChecker(SemanticsContext &context) : context_{context} {}
+  void Leave(const parser::AssignmentStmt &);
+  void Leave(const parser::CallStmt &);
+  void Leave(const parser::ConnectSpec &);
+  void Enter(const parser::CycleStmt &);
+  void Enter(const parser::DoConstruct &);
+  void Leave(const parser::DoConstruct &);
+  void Enter(const parser::ForallConstruct &);
+  void Leave(const parser::ForallConstruct &);
+  void Enter(const parser::ForallStmt &);
+  void Leave(const parser::ForallStmt &);
+  void Leave(const parser::ForallAssignmentStmt &s);
+  void Enter(const parser::ExitStmt &);
+  void Enter(const parser::Expr &);
+  void Leave(const parser::Expr &);
+  void Leave(const parser::InquireSpec &);
+  void Leave(const parser::IoControlSpec &);
+  void Leave(const parser::OutputImpliedDo &);
+  void Leave(const parser::StatVariable &);
 
 private:
-    SemanticsContext &context_;
-    int exprDepth_{0};
+  SemanticsContext &context_;
+  int exprDepth_{0};
 
-    void SayBadLeave(
-        StmtType, const char *enclosingStmt, const ConstructNode &) const;
-    void CheckDoConcurrentExit(StmtType, const ConstructNode &) const;
-    void CheckForBadLeave(StmtType, const ConstructNode &) const;
-    void CheckNesting(StmtType, const parser::Name *) const;
+  void SayBadLeave(
+      StmtType, const char *enclosingStmt, const ConstructNode &) const;
+  void CheckDoConcurrentExit(StmtType, const ConstructNode &) const;
+  void CheckForBadLeave(StmtType, const ConstructNode &) const;
+  void CheckNesting(StmtType, const parser::Name *) const;
 };
 } // namespace Fortran::semantics
 #endif

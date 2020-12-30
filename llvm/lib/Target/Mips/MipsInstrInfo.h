@@ -39,153 +39,150 @@ class TargetRegisterClass;
 class TargetRegisterInfo;
 
 class MipsInstrInfo : public MipsGenInstrInfo {
-    virtual void anchor();
+  virtual void anchor();
 
 protected:
-    const MipsSubtarget &Subtarget;
-    unsigned UncondBrOpc;
+  const MipsSubtarget &Subtarget;
+  unsigned UncondBrOpc;
 
 public:
-    enum BranchType {
-        BT_None,       // Couldn't analyze branch.
-        BT_NoBranch,   // No branches found.
-        BT_Uncond,     // One unconditional branch.
-        BT_Cond,       // One conditional branch.
-        BT_CondUncond, // A conditional branch followed by an unconditional branch.
-        BT_Indirect    // One indirct branch.
-    };
+  enum BranchType {
+    BT_None,       // Couldn't analyze branch.
+    BT_NoBranch,   // No branches found.
+    BT_Uncond,     // One unconditional branch.
+    BT_Cond,       // One conditional branch.
+    BT_CondUncond, // A conditional branch followed by an unconditional branch.
+    BT_Indirect    // One indirct branch.
+  };
 
-    explicit MipsInstrInfo(const MipsSubtarget &STI, unsigned UncondBrOpc);
+  explicit MipsInstrInfo(const MipsSubtarget &STI, unsigned UncondBrOpc);
 
-    static const MipsInstrInfo *create(MipsSubtarget &STI);
+  static const MipsInstrInfo *create(MipsSubtarget &STI);
 
-    /// Branch Analysis
-    bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-                       MachineBasicBlock *&FBB,
-                       SmallVectorImpl<MachineOperand> &Cond,
-                       bool AllowModify) const override;
+  /// Branch Analysis
+  bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                     MachineBasicBlock *&FBB,
+                     SmallVectorImpl<MachineOperand> &Cond,
+                     bool AllowModify) const override;
 
-    unsigned removeBranch(MachineBasicBlock &MBB,
-                          int *BytesRemoved = nullptr) const override;
+  unsigned removeBranch(MachineBasicBlock &MBB,
+                        int *BytesRemoved = nullptr) const override;
 
-    unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-                          MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
-                          const DebugLoc &DL,
-                          int *BytesAdded = nullptr) const override;
+  unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                        const DebugLoc &DL,
+                        int *BytesAdded = nullptr) const override;
 
-    bool
-    reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+  bool
+  reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
 
-    BranchType analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-                             MachineBasicBlock *&FBB,
-                             SmallVectorImpl<MachineOperand> &Cond,
-                             bool AllowModify,
-                             SmallVectorImpl<MachineInstr *> &BranchInstrs) const;
+  BranchType analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                           MachineBasicBlock *&FBB,
+                           SmallVectorImpl<MachineOperand> &Cond,
+                           bool AllowModify,
+                           SmallVectorImpl<MachineInstr *> &BranchInstrs) const;
 
-    /// Determine the opcode of a non-delay slot form for a branch if one exists.
-    unsigned getEquivalentCompactForm(const MachineBasicBlock::iterator I) const;
+  /// Determine the opcode of a non-delay slot form for a branch if one exists.
+  unsigned getEquivalentCompactForm(const MachineBasicBlock::iterator I) const;
 
-    /// Determine if the branch target is in range.
-    bool isBranchOffsetInRange(unsigned BranchOpc,
-                               int64_t BrOffset) const override;
+  /// Determine if the branch target is in range.
+  bool isBranchOffsetInRange(unsigned BranchOpc,
+                             int64_t BrOffset) const override;
 
-    /// Predicate to determine if an instruction can go in a forbidden slot.
-    bool SafeInForbiddenSlot(const MachineInstr &MI) const;
+  /// Predicate to determine if an instruction can go in a forbidden slot.
+  bool SafeInForbiddenSlot(const MachineInstr &MI) const;
 
-    /// Predicate to determine if an instruction has a forbidden slot.
-    bool HasForbiddenSlot(const MachineInstr &MI) const;
+  /// Predicate to determine if an instruction has a forbidden slot.
+  bool HasForbiddenSlot(const MachineInstr &MI) const;
 
-    /// Insert nop instruction when hazard condition is found
-    void insertNoop(MachineBasicBlock &MBB,
-                    MachineBasicBlock::iterator MI) const override;
+  /// Insert nop instruction when hazard condition is found
+  void insertNoop(MachineBasicBlock &MBB,
+                  MachineBasicBlock::iterator MI) const override;
 
-    /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
-    /// such, whenever a client has an instance of instruction info, it should
-    /// always be able to get register info as well (through this method).
-    virtual const MipsRegisterInfo &getRegisterInfo() const = 0;
+  /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
+  /// such, whenever a client has an instance of instruction info, it should
+  /// always be able to get register info as well (through this method).
+  virtual const MipsRegisterInfo &getRegisterInfo() const = 0;
 
-    virtual unsigned getOppositeBranchOpc(unsigned Opc) const = 0;
+  virtual unsigned getOppositeBranchOpc(unsigned Opc) const = 0;
 
-    virtual bool isBranchWithImm(unsigned Opc) const {
-        return false;
-    }
+  virtual bool isBranchWithImm(unsigned Opc) const { return false; }
 
-    /// Return the number of bytes of code the specified instruction may be.
-    unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+  /// Return the number of bytes of code the specified instruction may be.
+  unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
 
-    void storeRegToStackSlot(MachineBasicBlock &MBB,
-                             MachineBasicBlock::iterator MBBI,
-                             Register SrcReg, bool isKill, int FrameIndex,
-                             const TargetRegisterClass *RC,
-                             const TargetRegisterInfo *TRI) const override {
-        storeRegToStack(MBB, MBBI, SrcReg, isKill, FrameIndex, RC, TRI, 0);
-    }
+  void storeRegToStackSlot(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MBBI, Register SrcReg,
+                           bool isKill, int FrameIndex,
+                           const TargetRegisterClass *RC,
+                           const TargetRegisterInfo *TRI) const override {
+    storeRegToStack(MBB, MBBI, SrcReg, isKill, FrameIndex, RC, TRI, 0);
+  }
 
-    void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                              MachineBasicBlock::iterator MBBI,
-                              Register DestReg, int FrameIndex,
-                              const TargetRegisterClass *RC,
-                              const TargetRegisterInfo *TRI) const override {
-        loadRegFromStack(MBB, MBBI, DestReg, FrameIndex, RC, TRI, 0);
-    }
+  void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI, Register DestReg,
+                            int FrameIndex, const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI) const override {
+    loadRegFromStack(MBB, MBBI, DestReg, FrameIndex, RC, TRI, 0);
+  }
 
-    virtual void storeRegToStack(MachineBasicBlock &MBB,
-                                 MachineBasicBlock::iterator MI,
-                                 Register SrcReg, bool isKill, int FrameIndex,
-                                 const TargetRegisterClass *RC,
-                                 const TargetRegisterInfo *TRI,
-                                 int64_t Offset) const = 0;
+  virtual void storeRegToStack(MachineBasicBlock &MBB,
+                               MachineBasicBlock::iterator MI, Register SrcReg,
+                               bool isKill, int FrameIndex,
+                               const TargetRegisterClass *RC,
+                               const TargetRegisterInfo *TRI,
+                               int64_t Offset) const = 0;
 
-    virtual void loadRegFromStack(MachineBasicBlock &MBB,
-                                  MachineBasicBlock::iterator MI,
-                                  Register DestReg, int FrameIndex,
-                                  const TargetRegisterClass *RC,
-                                  const TargetRegisterInfo *TRI,
-                                  int64_t Offset) const = 0;
+  virtual void loadRegFromStack(MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MI,
+                                Register DestReg, int FrameIndex,
+                                const TargetRegisterClass *RC,
+                                const TargetRegisterInfo *TRI,
+                                int64_t Offset) const = 0;
 
-    virtual void adjustStackPtr(unsigned SP, int64_t Amount,
-                                MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator I) const = 0;
+  virtual void adjustStackPtr(unsigned SP, int64_t Amount,
+                              MachineBasicBlock &MBB,
+                              MachineBasicBlock::iterator I) const = 0;
 
-    /// Create an instruction which has the same operands and memory operands
-    /// as MI but has a new opcode.
-    MachineInstrBuilder genInstrWithNewOpc(unsigned NewOpc,
-                                           MachineBasicBlock::iterator I) const;
+  /// Create an instruction which has the same operands and memory operands
+  /// as MI but has a new opcode.
+  MachineInstrBuilder genInstrWithNewOpc(unsigned NewOpc,
+                                         MachineBasicBlock::iterator I) const;
 
-    bool findCommutedOpIndices(const MachineInstr &MI, unsigned &SrcOpIdx1,
-                               unsigned &SrcOpIdx2) const override;
+  bool findCommutedOpIndices(const MachineInstr &MI, unsigned &SrcOpIdx1,
+                             unsigned &SrcOpIdx2) const override;
 
-    /// Perform target specific instruction verification.
-    bool verifyInstruction(const MachineInstr &MI,
-                           StringRef &ErrInfo) const override;
+  /// Perform target specific instruction verification.
+  bool verifyInstruction(const MachineInstr &MI,
+                         StringRef &ErrInfo) const override;
 
-    std::pair<unsigned, unsigned>
-    decomposeMachineOperandsTargetFlags(unsigned TF) const override;
+  std::pair<unsigned, unsigned>
+  decomposeMachineOperandsTargetFlags(unsigned TF) const override;
 
-    ArrayRef<std::pair<unsigned, const char *>>
-            getSerializableDirectMachineOperandTargetFlags() const override;
+  ArrayRef<std::pair<unsigned, const char *>>
+  getSerializableDirectMachineOperandTargetFlags() const override;
 
-    Optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
-                                        Register Reg) const override;
+  Optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
+                                      Register Reg) const override;
 
-    Optional<ParamLoadedValue> describeLoadedValue(const MachineInstr &MI,
-            Register Reg) const override;
+  Optional<ParamLoadedValue> describeLoadedValue(const MachineInstr &MI,
+                                                 Register Reg) const override;
 
 protected:
-    bool isZeroImm(const MachineOperand &op) const;
+  bool isZeroImm(const MachineOperand &op) const;
 
-    MachineMemOperand *GetMemOperand(MachineBasicBlock &MBB, int FI,
-                                     MachineMemOperand::Flags Flags) const;
+  MachineMemOperand *GetMemOperand(MachineBasicBlock &MBB, int FI,
+                                   MachineMemOperand::Flags Flags) const;
 
 private:
-    virtual unsigned getAnalyzableBrOpc(unsigned Opc) const = 0;
+  virtual unsigned getAnalyzableBrOpc(unsigned Opc) const = 0;
 
-    void AnalyzeCondBr(const MachineInstr *Inst, unsigned Opc,
-                       MachineBasicBlock *&BB,
-                       SmallVectorImpl<MachineOperand> &Cond) const;
+  void AnalyzeCondBr(const MachineInstr *Inst, unsigned Opc,
+                     MachineBasicBlock *&BB,
+                     SmallVectorImpl<MachineOperand> &Cond) const;
 
-    void BuildCondBr(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-                     const DebugLoc &DL, ArrayRef<MachineOperand> Cond) const;
+  void BuildCondBr(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                   const DebugLoc &DL, ArrayRef<MachineOperand> Cond) const;
 };
 
 /// Create MipsInstrInfo objects.

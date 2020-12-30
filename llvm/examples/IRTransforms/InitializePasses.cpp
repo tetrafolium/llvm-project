@@ -17,5 +17,5 @@
 using namespace llvm;
 
 void initializeExampleIRTransforms(PassRegistry &Registry) {
-    initializeSimplifyCFGLegacyPassPass(Registry);
+  initializeSimplifyCFGLegacyPassPass(Registry);
 }

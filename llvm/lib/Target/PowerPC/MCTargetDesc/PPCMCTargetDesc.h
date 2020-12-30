@@ -43,7 +43,7 @@ MCAsmBackend *createPPCAsmBackend(const Target &T, const MCSubtargetInfo &STI,
 
 /// Construct an PPC ELF object writer.
 std::unique_ptr<MCObjectTargetWriter> createPPCELFObjectWriter(bool Is64Bit,
-        uint8_t OSABI);
+                                                               uint8_t OSABI);
 /// Construct a PPC Mach-O object writer.
 std::unique_ptr<MCObjectTargetWriter>
 createPPCMachObjectWriter(bool Is64Bit, uint32_t CPUType, uint32_t CPUSubtype);
@@ -56,51 +56,51 @@ std::unique_ptr<MCObjectTargetWriter> createPPCXCOFFObjectWriter(bool Is64Bit);
 /// 0x000FFF0, 0x0000FFFF, and 0xFF0000FF are all runs.  0x0F0F0000 is not,
 /// since all 1s are not contiguous.
 static inline bool isRunOfOnes(unsigned Val, unsigned &MB, unsigned &ME) {
-    if (!Val)
-        return false;
-
-    if (isShiftedMask_32(Val)) {
-        // look for the first non-zero bit
-        MB = countLeadingZeros(Val);
-        // look for the first zero bit after the run of ones
-        ME = countLeadingZeros((Val - 1) ^ Val);
-        return true;
-    } else {
-        Val = ~Val; // invert mask
-        if (isShiftedMask_32(Val)) {
-            // effectively look for the first zero bit
-            ME = countLeadingZeros(Val) - 1;
-            // effectively look for the first one bit after the run of zeros
-            MB = countLeadingZeros((Val - 1) ^ Val) + 1;
-            return true;
-        }
-    }
-    // no run present
+  if (!Val)
     return false;
+
+  if (isShiftedMask_32(Val)) {
+    // look for the first non-zero bit
+    MB = countLeadingZeros(Val);
+    // look for the first zero bit after the run of ones
+    ME = countLeadingZeros((Val - 1) ^ Val);
+    return true;
+  } else {
+    Val = ~Val; // invert mask
+    if (isShiftedMask_32(Val)) {
+      // effectively look for the first zero bit
+      ME = countLeadingZeros(Val) - 1;
+      // effectively look for the first one bit after the run of zeros
+      MB = countLeadingZeros((Val - 1) ^ Val) + 1;
+      return true;
+    }
+  }
+  // no run present
+  return false;
 }
 
 static inline bool isRunOfOnes64(uint64_t Val, unsigned &MB, unsigned &ME) {
-    if (!Val)
-        return false;
-
-    if (isShiftedMask_64(Val)) {
-        // look for the first non-zero bit
-        MB = countLeadingZeros(Val);
-        // look for the first zero bit after the run of ones
-        ME = countLeadingZeros((Val - 1) ^ Val);
-        return true;
-    } else {
-        Val = ~Val; // invert mask
-        if (isShiftedMask_64(Val)) {
-            // effectively look for the first zero bit
-            ME = countLeadingZeros(Val) - 1;
-            // effectively look for the first one bit after the run of zeros
-            MB = countLeadingZeros((Val - 1) ^ Val) + 1;
-            return true;
-        }
-    }
-    // no run present
+  if (!Val)
     return false;
+
+  if (isShiftedMask_64(Val)) {
+    // look for the first non-zero bit
+    MB = countLeadingZeros(Val);
+    // look for the first zero bit after the run of ones
+    ME = countLeadingZeros((Val - 1) ^ Val);
+    return true;
+  } else {
+    Val = ~Val; // invert mask
+    if (isShiftedMask_64(Val)) {
+      // effectively look for the first zero bit
+      ME = countLeadingZeros(Val) - 1;
+      // effectively look for the first one bit after the run of zeros
+      MB = countLeadingZeros((Val - 1) ^ Val) + 1;
+      return true;
+    }
+  }
+  // no run present
+  return false;
 }
 
 } // end namespace llvm
@@ -125,9 +125,7 @@ static inline bool isRunOfOnes64(uint64_t Val, unsigned &MB, unsigned &ME) {
 #include "PPCGenSubtargetInfo.inc"
 
 #define PPC_REGS0_7(X)                                                         \
-  {                                                                            \
-    X##0, X##1, X##2, X##3, X##4, X##5, X##6, X##7                             \
-  }
+  { X##0, X##1, X##2, X##3, X##4, X##5, X##6, X##7 }
 
 #define PPC_REGS0_31(X)                                                        \
   {                                                                            \
@@ -157,33 +155,26 @@ static inline bool isRunOfOnes64(uint64_t Val, unsigned &MB, unsigned &ME) {
 
 using llvm::MCPhysReg;
 
-#define DEFINE_PPC_REGCLASSES \
-  static const MCPhysReg RRegs[32] = PPC_REGS0_31(PPC::R); \
-  static const MCPhysReg XRegs[32] = PPC_REGS0_31(PPC::X); \
-  static const MCPhysReg FRegs[32] = PPC_REGS0_31(PPC::F); \
-  static const MCPhysReg VSRpRegs[32] = PPC_REGS0_31(PPC::VSRp); \
-  static const MCPhysReg SPERegs[32] = PPC_REGS0_31(PPC::S); \
-  static const MCPhysReg VFRegs[32] = PPC_REGS0_31(PPC::VF); \
-  static const MCPhysReg VRegs[32] = PPC_REGS0_31(PPC::V); \
-  static const MCPhysReg RRegsNoR0[32] = \
-    PPC_REGS_NO0_31(PPC::ZERO, PPC::R); \
-  static const MCPhysReg XRegsNoX0[32] = \
-    PPC_REGS_NO0_31(PPC::ZERO8, PPC::X); \
-  static const MCPhysReg VSRegs[64] = \
-    PPC_REGS_LO_HI(PPC::VSL, PPC::V); \
-  static const MCPhysReg VSFRegs[64] = \
-    PPC_REGS_LO_HI(PPC::F, PPC::VF); \
-  static const MCPhysReg VSSRegs[64] = \
-    PPC_REGS_LO_HI(PPC::F, PPC::VF); \
-  static const MCPhysReg CRBITRegs[32] = { \
-    PPC::CR0LT, PPC::CR0GT, PPC::CR0EQ, PPC::CR0UN, \
-    PPC::CR1LT, PPC::CR1GT, PPC::CR1EQ, PPC::CR1UN, \
-    PPC::CR2LT, PPC::CR2GT, PPC::CR2EQ, PPC::CR2UN, \
-    PPC::CR3LT, PPC::CR3GT, PPC::CR3EQ, PPC::CR3UN, \
-    PPC::CR4LT, PPC::CR4GT, PPC::CR4EQ, PPC::CR4UN, \
-    PPC::CR5LT, PPC::CR5GT, PPC::CR5EQ, PPC::CR5UN, \
-    PPC::CR6LT, PPC::CR6GT, PPC::CR6EQ, PPC::CR6UN, \
-    PPC::CR7LT, PPC::CR7GT, PPC::CR7EQ, PPC::CR7UN}; \
-  static const MCPhysReg CRRegs[8] = PPC_REGS0_7(PPC::CR); \
+#define DEFINE_PPC_REGCLASSES                                                  \
+  static const MCPhysReg RRegs[32] = PPC_REGS0_31(PPC::R);                     \
+  static const MCPhysReg XRegs[32] = PPC_REGS0_31(PPC::X);                     \
+  static const MCPhysReg FRegs[32] = PPC_REGS0_31(PPC::F);                     \
+  static const MCPhysReg VSRpRegs[32] = PPC_REGS0_31(PPC::VSRp);               \
+  static const MCPhysReg SPERegs[32] = PPC_REGS0_31(PPC::S);                   \
+  static const MCPhysReg VFRegs[32] = PPC_REGS0_31(PPC::VF);                   \
+  static const MCPhysReg VRegs[32] = PPC_REGS0_31(PPC::V);                     \
+  static const MCPhysReg RRegsNoR0[32] = PPC_REGS_NO0_31(PPC::ZERO, PPC::R);   \
+  static const MCPhysReg XRegsNoX0[32] = PPC_REGS_NO0_31(PPC::ZERO8, PPC::X);  \
+  static const MCPhysReg VSRegs[64] = PPC_REGS_LO_HI(PPC::VSL, PPC::V);        \
+  static const MCPhysReg VSFRegs[64] = PPC_REGS_LO_HI(PPC::F, PPC::VF);        \
+  static const MCPhysReg VSSRegs[64] = PPC_REGS_LO_HI(PPC::F, PPC::VF);        \
+  static const MCPhysReg CRBITRegs[32] = {                                     \
+      PPC::CR0LT, PPC::CR0GT, PPC::CR0EQ, PPC::CR0UN, PPC::CR1LT, PPC::CR1GT,  \
+      PPC::CR1EQ, PPC::CR1UN, PPC::CR2LT, PPC::CR2GT, PPC::CR2EQ, PPC::CR2UN,  \
+      PPC::CR3LT, PPC::CR3GT, PPC::CR3EQ, PPC::CR3UN, PPC::CR4LT, PPC::CR4GT,  \
+      PPC::CR4EQ, PPC::CR4UN, PPC::CR5LT, PPC::CR5GT, PPC::CR5EQ, PPC::CR5UN,  \
+      PPC::CR6LT, PPC::CR6GT, PPC::CR6EQ, PPC::CR6UN, PPC::CR7LT, PPC::CR7GT,  \
+      PPC::CR7EQ, PPC::CR7UN};                                                 \
+  static const MCPhysReg CRRegs[8] = PPC_REGS0_7(PPC::CR);                     \
   static const MCPhysReg ACCRegs[8] = PPC_REGS0_7(PPC::ACC)
 #endif // LLVM_LIB_TARGET_POWERPC_MCTARGETDESC_PPCMCTARGETDESC_H

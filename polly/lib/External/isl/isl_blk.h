@@ -17,11 +17,11 @@ extern "C" {
 #endif
 
 struct isl_blk {
-    size_t size;
-    isl_int *data;
+  size_t size;
+  isl_int *data;
 };
 
-#define ISL_BLK_CACHE_SIZE	20
+#define ISL_BLK_CACHE_SIZE 20
 
 struct isl_ctx;
 

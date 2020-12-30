@@ -22,49 +22,49 @@ using namespace tooling;
 using ast_matchers::MatchFinder;
 
 void Transformer::registerMatchers(MatchFinder *MatchFinder) {
-    for (auto &Matcher : transformer::detail::buildMatchers(Rule))
-        MatchFinder->addDynamicMatcher(Matcher, this);
+  for (auto &Matcher : transformer::detail::buildMatchers(Rule))
+    MatchFinder->addDynamicMatcher(Matcher, this);
 }
 
 void Transformer::run(const MatchFinder::MatchResult &Result) {
-    if (Result.Context->getDiagnostics().hasErrorOccurred())
-        return;
+  if (Result.Context->getDiagnostics().hasErrorOccurred())
+    return;
 
-    transformer::RewriteRule::Case Case =
-        transformer::detail::findSelectedCase(Result, Rule);
-    auto Transformations = Case.Edits(Result);
-    if (!Transformations) {
-        Consumer(Transformations.takeError());
-        return;
-    }
+  transformer::RewriteRule::Case Case =
+      transformer::detail::findSelectedCase(Result, Rule);
+  auto Transformations = Case.Edits(Result);
+  if (!Transformations) {
+    Consumer(Transformations.takeError());
+    return;
+  }
 
-    if (Transformations->empty())
-        return;
+  if (Transformations->empty())
+    return;
 
-    // Group the transformations, by file, into AtomicChanges, each anchored by
-    // the location of the first change in that file.
-    std::map<FileID, AtomicChange> ChangesByFileID;
-    for (const auto &T : *Transformations) {
-        auto ID = Result.SourceManager->getFileID(T.Range.getBegin());
-        auto Iter = ChangesByFileID
+  // Group the transformations, by file, into AtomicChanges, each anchored by
+  // the location of the first change in that file.
+  std::map<FileID, AtomicChange> ChangesByFileID;
+  for (const auto &T : *Transformations) {
+    auto ID = Result.SourceManager->getFileID(T.Range.getBegin());
+    auto Iter = ChangesByFileID
                     .emplace(ID, AtomicChange(*Result.SourceManager,
                                               T.Range.getBegin(), T.Metadata))
                     .first;
-        auto &AC = Iter->second;
-        switch (T.Kind) {
-        case transformer::EditKind::Range:
-            if (auto Err =
-                        AC.replace(*Result.SourceManager, T.Range, T.Replacement)) {
-                Consumer(std::move(Err));
-                return;
-            }
-            break;
-        case transformer::EditKind::AddInclude:
-            AC.addHeader(T.Replacement);
-            break;
-        }
+    auto &AC = Iter->second;
+    switch (T.Kind) {
+    case transformer::EditKind::Range:
+      if (auto Err =
+              AC.replace(*Result.SourceManager, T.Range, T.Replacement)) {
+        Consumer(std::move(Err));
+        return;
+      }
+      break;
+    case transformer::EditKind::AddInclude:
+      AC.addHeader(T.Replacement);
+      break;
     }
+  }
 
-    for (auto &IDChangePair : ChangesByFileID)
-        Consumer(std::move(IDChangePair.second));
+  for (auto &IDChangePair : ChangesByFileID)
+    Consumer(std::move(IDChangePair.second));
 }

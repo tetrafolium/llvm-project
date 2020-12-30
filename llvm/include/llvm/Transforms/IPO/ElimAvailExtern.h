@@ -24,7 +24,7 @@ class Module;
 class EliminateAvailableExternallyPass
     : public PassInfoMixin<EliminateAvailableExternallyPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
 };
 
 } // end namespace llvm

@@ -23,25 +23,25 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-lambda-function-name.html
 class LambdaFunctionNameCheck : public ClangTidyCheck {
 public:
-    struct SourceRangeLessThan {
-        bool operator()(const SourceRange &L, const SourceRange &R) const {
-            if (L.getBegin() == R.getBegin()) {
-                return L.getEnd() < R.getEnd();
-            }
-            return L.getBegin() < R.getBegin();
-        }
-    };
-    using SourceRangeSet = std::set<SourceRange, SourceRangeLessThan>;
+  struct SourceRangeLessThan {
+    bool operator()(const SourceRange &L, const SourceRange &R) const {
+      if (L.getBegin() == R.getBegin()) {
+        return L.getEnd() < R.getEnd();
+      }
+      return L.getBegin() < R.getBegin();
+    }
+  };
+  using SourceRangeSet = std::set<SourceRange, SourceRangeLessThan>;
 
-    LambdaFunctionNameCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  LambdaFunctionNameCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    SourceRangeSet SuppressMacroExpansions;
+  SourceRangeSet SuppressMacroExpansions;
 };
 
 } // namespace bugprone

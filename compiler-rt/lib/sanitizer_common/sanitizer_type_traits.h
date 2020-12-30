@@ -16,11 +16,11 @@
 namespace __sanitizer {
 
 struct true_type {
-    static const bool value = true;
+  static const bool value = true;
 };
 
 struct false_type {
-    static const bool value = false;
+  static const bool value = false;
 };
 
 // is_same<T, U>
@@ -49,12 +49,12 @@ struct is_same<T, T> : public true_type {};
 // ```
 template <bool B, class T, class F>
 struct conditional {
-    using type = T;
+  using type = T;
 };
 
 template <class T, class F>
 struct conditional<false, T, F> {
-    using type = F;
+  using type = F;
 };
 
 }  // namespace __sanitizer

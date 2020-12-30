@@ -18,8 +18,8 @@
 namespace {
 
 llvm::cl::opt<std::string>
-HeaderDefFile("def", llvm::cl::desc("Path to the .h.def file."),
-              llvm::cl::value_desc("<filename>"), llvm::cl::Required);
+    HeaderDefFile("def", llvm::cl::desc("Path to the .h.def file."),
+                  llvm::cl::value_desc("<filename>"), llvm::cl::Required);
 llvm::cl::opt<std::string> StandardHeader(
     "header",
     llvm::cl::desc("The standard header file which is to be generated."),
@@ -34,10 +34,10 @@ llvm::cl::list<std::string> ReplacementValues(
     llvm::cl::value_desc("<name=value>[,name=value]"));
 
 void ParseArgValuePairs(std::unordered_map<std::string, std::string> &Map) {
-    for (std::string &R : ReplacementValues) {
-        auto Pair = llvm::StringRef(R).split('=');
-        Map[std::string(Pair.first)] = std::string(Pair.second);
-    }
+  for (std::string &R : ReplacementValues) {
+    auto Pair = llvm::StringRef(R).split('=');
+    Map[std::string(Pair.first)] = std::string(Pair.second);
+  }
 }
 
 } // anonymous namespace
@@ -45,17 +45,17 @@ void ParseArgValuePairs(std::unordered_map<std::string, std::string> &Map) {
 namespace llvm_libc {
 
 bool HeaderGeneratorMain(llvm::raw_ostream &OS, llvm::RecordKeeper &Records) {
-    std::unordered_map<std::string, std::string> ArgMap;
-    ParseArgValuePairs(ArgMap);
-    Generator G(HeaderDefFile, EntrypointNamesOption, StandardHeader, ArgMap);
-    G.generate(OS, Records);
+  std::unordered_map<std::string, std::string> ArgMap;
+  ParseArgValuePairs(ArgMap);
+  Generator G(HeaderDefFile, EntrypointNamesOption, StandardHeader, ArgMap);
+  G.generate(OS, Records);
 
-    return false;
+  return false;
 }
 
 } // namespace llvm_libc
 
 int main(int argc, char *argv[]) {
-    llvm::cl::ParseCommandLineOptions(argc, argv);
-    return TableGenMain(argv[0], &llvm_libc::HeaderGeneratorMain);
+  llvm::cl::ParseCommandLineOptions(argc, argv);
+  return TableGenMain(argv[0], &llvm_libc::HeaderGeneratorMain);
 }

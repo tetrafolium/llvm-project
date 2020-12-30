@@ -46,49 +46,49 @@ using namespace mlir;
 /// linked together and returned.
 static std::unique_ptr<llvm::Module>
 convertMLIRModule(ModuleOp module, llvm::LLVMContext &context) {
-    // Verify that there is only one nested module.
-    auto modules = module.getOps<ModuleOp>();
-    if (!llvm::hasSingleElement(modules)) {
-        module.emitError("The module must contain exactly one nested module");
-        return nullptr;
-    }
+  // Verify that there is only one nested module.
+  auto modules = module.getOps<ModuleOp>();
+  if (!llvm::hasSingleElement(modules)) {
+    module.emitError("The module must contain exactly one nested module");
+    return nullptr;
+  }
 
-    // Translate nested module and erase it.
-    ModuleOp nested = *modules.begin();
-    std::unique_ptr<llvm::Module> kernelModule =
-        translateModuleToLLVMIR(nested, context);
-    nested.erase();
+  // Translate nested module and erase it.
+  ModuleOp nested = *modules.begin();
+  std::unique_ptr<llvm::Module> kernelModule =
+      translateModuleToLLVMIR(nested, context);
+  nested.erase();
 
-    std::unique_ptr<llvm::Module> mainModule =
-        translateModuleToLLVMIR(module, context);
-    llvm::Linker::linkModules(*mainModule, std::move(kernelModule));
-    return mainModule;
+  std::unique_ptr<llvm::Module> mainModule =
+      translateModuleToLLVMIR(module, context);
+  llvm::Linker::linkModules(*mainModule, std::move(kernelModule));
+  return mainModule;
 }
 
 static LogicalResult runMLIRPasses(ModuleOp module) {
-    PassManager passManager(module.getContext());
-    applyPassManagerCLOptions(passManager);
-    passManager.addPass(createGpuKernelOutliningPass());
-    passManager.addPass(createConvertGPUToSPIRVPass());
+  PassManager passManager(module.getContext());
+  applyPassManagerCLOptions(passManager);
+  passManager.addPass(createGpuKernelOutliningPass());
+  passManager.addPass(createConvertGPUToSPIRVPass());
 
-    OpPassManager &nestedPM = passManager.nest<spirv::ModuleOp>();
-    nestedPM.addPass(spirv::createLowerABIAttributesPass());
-    nestedPM.addPass(spirv::createUpdateVersionCapabilityExtensionPass());
-    passManager.addPass(createLowerHostCodeToLLVMPass());
-    passManager.addPass(createConvertSPIRVToLLVMPass());
-    return passManager.run(module);
+  OpPassManager &nestedPM = passManager.nest<spirv::ModuleOp>();
+  nestedPM.addPass(spirv::createLowerABIAttributesPass());
+  nestedPM.addPass(spirv::createUpdateVersionCapabilityExtensionPass());
+  passManager.addPass(createLowerHostCodeToLLVMPass());
+  passManager.addPass(createConvertSPIRVToLLVMPass());
+  return passManager.run(module);
 }
 
 int main(int argc, char **argv) {
-    llvm::InitLLVM y(argc, argv);
+  llvm::InitLLVM y(argc, argv);
 
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    mlir::initializeLLVMPasses();
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
+  mlir::initializeLLVMPasses();
 
-    mlir::JitRunnerConfig jitRunnerConfig;
-    jitRunnerConfig.mlirTransformer = runMLIRPasses;
-    jitRunnerConfig.llvmModuleBuilder = convertMLIRModule;
+  mlir::JitRunnerConfig jitRunnerConfig;
+  jitRunnerConfig.mlirTransformer = runMLIRPasses;
+  jitRunnerConfig.llvmModuleBuilder = convertMLIRModule;
 
-    return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
+  return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
 }

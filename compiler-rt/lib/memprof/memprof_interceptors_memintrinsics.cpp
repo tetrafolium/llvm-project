@@ -17,13 +17,13 @@
 using namespace __memprof;
 
 void *__memprof_memcpy(void *to, const void *from, uptr size) {
-    MEMPROF_MEMCPY_IMPL(to, from, size);
+  MEMPROF_MEMCPY_IMPL(to, from, size);
 }
 
 void *__memprof_memset(void *block, int c, uptr size) {
-    MEMPROF_MEMSET_IMPL(block, c, size);
+  MEMPROF_MEMSET_IMPL(block, c, size);
 }
 
 void *__memprof_memmove(void *to, const void *from, uptr size) {
-    MEMPROF_MEMMOVE_IMPL(to, from, size);
+  MEMPROF_MEMMOVE_IMPL(to, from, size);
 }

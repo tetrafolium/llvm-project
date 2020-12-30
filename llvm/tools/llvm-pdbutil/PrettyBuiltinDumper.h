@@ -19,16 +19,16 @@ class LinePrinter;
 
 class BuiltinDumper : public PDBSymDumper {
 public:
-    BuiltinDumper(LinePrinter &P);
+  BuiltinDumper(LinePrinter &P);
 
-    void start(const PDBSymbolTypeBuiltin &Symbol);
+  void start(const PDBSymbolTypeBuiltin &Symbol);
 
 private:
-    StringRef getTypeName(const PDBSymbolTypeBuiltin &Symbol);
+  StringRef getTypeName(const PDBSymbolTypeBuiltin &Symbol);
 
-    LinePrinter &Printer;
+  LinePrinter &Printer;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

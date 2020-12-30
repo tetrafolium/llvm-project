@@ -19,20 +19,14 @@ namespace llvm {
 
 /// A utility class that uses RAII to save and restore the value of a variable.
 template <typename T> struct SaveAndRestore {
-    SaveAndRestore(T &X) : X(X), OldValue(X) {}
-    SaveAndRestore(T &X, const T &NewValue) : X(X), OldValue(X) {
-        X = NewValue;
-    }
-    ~SaveAndRestore() {
-        X = OldValue;
-    }
-    T get() {
-        return OldValue;
-    }
+  SaveAndRestore(T &X) : X(X), OldValue(X) {}
+  SaveAndRestore(T &X, const T &NewValue) : X(X), OldValue(X) { X = NewValue; }
+  ~SaveAndRestore() { X = OldValue; }
+  T get() { return OldValue; }
 
 private:
-    T &X;
-    T OldValue;
+  T &X;
+  T OldValue;
 };
 
 } // namespace llvm

@@ -26,38 +26,36 @@ class StringRef;
 class TargetTransformInfo;
 
 class X86TargetMachine final : public LLVMTargetMachine {
-    std::unique_ptr<TargetLoweringObjectFile> TLOF;
-    mutable StringMap<std::unique_ptr<X86Subtarget>> SubtargetMap;
-    // True if this is used in JIT.
-    bool IsJIT;
+  std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  mutable StringMap<std::unique_ptr<X86Subtarget>> SubtargetMap;
+  // True if this is used in JIT.
+  bool IsJIT;
 
 public:
-    X86TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                     StringRef FS, const TargetOptions &Options,
-                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                     CodeGenOpt::Level OL, bool JIT);
-    ~X86TargetMachine() override;
+  X86TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                   StringRef FS, const TargetOptions &Options,
+                   Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                   CodeGenOpt::Level OL, bool JIT);
+  ~X86TargetMachine() override;
 
-    const X86Subtarget *getSubtargetImpl(const Function &F) const override;
-    // DO NOT IMPLEMENT: There is no such thing as a valid default subtarget,
-    // subtargets are per-function entities based on the target-specific
-    // attributes of each function.
-    const X86Subtarget *getSubtargetImpl() const = delete;
+  const X86Subtarget *getSubtargetImpl(const Function &F) const override;
+  // DO NOT IMPLEMENT: There is no such thing as a valid default subtarget,
+  // subtargets are per-function entities based on the target-specific
+  // attributes of each function.
+  const X86Subtarget *getSubtargetImpl() const = delete;
 
-    TargetTransformInfo getTargetTransformInfo(const Function &F) override;
+  TargetTransformInfo getTargetTransformInfo(const Function &F) override;
 
-    // Set up the pass pipeline.
-    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+  // Set up the pass pipeline.
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-    TargetLoweringObjectFile *getObjFileLowering() const override {
-        return TLOF.get();
-    }
+  TargetLoweringObjectFile *getObjFileLowering() const override {
+    return TLOF.get();
+  }
 
-    bool isJIT() const {
-        return IsJIT;
-    }
+  bool isJIT() const { return IsJIT; }
 
-    bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override;
+  bool isNoopAddrSpaceCast(unsigned SrcAS, unsigned DestAS) const override;
 };
 
 } // end namespace llvm

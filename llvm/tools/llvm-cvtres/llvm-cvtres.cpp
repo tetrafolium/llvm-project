@@ -37,7 +37,7 @@ using namespace object;
 namespace {
 
 enum ID {
-    OPT_INVALID = 0, // This is not an option ID.
+  OPT_INVALID = 0, // This is not an option ID.
 #define OPTION(PREFIX, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,  \
                HELPTEXT, METAVAR, VALUES)                                      \
   OPT_##ID,
@@ -63,152 +63,150 @@ static const opt::OptTable::Info InfoTable[] = {
 
 class CvtResOptTable : public opt::OptTable {
 public:
-    CvtResOptTable() : OptTable(InfoTable, true) {}
+  CvtResOptTable() : OptTable(InfoTable, true) {}
 };
-}
+} // namespace
 
 static LLVM_ATTRIBUTE_NORETURN void reportError(Twine Msg) {
-    errs() << Msg;
-    exit(1);
+  errs() << Msg;
+  exit(1);
 }
 
 static void reportError(StringRef Input, std::error_code EC) {
-    reportError(Twine(Input) + ": " + EC.message() + ".\n");
+  reportError(Twine(Input) + ": " + EC.message() + ".\n");
 }
 
 static void error(Error EC) {
-    if (!EC)
-        return;
-    handleAllErrors(std::move(EC),
-    [&](const ErrorInfoBase &EI) {
-        reportError(EI.message());
-    });
+  if (!EC)
+    return;
+  handleAllErrors(std::move(EC),
+                  [&](const ErrorInfoBase &EI) { reportError(EI.message()); });
 }
 
 static uint32_t getTime() {
-    std::time_t Now = time(nullptr);
-    if (Now < 0 || !isUInt<32>(Now))
-        return UINT32_MAX;
-    return static_cast<uint32_t>(Now);
+  std::time_t Now = time(nullptr);
+  if (Now < 0 || !isUInt<32>(Now))
+    return UINT32_MAX;
+  return static_cast<uint32_t>(Now);
 }
 
 template <typename T> T error(Expected<T> EC) {
-    if (!EC)
-        error(EC.takeError());
-    return std::move(EC.get());
+  if (!EC)
+    error(EC.takeError());
+  return std::move(EC.get());
 }
 
 int main(int Argc, const char **Argv) {
-    InitLLVM X(Argc, Argv);
+  InitLLVM X(Argc, Argv);
 
-    CvtResOptTable T;
-    unsigned MAI, MAC;
-    ArrayRef<const char *> ArgsArr = makeArrayRef(Argv + 1, Argc - 1);
-    opt::InputArgList InputArgs = T.ParseArgs(ArgsArr, MAI, MAC);
+  CvtResOptTable T;
+  unsigned MAI, MAC;
+  ArrayRef<const char *> ArgsArr = makeArrayRef(Argv + 1, Argc - 1);
+  opt::InputArgList InputArgs = T.ParseArgs(ArgsArr, MAI, MAC);
 
-    if (InputArgs.hasArg(OPT_HELP)) {
-        T.PrintHelp(outs(), "llvm-cvtres [options] file...", "Resource Converter");
-        return 0;
-    }
-
-    bool Verbose = InputArgs.hasArg(OPT_VERBOSE);
-
-    COFF::MachineTypes MachineType;
-
-    if (opt::Arg *Arg = InputArgs.getLastArg(OPT_MACHINE)) {
-        MachineType = getMachineType(Arg->getValue());
-        if (MachineType == COFF::IMAGE_FILE_MACHINE_UNKNOWN) {
-            reportError(Twine("Unsupported machine architecture ") + Arg->getValue() +
-                        "\n");
-        }
-    } else {
-        if (Verbose)
-            outs() << "Machine architecture not specified; assumed X64.\n";
-        MachineType = COFF::IMAGE_FILE_MACHINE_AMD64;
-    }
-
-    std::vector<std::string> InputFiles = InputArgs.getAllArgValues(OPT_INPUT);
-
-    if (InputFiles.size() == 0) {
-        reportError("No input file specified.\n");
-    }
-
-    SmallString<128> OutputFile;
-
-    if (opt::Arg *Arg = InputArgs.getLastArg(OPT_OUT)) {
-        OutputFile = Arg->getValue();
-    } else {
-        OutputFile = sys::path::filename(StringRef(InputFiles[0]));
-        sys::path::replace_extension(OutputFile, ".obj");
-    }
-
-    uint32_t DateTimeStamp;
-    if (llvm::opt::Arg *Arg = InputArgs.getLastArg(OPT_TIMESTAMP)) {
-        StringRef Value(Arg->getValue());
-        if (Value.getAsInteger(0, DateTimeStamp))
-            reportError(Twine("invalid timestamp: ") + Value +
-                        ".  Expected 32-bit integer\n");
-    } else {
-        DateTimeStamp = getTime();
-    }
-
-    if (Verbose)
-        outs() << "Machine: " << machineToStr(MachineType) << '\n';
-
-    WindowsResourceParser Parser;
-
-    for (const auto &File : InputFiles) {
-        Expected<OwningBinary<Binary>> BinaryOrErr = createBinary(File);
-        if (!BinaryOrErr)
-            reportError(File, errorToErrorCode(BinaryOrErr.takeError()));
-
-        Binary &Binary = *BinaryOrErr.get().getBinary();
-
-        WindowsResource *RF = dyn_cast<WindowsResource>(&Binary);
-        if (!RF)
-            reportError(File + ": unrecognized file format.\n");
-
-        if (Verbose) {
-            int EntryNumber = 0;
-            ResourceEntryRef Entry = error(RF->getHeadEntry());
-            bool End = false;
-            while (!End) {
-                error(Entry.moveNext(End));
-                EntryNumber++;
-            }
-            outs() << "Number of resources: " << EntryNumber << "\n";
-        }
-
-        std::vector<std::string> Duplicates;
-        error(Parser.parse(RF, Duplicates));
-        for (const auto& DupeDiag : Duplicates)
-            reportError(DupeDiag);
-    }
-
-    if (Verbose) {
-        Parser.printTree(outs());
-    }
-
-    std::unique_ptr<MemoryBuffer> OutputBuffer =
-        error(llvm::object::writeWindowsResourceCOFF(MachineType, Parser,
-                DateTimeStamp));
-    auto FileOrErr =
-        FileOutputBuffer::create(OutputFile, OutputBuffer->getBufferSize());
-    if (!FileOrErr)
-        reportError(OutputFile, errorToErrorCode(FileOrErr.takeError()));
-    std::unique_ptr<FileOutputBuffer> FileBuffer = std::move(*FileOrErr);
-    std::copy(OutputBuffer->getBufferStart(), OutputBuffer->getBufferEnd(),
-              FileBuffer->getBufferStart());
-    error(FileBuffer->commit());
-
-    if (Verbose) {
-        Expected<OwningBinary<Binary>> BinaryOrErr = createBinary(OutputFile);
-        if (!BinaryOrErr)
-            reportError(OutputFile, errorToErrorCode(BinaryOrErr.takeError()));
-        Binary &Binary = *BinaryOrErr.get().getBinary();
-        ScopedPrinter W(errs());
-        W.printBinaryBlock("Output File Raw Data", Binary.getData());
-    }
-
+  if (InputArgs.hasArg(OPT_HELP)) {
+    T.PrintHelp(outs(), "llvm-cvtres [options] file...", "Resource Converter");
     return 0;
+  }
+
+  bool Verbose = InputArgs.hasArg(OPT_VERBOSE);
+
+  COFF::MachineTypes MachineType;
+
+  if (opt::Arg *Arg = InputArgs.getLastArg(OPT_MACHINE)) {
+    MachineType = getMachineType(Arg->getValue());
+    if (MachineType == COFF::IMAGE_FILE_MACHINE_UNKNOWN) {
+      reportError(Twine("Unsupported machine architecture ") + Arg->getValue() +
+                  "\n");
+    }
+  } else {
+    if (Verbose)
+      outs() << "Machine architecture not specified; assumed X64.\n";
+    MachineType = COFF::IMAGE_FILE_MACHINE_AMD64;
+  }
+
+  std::vector<std::string> InputFiles = InputArgs.getAllArgValues(OPT_INPUT);
+
+  if (InputFiles.size() == 0) {
+    reportError("No input file specified.\n");
+  }
+
+  SmallString<128> OutputFile;
+
+  if (opt::Arg *Arg = InputArgs.getLastArg(OPT_OUT)) {
+    OutputFile = Arg->getValue();
+  } else {
+    OutputFile = sys::path::filename(StringRef(InputFiles[0]));
+    sys::path::replace_extension(OutputFile, ".obj");
+  }
+
+  uint32_t DateTimeStamp;
+  if (llvm::opt::Arg *Arg = InputArgs.getLastArg(OPT_TIMESTAMP)) {
+    StringRef Value(Arg->getValue());
+    if (Value.getAsInteger(0, DateTimeStamp))
+      reportError(Twine("invalid timestamp: ") + Value +
+                  ".  Expected 32-bit integer\n");
+  } else {
+    DateTimeStamp = getTime();
+  }
+
+  if (Verbose)
+    outs() << "Machine: " << machineToStr(MachineType) << '\n';
+
+  WindowsResourceParser Parser;
+
+  for (const auto &File : InputFiles) {
+    Expected<OwningBinary<Binary>> BinaryOrErr = createBinary(File);
+    if (!BinaryOrErr)
+      reportError(File, errorToErrorCode(BinaryOrErr.takeError()));
+
+    Binary &Binary = *BinaryOrErr.get().getBinary();
+
+    WindowsResource *RF = dyn_cast<WindowsResource>(&Binary);
+    if (!RF)
+      reportError(File + ": unrecognized file format.\n");
+
+    if (Verbose) {
+      int EntryNumber = 0;
+      ResourceEntryRef Entry = error(RF->getHeadEntry());
+      bool End = false;
+      while (!End) {
+        error(Entry.moveNext(End));
+        EntryNumber++;
+      }
+      outs() << "Number of resources: " << EntryNumber << "\n";
+    }
+
+    std::vector<std::string> Duplicates;
+    error(Parser.parse(RF, Duplicates));
+    for (const auto &DupeDiag : Duplicates)
+      reportError(DupeDiag);
+  }
+
+  if (Verbose) {
+    Parser.printTree(outs());
+  }
+
+  std::unique_ptr<MemoryBuffer> OutputBuffer =
+      error(llvm::object::writeWindowsResourceCOFF(MachineType, Parser,
+                                                   DateTimeStamp));
+  auto FileOrErr =
+      FileOutputBuffer::create(OutputFile, OutputBuffer->getBufferSize());
+  if (!FileOrErr)
+    reportError(OutputFile, errorToErrorCode(FileOrErr.takeError()));
+  std::unique_ptr<FileOutputBuffer> FileBuffer = std::move(*FileOrErr);
+  std::copy(OutputBuffer->getBufferStart(), OutputBuffer->getBufferEnd(),
+            FileBuffer->getBufferStart());
+  error(FileBuffer->commit());
+
+  if (Verbose) {
+    Expected<OwningBinary<Binary>> BinaryOrErr = createBinary(OutputFile);
+    if (!BinaryOrErr)
+      reportError(OutputFile, errorToErrorCode(BinaryOrErr.takeError()));
+    Binary &Binary = *BinaryOrErr.get().getBinary();
+    ScopedPrinter W(errs());
+    W.printBinaryBlock("Output File Raw Data", Binary.getData());
+  }
+
+  return 0;
 }

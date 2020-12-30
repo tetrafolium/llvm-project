@@ -21,9 +21,9 @@ using namespace lldb_private::process_freebsd;
 // clang-format on
 
 NativeProcessFreeBSD &NativeRegisterContextFreeBSD::GetProcess() {
-    return static_cast<NativeProcessFreeBSD &>(m_thread.GetProcess());
+  return static_cast<NativeProcessFreeBSD &>(m_thread.GetProcess());
 }
 
 ::pid_t NativeRegisterContextFreeBSD::GetProcessPid() {
-    return GetProcess().GetID();
+  return GetProcess().GetID();
 }

@@ -11,18 +11,16 @@
 lldb_private::ExternalASTSourceWrapper::~ExternalASTSourceWrapper() {}
 
 void lldb_private::ExternalASTSourceWrapper::PrintStats() {
-    m_Source->PrintStats();
+  m_Source->PrintStats();
 }
 
 lldb_private::ASTConsumerForwarder::~ASTConsumerForwarder() {}
 
-void lldb_private::ASTConsumerForwarder::PrintStats() {
-    m_c->PrintStats();
-}
+void lldb_private::ASTConsumerForwarder::PrintStats() { m_c->PrintStats(); }
 
 lldb_private::SemaSourceWithPriorities::~SemaSourceWithPriorities() {}
 
 void lldb_private::SemaSourceWithPriorities::PrintStats() {
-    for (size_t i = 0; i < Sources.size(); ++i)
-        Sources[i]->PrintStats();
+  for (size_t i = 0; i < Sources.size(); ++i)
+    Sources[i]->PrintStats();
 }

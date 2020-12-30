@@ -19,19 +19,19 @@
 namespace llvm {
 
 class CSKYTargetMachine : public LLVMTargetMachine {
-    std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  std::unique_ptr<TargetLoweringObjectFile> TLOF;
 
 public:
-    CSKYTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                      StringRef FS, const TargetOptions &Options,
-                      Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                      CodeGenOpt::Level OL, bool JIT);
+  CSKYTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                    StringRef FS, const TargetOptions &Options,
+                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                    CodeGenOpt::Level OL, bool JIT);
 
-    TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
+  TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
-    TargetLoweringObjectFile *getObjFileLowering() const override {
-        return TLOF.get();
-    }
+  TargetLoweringObjectFile *getObjFileLowering() const override {
+    return TLOF.get();
+  }
 };
 } // namespace llvm
 

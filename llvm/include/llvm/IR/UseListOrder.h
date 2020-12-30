@@ -24,16 +24,16 @@ class Value;
 
 /// Structure to hold a use-list order.
 struct UseListOrder {
-    const Value *V = nullptr;
-    const Function *F = nullptr;
-    std::vector<unsigned> Shuffle;
+  const Value *V = nullptr;
+  const Function *F = nullptr;
+  std::vector<unsigned> Shuffle;
 
-    UseListOrder(const Value *V, const Function *F, size_t ShuffleSize)
-        : V(V), F(F), Shuffle(ShuffleSize) {}
+  UseListOrder(const Value *V, const Function *F, size_t ShuffleSize)
+      : V(V), F(F), Shuffle(ShuffleSize) {}
 
-    UseListOrder() = default;
-    UseListOrder(UseListOrder &&) = default;
-    UseListOrder &operator=(UseListOrder &&) = default;
+  UseListOrder() = default;
+  UseListOrder(UseListOrder &&) = default;
+  UseListOrder &operator=(UseListOrder &&) = default;
 };
 
 using UseListOrderStack = std::vector<UseListOrder>;

@@ -16,16 +16,16 @@ CodeGenOptions::CodeGenOptions() {
 #define ENUM_CODEGENOPT(Name, Type, Bits, Default) set##Name(Default);
 #include "clang/Basic/CodeGenOptions.def"
 
-    RelocationModel = llvm::Reloc::PIC_;
-    memcpy(CoverageVersion, "408*", 4);
+  RelocationModel = llvm::Reloc::PIC_;
+  memcpy(CoverageVersion, "408*", 4);
 }
 
 bool CodeGenOptions::isNoBuiltinFunc(const char *Name) const {
-    StringRef FuncName(Name);
-    for (unsigned i = 0, e = NoBuiltinFuncs.size(); i != e; ++i)
-        if (FuncName.equals(NoBuiltinFuncs[i]))
-            return true;
-    return false;
+  StringRef FuncName(Name);
+  for (unsigned i = 0, e = NoBuiltinFuncs.size(); i != e; ++i)
+    if (FuncName.equals(NoBuiltinFuncs[i]))
+      return true;
+  return false;
 }
 
-}  // end namespace clang
+} // end namespace clang

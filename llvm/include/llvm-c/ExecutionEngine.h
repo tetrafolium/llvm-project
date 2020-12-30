@@ -41,18 +41,18 @@ typedef struct LLVMOpaqueExecutionEngine *LLVMExecutionEngineRef;
 typedef struct LLVMOpaqueMCJITMemoryManager *LLVMMCJITMemoryManagerRef;
 
 struct LLVMMCJITCompilerOptions {
-    unsigned OptLevel;
-    LLVMCodeModel CodeModel;
-    LLVMBool NoFramePointerElim;
-    LLVMBool EnableFastISel;
-    LLVMMCJITMemoryManagerRef MCJMM;
+  unsigned OptLevel;
+  LLVMCodeModel CodeModel;
+  LLVMBool NoFramePointerElim;
+  LLVMBool EnableFastISel;
+  LLVMMCJITMemoryManagerRef MCJMM;
 };
 
 /*===-- Operations on generic values --------------------------------------===*/
 
 LLVMGenericValueRef LLVMCreateGenericValueOfInt(LLVMTypeRef Ty,
-        unsigned long long N,
-        LLVMBool IsSigned);
+                                                unsigned long long N,
+                                                LLVMBool IsSigned);
 
 LLVMGenericValueRef LLVMCreateGenericValueOfPointer(void *P);
 
@@ -61,7 +61,7 @@ LLVMGenericValueRef LLVMCreateGenericValueOfFloat(LLVMTypeRef Ty, double N);
 unsigned LLVMGenericValueIntWidth(LLVMGenericValueRef GenValRef);
 
 unsigned long long LLVMGenericValueToInt(LLVMGenericValueRef GenVal,
-        LLVMBool IsSigned);
+                                         LLVMBool IsSigned);
 
 void *LLVMGenericValueToPointer(LLVMGenericValueRef GenVal);
 
@@ -72,16 +72,13 @@ void LLVMDisposeGenericValue(LLVMGenericValueRef GenVal);
 /*===-- Operations on execution engines -----------------------------------===*/
 
 LLVMBool LLVMCreateExecutionEngineForModule(LLVMExecutionEngineRef *OutEE,
-        LLVMModuleRef M,
-        char **OutError);
+                                            LLVMModuleRef M, char **OutError);
 
 LLVMBool LLVMCreateInterpreterForModule(LLVMExecutionEngineRef *OutInterp,
-                                        LLVMModuleRef M,
-                                        char **OutError);
+                                        LLVMModuleRef M, char **OutError);
 
 LLVMBool LLVMCreateJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
-                                        LLVMModuleRef M,
-                                        unsigned OptLevel,
+                                        LLVMModuleRef M, unsigned OptLevel,
                                         char **OutError);
 
 void LLVMInitializeMCJITCompilerOptions(
@@ -104,10 +101,11 @@ void LLVMInitializeMCJITCompilerOptions(
  *
  * LLVMCreateMCJITCompilerForModule(&jit, mod, 0, 0, &error);
  */
-LLVMBool LLVMCreateMCJITCompilerForModule(
-    LLVMExecutionEngineRef *OutJIT, LLVMModuleRef M,
-    struct LLVMMCJITCompilerOptions *Options, size_t SizeOfOptions,
-    char **OutError);
+LLVMBool
+LLVMCreateMCJITCompilerForModule(LLVMExecutionEngineRef *OutJIT,
+                                 LLVMModuleRef M,
+                                 struct LLVMMCJITCompilerOptions *Options,
+                                 size_t SizeOfOptions, char **OutError);
 
 void LLVMDisposeExecutionEngine(LLVMExecutionEngineRef EE);
 
@@ -116,8 +114,8 @@ void LLVMRunStaticConstructors(LLVMExecutionEngineRef EE);
 void LLVMRunStaticDestructors(LLVMExecutionEngineRef EE);
 
 int LLVMRunFunctionAsMain(LLVMExecutionEngineRef EE, LLVMValueRef F,
-                          unsigned ArgC, const char * const *ArgV,
-                          const char * const *EnvP);
+                          unsigned ArgC, const char *const *ArgV,
+                          const char *const *EnvP);
 
 LLVMGenericValueRef LLVMRunFunction(LLVMExecutionEngineRef EE, LLVMValueRef F,
                                     unsigned NumArgs,
@@ -141,7 +139,7 @@ LLVMTargetMachineRef
 LLVMGetExecutionEngineTargetMachine(LLVMExecutionEngineRef EE);
 
 void LLVMAddGlobalMapping(LLVMExecutionEngineRef EE, LLVMValueRef Global,
-                          void* Addr);
+                          void *Addr);
 
 void *LLVMGetPointerToGlobal(LLVMExecutionEngineRef EE, LLVMValueRef Global);
 
@@ -162,8 +160,8 @@ typedef uint8_t *(*LLVMMemoryManagerAllocateCodeSectionCallback)(
 typedef uint8_t *(*LLVMMemoryManagerAllocateDataSectionCallback)(
     void *Opaque, uintptr_t Size, unsigned Alignment, unsigned SectionID,
     const char *SectionName, LLVMBool IsReadOnly);
-typedef LLVMBool (*LLVMMemoryManagerFinalizeMemoryCallback)(
-    void *Opaque, char **ErrMsg);
+typedef LLVMBool (*LLVMMemoryManagerFinalizeMemoryCallback)(void *Opaque,
+                                                            char **ErrMsg);
 typedef void (*LLVMMemoryManagerDestroyCallback)(void *Opaque);
 
 /**

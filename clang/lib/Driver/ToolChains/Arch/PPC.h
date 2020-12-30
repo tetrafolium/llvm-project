@@ -23,14 +23,14 @@ namespace ppc {
 bool hasPPCAbiArg(const llvm::opt::ArgList &Args, const char *Value);
 
 enum class FloatABI {
-    Invalid,
-    Soft,
-    Hard,
+  Invalid,
+  Soft,
+  Hard,
 };
 
 enum class ReadGOTPtrMode {
-    Bss,
-    SecurePlt,
+  Bss,
+  SecurePlt,
 };
 
 FloatABI getPPCFloatABI(const Driver &D, const llvm::opt::ArgList &Args);
@@ -45,7 +45,7 @@ void getPPCTargetFeatures(const Driver &D, const llvm::Triple &Triple,
                           std::vector<llvm::StringRef> &Features);
 
 } // end namespace ppc
-} // end namespace target
+} // namespace tools
 } // end namespace driver
 } // end namespace clang
 

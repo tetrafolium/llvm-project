@@ -15,9 +15,9 @@ namespace clangd {
 namespace remote {
 
 std::unique_ptr<clangd::SymbolIndex> getClient(llvm::StringRef Address,
-        llvm::StringRef IndexRoot) {
-    elog("Can't create SymbolIndex client without Remote Index support.");
-    return nullptr;
+                                               llvm::StringRef IndexRoot) {
+  elog("Can't create SymbolIndex client without Remote Index support.");
+  return nullptr;
 }
 
 } // namespace remote

@@ -21,96 +21,95 @@ mlir::edsc::ScopedContext::ScopedContext(OpBuilder &b)
 mlir::edsc::ScopedContext::ScopedContext(OpBuilder &b, Location location)
     : builder(b), guard(builder), location(location),
       enclosingScopedContext(ScopedContext::getCurrentScopedContext()) {
-    getCurrentScopedContext() = this;
+  getCurrentScopedContext() = this;
 }
 
 /// Sets the insertion point of the builder to 'newInsertPt' for the duration
 /// of the scope. The existing insertion point of the builder is restored on
 /// destruction.
 mlir::edsc::ScopedContext::ScopedContext(OpBuilder &b,
-        OpBuilder::InsertPoint newInsertPt,
-        Location location)
+                                         OpBuilder::InsertPoint newInsertPt,
+                                         Location location)
     : builder(b), guard(builder), location(location),
       enclosingScopedContext(ScopedContext::getCurrentScopedContext()) {
-    getCurrentScopedContext() = this;
-    builder.restoreInsertionPoint(newInsertPt);
+  getCurrentScopedContext() = this;
+  builder.restoreInsertionPoint(newInsertPt);
 }
 
 mlir::edsc::ScopedContext::~ScopedContext() {
-    getCurrentScopedContext() = enclosingScopedContext;
+  getCurrentScopedContext() = enclosingScopedContext;
 }
 
 ScopedContext *&mlir::edsc::ScopedContext::getCurrentScopedContext() {
-    thread_local ScopedContext *context = nullptr;
-    return context;
+  thread_local ScopedContext *context = nullptr;
+  return context;
 }
 
 OpBuilder &mlir::edsc::ScopedContext::getBuilderRef() {
-    assert(ScopedContext::getCurrentScopedContext() &&
-           "Unexpected Null ScopedContext");
-    return ScopedContext::getCurrentScopedContext()->builder;
+  assert(ScopedContext::getCurrentScopedContext() &&
+         "Unexpected Null ScopedContext");
+  return ScopedContext::getCurrentScopedContext()->builder;
 }
 
 Location mlir::edsc::ScopedContext::getLocation() {
-    assert(ScopedContext::getCurrentScopedContext() &&
-           "Unexpected Null ScopedContext");
-    return ScopedContext::getCurrentScopedContext()->location;
+  assert(ScopedContext::getCurrentScopedContext() &&
+         "Unexpected Null ScopedContext");
+  return ScopedContext::getCurrentScopedContext()->location;
 }
 
 MLIRContext *mlir::edsc::ScopedContext::getContext() {
-    return getBuilderRef().getContext();
+  return getBuilderRef().getContext();
 }
 
 Block *mlir::edsc::createBlock(TypeRange argTypes) {
-    assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
-    OpBuilder &builder = ScopedContext::getBuilderRef();
-    Block *block = builder.getInsertionBlock();
-    assert(block != nullptr &&
-           "insertion point not set up in the builder within ScopedContext");
+  assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
+  OpBuilder &builder = ScopedContext::getBuilderRef();
+  Block *block = builder.getInsertionBlock();
+  assert(block != nullptr &&
+         "insertion point not set up in the builder within ScopedContext");
 
-    return createBlockInRegion(*block->getParent(), argTypes);
+  return createBlockInRegion(*block->getParent(), argTypes);
 }
 
 Block *mlir::edsc::createBlockInRegion(Region &region, TypeRange argTypes) {
-    assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
-    OpBuilder &builder = ScopedContext::getBuilderRef();
+  assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
+  OpBuilder &builder = ScopedContext::getBuilderRef();
 
-    OpBuilder::InsertionGuard guard(builder);
-    return builder.createBlock(&region, {}, argTypes);
+  OpBuilder::InsertionGuard guard(builder);
+  return builder.createBlock(&region, {}, argTypes);
 }
 
 void mlir::edsc::appendToBlock(Block *block,
                                function_ref<void(ValueRange)> builderFn) {
-    assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
-    OpBuilder &builder = ScopedContext::getBuilderRef();
+  assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
+  OpBuilder &builder = ScopedContext::getBuilderRef();
 
-    OpBuilder::InsertionGuard guard(builder);
-    if (block->empty() || block->back().isKnownNonTerminator())
-        builder.setInsertionPointToEnd(block);
-    else
-        builder.setInsertionPoint(&block->back());
-    builderFn(block->getArguments());
+  OpBuilder::InsertionGuard guard(builder);
+  if (block->empty() || block->back().isKnownNonTerminator())
+    builder.setInsertionPointToEnd(block);
+  else
+    builder.setInsertionPoint(&block->back());
+  builderFn(block->getArguments());
 }
 
 Block *mlir::edsc::buildInNewBlock(TypeRange argTypes,
                                    function_ref<void(ValueRange)> builderFn) {
-    assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
-    OpBuilder &builder = ScopedContext::getBuilderRef();
-    Block *block = builder.getInsertionBlock();
-    assert(block != nullptr &&
-           "insertion point not set up in the builder within ScopedContext");
-    return buildInNewBlock(*block->getParent(), argTypes, builderFn);
+  assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
+  OpBuilder &builder = ScopedContext::getBuilderRef();
+  Block *block = builder.getInsertionBlock();
+  assert(block != nullptr &&
+         "insertion point not set up in the builder within ScopedContext");
+  return buildInNewBlock(*block->getParent(), argTypes, builderFn);
 }
 
 Block *mlir::edsc::buildInNewBlock(Region &region, TypeRange argTypes,
                                    function_ref<void(ValueRange)> builderFn) {
-    assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
-    OpBuilder &builder = ScopedContext::getBuilderRef();
+  assert(ScopedContext::getContext() != nullptr && "ScopedContext not set up");
+  OpBuilder &builder = ScopedContext::getBuilderRef();
 
-    Block *block = createBlockInRegion(region, argTypes);
-    OpBuilder::InsertionGuard guard(builder);
-    builder.setInsertionPointToStart(block);
-    builderFn(block->getArguments());
-    return block;
+  Block *block = createBlockInRegion(region, argTypes);
+  OpBuilder::InsertionGuard guard(builder);
+  builder.setInsertionPointToStart(block);
+  builderFn(block->getArguments());
+  return block;
 }
-

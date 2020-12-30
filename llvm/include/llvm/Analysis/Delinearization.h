@@ -22,11 +22,11 @@
 namespace llvm {
 struct DelinearizationPrinterPass
     : public PassInfoMixin<DelinearizationPrinterPass> {
-    explicit DelinearizationPrinterPass(raw_ostream &OS);
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  explicit DelinearizationPrinterPass(raw_ostream &OS);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
 private:
-    raw_ostream &OS;
+  raw_ostream &OS;
 };
 } // namespace llvm
 

@@ -15,7 +15,7 @@
 namespace gwp_asan {
 class PlatformMutex {
 protected:
-    sync_mutex_t Mu = {};
+  sync_mutex_t Mu = {};
 };
 } // namespace gwp_asan
 

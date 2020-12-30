@@ -32,9 +32,9 @@ using namespace llvm;
 
 #define DEBUG_TYPE "capture-tracking"
 
-STATISTIC(NumCaptured,          "Number of pointers maybe captured");
-STATISTIC(NumNotCaptured,       "Number of pointers not captured");
-STATISTIC(NumCapturedBefore,    "Number of pointers maybe captured before");
+STATISTIC(NumCaptured, "Number of pointers maybe captured");
+STATISTIC(NumNotCaptured, "Number of pointers not captured");
+STATISTIC(NumCapturedBefore, "Number of pointers maybe captured before");
 STATISTIC(NumNotCapturedBefore, "Number of pointers not captured before");
 
 /// The default value for MaxUsesToExplore argument. It's relatively small to
@@ -44,56 +44,52 @@ STATISTIC(NumNotCapturedBefore, "Number of pointers not captured before");
 /// use it where possible. The caching version can use much higher limit or
 /// don't have this cap at all.
 static cl::opt<unsigned>
-DefaultMaxUsesToExplore("capture-tracking-max-uses-to-explore", cl::Hidden,
-                        cl::desc("Maximal number of uses to explore."),
-                        cl::init(20));
+    DefaultMaxUsesToExplore("capture-tracking-max-uses-to-explore", cl::Hidden,
+                            cl::desc("Maximal number of uses to explore."),
+                            cl::init(20));
 
 unsigned llvm::getDefaultMaxUsesToExploreForCaptureTracking() {
-    return DefaultMaxUsesToExplore;
+  return DefaultMaxUsesToExplore;
 }
 
 CaptureTracker::~CaptureTracker() {}
 
-bool CaptureTracker::shouldExplore(const Use *U) {
-    return true;
-}
+bool CaptureTracker::shouldExplore(const Use *U) { return true; }
 
 bool CaptureTracker::isDereferenceableOrNull(Value *O, const DataLayout &DL) {
-    // An inbounds GEP can either be a valid pointer (pointing into
-    // or to the end of an allocation), or be null in the default
-    // address space. So for an inbounds GEP there is no way to let
-    // the pointer escape using clever GEP hacking because doing so
-    // would make the pointer point outside of the allocated object
-    // and thus make the GEP result a poison value. Similarly, other
-    // dereferenceable pointers cannot be manipulated without producing
-    // poison.
-    if (auto *GEP = dyn_cast<GetElementPtrInst>(O))
-        if (GEP->isInBounds())
-            return true;
-    bool CanBeNull;
-    return O->getPointerDereferenceableBytes(DL, CanBeNull);
+  // An inbounds GEP can either be a valid pointer (pointing into
+  // or to the end of an allocation), or be null in the default
+  // address space. So for an inbounds GEP there is no way to let
+  // the pointer escape using clever GEP hacking because doing so
+  // would make the pointer point outside of the allocated object
+  // and thus make the GEP result a poison value. Similarly, other
+  // dereferenceable pointers cannot be manipulated without producing
+  // poison.
+  if (auto *GEP = dyn_cast<GetElementPtrInst>(O))
+    if (GEP->isInBounds())
+      return true;
+  bool CanBeNull;
+  return O->getPointerDereferenceableBytes(DL, CanBeNull);
 }
 
 namespace {
 struct SimpleCaptureTracker : public CaptureTracker {
-    explicit SimpleCaptureTracker(bool ReturnCaptures)
-        : ReturnCaptures(ReturnCaptures), Captured(false) {}
+  explicit SimpleCaptureTracker(bool ReturnCaptures)
+      : ReturnCaptures(ReturnCaptures), Captured(false) {}
 
-    void tooManyUses() override {
-        Captured = true;
-    }
+  void tooManyUses() override { Captured = true; }
 
-    bool captured(const Use *U) override {
-        if (isa<ReturnInst>(U->getUser()) && !ReturnCaptures)
-            return false;
+  bool captured(const Use *U) override {
+    if (isa<ReturnInst>(U->getUser()) && !ReturnCaptures)
+      return false;
 
-        Captured = true;
-        return true;
-    }
+    Captured = true;
+    return true;
+  }
 
-    bool ReturnCaptures;
+  bool ReturnCaptures;
 
-    bool Captured;
+  bool Captured;
 };
 
 /// Only find pointer captures which happen before the given instruction. Uses
@@ -102,90 +98,88 @@ struct SimpleCaptureTracker : public CaptureTracker {
 /// as the given instruction and the use.
 struct CapturesBefore : public CaptureTracker {
 
-    CapturesBefore(bool ReturnCaptures, const Instruction *I, const DominatorTree *DT,
-                   bool IncludeI)
-        : BeforeHere(I), DT(DT),
-          ReturnCaptures(ReturnCaptures), IncludeI(IncludeI), Captured(false) {}
+  CapturesBefore(bool ReturnCaptures, const Instruction *I,
+                 const DominatorTree *DT, bool IncludeI)
+      : BeforeHere(I), DT(DT), ReturnCaptures(ReturnCaptures),
+        IncludeI(IncludeI), Captured(false) {}
 
-    void tooManyUses() override {
-        Captured = true;
-    }
+  void tooManyUses() override { Captured = true; }
 
-    bool isSafeToPrune(Instruction *I) {
-        BasicBlock *BB = I->getParent();
-        // We explore this usage only if the usage can reach "BeforeHere".
-        // If use is not reachable from entry, there is no need to explore.
-        if (BeforeHere != I && !DT->isReachableFromEntry(BB))
-            return true;
+  bool isSafeToPrune(Instruction *I) {
+    BasicBlock *BB = I->getParent();
+    // We explore this usage only if the usage can reach "BeforeHere".
+    // If use is not reachable from entry, there is no need to explore.
+    if (BeforeHere != I && !DT->isReachableFromEntry(BB))
+      return true;
 
-        // Compute the case where both instructions are inside the same basic
-        // block.
-        if (BB == BeforeHere->getParent()) {
-            // 'I' dominates 'BeforeHere' => not safe to prune.
-            //
-            // The value defined by an invoke dominates an instruction only
-            // if it dominates every instruction in UseBB. A PHI is dominated only
-            // if the instruction dominates every possible use in the UseBB. Since
-            // UseBB == BB, avoid pruning.
-            if (isa<InvokeInst>(BeforeHere) || isa<PHINode>(I) || I == BeforeHere)
-                return false;
-            if (!BeforeHere->comesBefore(I))
-                return false;
-
-            // 'BeforeHere' comes before 'I', it's safe to prune if we also
-            // guarantee that 'I' never reaches 'BeforeHere' through a back-edge or
-            // by its successors, i.e, prune if:
-            //
-            //  (1) BB is an entry block or have no successors.
-            //  (2) There's no path coming back through BB successors.
-            if (BB == &BB->getParent()->getEntryBlock() ||
-                    !BB->getTerminator()->getNumSuccessors())
-                return true;
-
-            SmallVector<BasicBlock*, 32> Worklist;
-            Worklist.append(succ_begin(BB), succ_end(BB));
-            return !isPotentiallyReachableFromMany(Worklist, BB, nullptr, DT);
-        }
-
-        // If the value is defined in the same basic block as use and BeforeHere,
-        // there is no need to explore the use if BeforeHere dominates use.
-        // Check whether there is a path from I to BeforeHere.
-        if (BeforeHere != I && DT->dominates(BeforeHere, I) &&
-                !isPotentiallyReachable(I, BeforeHere, nullptr, DT))
-            return true;
-
+    // Compute the case where both instructions are inside the same basic
+    // block.
+    if (BB == BeforeHere->getParent()) {
+      // 'I' dominates 'BeforeHere' => not safe to prune.
+      //
+      // The value defined by an invoke dominates an instruction only
+      // if it dominates every instruction in UseBB. A PHI is dominated only
+      // if the instruction dominates every possible use in the UseBB. Since
+      // UseBB == BB, avoid pruning.
+      if (isa<InvokeInst>(BeforeHere) || isa<PHINode>(I) || I == BeforeHere)
         return false;
-    }
+      if (!BeforeHere->comesBefore(I))
+        return false;
 
-    bool shouldExplore(const Use *U) override {
-        Instruction *I = cast<Instruction>(U->getUser());
-
-        if (BeforeHere == I && !IncludeI)
-            return false;
-
-        if (isSafeToPrune(I))
-            return false;
-
+      // 'BeforeHere' comes before 'I', it's safe to prune if we also
+      // guarantee that 'I' never reaches 'BeforeHere' through a back-edge or
+      // by its successors, i.e, prune if:
+      //
+      //  (1) BB is an entry block or have no successors.
+      //  (2) There's no path coming back through BB successors.
+      if (BB == &BB->getParent()->getEntryBlock() ||
+          !BB->getTerminator()->getNumSuccessors())
         return true;
+
+      SmallVector<BasicBlock *, 32> Worklist;
+      Worklist.append(succ_begin(BB), succ_end(BB));
+      return !isPotentiallyReachableFromMany(Worklist, BB, nullptr, DT);
     }
 
-    bool captured(const Use *U) override {
-        if (isa<ReturnInst>(U->getUser()) && !ReturnCaptures)
-            return false;
+    // If the value is defined in the same basic block as use and BeforeHere,
+    // there is no need to explore the use if BeforeHere dominates use.
+    // Check whether there is a path from I to BeforeHere.
+    if (BeforeHere != I && DT->dominates(BeforeHere, I) &&
+        !isPotentiallyReachable(I, BeforeHere, nullptr, DT))
+      return true;
 
-        Captured = true;
-        return true;
-    }
+    return false;
+  }
 
-    const Instruction *BeforeHere;
-    const DominatorTree *DT;
+  bool shouldExplore(const Use *U) override {
+    Instruction *I = cast<Instruction>(U->getUser());
 
-    bool ReturnCaptures;
-    bool IncludeI;
+    if (BeforeHere == I && !IncludeI)
+      return false;
 
-    bool Captured;
+    if (isSafeToPrune(I))
+      return false;
+
+    return true;
+  }
+
+  bool captured(const Use *U) override {
+    if (isa<ReturnInst>(U->getUser()) && !ReturnCaptures)
+      return false;
+
+    Captured = true;
+    return true;
+  }
+
+  const Instruction *BeforeHere;
+  const DominatorTree *DT;
+
+  bool ReturnCaptures;
+  bool IncludeI;
+
+  bool Captured;
 };
-}
+} // namespace
 
 /// PointerMayBeCaptured - Return true if this pointer value may be captured
 /// by the enclosing function (which is required to exist).  This routine can
@@ -194,25 +188,24 @@ struct CapturesBefore : public CaptureTracker {
 /// counts as capturing it or not.  The boolean StoreCaptures specified whether
 /// storing the value (or part of it) into memory anywhere automatically
 /// counts as capturing it or not.
-bool llvm::PointerMayBeCaptured(const Value *V,
-                                bool ReturnCaptures, bool StoreCaptures,
-                                unsigned MaxUsesToExplore) {
-    assert(!isa<GlobalValue>(V) &&
-           "It doesn't make sense to ask whether a global is captured.");
+bool llvm::PointerMayBeCaptured(const Value *V, bool ReturnCaptures,
+                                bool StoreCaptures, unsigned MaxUsesToExplore) {
+  assert(!isa<GlobalValue>(V) &&
+         "It doesn't make sense to ask whether a global is captured.");
 
-    // TODO: If StoreCaptures is not true, we could do Fancy analysis
-    // to determine whether this store is not actually an escape point.
-    // In that case, BasicAliasAnalysis should be updated as well to
-    // take advantage of this.
-    (void)StoreCaptures;
+  // TODO: If StoreCaptures is not true, we could do Fancy analysis
+  // to determine whether this store is not actually an escape point.
+  // In that case, BasicAliasAnalysis should be updated as well to
+  // take advantage of this.
+  (void)StoreCaptures;
 
-    SimpleCaptureTracker SCT(ReturnCaptures);
-    PointerMayBeCaptured(V, &SCT, MaxUsesToExplore);
-    if (SCT.Captured)
-        ++NumCaptured;
-    else
-        ++NumNotCaptured;
-    return SCT.Captured;
+  SimpleCaptureTracker SCT(ReturnCaptures);
+  PointerMayBeCaptured(V, &SCT, MaxUsesToExplore);
+  if (SCT.Captured)
+    ++NumCaptured;
+  else
+    ++NumNotCaptured;
+  return SCT.Captured;
 }
 
 /// PointerMayBeCapturedBefore - Return true if this pointer value may be
@@ -228,233 +221,234 @@ bool llvm::PointerMayBeCapturedBefore(const Value *V, bool ReturnCaptures,
                                       bool StoreCaptures, const Instruction *I,
                                       const DominatorTree *DT, bool IncludeI,
                                       unsigned MaxUsesToExplore) {
-    assert(!isa<GlobalValue>(V) &&
-           "It doesn't make sense to ask whether a global is captured.");
+  assert(!isa<GlobalValue>(V) &&
+         "It doesn't make sense to ask whether a global is captured.");
 
-    if (!DT)
-        return PointerMayBeCaptured(V, ReturnCaptures, StoreCaptures,
-                                    MaxUsesToExplore);
+  if (!DT)
+    return PointerMayBeCaptured(V, ReturnCaptures, StoreCaptures,
+                                MaxUsesToExplore);
 
-    // TODO: See comment in PointerMayBeCaptured regarding what could be done
-    // with StoreCaptures.
+  // TODO: See comment in PointerMayBeCaptured regarding what could be done
+  // with StoreCaptures.
 
-    CapturesBefore CB(ReturnCaptures, I, DT, IncludeI);
-    PointerMayBeCaptured(V, &CB, MaxUsesToExplore);
-    if (CB.Captured)
-        ++NumCapturedBefore;
-    else
-        ++NumNotCapturedBefore;
-    return CB.Captured;
+  CapturesBefore CB(ReturnCaptures, I, DT, IncludeI);
+  PointerMayBeCaptured(V, &CB, MaxUsesToExplore);
+  if (CB.Captured)
+    ++NumCapturedBefore;
+  else
+    ++NumNotCapturedBefore;
+  return CB.Captured;
 }
 
 void llvm::PointerMayBeCaptured(const Value *V, CaptureTracker *Tracker,
                                 unsigned MaxUsesToExplore) {
-    assert(V->getType()->isPointerTy() && "Capture is for pointers only!");
-    if (MaxUsesToExplore == 0)
-        MaxUsesToExplore = DefaultMaxUsesToExplore;
+  assert(V->getType()->isPointerTy() && "Capture is for pointers only!");
+  if (MaxUsesToExplore == 0)
+    MaxUsesToExplore = DefaultMaxUsesToExplore;
 
-    SmallVector<const Use *, 20> Worklist;
-    Worklist.reserve(getDefaultMaxUsesToExploreForCaptureTracking());
-    SmallSet<const Use *, 20> Visited;
+  SmallVector<const Use *, 20> Worklist;
+  Worklist.reserve(getDefaultMaxUsesToExploreForCaptureTracking());
+  SmallSet<const Use *, 20> Visited;
 
-    auto AddUses = [&](const Value *V) {
-        unsigned Count = 0;
-        for (const Use &U : V->uses()) {
-            // If there are lots of uses, conservatively say that the value
-            // is captured to avoid taking too much compile time.
-            if (Count++ >= MaxUsesToExplore) {
-                Tracker->tooManyUses();
-                return false;
-            }
-            if (!Visited.insert(&U).second)
-                continue;
-            if (!Tracker->shouldExplore(&U))
-                continue;
-            Worklist.push_back(&U);
-        }
-        return true;
-    };
-    if (!AddUses(V))
-        return;
-
-    while (!Worklist.empty()) {
-        const Use *U = Worklist.pop_back_val();
-        Instruction *I = cast<Instruction>(U->getUser());
-
-        switch (I->getOpcode()) {
-        case Instruction::Call:
-        case Instruction::Invoke: {
-            auto *Call = cast<CallBase>(I);
-            // Not captured if the callee is readonly, doesn't return a copy through
-            // its return value and doesn't unwind (a readonly function can leak bits
-            // by throwing an exception or not depending on the input value).
-            if (Call->onlyReadsMemory() && Call->doesNotThrow() &&
-                    Call->getType()->isVoidTy())
-                break;
-
-            // The pointer is not captured if returned pointer is not captured.
-            // NOTE: CaptureTracking users should not assume that only functions
-            // marked with nocapture do not capture. This means that places like
-            // getUnderlyingObject in ValueTracking or DecomposeGEPExpression
-            // in BasicAA also need to know about this property.
-            if (isIntrinsicReturningPointerAliasingArgumentWithoutCapturing(Call,
-                    true)) {
-                if (!AddUses(Call))
-                    return;
-                break;
-            }
-
-            // Volatile operations effectively capture the memory location that they
-            // load and store to.
-            if (auto *MI = dyn_cast<MemIntrinsic>(Call))
-                if (MI->isVolatile())
-                    if (Tracker->captured(U))
-                        return;
-
-            // Not captured if only passed via 'nocapture' arguments.  Note that
-            // calling a function pointer does not in itself cause the pointer to
-            // be captured.  This is a subtle point considering that (for example)
-            // the callee might return its own address.  It is analogous to saying
-            // that loading a value from a pointer does not cause the pointer to be
-            // captured, even though the loaded value might be the pointer itself
-            // (think of self-referential objects).
-            if (Call->isDataOperand(U) &&
-                    !Call->doesNotCapture(Call->getDataOperandNo(U))) {
-                // The parameter is not marked 'nocapture' - captured.
-                if (Tracker->captured(U))
-                    return;
-            }
-            break;
-        }
-        case Instruction::Load:
-            // Volatile loads make the address observable.
-            if (cast<LoadInst>(I)->isVolatile())
-                if (Tracker->captured(U))
-                    return;
-            break;
-        case Instruction::VAArg:
-            // "va-arg" from a pointer does not cause it to be captured.
-            break;
-        case Instruction::Store:
-            // Stored the pointer - conservatively assume it may be captured.
-            // Volatile stores make the address observable.
-            if (U->getOperandNo() == 0 || cast<StoreInst>(I)->isVolatile())
-                if (Tracker->captured(U))
-                    return;
-            break;
-        case Instruction::AtomicRMW: {
-            // atomicrmw conceptually includes both a load and store from
-            // the same location.
-            // As with a store, the location being accessed is not captured,
-            // but the value being stored is.
-            // Volatile stores make the address observable.
-            auto *ARMWI = cast<AtomicRMWInst>(I);
-            if (U->getOperandNo() == 1 || ARMWI->isVolatile())
-                if (Tracker->captured(U))
-                    return;
-            break;
-        }
-        case Instruction::AtomicCmpXchg: {
-            // cmpxchg conceptually includes both a load and store from
-            // the same location.
-            // As with a store, the location being accessed is not captured,
-            // but the value being stored is.
-            // Volatile stores make the address observable.
-            auto *ACXI = cast<AtomicCmpXchgInst>(I);
-            if (U->getOperandNo() == 1 || U->getOperandNo() == 2 ||
-                    ACXI->isVolatile())
-                if (Tracker->captured(U))
-                    return;
-            break;
-        }
-        case Instruction::BitCast:
-        case Instruction::GetElementPtr:
-        case Instruction::PHI:
-        case Instruction::Select:
-        case Instruction::AddrSpaceCast:
-            // The original value is not captured via this if the new value isn't.
-            if (!AddUses(I))
-                return;
-            break;
-        case Instruction::ICmp: {
-            unsigned Idx = U->getOperandNo();
-            unsigned OtherIdx = 1 - Idx;
-            if (auto *CPN = dyn_cast<ConstantPointerNull>(I->getOperand(OtherIdx))) {
-                // Don't count comparisons of a no-alias return value against null as
-                // captures. This allows us to ignore comparisons of malloc results
-                // with null, for example.
-                if (CPN->getType()->getAddressSpace() == 0)
-                    if (isNoAliasCall(U->get()->stripPointerCasts()))
-                        break;
-                if (!I->getFunction()->nullPointerIsDefined()) {
-                    auto *O = I->getOperand(Idx)->stripPointerCastsSameRepresentation();
-                    // Comparing a dereferenceable_or_null pointer against null cannot
-                    // lead to pointer escapes, because if it is not null it must be a
-                    // valid (in-bounds) pointer.
-                    if (Tracker->isDereferenceableOrNull(O, I->getModule()->getDataLayout()))
-                        break;
-                }
-            }
-            // Comparison against value stored in global variable. Given the pointer
-            // does not escape, its value cannot be guessed and stored separately in a
-            // global variable.
-            auto *LI = dyn_cast<LoadInst>(I->getOperand(OtherIdx));
-            if (LI && isa<GlobalVariable>(LI->getPointerOperand()))
-                break;
-            // Otherwise, be conservative. There are crazy ways to capture pointers
-            // using comparisons.
-            if (Tracker->captured(U))
-                return;
-            break;
-        }
-        default:
-            // Something else - be conservative and say it is captured.
-            if (Tracker->captured(U))
-                return;
-            break;
-        }
+  auto AddUses = [&](const Value *V) {
+    unsigned Count = 0;
+    for (const Use &U : V->uses()) {
+      // If there are lots of uses, conservatively say that the value
+      // is captured to avoid taking too much compile time.
+      if (Count++ >= MaxUsesToExplore) {
+        Tracker->tooManyUses();
+        return false;
+      }
+      if (!Visited.insert(&U).second)
+        continue;
+      if (!Tracker->shouldExplore(&U))
+        continue;
+      Worklist.push_back(&U);
     }
+    return true;
+  };
+  if (!AddUses(V))
+    return;
 
-    // All uses examined.
+  while (!Worklist.empty()) {
+    const Use *U = Worklist.pop_back_val();
+    Instruction *I = cast<Instruction>(U->getUser());
+
+    switch (I->getOpcode()) {
+    case Instruction::Call:
+    case Instruction::Invoke: {
+      auto *Call = cast<CallBase>(I);
+      // Not captured if the callee is readonly, doesn't return a copy through
+      // its return value and doesn't unwind (a readonly function can leak bits
+      // by throwing an exception or not depending on the input value).
+      if (Call->onlyReadsMemory() && Call->doesNotThrow() &&
+          Call->getType()->isVoidTy())
+        break;
+
+      // The pointer is not captured if returned pointer is not captured.
+      // NOTE: CaptureTracking users should not assume that only functions
+      // marked with nocapture do not capture. This means that places like
+      // getUnderlyingObject in ValueTracking or DecomposeGEPExpression
+      // in BasicAA also need to know about this property.
+      if (isIntrinsicReturningPointerAliasingArgumentWithoutCapturing(Call,
+                                                                      true)) {
+        if (!AddUses(Call))
+          return;
+        break;
+      }
+
+      // Volatile operations effectively capture the memory location that they
+      // load and store to.
+      if (auto *MI = dyn_cast<MemIntrinsic>(Call))
+        if (MI->isVolatile())
+          if (Tracker->captured(U))
+            return;
+
+      // Not captured if only passed via 'nocapture' arguments.  Note that
+      // calling a function pointer does not in itself cause the pointer to
+      // be captured.  This is a subtle point considering that (for example)
+      // the callee might return its own address.  It is analogous to saying
+      // that loading a value from a pointer does not cause the pointer to be
+      // captured, even though the loaded value might be the pointer itself
+      // (think of self-referential objects).
+      if (Call->isDataOperand(U) &&
+          !Call->doesNotCapture(Call->getDataOperandNo(U))) {
+        // The parameter is not marked 'nocapture' - captured.
+        if (Tracker->captured(U))
+          return;
+      }
+      break;
+    }
+    case Instruction::Load:
+      // Volatile loads make the address observable.
+      if (cast<LoadInst>(I)->isVolatile())
+        if (Tracker->captured(U))
+          return;
+      break;
+    case Instruction::VAArg:
+      // "va-arg" from a pointer does not cause it to be captured.
+      break;
+    case Instruction::Store:
+      // Stored the pointer - conservatively assume it may be captured.
+      // Volatile stores make the address observable.
+      if (U->getOperandNo() == 0 || cast<StoreInst>(I)->isVolatile())
+        if (Tracker->captured(U))
+          return;
+      break;
+    case Instruction::AtomicRMW: {
+      // atomicrmw conceptually includes both a load and store from
+      // the same location.
+      // As with a store, the location being accessed is not captured,
+      // but the value being stored is.
+      // Volatile stores make the address observable.
+      auto *ARMWI = cast<AtomicRMWInst>(I);
+      if (U->getOperandNo() == 1 || ARMWI->isVolatile())
+        if (Tracker->captured(U))
+          return;
+      break;
+    }
+    case Instruction::AtomicCmpXchg: {
+      // cmpxchg conceptually includes both a load and store from
+      // the same location.
+      // As with a store, the location being accessed is not captured,
+      // but the value being stored is.
+      // Volatile stores make the address observable.
+      auto *ACXI = cast<AtomicCmpXchgInst>(I);
+      if (U->getOperandNo() == 1 || U->getOperandNo() == 2 ||
+          ACXI->isVolatile())
+        if (Tracker->captured(U))
+          return;
+      break;
+    }
+    case Instruction::BitCast:
+    case Instruction::GetElementPtr:
+    case Instruction::PHI:
+    case Instruction::Select:
+    case Instruction::AddrSpaceCast:
+      // The original value is not captured via this if the new value isn't.
+      if (!AddUses(I))
+        return;
+      break;
+    case Instruction::ICmp: {
+      unsigned Idx = U->getOperandNo();
+      unsigned OtherIdx = 1 - Idx;
+      if (auto *CPN = dyn_cast<ConstantPointerNull>(I->getOperand(OtherIdx))) {
+        // Don't count comparisons of a no-alias return value against null as
+        // captures. This allows us to ignore comparisons of malloc results
+        // with null, for example.
+        if (CPN->getType()->getAddressSpace() == 0)
+          if (isNoAliasCall(U->get()->stripPointerCasts()))
+            break;
+        if (!I->getFunction()->nullPointerIsDefined()) {
+          auto *O = I->getOperand(Idx)->stripPointerCastsSameRepresentation();
+          // Comparing a dereferenceable_or_null pointer against null cannot
+          // lead to pointer escapes, because if it is not null it must be a
+          // valid (in-bounds) pointer.
+          if (Tracker->isDereferenceableOrNull(O,
+                                               I->getModule()->getDataLayout()))
+            break;
+        }
+      }
+      // Comparison against value stored in global variable. Given the pointer
+      // does not escape, its value cannot be guessed and stored separately in a
+      // global variable.
+      auto *LI = dyn_cast<LoadInst>(I->getOperand(OtherIdx));
+      if (LI && isa<GlobalVariable>(LI->getPointerOperand()))
+        break;
+      // Otherwise, be conservative. There are crazy ways to capture pointers
+      // using comparisons.
+      if (Tracker->captured(U))
+        return;
+      break;
+    }
+    default:
+      // Something else - be conservative and say it is captured.
+      if (Tracker->captured(U))
+        return;
+      break;
+    }
+  }
+
+  // All uses examined.
 }
 
 bool llvm::isNonEscapingLocalObject(
     const Value *V, SmallDenseMap<const Value *, bool, 8> *IsCapturedCache) {
-    SmallDenseMap<const Value *, bool, 8>::iterator CacheIt;
-    if (IsCapturedCache) {
-        bool Inserted;
-        std::tie(CacheIt, Inserted) = IsCapturedCache->insert({V, false});
-        if (!Inserted)
-            // Found cached result, return it!
-            return CacheIt->second;
+  SmallDenseMap<const Value *, bool, 8>::iterator CacheIt;
+  if (IsCapturedCache) {
+    bool Inserted;
+    std::tie(CacheIt, Inserted) = IsCapturedCache->insert({V, false});
+    if (!Inserted)
+      // Found cached result, return it!
+      return CacheIt->second;
+  }
+
+  // If this is a local allocation, check to see if it escapes.
+  if (isa<AllocaInst>(V) || isNoAliasCall(V)) {
+    // Set StoreCaptures to True so that we can assume in our callers that the
+    // pointer is not the result of a load instruction. Currently
+    // PointerMayBeCaptured doesn't have any special analysis for the
+    // StoreCaptures=false case; if it did, our callers could be refined to be
+    // more precise.
+    auto Ret = !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
+    if (IsCapturedCache)
+      CacheIt->second = Ret;
+    return Ret;
+  }
+
+  // If this is an argument that corresponds to a byval or noalias argument,
+  // then it has not escaped before entering the function.  Check if it escapes
+  // inside the function.
+  if (const Argument *A = dyn_cast<Argument>(V))
+    if (A->hasByValAttr() || A->hasNoAliasAttr()) {
+      // Note even if the argument is marked nocapture, we still need to check
+      // for copies made inside the function. The nocapture attribute only
+      // specifies that there are no copies made that outlive the function.
+      auto Ret = !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
+      if (IsCapturedCache)
+        CacheIt->second = Ret;
+      return Ret;
     }
 
-    // If this is a local allocation, check to see if it escapes.
-    if (isa<AllocaInst>(V) || isNoAliasCall(V)) {
-        // Set StoreCaptures to True so that we can assume in our callers that the
-        // pointer is not the result of a load instruction. Currently
-        // PointerMayBeCaptured doesn't have any special analysis for the
-        // StoreCaptures=false case; if it did, our callers could be refined to be
-        // more precise.
-        auto Ret = !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
-        if (IsCapturedCache)
-            CacheIt->second = Ret;
-        return Ret;
-    }
-
-    // If this is an argument that corresponds to a byval or noalias argument,
-    // then it has not escaped before entering the function.  Check if it escapes
-    // inside the function.
-    if (const Argument *A = dyn_cast<Argument>(V))
-        if (A->hasByValAttr() || A->hasNoAliasAttr()) {
-            // Note even if the argument is marked nocapture, we still need to check
-            // for copies made inside the function. The nocapture attribute only
-            // specifies that there are no copies made that outlive the function.
-            auto Ret = !PointerMayBeCaptured(V, false, /*StoreCaptures=*/true);
-            if (IsCapturedCache)
-                CacheIt->second = Ret;
-            return Ret;
-        }
-
-    return false;
+  return false;
 }

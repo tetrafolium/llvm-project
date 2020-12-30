@@ -18,13 +18,13 @@ namespace tidy {
 namespace android {
 
 void CloexecEpollCreate1Check::registerMatchers(MatchFinder *Finder) {
-    registerMatchersImpl(
-        Finder, functionDecl(returns(isInteger()), hasName("epoll_create1"),
-                             hasParameter(0, hasType(isInteger()))));
+  registerMatchersImpl(
+      Finder, functionDecl(returns(isInteger()), hasName("epoll_create1"),
+                           hasParameter(0, hasType(isInteger()))));
 }
 
 void CloexecEpollCreate1Check::check(const MatchFinder::MatchResult &Result) {
-    insertMacroFlag(Result, /*MacroFlag=*/"EPOLL_CLOEXEC", /*ArgPos=*/0);
+  insertMacroFlag(Result, /*MacroFlag=*/"EPOLL_CLOEXEC", /*ArgPos=*/0);
 }
 
 } // namespace android

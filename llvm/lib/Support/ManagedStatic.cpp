@@ -22,62 +22,62 @@ static std::recursive_mutex *ManagedStaticMutex = nullptr;
 static llvm::once_flag mutex_init_flag;
 
 static void initializeMutex() {
-    ManagedStaticMutex = new std::recursive_mutex();
+  ManagedStaticMutex = new std::recursive_mutex();
 }
 
 static std::recursive_mutex *getManagedStaticMutex() {
-    llvm::call_once(mutex_init_flag, initializeMutex);
-    return ManagedStaticMutex;
+  llvm::call_once(mutex_init_flag, initializeMutex);
+  return ManagedStaticMutex;
 }
 
 void ManagedStaticBase::RegisterManagedStatic(void *(*Creator)(),
-        void (*Deleter)(void*)) const {
-    assert(Creator);
-    if (llvm_is_multithreaded()) {
-        std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
+                                              void (*Deleter)(void *)) const {
+  assert(Creator);
+  if (llvm_is_multithreaded()) {
+    std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
 
-        if (!Ptr.load(std::memory_order_relaxed)) {
-            void *Tmp = Creator();
+    if (!Ptr.load(std::memory_order_relaxed)) {
+      void *Tmp = Creator();
 
-            Ptr.store(Tmp, std::memory_order_release);
-            DeleterFn = Deleter;
+      Ptr.store(Tmp, std::memory_order_release);
+      DeleterFn = Deleter;
 
-            // Add to list of managed statics.
-            Next = StaticList;
-            StaticList = this;
-        }
-    } else {
-        assert(!Ptr && !DeleterFn && !Next &&
-               "Partially initialized ManagedStatic!?");
-        Ptr = Creator();
-        DeleterFn = Deleter;
-
-        // Add to list of managed statics.
-        Next = StaticList;
-        StaticList = this;
+      // Add to list of managed statics.
+      Next = StaticList;
+      StaticList = this;
     }
+  } else {
+    assert(!Ptr && !DeleterFn && !Next &&
+           "Partially initialized ManagedStatic!?");
+    Ptr = Creator();
+    DeleterFn = Deleter;
+
+    // Add to list of managed statics.
+    Next = StaticList;
+    StaticList = this;
+  }
 }
 
 void ManagedStaticBase::destroy() const {
-    assert(DeleterFn && "ManagedStatic not initialized correctly!");
-    assert(StaticList == this &&
-           "Not destroyed in reverse order of construction?");
-    // Unlink from list.
-    StaticList = Next;
-    Next = nullptr;
+  assert(DeleterFn && "ManagedStatic not initialized correctly!");
+  assert(StaticList == this &&
+         "Not destroyed in reverse order of construction?");
+  // Unlink from list.
+  StaticList = Next;
+  Next = nullptr;
 
-    // Destroy memory.
-    DeleterFn(Ptr);
+  // Destroy memory.
+  DeleterFn(Ptr);
 
-    // Cleanup.
-    Ptr = nullptr;
-    DeleterFn = nullptr;
+  // Cleanup.
+  Ptr = nullptr;
+  DeleterFn = nullptr;
 }
 
 /// llvm_shutdown - Deallocate and destroy all ManagedStatic variables.
 void llvm::llvm_shutdown() {
-    std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
+  std::lock_guard<std::recursive_mutex> Lock(*getManagedStaticMutex());
 
-    while (StaticList)
-        StaticList->destroy();
+  while (StaticList)
+    StaticList->destroy();
 }

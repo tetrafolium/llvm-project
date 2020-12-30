@@ -23,17 +23,15 @@ namespace xray {
 ///       .consume();
 ///
 class LogBuilder {
-    std::vector<std::unique_ptr<Record>> Records;
+  std::vector<std::unique_ptr<Record>> Records;
 
 public:
-    template <class R, class... T> LogBuilder &add(T &&... A) {
-        Records.emplace_back(new R(std::forward<T>(A)...));
-        return *this;
-    }
+  template <class R, class... T> LogBuilder &add(T &&... A) {
+    Records.emplace_back(new R(std::forward<T>(A)...));
+    return *this;
+  }
 
-    std::vector<std::unique_ptr<Record>> consume() {
-        return std::move(Records);
-    }
+  std::vector<std::unique_ptr<Record>> consume() { return std::move(Records); }
 };
 
 } // namespace xray

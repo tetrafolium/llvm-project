@@ -21,31 +21,31 @@ class MipsSubtarget;
 
 class MipsSEFrameLowering : public MipsFrameLowering {
 public:
-    explicit MipsSEFrameLowering(const MipsSubtarget &STI);
+  explicit MipsSEFrameLowering(const MipsSubtarget &STI);
 
-    /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
-    /// the function.
-    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
+  /// the function.
+  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-    StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
-                                       Register &FrameReg) const override;
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
 
-    bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
-                                   MachineBasicBlock::iterator MI,
-                                   ArrayRef<CalleeSavedInfo> CSI,
-                                   const TargetRegisterInfo *TRI) const override;
+  bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                 MachineBasicBlock::iterator MI,
+                                 ArrayRef<CalleeSavedInfo> CSI,
+                                 const TargetRegisterInfo *TRI) const override;
 
-    bool hasReservedCallFrame(const MachineFunction &MF) const override;
+  bool hasReservedCallFrame(const MachineFunction &MF) const override;
 
-    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                              RegScavenger *RS) const override;
+  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                            RegScavenger *RS) const override;
 
 private:
-    void emitInterruptEpilogueStub(MachineFunction &MF,
-                                   MachineBasicBlock &MBB) const;
-    void emitInterruptPrologueStub(MachineFunction &MF,
-                                   MachineBasicBlock &MBB) const;
+  void emitInterruptEpilogueStub(MachineFunction &MF,
+                                 MachineBasicBlock &MBB) const;
+  void emitInterruptPrologueStub(MachineFunction &MF,
+                                 MachineBasicBlock &MBB) const;
 };
 
 } // end namespace llvm

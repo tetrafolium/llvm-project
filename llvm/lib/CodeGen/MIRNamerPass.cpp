@@ -37,33 +37,33 @@ namespace {
 
 class MIRNamer : public MachineFunctionPass {
 public:
-    static char ID;
-    MIRNamer() : MachineFunctionPass(ID) {}
+  static char ID;
+  MIRNamer() : MachineFunctionPass(ID) {}
 
-    StringRef getPassName() const override {
-        return "Rename virtual register operands";
-    }
+  StringRef getPassName() const override {
+    return "Rename virtual register operands";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override {
-        bool Changed = false;
+  bool runOnMachineFunction(MachineFunction &MF) override {
+    bool Changed = false;
 
-        if (MF.empty())
-            return Changed;
+    if (MF.empty())
+      return Changed;
 
-        VRegRenamer Renamer(MF.getRegInfo());
+    VRegRenamer Renamer(MF.getRegInfo());
 
-        unsigned BBIndex = 0;
-        ReversePostOrderTraversal<MachineBasicBlock *> RPOT(&*MF.begin());
-        for (auto &MBB : RPOT)
-            Changed |= Renamer.renameVRegs(MBB, BBIndex++);
+    unsigned BBIndex = 0;
+    ReversePostOrderTraversal<MachineBasicBlock *> RPOT(&*MF.begin());
+    for (auto &MBB : RPOT)
+      Changed |= Renamer.renameVRegs(MBB, BBIndex++);
 
-        return Changed;
-    }
+    return Changed;
+  }
 };
 
 } // end anonymous namespace

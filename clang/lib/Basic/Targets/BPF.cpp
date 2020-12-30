@@ -27,23 +27,22 @@ const Builtin::Info BPFTargetInfo::BuiltinInfo[] = {
 
 void BPFTargetInfo::getTargetDefines(const LangOptions &Opts,
                                      MacroBuilder &Builder) const {
-    Builder.defineMacro("__bpf__");
-    Builder.defineMacro("__BPF__");
+  Builder.defineMacro("__bpf__");
+  Builder.defineMacro("__BPF__");
 }
 
 static constexpr llvm::StringLiteral ValidCPUNames[] = {"generic", "v1", "v2",
-                                                        "v3", "probe"
-                                                       };
+                                                        "v3", "probe"};
 
 bool BPFTargetInfo::isValidCPUName(StringRef Name) const {
-    return llvm::find(ValidCPUNames, Name) != std::end(ValidCPUNames);
+  return llvm::find(ValidCPUNames, Name) != std::end(ValidCPUNames);
 }
 
 void BPFTargetInfo::fillValidCPUList(SmallVectorImpl<StringRef> &Values) const {
-    Values.append(std::begin(ValidCPUNames), std::end(ValidCPUNames));
+  Values.append(std::begin(ValidCPUNames), std::end(ValidCPUNames));
 }
 
 ArrayRef<Builtin::Info> BPFTargetInfo::getTargetBuiltins() const {
-    return llvm::makeArrayRef(BuiltinInfo, clang::BPF::LastTSBuiltin -
-                              Builtin::FirstTSBuiltin);
+  return llvm::makeArrayRef(BuiltinInfo, clang::BPF::LastTSBuiltin -
+                                             Builtin::FirstTSBuiltin);
 }

@@ -17,7 +17,7 @@ class Triple;
 
 class SystemZMCAsmInfo : public MCAsmInfoELF {
 public:
-    explicit SystemZMCAsmInfo(const Triple &TT);
+  explicit SystemZMCAsmInfo(const Triple &TT);
 };
 
 } // end namespace llvm

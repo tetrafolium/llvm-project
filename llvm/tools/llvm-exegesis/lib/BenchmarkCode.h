@@ -19,14 +19,14 @@ namespace exegesis {
 
 // A collection of instructions that are to be assembled, executed and measured.
 struct BenchmarkCode {
-    InstructionBenchmarkKey Key;
+  InstructionBenchmarkKey Key;
 
-    // We also need to provide the registers that are live on entry for the
-    // assembler to generate proper prologue/epilogue.
-    std::vector<unsigned> LiveIns;
+  // We also need to provide the registers that are live on entry for the
+  // assembler to generate proper prologue/epilogue.
+  std::vector<unsigned> LiveIns;
 
-    // Informations about how this configuration was built.
-    std::string Info;
+  // Informations about how this configuration was built.
+  std::string Info;
 };
 
 } // namespace exegesis

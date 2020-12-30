@@ -22,15 +22,15 @@ namespace pdb {
 /// stream type.
 class IPDBDataStream {
 public:
-    using RecordType = SmallVector<uint8_t, 32>;
+  using RecordType = SmallVector<uint8_t, 32>;
 
-    virtual ~IPDBDataStream();
+  virtual ~IPDBDataStream();
 
-    virtual uint32_t getRecordCount() const = 0;
-    virtual std::string getName() const = 0;
-    virtual Optional<RecordType> getItemAtIndex(uint32_t Index) const = 0;
-    virtual bool getNext(RecordType &Record) = 0;
-    virtual void reset() = 0;
+  virtual uint32_t getRecordCount() const = 0;
+  virtual std::string getName() const = 0;
+  virtual Optional<RecordType> getItemAtIndex(uint32_t Index) const = 0;
+  virtual bool getNext(RecordType &Record) = 0;
+  virtual void reset() = 0;
 };
 
 } // end namespace pdb

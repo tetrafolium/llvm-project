@@ -31,31 +31,31 @@ namespace codeview {
 enum class ContinuationRecordKind { FieldList, MethodOverloadList };
 
 class ContinuationRecordBuilder {
-    SmallVector<uint32_t, 4> SegmentOffsets;
-    Optional<ContinuationRecordKind> Kind;
-    AppendingBinaryByteStream Buffer;
-    BinaryStreamWriter SegmentWriter;
-    TypeRecordMapping Mapping;
-    ArrayRef<uint8_t> InjectedSegmentBytes;
+  SmallVector<uint32_t, 4> SegmentOffsets;
+  Optional<ContinuationRecordKind> Kind;
+  AppendingBinaryByteStream Buffer;
+  BinaryStreamWriter SegmentWriter;
+  TypeRecordMapping Mapping;
+  ArrayRef<uint8_t> InjectedSegmentBytes;
 
-    uint32_t getCurrentSegmentLength() const;
+  uint32_t getCurrentSegmentLength() const;
 
-    void insertSegmentEnd(uint32_t Offset);
-    CVType createSegmentRecord(uint32_t OffBegin, uint32_t OffEnd,
-                               Optional<TypeIndex> RefersTo);
+  void insertSegmentEnd(uint32_t Offset);
+  CVType createSegmentRecord(uint32_t OffBegin, uint32_t OffEnd,
+                             Optional<TypeIndex> RefersTo);
 
 public:
-    ContinuationRecordBuilder();
-    ~ContinuationRecordBuilder();
+  ContinuationRecordBuilder();
+  ~ContinuationRecordBuilder();
 
-    void begin(ContinuationRecordKind RecordKind);
+  void begin(ContinuationRecordKind RecordKind);
 
-    // This template is explicitly instantiated in the implementation file for all
-    // supported types.  The method itself is ugly, so inlining it into the header
-    // file clutters an otherwise straightforward interface.
-    template <typename RecordType> void writeMemberType(RecordType &Record);
+  // This template is explicitly instantiated in the implementation file for all
+  // supported types.  The method itself is ugly, so inlining it into the header
+  // file clutters an otherwise straightforward interface.
+  template <typename RecordType> void writeMemberType(RecordType &Record);
 
-    std::vector<CVType> end(TypeIndex Index);
+  std::vector<CVType> end(TypeIndex Index);
 };
 } // namespace codeview
 } // namespace llvm

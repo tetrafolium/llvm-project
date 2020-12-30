@@ -95,7 +95,7 @@ Operation *linalg_generic_pointwise(UnaryPointwiseOpBuilder unaryOp,
 /// computes `O = tanh(I)`. The client is responsible for specifying the proper
 /// indexings when creating the StructuredIndexed.
 Operation *linalg_generic_pointwise_tanh(StructuredIndexed I,
-        StructuredIndexed O);
+                                         StructuredIndexed O);
 
 /// Binary pointwise operation (with broadcast) entry point.
 using BinaryPointwiseOpBuilder = function_ref<Value(Value, Value)>;
@@ -148,8 +148,8 @@ template <typename Container>
 Operation *
 linalg_generic_matmul(Container values,
                       MatmulRegionBuilder regionBuilder = macRegionBuilder) {
-    assert(values.size() == 3 && "Expected exactly 3 values");
-    return linalg_generic_matmul(values[0], values[1], values[2], regionBuilder);
+  assert(values.size() == 3 && "Expected exactly 3 values");
+  return linalg_generic_matmul(values[0], values[1], values[2], regionBuilder);
 }
 
 /// Build a linalg.generic, under the current ScopedContext, at the current
@@ -182,9 +182,9 @@ template <typename Container>
 Operation *linalg_generic_conv_nhwc(Container values,
                                     ArrayRef<int> strides = {},
                                     ArrayRef<int> dilations = {}) {
-    assert(values.size() == 3 && "Expected exactly 3 values");
-    return linalg_generic_conv_nhwc(values[0], values[1], values[2], strides,
-                                    dilations);
+  assert(values.size() == 3 && "Expected exactly 3 values");
+  return linalg_generic_conv_nhwc(values[0], values[1], values[2], strides,
+                                  dilations);
 }
 
 /// Build a linalg.generic, under the current ScopedContext, at the current
@@ -210,18 +210,18 @@ Operation *linalg_generic_conv_nhwc(Container values,
 ///
 // TODO: Extend convolution rank with some template magic.
 Operation *linalg_generic_dilated_conv_nhwc(Value vI, Value vW, Value vO,
-        int depth_multiplier = 1,
-        ArrayRef<int> strides = {},
-        ArrayRef<int> dilations = {});
+                                            int depth_multiplier = 1,
+                                            ArrayRef<int> strides = {},
+                                            ArrayRef<int> dilations = {});
 
 template <typename Container>
 Operation *linalg_generic_dilated_conv_nhwc(Container values,
-        int depth_multiplier,
-        ArrayRef<int> strides = {},
-        ArrayRef<int> dilations = {}) {
-    assert(values.size() == 3 && "Expected exactly 3 values");
-    return linalg_generic_dilated_conv_nhwc(values[0], values[1], values[2],
-                                            depth_multiplier, strides, dilations);
+                                            int depth_multiplier,
+                                            ArrayRef<int> strides = {},
+                                            ArrayRef<int> dilations = {}) {
+  assert(values.size() == 3 && "Expected exactly 3 values");
+  return linalg_generic_dilated_conv_nhwc(values[0], values[1], values[2],
+                                          depth_multiplier, strides, dilations);
 }
 
 } // namespace ops

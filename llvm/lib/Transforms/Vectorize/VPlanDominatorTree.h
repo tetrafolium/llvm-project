@@ -31,11 +31,11 @@ using VPDomTreeNode = DomTreeNodeBase<VPBlockBase>;
 template <>
 struct GraphTraits<VPDomTreeNode *>
     : public DomTreeGraphTraitsBase<VPDomTreeNode,
-      VPDomTreeNode::const_iterator> {};
+                                    VPDomTreeNode::const_iterator> {};
 
 template <>
 struct GraphTraits<const VPDomTreeNode *>
     : public DomTreeGraphTraitsBase<const VPDomTreeNode,
-      VPDomTreeNode::const_iterator> {};
+                                    VPDomTreeNode::const_iterator> {};
 } // namespace llvm
 #endif // LLVM_TRANSFORMS_VECTORIZE_VPLANDOMINATORTREE_H

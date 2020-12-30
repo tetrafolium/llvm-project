@@ -9,26 +9,25 @@
 #include "XCoreMCAsmInfo.h"
 using namespace llvm;
 
-void XCoreMCAsmInfo::anchor() { }
+void XCoreMCAsmInfo::anchor() {}
 
 XCoreMCAsmInfo::XCoreMCAsmInfo(const Triple &TT) {
-    SupportsDebugInformation = true;
-    Data16bitsDirective = "\t.short\t";
-    Data32bitsDirective = "\t.long\t";
-    Data64bitsDirective = nullptr;
-    ZeroDirective = "\t.space\t";
-    CommentString = "#";
+  SupportsDebugInformation = true;
+  Data16bitsDirective = "\t.short\t";
+  Data32bitsDirective = "\t.long\t";
+  Data64bitsDirective = nullptr;
+  ZeroDirective = "\t.space\t";
+  CommentString = "#";
 
-    AscizDirective = ".asciiz";
+  AscizDirective = ".asciiz";
 
-    HiddenVisibilityAttr = MCSA_Invalid;
-    HiddenDeclarationVisibilityAttr = MCSA_Invalid;
-    ProtectedVisibilityAttr = MCSA_Invalid;
+  HiddenVisibilityAttr = MCSA_Invalid;
+  HiddenDeclarationVisibilityAttr = MCSA_Invalid;
+  ProtectedVisibilityAttr = MCSA_Invalid;
 
-    // Debug
-    ExceptionsType = ExceptionHandling::DwarfCFI;
-    DwarfRegNumForCFI = true;
+  // Debug
+  ExceptionsType = ExceptionHandling::DwarfCFI;
+  DwarfRegNumForCFI = true;
 
-    UseIntegratedAssembler = false;
+  UseIntegratedAssembler = false;
 }
-

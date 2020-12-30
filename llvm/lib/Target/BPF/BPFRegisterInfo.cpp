@@ -26,101 +26,97 @@
 #include "BPFGenRegisterInfo.inc"
 using namespace llvm;
 
-BPFRegisterInfo::BPFRegisterInfo()
-    : BPFGenRegisterInfo(BPF::R0) {}
+BPFRegisterInfo::BPFRegisterInfo() : BPFGenRegisterInfo(BPF::R0) {}
 
 const MCPhysReg *
 BPFRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
-    return CSR_SaveList;
+  return CSR_SaveList;
 }
 
 BitVector BPFRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
-    BitVector Reserved(getNumRegs());
-    markSuperRegs(Reserved, BPF::W10); // [W|R]10 is read only frame pointer
-    markSuperRegs(Reserved, BPF::W11); // [W|R]11 is pseudo stack pointer
-    return Reserved;
+  BitVector Reserved(getNumRegs());
+  markSuperRegs(Reserved, BPF::W10); // [W|R]10 is read only frame pointer
+  markSuperRegs(Reserved, BPF::W11); // [W|R]11 is pseudo stack pointer
+  return Reserved;
 }
 
-static void WarnSize(int Offset, MachineFunction &MF, DebugLoc& DL)
-{
-    if (Offset <= -512) {
-        const Function &F = MF.getFunction();
-        DiagnosticInfoUnsupported DiagStackSize(F,
-                                                "Looks like the BPF stack limit of 512 bytes is exceeded. "
-                                                "Please move large on stack variables into BPF per-cpu array map.\n",
-                                                DL);
-        F.getContext().diagnose(DiagStackSize);
-    }
+static void WarnSize(int Offset, MachineFunction &MF, DebugLoc &DL) {
+  if (Offset <= -512) {
+    const Function &F = MF.getFunction();
+    DiagnosticInfoUnsupported DiagStackSize(
+        F,
+        "Looks like the BPF stack limit of 512 bytes is exceeded. "
+        "Please move large on stack variables into BPF per-cpu array map.\n",
+        DL);
+    F.getContext().diagnose(DiagStackSize);
+  }
 }
 
 void BPFRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
-        int SPAdj, unsigned FIOperandNum,
-        RegScavenger *RS) const {
-    assert(SPAdj == 0 && "Unexpected");
+                                          int SPAdj, unsigned FIOperandNum,
+                                          RegScavenger *RS) const {
+  assert(SPAdj == 0 && "Unexpected");
 
-    unsigned i = 0;
-    MachineInstr &MI = *II;
-    MachineBasicBlock &MBB = *MI.getParent();
-    MachineFunction &MF = *MBB.getParent();
-    DebugLoc DL = MI.getDebugLoc();
+  unsigned i = 0;
+  MachineInstr &MI = *II;
+  MachineBasicBlock &MBB = *MI.getParent();
+  MachineFunction &MF = *MBB.getParent();
+  DebugLoc DL = MI.getDebugLoc();
 
-    if (!DL)
-        /* try harder to get some debug loc */
-        for (auto &I : MBB)
-            if (I.getDebugLoc()) {
-                DL = I.getDebugLoc();
-                break;
-            }
+  if (!DL)
+    /* try harder to get some debug loc */
+    for (auto &I : MBB)
+      if (I.getDebugLoc()) {
+        DL = I.getDebugLoc();
+        break;
+      }
 
-    while (!MI.getOperand(i).isFI()) {
-        ++i;
-        assert(i < MI.getNumOperands() && "Instr doesn't have FrameIndex operand!");
-    }
+  while (!MI.getOperand(i).isFI()) {
+    ++i;
+    assert(i < MI.getNumOperands() && "Instr doesn't have FrameIndex operand!");
+  }
 
-    Register FrameReg = getFrameRegister(MF);
-    int FrameIndex = MI.getOperand(i).getIndex();
-    const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+  Register FrameReg = getFrameRegister(MF);
+  int FrameIndex = MI.getOperand(i).getIndex();
+  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
 
-    if (MI.getOpcode() == BPF::MOV_rr) {
-        int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex);
-
-        WarnSize(Offset, MF, DL);
-        MI.getOperand(i).ChangeToRegister(FrameReg, false);
-        Register reg = MI.getOperand(i - 1).getReg();
-        BuildMI(MBB, ++II, DL, TII.get(BPF::ADD_ri), reg)
-        .addReg(reg)
-        .addImm(Offset);
-        return;
-    }
-
-    int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex) +
-                 MI.getOperand(i + 1).getImm();
-
-    if (!isInt<32>(Offset))
-        llvm_unreachable("bug in frame offset");
+  if (MI.getOpcode() == BPF::MOV_rr) {
+    int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex);
 
     WarnSize(Offset, MF, DL);
-
-    if (MI.getOpcode() == BPF::FI_ri) {
-        // architecture does not really support FI_ri, replace it with
-        //    MOV_rr <target_reg>, frame_reg
-        //    ADD_ri <target_reg>, imm
-        Register reg = MI.getOperand(i - 1).getReg();
-
-        BuildMI(MBB, ++II, DL, TII.get(BPF::MOV_rr), reg)
-        .addReg(FrameReg);
-        BuildMI(MBB, II, DL, TII.get(BPF::ADD_ri), reg)
+    MI.getOperand(i).ChangeToRegister(FrameReg, false);
+    Register reg = MI.getOperand(i - 1).getReg();
+    BuildMI(MBB, ++II, DL, TII.get(BPF::ADD_ri), reg)
         .addReg(reg)
         .addImm(Offset);
+    return;
+  }
 
-        // Remove FI_ri instruction
-        MI.eraseFromParent();
-    } else {
-        MI.getOperand(i).ChangeToRegister(FrameReg, false);
-        MI.getOperand(i + 1).ChangeToImmediate(Offset);
-    }
+  int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex) +
+               MI.getOperand(i + 1).getImm();
+
+  if (!isInt<32>(Offset))
+    llvm_unreachable("bug in frame offset");
+
+  WarnSize(Offset, MF, DL);
+
+  if (MI.getOpcode() == BPF::FI_ri) {
+    // architecture does not really support FI_ri, replace it with
+    //    MOV_rr <target_reg>, frame_reg
+    //    ADD_ri <target_reg>, imm
+    Register reg = MI.getOperand(i - 1).getReg();
+
+    BuildMI(MBB, ++II, DL, TII.get(BPF::MOV_rr), reg).addReg(FrameReg);
+    BuildMI(MBB, II, DL, TII.get(BPF::ADD_ri), reg).addReg(reg).addImm(Offset);
+
+    // Remove FI_ri instruction
+    MI.eraseFromParent();
+  } else {
+    MI.getOperand(i).ChangeToRegister(FrameReg, false);
+    MI.getOperand(i + 1).ChangeToImmediate(Offset);
+  }
 }
 
 Register BPFRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
-    return BPF::R10;
+  return BPF::R10;
 }

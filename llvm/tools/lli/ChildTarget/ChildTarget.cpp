@@ -22,48 +22,48 @@ ExitOnError ExitOnErr;
 
 int main(int argc, char *argv[]) {
 
-    if (argc != 3) {
-        errs() << "Usage: " << argv[0] << " <input fd> <output fd>\n";
-        return 1;
-    }
+  if (argc != 3) {
+    errs() << "Usage: " << argv[0] << " <input fd> <output fd>\n";
+    return 1;
+  }
 
-    ExitOnErr.setBanner(std::string(argv[0]) + ":");
+  ExitOnErr.setBanner(std::string(argv[0]) + ":");
 
-    int InFD;
-    int OutFD;
-    {
-        std::istringstream InFDStream(argv[1]), OutFDStream(argv[2]);
-        InFDStream >> InFD;
-        OutFDStream >> OutFD;
-    }
+  int InFD;
+  int OutFD;
+  {
+    std::istringstream InFDStream(argv[1]), OutFDStream(argv[2]);
+    InFDStream >> InFD;
+    OutFDStream >> OutFD;
+  }
 
-    if (sys::DynamicLibrary::LoadLibraryPermanently(nullptr)) {
-        errs() << "Error loading program symbols.\n";
-        return 1;
-    }
+  if (sys::DynamicLibrary::LoadLibraryPermanently(nullptr)) {
+    errs() << "Error loading program symbols.\n";
+    return 1;
+  }
 
-    auto SymbolLookup = [](const std::string &Name) {
-        return RTDyldMemoryManager::getSymbolAddressInProcess(Name);
-    };
+  auto SymbolLookup = [](const std::string &Name) {
+    return RTDyldMemoryManager::getSymbolAddressInProcess(Name);
+  };
 
-    auto RegisterEHFrames = [](uint8_t *Addr, uint32_t Size) {
-        RTDyldMemoryManager::registerEHFramesInProcess(Addr, Size);
-    };
+  auto RegisterEHFrames = [](uint8_t *Addr, uint32_t Size) {
+    RTDyldMemoryManager::registerEHFramesInProcess(Addr, Size);
+  };
 
-    auto DeregisterEHFrames = [](uint8_t *Addr, uint32_t Size) {
-        RTDyldMemoryManager::deregisterEHFramesInProcess(Addr, Size);
-    };
+  auto DeregisterEHFrames = [](uint8_t *Addr, uint32_t Size) {
+    RTDyldMemoryManager::deregisterEHFramesInProcess(Addr, Size);
+  };
 
-    rpc::FDRawByteChannel Channel(InFD, OutFD);
-    typedef remote::OrcRemoteTargetServer<rpc::FDRawByteChannel, HostOrcArch>
-    JITServer;
-    JITServer Server(Channel, SymbolLookup, RegisterEHFrames, DeregisterEHFrames);
+  rpc::FDRawByteChannel Channel(InFD, OutFD);
+  typedef remote::OrcRemoteTargetServer<rpc::FDRawByteChannel, HostOrcArch>
+      JITServer;
+  JITServer Server(Channel, SymbolLookup, RegisterEHFrames, DeregisterEHFrames);
 
-    while (!Server.receivedTerminate())
-        ExitOnErr(Server.handleOne());
+  while (!Server.receivedTerminate())
+    ExitOnErr(Server.handleOne());
 
-    close(InFD);
-    close(OutFD);
+  close(InFD);
+  close(OutFD);
 
-    return 0;
+  return 0;
 }

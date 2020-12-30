@@ -21,15 +21,15 @@ namespace exegesis {
 
 class UopsBenchmarkRunner : public BenchmarkRunner {
 public:
-    UopsBenchmarkRunner(const LLVMState &State)
-        : BenchmarkRunner(State, InstructionBenchmark::Uops) {}
-    ~UopsBenchmarkRunner() override;
+  UopsBenchmarkRunner(const LLVMState &State)
+      : BenchmarkRunner(State, InstructionBenchmark::Uops) {}
+  ~UopsBenchmarkRunner() override;
 
-    static constexpr const size_t kMinNumDifferentAddresses = 6;
+  static constexpr const size_t kMinNumDifferentAddresses = 6;
 
 private:
-    Expected<std::vector<BenchmarkMeasure>>
-                                         runMeasurements(const FunctionExecutor &Executor) const override;
+  Expected<std::vector<BenchmarkMeasure>>
+  runMeasurements(const FunctionExecutor &Executor) const override;
 };
 
 } // namespace exegesis

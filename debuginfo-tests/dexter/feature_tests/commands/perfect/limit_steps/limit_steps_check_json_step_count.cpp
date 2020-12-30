@@ -9,11 +9,11 @@
 // CHECK-COUNT-3: json_step_count.cpp",
 
 int main() {
-    int result = 0;
-    for(int ix = 0; ix != 10; ++ix) {
-        int index = ix;
-        result += index; // DexLabel('check')
-    }
+  int result = 0;
+  for (int ix = 0; ix != 10; ++ix) {
+    int index = ix;
+    result += index; // DexLabel('check')
+  }
 }
 
 // DexExpectWatchValue('index', 2, 7, 9, on_line='check')

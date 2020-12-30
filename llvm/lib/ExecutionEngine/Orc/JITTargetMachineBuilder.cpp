@@ -17,123 +17,123 @@ namespace orc {
 
 JITTargetMachineBuilder::JITTargetMachineBuilder(Triple TT)
     : TT(std::move(TT)) {
-    Options.EmulatedTLS = true;
-    Options.ExplicitEmulatedTLS = true;
+  Options.EmulatedTLS = true;
+  Options.ExplicitEmulatedTLS = true;
 }
 
 Expected<JITTargetMachineBuilder> JITTargetMachineBuilder::detectHost() {
-    // FIXME: getProcessTriple is bogus. It returns the host LLVM was compiled on,
-    //        rather than a valid triple for the current process.
-    JITTargetMachineBuilder TMBuilder((Triple(sys::getProcessTriple())));
+  // FIXME: getProcessTriple is bogus. It returns the host LLVM was compiled on,
+  //        rather than a valid triple for the current process.
+  JITTargetMachineBuilder TMBuilder((Triple(sys::getProcessTriple())));
 
-    // Retrieve host CPU name and sub-target features and add them to builder.
-    // Relocation model, code model and codegen opt level are kept to default
-    // values.
-    llvm::StringMap<bool> FeatureMap;
-    llvm::sys::getHostCPUFeatures(FeatureMap);
-    for (auto &Feature : FeatureMap)
-        TMBuilder.getFeatures().AddFeature(Feature.first(), Feature.second);
+  // Retrieve host CPU name and sub-target features and add them to builder.
+  // Relocation model, code model and codegen opt level are kept to default
+  // values.
+  llvm::StringMap<bool> FeatureMap;
+  llvm::sys::getHostCPUFeatures(FeatureMap);
+  for (auto &Feature : FeatureMap)
+    TMBuilder.getFeatures().AddFeature(Feature.first(), Feature.second);
 
-    TMBuilder.setCPU(std::string(llvm::sys::getHostCPUName()));
+  TMBuilder.setCPU(std::string(llvm::sys::getHostCPUName()));
 
-    return TMBuilder;
+  return TMBuilder;
 }
 
 Expected<std::unique_ptr<TargetMachine>>
 JITTargetMachineBuilder::createTargetMachine() {
 
-    std::string ErrMsg;
-    auto *TheTarget = TargetRegistry::lookupTarget(TT.getTriple(), ErrMsg);
-    if (!TheTarget)
-        return make_error<StringError>(std::move(ErrMsg), inconvertibleErrorCode());
+  std::string ErrMsg;
+  auto *TheTarget = TargetRegistry::lookupTarget(TT.getTriple(), ErrMsg);
+  if (!TheTarget)
+    return make_error<StringError>(std::move(ErrMsg), inconvertibleErrorCode());
 
-    auto *TM =
-        TheTarget->createTargetMachine(TT.getTriple(), CPU, Features.getString(),
-                                       Options, RM, CM, OptLevel, /*JIT*/ true);
-    if (!TM)
-        return make_error<StringError>("Could not allocate target machine",
-                                       inconvertibleErrorCode());
+  auto *TM =
+      TheTarget->createTargetMachine(TT.getTriple(), CPU, Features.getString(),
+                                     Options, RM, CM, OptLevel, /*JIT*/ true);
+  if (!TM)
+    return make_error<StringError>("Could not allocate target machine",
+                                   inconvertibleErrorCode());
 
-    return std::unique_ptr<TargetMachine>(TM);
+  return std::unique_ptr<TargetMachine>(TM);
 }
 
 JITTargetMachineBuilder &JITTargetMachineBuilder::addFeatures(
     const std::vector<std::string> &FeatureVec) {
-    for (const auto &F : FeatureVec)
-        Features.AddFeature(F);
-    return *this;
+  for (const auto &F : FeatureVec)
+    Features.AddFeature(F);
+  return *this;
 }
 
 #ifndef NDEBUG
 raw_ostream &operator<<(raw_ostream &OS, const JITTargetMachineBuilder &JTMB) {
-    OS << "{ Triple = \"" << JTMB.TT.str() << "\", CPU = \"" << JTMB.CPU
-       << "\", Options = <not-printable>, Relocation Model = ";
+  OS << "{ Triple = \"" << JTMB.TT.str() << "\", CPU = \"" << JTMB.CPU
+     << "\", Options = <not-printable>, Relocation Model = ";
 
-    if (JTMB.RM) {
-        switch (*JTMB.RM) {
-        case Reloc::Static:
-            OS << "Static";
-            break;
-        case Reloc::PIC_:
-            OS << "PIC_";
-            break;
-        case Reloc::DynamicNoPIC:
-            OS << "DynamicNoPIC";
-            break;
-        case Reloc::ROPI:
-            OS << "ROPI";
-            break;
-        case Reloc::RWPI:
-            OS << "RWPI";
-            break;
-        case Reloc::ROPI_RWPI:
-            OS << "ROPI_RWPI";
-            break;
-        }
-    } else
-        OS << "unspecified";
-
-    OS << ", Code Model = ";
-
-    if (JTMB.CM) {
-        switch (*JTMB.CM) {
-        case CodeModel::Tiny:
-            OS << "Tiny";
-            break;
-        case CodeModel::Small:
-            OS << "Small";
-            break;
-        case CodeModel::Kernel:
-            OS << "Kernel";
-            break;
-        case CodeModel::Medium:
-            OS << "Medium";
-            break;
-        case CodeModel::Large:
-            OS << "Large";
-            break;
-        }
-    } else
-        OS << "unspecified";
-
-    OS << ", Optimization Level = ";
-    switch (JTMB.OptLevel) {
-    case CodeGenOpt::None:
-        OS << "None";
-        break;
-    case CodeGenOpt::Less:
-        OS << "Less";
-        break;
-    case CodeGenOpt::Default:
-        OS << "Default";
-        break;
-    case CodeGenOpt::Aggressive:
-        OS << "Aggressive";
-        break;
+  if (JTMB.RM) {
+    switch (*JTMB.RM) {
+    case Reloc::Static:
+      OS << "Static";
+      break;
+    case Reloc::PIC_:
+      OS << "PIC_";
+      break;
+    case Reloc::DynamicNoPIC:
+      OS << "DynamicNoPIC";
+      break;
+    case Reloc::ROPI:
+      OS << "ROPI";
+      break;
+    case Reloc::RWPI:
+      OS << "RWPI";
+      break;
+    case Reloc::ROPI_RWPI:
+      OS << "ROPI_RWPI";
+      break;
     }
+  } else
+    OS << "unspecified";
 
-    OS << " }";
-    return OS;
+  OS << ", Code Model = ";
+
+  if (JTMB.CM) {
+    switch (*JTMB.CM) {
+    case CodeModel::Tiny:
+      OS << "Tiny";
+      break;
+    case CodeModel::Small:
+      OS << "Small";
+      break;
+    case CodeModel::Kernel:
+      OS << "Kernel";
+      break;
+    case CodeModel::Medium:
+      OS << "Medium";
+      break;
+    case CodeModel::Large:
+      OS << "Large";
+      break;
+    }
+  } else
+    OS << "unspecified";
+
+  OS << ", Optimization Level = ";
+  switch (JTMB.OptLevel) {
+  case CodeGenOpt::None:
+    OS << "None";
+    break;
+  case CodeGenOpt::Less:
+    OS << "Less";
+    break;
+  case CodeGenOpt::Default:
+    OS << "Default";
+    break;
+  case CodeGenOpt::Aggressive:
+    OS << "Aggressive";
+    break;
+  }
+
+  OS << " }";
+  return OS;
 }
 #endif // NDEBUG
 

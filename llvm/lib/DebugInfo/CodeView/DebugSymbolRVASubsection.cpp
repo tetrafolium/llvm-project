@@ -20,16 +20,16 @@ DebugSymbolRVASubsectionRef::DebugSymbolRVASubsectionRef()
     : DebugSubsectionRef(DebugSubsectionKind::CoffSymbolRVA) {}
 
 Error DebugSymbolRVASubsectionRef::initialize(BinaryStreamReader &Reader) {
-    return Reader.readArray(RVAs, Reader.bytesRemaining() / sizeof(uint32_t));
+  return Reader.readArray(RVAs, Reader.bytesRemaining() / sizeof(uint32_t));
 }
 
 DebugSymbolRVASubsection::DebugSymbolRVASubsection()
     : DebugSubsection(DebugSubsectionKind::CoffSymbolRVA) {}
 
 Error DebugSymbolRVASubsection::commit(BinaryStreamWriter &Writer) const {
-    return Writer.writeArray(makeArrayRef(RVAs));
+  return Writer.writeArray(makeArrayRef(RVAs));
 }
 
 uint32_t DebugSymbolRVASubsection::calculateSerializedSize() const {
-    return RVAs.size() * sizeof(uint32_t);
+  return RVAs.size() * sizeof(uint32_t);
 }

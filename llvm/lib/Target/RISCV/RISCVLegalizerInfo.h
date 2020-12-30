@@ -22,7 +22,7 @@ class RISCVSubtarget;
 /// This class provides the information for the target register banks.
 class RISCVLegalizerInfo : public LegalizerInfo {
 public:
-    RISCVLegalizerInfo(const RISCVSubtarget &ST);
+  RISCVLegalizerInfo(const RISCVSubtarget &ST);
 };
 } // end namespace llvm
 #endif

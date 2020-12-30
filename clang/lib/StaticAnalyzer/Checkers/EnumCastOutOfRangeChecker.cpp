@@ -32,22 +32,22 @@ namespace {
 // It uses the in-built ConstraintManager to resolve the equlity to possible or
 // not possible ProgramStates.
 class ConstraintBasedEQEvaluator {
-    const DefinedOrUnknownSVal CompareValue;
-    const ProgramStateRef PS;
-    SValBuilder &SVB;
+  const DefinedOrUnknownSVal CompareValue;
+  const ProgramStateRef PS;
+  SValBuilder &SVB;
 
 public:
-    ConstraintBasedEQEvaluator(CheckerContext &C,
-                               const DefinedOrUnknownSVal CompareValue)
-        : CompareValue(CompareValue), PS(C.getState()), SVB(C.getSValBuilder()) {}
+  ConstraintBasedEQEvaluator(CheckerContext &C,
+                             const DefinedOrUnknownSVal CompareValue)
+      : CompareValue(CompareValue), PS(C.getState()), SVB(C.getSValBuilder()) {}
 
-    bool operator()(const llvm::APSInt &EnumDeclInitValue) {
-        DefinedOrUnknownSVal EnumDeclValue = SVB.makeIntVal(EnumDeclInitValue);
-        DefinedOrUnknownSVal ElemEqualsValueToCast =
-            SVB.evalEQ(PS, EnumDeclValue, CompareValue);
+  bool operator()(const llvm::APSInt &EnumDeclInitValue) {
+    DefinedOrUnknownSVal EnumDeclValue = SVB.makeIntVal(EnumDeclInitValue);
+    DefinedOrUnknownSVal ElemEqualsValueToCast =
+        SVB.evalEQ(PS, EnumDeclValue, CompareValue);
 
-        return static_cast<bool>(PS->assume(ElemEqualsValueToCast, true));
-    }
+    return static_cast<bool>(PS->assume(ElemEqualsValueToCast, true));
+  }
 };
 
 // This checker checks CastExpr statements.
@@ -57,93 +57,91 @@ public:
 // Being conservative, it does not warn if there is slight possibility the
 // value can be matching.
 class EnumCastOutOfRangeChecker : public Checker<check::PreStmt<CastExpr>> {
-    mutable std::unique_ptr<BuiltinBug> EnumValueCastOutOfRange;
-    void reportWarning(CheckerContext &C) const;
+  mutable std::unique_ptr<BuiltinBug> EnumValueCastOutOfRange;
+  void reportWarning(CheckerContext &C) const;
 
 public:
-    void checkPreStmt(const CastExpr *CE, CheckerContext &C) const;
+  void checkPreStmt(const CastExpr *CE, CheckerContext &C) const;
 };
 
 using EnumValueVector = llvm::SmallVector<llvm::APSInt, 6>;
 
 // Collects all of the values an enum can represent (as SVals).
 EnumValueVector getDeclValuesForEnum(const EnumDecl *ED) {
-    EnumValueVector DeclValues(
-        std::distance(ED->enumerator_begin(), ED->enumerator_end()));
-    llvm::transform(ED->enumerators(), DeclValues.begin(),
-    [](const EnumConstantDecl *D) {
-        return D->getInitVal();
-    });
-    return DeclValues;
+  EnumValueVector DeclValues(
+      std::distance(ED->enumerator_begin(), ED->enumerator_end()));
+  llvm::transform(ED->enumerators(), DeclValues.begin(),
+                  [](const EnumConstantDecl *D) { return D->getInitVal(); });
+  return DeclValues;
 }
 } // namespace
 
 void EnumCastOutOfRangeChecker::reportWarning(CheckerContext &C) const {
-    if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
-        if (!EnumValueCastOutOfRange)
-            EnumValueCastOutOfRange.reset(
-                new BuiltinBug(this, "Enum cast out of range",
-                               "The value provided to the cast expression is not in "
-                               "the valid range of values for the enum"));
-        C.emitReport(std::make_unique<PathSensitiveBugReport>(
-                         *EnumValueCastOutOfRange, EnumValueCastOutOfRange->getDescription(),
-                         N));
-    }
+  if (const ExplodedNode *N = C.generateNonFatalErrorNode()) {
+    if (!EnumValueCastOutOfRange)
+      EnumValueCastOutOfRange.reset(
+          new BuiltinBug(this, "Enum cast out of range",
+                         "The value provided to the cast expression is not in "
+                         "the valid range of values for the enum"));
+    C.emitReport(std::make_unique<PathSensitiveBugReport>(
+        *EnumValueCastOutOfRange, EnumValueCastOutOfRange->getDescription(),
+        N));
+  }
 }
 
 void EnumCastOutOfRangeChecker::checkPreStmt(const CastExpr *CE,
-        CheckerContext &C) const {
+                                             CheckerContext &C) const {
 
-    // Only perform enum range check on casts where such checks are valid.  For
-    // all other cast kinds (where enum range checks are unnecessary or invalid),
-    // just return immediately.  TODO: The set of casts whitelisted for enum
-    // range checking may be incomplete.  Better to add a missing cast kind to
-    // enable a missing check than to generate false negatives and have to remove
-    // those later.
-    switch (CE->getCastKind()) {
-    case CK_IntegralCast:
-        break;
+  // Only perform enum range check on casts where such checks are valid.  For
+  // all other cast kinds (where enum range checks are unnecessary or invalid),
+  // just return immediately.  TODO: The set of casts whitelisted for enum
+  // range checking may be incomplete.  Better to add a missing cast kind to
+  // enable a missing check than to generate false negatives and have to remove
+  // those later.
+  switch (CE->getCastKind()) {
+  case CK_IntegralCast:
+    break;
 
-    default:
-        return;
-        break;
-    }
+  default:
+    return;
+    break;
+  }
 
-    // Get the value of the expression to cast.
-    const llvm::Optional<DefinedOrUnknownSVal> ValueToCast =
-        C.getSVal(CE->getSubExpr()).getAs<DefinedOrUnknownSVal>();
+  // Get the value of the expression to cast.
+  const llvm::Optional<DefinedOrUnknownSVal> ValueToCast =
+      C.getSVal(CE->getSubExpr()).getAs<DefinedOrUnknownSVal>();
 
-    // If the value cannot be reasoned about (not even a DefinedOrUnknownSVal),
-    // don't analyze further.
-    if (!ValueToCast)
-        return;
+  // If the value cannot be reasoned about (not even a DefinedOrUnknownSVal),
+  // don't analyze further.
+  if (!ValueToCast)
+    return;
 
-    const QualType T = CE->getType();
-    // Check whether the cast type is an enum.
-    if (!T->isEnumeralType())
-        return;
+  const QualType T = CE->getType();
+  // Check whether the cast type is an enum.
+  if (!T->isEnumeralType())
+    return;
 
-    // If the cast is an enum, get its declaration.
-    // If the isEnumeralType() returned true, then the declaration must exist
-    // even if it is a stub declaration. It is up to the getDeclValuesForEnum()
-    // function to handle this.
-    const EnumDecl *ED = T->castAs<EnumType>()->getDecl();
+  // If the cast is an enum, get its declaration.
+  // If the isEnumeralType() returned true, then the declaration must exist
+  // even if it is a stub declaration. It is up to the getDeclValuesForEnum()
+  // function to handle this.
+  const EnumDecl *ED = T->castAs<EnumType>()->getDecl();
 
-    EnumValueVector DeclValues = getDeclValuesForEnum(ED);
-    // Check if any of the enum values possibly match.
-    bool PossibleValueMatch = llvm::any_of(
-                                  DeclValues, ConstraintBasedEQEvaluator(C, *ValueToCast));
+  EnumValueVector DeclValues = getDeclValuesForEnum(ED);
+  // Check if any of the enum values possibly match.
+  bool PossibleValueMatch =
+      llvm::any_of(DeclValues, ConstraintBasedEQEvaluator(C, *ValueToCast));
 
-    // If there is no value that can possibly match any of the enum values, then
-    // warn.
-    if (!PossibleValueMatch)
-        reportWarning(C);
+  // If there is no value that can possibly match any of the enum values, then
+  // warn.
+  if (!PossibleValueMatch)
+    reportWarning(C);
 }
 
 void ento::registerEnumCastOutOfRangeChecker(CheckerManager &mgr) {
-    mgr.registerChecker<EnumCastOutOfRangeChecker>();
+  mgr.registerChecker<EnumCastOutOfRangeChecker>();
 }
 
 bool ento::shouldRegisterEnumCastOutOfRangeChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

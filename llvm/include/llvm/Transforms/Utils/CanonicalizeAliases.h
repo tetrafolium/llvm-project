@@ -21,9 +21,9 @@ namespace llvm {
 /// Simple pass that canonicalizes aliases.
 class CanonicalizeAliasesPass : public PassInfoMixin<CanonicalizeAliasesPass> {
 public:
-    CanonicalizeAliasesPass() = default;
+  CanonicalizeAliasesPass() = default;
 
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

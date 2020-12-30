@@ -22,27 +22,27 @@ using namespace llvm;
 WebAssemblyMCAsmInfo::~WebAssemblyMCAsmInfo() = default; // anchor.
 
 WebAssemblyMCAsmInfo::WebAssemblyMCAsmInfo(const Triple &T,
-        const MCTargetOptions &Options) {
-    CodePointerSize = CalleeSaveStackSlotSize = T.isArch64Bit() ? 8 : 4;
+                                           const MCTargetOptions &Options) {
+  CodePointerSize = CalleeSaveStackSlotSize = T.isArch64Bit() ? 8 : 4;
 
-    // TODO: What should MaxInstLength be?
+  // TODO: What should MaxInstLength be?
 
-    UseDataRegionDirectives = true;
+  UseDataRegionDirectives = true;
 
-    // Use .skip instead of .zero because .zero is confusing when used with two
-    // arguments (it doesn't actually zero things out).
-    ZeroDirective = "\t.skip\t";
+  // Use .skip instead of .zero because .zero is confusing when used with two
+  // arguments (it doesn't actually zero things out).
+  ZeroDirective = "\t.skip\t";
 
-    Data8bitsDirective = "\t.int8\t";
-    Data16bitsDirective = "\t.int16\t";
-    Data32bitsDirective = "\t.int32\t";
-    Data64bitsDirective = "\t.int64\t";
+  Data8bitsDirective = "\t.int8\t";
+  Data16bitsDirective = "\t.int16\t";
+  Data32bitsDirective = "\t.int32\t";
+  Data64bitsDirective = "\t.int64\t";
 
-    AlignmentIsInBytes = false;
-    COMMDirectiveAlignmentIsInBytes = false;
-    LCOMMDirectiveAlignmentType = LCOMM::Log2Alignment;
+  AlignmentIsInBytes = false;
+  COMMDirectiveAlignmentIsInBytes = false;
+  LCOMMDirectiveAlignmentType = LCOMM::Log2Alignment;
 
-    SupportsDebugInformation = true;
+  SupportsDebugInformation = true;
 
-    // TODO: UseIntegratedAssembler?
+  // TODO: UseIntegratedAssembler?
 }

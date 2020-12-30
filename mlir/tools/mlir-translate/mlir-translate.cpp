@@ -24,12 +24,12 @@ void registerTestRoundtripDebugSPIRV();
 } // namespace mlir
 
 static void registerTestTranslations() {
-    registerTestRoundtripSPIRV();
-    registerTestRoundtripDebugSPIRV();
+  registerTestRoundtripSPIRV();
+  registerTestRoundtripDebugSPIRV();
 }
 
 int main(int argc, char **argv) {
-    registerAllTranslations();
-    registerTestTranslations();
-    return failed(mlirTranslateMain(argc, argv, "MLIR Translation Testing Tool"));
+  registerAllTranslations();
+  registerTestTranslations();
+  return failed(mlirTranslateMain(argc, argv, "MLIR Translation Testing Tool"));
 }

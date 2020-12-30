@@ -19,27 +19,27 @@ namespace {
 
 class CSKYELFObjectWriter : public MCELFObjectTargetWriter {
 public:
-    CSKYELFObjectWriter(uint8_t OSABI = 0)
-        : MCELFObjectTargetWriter(false, OSABI, ELF::EM_CSKY, true) {};
-    ~CSKYELFObjectWriter() {}
+  CSKYELFObjectWriter(uint8_t OSABI = 0)
+      : MCELFObjectTargetWriter(false, OSABI, ELF::EM_CSKY, true){};
+  ~CSKYELFObjectWriter() {}
 
-    unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
-                          const MCFixup &Fixup, bool IsPCRel) const override;
+  unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
+                        const MCFixup &Fixup, bool IsPCRel) const override;
 };
 
 } // namespace
 
 unsigned CSKYELFObjectWriter::getRelocType(MCContext &Ctx,
-        const MCValue &Target,
-        const MCFixup &Fixup,
-        bool IsPCRel) const {
-    // Determine the type of the relocation.
-    switch ((unsigned)Fixup.getKind()) {
-    default:
-        llvm_unreachable("invalid fixup kind!");
-    }
+                                           const MCValue &Target,
+                                           const MCFixup &Fixup,
+                                           bool IsPCRel) const {
+  // Determine the type of the relocation.
+  switch ((unsigned)Fixup.getKind()) {
+  default:
+    llvm_unreachable("invalid fixup kind!");
+  }
 }
 
 std::unique_ptr<MCObjectTargetWriter> llvm::createCSKYELFObjectWriter() {
-    return std::make_unique<CSKYELFObjectWriter>();
+  return std::make_unique<CSKYELFObjectWriter>();
 }

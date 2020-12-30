@@ -20,41 +20,39 @@
 namespace __sanitizer {
 
 struct MemoryMappingLayoutData {
-    int current_image;
-    u32 current_magic;
-    u32 current_filetype;
-    ModuleArch current_arch;
-    u8 current_uuid[kModuleUUIDSize];
-    int current_load_cmd_count;
-    const char *current_load_cmd_addr;
-    bool current_instrumented;
+  int current_image;
+  u32 current_magic;
+  u32 current_filetype;
+  ModuleArch current_arch;
+  u8 current_uuid[kModuleUUIDSize];
+  int current_load_cmd_count;
+  const char *current_load_cmd_addr;
+  bool current_instrumented;
 };
 
 template <typename VersionType>
 struct VersionBase {
-    u16 major;
-    u16 minor;
+  u16 major;
+  u16 minor;
 
-    VersionBase(u16 major, u16 minor) : major(major), minor(minor) {}
+  VersionBase(u16 major, u16 minor) : major(major), minor(minor) {}
 
-    bool operator==(const VersionType &other) const {
-        return major == other.major && minor == other.minor;
-    }
-    bool operator>=(const VersionType &other) const {
-        return major > other.major ||
-               (major == other.major && minor >= other.minor);
-    }
-    bool operator<(const VersionType &other) const {
-        return !(*this >= other);
-    }
+  bool operator==(const VersionType &other) const {
+    return major == other.major && minor == other.minor;
+  }
+  bool operator>=(const VersionType &other) const {
+    return major > other.major ||
+           (major == other.major && minor >= other.minor);
+  }
+  bool operator<(const VersionType &other) const { return !(*this >= other); }
 };
 
 struct MacosVersion : VersionBase<MacosVersion> {
-    MacosVersion(u16 major, u16 minor) : VersionBase(major, minor) {}
+  MacosVersion(u16 major, u16 minor) : VersionBase(major, minor) {}
 };
 
 struct DarwinKernelVersion : VersionBase<DarwinKernelVersion> {
-    DarwinKernelVersion(u16 major, u16 minor) : VersionBase(major, minor) {}
+  DarwinKernelVersion(u16 major, u16 minor) : VersionBase(major, minor) {}
 };
 
 MacosVersion GetMacosAlignedVersion();
@@ -67,20 +65,20 @@ void RestrictMemoryToMaxAddress(uptr max_address);
 }  // namespace __sanitizer
 
 extern "C" {
-    static char __crashreporter_info_buff__[__sanitizer::kErrorMessageBufferSize] =
-        {};
-    static const char *__crashreporter_info__ __attribute__((__used__)) =
-        &__crashreporter_info_buff__[0];
-    asm(".desc ___crashreporter_info__, 0x10");
-} // extern "C"
+static char __crashreporter_info_buff__[__sanitizer::kErrorMessageBufferSize] =
+    {};
+static const char *__crashreporter_info__ __attribute__((__used__)) =
+    &__crashreporter_info_buff__[0];
+asm(".desc ___crashreporter_info__, 0x10");
+}  // extern "C"
 
 namespace __sanitizer {
 static BlockingMutex crashreporter_info_mutex(LINKER_INITIALIZED);
 
 inline void CRAppendCrashLogMessage(const char *msg) {
-    BlockingMutexLock l(&crashreporter_info_mutex);
-    internal_strlcat(__crashreporter_info_buff__, msg,
-                     sizeof(__crashreporter_info_buff__));
+  BlockingMutexLock l(&crashreporter_info_mutex);
+  internal_strlcat(__crashreporter_info_buff__, msg,
+                   sizeof(__crashreporter_info_buff__));
 }
 }  // namespace __sanitizer
 

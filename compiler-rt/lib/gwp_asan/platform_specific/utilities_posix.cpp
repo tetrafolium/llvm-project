@@ -16,12 +16,12 @@ extern "C" GWP_ASAN_WEAK void android_set_abort_message(const char *);
 namespace gwp_asan {
 void die(const char *Message) {
 #ifdef __BIONIC__
-    if (&android_set_abort_message != nullptr)
-        android_set_abort_message(Message);
-    abort();
+  if (&android_set_abort_message != nullptr)
+    android_set_abort_message(Message);
+  abort();
 #else  // __BIONIC__
-    fprintf(stderr, "%s", Message);
-    __builtin_trap();
+  fprintf(stderr, "%s", Message);
+  __builtin_trap();
 #endif // __BIONIC__
 }
 } // namespace gwp_asan

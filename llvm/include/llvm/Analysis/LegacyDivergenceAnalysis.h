@@ -1,4 +1,5 @@
-//===- llvm/Analysis/LegacyDivergenceAnalysis.h - KernelDivergence Analysis -*- C++ -*-===//
+//===- llvm/Analysis/LegacyDivergenceAnalysis.h - KernelDivergence Analysis -*-
+//C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -7,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 //
 // The kernel divergence analysis is an LLVM pass which can be used to find out
-// if a branch instruction in a GPU program (kernel) is divergent or not. It can help
-// branch optimizations such as jump threading and loop unswitching to make
+// if a branch instruction in a GPU program (kernel) is divergent or not. It can
+// help branch optimizations such as jump threading and loop unswitching to make
 // better decisions.
 //
 //===----------------------------------------------------------------------===//
@@ -30,53 +31,47 @@ class Value;
 
 class LegacyDivergenceAnalysis : public FunctionPass {
 public:
-    static char ID;
+  static char ID;
 
-    LegacyDivergenceAnalysis();
+  LegacyDivergenceAnalysis();
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 
-    // Print all divergent branches in the function.
-    void print(raw_ostream &OS, const Module *) const override;
+  // Print all divergent branches in the function.
+  void print(raw_ostream &OS, const Module *) const override;
 
-    // Returns true if V is divergent at its definition.
-    bool isDivergent(const Value *V) const;
+  // Returns true if V is divergent at its definition.
+  bool isDivergent(const Value *V) const;
 
-    // Returns true if U is divergent. Uses of a uniform value can be divergent.
-    bool isDivergentUse(const Use *U) const;
+  // Returns true if U is divergent. Uses of a uniform value can be divergent.
+  bool isDivergentUse(const Use *U) const;
 
-    // Returns true if V is uniform/non-divergent.
-    bool isUniform(const Value *V) const {
-        return !isDivergent(V);
-    }
+  // Returns true if V is uniform/non-divergent.
+  bool isUniform(const Value *V) const { return !isDivergent(V); }
 
-    // Returns true if U is uniform/non-divergent. Uses of a uniform value can be
-    // divergent.
-    bool isUniformUse(const Use *U) const {
-        return !isDivergentUse(U);
-    }
+  // Returns true if U is uniform/non-divergent. Uses of a uniform value can be
+  // divergent.
+  bool isUniformUse(const Use *U) const { return !isDivergentUse(U); }
 
-    // Keep the analysis results uptodate by removing an erased value.
-    void removeValue(const Value *V) {
-        DivergentValues.erase(V);
-    }
+  // Keep the analysis results uptodate by removing an erased value.
+  void removeValue(const Value *V) { DivergentValues.erase(V); }
 
 private:
-    // Whether analysis should be performed by GPUDivergenceAnalysis.
-    bool shouldUseGPUDivergenceAnalysis(const Function &F,
-                                        const TargetTransformInfo &TTI) const;
+  // Whether analysis should be performed by GPUDivergenceAnalysis.
+  bool shouldUseGPUDivergenceAnalysis(const Function &F,
+                                      const TargetTransformInfo &TTI) const;
 
-    // (optional) handle to new DivergenceAnalysis
-    std::unique_ptr<GPUDivergenceAnalysis> gpuDA;
+  // (optional) handle to new DivergenceAnalysis
+  std::unique_ptr<GPUDivergenceAnalysis> gpuDA;
 
-    // Stores all divergent values.
-    DenseSet<const Value *> DivergentValues;
+  // Stores all divergent values.
+  DenseSet<const Value *> DivergentValues;
 
-    // Stores divergent uses of possibly uniform values.
-    DenseSet<const Use *> DivergentUses;
+  // Stores divergent uses of possibly uniform values.
+  DenseSet<const Use *> DivergentUses;
 };
-} // End llvm namespace
+} // namespace llvm
 
-#endif //LLVM_ANALYSIS_LEGACY_DIVERGENCE_ANALYSIS_H
+#endif // LLVM_ANALYSIS_LEGACY_DIVERGENCE_ANALYSIS_H

@@ -1,4 +1,5 @@
-//===- llvm/Support/Program.h ------------------------------------*- C++ -*-===//
+//===- llvm/Support/Program.h ------------------------------------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -28,7 +29,7 @@ namespace sys {
 // a colon on Unix or a semicolon on Windows.
 #if defined(LLVM_ON_UNIX)
 const char EnvPathSeparator = ':';
-#elif defined (_WIN32)
+#elif defined(_WIN32)
 const char EnvPathSeparator = ';';
 #endif
 
@@ -42,22 +43,22 @@ typedef procid_t process_t;
 
 /// This struct encapsulates information about a process.
 struct ProcessInfo {
-    enum : procid_t { InvalidPid = 0 };
+  enum : procid_t { InvalidPid = 0 };
 
-    procid_t Pid;      /// The process identifier.
-    process_t Process; /// Platform-dependent process object.
+  procid_t Pid;      /// The process identifier.
+  process_t Process; /// Platform-dependent process object.
 
-    /// The return code, set after execution.
-    int ReturnCode;
+  /// The return code, set after execution.
+  int ReturnCode;
 
-    ProcessInfo();
+  ProcessInfo();
 };
 
 /// This struct encapsulates information about a process execution.
 struct ProcessStatistics {
-    std::chrono::microseconds TotalTime;
-    std::chrono::microseconds UserTime;
-    uint64_t PeakMemory = 0; ///< Maximum resident set size in KiB.
+  std::chrono::microseconds TotalTime;
+  std::chrono::microseconds UserTime;
+  uint64_t PeakMemory = 0; ///< Maximum resident set size in KiB.
 };
 
 /// Find the first executable file \p Name in \p Paths.
@@ -73,8 +74,8 @@ struct ProcessStatistics {
 ///
 /// \returns The fully qualified path to the first \p Name in \p Paths if it
 ///   exists. \p Name if \p Name has slashes in it. Otherwise an error.
-ErrorOr<std::string>
-findProgramByName(StringRef Name, ArrayRef<StringRef> Paths = {});
+ErrorOr<std::string> findProgramByName(StringRef Name,
+                                       ArrayRef<StringRef> Paths = {});
 
 // These functions change the specified standard stream (stdin or stdout) to
 // binary mode. They return errc::success if the specified stream
@@ -125,9 +126,10 @@ int ExecuteAndWait(
     ///< string is non-empty upon return an error occurred while invoking the
     ///< program.
     bool *ExecutionFailed = nullptr,
-    Optional<ProcessStatistics> *ProcStat = nullptr ///< If non-zero, provides
-            /// a pointer to a structure in which process execution statistics will be
-            /// stored.
+    Optional<ProcessStatistics> *ProcStat =
+        nullptr ///< If non-zero, provides
+                /// a pointer to a structure in which process execution
+                /// statistics will be stored.
 );
 
 /// Similar to ExecuteAndWait, but returns immediately.
@@ -155,11 +157,11 @@ bool commandLineFitsWithinSystemLimits(StringRef Program,
 /// File encoding options when writing contents that a non-UTF8 tool will
 /// read (on Windows systems). For UNIX, we always use UTF-8.
 enum WindowsEncodingMethod {
-    /// UTF-8 is the LLVM native encoding, being the same as "do not perform
-    /// encoding conversion".
-    WEM_UTF8,
-    WEM_CurrentCodePage,
-    WEM_UTF16
+  /// UTF-8 is the LLVM native encoding, being the same as "do not perform
+  /// encoding conversion".
+  WEM_UTF8,
+  WEM_CurrentCodePage,
+  WEM_UTF16
 };
 
 /// Saves the UTF8-encoded \p contents string into the file \p FileName
@@ -193,21 +195,22 @@ writeFileWithEncoding(StringRef FileName, StringRef Contents,
 /// \li 0 if the child process has not changed state.
 /// \note Users of this function should always check the ReturnCode member of
 /// the \see ProcessInfo returned from this function.
-ProcessInfo Wait(
-    const ProcessInfo &PI,  ///< The child process that should be waited on.
-    unsigned SecondsToWait, ///< If non-zero, this specifies the amount of
-    ///< time to wait for the child process to exit. If the time expires, the
-    ///< child is killed and this function returns. If zero, this function
-    ///< will perform a non-blocking wait on the child process.
-    bool WaitUntilTerminates, ///< If true, ignores \p SecondsToWait and waits
-    ///< until child has terminated.
-    std::string *ErrMsg = nullptr, ///< If non-zero, provides a pointer to a
-    ///< string instance in which error messages will be returned. If the
-    ///< string is non-empty upon return an error occurred while invoking the
-    ///< program.
-    Optional<ProcessStatistics> *ProcStat = nullptr ///< If non-zero, provides
-            /// a pointer to a structure in which process execution statistics will be
-            /// stored.
+ProcessInfo
+Wait(const ProcessInfo &PI,  ///< The child process that should be waited on.
+     unsigned SecondsToWait, ///< If non-zero, this specifies the amount of
+     ///< time to wait for the child process to exit. If the time expires, the
+     ///< child is killed and this function returns. If zero, this function
+     ///< will perform a non-blocking wait on the child process.
+     bool WaitUntilTerminates, ///< If true, ignores \p SecondsToWait and waits
+     ///< until child has terminated.
+     std::string *ErrMsg = nullptr, ///< If non-zero, provides a pointer to a
+     ///< string instance in which error messages will be returned. If the
+     ///< string is non-empty upon return an error occurred while invoking the
+     ///< program.
+     Optional<ProcessStatistics> *ProcStat =
+         nullptr ///< If non-zero, provides
+                 /// a pointer to a structure in which process execution
+                 /// statistics will be stored.
 );
 
 /// Print a command argument, and optionally quote it.
@@ -220,7 +223,7 @@ void printArg(llvm::raw_ostream &OS, StringRef Arg, bool Quote);
 /// Windows.
 ErrorOr<std::wstring> flattenWindowsCommandLine(ArrayRef<StringRef> Args);
 #endif
-}
-}
+} // namespace sys
+} // namespace llvm
 
 #endif

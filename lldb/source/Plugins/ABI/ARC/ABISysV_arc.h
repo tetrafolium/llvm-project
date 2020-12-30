@@ -18,89 +18,90 @@
 
 class ABISysV_arc : public lldb_private::RegInfoBasedABI {
 public:
-    ~ABISysV_arc() override = default;
+  ~ABISysV_arc() override = default;
 
-    size_t GetRedZoneSize() const override;
+  size_t GetRedZoneSize() const override;
 
-    bool PrepareTrivialCall(lldb_private::Thread &thread, lldb::addr_t sp,
-                            lldb::addr_t functionAddress,
-                            lldb::addr_t returnAddress,
-                            llvm::ArrayRef<lldb::addr_t> args) const override;
+  bool PrepareTrivialCall(lldb_private::Thread &thread, lldb::addr_t sp,
+                          lldb::addr_t functionAddress,
+                          lldb::addr_t returnAddress,
+                          llvm::ArrayRef<lldb::addr_t> args) const override;
 
-    // Special thread plan for GDB style non-jit function calls.
-    bool
-    PrepareTrivialCall(lldb_private::Thread &thread, lldb::addr_t sp,
-                       lldb::addr_t functionAddress, lldb::addr_t returnAddress,
-                       llvm::Type &prototype,
-                       llvm::ArrayRef<ABI::CallArgument> args) const override;
+  // Special thread plan for GDB style non-jit function calls.
+  bool
+  PrepareTrivialCall(lldb_private::Thread &thread, lldb::addr_t sp,
+                     lldb::addr_t functionAddress, lldb::addr_t returnAddress,
+                     llvm::Type &prototype,
+                     llvm::ArrayRef<ABI::CallArgument> args) const override;
 
-    bool GetArgumentValues(lldb_private::Thread &thread,
-                           lldb_private::ValueList &values) const override;
+  bool GetArgumentValues(lldb_private::Thread &thread,
+                         lldb_private::ValueList &values) const override;
 
-    lldb_private::Status
-    SetReturnValueObject(lldb::StackFrameSP &frame_sp,
-                         lldb::ValueObjectSP &new_value) override;
+  lldb_private::Status
+  SetReturnValueObject(lldb::StackFrameSP &frame_sp,
+                       lldb::ValueObjectSP &new_value) override;
 
-    lldb::ValueObjectSP
-    GetReturnValueObjectImpl(lldb_private::Thread &thread,
-                             lldb_private::CompilerType &type) const override;
+  lldb::ValueObjectSP
+  GetReturnValueObjectImpl(lldb_private::Thread &thread,
+                           lldb_private::CompilerType &type) const override;
 
-    // Specialized to work with llvm IR types.
-    lldb::ValueObjectSP GetReturnValueObjectImpl(lldb_private::Thread &thread,
-            llvm::Type &type) const override;
+  // Specialized to work with llvm IR types.
+  lldb::ValueObjectSP GetReturnValueObjectImpl(lldb_private::Thread &thread,
+                                               llvm::Type &type) const override;
 
-    bool
-    CreateFunctionEntryUnwindPlan(lldb_private::UnwindPlan &unwind_plan) override;
+  bool
+  CreateFunctionEntryUnwindPlan(lldb_private::UnwindPlan &unwind_plan) override;
 
-    bool CreateDefaultUnwindPlan(lldb_private::UnwindPlan &unwind_plan) override;
+  bool CreateDefaultUnwindPlan(lldb_private::UnwindPlan &unwind_plan) override;
 
-    bool RegisterIsVolatile(const lldb_private::RegisterInfo *reg_info) override;
+  bool RegisterIsVolatile(const lldb_private::RegisterInfo *reg_info) override;
 
-    bool CallFrameAddressIsValid(lldb::addr_t cfa) override {
-        // Stack call frame address must be 4 byte aligned.
-        return (cfa & 0x3ull) == 0;
-    }
+  bool CallFrameAddressIsValid(lldb::addr_t cfa) override {
+    // Stack call frame address must be 4 byte aligned.
+    return (cfa & 0x3ull) == 0;
+  }
 
-    bool CodeAddressIsValid(lldb::addr_t pc) override {
-        // Code addresse must be 2 byte aligned.
-        return (pc & 1ull) == 0;
-    }
+  bool CodeAddressIsValid(lldb::addr_t pc) override {
+    // Code addresse must be 2 byte aligned.
+    return (pc & 1ull) == 0;
+  }
 
-    const lldb_private::RegisterInfo *
-    GetRegisterInfoArray(uint32_t &count) override;
+  const lldb_private::RegisterInfo *
+  GetRegisterInfoArray(uint32_t &count) override;
 
-    //------------------------------------------------------------------
-    // Static Functions
-    //------------------------------------------------------------------
+  //------------------------------------------------------------------
+  // Static Functions
+  //------------------------------------------------------------------
 
-    static void Initialize();
+  static void Initialize();
 
-    static void Terminate();
+  static void Terminate();
 
-    static lldb::ABISP CreateInstance(lldb::ProcessSP process_sp,
-                                      const lldb_private::ArchSpec &arch);
+  static lldb::ABISP CreateInstance(lldb::ProcessSP process_sp,
+                                    const lldb_private::ArchSpec &arch);
 
-    static lldb_private::ConstString GetPluginNameStatic();
+  static lldb_private::ConstString GetPluginNameStatic();
 
-    //------------------------------------------------------------------
-    // PluginInterface protocol
-    //------------------------------------------------------------------
+  //------------------------------------------------------------------
+  // PluginInterface protocol
+  //------------------------------------------------------------------
 
-    lldb_private::ConstString GetPluginName() override;
+  lldb_private::ConstString GetPluginName() override;
 
-    uint32_t GetPluginVersion() override;
+  uint32_t GetPluginVersion() override;
 
 private:
-    lldb::ValueObjectSP
-    GetReturnValueObjectSimple(lldb_private::Thread &thread,
-                               lldb_private::CompilerType &ast_type) const;
+  lldb::ValueObjectSP
+  GetReturnValueObjectSimple(lldb_private::Thread &thread,
+                             lldb_private::CompilerType &ast_type) const;
 
-    bool IsRegisterFileReduced(lldb_private::RegisterContext &reg_ctx) const;
+  bool IsRegisterFileReduced(lldb_private::RegisterContext &reg_ctx) const;
 
-    using lldb_private::RegInfoBasedABI::RegInfoBasedABI; // Call CreateInstance instead.
+  using lldb_private::RegInfoBasedABI::RegInfoBasedABI; // Call CreateInstance
+                                                        // instead.
 
-    using RegisterFileFlag = llvm::Optional<bool>;
-    mutable RegisterFileFlag m_is_reg_file_reduced;
+  using RegisterFileFlag = llvm::Optional<bool>;
+  mutable RegisterFileFlag m_is_reg_file_reduced;
 };
 
 #endif // liblldb_ABISysV_arc_h_

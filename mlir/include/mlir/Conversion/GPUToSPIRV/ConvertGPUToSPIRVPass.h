@@ -20,7 +20,8 @@
 namespace mlir {
 
 class ModuleOp;
-template <typename T> class OperationPass;
+template <typename T>
+class OperationPass;
 
 /// Pass to convert GPU Ops to SPIR-V ops. For a gpu.func to be converted, it
 /// should have a spv.entry_point_abi attribute.

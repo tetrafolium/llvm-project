@@ -26,50 +26,50 @@ namespace {
 // GPU launch operations.  Nested launches are not allowed, so this does not
 // walk the function recursively to avoid considering nested loops.
 struct ForLoopMapper : public ConvertAffineForToGPUBase<ForLoopMapper> {
-    ForLoopMapper() = default;
-    ForLoopMapper(unsigned numBlockDims, unsigned numThreadDims) {
-        this->numBlockDims = numBlockDims;
-        this->numThreadDims = numThreadDims;
-    }
+  ForLoopMapper() = default;
+  ForLoopMapper(unsigned numBlockDims, unsigned numThreadDims) {
+    this->numBlockDims = numBlockDims;
+    this->numThreadDims = numThreadDims;
+  }
 
-    void runOnFunction() override {
-        for (Operation &op : llvm::make_early_inc_range(getFunction().getOps())) {
-            if (auto forOp = dyn_cast<AffineForOp>(&op)) {
-                if (failed(convertAffineLoopNestToGPULaunch(forOp, numBlockDims,
-                           numThreadDims)))
-                    signalPassFailure();
-            }
-        }
+  void runOnFunction() override {
+    for (Operation &op : llvm::make_early_inc_range(getFunction().getOps())) {
+      if (auto forOp = dyn_cast<AffineForOp>(&op)) {
+        if (failed(convertAffineLoopNestToGPULaunch(forOp, numBlockDims,
+                                                    numThreadDims)))
+          signalPassFailure();
+      }
     }
+  }
 };
 
 struct ParallelLoopToGpuPass
     : public ConvertParallelLoopToGpuBase<ParallelLoopToGpuPass> {
-    void runOnOperation() override {
-        OwningRewritePatternList patterns;
-        populateParallelLoopToGPUPatterns(patterns, &getContext());
-        ConversionTarget target(getContext());
-        target.addLegalDialect<StandardOpsDialect>();
-        target.addLegalDialect<AffineDialect>();
-        target.addLegalDialect<gpu::GPUDialect>();
-        target.addLegalDialect<scf::SCFDialect>();
-        configureParallelLoopToGPULegality(target);
-        if (failed(applyPartialConversion(getOperation(), target,
-                                          std::move(patterns))))
-            signalPassFailure();
-    }
+  void runOnOperation() override {
+    OwningRewritePatternList patterns;
+    populateParallelLoopToGPUPatterns(patterns, &getContext());
+    ConversionTarget target(getContext());
+    target.addLegalDialect<StandardOpsDialect>();
+    target.addLegalDialect<AffineDialect>();
+    target.addLegalDialect<gpu::GPUDialect>();
+    target.addLegalDialect<scf::SCFDialect>();
+    configureParallelLoopToGPULegality(target);
+    if (failed(applyPartialConversion(getOperation(), target,
+                                      std::move(patterns))))
+      signalPassFailure();
+  }
 };
 
 } // namespace
 
 std::unique_ptr<OperationPass<FuncOp>>
 mlir::createAffineForToGPUPass(unsigned numBlockDims, unsigned numThreadDims) {
-    return std::make_unique<ForLoopMapper>(numBlockDims, numThreadDims);
+  return std::make_unique<ForLoopMapper>(numBlockDims, numThreadDims);
 }
 std::unique_ptr<OperationPass<FuncOp>> mlir::createAffineForToGPUPass() {
-    return std::make_unique<ForLoopMapper>();
+  return std::make_unique<ForLoopMapper>();
 }
 
 std::unique_ptr<Pass> mlir::createParallelLoopToGpuPass() {
-    return std::make_unique<ParallelLoopToGpuPass>();
+  return std::make_unique<ParallelLoopToGpuPass>();
 }

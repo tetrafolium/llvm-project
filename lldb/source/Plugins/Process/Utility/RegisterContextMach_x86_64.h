@@ -14,23 +14,23 @@
 
 class RegisterContextMach_x86_64 : public RegisterContextDarwin_x86_64 {
 public:
-    RegisterContextMach_x86_64(lldb_private::Thread &thread,
-                               uint32_t concrete_frame_idx);
+  RegisterContextMach_x86_64(lldb_private::Thread &thread,
+                             uint32_t concrete_frame_idx);
 
-    virtual ~RegisterContextMach_x86_64();
+  virtual ~RegisterContextMach_x86_64();
 
 protected:
-    int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
+  int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
 
-    int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
+  int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
 
-    int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
+  int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
 
-    int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
+  int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
 
-    int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
+  int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
 
-    int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
+  int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_UTILITY_REGISTERCONTEXTMACH_X86_64_H

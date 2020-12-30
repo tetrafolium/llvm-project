@@ -19,11 +19,11 @@ namespace readability {
 // them.
 class AvoidConstParamsInDecls : public ClangTidyCheck {
 public:
-    AvoidConstParamsInDecls(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
+  AvoidConstParamsInDecls(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
 
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace readability

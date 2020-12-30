@@ -36,77 +36,75 @@ namespace npdb {
 class PdbIndex;
 
 struct CVTagRecord {
-    enum Kind { Class, Struct, Union, Enum };
+  enum Kind { Class, Struct, Union, Enum };
 
-    static CVTagRecord create(llvm::codeview::CVType type);
+  static CVTagRecord create(llvm::codeview::CVType type);
 
-    Kind kind() const {
-        return m_kind;
-    }
+  Kind kind() const { return m_kind; }
 
-    const llvm::codeview::TagRecord &asTag() const {
-        if (m_kind == Struct || m_kind == Class)
-            return cvclass;
-        if (m_kind == Enum)
-            return cvenum;
-        return cvunion;
-    }
+  const llvm::codeview::TagRecord &asTag() const {
+    if (m_kind == Struct || m_kind == Class)
+      return cvclass;
+    if (m_kind == Enum)
+      return cvenum;
+    return cvunion;
+  }
 
-    const llvm::codeview::ClassRecord &asClass() const {
-        assert(m_kind == Struct || m_kind == Class);
-        return cvclass;
-    }
+  const llvm::codeview::ClassRecord &asClass() const {
+    assert(m_kind == Struct || m_kind == Class);
+    return cvclass;
+  }
 
-    const llvm::codeview::EnumRecord &asEnum() const {
-        assert(m_kind == Enum);
-        return cvenum;
-    }
+  const llvm::codeview::EnumRecord &asEnum() const {
+    assert(m_kind == Enum);
+    return cvenum;
+  }
 
-    const llvm::codeview::UnionRecord &asUnion() const {
-        assert(m_kind == Union);
-        return cvunion;
-    }
+  const llvm::codeview::UnionRecord &asUnion() const {
+    assert(m_kind == Union);
+    return cvunion;
+  }
 
-    llvm::StringRef name() const {
-        if (m_kind == Struct || m_kind == Union)
-            return cvclass.Name;
-        if (m_kind == Enum)
-            return cvenum.Name;
-        return cvunion.Name;
-    }
+  llvm::StringRef name() const {
+    if (m_kind == Struct || m_kind == Union)
+      return cvclass.Name;
+    if (m_kind == Enum)
+      return cvenum.Name;
+    return cvunion.Name;
+  }
 
 private:
-    CVTagRecord(llvm::codeview::ClassRecord &&c);
-    CVTagRecord(llvm::codeview::UnionRecord &&u);
-    CVTagRecord(llvm::codeview::EnumRecord &&e);
-    union {
-        llvm::codeview::ClassRecord cvclass;
-        llvm::codeview::EnumRecord cvenum;
-        llvm::codeview::UnionRecord cvunion;
-    };
-    Kind m_kind;
+  CVTagRecord(llvm::codeview::ClassRecord &&c);
+  CVTagRecord(llvm::codeview::UnionRecord &&u);
+  CVTagRecord(llvm::codeview::EnumRecord &&e);
+  union {
+    llvm::codeview::ClassRecord cvclass;
+    llvm::codeview::EnumRecord cvenum;
+    llvm::codeview::UnionRecord cvunion;
+  };
+  Kind m_kind;
 };
 
 struct SegmentOffset {
-    SegmentOffset() = default;
-    SegmentOffset(uint16_t s, uint32_t o) : segment(s), offset(o) {}
-    uint16_t segment = 0;
-    uint32_t offset = 0;
+  SegmentOffset() = default;
+  SegmentOffset(uint16_t s, uint32_t o) : segment(s), offset(o) {}
+  uint16_t segment = 0;
+  uint32_t offset = 0;
 };
 
 struct SegmentOffsetLength {
-    SegmentOffsetLength() = default;
-    SegmentOffsetLength(uint16_t s, uint32_t o, uint32_t l)
-        : so(s, o), length(l) {}
-    SegmentOffset so;
-    uint32_t length = 0;
+  SegmentOffsetLength() = default;
+  SegmentOffsetLength(uint16_t s, uint32_t o, uint32_t l)
+      : so(s, o), length(l) {}
+  SegmentOffset so;
+  uint32_t length = 0;
 };
 
 struct VariableInfo {
-    llvm::StringRef name;
-    llvm::codeview::TypeIndex type;
-    llvm::Optional<DWARFExpression> location;
-    llvm::Optional<Variable::RangeList> ranges;
+  llvm::StringRef name;
+  llvm::codeview::TypeIndex type;
+  llvm::Optional<DWARFExpression> location;
+  llvm::Optional<Variable::RangeList> ranges;
 };
 
 llvm::pdb::PDB_SymType CVSymToPDBSym(llvm::codeview::SymbolKind kind);
@@ -120,12 +118,12 @@ SegmentOffsetLength
 GetSegmentOffsetAndLength(const llvm::codeview::CVSymbol &sym);
 
 template <typename RecordT> bool IsValidRecord(const RecordT &sym) {
-    return true;
+  return true;
 }
 
 inline bool IsValidRecord(const llvm::codeview::ProcRefSym &sym) {
-    // S_PROCREF symbols have 1-based module indices.
-    return sym.Module > 0;
+  // S_PROCREF symbols have 1-based module indices.
+  return sym.Module > 0;
 }
 
 bool IsForwardRefUdt(llvm::codeview::CVType cvt);
@@ -143,8 +141,8 @@ LookThroughModifierRecord(llvm::codeview::CVType modifier);
 llvm::StringRef DropNameScope(llvm::StringRef name);
 
 VariableInfo GetVariableNameInfo(llvm::codeview::CVSymbol symbol);
-VariableInfo GetVariableLocationInfo(PdbIndex &index, PdbCompilandSymId var_id, Block& block,
-                                     lldb::ModuleSP module);
+VariableInfo GetVariableLocationInfo(PdbIndex &index, PdbCompilandSymId var_id,
+                                     Block &block, lldb::ModuleSP module);
 
 size_t GetTypeSizeForSimpleKind(llvm::codeview::SimpleTypeKind kind);
 lldb::BasicType

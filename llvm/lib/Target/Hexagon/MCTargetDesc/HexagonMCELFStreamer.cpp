@@ -39,11 +39,10 @@
 
 using namespace llvm;
 
-static cl::opt<unsigned> GPSize
-("gpsize", cl::NotHidden,
- cl::desc("Global Pointer Addressing Size.  The default size is 8."),
- cl::Prefix,
- cl::init(8));
+static cl::opt<unsigned>
+    GPSize("gpsize", cl::NotHidden,
+           cl::desc("Global Pointer Addressing Size.  The default size is 8."),
+           cl::Prefix, cl::init(8));
 
 HexagonMCELFStreamer::HexagonMCELFStreamer(
     MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
@@ -59,102 +58,100 @@ HexagonMCELFStreamer::HexagonMCELFStreamer(
       MCII(createHexagonMCInstrInfo()) {}
 
 void HexagonMCELFStreamer::emitInstruction(const MCInst &MCB,
-        const MCSubtargetInfo &STI) {
-    assert(MCB.getOpcode() == Hexagon::BUNDLE);
-    assert(HexagonMCInstrInfo::bundleSize(MCB) <= HEXAGON_PACKET_SIZE);
-    assert(HexagonMCInstrInfo::bundleSize(MCB) > 0);
+                                           const MCSubtargetInfo &STI) {
+  assert(MCB.getOpcode() == Hexagon::BUNDLE);
+  assert(HexagonMCInstrInfo::bundleSize(MCB) <= HEXAGON_PACKET_SIZE);
+  assert(HexagonMCInstrInfo::bundleSize(MCB) > 0);
 
-    // At this point, MCB is a bundle
-    // Iterate through the bundle and assign addends for the instructions
-    for (auto const &I : HexagonMCInstrInfo::bundleInstructions(MCB)) {
-        MCInst *MCI = const_cast<MCInst *>(I.getInst());
-        EmitSymbol(*MCI);
-    }
+  // At this point, MCB is a bundle
+  // Iterate through the bundle and assign addends for the instructions
+  for (auto const &I : HexagonMCInstrInfo::bundleInstructions(MCB)) {
+    MCInst *MCI = const_cast<MCInst *>(I.getInst());
+    EmitSymbol(*MCI);
+  }
 
-    MCObjectStreamer::emitInstruction(MCB, STI);
+  MCObjectStreamer::emitInstruction(MCB, STI);
 }
 
 void HexagonMCELFStreamer::EmitSymbol(const MCInst &Inst) {
-    // Scan for values.
-    for (unsigned i = Inst.getNumOperands(); i--;)
-        if (Inst.getOperand(i).isExpr())
-            visitUsedExpr(*Inst.getOperand(i).getExpr());
+  // Scan for values.
+  for (unsigned i = Inst.getNumOperands(); i--;)
+    if (Inst.getOperand(i).isExpr())
+      visitUsedExpr(*Inst.getOperand(i).getExpr());
 }
 
 // EmitCommonSymbol and EmitLocalCommonSymbol are extended versions of the
 // functions found in MCELFStreamer.cpp taking AccessSize as an additional
 // parameter.
 void HexagonMCELFStreamer::HexagonMCEmitCommonSymbol(MCSymbol *Symbol,
-        uint64_t Size,
-        unsigned ByteAlignment,
-        unsigned AccessSize) {
-    getAssembler().registerSymbol(*Symbol);
-    StringRef sbss[4] = {".sbss.1", ".sbss.2", ".sbss.4", ".sbss.8"};
+                                                     uint64_t Size,
+                                                     unsigned ByteAlignment,
+                                                     unsigned AccessSize) {
+  getAssembler().registerSymbol(*Symbol);
+  StringRef sbss[4] = {".sbss.1", ".sbss.2", ".sbss.4", ".sbss.8"};
 
-    auto ELFSymbol = cast<MCSymbolELF>(Symbol);
-    if (!ELFSymbol->isBindingSet()) {
-        ELFSymbol->setBinding(ELF::STB_GLOBAL);
-        ELFSymbol->setExternal(true);
-    }
+  auto ELFSymbol = cast<MCSymbolELF>(Symbol);
+  if (!ELFSymbol->isBindingSet()) {
+    ELFSymbol->setBinding(ELF::STB_GLOBAL);
+    ELFSymbol->setExternal(true);
+  }
 
-    ELFSymbol->setType(ELF::STT_OBJECT);
+  ELFSymbol->setType(ELF::STT_OBJECT);
 
-    if (ELFSymbol->getBinding() == ELF::STB_LOCAL) {
-        StringRef SectionName =
-            ((AccessSize == 0) || (Size == 0) || (Size > GPSize))
+  if (ELFSymbol->getBinding() == ELF::STB_LOCAL) {
+    StringRef SectionName =
+        ((AccessSize == 0) || (Size == 0) || (Size > GPSize))
             ? ".bss"
             : sbss[(Log2_64(AccessSize))];
-        MCSection &Section = *getAssembler().getContext().getELFSection(
-                                 SectionName, ELF::SHT_NOBITS, ELF::SHF_WRITE | ELF::SHF_ALLOC);
-        MCSectionSubPair P = getCurrentSection();
-        SwitchSection(&Section);
+    MCSection &Section = *getAssembler().getContext().getELFSection(
+        SectionName, ELF::SHT_NOBITS, ELF::SHF_WRITE | ELF::SHF_ALLOC);
+    MCSectionSubPair P = getCurrentSection();
+    SwitchSection(&Section);
 
-        if (ELFSymbol->isUndefined()) {
-            emitValueToAlignment(ByteAlignment, 0, 1, 0);
-            emitLabel(Symbol);
-            emitZeros(Size);
-        }
-
-        // Update the maximum alignment of the section if necessary.
-        if (Align(ByteAlignment) > Section.getAlignment())
-            Section.setAlignment(Align(ByteAlignment));
-
-        SwitchSection(P.first, P.second);
-    } else {
-        if (ELFSymbol->declareCommon(Size, ByteAlignment))
-            report_fatal_error("Symbol: " + Symbol->getName() +
-                               " redeclared as different type");
-        if ((AccessSize) && (Size <= GPSize)) {
-            uint64_t SectionIndex =
-                (AccessSize <= GPSize)
-                ? ELF::SHN_HEXAGON_SCOMMON + (Log2_64(AccessSize) + 1)
-                : (unsigned)ELF::SHN_HEXAGON_SCOMMON;
-            ELFSymbol->setIndex(SectionIndex);
-        }
+    if (ELFSymbol->isUndefined()) {
+      emitValueToAlignment(ByteAlignment, 0, 1, 0);
+      emitLabel(Symbol);
+      emitZeros(Size);
     }
 
-    ELFSymbol->setSize(MCConstantExpr::create(Size, getContext()));
+    // Update the maximum alignment of the section if necessary.
+    if (Align(ByteAlignment) > Section.getAlignment())
+      Section.setAlignment(Align(ByteAlignment));
+
+    SwitchSection(P.first, P.second);
+  } else {
+    if (ELFSymbol->declareCommon(Size, ByteAlignment))
+      report_fatal_error("Symbol: " + Symbol->getName() +
+                         " redeclared as different type");
+    if ((AccessSize) && (Size <= GPSize)) {
+      uint64_t SectionIndex =
+          (AccessSize <= GPSize)
+              ? ELF::SHN_HEXAGON_SCOMMON + (Log2_64(AccessSize) + 1)
+              : (unsigned)ELF::SHN_HEXAGON_SCOMMON;
+      ELFSymbol->setIndex(SectionIndex);
+    }
+  }
+
+  ELFSymbol->setSize(MCConstantExpr::create(Size, getContext()));
 }
 
-void HexagonMCELFStreamer::HexagonMCEmitLocalCommonSymbol(MCSymbol *Symbol,
-        uint64_t Size,
-        unsigned ByteAlignment,
-        unsigned AccessSize) {
-    getAssembler().registerSymbol(*Symbol);
-    auto ELFSymbol = cast<MCSymbolELF>(Symbol);
-    ELFSymbol->setBinding(ELF::STB_LOCAL);
-    ELFSymbol->setExternal(false);
-    HexagonMCEmitCommonSymbol(Symbol, Size, ByteAlignment, AccessSize);
+void HexagonMCELFStreamer::HexagonMCEmitLocalCommonSymbol(
+    MCSymbol *Symbol, uint64_t Size, unsigned ByteAlignment,
+    unsigned AccessSize) {
+  getAssembler().registerSymbol(*Symbol);
+  auto ELFSymbol = cast<MCSymbolELF>(Symbol);
+  ELFSymbol->setBinding(ELF::STB_LOCAL);
+  ELFSymbol->setExternal(false);
+  HexagonMCEmitCommonSymbol(Symbol, Size, ByteAlignment, AccessSize);
 }
-
 
 namespace llvm {
 MCStreamer *createHexagonELFStreamer(Triple const &TT, MCContext &Context,
                                      std::unique_ptr<MCAsmBackend> MAB,
                                      std::unique_ptr<MCObjectWriter> OW,
                                      std::unique_ptr<MCCodeEmitter> CE) {
-    return new HexagonMCELFStreamer(Context, std::move(MAB), std::move(OW),
-                                    std::move(CE));
+  return new HexagonMCELFStreamer(Context, std::move(MAB), std::move(OW),
+                                  std::move(CE));
 }
 
 } // end namespace llvm

@@ -13,12 +13,12 @@
 namespace llvm {
 
 enum CombineLevel {
-    BeforeLegalizeTypes,
-    AfterLegalizeTypes,
-    AfterLegalizeVectorOps,
-    AfterLegalizeDAG
+  BeforeLegalizeTypes,
+  AfterLegalizeTypes,
+  AfterLegalizeVectorOps,
+  AfterLegalizeDAG
 };
 
-} // end llvm namespace
+} // namespace llvm
 
 #endif

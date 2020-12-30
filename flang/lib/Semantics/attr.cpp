@@ -14,43 +14,43 @@
 namespace Fortran::semantics {
 
 void Attrs::CheckValid(const Attrs &allowed) const {
-    if (!allowed.HasAll(*this)) {
-        common::die("invalid attribute");
-    }
+  if (!allowed.HasAll(*this)) {
+    common::die("invalid attribute");
+  }
 }
 
 std::string AttrToString(Attr attr) {
-    switch (attr) {
-    case Attr::BIND_C:
-        return "BIND(C)";
-    case Attr::INTENT_IN:
-        return "INTENT(IN)";
-    case Attr::INTENT_INOUT:
-        return "INTENT(INOUT)";
-    case Attr::INTENT_OUT:
-        return "INTENT(OUT)";
-    default:
-        return EnumToString(attr);
-    }
+  switch (attr) {
+  case Attr::BIND_C:
+    return "BIND(C)";
+  case Attr::INTENT_IN:
+    return "INTENT(IN)";
+  case Attr::INTENT_INOUT:
+    return "INTENT(INOUT)";
+  case Attr::INTENT_OUT:
+    return "INTENT(OUT)";
+  default:
+    return EnumToString(attr);
+  }
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &o, Attr attr) {
-    return o << AttrToString(attr);
+  return o << AttrToString(attr);
 }
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &o, const Attrs &attrs) {
-    std::size_t n{attrs.count()};
-    std::size_t seen{0};
-    for (std::size_t j{0}; seen < n; ++j) {
-        Attr attr{static_cast<Attr>(j)};
-        if (attrs.test(attr)) {
-            if (seen > 0) {
-                o << ", ";
-            }
-            o << attr;
-            ++seen;
-        }
+  std::size_t n{attrs.count()};
+  std::size_t seen{0};
+  for (std::size_t j{0}; seen < n; ++j) {
+    Attr attr{static_cast<Attr>(j)};
+    if (attrs.test(attr)) {
+      if (seen > 0) {
+        o << ", ";
+      }
+      o << attr;
+      ++seen;
     }
-    return o;
+  }
+  return o;
 }
 } // namespace Fortran::semantics

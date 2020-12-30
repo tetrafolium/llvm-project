@@ -21,73 +21,63 @@ namespace lldb_private {
 
 class OptionValueEnumeration : public OptionValue {
 public:
-    typedef int64_t enum_type;
-    struct EnumeratorInfo {
-        enum_type value;
-        const char *description;
-    };
-    typedef UniqueCStringMap<EnumeratorInfo> EnumerationMap;
-    typedef EnumerationMap::Entry EnumerationMapEntry;
+  typedef int64_t enum_type;
+  struct EnumeratorInfo {
+    enum_type value;
+    const char *description;
+  };
+  typedef UniqueCStringMap<EnumeratorInfo> EnumerationMap;
+  typedef EnumerationMap::Entry EnumerationMapEntry;
 
-    OptionValueEnumeration(const OptionEnumValues &enumerators, enum_type value);
+  OptionValueEnumeration(const OptionEnumValues &enumerators, enum_type value);
 
-    ~OptionValueEnumeration() override;
+  ~OptionValueEnumeration() override;
 
-    // Virtual subclass pure virtual overrides
+  // Virtual subclass pure virtual overrides
 
-    OptionValue::Type GetType() const override {
-        return eTypeEnum;
-    }
+  OptionValue::Type GetType() const override { return eTypeEnum; }
 
-    void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
-                   uint32_t dump_mask) override;
+  void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
+                 uint32_t dump_mask) override;
 
-    Status
-    SetValueFromString(llvm::StringRef value,
-                       VarSetOperationType op = eVarSetOperationAssign) override;
-    Status
-    SetValueFromString(const char *,
-                       VarSetOperationType = eVarSetOperationAssign) = delete;
+  Status
+  SetValueFromString(llvm::StringRef value,
+                     VarSetOperationType op = eVarSetOperationAssign) override;
+  Status
+  SetValueFromString(const char *,
+                     VarSetOperationType = eVarSetOperationAssign) = delete;
 
-    void Clear() override {
-        m_current_value = m_default_value;
-        m_value_was_set = false;
-    }
+  void Clear() override {
+    m_current_value = m_default_value;
+    m_value_was_set = false;
+  }
 
-    lldb::OptionValueSP DeepCopy() const override;
+  lldb::OptionValueSP DeepCopy() const override;
 
-    void AutoComplete(CommandInterpreter &interpreter,
-                      CompletionRequest &request) override;
+  void AutoComplete(CommandInterpreter &interpreter,
+                    CompletionRequest &request) override;
 
-    // Subclass specific functions
+  // Subclass specific functions
 
-    enum_type operator=(enum_type value) {
-        m_current_value = value;
-        return m_current_value;
-    }
+  enum_type operator=(enum_type value) {
+    m_current_value = value;
+    return m_current_value;
+  }
 
-    enum_type GetCurrentValue() const {
-        return m_current_value;
-    }
+  enum_type GetCurrentValue() const { return m_current_value; }
 
-    enum_type GetDefaultValue() const {
-        return m_default_value;
-    }
+  enum_type GetDefaultValue() const { return m_default_value; }
 
-    void SetCurrentValue(enum_type value) {
-        m_current_value = value;
-    }
+  void SetCurrentValue(enum_type value) { m_current_value = value; }
 
-    void SetDefaultValue(enum_type value) {
-        m_default_value = value;
-    }
+  void SetDefaultValue(enum_type value) { m_default_value = value; }
 
 protected:
-    void SetEnumerations(const OptionEnumValues &enumerators);
+  void SetEnumerations(const OptionEnumValues &enumerators);
 
-    enum_type m_current_value;
-    enum_type m_default_value;
-    EnumerationMap m_enumerations;
+  enum_type m_current_value;
+  enum_type m_default_value;
+  EnumerationMap m_enumerations;
 };
 
 } // namespace lldb_private

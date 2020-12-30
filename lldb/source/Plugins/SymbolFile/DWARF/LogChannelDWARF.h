@@ -21,19 +21,15 @@
 
 namespace lldb_private {
 class LogChannelDWARF {
-    static Log::Channel g_channel;
+  static Log::Channel g_channel;
 
 public:
-    static void Initialize();
-    static void Terminate();
+  static void Initialize();
+  static void Terminate();
 
-    static Log *GetLogIfAll(uint32_t mask) {
-        return g_channel.GetLogIfAll(mask);
-    }
-    static Log *GetLogIfAny(uint32_t mask) {
-        return g_channel.GetLogIfAny(mask);
-    }
+  static Log *GetLogIfAll(uint32_t mask) { return g_channel.GetLogIfAll(mask); }
+  static Log *GetLogIfAny(uint32_t mask) { return g_channel.GetLogIfAny(mask); }
 };
-}
+} // namespace lldb_private
 
 #endif // LLDB_SOURCE_PLUGINS_SYMBOLFILE_DWARF_LOGCHANNELDWARF_H

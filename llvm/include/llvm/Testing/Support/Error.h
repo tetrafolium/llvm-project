@@ -21,142 +21,141 @@ namespace detail {
 ErrorHolder TakeError(Error Err);
 
 template <typename T> ExpectedHolder<T> TakeExpected(Expected<T> &Exp) {
-    return {TakeError(Exp.takeError()), Exp};
+  return {TakeError(Exp.takeError()), Exp};
 }
 
 template <typename T> ExpectedHolder<T> TakeExpected(Expected<T> &&Exp) {
-    return TakeExpected(Exp);
+  return TakeExpected(Exp);
 }
 
 template <typename T>
 class ValueMatchesMono
     : public testing::MatcherInterface<const ExpectedHolder<T> &> {
 public:
-    explicit ValueMatchesMono(const testing::Matcher<T> &Matcher)
-        : Matcher(Matcher) {}
+  explicit ValueMatchesMono(const testing::Matcher<T> &Matcher)
+      : Matcher(Matcher) {}
 
-    bool MatchAndExplain(const ExpectedHolder<T> &Holder,
-                         testing::MatchResultListener *listener) const override {
-        if (!Holder.Success())
-            return false;
+  bool MatchAndExplain(const ExpectedHolder<T> &Holder,
+                       testing::MatchResultListener *listener) const override {
+    if (!Holder.Success())
+      return false;
 
-        bool result = Matcher.MatchAndExplain(*Holder.Exp, listener);
+    bool result = Matcher.MatchAndExplain(*Holder.Exp, listener);
 
-        if (result)
-            return result;
-        *listener << "(";
-        Matcher.DescribeNegationTo(listener->stream());
-        *listener << ")";
-        return result;
-    }
+    if (result)
+      return result;
+    *listener << "(";
+    Matcher.DescribeNegationTo(listener->stream());
+    *listener << ")";
+    return result;
+  }
 
-    void DescribeTo(std::ostream *OS) const override {
-        *OS << "succeeded with value (";
-        Matcher.DescribeTo(OS);
-        *OS << ")";
-    }
+  void DescribeTo(std::ostream *OS) const override {
+    *OS << "succeeded with value (";
+    Matcher.DescribeTo(OS);
+    *OS << ")";
+  }
 
-    void DescribeNegationTo(std::ostream *OS) const override {
-        *OS << "did not succeed or value (";
-        Matcher.DescribeNegationTo(OS);
-        *OS << ")";
-    }
+  void DescribeNegationTo(std::ostream *OS) const override {
+    *OS << "did not succeed or value (";
+    Matcher.DescribeNegationTo(OS);
+    *OS << ")";
+  }
 
 private:
-    testing::Matcher<T> Matcher;
+  testing::Matcher<T> Matcher;
 };
 
-template<typename M>
-class ValueMatchesPoly {
+template <typename M> class ValueMatchesPoly {
 public:
-    explicit ValueMatchesPoly(const M &Matcher) : Matcher(Matcher) {}
+  explicit ValueMatchesPoly(const M &Matcher) : Matcher(Matcher) {}
 
-    template <typename T>
-    operator testing::Matcher<const ExpectedHolder<T> &>() const {
-        return MakeMatcher(
-                   new ValueMatchesMono<T>(testing::SafeMatcherCast<T>(Matcher)));
-    }
+  template <typename T>
+  operator testing::Matcher<const ExpectedHolder<T> &>() const {
+    return MakeMatcher(
+        new ValueMatchesMono<T>(testing::SafeMatcherCast<T>(Matcher)));
+  }
 
 private:
-    M Matcher;
+  M Matcher;
 };
 
 template <typename InfoT>
 class ErrorMatchesMono : public testing::MatcherInterface<const ErrorHolder &> {
 public:
-    explicit ErrorMatchesMono(Optional<testing::Matcher<InfoT &>> Matcher)
-        : Matcher(std::move(Matcher)) {}
+  explicit ErrorMatchesMono(Optional<testing::Matcher<InfoT &>> Matcher)
+      : Matcher(std::move(Matcher)) {}
 
-    bool MatchAndExplain(const ErrorHolder &Holder,
-                         testing::MatchResultListener *listener) const override {
-        if (Holder.Success())
-            return false;
+  bool MatchAndExplain(const ErrorHolder &Holder,
+                       testing::MatchResultListener *listener) const override {
+    if (Holder.Success())
+      return false;
 
-        if (Holder.Infos.size() > 1) {
-            *listener << "multiple errors";
-            return false;
-        }
-
-        auto &Info = *Holder.Infos[0];
-        if (!Info.isA<InfoT>()) {
-            *listener << "Error was not of given type";
-            return false;
-        }
-
-        if (!Matcher)
-            return true;
-
-        return Matcher->MatchAndExplain(static_cast<InfoT &>(Info), listener);
+    if (Holder.Infos.size() > 1) {
+      *listener << "multiple errors";
+      return false;
     }
 
-    void DescribeTo(std::ostream *OS) const override {
-        *OS << "failed with Error of given type";
-        if (Matcher) {
-            *OS << " and the error ";
-            Matcher->DescribeTo(OS);
-        }
+    auto &Info = *Holder.Infos[0];
+    if (!Info.isA<InfoT>()) {
+      *listener << "Error was not of given type";
+      return false;
     }
 
-    void DescribeNegationTo(std::ostream *OS) const override {
-        *OS << "succeeded or did not fail with the error of given type";
-        if (Matcher) {
-            *OS << " or the error ";
-            Matcher->DescribeNegationTo(OS);
-        }
+    if (!Matcher)
+      return true;
+
+    return Matcher->MatchAndExplain(static_cast<InfoT &>(Info), listener);
+  }
+
+  void DescribeTo(std::ostream *OS) const override {
+    *OS << "failed with Error of given type";
+    if (Matcher) {
+      *OS << " and the error ";
+      Matcher->DescribeTo(OS);
     }
+  }
+
+  void DescribeNegationTo(std::ostream *OS) const override {
+    *OS << "succeeded or did not fail with the error of given type";
+    if (Matcher) {
+      *OS << " or the error ";
+      Matcher->DescribeNegationTo(OS);
+    }
+  }
 
 private:
-    Optional<testing::Matcher<InfoT &>> Matcher;
+  Optional<testing::Matcher<InfoT &>> Matcher;
 };
 
 class ErrorMessageMatches
     : public testing::MatcherInterface<const ErrorHolder &> {
 public:
-    explicit ErrorMessageMatches(
-        testing::Matcher<std::vector<std::string>> Matcher)
-        : Matcher(std::move(Matcher)) {}
+  explicit ErrorMessageMatches(
+      testing::Matcher<std::vector<std::string>> Matcher)
+      : Matcher(std::move(Matcher)) {}
 
-    bool MatchAndExplain(const ErrorHolder &Holder,
-                         testing::MatchResultListener *listener) const override {
-        std::vector<std::string> Messages;
-        for (const std::shared_ptr<ErrorInfoBase> &Info: Holder.Infos)
-            Messages.push_back(Info->message());
+  bool MatchAndExplain(const ErrorHolder &Holder,
+                       testing::MatchResultListener *listener) const override {
+    std::vector<std::string> Messages;
+    for (const std::shared_ptr<ErrorInfoBase> &Info : Holder.Infos)
+      Messages.push_back(Info->message());
 
-        return Matcher.MatchAndExplain(Messages, listener);
-    }
+    return Matcher.MatchAndExplain(Messages, listener);
+  }
 
-    void DescribeTo(std::ostream *OS) const override {
-        *OS << "failed with Error whose message ";
-        Matcher.DescribeTo(OS);
-    }
+  void DescribeTo(std::ostream *OS) const override {
+    *OS << "failed with Error whose message ";
+    Matcher.DescribeTo(OS);
+  }
 
-    void DescribeNegationTo(std::ostream *OS) const override {
-        *OS << "failed with an Error whose message ";
-        Matcher.DescribeNegationTo(OS);
-    }
+  void DescribeNegationTo(std::ostream *OS) const override {
+    *OS << "failed with an Error whose message ";
+    Matcher.DescribeNegationTo(OS);
+  }
 
 private:
-    testing::Matcher<std::vector<std::string>> Matcher;
+  testing::Matcher<std::vector<std::string>> Matcher;
 };
 } // namespace detail
 
@@ -170,39 +169,35 @@ private:
 #define ASSERT_THAT_EXPECTED(Err, Matcher)                                     \
   ASSERT_THAT(llvm::detail::TakeExpected(Err), Matcher)
 
-MATCHER(Succeeded, "") {
-    return arg.Success();
-}
-MATCHER(Failed, "") {
-    return !arg.Success();
-}
+MATCHER(Succeeded, "") { return arg.Success(); }
+MATCHER(Failed, "") { return !arg.Success(); }
 
 template <typename InfoT>
 testing::Matcher<const detail::ErrorHolder &> Failed() {
-    return MakeMatcher(new detail::ErrorMatchesMono<InfoT>(None));
+  return MakeMatcher(new detail::ErrorMatchesMono<InfoT>(None));
 }
 
 template <typename InfoT, typename M>
 testing::Matcher<const detail::ErrorHolder &> Failed(M Matcher) {
-    return MakeMatcher(new detail::ErrorMatchesMono<InfoT>(
-                           testing::SafeMatcherCast<InfoT &>(Matcher)));
+  return MakeMatcher(new detail::ErrorMatchesMono<InfoT>(
+      testing::SafeMatcherCast<InfoT &>(Matcher)));
 }
 
 template <typename... M>
 testing::Matcher<const detail::ErrorHolder &> FailedWithMessage(M... Matcher) {
-    static_assert(sizeof...(M) > 0, "");
-    return MakeMatcher(
-               new detail::ErrorMessageMatches(testing::ElementsAre(Matcher...)));
+  static_assert(sizeof...(M) > 0, "");
+  return MakeMatcher(
+      new detail::ErrorMessageMatches(testing::ElementsAre(Matcher...)));
 }
 
 template <typename M>
-testing::Matcher<const detail::ErrorHolder &> FailedWithMessageArray(M Matcher) {
-    return MakeMatcher(new detail::ErrorMessageMatches(Matcher));
+testing::Matcher<const detail::ErrorHolder &>
+FailedWithMessageArray(M Matcher) {
+  return MakeMatcher(new detail::ErrorMessageMatches(Matcher));
 }
 
-template <typename M>
-detail::ValueMatchesPoly<M> HasValue(M Matcher) {
-    return detail::ValueMatchesPoly<M>(Matcher);
+template <typename M> detail::ValueMatchesPoly<M> HasValue(M Matcher) {
+  return detail::ValueMatchesPoly<M>(Matcher);
 }
 
 } // namespace llvm

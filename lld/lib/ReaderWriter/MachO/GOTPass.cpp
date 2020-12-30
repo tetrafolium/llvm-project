@@ -50,133 +50,125 @@ namespace mach_o {
 //
 class GOTEntryAtom : public SimpleDefinedAtom {
 public:
-    GOTEntryAtom(const File &file, bool is64, StringRef name)
-        : SimpleDefinedAtom(file), _is64(is64), _name(name) { }
+  GOTEntryAtom(const File &file, bool is64, StringRef name)
+      : SimpleDefinedAtom(file), _is64(is64), _name(name) {}
 
-    ~GOTEntryAtom() override = default;
+  ~GOTEntryAtom() override = default;
 
-    ContentType contentType() const override {
-        return DefinedAtom::typeGOT;
-    }
+  ContentType contentType() const override { return DefinedAtom::typeGOT; }
 
-    Alignment alignment() const override {
-        return _is64 ? 8 : 4;
-    }
+  Alignment alignment() const override { return _is64 ? 8 : 4; }
 
-    uint64_t size() const override {
-        return _is64 ? 8 : 4;
-    }
+  uint64_t size() const override { return _is64 ? 8 : 4; }
 
-    ContentPermissions permissions() const override {
-        return DefinedAtom::permRW_;
-    }
+  ContentPermissions permissions() const override {
+    return DefinedAtom::permRW_;
+  }
 
-    ArrayRef<uint8_t> rawContent() const override {
-        static const uint8_t zeros[] =
-        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        return llvm::makeArrayRef(zeros, size());
-    }
+  ArrayRef<uint8_t> rawContent() const override {
+    static const uint8_t zeros[] = {0x00, 0x00, 0x00, 0x00,
+                                    0x00, 0x00, 0x00, 0x00};
+    return llvm::makeArrayRef(zeros, size());
+  }
 
-    StringRef slotName() const {
-        return _name;
-    }
+  StringRef slotName() const { return _name; }
 
 private:
-    const bool _is64;
-    StringRef _name;
+  const bool _is64;
+  StringRef _name;
 };
 
 /// Pass for instantiating and optimizing GOT slots.
 ///
 class GOTPass : public Pass {
 public:
-    GOTPass(const MachOLinkingContext &context)
-        : _ctx(context), _archHandler(_ctx.archHandler()),
-          _file(*_ctx.make_file<MachOFile>("<mach-o GOT Pass>")) {
-        _file.setOrdinal(_ctx.getNextOrdinalAndIncrement());
-    }
+  GOTPass(const MachOLinkingContext &context)
+      : _ctx(context), _archHandler(_ctx.archHandler()),
+        _file(*_ctx.make_file<MachOFile>("<mach-o GOT Pass>")) {
+    _file.setOrdinal(_ctx.getNextOrdinalAndIncrement());
+  }
 
 private:
-    llvm::Error perform(SimpleFile &mergedFile) override {
-        // Scan all references in all atoms.
-        for (const DefinedAtom *atom : mergedFile.defined()) {
-            for (const Reference *ref : *atom) {
-                // Look at instructions accessing the GOT.
-                bool canBypassGOT;
-                if (!_archHandler.isGOTAccess(*ref, canBypassGOT))
-                    continue;
-                const Atom *target = ref->target();
-                assert(target != nullptr);
+  llvm::Error perform(SimpleFile &mergedFile) override {
+    // Scan all references in all atoms.
+    for (const DefinedAtom *atom : mergedFile.defined()) {
+      for (const Reference *ref : *atom) {
+        // Look at instructions accessing the GOT.
+        bool canBypassGOT;
+        if (!_archHandler.isGOTAccess(*ref, canBypassGOT))
+          continue;
+        const Atom *target = ref->target();
+        assert(target != nullptr);
 
-                if (!shouldReplaceTargetWithGOTAtom(target, canBypassGOT)) {
-                    // Update reference kind to reflect that target is a direct access.
-                    _archHandler.updateReferenceToGOT(ref, false);
-                } else {
-                    // Replace the target with a reference to a GOT entry.
-                    const DefinedAtom *gotEntry = makeGOTEntry(target);
-                    const_cast<Reference *>(ref)->setTarget(gotEntry);
-                    // Update reference kind to reflect that target is now a GOT entry.
-                    _archHandler.updateReferenceToGOT(ref, true);
-                }
-            }
+        if (!shouldReplaceTargetWithGOTAtom(target, canBypassGOT)) {
+          // Update reference kind to reflect that target is a direct access.
+          _archHandler.updateReferenceToGOT(ref, false);
+        } else {
+          // Replace the target with a reference to a GOT entry.
+          const DefinedAtom *gotEntry = makeGOTEntry(target);
+          const_cast<Reference *>(ref)->setTarget(gotEntry);
+          // Update reference kind to reflect that target is now a GOT entry.
+          _archHandler.updateReferenceToGOT(ref, true);
         }
-
-        // Sort and add all created GOT Atoms to master file
-        std::vector<const GOTEntryAtom *> entries;
-        entries.reserve(_targetToGOT.size());
-        for (auto &it : _targetToGOT)
-            entries.push_back(it.second);
-        std::sort(entries.begin(), entries.end(),
-        [](const GOTEntryAtom *left, const GOTEntryAtom *right) {
-            return (left->slotName().compare(right->slotName()) < 0);
-        });
-        for (const GOTEntryAtom *slot : entries)
-            mergedFile.addAtom(*slot);
-
-        return llvm::Error::success();
+      }
     }
 
-    bool shouldReplaceTargetWithGOTAtom(const Atom *target, bool canBypassGOT) {
-        // Accesses to shared library symbols must go through GOT.
-        if (isa<SharedLibraryAtom>(target))
-            return true;
-        // Accesses to interposable symbols in same linkage unit must also go
-        // through GOT.
-        const DefinedAtom *defTarget = dyn_cast<DefinedAtom>(target);
-        if (defTarget != nullptr &&
-                defTarget->interposable() != DefinedAtom::interposeNo) {
-            assert(defTarget->scope() != DefinedAtom::scopeTranslationUnit);
-            return true;
-        }
-        // Target does not require indirection.  So, if instruction allows GOT to be
-        // by-passed, do that optimization and don't create GOT entry.
-        return !canBypassGOT;
-    }
+    // Sort and add all created GOT Atoms to master file
+    std::vector<const GOTEntryAtom *> entries;
+    entries.reserve(_targetToGOT.size());
+    for (auto &it : _targetToGOT)
+      entries.push_back(it.second);
+    std::sort(entries.begin(), entries.end(),
+              [](const GOTEntryAtom *left, const GOTEntryAtom *right) {
+                return (left->slotName().compare(right->slotName()) < 0);
+              });
+    for (const GOTEntryAtom *slot : entries)
+      mergedFile.addAtom(*slot);
 
-    const DefinedAtom *makeGOTEntry(const Atom *target) {
-        auto pos = _targetToGOT.find(target);
-        if (pos == _targetToGOT.end()) {
-            auto *gotEntry = new (_file.allocator())
-            GOTEntryAtom(_file, _ctx.is64Bit(), target->name());
-            _targetToGOT[target] = gotEntry;
-            const ArchHandler::ReferenceInfo &nlInfo = _archHandler.stubInfo().
-                    nonLazyPointerReferenceToBinder;
-            gotEntry->addReference(Reference::KindNamespace::mach_o, nlInfo.arch,
-                                   nlInfo.kind, 0, target, 0);
-            return gotEntry;
-        }
-        return pos->second;
-    }
+    return llvm::Error::success();
+  }
 
-    const MachOLinkingContext &_ctx;
-    mach_o::ArchHandler                             &_archHandler;
-    MachOFile                                       &_file;
-    llvm::DenseMap<const Atom*, const GOTEntryAtom*> _targetToGOT;
+  bool shouldReplaceTargetWithGOTAtom(const Atom *target, bool canBypassGOT) {
+    // Accesses to shared library symbols must go through GOT.
+    if (isa<SharedLibraryAtom>(target))
+      return true;
+    // Accesses to interposable symbols in same linkage unit must also go
+    // through GOT.
+    const DefinedAtom *defTarget = dyn_cast<DefinedAtom>(target);
+    if (defTarget != nullptr &&
+        defTarget->interposable() != DefinedAtom::interposeNo) {
+      assert(defTarget->scope() != DefinedAtom::scopeTranslationUnit);
+      return true;
+    }
+    // Target does not require indirection.  So, if instruction allows GOT to be
+    // by-passed, do that optimization and don't create GOT entry.
+    return !canBypassGOT;
+  }
+
+  const DefinedAtom *makeGOTEntry(const Atom *target) {
+    auto pos = _targetToGOT.find(target);
+    if (pos == _targetToGOT.end()) {
+      auto *gotEntry = new (_file.allocator())
+          GOTEntryAtom(_file, _ctx.is64Bit(), target->name());
+      _targetToGOT[target] = gotEntry;
+      const ArchHandler::ReferenceInfo &nlInfo =
+          _archHandler.stubInfo().nonLazyPointerReferenceToBinder;
+      gotEntry->addReference(Reference::KindNamespace::mach_o, nlInfo.arch,
+                             nlInfo.kind, 0, target, 0);
+      return gotEntry;
+    }
+    return pos->second;
+  }
+
+  const MachOLinkingContext &_ctx;
+  mach_o::ArchHandler &_archHandler;
+  MachOFile &_file;
+  llvm::DenseMap<const Atom *, const GOTEntryAtom *> _targetToGOT;
 };
 
 void addGOTPass(PassManager &pm, const MachOLinkingContext &ctx) {
-    assert(ctx.needsGOTPass());
-    pm.add(std::make_unique<GOTPass>(ctx));
+  assert(ctx.needsGOTPass());
+  pm.add(std::make_unique<GOTPass>(ctx));
 }
 
 } // end namespace mach_o

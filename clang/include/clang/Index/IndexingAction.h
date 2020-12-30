@@ -62,7 +62,7 @@ void indexTopLevelDecls(ASTContext &Ctx, Preprocessor &PP,
 /// Creates a PPCallbacks that indexes macros and feeds macros to \p Consumer.
 /// The caller is responsible for calling `Consumer.setPreprocessor()`.
 std::unique_ptr<PPCallbacks> indexMacrosCallback(IndexDataConsumer &Consumer,
-        IndexingOptions Opts);
+                                                 IndexingOptions Opts);
 
 /// Recursively indexes all top-level decls in the module.
 void indexModuleFile(serialization::ModuleFile &Mod, ASTReader &Reader,

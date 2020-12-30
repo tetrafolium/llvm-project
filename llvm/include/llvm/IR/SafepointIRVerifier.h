@@ -37,10 +37,10 @@ FunctionPass *createSafepointIRVerifierPass();
 class SafepointIRVerifierPass : public PassInfoMixin<SafepointIRVerifierPass> {
 
 public:
-    explicit SafepointIRVerifierPass() {}
+  explicit SafepointIRVerifierPass() {}
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
-}
+} // namespace llvm
 
 #endif // LLVM_IR_SAFEPOINT_IR_VERIFIER

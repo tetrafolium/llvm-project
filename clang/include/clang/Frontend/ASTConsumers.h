@@ -32,7 +32,7 @@ class TargetOptions;
 // clang could re-parse the output back into the same AST, but the
 // implementation is still incomplete.
 std::unique_ptr<ASTConsumer> CreateASTPrinter(std::unique_ptr<raw_ostream> OS,
-        StringRef FilterString);
+                                              StringRef FilterString);
 
 // AST dumper: dumps the raw AST in human-readable form to the given output
 // stream, or stdout if OS is nullptr.
@@ -50,6 +50,6 @@ std::unique_ptr<ASTConsumer> CreateASTDeclNodeLister();
 // function declarations to stderr.
 std::unique_ptr<ASTConsumer> CreateASTViewer();
 
-} // end clang namespace
+} // namespace clang
 
 #endif

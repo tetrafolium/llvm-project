@@ -61,54 +61,52 @@ namespace yaml {
 /// } // end namespace llvm
 /// \endcode
 class BinaryRef {
-    friend bool operator==(const BinaryRef &LHS, const BinaryRef &RHS);
+  friend bool operator==(const BinaryRef &LHS, const BinaryRef &RHS);
 
-    /// Either raw binary data, or a string of hex bytes (must always
-    /// be an even number of characters).
-    ArrayRef<uint8_t> Data;
+  /// Either raw binary data, or a string of hex bytes (must always
+  /// be an even number of characters).
+  ArrayRef<uint8_t> Data;
 
-    /// Discriminator between the two states of the `Data` member.
-    bool DataIsHexString = true;
+  /// Discriminator between the two states of the `Data` member.
+  bool DataIsHexString = true;
 
 public:
-    BinaryRef() = default;
-    BinaryRef(ArrayRef<uint8_t> Data) : Data(Data), DataIsHexString(false) {}
-    BinaryRef(StringRef Data) : Data(arrayRefFromStringRef(Data)) {}
+  BinaryRef() = default;
+  BinaryRef(ArrayRef<uint8_t> Data) : Data(Data), DataIsHexString(false) {}
+  BinaryRef(StringRef Data) : Data(arrayRefFromStringRef(Data)) {}
 
-    /// The number of bytes that are represented by this BinaryRef.
-    /// This is the number of bytes that writeAsBinary() will write.
-    ArrayRef<uint8_t>::size_type binary_size() const {
-        if (DataIsHexString)
-            return Data.size() / 2;
-        return Data.size();
-    }
+  /// The number of bytes that are represented by this BinaryRef.
+  /// This is the number of bytes that writeAsBinary() will write.
+  ArrayRef<uint8_t>::size_type binary_size() const {
+    if (DataIsHexString)
+      return Data.size() / 2;
+    return Data.size();
+  }
 
-    /// Write the contents (regardless of whether it is binary or a
-    /// hex string) as binary to the given raw_ostream.
-    /// N can be used to specify the maximum number of bytes.
-    void writeAsBinary(raw_ostream &OS, uint64_t N = UINT64_MAX) const;
+  /// Write the contents (regardless of whether it is binary or a
+  /// hex string) as binary to the given raw_ostream.
+  /// N can be used to specify the maximum number of bytes.
+  void writeAsBinary(raw_ostream &OS, uint64_t N = UINT64_MAX) const;
 
-    /// Write the contents (regardless of whether it is binary or a
-    /// hex string) as hex to the given raw_ostream.
-    ///
-    /// For example, a possible output could be `DEADBEEFCAFEBABE`.
-    void writeAsHex(raw_ostream &OS) const;
+  /// Write the contents (regardless of whether it is binary or a
+  /// hex string) as hex to the given raw_ostream.
+  ///
+  /// For example, a possible output could be `DEADBEEFCAFEBABE`.
+  void writeAsHex(raw_ostream &OS) const;
 };
 
 inline bool operator==(const BinaryRef &LHS, const BinaryRef &RHS) {
-    // Special case for default constructed BinaryRef.
-    if (LHS.Data.empty() && RHS.Data.empty())
-        return true;
+  // Special case for default constructed BinaryRef.
+  if (LHS.Data.empty() && RHS.Data.empty())
+    return true;
 
-    return LHS.DataIsHexString == RHS.DataIsHexString && LHS.Data == RHS.Data;
+  return LHS.DataIsHexString == RHS.DataIsHexString && LHS.Data == RHS.Data;
 }
 
 template <> struct ScalarTraits<BinaryRef> {
-    static void output(const BinaryRef &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, BinaryRef &);
-    static QuotingType mustQuote(StringRef S) {
-        return needsQuotes(S);
-    }
+  static void output(const BinaryRef &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, BinaryRef &);
+  static QuotingType mustQuote(StringRef S) { return needsQuotes(S); }
 };
 
 } // end namespace yaml

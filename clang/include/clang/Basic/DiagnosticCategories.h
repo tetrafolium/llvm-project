@@ -17,9 +17,9 @@ enum {
 #include "clang/Basic/DiagnosticGroups.inc"
 #undef CATEGORY
 #undef GET_CATEGORY_TABLE
-    DiagCat_NUM_CATEGORIES
+  DiagCat_NUM_CATEGORIES
 };
-}  // end namespace diag
-}  // end namespace clang
+} // end namespace diag
+} // end namespace clang
 
 #endif

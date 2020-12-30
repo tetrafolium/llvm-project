@@ -2,10 +2,7 @@
 
 #include "../clcmacro.h"
 
-_CLC_OVERLOAD _CLC_DEF float rsqrt(float x)
-{
-    return 1.0f / sqrt(x);
-}
+_CLC_OVERLOAD _CLC_DEF float rsqrt(float x) { return 1.0f / sqrt(x); }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, rsqrt, float);
 
@@ -13,10 +10,7 @@ _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, rsqrt, float);
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-_CLC_OVERLOAD _CLC_DEF double rsqrt(double x)
-{
-    return 1.0 / sqrt(x);
-}
+_CLC_OVERLOAD _CLC_DEF double rsqrt(double x) { return 1.0 / sqrt(x); }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, double, rsqrt, double);
 

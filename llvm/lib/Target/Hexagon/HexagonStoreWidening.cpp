@@ -55,59 +55,56 @@ using namespace llvm;
 namespace llvm {
 
 FunctionPass *createHexagonStoreWidening();
-void initializeHexagonStoreWideningPass(PassRegistry&);
+void initializeHexagonStoreWideningPass(PassRegistry &);
 
 } // end namespace llvm
 
 namespace {
 
 struct HexagonStoreWidening : public MachineFunctionPass {
-    const HexagonInstrInfo      *TII;
-    const HexagonRegisterInfo   *TRI;
-    const MachineRegisterInfo   *MRI;
-    AliasAnalysis               *AA;
-    MachineFunction             *MF;
+  const HexagonInstrInfo *TII;
+  const HexagonRegisterInfo *TRI;
+  const MachineRegisterInfo *MRI;
+  AliasAnalysis *AA;
+  MachineFunction *MF;
 
 public:
-    static char ID;
+  static char ID;
 
-    HexagonStoreWidening() : MachineFunctionPass(ID) {
-        initializeHexagonStoreWideningPass(*PassRegistry::getPassRegistry());
-    }
+  HexagonStoreWidening() : MachineFunctionPass(ID) {
+    initializeHexagonStoreWideningPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    StringRef getPassName() const override {
-        return "Hexagon Store Widening";
-    }
+  StringRef getPassName() const override { return "Hexagon Store Widening"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<AAResultsWrapperPass>();
-        AU.addPreserved<AAResultsWrapperPass>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<AAResultsWrapperPass>();
+    AU.addPreserved<AAResultsWrapperPass>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    static bool handledStoreType(const MachineInstr *MI);
+  static bool handledStoreType(const MachineInstr *MI);
 
 private:
-    static const int MaxWideSize = 4;
+  static const int MaxWideSize = 4;
 
-    using InstrGroup = std::vector<MachineInstr *>;
-    using InstrGroupList = std::vector<InstrGroup>;
+  using InstrGroup = std::vector<MachineInstr *>;
+  using InstrGroupList = std::vector<InstrGroup>;
 
-    bool instrAliased(InstrGroup &Stores, const MachineMemOperand &MMO);
-    bool instrAliased(InstrGroup &Stores, const MachineInstr *MI);
-    void createStoreGroup(MachineInstr *BaseStore, InstrGroup::iterator Begin,
-                          InstrGroup::iterator End, InstrGroup &Group);
-    void createStoreGroups(MachineBasicBlock &MBB,
-                           InstrGroupList &StoreGroups);
-    bool processBasicBlock(MachineBasicBlock &MBB);
-    bool processStoreGroup(InstrGroup &Group);
-    bool selectStores(InstrGroup::iterator Begin, InstrGroup::iterator End,
-                      InstrGroup &OG, unsigned &TotalSize, unsigned MaxSize);
-    bool createWideStores(InstrGroup &OG, InstrGroup &NG, unsigned TotalSize);
-    bool replaceStores(InstrGroup &OG, InstrGroup &NG);
-    bool storesAreAdjacent(const MachineInstr *S1, const MachineInstr *S2);
+  bool instrAliased(InstrGroup &Stores, const MachineMemOperand &MMO);
+  bool instrAliased(InstrGroup &Stores, const MachineInstr *MI);
+  void createStoreGroup(MachineInstr *BaseStore, InstrGroup::iterator Begin,
+                        InstrGroup::iterator End, InstrGroup &Group);
+  void createStoreGroups(MachineBasicBlock &MBB, InstrGroupList &StoreGroups);
+  bool processBasicBlock(MachineBasicBlock &MBB);
+  bool processStoreGroup(InstrGroup &Group);
+  bool selectStores(InstrGroup::iterator Begin, InstrGroup::iterator End,
+                    InstrGroup &OG, unsigned &TotalSize, unsigned MaxSize);
+  bool createWideStores(InstrGroup &OG, InstrGroup &NG, unsigned TotalSize);
+  bool replaceStores(InstrGroup &OG, InstrGroup &NG);
+  bool storesAreAdjacent(const MachineInstr *S1, const MachineInstr *S2);
 };
 
 } // end anonymous namespace
@@ -122,81 +119,81 @@ INITIALIZE_PASS_END(HexagonStoreWidening, "hexagon-widen-stores",
 
 // Some local helper functions...
 static unsigned getBaseAddressRegister(const MachineInstr *MI) {
-    const MachineOperand &MO = MI->getOperand(0);
-    assert(MO.isReg() && "Expecting register operand");
-    return MO.getReg();
+  const MachineOperand &MO = MI->getOperand(0);
+  assert(MO.isReg() && "Expecting register operand");
+  return MO.getReg();
 }
 
 static int64_t getStoreOffset(const MachineInstr *MI) {
-    unsigned OpC = MI->getOpcode();
-    assert(HexagonStoreWidening::handledStoreType(MI) && "Unhandled opcode");
+  unsigned OpC = MI->getOpcode();
+  assert(HexagonStoreWidening::handledStoreType(MI) && "Unhandled opcode");
 
-    switch (OpC) {
-    case Hexagon::S4_storeirb_io:
-    case Hexagon::S4_storeirh_io:
-    case Hexagon::S4_storeiri_io: {
-        const MachineOperand &MO = MI->getOperand(1);
-        assert(MO.isImm() && "Expecting immediate offset");
-        return MO.getImm();
-    }
-    }
-    dbgs() << *MI;
-    llvm_unreachable("Store offset calculation missing for a handled opcode");
-    return 0;
+  switch (OpC) {
+  case Hexagon::S4_storeirb_io:
+  case Hexagon::S4_storeirh_io:
+  case Hexagon::S4_storeiri_io: {
+    const MachineOperand &MO = MI->getOperand(1);
+    assert(MO.isImm() && "Expecting immediate offset");
+    return MO.getImm();
+  }
+  }
+  dbgs() << *MI;
+  llvm_unreachable("Store offset calculation missing for a handled opcode");
+  return 0;
 }
 
 static const MachineMemOperand &getStoreTarget(const MachineInstr *MI) {
-    assert(!MI->memoperands_empty() && "Expecting memory operands");
-    return **MI->memoperands_begin();
+  assert(!MI->memoperands_empty() && "Expecting memory operands");
+  return **MI->memoperands_begin();
 }
 
 // Filtering function: any stores whose opcodes are not "approved" of by
 // this function will not be subjected to widening.
 inline bool HexagonStoreWidening::handledStoreType(const MachineInstr *MI) {
-    // For now, only handle stores of immediate values.
-    // Also, reject stores to stack slots.
-    unsigned Opc = MI->getOpcode();
-    switch (Opc) {
-    case Hexagon::S4_storeirb_io:
-    case Hexagon::S4_storeirh_io:
-    case Hexagon::S4_storeiri_io:
-        // Base address must be a register. (Implement FI later.)
-        return MI->getOperand(0).isReg();
-    default:
-        return false;
-    }
+  // For now, only handle stores of immediate values.
+  // Also, reject stores to stack slots.
+  unsigned Opc = MI->getOpcode();
+  switch (Opc) {
+  case Hexagon::S4_storeirb_io:
+  case Hexagon::S4_storeirh_io:
+  case Hexagon::S4_storeiri_io:
+    // Base address must be a register. (Implement FI later.)
+    return MI->getOperand(0).isReg();
+  default:
+    return false;
+  }
 }
 
 // Check if the machine memory operand MMO is aliased with any of the
 // stores in the store group Stores.
 bool HexagonStoreWidening::instrAliased(InstrGroup &Stores,
                                         const MachineMemOperand &MMO) {
-    if (!MMO.getValue())
-        return true;
+  if (!MMO.getValue())
+    return true;
 
-    MemoryLocation L(MMO.getValue(), MMO.getSize(), MMO.getAAInfo());
+  MemoryLocation L(MMO.getValue(), MMO.getSize(), MMO.getAAInfo());
 
-    for (auto SI : Stores) {
-        const MachineMemOperand &SMO = getStoreTarget(SI);
-        if (!SMO.getValue())
-            return true;
+  for (auto SI : Stores) {
+    const MachineMemOperand &SMO = getStoreTarget(SI);
+    if (!SMO.getValue())
+      return true;
 
-        MemoryLocation SL(SMO.getValue(), SMO.getSize(), SMO.getAAInfo());
-        if (AA->alias(L, SL))
-            return true;
-    }
+    MemoryLocation SL(SMO.getValue(), SMO.getSize(), SMO.getAAInfo());
+    if (AA->alias(L, SL))
+      return true;
+  }
 
-    return false;
+  return false;
 }
 
 // Check if the machine instruction MI accesses any storage aliased with
 // any store in the group Stores.
 bool HexagonStoreWidening::instrAliased(InstrGroup &Stores,
                                         const MachineInstr *MI) {
-    for (auto &I : MI->memoperands())
-        if (instrAliased(Stores, *I))
-            return true;
-    return false;
+  for (auto &I : MI->memoperands())
+    if (instrAliased(Stores, *I))
+      return true;
+  return false;
 }
 
 // Inspect a machine basic block, and generate store groups out of stores
@@ -209,93 +206,95 @@ bool HexagonStoreWidening::instrAliased(InstrGroup &Stores,
 // semantics as the entire group.  In many cases, a single store group
 // may need more than one wide store.
 void HexagonStoreWidening::createStoreGroups(MachineBasicBlock &MBB,
-        InstrGroupList &StoreGroups) {
-    InstrGroup AllInsns;
+                                             InstrGroupList &StoreGroups) {
+  InstrGroup AllInsns;
 
-    // Copy all instruction pointers from the basic block to a temporary
-    // list.  This will allow operating on the list, and modifying its
-    // elements without affecting the basic block.
-    for (auto &I : MBB)
-        AllInsns.push_back(&I);
+  // Copy all instruction pointers from the basic block to a temporary
+  // list.  This will allow operating on the list, and modifying its
+  // elements without affecting the basic block.
+  for (auto &I : MBB)
+    AllInsns.push_back(&I);
 
-    // Traverse all instructions in the AllInsns list, and if we encounter
-    // a store, then try to create a store group starting at that instruction
-    // i.e. a sequence of independent stores that can be widened.
-    for (auto I = AllInsns.begin(), E = AllInsns.end(); I != E; ++I) {
-        MachineInstr *MI = *I;
-        // Skip null pointers (processed instructions).
-        if (!MI || !handledStoreType(MI))
-            continue;
+  // Traverse all instructions in the AllInsns list, and if we encounter
+  // a store, then try to create a store group starting at that instruction
+  // i.e. a sequence of independent stores that can be widened.
+  for (auto I = AllInsns.begin(), E = AllInsns.end(); I != E; ++I) {
+    MachineInstr *MI = *I;
+    // Skip null pointers (processed instructions).
+    if (!MI || !handledStoreType(MI))
+      continue;
 
-        // Found a store.  Try to create a store group.
-        InstrGroup G;
-        createStoreGroup(MI, I+1, E, G);
-        if (G.size() > 1)
-            StoreGroups.push_back(G);
-    }
+    // Found a store.  Try to create a store group.
+    InstrGroup G;
+    createStoreGroup(MI, I + 1, E, G);
+    if (G.size() > 1)
+      StoreGroups.push_back(G);
+  }
 }
 
 // Create a single store group.  The stores need to be independent between
 // themselves, and also there cannot be other instructions between them
 // that could read or modify storage being stored into.
 void HexagonStoreWidening::createStoreGroup(MachineInstr *BaseStore,
-        InstrGroup::iterator Begin, InstrGroup::iterator End, InstrGroup &Group) {
-    assert(handledStoreType(BaseStore) && "Unexpected instruction");
-    unsigned BaseReg = getBaseAddressRegister(BaseStore);
-    InstrGroup Other;
+                                            InstrGroup::iterator Begin,
+                                            InstrGroup::iterator End,
+                                            InstrGroup &Group) {
+  assert(handledStoreType(BaseStore) && "Unexpected instruction");
+  unsigned BaseReg = getBaseAddressRegister(BaseStore);
+  InstrGroup Other;
 
-    Group.push_back(BaseStore);
+  Group.push_back(BaseStore);
 
-    for (auto I = Begin; I != End; ++I) {
-        MachineInstr *MI = *I;
-        if (!MI)
-            continue;
+  for (auto I = Begin; I != End; ++I) {
+    MachineInstr *MI = *I;
+    if (!MI)
+      continue;
 
-        if (handledStoreType(MI)) {
-            // If this store instruction is aliased with anything already in the
-            // group, terminate the group now.
-            if (instrAliased(Group, getStoreTarget(MI)))
-                return;
-            // If this store is aliased to any of the memory instructions we have
-            // seen so far (that are not a part of this group), terminate the group.
-            if (instrAliased(Other, getStoreTarget(MI)))
-                return;
+    if (handledStoreType(MI)) {
+      // If this store instruction is aliased with anything already in the
+      // group, terminate the group now.
+      if (instrAliased(Group, getStoreTarget(MI)))
+        return;
+      // If this store is aliased to any of the memory instructions we have
+      // seen so far (that are not a part of this group), terminate the group.
+      if (instrAliased(Other, getStoreTarget(MI)))
+        return;
 
-            unsigned BR = getBaseAddressRegister(MI);
-            if (BR == BaseReg) {
-                Group.push_back(MI);
-                *I = nullptr;
-                continue;
-            }
-        }
+      unsigned BR = getBaseAddressRegister(MI);
+      if (BR == BaseReg) {
+        Group.push_back(MI);
+        *I = nullptr;
+        continue;
+      }
+    }
 
-        // Assume calls are aliased to everything.
-        if (MI->isCall() || MI->hasUnmodeledSideEffects())
-            return;
+    // Assume calls are aliased to everything.
+    if (MI->isCall() || MI->hasUnmodeledSideEffects())
+      return;
 
-        if (MI->mayLoadOrStore()) {
-            if (MI->hasOrderedMemoryRef() || instrAliased(Group, MI))
-                return;
-            Other.push_back(MI);
-        }
-    } // for
+    if (MI->mayLoadOrStore()) {
+      if (MI->hasOrderedMemoryRef() || instrAliased(Group, MI))
+        return;
+      Other.push_back(MI);
+    }
+  } // for
 }
 
 // Check if store instructions S1 and S2 are adjacent.  More precisely,
 // S2 has to access memory immediately following that accessed by S1.
 bool HexagonStoreWidening::storesAreAdjacent(const MachineInstr *S1,
-        const MachineInstr *S2) {
-    if (!handledStoreType(S1) || !handledStoreType(S2))
-        return false;
+                                             const MachineInstr *S2) {
+  if (!handledStoreType(S1) || !handledStoreType(S2))
+    return false;
 
-    const MachineMemOperand &S1MO = getStoreTarget(S1);
+  const MachineMemOperand &S1MO = getStoreTarget(S1);
 
-    // Currently only handling immediate stores.
-    int Off1 = S1->getOperand(1).getImm();
-    int Off2 = S2->getOperand(1).getImm();
+  // Currently only handling immediate stores.
+  int Off1 = S1->getOperand(1).getImm();
+  int Off2 = S2->getOperand(1).getImm();
 
-    return (Off1 >= 0) ? Off1+S1MO.getSize() == unsigned(Off2)
-           : int(Off1+S1MO.getSize()) == Off2;
+  return (Off1 >= 0) ? Off1 + S1MO.getSize() == unsigned(Off2)
+                     : int(Off1 + S1MO.getSize()) == Off2;
 }
 
 /// Given a sequence of adjacent stores, and a maximum size of a single wide
@@ -305,166 +304,168 @@ bool HexagonStoreWidening::storesAreAdjacent(const MachineInstr *S1,
 /// OG should be empty on entry, and should be left empty if the function
 /// fails.
 bool HexagonStoreWidening::selectStores(InstrGroup::iterator Begin,
-                                        InstrGroup::iterator End, InstrGroup &OG, unsigned &TotalSize,
+                                        InstrGroup::iterator End,
+                                        InstrGroup &OG, unsigned &TotalSize,
                                         unsigned MaxSize) {
-    assert(Begin != End && "No instructions to analyze");
-    assert(OG.empty() && "Old group not empty on entry");
+  assert(Begin != End && "No instructions to analyze");
+  assert(OG.empty() && "Old group not empty on entry");
 
-    if (std::distance(Begin, End) <= 1)
-        return false;
+  if (std::distance(Begin, End) <= 1)
+    return false;
 
-    MachineInstr *FirstMI = *Begin;
-    assert(!FirstMI->memoperands_empty() && "Expecting some memory operands");
-    const MachineMemOperand &FirstMMO = getStoreTarget(FirstMI);
-    unsigned Alignment = FirstMMO.getAlign().value();
-    unsigned SizeAccum = FirstMMO.getSize();
-    unsigned FirstOffset = getStoreOffset(FirstMI);
+  MachineInstr *FirstMI = *Begin;
+  assert(!FirstMI->memoperands_empty() && "Expecting some memory operands");
+  const MachineMemOperand &FirstMMO = getStoreTarget(FirstMI);
+  unsigned Alignment = FirstMMO.getAlign().value();
+  unsigned SizeAccum = FirstMMO.getSize();
+  unsigned FirstOffset = getStoreOffset(FirstMI);
 
-    // The initial value of SizeAccum should always be a power of 2.
-    assert(isPowerOf2_32(SizeAccum) && "First store size not a power of 2");
+  // The initial value of SizeAccum should always be a power of 2.
+  assert(isPowerOf2_32(SizeAccum) && "First store size not a power of 2");
 
-    // If the size of the first store equals to or exceeds the limit, do nothing.
-    if (SizeAccum >= MaxSize)
-        return false;
+  // If the size of the first store equals to or exceeds the limit, do nothing.
+  if (SizeAccum >= MaxSize)
+    return false;
 
-    // If the size of the first store is greater than or equal to the address
-    // stored to, then the store cannot be made any wider.
-    if (SizeAccum >= Alignment)
-        return false;
+  // If the size of the first store is greater than or equal to the address
+  // stored to, then the store cannot be made any wider.
+  if (SizeAccum >= Alignment)
+    return false;
 
-    // The offset of a store will put restrictions on how wide the store can be.
-    // Offsets in stores of size 2^n bytes need to have the n lowest bits be 0.
-    // If the first store already exhausts the offset limits, quit.  Test this
-    // by checking if the next wider size would exceed the limit.
-    if ((2*SizeAccum-1) & FirstOffset)
-        return false;
+  // The offset of a store will put restrictions on how wide the store can be.
+  // Offsets in stores of size 2^n bytes need to have the n lowest bits be 0.
+  // If the first store already exhausts the offset limits, quit.  Test this
+  // by checking if the next wider size would exceed the limit.
+  if ((2 * SizeAccum - 1) & FirstOffset)
+    return false;
 
-    OG.push_back(FirstMI);
-    MachineInstr *S1 = FirstMI;
+  OG.push_back(FirstMI);
+  MachineInstr *S1 = FirstMI;
 
-    // Pow2Num will be the largest number of elements in OG such that the sum
-    // of sizes of stores 0...Pow2Num-1 will be a power of 2.
-    unsigned Pow2Num = 1;
-    unsigned Pow2Size = SizeAccum;
+  // Pow2Num will be the largest number of elements in OG such that the sum
+  // of sizes of stores 0...Pow2Num-1 will be a power of 2.
+  unsigned Pow2Num = 1;
+  unsigned Pow2Size = SizeAccum;
 
-    // Be greedy: keep accumulating stores as long as they are to adjacent
-    // memory locations, and as long as the total number of bytes stored
-    // does not exceed the limit (MaxSize).
-    // Keep track of when the total size covered is a power of 2, since
-    // this is a size a single store can cover.
-    for (InstrGroup::iterator I = Begin + 1; I != End; ++I) {
-        MachineInstr *S2 = *I;
-        // Stores are sorted, so if S1 and S2 are not adjacent, there won't be
-        // any other store to fill the "hole".
-        if (!storesAreAdjacent(S1, S2))
-            break;
+  // Be greedy: keep accumulating stores as long as they are to adjacent
+  // memory locations, and as long as the total number of bytes stored
+  // does not exceed the limit (MaxSize).
+  // Keep track of when the total size covered is a power of 2, since
+  // this is a size a single store can cover.
+  for (InstrGroup::iterator I = Begin + 1; I != End; ++I) {
+    MachineInstr *S2 = *I;
+    // Stores are sorted, so if S1 and S2 are not adjacent, there won't be
+    // any other store to fill the "hole".
+    if (!storesAreAdjacent(S1, S2))
+      break;
 
-        unsigned S2Size = getStoreTarget(S2).getSize();
-        if (SizeAccum + S2Size > std::min(MaxSize, Alignment))
-            break;
+    unsigned S2Size = getStoreTarget(S2).getSize();
+    if (SizeAccum + S2Size > std::min(MaxSize, Alignment))
+      break;
 
-        OG.push_back(S2);
-        SizeAccum += S2Size;
-        if (isPowerOf2_32(SizeAccum)) {
-            Pow2Num = OG.size();
-            Pow2Size = SizeAccum;
-        }
-        if ((2*Pow2Size-1) & FirstOffset)
-            break;
-
-        S1 = S2;
+    OG.push_back(S2);
+    SizeAccum += S2Size;
+    if (isPowerOf2_32(SizeAccum)) {
+      Pow2Num = OG.size();
+      Pow2Size = SizeAccum;
     }
+    if ((2 * Pow2Size - 1) & FirstOffset)
+      break;
 
-    // The stores don't add up to anything that can be widened.  Clean up.
-    if (Pow2Num <= 1) {
-        OG.clear();
-        return false;
-    }
+    S1 = S2;
+  }
 
-    // Only leave the stored being widened.
-    OG.resize(Pow2Num);
-    TotalSize = Pow2Size;
-    return true;
+  // The stores don't add up to anything that can be widened.  Clean up.
+  if (Pow2Num <= 1) {
+    OG.clear();
+    return false;
+  }
+
+  // Only leave the stored being widened.
+  OG.resize(Pow2Num);
+  TotalSize = Pow2Size;
+  return true;
 }
 
 /// Given an "old group" OG of stores, create a "new group" NG of instructions
 /// to replace them.  Ideally, NG would only have a single instruction in it,
 /// but that may only be possible for store-immediate.
 bool HexagonStoreWidening::createWideStores(InstrGroup &OG, InstrGroup &NG,
-        unsigned TotalSize) {
-    // XXX Current limitations:
-    // - only expect stores of immediate values in OG,
-    // - only handle a TotalSize of up to 4.
+                                            unsigned TotalSize) {
+  // XXX Current limitations:
+  // - only expect stores of immediate values in OG,
+  // - only handle a TotalSize of up to 4.
 
-    if (TotalSize > 4)
-        return false;
+  if (TotalSize > 4)
+    return false;
 
-    unsigned Acc = 0;  // Value accumulator.
-    unsigned Shift = 0;
+  unsigned Acc = 0; // Value accumulator.
+  unsigned Shift = 0;
 
-    for (InstrGroup::iterator I = OG.begin(), E = OG.end(); I != E; ++I) {
-        MachineInstr *MI = *I;
-        const MachineMemOperand &MMO = getStoreTarget(MI);
-        MachineOperand &SO = MI->getOperand(2);  // Source.
-        assert(SO.isImm() && "Expecting an immediate operand");
+  for (InstrGroup::iterator I = OG.begin(), E = OG.end(); I != E; ++I) {
+    MachineInstr *MI = *I;
+    const MachineMemOperand &MMO = getStoreTarget(MI);
+    MachineOperand &SO = MI->getOperand(2); // Source.
+    assert(SO.isImm() && "Expecting an immediate operand");
 
-        unsigned NBits = MMO.getSize()*8;
-        unsigned Mask = (0xFFFFFFFFU >> (32-NBits));
-        unsigned Val = (SO.getImm() & Mask) << Shift;
-        Acc |= Val;
-        Shift += NBits;
-    }
+    unsigned NBits = MMO.getSize() * 8;
+    unsigned Mask = (0xFFFFFFFFU >> (32 - NBits));
+    unsigned Val = (SO.getImm() & Mask) << Shift;
+    Acc |= Val;
+    Shift += NBits;
+  }
 
-    MachineInstr *FirstSt = OG.front();
-    DebugLoc DL = OG.back()->getDebugLoc();
-    const MachineMemOperand &OldM = getStoreTarget(FirstSt);
-    MachineMemOperand *NewM =
-        MF->getMachineMemOperand(OldM.getPointerInfo(), OldM.getFlags(),
-                                 TotalSize, OldM.getAlign(), OldM.getAAInfo());
+  MachineInstr *FirstSt = OG.front();
+  DebugLoc DL = OG.back()->getDebugLoc();
+  const MachineMemOperand &OldM = getStoreTarget(FirstSt);
+  MachineMemOperand *NewM =
+      MF->getMachineMemOperand(OldM.getPointerInfo(), OldM.getFlags(),
+                               TotalSize, OldM.getAlign(), OldM.getAAInfo());
 
-    if (Acc < 0x10000) {
-        // Create mem[hw] = #Acc
-        unsigned WOpc = (TotalSize == 2) ? Hexagon::S4_storeirh_io :
-                        (TotalSize == 4) ? Hexagon::S4_storeiri_io : 0;
-        assert(WOpc && "Unexpected size");
+  if (Acc < 0x10000) {
+    // Create mem[hw] = #Acc
+    unsigned WOpc = (TotalSize == 2)
+                        ? Hexagon::S4_storeirh_io
+                        : (TotalSize == 4) ? Hexagon::S4_storeiri_io : 0;
+    assert(WOpc && "Unexpected size");
 
-        int Val = (TotalSize == 2) ? int16_t(Acc) : int(Acc);
-        const MCInstrDesc &StD = TII->get(WOpc);
-        MachineOperand &MR = FirstSt->getOperand(0);
-        int64_t Off = FirstSt->getOperand(1).getImm();
-        MachineInstr *StI =
-            BuildMI(*MF, DL, StD)
+    int Val = (TotalSize == 2) ? int16_t(Acc) : int(Acc);
+    const MCInstrDesc &StD = TII->get(WOpc);
+    MachineOperand &MR = FirstSt->getOperand(0);
+    int64_t Off = FirstSt->getOperand(1).getImm();
+    MachineInstr *StI =
+        BuildMI(*MF, DL, StD)
             .addReg(MR.getReg(), getKillRegState(MR.isKill()), MR.getSubReg())
             .addImm(Off)
             .addImm(Val);
-        StI->addMemOperand(*MF, NewM);
-        NG.push_back(StI);
-    } else {
-        // Create vreg = A2_tfrsi #Acc; mem[hw] = vreg
-        const MCInstrDesc &TfrD = TII->get(Hexagon::A2_tfrsi);
-        const TargetRegisterClass *RC = TII->getRegClass(TfrD, 0, TRI, *MF);
-        Register VReg = MF->getRegInfo().createVirtualRegister(RC);
-        MachineInstr *TfrI = BuildMI(*MF, DL, TfrD, VReg)
-                             .addImm(int(Acc));
-        NG.push_back(TfrI);
+    StI->addMemOperand(*MF, NewM);
+    NG.push_back(StI);
+  } else {
+    // Create vreg = A2_tfrsi #Acc; mem[hw] = vreg
+    const MCInstrDesc &TfrD = TII->get(Hexagon::A2_tfrsi);
+    const TargetRegisterClass *RC = TII->getRegClass(TfrD, 0, TRI, *MF);
+    Register VReg = MF->getRegInfo().createVirtualRegister(RC);
+    MachineInstr *TfrI = BuildMI(*MF, DL, TfrD, VReg).addImm(int(Acc));
+    NG.push_back(TfrI);
 
-        unsigned WOpc = (TotalSize == 2) ? Hexagon::S2_storerh_io :
-                        (TotalSize == 4) ? Hexagon::S2_storeri_io : 0;
-        assert(WOpc && "Unexpected size");
+    unsigned WOpc = (TotalSize == 2)
+                        ? Hexagon::S2_storerh_io
+                        : (TotalSize == 4) ? Hexagon::S2_storeri_io : 0;
+    assert(WOpc && "Unexpected size");
 
-        const MCInstrDesc &StD = TII->get(WOpc);
-        MachineOperand &MR = FirstSt->getOperand(0);
-        int64_t Off = FirstSt->getOperand(1).getImm();
-        MachineInstr *StI =
-            BuildMI(*MF, DL, StD)
+    const MCInstrDesc &StD = TII->get(WOpc);
+    MachineOperand &MR = FirstSt->getOperand(0);
+    int64_t Off = FirstSt->getOperand(1).getImm();
+    MachineInstr *StI =
+        BuildMI(*MF, DL, StD)
             .addReg(MR.getReg(), getKillRegState(MR.isKill()), MR.getSubReg())
             .addImm(Off)
             .addReg(VReg, RegState::Kill);
-        StI->addMemOperand(*MF, NewM);
-        NG.push_back(StI);
-    }
+    StI->addMemOperand(*MF, NewM);
+    NG.push_back(StI);
+  }
 
-    return true;
+  return true;
 }
 
 // Replace instructions from the old group OG with instructions from the
@@ -473,91 +474,91 @@ bool HexagonStoreWidening::createWideStores(InstrGroup &OG, InstrGroup &NG,
 // from OG was (in the order in which they appeared in the basic block).
 // (The ordering in OG does not have to match the order in the basic block.)
 bool HexagonStoreWidening::replaceStores(InstrGroup &OG, InstrGroup &NG) {
-    LLVM_DEBUG({
-        dbgs() << "Replacing:\n";
-        for (auto I : OG)
-            dbgs() << "  " << *I;
-        dbgs() << "with\n";
-        for (auto I : NG)
-            dbgs() << "  " << *I;
-    });
-
-    MachineBasicBlock *MBB = OG.back()->getParent();
-    MachineBasicBlock::iterator InsertAt = MBB->end();
-
-    // Need to establish the insertion point.  The best one is right before
-    // the first store in the OG, but in the order in which the stores occur
-    // in the program list.  Since the ordering in OG does not correspond
-    // to the order in the program list, we need to do some work to find
-    // the insertion point.
-
-    // Create a set of all instructions in OG (for quick lookup).
-    SmallPtrSet<MachineInstr*, 4> InstrSet;
+  LLVM_DEBUG({
+    dbgs() << "Replacing:\n";
     for (auto I : OG)
-        InstrSet.insert(I);
-
-    // Traverse the block, until we hit an instruction from OG.
-    for (auto &I : *MBB) {
-        if (InstrSet.count(&I)) {
-            InsertAt = I;
-            break;
-        }
-    }
-
-    assert((InsertAt != MBB->end()) && "Cannot locate any store from the group");
-
-    bool AtBBStart = false;
-
-    // InsertAt points at the first instruction that will be removed.  We need
-    // to move it out of the way, so it remains valid after removing all the
-    // old stores, and so we are able to recover it back to the proper insertion
-    // position.
-    if (InsertAt != MBB->begin())
-        --InsertAt;
-    else
-        AtBBStart = true;
-
-    for (auto I : OG)
-        I->eraseFromParent();
-
-    if (!AtBBStart)
-        ++InsertAt;
-    else
-        InsertAt = MBB->begin();
-
+      dbgs() << "  " << *I;
+    dbgs() << "with\n";
     for (auto I : NG)
-        MBB->insert(InsertAt, I);
+      dbgs() << "  " << *I;
+  });
 
-    return true;
+  MachineBasicBlock *MBB = OG.back()->getParent();
+  MachineBasicBlock::iterator InsertAt = MBB->end();
+
+  // Need to establish the insertion point.  The best one is right before
+  // the first store in the OG, but in the order in which the stores occur
+  // in the program list.  Since the ordering in OG does not correspond
+  // to the order in the program list, we need to do some work to find
+  // the insertion point.
+
+  // Create a set of all instructions in OG (for quick lookup).
+  SmallPtrSet<MachineInstr *, 4> InstrSet;
+  for (auto I : OG)
+    InstrSet.insert(I);
+
+  // Traverse the block, until we hit an instruction from OG.
+  for (auto &I : *MBB) {
+    if (InstrSet.count(&I)) {
+      InsertAt = I;
+      break;
+    }
+  }
+
+  assert((InsertAt != MBB->end()) && "Cannot locate any store from the group");
+
+  bool AtBBStart = false;
+
+  // InsertAt points at the first instruction that will be removed.  We need
+  // to move it out of the way, so it remains valid after removing all the
+  // old stores, and so we are able to recover it back to the proper insertion
+  // position.
+  if (InsertAt != MBB->begin())
+    --InsertAt;
+  else
+    AtBBStart = true;
+
+  for (auto I : OG)
+    I->eraseFromParent();
+
+  if (!AtBBStart)
+    ++InsertAt;
+  else
+    InsertAt = MBB->begin();
+
+  for (auto I : NG)
+    MBB->insert(InsertAt, I);
+
+  return true;
 }
 
 // Break up the group into smaller groups, each of which can be replaced by
 // a single wide store.  Widen each such smaller group and replace the old
 // instructions with the widened ones.
 bool HexagonStoreWidening::processStoreGroup(InstrGroup &Group) {
-    bool Changed = false;
-    InstrGroup::iterator I = Group.begin(), E = Group.end();
-    InstrGroup OG, NG;   // Old and new groups.
-    unsigned CollectedSize;
+  bool Changed = false;
+  InstrGroup::iterator I = Group.begin(), E = Group.end();
+  InstrGroup OG, NG; // Old and new groups.
+  unsigned CollectedSize;
 
-    while (I != E) {
-        OG.clear();
-        NG.clear();
+  while (I != E) {
+    OG.clear();
+    NG.clear();
 
-        bool Succ = selectStores(I++, E, OG, CollectedSize, MaxWideSize) &&
-                    createWideStores(OG, NG, CollectedSize)              &&
-                    replaceStores(OG, NG);
-        if (!Succ)
-            continue;
+    bool Succ = selectStores(I++, E, OG, CollectedSize, MaxWideSize) &&
+                createWideStores(OG, NG, CollectedSize) &&
+                replaceStores(OG, NG);
+    if (!Succ)
+      continue;
 
-        assert(OG.size() > 1 && "Created invalid group");
-        assert(distance(I, E)+1 >= int(OG.size()) && "Too many elements");
-        I += OG.size()-1;
+    assert(OG.size() > 1 && "Created invalid group");
+    assert(distance(I, E) + 1 >= int(OG.size()) && "Too many elements");
+    I += OG.size() - 1;
 
-        Changed = true;
-    }
+    Changed = true;
+  }
 
-    return Changed;
+  return Changed;
 }
 
 // Process a single basic block: create the store groups, and replace them
@@ -567,43 +568,43 @@ bool HexagonStoreWidening::processStoreGroup(InstrGroup &Group) {
 // any ill effects (other than not having performed widening in the unpro-
 // cessed blocks).  Also, the basic blocks can be processed in any order.
 bool HexagonStoreWidening::processBasicBlock(MachineBasicBlock &MBB) {
-    InstrGroupList SGs;
-    bool Changed = false;
+  InstrGroupList SGs;
+  bool Changed = false;
 
-    createStoreGroups(MBB, SGs);
+  createStoreGroups(MBB, SGs);
 
-    auto Less = [] (const MachineInstr *A, const MachineInstr *B) -> bool {
-        return getStoreOffset(A) < getStoreOffset(B);
-    };
-    for (auto &G : SGs) {
-        assert(G.size() > 1 && "Store group with fewer than 2 elements");
-        llvm::sort(G, Less);
+  auto Less = [](const MachineInstr *A, const MachineInstr *B) -> bool {
+    return getStoreOffset(A) < getStoreOffset(B);
+  };
+  for (auto &G : SGs) {
+    assert(G.size() > 1 && "Store group with fewer than 2 elements");
+    llvm::sort(G, Less);
 
-        Changed |= processStoreGroup(G);
-    }
+    Changed |= processStoreGroup(G);
+  }
 
-    return Changed;
+  return Changed;
 }
 
 bool HexagonStoreWidening::runOnMachineFunction(MachineFunction &MFn) {
-    if (skipFunction(MFn.getFunction()))
-        return false;
+  if (skipFunction(MFn.getFunction()))
+    return false;
 
-    MF = &MFn;
-    auto &ST = MFn.getSubtarget<HexagonSubtarget>();
-    TII = ST.getInstrInfo();
-    TRI = ST.getRegisterInfo();
-    MRI = &MFn.getRegInfo();
-    AA = &getAnalysis<AAResultsWrapperPass>().getAAResults();
+  MF = &MFn;
+  auto &ST = MFn.getSubtarget<HexagonSubtarget>();
+  TII = ST.getInstrInfo();
+  TRI = ST.getRegisterInfo();
+  MRI = &MFn.getRegInfo();
+  AA = &getAnalysis<AAResultsWrapperPass>().getAAResults();
 
-    bool Changed = false;
+  bool Changed = false;
 
-    for (auto &B : MFn)
-        Changed |= processBasicBlock(B);
+  for (auto &B : MFn)
+    Changed |= processBasicBlock(B);
 
-    return Changed;
+  return Changed;
 }
 
 FunctionPass *llvm::createHexagonStoreWidening() {
-    return new HexagonStoreWidening();
+  return new HexagonStoreWidening();
 }

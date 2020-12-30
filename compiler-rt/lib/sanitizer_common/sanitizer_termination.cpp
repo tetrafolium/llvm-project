@@ -20,75 +20,75 @@ static const int kMaxNumOfInternalDieCallbacks = 5;
 static DieCallbackType InternalDieCallbacks[kMaxNumOfInternalDieCallbacks];
 
 bool AddDieCallback(DieCallbackType callback) {
-    for (int i = 0; i < kMaxNumOfInternalDieCallbacks; i++) {
-        if (InternalDieCallbacks[i] == nullptr) {
-            InternalDieCallbacks[i] = callback;
-            return true;
-        }
+  for (int i = 0; i < kMaxNumOfInternalDieCallbacks; i++) {
+    if (InternalDieCallbacks[i] == nullptr) {
+      InternalDieCallbacks[i] = callback;
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 bool RemoveDieCallback(DieCallbackType callback) {
-    for (int i = 0; i < kMaxNumOfInternalDieCallbacks; i++) {
-        if (InternalDieCallbacks[i] == callback) {
-            internal_memmove(&InternalDieCallbacks[i], &InternalDieCallbacks[i + 1],
-                             sizeof(InternalDieCallbacks[0]) *
-                             (kMaxNumOfInternalDieCallbacks - i - 1));
-            InternalDieCallbacks[kMaxNumOfInternalDieCallbacks - 1] = nullptr;
-            return true;
-        }
+  for (int i = 0; i < kMaxNumOfInternalDieCallbacks; i++) {
+    if (InternalDieCallbacks[i] == callback) {
+      internal_memmove(&InternalDieCallbacks[i], &InternalDieCallbacks[i + 1],
+                       sizeof(InternalDieCallbacks[0]) *
+                           (kMaxNumOfInternalDieCallbacks - i - 1));
+      InternalDieCallbacks[kMaxNumOfInternalDieCallbacks - 1] = nullptr;
+      return true;
     }
-    return false;
+  }
+  return false;
 }
 
 static DieCallbackType UserDieCallback;
 void SetUserDieCallback(DieCallbackType callback) {
-    UserDieCallback = callback;
+  UserDieCallback = callback;
 }
 
 void NORETURN Die() {
-    if (UserDieCallback)
-        UserDieCallback();
-    for (int i = kMaxNumOfInternalDieCallbacks - 1; i >= 0; i--) {
-        if (InternalDieCallbacks[i])
-            InternalDieCallbacks[i]();
-    }
-    if (common_flags()->abort_on_error)
-        Abort();
-    internal__exit(common_flags()->exitcode);
+  if (UserDieCallback)
+    UserDieCallback();
+  for (int i = kMaxNumOfInternalDieCallbacks - 1; i >= 0; i--) {
+    if (InternalDieCallbacks[i])
+      InternalDieCallbacks[i]();
+  }
+  if (common_flags()->abort_on_error)
+    Abort();
+  internal__exit(common_flags()->exitcode);
 }
 
 static CheckFailedCallbackType CheckFailedCallback;
 void SetCheckFailedCallback(CheckFailedCallbackType callback) {
-    CheckFailedCallback = callback;
+  CheckFailedCallback = callback;
 }
 
 const int kSecondsToSleepWhenRecursiveCheckFailed = 2;
 
-void NORETURN CheckFailed(const char *file, int line, const char *cond,
-                          u64 v1, u64 v2) {
-    static atomic_uint32_t num_calls;
-    if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) > 10) {
-        SleepForSeconds(kSecondsToSleepWhenRecursiveCheckFailed);
-        Trap();
-    }
+void NORETURN CheckFailed(const char *file, int line, const char *cond, u64 v1,
+                          u64 v2) {
+  static atomic_uint32_t num_calls;
+  if (atomic_fetch_add(&num_calls, 1, memory_order_relaxed) > 10) {
+    SleepForSeconds(kSecondsToSleepWhenRecursiveCheckFailed);
+    Trap();
+  }
 
-    if (CheckFailedCallback) {
-        CheckFailedCallback(file, line, cond, v1, v2);
-    }
-    Report("Sanitizer CHECK failed: %s:%d %s (%lld, %lld)\n", file, line, cond,
-           v1, v2);
-    Die();
+  if (CheckFailedCallback) {
+    CheckFailedCallback(file, line, cond, v1, v2);
+  }
+  Report("Sanitizer CHECK failed: %s:%d %s (%lld, %lld)\n", file, line, cond,
+         v1, v2);
+  Die();
 }
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
 using namespace __sanitizer;
 
 extern "C" {
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void __sanitizer_set_death_callback(void (*callback)(void)) {
-        SetUserDieCallback(callback);
-    }
+SANITIZER_INTERFACE_ATTRIBUTE
+void __sanitizer_set_death_callback(void (*callback)(void)) {
+  SetUserDieCallback(callback);
+}
 }  // extern "C"

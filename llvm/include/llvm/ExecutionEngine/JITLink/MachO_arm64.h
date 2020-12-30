@@ -21,21 +21,21 @@ namespace jitlink {
 namespace MachO_arm64_Edges {
 
 enum MachOARM64RelocationKind : Edge::Kind {
-    Branch26 = Edge::FirstRelocation,
-    Pointer32,
-    Pointer64,
-    Pointer64Anon,
-    Page21,
-    PageOffset12,
-    GOTPage21,
-    GOTPageOffset12,
-    PointerToGOT,
-    PairedAddend,
-    LDRLiteral19,
-    Delta32,
-    Delta64,
-    NegDelta32,
-    NegDelta64,
+  Branch26 = Edge::FirstRelocation,
+  Pointer32,
+  Pointer64,
+  Pointer64Anon,
+  Page21,
+  PageOffset12,
+  GOTPage21,
+  GOTPageOffset12,
+  PointerToGOT,
+  PairedAddend,
+  LDRLiteral19,
+  Delta32,
+  Delta64,
+  NegDelta32,
+  NegDelta64,
 };
 
 } // namespace MachO_arm64_Edges
@@ -46,7 +46,7 @@ enum MachOARM64RelocationKind : Edge::Kind {
 /// its contents. The caller is responsible for ensuring that the object buffer
 /// outlives the graph.
 Expected<std::unique_ptr<LinkGraph>>
-                                  createLinkGraphFromMachOObject_arm64(MemoryBufferRef ObjectBuffer);
+createLinkGraphFromMachOObject_arm64(MemoryBufferRef ObjectBuffer);
 
 /// jit-link the given object buffer, which must be a MachO arm64 object file.
 ///

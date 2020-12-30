@@ -53,7 +53,7 @@ MLIR_CAPI_EXPORTED intptr_t mlirArrayAttrGetNumElements(MlirAttribute attr);
 
 /// Returns pos-th element stored in the given array attribute.
 MLIR_CAPI_EXPORTED MlirAttribute mlirArrayAttrGetElement(MlirAttribute attr,
-        intptr_t pos);
+                                                         intptr_t pos);
 
 //===----------------------------------------------------------------------===//
 // Dictionary attribute.
@@ -93,8 +93,8 @@ MLIR_CAPI_EXPORTED bool mlirAttributeIsAFloat(MlirAttribute attr);
 /** Creates a floating point attribute in the given context with the given
  * double value and double-precision FP semantics. */
 MLIR_CAPI_EXPORTED MlirAttribute mlirFloatAttrDoubleGet(MlirContext ctx,
-        MlirType type,
-        double value);
+                                                        MlirType type,
+                                                        double value);
 
 /** Same as "mlirFloatAttrDoubleGet", but if the type is not valid for a
  * construction of a FloatAttr, returns a null MlirAttribute. */
@@ -118,7 +118,7 @@ MLIR_CAPI_EXPORTED bool mlirAttributeIsAInteger(MlirAttribute attr);
 /** Creates an integer attribute of the given type with the given integer
  * value. */
 MLIR_CAPI_EXPORTED MlirAttribute mlirIntegerAttrGet(MlirType type,
-        int64_t value);
+                                                    int64_t value);
 
 /** Returns the value stored in the given integer attribute, assuming the value
  * fits into a 64-bit integer. */
@@ -177,12 +177,12 @@ MLIR_CAPI_EXPORTED bool mlirAttributeIsAString(MlirAttribute attr);
 /** Creates a string attribute in the given context containing the given string.
  */
 MLIR_CAPI_EXPORTED MlirAttribute mlirStringAttrGet(MlirContext ctx,
-        MlirStringRef str);
+                                                   MlirStringRef str);
 
 /** Creates a string attribute in the given context containing the given string.
  * Additionally, the attribute has the given type. */
 MLIR_CAPI_EXPORTED MlirAttribute mlirStringAttrTypedGet(MlirType type,
-        MlirStringRef str);
+                                                        MlirStringRef str);
 
 /** Returns the attribute values as a string reference. The data remains live as
  * long as the context in which the attribute lives. */
@@ -231,7 +231,7 @@ MLIR_CAPI_EXPORTED bool mlirAttributeIsAFlatSymbolRef(MlirAttribute attr);
 /** Creates a flat symbol reference attribute in the given context referencing a
  * symbol identified by the given string. */
 MLIR_CAPI_EXPORTED MlirAttribute mlirFlatSymbolRefAttrGet(MlirContext ctx,
-        MlirStringRef symbol);
+                                                          MlirStringRef symbol);
 
 /** Returns the referenced symbol as a string reference. The data remains live
  * as long as the context in which the attribute lives. */
@@ -271,8 +271,8 @@ MLIR_CAPI_EXPORTED bool mlirAttributeIsAElements(MlirAttribute attr);
 
 /// Returns the element at the given rank-dimensional index.
 MLIR_CAPI_EXPORTED MlirAttribute mlirElementsAttrGetValue(MlirAttribute attr,
-        intptr_t rank,
-        uint64_t *idxs);
+                                                          intptr_t rank,
+                                                          uint64_t *idxs);
 
 /** Checks whether the given rank-dimensional index is valid in the given
  * elements attribute. */
@@ -378,7 +378,7 @@ mlirDenseElementsAttrGetStringSplatValue(MlirAttribute attr);
 /** Returns the pos-th value (flat contiguous indexing) of a specific type
  * contained by the given dense elements attribute. */
 MLIR_CAPI_EXPORTED bool mlirDenseElementsAttrGetBoolValue(MlirAttribute attr,
-        intptr_t pos);
+                                                          intptr_t pos);
 MLIR_CAPI_EXPORTED int32_t
 mlirDenseElementsAttrGetInt32Value(MlirAttribute attr, intptr_t pos);
 MLIR_CAPI_EXPORTED uint32_t
@@ -388,7 +388,7 @@ mlirDenseElementsAttrGetInt64Value(MlirAttribute attr, intptr_t pos);
 MLIR_CAPI_EXPORTED uint64_t
 mlirDenseElementsAttrGetUInt64Value(MlirAttribute attr, intptr_t pos);
 MLIR_CAPI_EXPORTED float mlirDenseElementsAttrGetFloatValue(MlirAttribute attr,
-        intptr_t pos);
+                                                            intptr_t pos);
 MLIR_CAPI_EXPORTED double
 mlirDenseElementsAttrGetDoubleValue(MlirAttribute attr, intptr_t pos);
 MLIR_CAPI_EXPORTED MlirStringRef

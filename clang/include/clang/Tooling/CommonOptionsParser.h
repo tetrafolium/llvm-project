@@ -64,95 +64,91 @@ namespace tooling {
 /// \endcode
 class CommonOptionsParser {
 public:
-    /// Parses command-line, initializes a compilation database.
-    ///
-    /// This constructor can change argc and argv contents, e.g. consume
-    /// command-line options used for creating FixedCompilationDatabase.
-    ///
-    /// All options not belonging to \p Category become hidden.
-    ///
-    /// This constructor exits program in case of error.
-    CommonOptionsParser(int &argc, const char **argv,
-                        llvm::cl::OptionCategory &Category,
-                        const char *Overview = nullptr)
-        : CommonOptionsParser(argc, argv, Category, llvm::cl::OneOrMore,
-                              Overview) {}
+  /// Parses command-line, initializes a compilation database.
+  ///
+  /// This constructor can change argc and argv contents, e.g. consume
+  /// command-line options used for creating FixedCompilationDatabase.
+  ///
+  /// All options not belonging to \p Category become hidden.
+  ///
+  /// This constructor exits program in case of error.
+  CommonOptionsParser(int &argc, const char **argv,
+                      llvm::cl::OptionCategory &Category,
+                      const char *Overview = nullptr)
+      : CommonOptionsParser(argc, argv, Category, llvm::cl::OneOrMore,
+                            Overview) {}
 
-    /// Parses command-line, initializes a compilation database.
-    ///
-    /// This constructor can change argc and argv contents, e.g. consume
-    /// command-line options used for creating FixedCompilationDatabase.
-    ///
-    /// All options not belonging to \p Category become hidden.
-    ///
-    /// It also allows calls to set the required number of positional parameters.
-    CommonOptionsParser(int &argc, const char **argv,
-                        llvm::cl::OptionCategory &Category,
-                        llvm::cl::NumOccurrencesFlag OccurrencesFlag,
-                        const char *Overview = nullptr);
+  /// Parses command-line, initializes a compilation database.
+  ///
+  /// This constructor can change argc and argv contents, e.g. consume
+  /// command-line options used for creating FixedCompilationDatabase.
+  ///
+  /// All options not belonging to \p Category become hidden.
+  ///
+  /// It also allows calls to set the required number of positional parameters.
+  CommonOptionsParser(int &argc, const char **argv,
+                      llvm::cl::OptionCategory &Category,
+                      llvm::cl::NumOccurrencesFlag OccurrencesFlag,
+                      const char *Overview = nullptr);
 
-    /// A factory method that is similar to the above constructor, except
-    /// this returns an error instead exiting the program on error.
-    static llvm::Expected<CommonOptionsParser>
-    create(int &argc, const char **argv, llvm::cl::OptionCategory &Category,
-           llvm::cl::NumOccurrencesFlag OccurrencesFlag,
-           const char *Overview = nullptr);
+  /// A factory method that is similar to the above constructor, except
+  /// this returns an error instead exiting the program on error.
+  static llvm::Expected<CommonOptionsParser>
+  create(int &argc, const char **argv, llvm::cl::OptionCategory &Category,
+         llvm::cl::NumOccurrencesFlag OccurrencesFlag,
+         const char *Overview = nullptr);
 
-    /// Returns a reference to the loaded compilations database.
-    CompilationDatabase &getCompilations() {
-        return *Compilations;
-    }
+  /// Returns a reference to the loaded compilations database.
+  CompilationDatabase &getCompilations() { return *Compilations; }
 
-    /// Returns a list of source file paths to process.
-    const std::vector<std::string> &getSourcePathList() const {
-        return SourcePathList;
-    }
+  /// Returns a list of source file paths to process.
+  const std::vector<std::string> &getSourcePathList() const {
+    return SourcePathList;
+  }
 
-    /// Returns the argument adjuster calculated from "--extra-arg" and
-    //"--extra-arg-before" options.
-    ArgumentsAdjuster getArgumentsAdjuster() {
-        return Adjuster;
-    }
+  /// Returns the argument adjuster calculated from "--extra-arg" and
+  //"--extra-arg-before" options.
+  ArgumentsAdjuster getArgumentsAdjuster() { return Adjuster; }
 
-    static const char *const HelpMessage;
+  static const char *const HelpMessage;
 
 private:
-    CommonOptionsParser() = default;
+  CommonOptionsParser() = default;
 
-    llvm::Error init(int &argc, const char **argv,
-                     llvm::cl::OptionCategory &Category,
-                     llvm::cl::NumOccurrencesFlag OccurrencesFlag,
-                     const char *Overview);
+  llvm::Error init(int &argc, const char **argv,
+                   llvm::cl::OptionCategory &Category,
+                   llvm::cl::NumOccurrencesFlag OccurrencesFlag,
+                   const char *Overview);
 
-    std::unique_ptr<CompilationDatabase> Compilations;
-    std::vector<std::string> SourcePathList;
-    ArgumentsAdjuster Adjuster;
+  std::unique_ptr<CompilationDatabase> Compilations;
+  std::vector<std::string> SourcePathList;
+  ArgumentsAdjuster Adjuster;
 };
 
 class ArgumentsAdjustingCompilations : public CompilationDatabase {
 public:
-    ArgumentsAdjustingCompilations(
-        std::unique_ptr<CompilationDatabase> Compilations)
-        : Compilations(std::move(Compilations)) {}
+  ArgumentsAdjustingCompilations(
+      std::unique_ptr<CompilationDatabase> Compilations)
+      : Compilations(std::move(Compilations)) {}
 
-    void appendArgumentsAdjuster(ArgumentsAdjuster Adjuster);
+  void appendArgumentsAdjuster(ArgumentsAdjuster Adjuster);
 
-    std::vector<CompileCommand>
-    getCompileCommands(StringRef FilePath) const override;
+  std::vector<CompileCommand>
+  getCompileCommands(StringRef FilePath) const override;
 
-    std::vector<std::string> getAllFiles() const override;
+  std::vector<std::string> getAllFiles() const override;
 
-    std::vector<CompileCommand> getAllCompileCommands() const override;
+  std::vector<CompileCommand> getAllCompileCommands() const override;
 
 private:
-    std::unique_ptr<CompilationDatabase> Compilations;
-    std::vector<ArgumentsAdjuster> Adjusters;
+  std::unique_ptr<CompilationDatabase> Compilations;
+  std::vector<ArgumentsAdjuster> Adjusters;
 
-    std::vector<CompileCommand>
-    adjustCommands(std::vector<CompileCommand> Commands) const;
+  std::vector<CompileCommand>
+  adjustCommands(std::vector<CompileCommand> Commands) const;
 };
 
-}  // namespace tooling
-}  // namespace clang
+} // namespace tooling
+} // namespace clang
 
-#endif  // LLVM_TOOLS_CLANG_INCLUDE_CLANG_TOOLING_COMMONOPTIONSPARSER_H
+#endif // LLVM_TOOLS_CLANG_INCLUDE_CLANG_TOOLING_COMMONOPTIONSPARSER_H

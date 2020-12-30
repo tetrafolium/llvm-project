@@ -37,52 +37,52 @@ class DominatorTree;
 /// updates of different uses (which is not the case when traditional SSAUpdater
 /// is used).
 class SSAUpdaterBulk {
-    struct RewriteInfo {
-        DenseMap<BasicBlock *, Value *> Defines;
-        SmallVector<Use *, 4> Uses;
-        StringRef Name;
-        Type *Ty;
-        RewriteInfo() {};
-        RewriteInfo(StringRef &N, Type *T) : Name(N), Ty(T) {};
-    };
-    SmallVector<RewriteInfo, 4> Rewrites;
+  struct RewriteInfo {
+    DenseMap<BasicBlock *, Value *> Defines;
+    SmallVector<Use *, 4> Uses;
+    StringRef Name;
+    Type *Ty;
+    RewriteInfo(){};
+    RewriteInfo(StringRef &N, Type *T) : Name(N), Ty(T){};
+  };
+  SmallVector<RewriteInfo, 4> Rewrites;
 
-    PredIteratorCache PredCache;
+  PredIteratorCache PredCache;
 
-    Value *computeValueAt(BasicBlock *BB, RewriteInfo &R, DominatorTree *DT);
+  Value *computeValueAt(BasicBlock *BB, RewriteInfo &R, DominatorTree *DT);
 
 public:
-    explicit SSAUpdaterBulk() {};
-    SSAUpdaterBulk(const SSAUpdaterBulk &) = delete;
-    SSAUpdaterBulk &operator=(const SSAUpdaterBulk &) = delete;
-    ~SSAUpdaterBulk() {};
+  explicit SSAUpdaterBulk(){};
+  SSAUpdaterBulk(const SSAUpdaterBulk &) = delete;
+  SSAUpdaterBulk &operator=(const SSAUpdaterBulk &) = delete;
+  ~SSAUpdaterBulk(){};
 
-    /// Add a new variable to the SSA rewriter. This needs to be called before
-    /// AddAvailableValue or AddUse calls. The return value is the variable ID,
-    /// which needs to be passed to AddAvailableValue and AddUse.
-    unsigned AddVariable(StringRef Name, Type *Ty);
+  /// Add a new variable to the SSA rewriter. This needs to be called before
+  /// AddAvailableValue or AddUse calls. The return value is the variable ID,
+  /// which needs to be passed to AddAvailableValue and AddUse.
+  unsigned AddVariable(StringRef Name, Type *Ty);
 
-    /// Indicate that a rewritten value is available in the specified block with
-    /// the specified value.
-    void AddAvailableValue(unsigned Var, BasicBlock *BB, Value *V);
+  /// Indicate that a rewritten value is available in the specified block with
+  /// the specified value.
+  void AddAvailableValue(unsigned Var, BasicBlock *BB, Value *V);
 
-    /// Record a use of the symbolic value. This use will be updated with a
-    /// rewritten value when RewriteAllUses is called.
-    void AddUse(unsigned Var, Use *U);
+  /// Record a use of the symbolic value. This use will be updated with a
+  /// rewritten value when RewriteAllUses is called.
+  void AddUse(unsigned Var, Use *U);
 
-    /// Return true if the SSAUpdater already has a value for the specified
-    /// variable in the specified block.
-    bool HasValueForBlock(unsigned Var, BasicBlock *BB);
+  /// Return true if the SSAUpdater already has a value for the specified
+  /// variable in the specified block.
+  bool HasValueForBlock(unsigned Var, BasicBlock *BB);
 
-    /// Perform all the necessary updates, including new PHI-nodes insertion and
-    /// the requested uses update.
-    ///
-    /// The function requires dominator tree DT, which is used for computing
-    /// locations for new phi-nodes insertions. If a nonnull pointer to a vector
-    /// InsertedPHIs is passed, all the new phi-nodes will be added to this
-    /// vector.
-    void RewriteAllUses(DominatorTree *DT,
-                        SmallVectorImpl<PHINode *> *InsertedPHIs = nullptr);
+  /// Perform all the necessary updates, including new PHI-nodes insertion and
+  /// the requested uses update.
+  ///
+  /// The function requires dominator tree DT, which is used for computing
+  /// locations for new phi-nodes insertions. If a nonnull pointer to a vector
+  /// InsertedPHIs is passed, all the new phi-nodes will be added to this
+  /// vector.
+  void RewriteAllUses(DominatorTree *DT,
+                      SmallVectorImpl<PHINode *> *InsertedPHIs = nullptr);
 };
 
 } // end namespace llvm

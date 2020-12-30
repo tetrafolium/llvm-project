@@ -21,84 +21,84 @@ using namespace llvm;
 
 TargetTransformInfo::PopcntSupportKind
 WebAssemblyTTIImpl::getPopcntSupport(unsigned TyWidth) const {
-    assert(isPowerOf2_32(TyWidth) && "Ty width must be power of 2");
-    return TargetTransformInfo::PSK_FastHardware;
+  assert(isPowerOf2_32(TyWidth) && "Ty width must be power of 2");
+  return TargetTransformInfo::PSK_FastHardware;
 }
 
 unsigned WebAssemblyTTIImpl::getNumberOfRegisters(unsigned ClassID) const {
-    unsigned Result = BaseT::getNumberOfRegisters(ClassID);
+  unsigned Result = BaseT::getNumberOfRegisters(ClassID);
 
-    // For SIMD, use at least 16 registers, as a rough guess.
-    bool Vector = (ClassID == 1);
-    if (Vector)
-        Result = std::max(Result, 16u);
+  // For SIMD, use at least 16 registers, as a rough guess.
+  bool Vector = (ClassID == 1);
+  if (Vector)
+    Result = std::max(Result, 16u);
 
-    return Result;
+  return Result;
 }
 
 unsigned WebAssemblyTTIImpl::getRegisterBitWidth(bool Vector) const {
-    if (Vector && getST()->hasSIMD128())
-        return 128;
+  if (Vector && getST()->hasSIMD128())
+    return 128;
 
-    return 64;
+  return 64;
 }
 
 unsigned WebAssemblyTTIImpl::getArithmeticInstrCost(
     unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,
-    TTI::OperandValueKind Opd1Info,
-    TTI::OperandValueKind Opd2Info, TTI::OperandValueProperties Opd1PropInfo,
+    TTI::OperandValueKind Opd1Info, TTI::OperandValueKind Opd2Info,
+    TTI::OperandValueProperties Opd1PropInfo,
     TTI::OperandValueProperties Opd2PropInfo, ArrayRef<const Value *> Args,
     const Instruction *CxtI) {
 
-    unsigned Cost = BasicTTIImplBase<WebAssemblyTTIImpl>::getArithmeticInstrCost(
-                        Opcode, Ty, CostKind, Opd1Info, Opd2Info, Opd1PropInfo, Opd2PropInfo);
+  unsigned Cost = BasicTTIImplBase<WebAssemblyTTIImpl>::getArithmeticInstrCost(
+      Opcode, Ty, CostKind, Opd1Info, Opd2Info, Opd1PropInfo, Opd2PropInfo);
 
-    if (auto *VTy = dyn_cast<VectorType>(Ty)) {
-        switch (Opcode) {
-        case Instruction::LShr:
-        case Instruction::AShr:
-        case Instruction::Shl:
-            // SIMD128's shifts currently only accept a scalar shift count. For each
-            // element, we'll need to extract, op, insert. The following is a rough
-            // approxmation.
-            if (Opd2Info != TTI::OK_UniformValue &&
-                    Opd2Info != TTI::OK_UniformConstantValue)
-                Cost =
-                    cast<FixedVectorType>(VTy)->getNumElements() *
-                    (TargetTransformInfo::TCC_Basic +
-                     getArithmeticInstrCost(Opcode, VTy->getElementType(), CostKind) +
-                     TargetTransformInfo::TCC_Basic);
-            break;
-        }
+  if (auto *VTy = dyn_cast<VectorType>(Ty)) {
+    switch (Opcode) {
+    case Instruction::LShr:
+    case Instruction::AShr:
+    case Instruction::Shl:
+      // SIMD128's shifts currently only accept a scalar shift count. For each
+      // element, we'll need to extract, op, insert. The following is a rough
+      // approxmation.
+      if (Opd2Info != TTI::OK_UniformValue &&
+          Opd2Info != TTI::OK_UniformConstantValue)
+        Cost =
+            cast<FixedVectorType>(VTy)->getNumElements() *
+            (TargetTransformInfo::TCC_Basic +
+             getArithmeticInstrCost(Opcode, VTy->getElementType(), CostKind) +
+             TargetTransformInfo::TCC_Basic);
+      break;
     }
-    return Cost;
+  }
+  return Cost;
 }
 
 unsigned WebAssemblyTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
-        unsigned Index) {
-    unsigned Cost = BasicTTIImplBase::getVectorInstrCost(Opcode, Val, Index);
+                                                unsigned Index) {
+  unsigned Cost = BasicTTIImplBase::getVectorInstrCost(Opcode, Val, Index);
 
-    // SIMD128's insert/extract currently only take constant indices.
-    if (Index == -1u)
-        return Cost + 25 * TargetTransformInfo::TCC_Expensive;
+  // SIMD128's insert/extract currently only take constant indices.
+  if (Index == -1u)
+    return Cost + 25 * TargetTransformInfo::TCC_Expensive;
 
-    return Cost;
+  return Cost;
 }
 
 bool WebAssemblyTTIImpl::areInlineCompatible(const Function *Caller,
-        const Function *Callee) const {
-    // Allow inlining only when the Callee has a subset of the Caller's
-    // features. In principle, we should be able to inline regardless of any
-    // features because WebAssembly supports features at module granularity, not
-    // function granularity, but without this restriction it would be possible for
-    // a module to "forget" about features if all the functions that used them
-    // were inlined.
-    const TargetMachine &TM = getTLI()->getTargetMachine();
+                                             const Function *Callee) const {
+  // Allow inlining only when the Callee has a subset of the Caller's
+  // features. In principle, we should be able to inline regardless of any
+  // features because WebAssembly supports features at module granularity, not
+  // function granularity, but without this restriction it would be possible for
+  // a module to "forget" about features if all the functions that used them
+  // were inlined.
+  const TargetMachine &TM = getTLI()->getTargetMachine();
 
-    const FeatureBitset &CallerBits =
-        TM.getSubtargetImpl(*Caller)->getFeatureBits();
-    const FeatureBitset &CalleeBits =
-        TM.getSubtargetImpl(*Callee)->getFeatureBits();
+  const FeatureBitset &CallerBits =
+      TM.getSubtargetImpl(*Caller)->getFeatureBits();
+  const FeatureBitset &CalleeBits =
+      TM.getSubtargetImpl(*Callee)->getFeatureBits();
 
-    return (CallerBits & CalleeBits) == CalleeBits;
+  return (CallerBits & CalleeBits) == CalleeBits;
 }

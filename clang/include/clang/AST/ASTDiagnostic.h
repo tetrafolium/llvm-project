@@ -23,14 +23,10 @@ namespace clang {
 /// \c DiagnosticsEngine::SetArgToStringFn(), where the cookie is an \c
 /// ASTContext pointer.
 void FormatASTNodeDiagnosticArgument(
-    DiagnosticsEngine::ArgumentKind Kind,
-    intptr_t Val,
-    StringRef Modifier,
-    StringRef Argument,
-    ArrayRef<DiagnosticsEngine::ArgumentValue> PrevArgs,
-    SmallVectorImpl<char> &Output,
-    void *Cookie,
+    DiagnosticsEngine::ArgumentKind Kind, intptr_t Val, StringRef Modifier,
+    StringRef Argument, ArrayRef<DiagnosticsEngine::ArgumentValue> PrevArgs,
+    SmallVectorImpl<char> &Output, void *Cookie,
     ArrayRef<intptr_t> QualTypeVals);
-}  // end namespace clang
+} // end namespace clang
 
 #endif

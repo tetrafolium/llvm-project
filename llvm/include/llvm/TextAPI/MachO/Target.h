@@ -23,38 +23,38 @@ namespace MachO {
 // only way to get that information is to parse the triple string.
 class Target {
 public:
-    Target() = default;
-    Target(Architecture Arch, PlatformKind Platform)
-        : Arch(Arch), Platform(Platform) {}
-    explicit Target(const llvm::Triple &Triple)
-        : Arch(mapToArchitecture(Triple)), Platform(mapToPlatformKind(Triple)) {}
+  Target() = default;
+  Target(Architecture Arch, PlatformKind Platform)
+      : Arch(Arch), Platform(Platform) {}
+  explicit Target(const llvm::Triple &Triple)
+      : Arch(mapToArchitecture(Triple)), Platform(mapToPlatformKind(Triple)) {}
 
-    static llvm::Expected<Target> create(StringRef Target);
+  static llvm::Expected<Target> create(StringRef Target);
 
-    operator std::string() const;
+  operator std::string() const;
 
-    Architecture Arch;
-    PlatformKind Platform;
+  Architecture Arch;
+  PlatformKind Platform;
 };
 
 inline bool operator==(const Target &LHS, const Target &RHS) {
-    return std::tie(LHS.Arch, LHS.Platform) == std::tie(RHS.Arch, RHS.Platform);
+  return std::tie(LHS.Arch, LHS.Platform) == std::tie(RHS.Arch, RHS.Platform);
 }
 
 inline bool operator!=(const Target &LHS, const Target &RHS) {
-    return std::tie(LHS.Arch, LHS.Platform) != std::tie(RHS.Arch, RHS.Platform);
+  return std::tie(LHS.Arch, LHS.Platform) != std::tie(RHS.Arch, RHS.Platform);
 }
 
 inline bool operator<(const Target &LHS, const Target &RHS) {
-    return std::tie(LHS.Arch, LHS.Platform) < std::tie(RHS.Arch, RHS.Platform);
+  return std::tie(LHS.Arch, LHS.Platform) < std::tie(RHS.Arch, RHS.Platform);
 }
 
 inline bool operator==(const Target &LHS, const Architecture &RHS) {
-    return LHS.Arch == RHS;
+  return LHS.Arch == RHS;
 }
 
 inline bool operator!=(const Target &LHS, const Architecture &RHS) {
-    return LHS.Arch != RHS;
+  return LHS.Arch != RHS;
 }
 
 PlatformSet mapToPlatformSet(ArrayRef<Target> Targets);

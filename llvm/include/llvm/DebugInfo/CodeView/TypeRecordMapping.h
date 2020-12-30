@@ -22,17 +22,17 @@ class BinaryStreamWriter;
 namespace codeview {
 class TypeRecordMapping : public TypeVisitorCallbacks {
 public:
-    explicit TypeRecordMapping(BinaryStreamReader &Reader) : IO(Reader) {}
-    explicit TypeRecordMapping(BinaryStreamWriter &Writer) : IO(Writer) {}
-    explicit TypeRecordMapping(CodeViewRecordStreamer &Streamer) : IO(Streamer) {}
+  explicit TypeRecordMapping(BinaryStreamReader &Reader) : IO(Reader) {}
+  explicit TypeRecordMapping(BinaryStreamWriter &Writer) : IO(Writer) {}
+  explicit TypeRecordMapping(CodeViewRecordStreamer &Streamer) : IO(Streamer) {}
 
-    using TypeVisitorCallbacks::visitTypeBegin;
-    Error visitTypeBegin(CVType &Record) override;
-    Error visitTypeBegin(CVType &Record, TypeIndex Index) override;
-    Error visitTypeEnd(CVType &Record) override;
+  using TypeVisitorCallbacks::visitTypeBegin;
+  Error visitTypeBegin(CVType &Record) override;
+  Error visitTypeBegin(CVType &Record, TypeIndex Index) override;
+  Error visitTypeEnd(CVType &Record) override;
 
-    Error visitMemberBegin(CVMemberRecord &Record) override;
-    Error visitMemberEnd(CVMemberRecord &Record) override;
+  Error visitMemberBegin(CVMemberRecord &Record) override;
+  Error visitMemberEnd(CVMemberRecord &Record) override;
 
 #define TYPE_RECORD(EnumName, EnumVal, Name)                                   \
   Error visitKnownRecord(CVType &CVR, Name##Record &Record) override;
@@ -43,12 +43,12 @@ public:
 #include "llvm/DebugInfo/CodeView/CodeViewTypes.def"
 
 private:
-    Optional<TypeLeafKind> TypeKind;
-    Optional<TypeLeafKind> MemberKind;
+  Optional<TypeLeafKind> TypeKind;
+  Optional<TypeLeafKind> MemberKind;
 
-    CodeViewRecordIO IO;
+  CodeViewRecordIO IO;
 };
-}
-}
+} // namespace codeview
+} // namespace llvm
 
 #endif

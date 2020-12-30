@@ -24,21 +24,21 @@ class TypeReferenceTracker;
 
 class MinimalTypeDumpVisitor : public codeview::TypeVisitorCallbacks {
 public:
-    MinimalTypeDumpVisitor(LinePrinter &P, uint32_t Width, bool RecordBytes,
-                           bool Hashes, codeview::LazyRandomTypeCollection &Types,
-                           TypeReferenceTracker *RefTracker,
-                           uint32_t NumHashBuckets,
-                           FixedStreamArray<support::ulittle32_t> HashValues,
-                           pdb::TpiStream *Stream)
-        : P(P), Width(Width), RecordBytes(RecordBytes), Hashes(Hashes),
-          Types(Types), RefTracker(RefTracker), NumHashBuckets(NumHashBuckets),
-          HashValues(HashValues), Stream(Stream) {}
+  MinimalTypeDumpVisitor(LinePrinter &P, uint32_t Width, bool RecordBytes,
+                         bool Hashes, codeview::LazyRandomTypeCollection &Types,
+                         TypeReferenceTracker *RefTracker,
+                         uint32_t NumHashBuckets,
+                         FixedStreamArray<support::ulittle32_t> HashValues,
+                         pdb::TpiStream *Stream)
+      : P(P), Width(Width), RecordBytes(RecordBytes), Hashes(Hashes),
+        Types(Types), RefTracker(RefTracker), NumHashBuckets(NumHashBuckets),
+        HashValues(HashValues), Stream(Stream) {}
 
-    Error visitTypeBegin(codeview::CVType &Record,
-                         codeview::TypeIndex Index) override;
-    Error visitTypeEnd(codeview::CVType &Record) override;
-    Error visitMemberBegin(codeview::CVMemberRecord &Record) override;
-    Error visitMemberEnd(codeview::CVMemberRecord &Record) override;
+  Error visitTypeBegin(codeview::CVType &Record,
+                       codeview::TypeIndex Index) override;
+  Error visitTypeEnd(codeview::CVType &Record) override;
+  Error visitMemberBegin(codeview::CVMemberRecord &Record) override;
+  Error visitMemberEnd(codeview::CVMemberRecord &Record) override;
 
 #define TYPE_RECORD(EnumName, EnumVal, Name)                                   \
   Error visitKnownRecord(codeview::CVType &CVR,                                \
@@ -51,18 +51,18 @@ public:
 #include "llvm/DebugInfo/CodeView/CodeViewTypes.def"
 
 private:
-    StringRef getTypeName(codeview::TypeIndex TI) const;
+  StringRef getTypeName(codeview::TypeIndex TI) const;
 
-    LinePrinter &P;
-    uint32_t Width;
-    bool RecordBytes = false;
-    bool Hashes = false;
-    codeview::LazyRandomTypeCollection &Types;
-    pdb::TypeReferenceTracker *RefTracker = nullptr;
-    uint32_t NumHashBuckets;
-    codeview::TypeIndex CurrentTypeIndex;
-    FixedStreamArray<support::ulittle32_t> HashValues;
-    pdb::TpiStream *Stream = nullptr;
+  LinePrinter &P;
+  uint32_t Width;
+  bool RecordBytes = false;
+  bool Hashes = false;
+  codeview::LazyRandomTypeCollection &Types;
+  pdb::TypeReferenceTracker *RefTracker = nullptr;
+  uint32_t NumHashBuckets;
+  codeview::TypeIndex CurrentTypeIndex;
+  FixedStreamArray<support::ulittle32_t> HashValues;
+  pdb::TpiStream *Stream = nullptr;
 };
 } // namespace pdb
 } // namespace llvm

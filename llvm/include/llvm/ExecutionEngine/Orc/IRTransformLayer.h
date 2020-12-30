@@ -28,27 +28,27 @@ namespace orc {
 /// before operating on the module.
 class IRTransformLayer : public IRLayer {
 public:
-    using TransformFunction = unique_function<Expected<ThreadSafeModule>(
-                                  ThreadSafeModule, MaterializationResponsibility &R)>;
+  using TransformFunction = unique_function<Expected<ThreadSafeModule>(
+      ThreadSafeModule, MaterializationResponsibility &R)>;
 
-    IRTransformLayer(ExecutionSession &ES, IRLayer &BaseLayer,
-                     TransformFunction Transform = identityTransform);
+  IRTransformLayer(ExecutionSession &ES, IRLayer &BaseLayer,
+                   TransformFunction Transform = identityTransform);
 
-    void setTransform(TransformFunction Transform) {
-        this->Transform = std::move(Transform);
-    }
+  void setTransform(TransformFunction Transform) {
+    this->Transform = std::move(Transform);
+  }
 
-    void emit(std::unique_ptr<MaterializationResponsibility> R,
-              ThreadSafeModule TSM) override;
+  void emit(std::unique_ptr<MaterializationResponsibility> R,
+            ThreadSafeModule TSM) override;
 
-    static ThreadSafeModule identityTransform(ThreadSafeModule TSM,
-            MaterializationResponsibility &R) {
-        return TSM;
-    }
+  static ThreadSafeModule identityTransform(ThreadSafeModule TSM,
+                                            MaterializationResponsibility &R) {
+    return TSM;
+  }
 
 private:
-    IRLayer &BaseLayer;
-    TransformFunction Transform;
+  IRLayer &BaseLayer;
+  TransformFunction Transform;
 };
 
 } // end namespace orc

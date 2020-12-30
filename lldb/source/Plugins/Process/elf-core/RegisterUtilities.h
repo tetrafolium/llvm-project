@@ -24,27 +24,27 @@ enum { NT_PROCINFO_SIZE = 160 };
 
 /* Size in bytes */
 enum {
-    NT_PROCINFO_CPI_VERSION_SIZE = 4,
-    NT_PROCINFO_CPI_CPISIZE_SIZE = 4,
-    NT_PROCINFO_CPI_SIGNO_SIZE = 4,
-    NT_PROCINFO_CPI_SIGCODE_SIZE = 4,
-    NT_PROCINFO_CPI_SIGPEND_SIZE = 16,
-    NT_PROCINFO_CPI_SIGMASK_SIZE = 16,
-    NT_PROCINFO_CPI_SIGIGNORE_SIZE = 16,
-    NT_PROCINFO_CPI_SIGCATCH_SIZE = 16,
-    NT_PROCINFO_CPI_PID_SIZE = 4,
-    NT_PROCINFO_CPI_PPID_SIZE = 4,
-    NT_PROCINFO_CPI_PGRP_SIZE = 4,
-    NT_PROCINFO_CPI_SID_SIZE = 4,
-    NT_PROCINFO_CPI_RUID_SIZE = 4,
-    NT_PROCINFO_CPI_EUID_SIZE = 4,
-    NT_PROCINFO_CPI_SVUID_SIZE = 4,
-    NT_PROCINFO_CPI_RGID_SIZE = 4,
-    NT_PROCINFO_CPI_EGID_SIZE = 4,
-    NT_PROCINFO_CPI_SVGID_SIZE = 4,
-    NT_PROCINFO_CPI_NLWPS_SIZE = 4,
-    NT_PROCINFO_CPI_NAME_SIZE = 32,
-    NT_PROCINFO_CPI_SIGLWP_SIZE = 4,
+  NT_PROCINFO_CPI_VERSION_SIZE = 4,
+  NT_PROCINFO_CPI_CPISIZE_SIZE = 4,
+  NT_PROCINFO_CPI_SIGNO_SIZE = 4,
+  NT_PROCINFO_CPI_SIGCODE_SIZE = 4,
+  NT_PROCINFO_CPI_SIGPEND_SIZE = 16,
+  NT_PROCINFO_CPI_SIGMASK_SIZE = 16,
+  NT_PROCINFO_CPI_SIGIGNORE_SIZE = 16,
+  NT_PROCINFO_CPI_SIGCATCH_SIZE = 16,
+  NT_PROCINFO_CPI_PID_SIZE = 4,
+  NT_PROCINFO_CPI_PPID_SIZE = 4,
+  NT_PROCINFO_CPI_PGRP_SIZE = 4,
+  NT_PROCINFO_CPI_SID_SIZE = 4,
+  NT_PROCINFO_CPI_RUID_SIZE = 4,
+  NT_PROCINFO_CPI_EUID_SIZE = 4,
+  NT_PROCINFO_CPI_SVUID_SIZE = 4,
+  NT_PROCINFO_CPI_RGID_SIZE = 4,
+  NT_PROCINFO_CPI_EGID_SIZE = 4,
+  NT_PROCINFO_CPI_SVGID_SIZE = 4,
+  NT_PROCINFO_CPI_NLWPS_SIZE = 4,
+  NT_PROCINFO_CPI_NAME_SIZE = 32,
+  NT_PROCINFO_CPI_SIGLWP_SIZE = 4,
 };
 
 namespace AARCH64 {
@@ -59,30 +59,30 @@ enum { NT_REGS = 33, NT_FPREGS = 35 };
 
 namespace OPENBSD {
 enum {
-    NT_PROCINFO = 10,
-    NT_AUXV = 11,
-    NT_REGS = 20,
-    NT_FPREGS = 21,
+  NT_PROCINFO = 10,
+  NT_AUXV = 11,
+  NT_REGS = 20,
+  NT_FPREGS = 21,
 };
 }
 
 struct CoreNote {
-    ELFNote info;
-    DataExtractor data;
+  ELFNote info;
+  DataExtractor data;
 };
 
 // A structure describing how to find a register set in a core file from a given
 // OS.
 struct RegsetDesc {
-    // OS to which this entry applies to. Must not be UnknownOS.
-    llvm::Triple::OSType OS;
+  // OS to which this entry applies to. Must not be UnknownOS.
+  llvm::Triple::OSType OS;
 
-    // Architecture to which this entry applies to. Can be UnknownArch, in which
-    // case it applies to all architectures of a given OS.
-    llvm::Triple::ArchType Arch;
+  // Architecture to which this entry applies to. Can be UnknownArch, in which
+  // case it applies to all architectures of a given OS.
+  llvm::Triple::ArchType Arch;
 
-    // The note type under which the register set can be found.
-    uint32_t Note;
+  // The note type under which the register set can be found.
+  uint32_t Note;
 };
 
 // Returns the register set in Notes which corresponds to the specified Triple

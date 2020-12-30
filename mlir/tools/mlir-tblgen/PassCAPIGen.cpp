@@ -22,13 +22,13 @@ using namespace mlir;
 using namespace mlir::tblgen;
 
 static llvm::cl::OptionCategory
-passGenCat("Options for -gen-pass-capi-header and -gen-pass-capi-impl");
+    passGenCat("Options for -gen-pass-capi-header and -gen-pass-capi-impl");
 static llvm::cl::opt<std::string>
-groupName("prefix",
-          llvm::cl::desc("The prefix to use for this group of passes. The "
-                         "form will be mlirCreate<prefix><passname>, the "
-                         "prefix can avoid conflicts across libraries."),
-          llvm::cl::cat(passGenCat));
+    groupName("prefix",
+              llvm::cl::desc("The prefix to use for this group of passes. The "
+                             "form will be mlirCreate<prefix><passname>, the "
+                             "prefix can avoid conflicts across libraries."),
+              llvm::cl::cat(passGenCat));
 
 const char *const passDecl = R"(
 /* Create {0} Pass. */

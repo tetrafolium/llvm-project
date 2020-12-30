@@ -21,15 +21,15 @@
 namespace clang {
 
 enum TestLanguage {
-    Lang_C89,
-    Lang_C99,
-    Lang_CXX03,
-    Lang_CXX11,
-    Lang_CXX14,
-    Lang_CXX17,
-    Lang_CXX20,
-    Lang_OpenCL,
-    Lang_OBJCXX
+  Lang_C89,
+  Lang_C99,
+  Lang_CXX03,
+  Lang_CXX11,
+  Lang_CXX14,
+  Lang_CXX17,
+  Lang_CXX20,
+  Lang_OpenCL,
+  Lang_OBJCXX
 };
 
 std::vector<std::string> getCommandLineArgsForTesting(TestLanguage Lang);

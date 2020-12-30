@@ -24,27 +24,27 @@ namespace clang {
 /// it is not formally an access of the object, because it has (largely) the
 /// same set of semantic restrictions.
 enum AccessKinds {
-    AK_Read,
-    AK_ReadObjectRepresentation,
-    AK_Assign,
-    AK_Increment,
-    AK_Decrement,
-    AK_MemberCall,
-    AK_DynamicCast,
-    AK_TypeId,
-    AK_Construct,
-    AK_Destroy,
+  AK_Read,
+  AK_ReadObjectRepresentation,
+  AK_Assign,
+  AK_Increment,
+  AK_Decrement,
+  AK_MemberCall,
+  AK_DynamicCast,
+  AK_TypeId,
+  AK_Construct,
+  AK_Destroy,
 };
 
 // The order of this enum is important for diagnostics.
 enum CheckSubobjectKind {
-    CSK_Base,
-    CSK_Derived,
-    CSK_Field,
-    CSK_ArrayToPointer,
-    CSK_ArrayIndex,
-    CSK_Real,
-    CSK_Imag
+  CSK_Base,
+  CSK_Derived,
+  CSK_Field,
+  CSK_ArrayToPointer,
+  CSK_ArrayIndex,
+  CSK_Real,
+  CSK_Imag
 };
 
 namespace interp {
@@ -54,77 +54,77 @@ class SourceInfo;
 /// Interface for the VM to interact with the AST walker's context.
 class State {
 public:
-    virtual ~State();
+  virtual ~State();
 
-    virtual bool checkingForUndefinedBehavior() const = 0;
-    virtual bool checkingPotentialConstantExpression() const = 0;
-    virtual bool noteUndefinedBehavior() = 0;
-    virtual bool keepEvaluatingAfterFailure() const = 0;
-    virtual Frame *getCurrentFrame() = 0;
-    virtual const Frame *getBottomFrame() const = 0;
-    virtual bool hasActiveDiagnostic() = 0;
-    virtual void setActiveDiagnostic(bool Flag) = 0;
-    virtual void setFoldFailureDiagnostic(bool Flag) = 0;
-    virtual Expr::EvalStatus &getEvalStatus() const = 0;
-    virtual ASTContext &getCtx() const = 0;
-    virtual bool hasPriorDiagnostic() = 0;
-    virtual unsigned getCallStackDepth() = 0;
+  virtual bool checkingForUndefinedBehavior() const = 0;
+  virtual bool checkingPotentialConstantExpression() const = 0;
+  virtual bool noteUndefinedBehavior() = 0;
+  virtual bool keepEvaluatingAfterFailure() const = 0;
+  virtual Frame *getCurrentFrame() = 0;
+  virtual const Frame *getBottomFrame() const = 0;
+  virtual bool hasActiveDiagnostic() = 0;
+  virtual void setActiveDiagnostic(bool Flag) = 0;
+  virtual void setFoldFailureDiagnostic(bool Flag) = 0;
+  virtual Expr::EvalStatus &getEvalStatus() const = 0;
+  virtual ASTContext &getCtx() const = 0;
+  virtual bool hasPriorDiagnostic() = 0;
+  virtual unsigned getCallStackDepth() = 0;
 
 public:
-    // Diagnose that the evaluation could not be folded (FF => FoldFailure)
-    OptionalDiagnostic
-    FFDiag(SourceLocation Loc,
-           diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-           unsigned ExtraNotes = 0);
+  // Diagnose that the evaluation could not be folded (FF => FoldFailure)
+  OptionalDiagnostic
+  FFDiag(SourceLocation Loc,
+         diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+         unsigned ExtraNotes = 0);
 
-    OptionalDiagnostic
-    FFDiag(const Expr *E,
-           diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-           unsigned ExtraNotes = 0);
+  OptionalDiagnostic
+  FFDiag(const Expr *E,
+         diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+         unsigned ExtraNotes = 0);
 
-    OptionalDiagnostic
-    FFDiag(const SourceInfo &SI,
-           diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-           unsigned ExtraNotes = 0);
+  OptionalDiagnostic
+  FFDiag(const SourceInfo &SI,
+         diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+         unsigned ExtraNotes = 0);
 
-    /// Diagnose that the evaluation does not produce a C++11 core constant
-    /// expression.
-    ///
-    /// FIXME: Stop evaluating if we're in EM_ConstantExpression or
-    /// EM_PotentialConstantExpression mode and we produce one of these.
-    OptionalDiagnostic
-    CCEDiag(SourceLocation Loc,
-            diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-            unsigned ExtraNotes = 0);
+  /// Diagnose that the evaluation does not produce a C++11 core constant
+  /// expression.
+  ///
+  /// FIXME: Stop evaluating if we're in EM_ConstantExpression or
+  /// EM_PotentialConstantExpression mode and we produce one of these.
+  OptionalDiagnostic
+  CCEDiag(SourceLocation Loc,
+          diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+          unsigned ExtraNotes = 0);
 
-    OptionalDiagnostic
-    CCEDiag(const Expr *E,
-            diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-            unsigned ExtraNotes = 0);
+  OptionalDiagnostic
+  CCEDiag(const Expr *E,
+          diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+          unsigned ExtraNotes = 0);
 
-    OptionalDiagnostic
-    CCEDiag(const SourceInfo &SI,
-            diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
-            unsigned ExtraNotes = 0);
+  OptionalDiagnostic
+  CCEDiag(const SourceInfo &SI,
+          diag::kind DiagId = diag::note_invalid_subexpr_in_const_expr,
+          unsigned ExtraNotes = 0);
 
-    /// Add a note to a prior diagnostic.
-    OptionalDiagnostic Note(SourceLocation Loc, diag::kind DiagId);
+  /// Add a note to a prior diagnostic.
+  OptionalDiagnostic Note(SourceLocation Loc, diag::kind DiagId);
 
-    /// Add a stack of notes to a prior diagnostic.
-    void addNotes(ArrayRef<PartialDiagnosticAt> Diags);
+  /// Add a stack of notes to a prior diagnostic.
+  void addNotes(ArrayRef<PartialDiagnosticAt> Diags);
 
-    /// Directly reports a diagnostic message.
-    DiagnosticBuilder report(SourceLocation Loc, diag::kind DiagId);
+  /// Directly reports a diagnostic message.
+  DiagnosticBuilder report(SourceLocation Loc, diag::kind DiagId);
 
-    const LangOptions &getLangOpts() const;
+  const LangOptions &getLangOpts() const;
 
 private:
-    void addCallStack(unsigned Limit);
+  void addCallStack(unsigned Limit);
 
-    PartialDiagnostic &addDiag(SourceLocation Loc, diag::kind DiagId);
+  PartialDiagnostic &addDiag(SourceLocation Loc, diag::kind DiagId);
 
-    OptionalDiagnostic diag(SourceLocation Loc, diag::kind DiagId,
-                            unsigned ExtraNotes, bool IsCCEDiag);
+  OptionalDiagnostic diag(SourceLocation Loc, diag::kind DiagId,
+                          unsigned ExtraNotes, bool IsCCEDiag);
 };
 
 } // namespace interp

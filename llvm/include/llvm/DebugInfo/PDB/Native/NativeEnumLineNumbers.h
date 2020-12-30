@@ -22,16 +22,16 @@ class IPDBLineNumber;
 
 class NativeEnumLineNumbers : public IPDBEnumChildren<IPDBLineNumber> {
 public:
-    explicit NativeEnumLineNumbers(std::vector<NativeLineNumber> LineNums);
+  explicit NativeEnumLineNumbers(std::vector<NativeLineNumber> LineNums);
 
-    uint32_t getChildCount() const override;
-    ChildTypePtr getChildAtIndex(uint32_t Index) const override;
-    ChildTypePtr getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  ChildTypePtr getChildAtIndex(uint32_t Index) const override;
+  ChildTypePtr getNext() override;
+  void reset() override;
 
 private:
-    std::vector<NativeLineNumber> Lines;
-    uint32_t Index;
+  std::vector<NativeLineNumber> Lines;
+  uint32_t Index;
 };
 } // namespace pdb
 } // namespace llvm

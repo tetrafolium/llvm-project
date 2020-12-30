@@ -20,7 +20,7 @@ enum {
 #define SERIALIZATIONSTART
 #include "clang/Basic/DiagnosticSerializationKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_SERIALIZATION_DIAGNOSTICS
+  NUM_BUILTIN_SERIALIZATION_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

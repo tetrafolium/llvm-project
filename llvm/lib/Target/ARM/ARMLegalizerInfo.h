@@ -26,39 +26,39 @@ class ARMSubtarget;
 /// This class provides the information for the target register banks.
 class ARMLegalizerInfo : public LegalizerInfo {
 public:
-    ARMLegalizerInfo(const ARMSubtarget &ST);
+  ARMLegalizerInfo(const ARMSubtarget &ST);
 
-    bool legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI) const override;
+  bool legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI) const override;
 
 private:
-    void setFCmpLibcallsGNU();
-    void setFCmpLibcallsAEABI();
+  void setFCmpLibcallsGNU();
+  void setFCmpLibcallsAEABI();
 
-    struct FCmpLibcallInfo {
-        // Which libcall this is.
-        RTLIB::Libcall LibcallID;
+  struct FCmpLibcallInfo {
+    // Which libcall this is.
+    RTLIB::Libcall LibcallID;
 
-        // The predicate to be used when comparing the value returned by the
-        // function with a relevant constant (currently hard-coded to zero). This is
-        // necessary because often the libcall will return e.g. a value greater than
-        // 0 to represent 'true' and anything negative to represent 'false', or
-        // maybe 0 to represent 'true' and non-zero for 'false'. If no comparison is
-        // needed, this should be CmpInst::BAD_ICMP_PREDICATE.
-        CmpInst::Predicate Predicate;
-    };
-    using FCmpLibcallsList = SmallVector<FCmpLibcallInfo, 2>;
+    // The predicate to be used when comparing the value returned by the
+    // function with a relevant constant (currently hard-coded to zero). This is
+    // necessary because often the libcall will return e.g. a value greater than
+    // 0 to represent 'true' and anything negative to represent 'false', or
+    // maybe 0 to represent 'true' and non-zero for 'false'. If no comparison is
+    // needed, this should be CmpInst::BAD_ICMP_PREDICATE.
+    CmpInst::Predicate Predicate;
+  };
+  using FCmpLibcallsList = SmallVector<FCmpLibcallInfo, 2>;
 
-    // Map from each FCmp predicate to the corresponding libcall infos. A FCmp
-    // instruction may be lowered to one or two libcalls, which is why we need a
-    // list. If two libcalls are needed, their results will be OR'ed.
-    using FCmpLibcallsMapTy = IndexedMap<FCmpLibcallsList>;
+  // Map from each FCmp predicate to the corresponding libcall infos. A FCmp
+  // instruction may be lowered to one or two libcalls, which is why we need a
+  // list. If two libcalls are needed, their results will be OR'ed.
+  using FCmpLibcallsMapTy = IndexedMap<FCmpLibcallsList>;
 
-    FCmpLibcallsMapTy FCmp32Libcalls;
-    FCmpLibcallsMapTy FCmp64Libcalls;
+  FCmpLibcallsMapTy FCmp32Libcalls;
+  FCmpLibcallsMapTy FCmp64Libcalls;
 
-    // Get the libcall(s) corresponding to \p Predicate for operands of \p Size
-    // bits.
-    FCmpLibcallsList getFCmpLibcalls(CmpInst::Predicate, unsigned Size) const;
+  // Get the libcall(s) corresponding to \p Predicate for operands of \p Size
+  // bits.
+  FCmpLibcallsList getFCmpLibcalls(CmpInst::Predicate, unsigned Size) const;
 };
-} // End llvm namespace.
+} // namespace llvm
 #endif

@@ -28,17 +28,17 @@ class SymbolStream;
 /// the fact that symbol record offsets on disk are off-by-one.
 class GSIHashIterator
     : public iterator_adaptor_base<
-      GSIHashIterator, FixedStreamArrayIterator<PSHashRecord>,
-      std::random_access_iterator_tag, const uint32_t> {
+          GSIHashIterator, FixedStreamArrayIterator<PSHashRecord>,
+          std::random_access_iterator_tag, const uint32_t> {
 public:
-    template <typename T>
-    GSIHashIterator(T &&v)
-        : GSIHashIterator::iterator_adaptor_base(std::forward<T &&>(v)) {}
+  template <typename T>
+  GSIHashIterator(T &&v)
+      : GSIHashIterator::iterator_adaptor_base(std::forward<T &&>(v)) {}
 
-    uint32_t operator*() const {
-        uint32_t Off = this->I->Off;
-        return --Off;
-    }
+  uint32_t operator*() const {
+    uint32_t Off = this->I->Off;
+    return --Off;
+  }
 };
 
 /// From https://github.com/Microsoft/microsoft-pdb/blob/master/PDB/dbi/gsi.cpp
@@ -49,53 +49,39 @@ enum : unsigned { IPHR_HASH = 4096 };
 /// into the PDB symbol stream.
 class GSIHashTable {
 public:
-    const GSIHashHeader *HashHdr;
-    FixedStreamArray<PSHashRecord> HashRecords;
-    FixedStreamArray<support::ulittle32_t> HashBitmap;
-    FixedStreamArray<support::ulittle32_t> HashBuckets;
-    std::array<int32_t, IPHR_HASH + 1> BucketMap;
+  const GSIHashHeader *HashHdr;
+  FixedStreamArray<PSHashRecord> HashRecords;
+  FixedStreamArray<support::ulittle32_t> HashBitmap;
+  FixedStreamArray<support::ulittle32_t> HashBuckets;
+  std::array<int32_t, IPHR_HASH + 1> BucketMap;
 
-    Error read(BinaryStreamReader &Reader);
+  Error read(BinaryStreamReader &Reader);
 
-    uint32_t getVerSignature() const {
-        return HashHdr->VerSignature;
-    }
-    uint32_t getVerHeader() const {
-        return HashHdr->VerHdr;
-    }
-    uint32_t getHashRecordSize() const {
-        return HashHdr->HrSize;
-    }
-    uint32_t getNumBuckets() const {
-        return HashHdr->NumBuckets;
-    }
+  uint32_t getVerSignature() const { return HashHdr->VerSignature; }
+  uint32_t getVerHeader() const { return HashHdr->VerHdr; }
+  uint32_t getHashRecordSize() const { return HashHdr->HrSize; }
+  uint32_t getNumBuckets() const { return HashHdr->NumBuckets; }
 
-    typedef GSIHashHeader iterator;
-    GSIHashIterator begin() const {
-        return GSIHashIterator(HashRecords.begin());
-    }
-    GSIHashIterator end() const {
-        return GSIHashIterator(HashRecords.end());
-    }
+  typedef GSIHashHeader iterator;
+  GSIHashIterator begin() const { return GSIHashIterator(HashRecords.begin()); }
+  GSIHashIterator end() const { return GSIHashIterator(HashRecords.end()); }
 };
 
 class GlobalsStream {
 public:
-    explicit GlobalsStream(std::unique_ptr<msf::MappedBlockStream> Stream);
-    ~GlobalsStream();
-    const GSIHashTable &getGlobalsTable() const {
-        return GlobalsTable;
-    }
-    Error reload();
+  explicit GlobalsStream(std::unique_ptr<msf::MappedBlockStream> Stream);
+  ~GlobalsStream();
+  const GSIHashTable &getGlobalsTable() const { return GlobalsTable; }
+  Error reload();
 
-    std::vector<std::pair<uint32_t, codeview::CVSymbol>>
-            findRecordsByName(StringRef Name, const SymbolStream &Symbols) const;
+  std::vector<std::pair<uint32_t, codeview::CVSymbol>>
+  findRecordsByName(StringRef Name, const SymbolStream &Symbols) const;
 
 private:
-    GSIHashTable GlobalsTable;
-    std::unique_ptr<msf::MappedBlockStream> Stream;
+  GSIHashTable GlobalsTable;
+  std::unique_ptr<msf::MappedBlockStream> Stream;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

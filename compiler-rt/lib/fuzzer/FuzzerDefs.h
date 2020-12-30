@@ -20,15 +20,10 @@
 #include <string>
 #include <vector>
 
-
 namespace fuzzer {
 
-template <class T> T Min(T a, T b) {
-    return a < b ? a : b;
-}
-template <class T> T Max(T a, T b) {
-    return a > b ? a : b;
-}
+template <class T> T Min(T a, T b) { return a < b ? a : b; }
+template <class T> T Max(T a, T b) { return a > b ? a : b; }
 
 class Random;
 class Dictionary;
@@ -44,24 +39,20 @@ extern ExternalFunctions *EF;
 
 // We are using a custom allocator to give a different symbol name to STL
 // containers in order to avoid ODR violations.
-template<typename T>
-class fuzzer_allocator: public std::allocator<T> {
+template <typename T> class fuzzer_allocator : public std::allocator<T> {
 public:
-    fuzzer_allocator() = default;
+  fuzzer_allocator() = default;
 
-    template<class U>
-    fuzzer_allocator(const fuzzer_allocator<U>&) {}
+  template <class U> fuzzer_allocator(const fuzzer_allocator<U> &) {}
 
-    template<class Other>
-    struct rebind {
-        typedef fuzzer_allocator<Other> other;
-    };
+  template <class Other> struct rebind {
+    typedef fuzzer_allocator<Other> other;
+  };
 };
 
-template<typename T>
-using Vector = std::vector<T, fuzzer_allocator<T>>;
+template <typename T> using Vector = std::vector<T, fuzzer_allocator<T>>;
 
-template<typename T>
+template <typename T>
 using Set = std::set<T, std::less<T>, fuzzer_allocator<T>>;
 
 typedef Vector<uint8_t> Unit;
@@ -76,6 +67,6 @@ void ClearExtraCounters();
 
 extern bool RunningUserCallback;
 
-}  // namespace fuzzer
+} // namespace fuzzer
 
-#endif  // LLVM_FUZZER_DEFS_H
+#endif // LLVM_FUZZER_DEFS_H

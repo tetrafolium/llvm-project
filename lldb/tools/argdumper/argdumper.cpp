@@ -11,10 +11,10 @@
 using namespace llvm;
 
 int main(int argc, char *argv[]) {
-    json::Array Arguments;
-    for (int i = 1; i < argc; i++) {
-        Arguments.push_back(argv[i]);
-    }
-    llvm::outs() << json::Object({{"arguments", std::move(Arguments)}});
-    return 0;
+  json::Array Arguments;
+  for (int i = 1; i < argc; i++) {
+    Arguments.push_back(argv[i]);
+  }
+  llvm::outs() << json::Object({{"arguments", std::move(Arguments)}});
+  return 0;
 }

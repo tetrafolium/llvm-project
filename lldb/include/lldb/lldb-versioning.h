@@ -108,13 +108,13 @@
 #if defined(LLDB_API_CHECK_VERSIONING) &&                                      \
     !defined(LLDB_API_CHECK_VERSIONING_WORKS)
 #error                                                                         \
-"API version checking will not work here - please disable or create and submit patches to lldb-versioning.h"
+    "API version checking will not work here - please disable or create and submit patches to lldb-versioning.h"
 #endif
 
 #if defined(LLDB_API_CHECK_VERSIONING_WORKS) &&                                \
     (!defined(LLDB_API_IMPL_DEPRECATED) || !defined(LLDB_API_IMPL_TOONEW))
 #error                                                                         \
-"LLDB_API_CHECK_VERSIONING_WORKS needs LLDB_API_IMPL_DEPRECATED and LLDB_API_IMPL_TOONEW to be defined"
+    "LLDB_API_CHECK_VERSIONING_WORKS needs LLDB_API_IMPL_DEPRECATED and LLDB_API_IMPL_TOONEW to be defined"
 #endif
 
 #if defined(LLDB_API_CHECK_VERSIONING) &&                                      \
@@ -124,7 +124,7 @@
 #if defined(LLDB_API_MAJOR_VERSION) &&                                         \
     (LLDB_API_MAJOR_VERSION != LLDB_API_MAJOR_VERSION_WANTED)
 #error                                                                         \
-"Cannot link using this LLDB version - public API versions are incompatible"
+    "Cannot link using this LLDB version - public API versions are incompatible"
 #endif
 
 #define LLDB_API_MINOR_VERSION_DOT_0 0

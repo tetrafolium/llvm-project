@@ -28,64 +28,48 @@ namespace libunwind {
 
 class _LIBUNWIND_HIDDEN RWMutex {
 public:
-    bool lock_shared() {
-        return true;
-    }
-    bool unlock_shared() {
-        return true;
-    }
-    bool lock() {
-        return true;
-    }
-    bool unlock() {
-        return true;
-    }
+  bool lock_shared() { return true; }
+  bool unlock_shared() { return true; }
+  bool lock() { return true; }
+  bool unlock() { return true; }
 };
 
 #elif defined(_WIN32)
 
 class _LIBUNWIND_HIDDEN RWMutex {
 public:
-    bool lock_shared() {
-        AcquireSRWLockShared(&_lock);
-        return true;
-    }
-    bool unlock_shared() {
-        ReleaseSRWLockShared(&_lock);
-        return true;
-    }
-    bool lock() {
-        AcquireSRWLockExclusive(&_lock);
-        return true;
-    }
-    bool unlock() {
-        ReleaseSRWLockExclusive(&_lock);
-        return true;
-    }
+  bool lock_shared() {
+    AcquireSRWLockShared(&_lock);
+    return true;
+  }
+  bool unlock_shared() {
+    ReleaseSRWLockShared(&_lock);
+    return true;
+  }
+  bool lock() {
+    AcquireSRWLockExclusive(&_lock);
+    return true;
+  }
+  bool unlock() {
+    ReleaseSRWLockExclusive(&_lock);
+    return true;
+  }
 
 private:
-    SRWLOCK _lock = SRWLOCK_INIT;
+  SRWLOCK _lock = SRWLOCK_INIT;
 };
 
 #elif !defined(LIBUNWIND_USE_WEAK_PTHREAD)
 
 class _LIBUNWIND_HIDDEN RWMutex {
 public:
-    bool lock_shared() {
-        return pthread_rwlock_rdlock(&_lock) == 0;
-    }
-    bool unlock_shared() {
-        return pthread_rwlock_unlock(&_lock) == 0;
-    }
-    bool lock() {
-        return pthread_rwlock_wrlock(&_lock) == 0;
-    }
-    bool unlock() {
-        return pthread_rwlock_unlock(&_lock) == 0;
-    }
+  bool lock_shared() { return pthread_rwlock_rdlock(&_lock) == 0; }
+  bool unlock_shared() { return pthread_rwlock_unlock(&_lock) == 0; }
+  bool lock() { return pthread_rwlock_wrlock(&_lock) == 0; }
+  bool unlock() { return pthread_rwlock_unlock(&_lock) == 0; }
 
 private:
-    pthread_rwlock_t _lock = PTHREAD_RWLOCK_INITIALIZER;
+  pthread_rwlock_t _lock = PTHREAD_RWLOCK_INITIALIZER;
 };
 
 #else
@@ -106,21 +90,21 @@ pthread_rwlock_unlock(pthread_rwlock_t *lock);
 
 class _LIBUNWIND_HIDDEN RWMutex {
 public:
-    bool lock_shared() {
-        return !pthread_create || (pthread_rwlock_rdlock(&_lock) == 0);
-    }
-    bool unlock_shared() {
-        return !pthread_create || (pthread_rwlock_unlock(&_lock) == 0);
-    }
-    bool lock() {
-        return !pthread_create || (pthread_rwlock_wrlock(&_lock) == 0);
-    }
-    bool unlock() {
-        return !pthread_create || (pthread_rwlock_unlock(&_lock) == 0);
-    }
+  bool lock_shared() {
+    return !pthread_create || (pthread_rwlock_rdlock(&_lock) == 0);
+  }
+  bool unlock_shared() {
+    return !pthread_create || (pthread_rwlock_unlock(&_lock) == 0);
+  }
+  bool lock() {
+    return !pthread_create || (pthread_rwlock_wrlock(&_lock) == 0);
+  }
+  bool unlock() {
+    return !pthread_create || (pthread_rwlock_unlock(&_lock) == 0);
+  }
 
 private:
-    pthread_rwlock_t _lock = PTHREAD_RWLOCK_INITIALIZER;
+  pthread_rwlock_t _lock = PTHREAD_RWLOCK_INITIALIZER;
 };
 
 #endif

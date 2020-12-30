@@ -20,29 +20,27 @@ namespace gsym {
 /// size of a line table entry is calculated by looking at the next entry
 /// in the FunctionInfo's vector of entries.
 struct LineEntry {
-    uint64_t Addr; ///< Start address of this line entry.
-    uint32_t File; ///< 1 based index of file in FileTable
-    uint32_t Line; ///< Source line number.
-    LineEntry(uint64_t A = 0, uint32_t F = 0, uint32_t L = 0)
-        : Addr(A), File(F), Line(L) {}
-    bool isValid() {
-        return File != 0;
-    }
+  uint64_t Addr; ///< Start address of this line entry.
+  uint32_t File; ///< 1 based index of file in FileTable
+  uint32_t Line; ///< Source line number.
+  LineEntry(uint64_t A = 0, uint32_t F = 0, uint32_t L = 0)
+      : Addr(A), File(F), Line(L) {}
+  bool isValid() { return File != 0; }
 };
 
 inline raw_ostream &operator<<(raw_ostream &OS, const LineEntry &LE) {
-    return OS << "addr=" << HEX64(LE.Addr) << ", file=" << format("%3u", LE.File)
-           << ", line=" << format("%3u", LE.Line);
+  return OS << "addr=" << HEX64(LE.Addr) << ", file=" << format("%3u", LE.File)
+            << ", line=" << format("%3u", LE.Line);
 }
 
 inline bool operator==(const LineEntry &LHS, const LineEntry &RHS) {
-    return LHS.Addr == RHS.Addr && LHS.File == RHS.File && LHS.Line == RHS.Line;
+  return LHS.Addr == RHS.Addr && LHS.File == RHS.File && LHS.Line == RHS.Line;
 }
 inline bool operator!=(const LineEntry &LHS, const LineEntry &RHS) {
-    return !(LHS == RHS);
+  return !(LHS == RHS);
 }
 inline bool operator<(const LineEntry &LHS, const LineEntry &RHS) {
-    return LHS.Addr < RHS.Addr;
+  return LHS.Addr < RHS.Addr;
 }
 } // namespace gsym
 } // namespace llvm

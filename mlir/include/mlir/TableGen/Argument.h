@@ -35,27 +35,25 @@ namespace tblgen {
 
 // A struct wrapping an op attribute and its name together
 struct NamedAttribute {
-    llvm::StringRef name;
-    Attribute attr;
+  llvm::StringRef name;
+  Attribute attr;
 };
 
 // A struct wrapping an op operand/result's constraint and its name together
 struct NamedTypeConstraint {
-    // Returns true if this operand/result has constraint to be satisfied.
-    bool hasPredicate() const;
-    // Returns true if this is an optional type constraint. This is a special case
-    // of variadic for 0 or 1 type.
-    bool isOptional() const;
-    // Returns true if this operand/result is variadic.
-    bool isVariadic() const;
-    // Returns true if this is a variable length type constraint. This is either
-    // variadic or optional.
-    bool isVariableLength() const {
-        return isOptional() || isVariadic();
-    }
+  // Returns true if this operand/result has constraint to be satisfied.
+  bool hasPredicate() const;
+  // Returns true if this is an optional type constraint. This is a special case
+  // of variadic for 0 or 1 type.
+  bool isOptional() const;
+  // Returns true if this operand/result is variadic.
+  bool isVariadic() const;
+  // Returns true if this is a variable length type constraint. This is either
+  // variadic or optional.
+  bool isVariableLength() const { return isOptional() || isVariadic(); }
 
-    llvm::StringRef name;
-    TypeConstraint constraint;
+  llvm::StringRef name;
+  TypeConstraint constraint;
 };
 
 // Operation argument: either attribute or operand

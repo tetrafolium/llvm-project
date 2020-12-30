@@ -52,7 +52,7 @@ using TranslateFromMLIRFunction =
 /// all MLIR constructs needed during the process inside the given context. This
 /// can be used for round-tripping external formats through the MLIR system.
 using TranslateFunction = std::function<LogicalResult(
-                              llvm::SourceMgr &sourceMgr, llvm::raw_ostream &output, MLIRContext *)>;
+    llvm::SourceMgr &sourceMgr, llvm::raw_ostream &output, MLIRContext *)>;
 
 /// Use Translate[ToMLIR|FromMLIR]Registration as an initializer that
 /// registers a function and associates it with name. This requires that a
@@ -69,30 +69,30 @@ using TranslateFunction = std::function<LogicalResult(
 ///
 /// \{
 struct TranslateToMLIRRegistration {
-    TranslateToMLIRRegistration(llvm::StringRef name,
-                                const TranslateSourceMgrToMLIRFunction &function);
-    TranslateToMLIRRegistration(llvm::StringRef name,
-                                const TranslateStringRefToMLIRFunction &function);
+  TranslateToMLIRRegistration(llvm::StringRef name,
+                              const TranslateSourceMgrToMLIRFunction &function);
+  TranslateToMLIRRegistration(llvm::StringRef name,
+                              const TranslateStringRefToMLIRFunction &function);
 };
 
 struct TranslateFromMLIRRegistration {
-    TranslateFromMLIRRegistration(
-        llvm::StringRef name, const TranslateFromMLIRFunction &function,
-        std::function<void(DialectRegistry &)> dialectRegistration =
-    [](DialectRegistry &) {});
+  TranslateFromMLIRRegistration(
+      llvm::StringRef name, const TranslateFromMLIRFunction &function,
+      std::function<void(DialectRegistry &)> dialectRegistration =
+          [](DialectRegistry &) {});
 };
 struct TranslateRegistration {
-    TranslateRegistration(llvm::StringRef name,
-                          const TranslateFunction &function);
+  TranslateRegistration(llvm::StringRef name,
+                        const TranslateFunction &function);
 };
 /// \}
 
 /// A command line parser for translation functions.
 struct TranslationParser : public llvm::cl::parser<const TranslateFunction *> {
-    TranslationParser(llvm::cl::Option &opt);
+  TranslationParser(llvm::cl::Option &opt);
 
-    void printOptionInfo(const llvm::cl::Option &o,
-                         size_t globalWidth) const override;
+  void printOptionInfo(const llvm::cl::Option &o,
+                       size_t globalWidth) const override;
 };
 
 /// Translate to/from an MLIR module from/to an external representation (e.g.

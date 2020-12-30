@@ -37,7 +37,7 @@
 using namespace llvm;
 
 static cl::opt<std::string>
-InputFilename(cl::Positional, cl::desc("<input bitcode>"), cl::init("-"));
+    InputFilename(cl::Positional, cl::desc("<input bitcode>"), cl::init("-"));
 
 static cl::opt<bool> Dump("dump", cl::desc("Dump low level bitcode trace"));
 
@@ -50,65 +50,65 @@ static cl::opt<bool> NoHistogram("disable-histogram",
 
 static cl::opt<bool> NonSymbolic("non-symbolic",
                                  cl::desc("Emit numeric info in dump even if"
-                                         " symbolic info is available"));
+                                          " symbolic info is available"));
 
 static cl::opt<std::string>
-BlockInfoFilename("block-info",
-                  cl::desc("Use the BLOCK_INFO from the given file"));
+    BlockInfoFilename("block-info",
+                      cl::desc("Use the BLOCK_INFO from the given file"));
 
 static cl::opt<bool>
-ShowBinaryBlobs("show-binary-blobs",
-                cl::desc("Print binary blobs using hex escapes"));
+    ShowBinaryBlobs("show-binary-blobs",
+                    cl::desc("Print binary blobs using hex escapes"));
 
 static cl::opt<std::string> CheckHash(
     "check-hash",
     cl::desc("Check module hash using the argument as a string table"));
 
 static Error reportError(StringRef Message) {
-    return createStringError(std::errc::illegal_byte_sequence, Message.data());
+  return createStringError(std::errc::illegal_byte_sequence, Message.data());
 }
 
 static Expected<std::unique_ptr<MemoryBuffer>> openBitcodeFile(StringRef Path) {
-    // Read the input file.
-    Expected<std::unique_ptr<MemoryBuffer>> MemBufOrErr =
-            errorOrToExpected(MemoryBuffer::getFileOrSTDIN(Path));
-    if (Error E = MemBufOrErr.takeError())
-        return std::move(E);
+  // Read the input file.
+  Expected<std::unique_ptr<MemoryBuffer>> MemBufOrErr =
+      errorOrToExpected(MemoryBuffer::getFileOrSTDIN(Path));
+  if (Error E = MemBufOrErr.takeError())
+    return std::move(E);
 
-    std::unique_ptr<MemoryBuffer> MemBuf = std::move(*MemBufOrErr);
+  std::unique_ptr<MemoryBuffer> MemBuf = std::move(*MemBufOrErr);
 
-    if (MemBuf->getBufferSize() & 3)
-        return reportError(
-                   "Bitcode stream should be a multiple of 4 bytes in length");
-    return std::move(MemBuf);
+  if (MemBuf->getBufferSize() & 3)
+    return reportError(
+        "Bitcode stream should be a multiple of 4 bytes in length");
+  return std::move(MemBuf);
 }
 
 int main(int argc, char **argv) {
-    InitLLVM X(argc, argv);
-    cl::ParseCommandLineOptions(argc, argv, "llvm-bcanalyzer file analyzer\n");
-    ExitOnError ExitOnErr("llvm-bcanalyzer: ");
+  InitLLVM X(argc, argv);
+  cl::ParseCommandLineOptions(argc, argv, "llvm-bcanalyzer file analyzer\n");
+  ExitOnError ExitOnErr("llvm-bcanalyzer: ");
 
-    std::unique_ptr<MemoryBuffer> MB = ExitOnErr(openBitcodeFile(InputFilename));
-    std::unique_ptr<MemoryBuffer> BlockInfoMB = nullptr;
-    if (!BlockInfoFilename.empty())
-        BlockInfoMB = ExitOnErr(openBitcodeFile(BlockInfoFilename));
+  std::unique_ptr<MemoryBuffer> MB = ExitOnErr(openBitcodeFile(InputFilename));
+  std::unique_ptr<MemoryBuffer> BlockInfoMB = nullptr;
+  if (!BlockInfoFilename.empty())
+    BlockInfoMB = ExitOnErr(openBitcodeFile(BlockInfoFilename));
 
-    BitcodeAnalyzer BA(MB->getBuffer(),
-                       BlockInfoMB ? Optional<StringRef>(BlockInfoMB->getBuffer())
-                       : None);
+  BitcodeAnalyzer BA(MB->getBuffer(),
+                     BlockInfoMB ? Optional<StringRef>(BlockInfoMB->getBuffer())
+                                 : None);
 
-    BCDumpOptions O(outs());
-    O.Histogram = !NoHistogram;
-    O.Symbolic = !NonSymbolic;
-    O.ShowBinaryBlobs = ShowBinaryBlobs;
+  BCDumpOptions O(outs());
+  O.Histogram = !NoHistogram;
+  O.Symbolic = !NonSymbolic;
+  O.ShowBinaryBlobs = ShowBinaryBlobs;
 
-    ExitOnErr(BA.analyze(
-                  Dump ? Optional<BCDumpOptions>(O) : Optional<BCDumpOptions>(None),
-                  CheckHash.empty() ? None : Optional<StringRef>(CheckHash)));
+  ExitOnErr(BA.analyze(
+      Dump ? Optional<BCDumpOptions>(O) : Optional<BCDumpOptions>(None),
+      CheckHash.empty() ? None : Optional<StringRef>(CheckHash)));
 
-    if (Dump)
-        outs() << "\n\n";
+  if (Dump)
+    outs() << "\n\n";
 
-    BA.printStats(O, StringRef(InputFilename.getValue()));
-    return 0;
+  BA.printStats(O, StringRef(InputFilename.getValue()));
+  return 0;
 }

@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 int LLVM_LIBC_ENTRYPOINT(feraiseexcept)(int e) {
-    return fputil::raiseExcept(e);
+  return fputil::raiseExcept(e);
 }
 
 } // namespace __llvm_libc

@@ -27,8 +27,8 @@ class SemanticsContext;
 class Symbol;
 
 struct RuntimeDerivedTypeTables {
-    Scope *schemata{nullptr};
-    std::set<std::string> names;
+  Scope *schemata{nullptr};
+  std::set<std::string> names;
 };
 
 RuntimeDerivedTypeTables BuildRuntimeDerivedTypeTables(SemanticsContext &);

@@ -30,16 +30,16 @@ typedef struct ompt_callbacks_internal_s {
 #define ompt_event_macro(event, callback, eventid)                             \
   callback ompt_callback(event);
 
-    FOREACH_OMPT_EVENT(ompt_event_macro)
+  FOREACH_OMPT_EVENT(ompt_event_macro)
 
 #undef ompt_event_macro
 } ompt_callbacks_internal_t;
 
 typedef struct ompt_callbacks_active_s {
-    unsigned int enabled : 1;
+  unsigned int enabled : 1;
 #define ompt_event_macro(event, callback, eventid) unsigned int event : 1;
 
-    FOREACH_OMPT_EVENT(ompt_event_macro)
+  FOREACH_OMPT_EVENT(ompt_event_macro)
 
 #undef ompt_event_macro
 } ompt_callbacks_active_t;
@@ -53,34 +53,34 @@ typedef struct ompt_callbacks_active_s {
       (info->td_flags.merged_if0 ? ompt_task_mergeable : 0x0)
 
 typedef struct {
-    ompt_frame_t frame;
-    ompt_data_t task_data;
-    struct kmp_taskdata *scheduling_parent;
-    int thread_num;
+  ompt_frame_t frame;
+  ompt_data_t task_data;
+  struct kmp_taskdata *scheduling_parent;
+  int thread_num;
 } ompt_task_info_t;
 
 typedef struct {
-    ompt_data_t parallel_data;
-    void *master_return_address;
+  ompt_data_t parallel_data;
+  void *master_return_address;
 } ompt_team_info_t;
 
 typedef struct ompt_lw_taskteam_s {
-    ompt_team_info_t ompt_team_info;
-    ompt_task_info_t ompt_task_info;
-    int heap;
-    struct ompt_lw_taskteam_s *parent;
+  ompt_team_info_t ompt_team_info;
+  ompt_task_info_t ompt_task_info;
+  int heap;
+  struct ompt_lw_taskteam_s *parent;
 } ompt_lw_taskteam_t;
 
 typedef struct {
-    ompt_data_t thread_data;
-    ompt_data_t task_data; /* stored here from implicit barrier-begin until
-                            implicit-task-end */
-    void *return_address; /* stored here on entry of runtime */
-    ompt_state_t state;
-    ompt_wait_id_t wait_id;
-    int ompt_task_yielded;
-    int parallel_flags; // information for the last parallel region invoked
-    void *idle_frame;
+  ompt_data_t thread_data;
+  ompt_data_t task_data; /* stored here from implicit barrier-begin until
+                          implicit-task-end */
+  void *return_address; /* stored here on entry of runtime */
+  ompt_state_t state;
+  ompt_wait_id_t wait_id;
+  int ompt_task_yielded;
+  int parallel_flags; // information for the last parallel region invoked
+  void *idle_frame;
 } ompt_thread_info_t;
 
 extern ompt_callbacks_internal_t ompt_callbacks;

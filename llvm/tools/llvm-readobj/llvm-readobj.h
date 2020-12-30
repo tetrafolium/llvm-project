@@ -11,8 +11,8 @@
 
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Compiler.h"
-#include "llvm/Support/ErrorOr.h"
 #include "llvm/Support/Error.h"
+#include "llvm/Support/ErrorOr.h"
 #include <string>
 
 namespace llvm {
@@ -25,9 +25,9 @@ LLVM_ATTRIBUTE_NORETURN void reportError(Error Err, StringRef Input);
 void reportWarning(Error Err, StringRef Input);
 
 template <class T> T unwrapOrError(StringRef Input, Expected<T> EO) {
-    if (EO)
-        return *EO;
-    reportError(EO.takeError(), Input);
+  if (EO)
+    return *EO;
+  reportError(EO.takeError(), Input);
 }
 } // namespace llvm
 
@@ -43,10 +43,10 @@ enum OutputStyleTy { LLVM, GNU };
 extern llvm::cl::opt<OutputStyleTy> Output;
 } // namespace opts
 
-#define LLVM_READOBJ_ENUM_ENT(ns, enum) \
+#define LLVM_READOBJ_ENUM_ENT(ns, enum)                                        \
   { #enum, ns::enum }
 
-#define LLVM_READOBJ_ENUM_CLASS_ENT(enum_class, enum) \
-  { #enum, std::underlying_type<enum_class>::type(enum_class::enum) }
+#define LLVM_READOBJ_ENUM_CLASS_ENT(enum_class, enum)                          \
+  { #enum, std::underlying_type < enum_class> ::type(enum_class::enum) }
 
 #endif

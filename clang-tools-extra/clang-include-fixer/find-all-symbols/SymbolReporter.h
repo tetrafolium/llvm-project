@@ -17,10 +17,10 @@ namespace find_all_symbols {
 /// An interface for classes that collect symbols.
 class SymbolReporter {
 public:
-    virtual ~SymbolReporter() = default;
+  virtual ~SymbolReporter() = default;
 
-    virtual void reportSymbols(llvm::StringRef FileName,
-                               const SymbolInfo::SignalMap &Symbols) = 0;
+  virtual void reportSymbols(llvm::StringRef FileName,
+                             const SymbolInfo::SignalMap &Symbols) = 0;
 };
 
 } // namespace find_all_symbols

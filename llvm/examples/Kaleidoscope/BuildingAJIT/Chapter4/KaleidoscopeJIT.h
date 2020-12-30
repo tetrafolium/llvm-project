@@ -39,17 +39,17 @@ class ExprAST;
 
 /// FunctionAST - This class represents a function definition itself.
 class FunctionAST {
-    std::unique_ptr<PrototypeAST> Proto;
-    std::unique_ptr<ExprAST> Body;
+  std::unique_ptr<PrototypeAST> Proto;
+  std::unique_ptr<ExprAST> Body;
 
 public:
-    FunctionAST(std::unique_ptr<PrototypeAST> Proto,
-                std::unique_ptr<ExprAST> Body)
-        : Proto(std::move(Proto)), Body(std::move(Body)) {}
+  FunctionAST(std::unique_ptr<PrototypeAST> Proto,
+              std::unique_ptr<ExprAST> Body)
+      : Proto(std::move(Proto)), Body(std::move(Body)) {}
 
-    const PrototypeAST& getProto() const;
-    const std::string& getName() const;
-    llvm::Function *codegen();
+  const PrototypeAST &getProto() const;
+  const std::string &getName() const;
+  llvm::Function *codegen();
 };
 
 /// This will compile FnAST to IR, rename the function to add the given
@@ -57,7 +57,7 @@ public:
 /// and then take ownership of the module that the function was compiled
 /// into.
 llvm::orc::ThreadSafeModule irgenAndTakeOwnership(FunctionAST &FnAST,
-        const std::string &Suffix);
+                                                  const std::string &Suffix);
 
 namespace llvm {
 namespace orc {
@@ -67,52 +67,52 @@ class KaleidoscopeJIT;
 
 class KaleidoscopeASTMaterializationUnit : public MaterializationUnit {
 public:
-    KaleidoscopeASTMaterializationUnit(KaleidoscopeASTLayer &L,
-                                       std::unique_ptr<FunctionAST> F);
+  KaleidoscopeASTMaterializationUnit(KaleidoscopeASTLayer &L,
+                                     std::unique_ptr<FunctionAST> F);
 
-    StringRef getName() const override {
-        return "KaleidoscopeASTMaterializationUnit";
-    }
+  StringRef getName() const override {
+    return "KaleidoscopeASTMaterializationUnit";
+  }
 
-    void materialize(std::unique_ptr<MaterializationResponsibility> R) override;
+  void materialize(std::unique_ptr<MaterializationResponsibility> R) override;
 
 private:
-    void discard(const JITDylib &JD, const SymbolStringPtr &Sym) override {
-        llvm_unreachable("Kaleidoscope functions are not overridable");
-    }
+  void discard(const JITDylib &JD, const SymbolStringPtr &Sym) override {
+    llvm_unreachable("Kaleidoscope functions are not overridable");
+  }
 
-    KaleidoscopeASTLayer &L;
-    std::unique_ptr<FunctionAST> F;
+  KaleidoscopeASTLayer &L;
+  std::unique_ptr<FunctionAST> F;
 };
 
 class KaleidoscopeASTLayer {
 public:
-    KaleidoscopeASTLayer(IRLayer &BaseLayer, const DataLayout &DL)
-        : BaseLayer(BaseLayer), DL(DL) {}
+  KaleidoscopeASTLayer(IRLayer &BaseLayer, const DataLayout &DL)
+      : BaseLayer(BaseLayer), DL(DL) {}
 
-    Error add(ResourceTrackerSP RT, std::unique_ptr<FunctionAST> F) {
-        return RT->getJITDylib().define(
-                   std::make_unique<KaleidoscopeASTMaterializationUnit>(*this,
-                           std::move(F)),
-                   RT);
-    }
+  Error add(ResourceTrackerSP RT, std::unique_ptr<FunctionAST> F) {
+    return RT->getJITDylib().define(
+        std::make_unique<KaleidoscopeASTMaterializationUnit>(*this,
+                                                             std::move(F)),
+        RT);
+  }
 
-    void emit(std::unique_ptr<MaterializationResponsibility> MR,
-              std::unique_ptr<FunctionAST> F) {
-        BaseLayer.emit(std::move(MR), irgenAndTakeOwnership(*F, ""));
-    }
+  void emit(std::unique_ptr<MaterializationResponsibility> MR,
+            std::unique_ptr<FunctionAST> F) {
+    BaseLayer.emit(std::move(MR), irgenAndTakeOwnership(*F, ""));
+  }
 
-    SymbolFlagsMap getInterface(FunctionAST &F) {
-        MangleAndInterner Mangle(BaseLayer.getExecutionSession(), DL);
-        SymbolFlagsMap Symbols;
-        Symbols[Mangle(F.getName())] =
-            JITSymbolFlags(JITSymbolFlags::Exported | JITSymbolFlags::Callable);
-        return Symbols;
-    }
+  SymbolFlagsMap getInterface(FunctionAST &F) {
+    MangleAndInterner Mangle(BaseLayer.getExecutionSession(), DL);
+    SymbolFlagsMap Symbols;
+    Symbols[Mangle(F.getName())] =
+        JITSymbolFlags(JITSymbolFlags::Exported | JITSymbolFlags::Callable);
+    return Symbols;
+  }
 
 private:
-    IRLayer &BaseLayer;
-    const DataLayout &DL;
+  IRLayer &BaseLayer;
+  const DataLayout &DL;
 };
 
 KaleidoscopeASTMaterializationUnit::KaleidoscopeASTMaterializationUnit(
@@ -121,134 +121,128 @@ KaleidoscopeASTMaterializationUnit::KaleidoscopeASTMaterializationUnit(
 
 void KaleidoscopeASTMaterializationUnit::materialize(
     std::unique_ptr<MaterializationResponsibility> R) {
-    L.emit(std::move(R), std::move(F));
+  L.emit(std::move(R), std::move(F));
 }
 
 class KaleidoscopeJIT {
 private:
-    std::unique_ptr<TargetProcessControl> TPC;
-    std::unique_ptr<ExecutionSession> ES;
-    std::unique_ptr<TPCIndirectionUtils> TPCIU;
+  std::unique_ptr<TargetProcessControl> TPC;
+  std::unique_ptr<ExecutionSession> ES;
+  std::unique_ptr<TPCIndirectionUtils> TPCIU;
 
-    DataLayout DL;
-    MangleAndInterner Mangle;
+  DataLayout DL;
+  MangleAndInterner Mangle;
 
-    RTDyldObjectLinkingLayer ObjectLayer;
-    IRCompileLayer CompileLayer;
-    IRTransformLayer OptimizeLayer;
-    KaleidoscopeASTLayer ASTLayer;
+  RTDyldObjectLinkingLayer ObjectLayer;
+  IRCompileLayer CompileLayer;
+  IRTransformLayer OptimizeLayer;
+  KaleidoscopeASTLayer ASTLayer;
 
-    JITDylib &MainJD;
+  JITDylib &MainJD;
 
-    static void handleLazyCallThroughError() {
-        errs() << "LazyCallThrough error: Could not find function body";
-        exit(1);
-    }
+  static void handleLazyCallThroughError() {
+    errs() << "LazyCallThrough error: Could not find function body";
+    exit(1);
+  }
 
 public:
-    KaleidoscopeJIT(std::unique_ptr<TargetProcessControl> TPC,
-                    std::unique_ptr<ExecutionSession> ES,
-                    std::unique_ptr<TPCIndirectionUtils> TPCIU,
-                    JITTargetMachineBuilder JTMB, DataLayout DL)
-        : TPC(std::move(TPC)), ES(std::move(ES)), TPCIU(std::move(TPCIU)),
-          DL(std::move(DL)), Mangle(*this->ES, this->DL),
-          ObjectLayer(*this->ES,
-                      []() {
-        return std::make_unique<SectionMemoryManager>();
-    }),
-    CompileLayer(*this->ES, ObjectLayer,
-                 std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
-    OptimizeLayer(*this->ES, CompileLayer, optimizeModule),
-    ASTLayer(OptimizeLayer, this->DL),
-    MainJD(this->ES->createBareJITDylib("<main>")) {
-        MainJD.addGenerator(
-            cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
-                         DL.getGlobalPrefix())));
-    }
+  KaleidoscopeJIT(std::unique_ptr<TargetProcessControl> TPC,
+                  std::unique_ptr<ExecutionSession> ES,
+                  std::unique_ptr<TPCIndirectionUtils> TPCIU,
+                  JITTargetMachineBuilder JTMB, DataLayout DL)
+      : TPC(std::move(TPC)), ES(std::move(ES)), TPCIU(std::move(TPCIU)),
+        DL(std::move(DL)), Mangle(*this->ES, this->DL),
+        ObjectLayer(*this->ES,
+                    []() { return std::make_unique<SectionMemoryManager>(); }),
+        CompileLayer(*this->ES, ObjectLayer,
+                     std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
+        OptimizeLayer(*this->ES, CompileLayer, optimizeModule),
+        ASTLayer(OptimizeLayer, this->DL),
+        MainJD(this->ES->createBareJITDylib("<main>")) {
+    MainJD.addGenerator(
+        cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
+            DL.getGlobalPrefix())));
+  }
 
-    ~KaleidoscopeJIT() {
-        if (auto Err = ES->endSession())
-            ES->reportError(std::move(Err));
-        if (auto Err = TPCIU->cleanup())
-            ES->reportError(std::move(Err));
-    }
+  ~KaleidoscopeJIT() {
+    if (auto Err = ES->endSession())
+      ES->reportError(std::move(Err));
+    if (auto Err = TPCIU->cleanup())
+      ES->reportError(std::move(Err));
+  }
 
-    static Expected<std::unique_ptr<KaleidoscopeJIT>> Create() {
-        auto SSP = std::make_shared<SymbolStringPool>();
-        auto TPC = SelfTargetProcessControl::Create(SSP);
-        if (!TPC)
-            return TPC.takeError();
+  static Expected<std::unique_ptr<KaleidoscopeJIT>> Create() {
+    auto SSP = std::make_shared<SymbolStringPool>();
+    auto TPC = SelfTargetProcessControl::Create(SSP);
+    if (!TPC)
+      return TPC.takeError();
 
-        auto ES = std::make_unique<ExecutionSession>(std::move(SSP));
+    auto ES = std::make_unique<ExecutionSession>(std::move(SSP));
 
-        auto TPCIU = TPCIndirectionUtils::Create(**TPC);
-        if (!TPCIU)
-            return TPCIU.takeError();
+    auto TPCIU = TPCIndirectionUtils::Create(**TPC);
+    if (!TPCIU)
+      return TPCIU.takeError();
 
-        (*TPCIU)->createLazyCallThroughManager(
-            *ES, pointerToJITTargetAddress(&handleLazyCallThroughError));
+    (*TPCIU)->createLazyCallThroughManager(
+        *ES, pointerToJITTargetAddress(&handleLazyCallThroughError));
 
-        if (auto Err = setUpInProcessLCTMReentryViaTPCIU(**TPCIU))
-            return std::move(Err);
+    if (auto Err = setUpInProcessLCTMReentryViaTPCIU(**TPCIU))
+      return std::move(Err);
 
-        JITTargetMachineBuilder JTMB((*TPC)->getTargetTriple());
+    JITTargetMachineBuilder JTMB((*TPC)->getTargetTriple());
 
-        auto DL = JTMB.getDefaultDataLayoutForTarget();
-        if (!DL)
-            return DL.takeError();
+    auto DL = JTMB.getDefaultDataLayoutForTarget();
+    if (!DL)
+      return DL.takeError();
 
-        return std::make_unique<KaleidoscopeJIT>(std::move(*TPC), std::move(ES),
-                std::move(*TPCIU), std::move(JTMB),
-                std::move(*DL));
-    }
+    return std::make_unique<KaleidoscopeJIT>(std::move(*TPC), std::move(ES),
+                                             std::move(*TPCIU), std::move(JTMB),
+                                             std::move(*DL));
+  }
 
-    const DataLayout &getDataLayout() const {
-        return DL;
-    }
+  const DataLayout &getDataLayout() const { return DL; }
 
-    JITDylib &getMainJITDylib() {
-        return MainJD;
-    }
+  JITDylib &getMainJITDylib() { return MainJD; }
 
-    Error addModule(ThreadSafeModule TSM, ResourceTrackerSP RT = nullptr) {
-        if (!RT)
-            RT = MainJD.getDefaultResourceTracker();
+  Error addModule(ThreadSafeModule TSM, ResourceTrackerSP RT = nullptr) {
+    if (!RT)
+      RT = MainJD.getDefaultResourceTracker();
 
-        return OptimizeLayer.add(RT, std::move(TSM));
-    }
+    return OptimizeLayer.add(RT, std::move(TSM));
+  }
 
-    Error addAST(std::unique_ptr<FunctionAST> F, ResourceTrackerSP RT = nullptr) {
-        if (!RT)
-            RT = MainJD.getDefaultResourceTracker();
-        return ASTLayer.add(RT, std::move(F));
-    }
+  Error addAST(std::unique_ptr<FunctionAST> F, ResourceTrackerSP RT = nullptr) {
+    if (!RT)
+      RT = MainJD.getDefaultResourceTracker();
+    return ASTLayer.add(RT, std::move(F));
+  }
 
-    Expected<JITEvaluatedSymbol> lookup(StringRef Name) {
-        return ES->lookup({&MainJD}, Mangle(Name.str()));
-    }
+  Expected<JITEvaluatedSymbol> lookup(StringRef Name) {
+    return ES->lookup({&MainJD}, Mangle(Name.str()));
+  }
 
 private:
-    static Expected<ThreadSafeModule>
-    optimizeModule(ThreadSafeModule TSM, const MaterializationResponsibility &R) {
-        TSM.withModuleDo([](Module &M) {
-            // Create a function pass manager.
-            auto FPM = std::make_unique<legacy::FunctionPassManager>(&M);
+  static Expected<ThreadSafeModule>
+  optimizeModule(ThreadSafeModule TSM, const MaterializationResponsibility &R) {
+    TSM.withModuleDo([](Module &M) {
+      // Create a function pass manager.
+      auto FPM = std::make_unique<legacy::FunctionPassManager>(&M);
 
-            // Add some optimizations.
-            FPM->add(createInstructionCombiningPass());
-            FPM->add(createReassociatePass());
-            FPM->add(createGVNPass());
-            FPM->add(createCFGSimplificationPass());
-            FPM->doInitialization();
+      // Add some optimizations.
+      FPM->add(createInstructionCombiningPass());
+      FPM->add(createReassociatePass());
+      FPM->add(createGVNPass());
+      FPM->add(createCFGSimplificationPass());
+      FPM->doInitialization();
 
-            // Run the optimizations over all functions in the module being added to
-            // the JIT.
-            for (auto &F : M)
-                FPM->run(F);
-        });
+      // Run the optimizations over all functions in the module being added to
+      // the JIT.
+      for (auto &F : M)
+        FPM->run(F);
+    });
 
-        return std::move(TSM);
-    }
+    return std::move(TSM);
+  }
 };
 
 } // end namespace orc

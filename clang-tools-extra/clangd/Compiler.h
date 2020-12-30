@@ -28,34 +28,34 @@ namespace clangd {
 
 class IgnoreDiagnostics : public DiagnosticConsumer {
 public:
-    static void log(DiagnosticsEngine::Level DiagLevel,
-                    const clang::Diagnostic &Info);
+  static void log(DiagnosticsEngine::Level DiagLevel,
+                  const clang::Diagnostic &Info);
 
-    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
-                          const clang::Diagnostic &Info) override;
+  void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
+                        const clang::Diagnostic &Info) override;
 };
 
 // Options to run clang e.g. when parsing AST.
 struct ParseOptions {
-    bool SuggestMissingIncludes = false;
-    bool BuildRecoveryAST = false;
-    bool PreserveRecoveryASTType = false;
+  bool SuggestMissingIncludes = false;
+  bool BuildRecoveryAST = false;
+  bool PreserveRecoveryASTType = false;
 };
 
 /// Information required to run clang, e.g. to parse AST or do code completion.
 struct ParseInputs {
-    tooling::CompileCommand CompileCommand;
-    const ThreadsafeFS *TFS;
-    std::string Contents;
-    // Version identifier for Contents, provided by the client and opaque to us.
-    std::string Version = "null";
-    // Prevent reuse of the cached preamble/AST. Slow! Useful to workaround
-    // clangd's assumption that missing header files will stay missing.
-    bool ForceRebuild = false;
-    // Used to recover from diagnostics (e.g. find missing includes for symbol).
-    const SymbolIndex *Index = nullptr;
-    ParseOptions Opts = ParseOptions();
-    TidyProviderRef ClangTidyProvider = {};
+  tooling::CompileCommand CompileCommand;
+  const ThreadsafeFS *TFS;
+  std::string Contents;
+  // Version identifier for Contents, provided by the client and opaque to us.
+  std::string Version = "null";
+  // Prevent reuse of the cached preamble/AST. Slow! Useful to workaround
+  // clangd's assumption that missing header files will stay missing.
+  bool ForceRebuild = false;
+  // Used to recover from diagnostics (e.g. find missing includes for symbol).
+  const SymbolIndex *Index = nullptr;
+  ParseOptions Opts = ParseOptions();
+  TidyProviderRef ClangTidyProvider = {};
 };
 
 /// Builds compiler invocation that could be used to build AST or preamble.

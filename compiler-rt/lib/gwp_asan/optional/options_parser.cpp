@@ -30,64 +30,62 @@ void registerGwpAsanFlags(__sanitizer::FlagParser *parser, Options *o) {
 
 const char *getCompileDefinitionGwpAsanDefaultOptions() {
 #ifdef GWP_ASAN_DEFAULT_OPTIONS
-    return SANITIZER_STRINGIFY(GWP_ASAN_DEFAULT_OPTIONS);
+  return SANITIZER_STRINGIFY(GWP_ASAN_DEFAULT_OPTIONS);
 #else
-    return "";
+  return "";
 #endif
 }
 
 const char *getGwpAsanDefaultOptions() {
-    return (__gwp_asan_default_options) ? __gwp_asan_default_options() : "";
+  return (__gwp_asan_default_options) ? __gwp_asan_default_options() : "";
 }
 
 Options *getOptionsInternal() {
-    static Options GwpAsanFlags;
-    return &GwpAsanFlags;
+  static Options GwpAsanFlags;
+  return &GwpAsanFlags;
 }
 } // anonymous namespace
 
 void initOptions() {
-    __sanitizer::SetCommonFlagsDefaults();
+  __sanitizer::SetCommonFlagsDefaults();
 
-    Options *o = getOptionsInternal();
-    o->setDefaults();
+  Options *o = getOptionsInternal();
+  o->setDefaults();
 
-    __sanitizer::FlagParser Parser;
-    registerGwpAsanFlags(&Parser, o);
+  __sanitizer::FlagParser Parser;
+  registerGwpAsanFlags(&Parser, o);
 
-    // Override from compile definition.
-    Parser.ParseString(getCompileDefinitionGwpAsanDefaultOptions());
+  // Override from compile definition.
+  Parser.ParseString(getCompileDefinitionGwpAsanDefaultOptions());
 
-    // Override from user-specified string.
-    Parser.ParseString(getGwpAsanDefaultOptions());
+  // Override from user-specified string.
+  Parser.ParseString(getGwpAsanDefaultOptions());
 
-    // Override from environment.
-    Parser.ParseString(__sanitizer::GetEnv("GWP_ASAN_OPTIONS"));
+  // Override from environment.
+  Parser.ParseString(__sanitizer::GetEnv("GWP_ASAN_OPTIONS"));
 
-    __sanitizer::InitializeCommonFlags();
-    if (__sanitizer::Verbosity())
-        __sanitizer::ReportUnrecognizedFlags();
+  __sanitizer::InitializeCommonFlags();
+  if (__sanitizer::Verbosity())
+    __sanitizer::ReportUnrecognizedFlags();
 
-    if (!o->Enabled)
-        return;
+  if (!o->Enabled)
+    return;
 
-    // Sanity checks for the parameters.
-    if (o->MaxSimultaneousAllocations <= 0) {
-        __sanitizer::Printf("GWP-ASan ERROR: MaxSimultaneousAllocations must be > "
-                            "0 when GWP-ASan is enabled.\n");
-        exit(EXIT_FAILURE);
-    }
+  // Sanity checks for the parameters.
+  if (o->MaxSimultaneousAllocations <= 0) {
+    __sanitizer::Printf("GWP-ASan ERROR: MaxSimultaneousAllocations must be > "
+                        "0 when GWP-ASan is enabled.\n");
+    exit(EXIT_FAILURE);
+  }
 
-    if (o->SampleRate < 1) {
-        __sanitizer::Printf(
-            "GWP-ASan ERROR: SampleRate must be > 0 when GWP-ASan is enabled.\n");
-        exit(EXIT_FAILURE);
-    }
+  if (o->SampleRate < 1) {
+    __sanitizer::Printf(
+        "GWP-ASan ERROR: SampleRate must be > 0 when GWP-ASan is enabled.\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
-Options &getOptions() {
-    return *getOptionsInternal();
-}
+Options &getOptions() { return *getOptionsInternal(); }
 
 } // namespace options
 } // namespace gwp_asan

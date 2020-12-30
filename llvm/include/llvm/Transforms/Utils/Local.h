@@ -174,7 +174,7 @@ void MergeBasicBlockIntoOnlyPred(BasicBlock *BB, DomTreeUpdater *DTU = nullptr);
 /// possible, eliminate BB by rewriting all the predecessors to branch to the
 /// successor block and return true. If we can't transform, return false.
 bool TryToSimplifyUncondBranchFromEmptyBlock(BasicBlock *BB,
-        DomTreeUpdater *DTU = nullptr);
+                                             DomTreeUpdater *DTU = nullptr);
 
 /// Check for and eliminate duplicate PHI nodes in this block. This doesn't try
 /// to be clever about PHI nodes which differ only in the order of the incoming
@@ -211,8 +211,7 @@ bool FoldBranchToCommonDest(BranchInst *BI, llvm::DomTreeUpdater *DTU = nullptr,
 /// This allows the CFG to be changed around without fear of invalidating the
 /// SSA information for the value. It returns the pointer to the alloca inserted
 /// to create a stack slot for X.
-AllocaInst *DemoteRegToStack(Instruction &X,
-                             bool VolatileLoads = false,
+AllocaInst *DemoteRegToStack(Instruction &X, bool VolatileLoads = false,
                              Instruction *AllocaPoint = nullptr);
 
 /// This function takes a virtual register computed by a phi node and replaces
@@ -240,7 +239,7 @@ inline Align getKnownAlignment(Value *V, const DataLayout &DL,
                                const Instruction *CxtI = nullptr,
                                AssumptionCache *AC = nullptr,
                                const DominatorTree *DT = nullptr) {
-    return getOrEnforceKnownAlignment(V, MaybeAlign(), DL, CxtI, AC, DT);
+  return getOrEnforceKnownAlignment(V, MaybeAlign(), DL, CxtI, AC, DT);
 }
 
 /// Create a call that matches the invoke \p II in terms of arguments,
@@ -258,18 +257,18 @@ void changeToCall(InvokeInst *II, DomTreeUpdater *DTU = nullptr);
 
 /// Inserts a llvm.dbg.value intrinsic before a store to an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.
-void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                     StoreInst *SI, DIBuilder &Builder);
+void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII, StoreInst *SI,
+                                     DIBuilder &Builder);
 
 /// Inserts a llvm.dbg.value intrinsic before a load of an alloca'd value
 /// that has an associated llvm.dbg.declare or llvm.dbg.addr intrinsic.
-void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                     LoadInst *LI, DIBuilder &Builder);
+void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII, LoadInst *LI,
+                                     DIBuilder &Builder);
 
 /// Inserts a llvm.dbg.value intrinsic after a phi that has an associated
 /// llvm.dbg.declare or llvm.dbg.addr intrinsic.
-void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII,
-                                     PHINode *LI, DIBuilder &Builder);
+void ConvertDebugDeclareToDebugValue(DbgVariableIntrinsic *DII, PHINode *LI,
+                                     DIBuilder &Builder);
 
 /// Lowers llvm.dbg.declare intrinsics into appropriate set of
 /// llvm.dbg.value intrinsics.
@@ -314,7 +313,6 @@ void replaceDbgValueForAlloca(AllocaInst *AI, Value *NewAllocaAddress,
 /// debug users of \p I by writing the effect of \p I in a DIExpression. If it
 /// cannot be salvaged changes its debug uses to undef.
 void salvageDebugInfo(Instruction &I);
-
 
 /// Implementation of salvageDebugInfo, applying only to instructions in
 /// \p Insns, rather than all debug users from findDbgUsers( \p I).
@@ -367,7 +365,7 @@ unsigned changeToUnreachable(Instruction *I, bool UseLLVMTrap,
 /// InvokeInst is a terminator instruction.  Returns the newly split basic
 /// block.
 BasicBlock *changeToInvokeAndSplitBasicBlock(CallInst *CI,
-        BasicBlock *UnwindEdge);
+                                             BasicBlock *UnwindEdge);
 
 /// Replace 'BB's terminator with one that does not have an unwind successor
 /// block. Rewrites `invoke` to `call`, etc. Updates any PHIs in unwind
@@ -484,7 +482,7 @@ bool recognizeBSwapOrBitReverseIdiom(
 /// to intercept string functions and want to avoid converting them to target
 /// specific instructions.
 void maybeMarkSanitizerLibraryCallNoBuiltin(CallInst *CI,
-        const TargetLibraryInfo *TLI);
+                                            const TargetLibraryInfo *TLI);
 
 //===----------------------------------------------------------------------===//
 //  Transform predicates

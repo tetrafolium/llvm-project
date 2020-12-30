@@ -16,9 +16,9 @@ namespace macho {
 
 class LoadCommand {
 public:
-    virtual ~LoadCommand() = default;
-    virtual uint32_t getSize() const = 0;
-    virtual void writeTo(uint8_t *buf) const = 0;
+  virtual ~LoadCommand() = default;
+  virtual uint32_t getSize() const = 0;
+  virtual void writeTo(uint8_t *buf) const = 0;
 };
 
 void writeResult();

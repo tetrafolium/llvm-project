@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/AST/DeclCXX.h"
+#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/Checker.h"
 #include "clang/StaticAnalyzer/Core/CheckerManager.h"
@@ -23,45 +23,46 @@ using namespace ento;
 
 namespace {
 class UndefinedArraySubscriptChecker
-    : public Checker< check::PreStmt<ArraySubscriptExpr> > {
-    mutable std::unique_ptr<BugType> BT;
+    : public Checker<check::PreStmt<ArraySubscriptExpr>> {
+  mutable std::unique_ptr<BugType> BT;
 
 public:
-    void checkPreStmt(const ArraySubscriptExpr *A, CheckerContext &C) const;
+  void checkPreStmt(const ArraySubscriptExpr *A, CheckerContext &C) const;
 };
 } // end anonymous namespace
 
-void
-UndefinedArraySubscriptChecker::checkPreStmt(const ArraySubscriptExpr *A,
-        CheckerContext &C) const {
-    const Expr *Index = A->getIdx();
-    if (!C.getSVal(Index).isUndef())
-        return;
+void UndefinedArraySubscriptChecker::checkPreStmt(const ArraySubscriptExpr *A,
+                                                  CheckerContext &C) const {
+  const Expr *Index = A->getIdx();
+  if (!C.getSVal(Index).isUndef())
+    return;
 
-    // Sema generates anonymous array variables for copying array struct fields.
-    // Don't warn if we're in an implicitly-generated constructor.
-    const Decl *D = C.getLocationContext()->getDecl();
-    if (const CXXConstructorDecl *Ctor = dyn_cast<CXXConstructorDecl>(D))
-        if (Ctor->isDefaulted())
-            return;
+  // Sema generates anonymous array variables for copying array struct fields.
+  // Don't warn if we're in an implicitly-generated constructor.
+  const Decl *D = C.getLocationContext()->getDecl();
+  if (const CXXConstructorDecl *Ctor = dyn_cast<CXXConstructorDecl>(D))
+    if (Ctor->isDefaulted())
+      return;
 
-    ExplodedNode *N = C.generateErrorNode();
-    if (!N)
-        return;
-    if (!BT)
-        BT.reset(new BuiltinBug(this, "Array subscript is undefined"));
+  ExplodedNode *N = C.generateErrorNode();
+  if (!N)
+    return;
+  if (!BT)
+    BT.reset(new BuiltinBug(this, "Array subscript is undefined"));
 
-    // Generate a report for this bug.
-    auto R = std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
-    R->addRange(A->getIdx()->getSourceRange());
-    bugreporter::trackExpressionValue(N, A->getIdx(), *R);
-    C.emitReport(std::move(R));
+  // Generate a report for this bug.
+  auto R =
+      std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
+  R->addRange(A->getIdx()->getSourceRange());
+  bugreporter::trackExpressionValue(N, A->getIdx(), *R);
+  C.emitReport(std::move(R));
 }
 
 void ento::registerUndefinedArraySubscriptChecker(CheckerManager &mgr) {
-    mgr.registerChecker<UndefinedArraySubscriptChecker>();
+  mgr.registerChecker<UndefinedArraySubscriptChecker>();
 }
 
-bool ento::shouldRegisterUndefinedArraySubscriptChecker(const CheckerManager &mgr) {
-    return true;
+bool ento::shouldRegisterUndefinedArraySubscriptChecker(
+    const CheckerManager &mgr) {
+  return true;
 }

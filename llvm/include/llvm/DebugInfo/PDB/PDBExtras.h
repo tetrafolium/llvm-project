@@ -41,13 +41,13 @@ raw_ostream &operator<<(raw_ostream &OS, const Variant &Value);
 raw_ostream &operator<<(raw_ostream &OS, const VersionInfo &Version);
 raw_ostream &operator<<(raw_ostream &OS, const TagStats &Stats);
 
-raw_ostream& dumpPDBSourceCompression(raw_ostream& OS, uint32_t Compression);
+raw_ostream &dumpPDBSourceCompression(raw_ostream &OS, uint32_t Compression);
 
 template <typename T>
 void dumpSymbolField(raw_ostream &OS, StringRef Name, T Value, int Indent) {
-    OS << "\n";
-    OS.indent(Indent);
-    OS << Name << ": " << Value;
+  OS << "\n";
+  OS.indent(Indent);
+  OS << Name << ": " << Value;
 }
 
 } // end namespace pdb

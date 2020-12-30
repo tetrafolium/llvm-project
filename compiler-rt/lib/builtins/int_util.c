@@ -24,7 +24,7 @@ NORETURN extern void panic(const char *, ...);
 __attribute__((visibility("hidden")))
 #endif
 void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-    panic("%s:%d: abort in %s", file, line, function);
+  panic("%s:%d: abort in %s", file, line, function);
 }
 
 #elif __APPLE__
@@ -38,7 +38,7 @@ __attribute__((weak))
 __attribute__((visibility("hidden")))
 #endif
 void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-    __assert_rtn(function, file, line, "libcompiler_rt abort");
+  __assert_rtn(function, file, line, "libcompiler_rt abort");
 }
 
 #elif __Fuchsia__
@@ -48,7 +48,7 @@ __attribute__((weak))
 __attribute__((visibility("hidden")))
 #endif
 void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-    __builtin_trap();
+  __builtin_trap();
 }
 
 #else
@@ -61,7 +61,7 @@ __attribute__((weak))
 __attribute__((visibility("hidden")))
 #endif
 void __compilerrt_abort_impl(const char *file, int line, const char *function) {
-    abort();
+  abort();
 }
 
 #endif

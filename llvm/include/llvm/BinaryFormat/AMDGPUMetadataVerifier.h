@@ -31,34 +31,34 @@ namespace V3 {
 ///
 /// In non-strict mode, metadata is coerced into expected types when possible.
 class MetadataVerifier {
-    bool Strict;
+  bool Strict;
 
-    bool verifyScalar(msgpack::DocNode &Node, msgpack::Type SKind,
-                      function_ref<bool(msgpack::DocNode &)> verifyValue = {});
-    bool verifyInteger(msgpack::DocNode &Node);
-    bool verifyArray(msgpack::DocNode &Node,
-                     function_ref<bool(msgpack::DocNode &)> verifyNode,
-                     Optional<size_t> Size = None);
-    bool verifyEntry(msgpack::MapDocNode &MapNode, StringRef Key, bool Required,
-                     function_ref<bool(msgpack::DocNode &)> verifyNode);
-    bool
-    verifyScalarEntry(msgpack::MapDocNode &MapNode, StringRef Key, bool Required,
-                      msgpack::Type SKind,
-                      function_ref<bool(msgpack::DocNode &)> verifyValue = {});
-    bool verifyIntegerEntry(msgpack::MapDocNode &MapNode, StringRef Key,
-                            bool Required);
-    bool verifyKernelArgs(msgpack::DocNode &Node);
-    bool verifyKernel(msgpack::DocNode &Node);
+  bool verifyScalar(msgpack::DocNode &Node, msgpack::Type SKind,
+                    function_ref<bool(msgpack::DocNode &)> verifyValue = {});
+  bool verifyInteger(msgpack::DocNode &Node);
+  bool verifyArray(msgpack::DocNode &Node,
+                   function_ref<bool(msgpack::DocNode &)> verifyNode,
+                   Optional<size_t> Size = None);
+  bool verifyEntry(msgpack::MapDocNode &MapNode, StringRef Key, bool Required,
+                   function_ref<bool(msgpack::DocNode &)> verifyNode);
+  bool
+  verifyScalarEntry(msgpack::MapDocNode &MapNode, StringRef Key, bool Required,
+                    msgpack::Type SKind,
+                    function_ref<bool(msgpack::DocNode &)> verifyValue = {});
+  bool verifyIntegerEntry(msgpack::MapDocNode &MapNode, StringRef Key,
+                          bool Required);
+  bool verifyKernelArgs(msgpack::DocNode &Node);
+  bool verifyKernel(msgpack::DocNode &Node);
 
 public:
-    /// Construct a MetadataVerifier, specifying whether it will operate in \p
-    /// Strict mode.
-    MetadataVerifier(bool Strict) : Strict(Strict) {}
+  /// Construct a MetadataVerifier, specifying whether it will operate in \p
+  /// Strict mode.
+  MetadataVerifier(bool Strict) : Strict(Strict) {}
 
-    /// Verify given HSA metadata.
-    ///
-    /// \returns True when successful, false when metadata is invalid.
-    bool verify(msgpack::DocNode &HSAMetadataRoot);
+  /// Verify given HSA metadata.
+  ///
+  /// \returns True when successful, false when metadata is invalid.
+  bool verify(msgpack::DocNode &HSAMetadataRoot);
 };
 
 } // end namespace V3

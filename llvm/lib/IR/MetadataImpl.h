@@ -21,36 +21,36 @@ namespace llvm {
 template <class T, class InfoT>
 static T *getUniqued(DenseSet<T *, InfoT> &Store,
                      const typename InfoT::KeyTy &Key) {
-    auto I = Store.find_as(Key);
-    return I == Store.end() ? nullptr : *I;
+  auto I = Store.find_as(Key);
+  return I == Store.end() ? nullptr : *I;
 }
 
 template <class T> T *MDNode::storeImpl(T *N, StorageType Storage) {
-    switch (Storage) {
-    case Uniqued:
-        llvm_unreachable("Cannot unique without a uniquing-store");
-    case Distinct:
-        N->storeDistinctInContext();
-        break;
-    case Temporary:
-        break;
-    }
-    return N;
+  switch (Storage) {
+  case Uniqued:
+    llvm_unreachable("Cannot unique without a uniquing-store");
+  case Distinct:
+    N->storeDistinctInContext();
+    break;
+  case Temporary:
+    break;
+  }
+  return N;
 }
 
 template <class T, class StoreT>
 T *MDNode::storeImpl(T *N, StorageType Storage, StoreT &Store) {
-    switch (Storage) {
-    case Uniqued:
-        Store.insert(N);
-        break;
-    case Distinct:
-        N->storeDistinctInContext();
-        break;
-    case Temporary:
-        break;
-    }
-    return N;
+  switch (Storage) {
+  case Uniqued:
+    Store.insert(N);
+    break;
+  case Distinct:
+    N->storeDistinctInContext();
+    break;
+  case Temporary:
+    break;
+  }
+  return N;
 }
 
 } // end namespace llvm

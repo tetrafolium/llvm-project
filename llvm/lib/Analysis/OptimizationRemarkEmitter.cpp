@@ -25,100 +25,100 @@ using namespace llvm;
 
 OptimizationRemarkEmitter::OptimizationRemarkEmitter(const Function *F)
     : F(F), BFI(nullptr) {
-    if (!F->getContext().getDiagnosticsHotnessRequested())
-        return;
+  if (!F->getContext().getDiagnosticsHotnessRequested())
+    return;
 
-    // First create a dominator tree.
-    DominatorTree DT;
-    DT.recalculate(*const_cast<Function *>(F));
+  // First create a dominator tree.
+  DominatorTree DT;
+  DT.recalculate(*const_cast<Function *>(F));
 
-    // Generate LoopInfo from it.
-    LoopInfo LI;
-    LI.analyze(DT);
+  // Generate LoopInfo from it.
+  LoopInfo LI;
+  LI.analyze(DT);
 
-    // Then compute BranchProbabilityInfo.
-    BranchProbabilityInfo BPI(*F, LI);
+  // Then compute BranchProbabilityInfo.
+  BranchProbabilityInfo BPI(*F, LI);
 
-    // Finally compute BFI.
-    OwnedBFI = std::make_unique<BlockFrequencyInfo>(*F, BPI, LI);
-    BFI = OwnedBFI.get();
+  // Finally compute BFI.
+  OwnedBFI = std::make_unique<BlockFrequencyInfo>(*F, BPI, LI);
+  BFI = OwnedBFI.get();
 }
 
 bool OptimizationRemarkEmitter::invalidate(
     Function &F, const PreservedAnalyses &PA,
     FunctionAnalysisManager::Invalidator &Inv) {
-    if (OwnedBFI.get()) {
-        OwnedBFI.reset();
-        BFI = nullptr;
-    }
-    // This analysis has no state and so can be trivially preserved but it needs
-    // a fresh view of BFI if it was constructed with one.
-    if (BFI && Inv.invalidate<BlockFrequencyAnalysis>(F, PA))
-        return true;
+  if (OwnedBFI.get()) {
+    OwnedBFI.reset();
+    BFI = nullptr;
+  }
+  // This analysis has no state and so can be trivially preserved but it needs
+  // a fresh view of BFI if it was constructed with one.
+  if (BFI && Inv.invalidate<BlockFrequencyAnalysis>(F, PA))
+    return true;
 
-    // Otherwise this analysis result remains valid.
-    return false;
+  // Otherwise this analysis result remains valid.
+  return false;
 }
 
 Optional<uint64_t> OptimizationRemarkEmitter::computeHotness(const Value *V) {
-    if (!BFI)
-        return None;
+  if (!BFI)
+    return None;
 
-    return BFI->getBlockProfileCount(cast<BasicBlock>(V));
+  return BFI->getBlockProfileCount(cast<BasicBlock>(V));
 }
 
 void OptimizationRemarkEmitter::computeHotness(
     DiagnosticInfoIROptimization &OptDiag) {
-    const Value *V = OptDiag.getCodeRegion();
-    if (V)
-        OptDiag.setHotness(computeHotness(V));
+  const Value *V = OptDiag.getCodeRegion();
+  if (V)
+    OptDiag.setHotness(computeHotness(V));
 }
 
 void OptimizationRemarkEmitter::emit(
     DiagnosticInfoOptimizationBase &OptDiagBase) {
-    auto &OptDiag = cast<DiagnosticInfoIROptimization>(OptDiagBase);
-    computeHotness(OptDiag);
+  auto &OptDiag = cast<DiagnosticInfoIROptimization>(OptDiagBase);
+  computeHotness(OptDiag);
 
-    // Only emit it if its hotness meets the threshold.
-    if (OptDiag.getHotness().getValueOr(0) <
-            F->getContext().getDiagnosticsHotnessThreshold()) {
-        return;
-    }
+  // Only emit it if its hotness meets the threshold.
+  if (OptDiag.getHotness().getValueOr(0) <
+      F->getContext().getDiagnosticsHotnessThreshold()) {
+    return;
+  }
 
-    F->getContext().diagnose(OptDiag);
+  F->getContext().diagnose(OptDiag);
 }
 
 OptimizationRemarkEmitterWrapperPass::OptimizationRemarkEmitterWrapperPass()
     : FunctionPass(ID) {
-    initializeOptimizationRemarkEmitterWrapperPassPass(
-        *PassRegistry::getPassRegistry());
+  initializeOptimizationRemarkEmitterWrapperPassPass(
+      *PassRegistry::getPassRegistry());
 }
 
 bool OptimizationRemarkEmitterWrapperPass::runOnFunction(Function &Fn) {
-    BlockFrequencyInfo *BFI;
+  BlockFrequencyInfo *BFI;
 
-    auto &Context = Fn.getContext();
-    if (Context.getDiagnosticsHotnessRequested()) {
-        BFI = &getAnalysis<LazyBlockFrequencyInfoPass>().getBFI();
-        // Get hotness threshold from PSI. This should only happen once.
-        if (Context.isDiagnosticsHotnessThresholdSetFromPSI()) {
-            if (ProfileSummaryInfo *PSI =
-                        &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI())
-                Context.setDiagnosticsHotnessThreshold(
-                    PSI->getOrCompHotCountThreshold());
-        }
-    } else
-        BFI = nullptr;
+  auto &Context = Fn.getContext();
+  if (Context.getDiagnosticsHotnessRequested()) {
+    BFI = &getAnalysis<LazyBlockFrequencyInfoPass>().getBFI();
+    // Get hotness threshold from PSI. This should only happen once.
+    if (Context.isDiagnosticsHotnessThresholdSetFromPSI()) {
+      if (ProfileSummaryInfo *PSI =
+              &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI())
+        Context.setDiagnosticsHotnessThreshold(
+            PSI->getOrCompHotCountThreshold());
+    }
+  } else
+    BFI = nullptr;
 
-    ORE = std::make_unique<OptimizationRemarkEmitter>(&Fn, BFI);
-    return false;
+  ORE = std::make_unique<OptimizationRemarkEmitter>(&Fn, BFI);
+  return false;
 }
 
 void OptimizationRemarkEmitterWrapperPass::getAnalysisUsage(
     AnalysisUsage &AU) const {
-    LazyBlockFrequencyInfoPass::getLazyBFIAnalysisUsage(AU);
-    AU.addRequired<ProfileSummaryInfoWrapperPass>();
-    AU.setPreservesAll();
+  LazyBlockFrequencyInfoPass::getLazyBFIAnalysisUsage(AU);
+  AU.addRequired<ProfileSummaryInfoWrapperPass>();
+  AU.setPreservesAll();
 }
 
 AnalysisKey OptimizationRemarkEmitterAnalysis::Key;
@@ -126,23 +126,23 @@ AnalysisKey OptimizationRemarkEmitterAnalysis::Key;
 OptimizationRemarkEmitter
 OptimizationRemarkEmitterAnalysis::run(Function &F,
                                        FunctionAnalysisManager &AM) {
-    BlockFrequencyInfo *BFI;
-    auto &Context = F.getContext();
+  BlockFrequencyInfo *BFI;
+  auto &Context = F.getContext();
 
-    if (Context.getDiagnosticsHotnessRequested()) {
-        BFI = &AM.getResult<BlockFrequencyAnalysis>(F);
-        // Get hotness threshold from PSI. This should only happen once.
-        if (Context.isDiagnosticsHotnessThresholdSetFromPSI()) {
-            auto &MAMProxy = AM.getResult<ModuleAnalysisManagerFunctionProxy>(F);
-            if (ProfileSummaryInfo *PSI =
-                        MAMProxy.getCachedResult<ProfileSummaryAnalysis>(*F.getParent()))
-                Context.setDiagnosticsHotnessThreshold(
-                    PSI->getOrCompHotCountThreshold());
-        }
-    } else
-        BFI = nullptr;
+  if (Context.getDiagnosticsHotnessRequested()) {
+    BFI = &AM.getResult<BlockFrequencyAnalysis>(F);
+    // Get hotness threshold from PSI. This should only happen once.
+    if (Context.isDiagnosticsHotnessThresholdSetFromPSI()) {
+      auto &MAMProxy = AM.getResult<ModuleAnalysisManagerFunctionProxy>(F);
+      if (ProfileSummaryInfo *PSI =
+              MAMProxy.getCachedResult<ProfileSummaryAnalysis>(*F.getParent()))
+        Context.setDiagnosticsHotnessThreshold(
+            PSI->getOrCompHotCountThreshold());
+    }
+  } else
+    BFI = nullptr;
 
-    return OptimizationRemarkEmitter(&F, BFI);
+  return OptimizationRemarkEmitter(&F, BFI);
 }
 
 char OptimizationRemarkEmitterWrapperPass::ID = 0;

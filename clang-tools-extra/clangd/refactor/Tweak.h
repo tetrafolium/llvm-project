@@ -45,79 +45,77 @@ namespace clangd {
 ///   REGISTER_TWEAK(MyTweak);
 class Tweak {
 public:
-    /// Input to prepare and apply tweaks.
-    struct Selection {
-        Selection(const SymbolIndex *Index, ParsedAST &AST, unsigned RangeBegin,
-                  unsigned RangeEnd, SelectionTree ASTSelection);
-        /// The text of the active document.
-        llvm::StringRef Code;
-        /// The Index for handling codebase related queries.
-        const SymbolIndex *Index = nullptr;
-        /// The parsed active file. Never null. (Pointer so Selection is movable).
-        ParsedAST *AST;
-        /// A location of the cursor in the editor.
-        // FIXME: Cursor is redundant and should be removed
-        SourceLocation Cursor;
-        /// The begin offset of the selection
-        unsigned SelectionBegin;
-        /// The end offset of the selection
-        unsigned SelectionEnd;
-        /// The AST nodes that were selected.
-        SelectionTree ASTSelection;
-        // FIXME: provide a way to get sources and ASTs for other files.
-    };
+  /// Input to prepare and apply tweaks.
+  struct Selection {
+    Selection(const SymbolIndex *Index, ParsedAST &AST, unsigned RangeBegin,
+              unsigned RangeEnd, SelectionTree ASTSelection);
+    /// The text of the active document.
+    llvm::StringRef Code;
+    /// The Index for handling codebase related queries.
+    const SymbolIndex *Index = nullptr;
+    /// The parsed active file. Never null. (Pointer so Selection is movable).
+    ParsedAST *AST;
+    /// A location of the cursor in the editor.
+    // FIXME: Cursor is redundant and should be removed
+    SourceLocation Cursor;
+    /// The begin offset of the selection
+    unsigned SelectionBegin;
+    /// The end offset of the selection
+    unsigned SelectionEnd;
+    /// The AST nodes that were selected.
+    SelectionTree ASTSelection;
+    // FIXME: provide a way to get sources and ASTs for other files.
+  };
 
-    struct Effect {
-        /// A message to be displayed to the user.
-        llvm::Optional<std::string> ShowMessage;
-        FileEdits ApplyEdits;
+  struct Effect {
+    /// A message to be displayed to the user.
+    llvm::Optional<std::string> ShowMessage;
+    FileEdits ApplyEdits;
 
-        static Effect showMessage(StringRef S) {
-            Effect E;
-            E.ShowMessage = std::string(S);
-            return E;
-        }
-
-        /// Path is the absolute, symlink-resolved path for the file pointed by FID
-        /// in SM. Edit is generated from Replacements.
-        /// Fails if cannot figure out absolute path for FID.
-        static llvm::Expected<std::pair<Path, Edit>>
-                fileEdit(const SourceManager &SM, FileID FID,
-                         tooling::Replacements Replacements);
-
-        /// Creates an effect with an Edit for the main file.
-        /// Fails if cannot figure out absolute path for main file.
-        static llvm::Expected<Tweak::Effect>
-        mainFileEdit(const SourceManager &SM, tooling::Replacements Replacements);
-    };
-
-    virtual ~Tweak() = default;
-    /// A unique id of the action, it is always equal to the name of the class
-    /// defining the Tweak. Definition is provided automatically by
-    /// REGISTER_TWEAK.
-    virtual const char *id() const = 0;
-    /// Run the first stage of the action. Returns true indicating that the
-    /// action is available and should be shown to the user. Returns false if the
-    /// action is not available.
-    /// This function should be fast, if the action requires non-trivial work it
-    /// should be moved into 'apply'.
-    /// Returns true iff the action is available and apply() can be called on it.
-    virtual bool prepare(const Selection &Sel) = 0;
-    /// Run the second stage of the action that would produce the actual effect.
-    /// EXPECTS: prepare() was called and returned true.
-    virtual Expected<Effect> apply(const Selection &Sel) = 0;
-
-    /// A one-line title of the action that should be shown to the users in the
-    /// UI.
-    /// EXPECTS: prepare() was called and returned true.
-    virtual std::string title() const = 0;
-    /// Describes what kind of action this is.
-    /// EXPECTS: prepare() was called and returned true.
-    virtual llvm::StringLiteral kind() const = 0;
-    /// Is this a 'hidden' tweak, which are off by default.
-    virtual bool hidden() const {
-        return false;
+    static Effect showMessage(StringRef S) {
+      Effect E;
+      E.ShowMessage = std::string(S);
+      return E;
     }
+
+    /// Path is the absolute, symlink-resolved path for the file pointed by FID
+    /// in SM. Edit is generated from Replacements.
+    /// Fails if cannot figure out absolute path for FID.
+    static llvm::Expected<std::pair<Path, Edit>>
+    fileEdit(const SourceManager &SM, FileID FID,
+             tooling::Replacements Replacements);
+
+    /// Creates an effect with an Edit for the main file.
+    /// Fails if cannot figure out absolute path for main file.
+    static llvm::Expected<Tweak::Effect>
+    mainFileEdit(const SourceManager &SM, tooling::Replacements Replacements);
+  };
+
+  virtual ~Tweak() = default;
+  /// A unique id of the action, it is always equal to the name of the class
+  /// defining the Tweak. Definition is provided automatically by
+  /// REGISTER_TWEAK.
+  virtual const char *id() const = 0;
+  /// Run the first stage of the action. Returns true indicating that the
+  /// action is available and should be shown to the user. Returns false if the
+  /// action is not available.
+  /// This function should be fast, if the action requires non-trivial work it
+  /// should be moved into 'apply'.
+  /// Returns true iff the action is available and apply() can be called on it.
+  virtual bool prepare(const Selection &Sel) = 0;
+  /// Run the second stage of the action that would produce the actual effect.
+  /// EXPECTS: prepare() was called and returned true.
+  virtual Expected<Effect> apply(const Selection &Sel) = 0;
+
+  /// A one-line title of the action that should be shown to the users in the
+  /// UI.
+  /// EXPECTS: prepare() was called and returned true.
+  virtual std::string title() const = 0;
+  /// Describes what kind of action this is.
+  /// EXPECTS: prepare() was called and returned true.
+  virtual llvm::StringLiteral kind() const = 0;
+  /// Is this a 'hidden' tweak, which are off by default.
+  virtual bool hidden() const { return false; }
 };
 
 // All tweaks must be registered in the .cpp file next to their definition.
@@ -129,14 +127,14 @@ public:
 /// Calls prepare() on all tweaks that satisfy the filter, returning those that
 /// can run on the selection.
 std::vector<std::unique_ptr<Tweak>>
-                                 prepareTweaks(const Tweak::Selection &S,
-                                         llvm::function_ref<bool(const Tweak &)> Filter);
+prepareTweaks(const Tweak::Selection &S,
+              llvm::function_ref<bool(const Tweak &)> Filter);
 
 // Calls prepare() on the tweak with a given ID.
 // If prepare() returns false, returns an error.
 // If prepare() returns true, returns the corresponding tweak.
 llvm::Expected<std::unique_ptr<Tweak>> prepareTweak(StringRef TweakID,
-                                    const Tweak::Selection &S);
+                                                    const Tweak::Selection &S);
 } // namespace clangd
 } // namespace clang
 

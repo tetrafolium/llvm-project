@@ -39,32 +39,26 @@ const NamedDecl *getCanonicalSymbolDeclaration(const NamedDecl *FoundDecl);
 
 /// Returns the set of USRs that correspond to the given declaration.
 std::vector<std::string> getUSRsForDeclaration(const NamedDecl *ND,
-        ASTContext &Context);
+                                               ASTContext &Context);
 
 struct USRFindingAction {
-    USRFindingAction(ArrayRef<unsigned> SymbolOffsets,
-                     ArrayRef<std::string> QualifiedNames, bool Force)
-        : SymbolOffsets(SymbolOffsets), QualifiedNames(QualifiedNames),
-          ErrorOccurred(false), Force(Force) {}
-    std::unique_ptr<ASTConsumer> newASTConsumer();
+  USRFindingAction(ArrayRef<unsigned> SymbolOffsets,
+                   ArrayRef<std::string> QualifiedNames, bool Force)
+      : SymbolOffsets(SymbolOffsets), QualifiedNames(QualifiedNames),
+        ErrorOccurred(false), Force(Force) {}
+  std::unique_ptr<ASTConsumer> newASTConsumer();
 
-    ArrayRef<std::string> getUSRSpellings() {
-        return SpellingNames;
-    }
-    ArrayRef<std::vector<std::string>> getUSRList() {
-        return USRList;
-    }
-    bool errorOccurred() {
-        return ErrorOccurred;
-    }
+  ArrayRef<std::string> getUSRSpellings() { return SpellingNames; }
+  ArrayRef<std::vector<std::string>> getUSRList() { return USRList; }
+  bool errorOccurred() { return ErrorOccurred; }
 
 private:
-    std::vector<unsigned> SymbolOffsets;
-    std::vector<std::string> QualifiedNames;
-    std::vector<std::string> SpellingNames;
-    std::vector<std::vector<std::string>> USRList;
-    bool ErrorOccurred;
-    bool Force;
+  std::vector<unsigned> SymbolOffsets;
+  std::vector<std::string> QualifiedNames;
+  std::vector<std::string> SpellingNames;
+  std::vector<std::vector<std::string>> USRList;
+  bool ErrorOccurred;
+  bool Force;
 };
 
 } // end namespace tooling

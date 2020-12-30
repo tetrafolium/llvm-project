@@ -22,26 +22,26 @@ class PDBFile;
 
 class SymbolStream {
 public:
-    SymbolStream(std::unique_ptr<msf::MappedBlockStream> Stream);
-    ~SymbolStream();
-    Error reload();
+  SymbolStream(std::unique_ptr<msf::MappedBlockStream> Stream);
+  ~SymbolStream();
+  Error reload();
 
-    const codeview::CVSymbolArray &getSymbolArray() const {
-        return SymbolRecords;
-    }
+  const codeview::CVSymbolArray &getSymbolArray() const {
+    return SymbolRecords;
+  }
 
-    codeview::CVSymbol readRecord(uint32_t Offset) const;
+  codeview::CVSymbol readRecord(uint32_t Offset) const;
 
-    iterator_range<codeview::CVSymbolArray::Iterator>
-    getSymbols(bool *HadError) const;
+  iterator_range<codeview::CVSymbolArray::Iterator>
+  getSymbols(bool *HadError) const;
 
-    Error commit();
+  Error commit();
 
 private:
-    codeview::CVSymbolArray SymbolRecords;
-    std::unique_ptr<msf::MappedBlockStream> Stream;
+  codeview::CVSymbolArray SymbolRecords;
+  std::unique_ptr<msf::MappedBlockStream> Stream;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

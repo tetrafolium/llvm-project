@@ -59,19 +59,19 @@ static const long SPINLOCK_MASK = SPINLOCK_COUNT - 1;
 // clang-format on
 typedef struct _usem Lock;
 __inline static void unlock(Lock *l) {
-    __c11_atomic_store((_Atomic(uint32_t) *)&l->_count, 1, __ATOMIC_RELEASE);
-    __c11_atomic_thread_fence(__ATOMIC_SEQ_CST);
-    if (l->_has_waiters)
-        _umtx_op(l, UMTX_OP_SEM_WAKE, 1, 0, 0);
+  __c11_atomic_store((_Atomic(uint32_t) *)&l->_count, 1, __ATOMIC_RELEASE);
+  __c11_atomic_thread_fence(__ATOMIC_SEQ_CST);
+  if (l->_has_waiters)
+    _umtx_op(l, UMTX_OP_SEM_WAKE, 1, 0, 0);
 }
 __inline static void lock(Lock *l) {
-    uint32_t old = 1;
-    while (!__c11_atomic_compare_exchange_weak((_Atomic(uint32_t) *)&l->_count,
-            &old, 0, __ATOMIC_ACQUIRE,
-            __ATOMIC_RELAXED)) {
-        _umtx_op(l, UMTX_OP_SEM_WAIT, 0, 0, 0);
-        old = 1;
-    }
+  uint32_t old = 1;
+  while (!__c11_atomic_compare_exchange_weak((_Atomic(uint32_t) *)&l->_count,
+                                             &old, 0, __ATOMIC_ACQUIRE,
+                                             __ATOMIC_RELAXED)) {
+    _umtx_op(l, UMTX_OP_SEM_WAIT, 0, 0, 0);
+    old = 1;
+  }
 }
 /// locks for atomic operations
 static Lock locks[SPINLOCK_COUNT] = {[0 ... SPINLOCK_COUNT - 1] = {0, 1, 0}};
@@ -79,29 +79,25 @@ static Lock locks[SPINLOCK_COUNT] = {[0 ... SPINLOCK_COUNT - 1] = {0, 1, 0}};
 #elif defined(__APPLE__)
 #include <libkern/OSAtomic.h>
 typedef OSSpinLock Lock;
-__inline static void unlock(Lock *l) {
-    OSSpinLockUnlock(l);
-}
+__inline static void unlock(Lock *l) { OSSpinLockUnlock(l); }
 /// Locks a lock.  In the current implementation, this is potentially
 /// unbounded in the contended case.
-__inline static void lock(Lock *l) {
-    OSSpinLockLock(l);
-}
+__inline static void lock(Lock *l) { OSSpinLockLock(l); }
 static Lock locks[SPINLOCK_COUNT]; // initialized to OS_SPINLOCK_INIT which is 0
 
 #else
 typedef _Atomic(uintptr_t) Lock;
 /// Unlock a lock.  This is a release operation.
 __inline static void unlock(Lock *l) {
-    __c11_atomic_store(l, 0, __ATOMIC_RELEASE);
+  __c11_atomic_store(l, 0, __ATOMIC_RELEASE);
 }
 /// Locks a lock.  In the current implementation, this is potentially
 /// unbounded in the contended case.
 __inline static void lock(Lock *l) {
-    uintptr_t old = 0;
-    while (!__c11_atomic_compare_exchange_weak(l, &old, 1, __ATOMIC_ACQUIRE,
-            __ATOMIC_RELAXED))
-        old = 0;
+  uintptr_t old = 0;
+  while (!__c11_atomic_compare_exchange_weak(l, &old, 1, __ATOMIC_ACQUIRE,
+                                             __ATOMIC_RELAXED))
+    old = 0;
 }
 /// locks for atomic operations
 static Lock locks[SPINLOCK_COUNT];
@@ -109,19 +105,19 @@ static Lock locks[SPINLOCK_COUNT];
 
 /// Returns a lock to use for a given pointer.
 static __inline Lock *lock_for_pointer(void *ptr) {
-    intptr_t hash = (intptr_t)ptr;
-    // Disregard the lowest 4 bits.  We want all values that may be part of the
-    // same memory operation to hash to the same value and therefore use the same
-    // lock.
-    hash >>= 4;
-    // Use the next bits as the basis for the hash
-    intptr_t low = hash & SPINLOCK_MASK;
-    // Now use the high(er) set of bits to perturb the hash, so that we don't
-    // get collisions from atomic fields in a single object
-    hash >>= 16;
-    hash ^= low;
-    // Return a pointer to the word to use
-    return locks + (hash & SPINLOCK_MASK);
+  intptr_t hash = (intptr_t)ptr;
+  // Disregard the lowest 4 bits.  We want all values that may be part of the
+  // same memory operation to hash to the same value and therefore use the same
+  // lock.
+  hash >>= 4;
+  // Use the next bits as the basis for the hash
+  intptr_t low = hash & SPINLOCK_MASK;
+  // Now use the high(er) set of bits to perturb the hash, so that we don't
+  // get collisions from atomic fields in a single object
+  hash >>= 16;
+  hash ^= low;
+  // Return a pointer to the word to use
+  return locks + (hash & SPINLOCK_MASK);
 }
 
 /// Macros for determining whether a size is lock free.
@@ -167,12 +163,12 @@ void __atomic_load_c(int size, void *src, void *dest, int model) {
 #define LOCK_FREE_ACTION(type)                                                 \
   *((type *)dest) = __c11_atomic_load((_Atomic(type) *)src, model);            \
   return;
-    LOCK_FREE_CASES(src);
+  LOCK_FREE_CASES(src);
 #undef LOCK_FREE_ACTION
-    Lock *l = lock_for_pointer(src);
-    lock(l);
-    memcpy(dest, src, size);
-    unlock(l);
+  Lock *l = lock_for_pointer(src);
+  lock(l);
+  memcpy(dest, src, size);
+  unlock(l);
 }
 
 /// An atomic store operation.  This is atomic with respect to the destination
@@ -181,12 +177,12 @@ void __atomic_store_c(int size, void *dest, void *src, int model) {
 #define LOCK_FREE_ACTION(type)                                                 \
   __c11_atomic_store((_Atomic(type) *)dest, *(type *)src, model);              \
   return;
-    LOCK_FREE_CASES(dest);
+  LOCK_FREE_CASES(dest);
 #undef LOCK_FREE_ACTION
-    Lock *l = lock_for_pointer(dest);
-    lock(l);
-    memcpy(dest, src, size);
-    unlock(l);
+  Lock *l = lock_for_pointer(dest);
+  lock(l);
+  memcpy(dest, src, size);
+  unlock(l);
 }
 
 /// Atomic compare and exchange operation.  If the value at *ptr is identical
@@ -200,18 +196,18 @@ int __atomic_compare_exchange_c(int size, void *ptr, void *expected,
   return __c11_atomic_compare_exchange_strong(                                 \
       (_Atomic(type) *)ptr, (type *)expected, *(type *)desired, success,       \
       failure)
-    LOCK_FREE_CASES(ptr);
+  LOCK_FREE_CASES(ptr);
 #undef LOCK_FREE_ACTION
-    Lock *l = lock_for_pointer(ptr);
-    lock(l);
-    if (memcmp(ptr, expected, size) == 0) {
-        memcpy(ptr, desired, size);
-        unlock(l);
-        return 1;
-    }
-    memcpy(expected, ptr, size);
+  Lock *l = lock_for_pointer(ptr);
+  lock(l);
+  if (memcmp(ptr, expected, size) == 0) {
+    memcpy(ptr, desired, size);
     unlock(l);
-    return 0;
+    return 1;
+  }
+  memcpy(expected, ptr, size);
+  unlock(l);
+  return 0;
 }
 
 /// Performs an atomic exchange operation between two pointers.  This is atomic
@@ -221,13 +217,13 @@ void __atomic_exchange_c(int size, void *ptr, void *val, void *old, int model) {
   *(type *)old =                                                               \
       __c11_atomic_exchange((_Atomic(type) *)ptr, *(type *)val, model);        \
   return;
-    LOCK_FREE_CASES(ptr);
+  LOCK_FREE_CASES(ptr);
 #undef LOCK_FREE_ACTION
-    Lock *l = lock_for_pointer(ptr);
-    lock(l);
-    memcpy(old, ptr, size);
-    memcpy(ptr, val, size);
-    unlock(l);
+  Lock *l = lock_for_pointer(ptr);
+  lock(l);
+  memcpy(old, ptr, size);
+  memcpy(ptr, val, size);
+  unlock(l);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

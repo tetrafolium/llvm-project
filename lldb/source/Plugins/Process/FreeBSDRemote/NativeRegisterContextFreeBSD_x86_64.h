@@ -36,56 +36,56 @@ class NativeRegisterContextFreeBSD_x86_64
     : public NativeRegisterContextFreeBSD,
       public NativeRegisterContextWatchpoint_x86 {
 public:
-    NativeRegisterContextFreeBSD_x86_64(const ArchSpec &target_arch,
-                                        NativeThreadProtocol &native_thread);
-    uint32_t GetRegisterSetCount() const override;
+  NativeRegisterContextFreeBSD_x86_64(const ArchSpec &target_arch,
+                                      NativeThreadProtocol &native_thread);
+  uint32_t GetRegisterSetCount() const override;
 
-    const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
+  const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
 
-    Status ReadRegister(const RegisterInfo *reg_info,
-                        RegisterValue &reg_value) override;
+  Status ReadRegister(const RegisterInfo *reg_info,
+                      RegisterValue &reg_value) override;
 
-    Status WriteRegister(const RegisterInfo *reg_info,
-                         const RegisterValue &reg_value) override;
+  Status WriteRegister(const RegisterInfo *reg_info,
+                       const RegisterValue &reg_value) override;
 
-    Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+  Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-    Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+  Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-    llvm::Error
-    CopyHardwareWatchpointsFrom(NativeRegisterContextFreeBSD &source) override;
+  llvm::Error
+  CopyHardwareWatchpointsFrom(NativeRegisterContextFreeBSD &source) override;
 
 private:
-    // Private member types.
-    enum RegSetKind {
-        GPRegSet,
-        FPRegSet,
-        DBRegSet,
-        YMMRegSet,
-        MPXRegSet,
-        MaxRegSet = MPXRegSet,
-    };
+  // Private member types.
+  enum RegSetKind {
+    GPRegSet,
+    FPRegSet,
+    DBRegSet,
+    YMMRegSet,
+    MPXRegSet,
+    MaxRegSet = MPXRegSet,
+  };
 
-    // Private member variables.
-    std::array<uint8_t, sizeof(struct reg)> m_gpr;
-    std::array<uint8_t, 512> m_fpr; // FXSAVE
-    std::array<uint8_t, sizeof(struct dbreg)> m_dbr;
-    std::vector<uint8_t> m_xsave;
-    std::array<uint32_t, MaxRegSet + 1> m_xsave_offsets;
-    std::array<size_t, MaxRegSet + 1> m_regset_offsets;
+  // Private member variables.
+  std::array<uint8_t, sizeof(struct reg)> m_gpr;
+  std::array<uint8_t, 512> m_fpr; // FXSAVE
+  std::array<uint8_t, sizeof(struct dbreg)> m_dbr;
+  std::vector<uint8_t> m_xsave;
+  std::array<uint32_t, MaxRegSet + 1> m_xsave_offsets;
+  std::array<size_t, MaxRegSet + 1> m_regset_offsets;
 
-    llvm::Optional<RegSetKind> GetSetForNativeRegNum(uint32_t reg_num) const;
+  llvm::Optional<RegSetKind> GetSetForNativeRegNum(uint32_t reg_num) const;
 
-    Status ReadRegisterSet(RegSetKind set);
-    Status WriteRegisterSet(RegSetKind set);
+  Status ReadRegisterSet(RegSetKind set);
+  Status WriteRegisterSet(RegSetKind set);
 
-    uint8_t *GetOffsetRegSetData(RegSetKind set, size_t reg_offset);
+  uint8_t *GetOffsetRegSetData(RegSetKind set, size_t reg_offset);
 
-    struct YMMSplitPtr {
-        void *xmm;
-        void *ymm_hi;
-    };
-    llvm::Optional<YMMSplitPtr> GetYMMSplitReg(uint32_t reg);
+  struct YMMSplitPtr {
+    void *xmm;
+    void *ymm_hi;
+  };
+  llvm::Optional<YMMSplitPtr> GetYMMSplitReg(uint32_t reg);
 };
 
 } // namespace process_freebsd

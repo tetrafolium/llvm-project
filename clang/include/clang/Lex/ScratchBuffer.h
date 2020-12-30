@@ -22,21 +22,22 @@ class SourceManager;
 /// construction of tokens.  This is used for builtin macros (e.g. __LINE__) as
 /// well as token pasting, etc.
 class ScratchBuffer {
-    SourceManager &SourceMgr;
-    char *CurBuffer;
-    SourceLocation BufferStartLoc;
-    unsigned BytesUsed;
-public:
-    ScratchBuffer(SourceManager &SM);
+  SourceManager &SourceMgr;
+  char *CurBuffer;
+  SourceLocation BufferStartLoc;
+  unsigned BytesUsed;
 
-    /// getToken - Splat the specified text into a temporary MemoryBuffer and
-    /// return a SourceLocation that refers to the token.  This is just like the
-    /// previous method, but returns a location that indicates the physloc of the
-    /// token.
-    SourceLocation getToken(const char *Buf, unsigned Len, const char *&DestPtr);
+public:
+  ScratchBuffer(SourceManager &SM);
+
+  /// getToken - Splat the specified text into a temporary MemoryBuffer and
+  /// return a SourceLocation that refers to the token.  This is just like the
+  /// previous method, but returns a location that indicates the physloc of the
+  /// token.
+  SourceLocation getToken(const char *Buf, unsigned Len, const char *&DestPtr);
 
 private:
-    void AllocScratchBuffer(unsigned RequestLen);
+  void AllocScratchBuffer(unsigned RequestLen);
 };
 
 } // end namespace clang

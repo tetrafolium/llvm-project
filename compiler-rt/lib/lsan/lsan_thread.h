@@ -19,32 +19,24 @@
 namespace __lsan {
 
 class ThreadContextLsanBase : public ThreadContextBase {
-public:
-    explicit ThreadContextLsanBase(int tid);
-    void OnFinished() override;
-    uptr stack_begin() {
-        return stack_begin_;
-    }
-    uptr stack_end() {
-        return stack_end_;
-    }
-    uptr cache_begin() {
-        return cache_begin_;
-    }
-    uptr cache_end() {
-        return cache_end_;
-    }
+ public:
+  explicit ThreadContextLsanBase(int tid);
+  void OnFinished() override;
+  uptr stack_begin() { return stack_begin_; }
+  uptr stack_end() { return stack_end_; }
+  uptr cache_begin() { return cache_begin_; }
+  uptr cache_end() { return cache_end_; }
 
-    // The argument is passed on to the subclass's OnStarted member function.
-    static void ThreadStart(u32 tid, tid_t os_id, ThreadType thread_type,
-                            void *onstarted_arg);
+  // The argument is passed on to the subclass's OnStarted member function.
+  static void ThreadStart(u32 tid, tid_t os_id, ThreadType thread_type,
+                          void *onstarted_arg);
 
-protected:
-    ~ThreadContextLsanBase() {}
-    uptr stack_begin_ = 0;
-    uptr stack_end_ = 0;
-    uptr cache_begin_ = 0;
-    uptr cache_end_ = 0;
+ protected:
+  ~ThreadContextLsanBase() {}
+  uptr stack_begin_ = 0;
+  uptr stack_end_ = 0;
+  uptr cache_begin_ = 0;
+  uptr cache_end_ = 0;
 };
 
 // This subclass of ThreadContextLsanBase is declared in an OS-specific header.

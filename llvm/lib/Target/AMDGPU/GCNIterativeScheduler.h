@@ -33,98 +33,92 @@ class SUnit;
 class raw_ostream;
 
 class GCNIterativeScheduler : public ScheduleDAGMILive {
-    using BaseClass = ScheduleDAGMILive;
+  using BaseClass = ScheduleDAGMILive;
 
 public:
-    enum StrategyKind {
-        SCHEDULE_MINREGONLY,
-        SCHEDULE_MINREGFORCED,
-        SCHEDULE_LEGACYMAXOCCUPANCY,
-        SCHEDULE_ILP
-    };
+  enum StrategyKind {
+    SCHEDULE_MINREGONLY,
+    SCHEDULE_MINREGFORCED,
+    SCHEDULE_LEGACYMAXOCCUPANCY,
+    SCHEDULE_ILP
+  };
 
-    GCNIterativeScheduler(MachineSchedContext *C,
-                          StrategyKind S);
+  GCNIterativeScheduler(MachineSchedContext *C, StrategyKind S);
 
-    void schedule() override;
+  void schedule() override;
 
-    void enterRegion(MachineBasicBlock *BB,
-                     MachineBasicBlock::iterator Begin,
-                     MachineBasicBlock::iterator End,
-                     unsigned RegionInstrs) override;
+  void enterRegion(MachineBasicBlock *BB, MachineBasicBlock::iterator Begin,
+                   MachineBasicBlock::iterator End,
+                   unsigned RegionInstrs) override;
 
-    void finalizeSchedule() override;
+  void finalizeSchedule() override;
 
 protected:
-    using ScheduleRef = ArrayRef<const SUnit *>;
+  using ScheduleRef = ArrayRef<const SUnit *>;
 
-    struct TentativeSchedule {
-        std::vector<MachineInstr *> Schedule;
-        GCNRegPressure MaxPressure;
-    };
+  struct TentativeSchedule {
+    std::vector<MachineInstr *> Schedule;
+    GCNRegPressure MaxPressure;
+  };
 
-    struct Region {
-        // Fields except for BestSchedule are supposed to reflect current IR state
-        // `const` fields are to emphasize they shouldn't change for any schedule.
-        MachineBasicBlock::iterator Begin;
-        // End is either a boundary instruction or end of basic block
-        const MachineBasicBlock::iterator End;
-        const unsigned NumRegionInstrs;
-        GCNRegPressure MaxPressure;
+  struct Region {
+    // Fields except for BestSchedule are supposed to reflect current IR state
+    // `const` fields are to emphasize they shouldn't change for any schedule.
+    MachineBasicBlock::iterator Begin;
+    // End is either a boundary instruction or end of basic block
+    const MachineBasicBlock::iterator End;
+    const unsigned NumRegionInstrs;
+    GCNRegPressure MaxPressure;
 
-        // best schedule for the region so far (not scheduled yet)
-        std::unique_ptr<TentativeSchedule> BestSchedule;
-    };
+    // best schedule for the region so far (not scheduled yet)
+    std::unique_ptr<TentativeSchedule> BestSchedule;
+  };
 
-    SpecificBumpPtrAllocator<Region> Alloc;
-    std::vector<Region*> Regions;
+  SpecificBumpPtrAllocator<Region> Alloc;
+  std::vector<Region *> Regions;
 
-    MachineSchedContext *Context;
-    const StrategyKind Strategy;
-    mutable GCNUpwardRPTracker UPTracker;
+  MachineSchedContext *Context;
+  const StrategyKind Strategy;
+  mutable GCNUpwardRPTracker UPTracker;
 
-    class BuildDAG;
-    class OverrideLegacyStrategy;
+  class BuildDAG;
+  class OverrideLegacyStrategy;
 
-    template <typename Range>
-    GCNRegPressure getSchedulePressure(const Region &R,
-                                       Range &&Schedule) const;
+  template <typename Range>
+  GCNRegPressure getSchedulePressure(const Region &R, Range &&Schedule) const;
 
-    GCNRegPressure getRegionPressure(MachineBasicBlock::iterator Begin,
-                                     MachineBasicBlock::iterator End) const;
+  GCNRegPressure getRegionPressure(MachineBasicBlock::iterator Begin,
+                                   MachineBasicBlock::iterator End) const;
 
-    GCNRegPressure getRegionPressure(const Region &R) const {
-        return getRegionPressure(R.Begin, R.End);
-    }
+  GCNRegPressure getRegionPressure(const Region &R) const {
+    return getRegionPressure(R.Begin, R.End);
+  }
 
-    void setBestSchedule(Region &R,
-                         ScheduleRef Schedule,
-                         const GCNRegPressure &MaxRP = GCNRegPressure());
+  void setBestSchedule(Region &R, ScheduleRef Schedule,
+                       const GCNRegPressure &MaxRP = GCNRegPressure());
 
-    void scheduleBest(Region &R);
+  void scheduleBest(Region &R);
 
-    std::vector<MachineInstr*> detachSchedule(ScheduleRef Schedule) const;
+  std::vector<MachineInstr *> detachSchedule(ScheduleRef Schedule) const;
 
-    void sortRegionsByPressure(unsigned TargetOcc);
+  void sortRegionsByPressure(unsigned TargetOcc);
 
-    template <typename Range>
-    void scheduleRegion(Region &R, Range &&Schedule,
-                        const GCNRegPressure &MaxRP = GCNRegPressure());
+  template <typename Range>
+  void scheduleRegion(Region &R, Range &&Schedule,
+                      const GCNRegPressure &MaxRP = GCNRegPressure());
 
-    unsigned tryMaximizeOccupancy(unsigned TargetOcc =
-                                      std::numeric_limits<unsigned>::max());
+  unsigned tryMaximizeOccupancy(
+      unsigned TargetOcc = std::numeric_limits<unsigned>::max());
 
-    void scheduleLegacyMaxOccupancy(bool TryMaximizeOccupancy = true);
-    void scheduleMinReg(bool force = false);
-    void scheduleILP(bool TryMaximizeOccupancy = true);
+  void scheduleLegacyMaxOccupancy(bool TryMaximizeOccupancy = true);
+  void scheduleMinReg(bool force = false);
+  void scheduleILP(bool TryMaximizeOccupancy = true);
 
-    void printRegions(raw_ostream &OS) const;
-    void printSchedResult(raw_ostream &OS,
-                          const Region *R,
-                          const GCNRegPressure &RP) const;
-    void printSchedRP(raw_ostream &OS,
-                      const GCNRegPressure &Before,
-                      const GCNRegPressure &After) const;
+  void printRegions(raw_ostream &OS) const;
+  void printSchedResult(raw_ostream &OS, const Region *R,
+                        const GCNRegPressure &RP) const;
+  void printSchedRP(raw_ostream &OS, const GCNRegPressure &Before,
+                    const GCNRegPressure &After) const;
 };
 
 } // end namespace llvm

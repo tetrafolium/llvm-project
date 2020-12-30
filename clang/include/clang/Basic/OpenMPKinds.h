@@ -27,59 +27,53 @@ using OpenMPClauseKind = llvm::omp::Clause;
 
 /// OpenMP attributes for 'schedule' clause.
 enum OpenMPScheduleClauseKind {
-#define OPENMP_SCHEDULE_KIND(Name) \
-  OMPC_SCHEDULE_##Name,
+#define OPENMP_SCHEDULE_KIND(Name) OMPC_SCHEDULE_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_SCHEDULE_unknown
+  OMPC_SCHEDULE_unknown
 };
 
 /// OpenMP modifiers for 'schedule' clause.
 enum OpenMPScheduleClauseModifier {
-    OMPC_SCHEDULE_MODIFIER_unknown = OMPC_SCHEDULE_unknown,
-#define OPENMP_SCHEDULE_MODIFIER(Name) \
-  OMPC_SCHEDULE_MODIFIER_##Name,
+  OMPC_SCHEDULE_MODIFIER_unknown = OMPC_SCHEDULE_unknown,
+#define OPENMP_SCHEDULE_MODIFIER(Name) OMPC_SCHEDULE_MODIFIER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_SCHEDULE_MODIFIER_last
+  OMPC_SCHEDULE_MODIFIER_last
 };
 
 /// OpenMP modifiers for 'device' clause.
 enum OpenMPDeviceClauseModifier {
 #define OPENMP_DEVICE_MODIFIER(Name) OMPC_DEVICE_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DEVICE_unknown,
+  OMPC_DEVICE_unknown,
 };
 
 /// OpenMP attributes for 'depend' clause.
 enum OpenMPDependClauseKind {
-#define OPENMP_DEPEND_KIND(Name) \
-  OMPC_DEPEND_##Name,
+#define OPENMP_DEPEND_KIND(Name) OMPC_DEPEND_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DEPEND_unknown
+  OMPC_DEPEND_unknown
 };
 
 /// OpenMP attributes for 'linear' clause.
 enum OpenMPLinearClauseKind {
-#define OPENMP_LINEAR_KIND(Name) \
-  OMPC_LINEAR_##Name,
+#define OPENMP_LINEAR_KIND(Name) OMPC_LINEAR_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_LINEAR_unknown
+  OMPC_LINEAR_unknown
 };
 
 /// OpenMP mapping kind for 'map' clause.
 enum OpenMPMapClauseKind {
-#define OPENMP_MAP_KIND(Name) \
-  OMPC_MAP_##Name,
+#define OPENMP_MAP_KIND(Name) OMPC_MAP_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_MAP_unknown
+  OMPC_MAP_unknown
 };
 
 /// OpenMP modifier kind for 'map' clause.
 enum OpenMPMapModifierKind {
-    OMPC_MAP_MODIFIER_unknown = OMPC_MAP_unknown,
-#define OPENMP_MAP_MODIFIER_KIND(Name) \
-  OMPC_MAP_MODIFIER_##Name,
+  OMPC_MAP_MODIFIER_unknown = OMPC_MAP_unknown,
+#define OPENMP_MAP_MODIFIER_KIND(Name) OMPC_MAP_MODIFIER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_MAP_MODIFIER_last
+  OMPC_MAP_MODIFIER_last
 };
 
 /// Number of allowed map-type-modifiers.
@@ -88,10 +82,9 @@ static constexpr unsigned NumberOfOMPMapClauseModifiers =
 
 /// OpenMP modifier kind for 'to' or 'from' clause.
 enum OpenMPMotionModifierKind {
-#define OPENMP_MOTION_MODIFIER_KIND(Name) \
-  OMPC_MOTION_MODIFIER_##Name,
+#define OPENMP_MOTION_MODIFIER_KIND(Name) OMPC_MOTION_MODIFIER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_MOTION_MODIFIER_unknown
+  OMPC_MOTION_MODIFIER_unknown
 };
 
 /// Number of allowed motion-modifiers.
@@ -102,68 +95,65 @@ static constexpr unsigned NumberOfOMPMotionModifiers =
 enum OpenMPDistScheduleClauseKind {
 #define OPENMP_DIST_SCHEDULE_KIND(Name) OMPC_DIST_SCHEDULE_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DIST_SCHEDULE_unknown
+  OMPC_DIST_SCHEDULE_unknown
 };
 
 /// OpenMP attributes for 'defaultmap' clause.
 enum OpenMPDefaultmapClauseKind {
-#define OPENMP_DEFAULTMAP_KIND(Name) \
-  OMPC_DEFAULTMAP_##Name,
+#define OPENMP_DEFAULTMAP_KIND(Name) OMPC_DEFAULTMAP_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DEFAULTMAP_unknown
+  OMPC_DEFAULTMAP_unknown
 };
 
 /// OpenMP modifiers for 'defaultmap' clause.
 enum OpenMPDefaultmapClauseModifier {
-    OMPC_DEFAULTMAP_MODIFIER_unknown = OMPC_DEFAULTMAP_unknown,
-#define OPENMP_DEFAULTMAP_MODIFIER(Name) \
-  OMPC_DEFAULTMAP_MODIFIER_##Name,
+  OMPC_DEFAULTMAP_MODIFIER_unknown = OMPC_DEFAULTMAP_unknown,
+#define OPENMP_DEFAULTMAP_MODIFIER(Name) OMPC_DEFAULTMAP_MODIFIER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DEFAULTMAP_MODIFIER_last
+  OMPC_DEFAULTMAP_MODIFIER_last
 };
 
 /// OpenMP attributes for 'atomic_default_mem_order' clause.
 enum OpenMPAtomicDefaultMemOrderClauseKind {
-#define OPENMP_ATOMIC_DEFAULT_MEM_ORDER_KIND(Name)  \
+#define OPENMP_ATOMIC_DEFAULT_MEM_ORDER_KIND(Name)                             \
   OMPC_ATOMIC_DEFAULT_MEM_ORDER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_ATOMIC_DEFAULT_MEM_ORDER_unknown
+  OMPC_ATOMIC_DEFAULT_MEM_ORDER_unknown
 };
 
 /// OpenMP device type for 'device_type' clause.
 enum OpenMPDeviceType {
-#define OPENMP_DEVICE_TYPE_KIND(Name) \
-  OMPC_DEVICE_TYPE_##Name,
+#define OPENMP_DEVICE_TYPE_KIND(Name) OMPC_DEVICE_TYPE_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_DEVICE_TYPE_unknown
+  OMPC_DEVICE_TYPE_unknown
 };
 
 /// OpenMP 'lastprivate' clause modifier.
 enum OpenMPLastprivateModifier {
 #define OPENMP_LASTPRIVATE_KIND(Name) OMPC_LASTPRIVATE_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_LASTPRIVATE_unknown,
+  OMPC_LASTPRIVATE_unknown,
 };
 
 /// OpenMP attributes for 'order' clause.
 enum OpenMPOrderClauseKind {
 #define OPENMP_ORDER_KIND(Name) OMPC_ORDER_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_ORDER_unknown,
+  OMPC_ORDER_unknown,
 };
 
 /// Scheduling data for loop-based OpenMP directives.
 struct OpenMPScheduleTy final {
-    OpenMPScheduleClauseKind Schedule = OMPC_SCHEDULE_unknown;
-    OpenMPScheduleClauseModifier M1 = OMPC_SCHEDULE_MODIFIER_unknown;
-    OpenMPScheduleClauseModifier M2 = OMPC_SCHEDULE_MODIFIER_unknown;
+  OpenMPScheduleClauseKind Schedule = OMPC_SCHEDULE_unknown;
+  OpenMPScheduleClauseModifier M1 = OMPC_SCHEDULE_MODIFIER_unknown;
+  OpenMPScheduleClauseModifier M2 = OMPC_SCHEDULE_MODIFIER_unknown;
 };
 
 /// OpenMP modifiers for 'reduction' clause.
 enum OpenMPReductionClauseModifier {
 #define OPENMP_REDUCTION_MODIFIER(Name) OMPC_REDUCTION_##Name,
 #include "clang/Basic/OpenMPKinds.def"
-    OMPC_REDUCTION_unknown,
+  OMPC_REDUCTION_unknown,
 };
 
 unsigned getOpenMPSimpleClauseType(OpenMPClauseKind Kind, llvm::StringRef Str,
@@ -271,7 +261,6 @@ bool isOpenMPLoopBoundSharingDirective(OpenMPDirectiveKind Kind);
 void getOpenMPCaptureRegions(
     llvm::SmallVectorImpl<OpenMPDirectiveKind> &CaptureRegions,
     OpenMPDirectiveKind DKind);
-}
+} // namespace clang
 
 #endif
-

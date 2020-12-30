@@ -20,36 +20,34 @@ namespace llvm {
 /// StringSet - A wrapper for StringMap that provides set-like functionality.
 template <class AllocatorTy = MallocAllocator>
 class StringSet : public StringMap<NoneType, AllocatorTy> {
-    using Base = StringMap<NoneType, AllocatorTy>;
+  using Base = StringMap<NoneType, AllocatorTy>;
 
 public:
-    StringSet() = default;
-    StringSet(std::initializer_list<StringRef> initializer) {
-        for (StringRef str : initializer)
-            insert(str);
-    }
-    explicit StringSet(AllocatorTy a) : Base(a) {}
+  StringSet() = default;
+  StringSet(std::initializer_list<StringRef> initializer) {
+    for (StringRef str : initializer)
+      insert(str);
+  }
+  explicit StringSet(AllocatorTy a) : Base(a) {}
 
-    std::pair<typename Base::iterator, bool> insert(StringRef key) {
-        return Base::try_emplace(key);
-    }
+  std::pair<typename Base::iterator, bool> insert(StringRef key) {
+    return Base::try_emplace(key);
+  }
 
-    template <typename InputIt>
-    void insert(const InputIt &begin, const InputIt &end) {
-        for (auto it = begin; it != end; ++it)
-            insert(*it);
-    }
+  template <typename InputIt>
+  void insert(const InputIt &begin, const InputIt &end) {
+    for (auto it = begin; it != end; ++it)
+      insert(*it);
+  }
 
-    template <typename ValueTy>
-    std::pair<typename Base::iterator, bool>
-    insert(const StringMapEntry<ValueTy> &mapEntry) {
-        return insert(mapEntry.getKey());
-    }
+  template <typename ValueTy>
+  std::pair<typename Base::iterator, bool>
+  insert(const StringMapEntry<ValueTy> &mapEntry) {
+    return insert(mapEntry.getKey());
+  }
 
-    /// Check if the set contains the given \c key.
-    bool contains(StringRef key) const {
-        return Base::FindKey(key) != -1;
-    }
+  /// Check if the set contains the given \c key.
+  bool contains(StringRef key) const { return Base::FindKey(key) != -1; }
 };
 
 } // end namespace llvm

@@ -21,7 +21,7 @@
 #include "llvm/Frontend/OpenACC/ACC.h.inc"
 
 using AccDirectiveSet = Fortran::common::EnumSet<llvm::acc::Directive,
-      llvm::acc::Directive_enumSize>;
+    llvm::acc::Directive_enumSize>;
 
 using AccClauseSet =
     Fortran::common::EnumSet<llvm::acc::Clause, llvm::acc::Clause_enumSize>;
@@ -33,92 +33,91 @@ namespace Fortran::semantics {
 
 class AccStructureChecker
     : public DirectiveStructureChecker<llvm::acc::Directive, llvm::acc::Clause,
-      parser::AccClause, llvm::acc::Clause_enumSize> {
+          parser::AccClause, llvm::acc::Clause_enumSize> {
 public:
-    AccStructureChecker(SemanticsContext &context)
-        : DirectiveStructureChecker(context,
+  AccStructureChecker(SemanticsContext &context)
+      : DirectiveStructureChecker(context,
 #define GEN_FLANG_DIRECTIVE_CLAUSE_MAP
 #include "llvm/Frontend/OpenACC/ACC.cpp.inc"
-                                   ) {
-    }
+        ) {
+  }
 
-    // Construct and directives
-    void Enter(const parser::OpenACCBlockConstruct &);
-    void Leave(const parser::OpenACCBlockConstruct &);
-    void Enter(const parser::OpenACCCombinedConstruct &);
-    void Leave(const parser::OpenACCCombinedConstruct &);
-    void Enter(const parser::OpenACCLoopConstruct &);
-    void Leave(const parser::OpenACCLoopConstruct &);
-    void Enter(const parser::OpenACCRoutineConstruct &);
-    void Leave(const parser::OpenACCRoutineConstruct &);
-    void Enter(const parser::OpenACCStandaloneConstruct &);
-    void Leave(const parser::OpenACCStandaloneConstruct &);
-    void Enter(const parser::OpenACCStandaloneDeclarativeConstruct &);
-    void Leave(const parser::OpenACCStandaloneDeclarativeConstruct &);
-    void Enter(const parser::OpenACCWaitConstruct &);
-    void Leave(const parser::OpenACCWaitConstruct &);
-    void Enter(const parser::OpenACCAtomicConstruct &);
-    void Leave(const parser::OpenACCAtomicConstruct &);
-    void Enter(const parser::OpenACCCacheConstruct &);
-    void Leave(const parser::OpenACCCacheConstruct &);
+  // Construct and directives
+  void Enter(const parser::OpenACCBlockConstruct &);
+  void Leave(const parser::OpenACCBlockConstruct &);
+  void Enter(const parser::OpenACCCombinedConstruct &);
+  void Leave(const parser::OpenACCCombinedConstruct &);
+  void Enter(const parser::OpenACCLoopConstruct &);
+  void Leave(const parser::OpenACCLoopConstruct &);
+  void Enter(const parser::OpenACCRoutineConstruct &);
+  void Leave(const parser::OpenACCRoutineConstruct &);
+  void Enter(const parser::OpenACCStandaloneConstruct &);
+  void Leave(const parser::OpenACCStandaloneConstruct &);
+  void Enter(const parser::OpenACCStandaloneDeclarativeConstruct &);
+  void Leave(const parser::OpenACCStandaloneDeclarativeConstruct &);
+  void Enter(const parser::OpenACCWaitConstruct &);
+  void Leave(const parser::OpenACCWaitConstruct &);
+  void Enter(const parser::OpenACCAtomicConstruct &);
+  void Leave(const parser::OpenACCAtomicConstruct &);
+  void Enter(const parser::OpenACCCacheConstruct &);
+  void Leave(const parser::OpenACCCacheConstruct &);
 
-    // Clauses
-    void Leave(const parser::AccClauseList &);
-    void Enter(const parser::AccClause &);
+  // Clauses
+  void Leave(const parser::AccClauseList &);
+  void Enter(const parser::AccClause &);
 
-    void Enter(const parser::AccClause::Auto &);
-    void Enter(const parser::AccClause::Async &);
-    void Enter(const parser::AccClause::Attach &);
-    void Enter(const parser::AccClause::Bind &);
-    void Enter(const parser::AccClause::Capture &);
-    void Enter(const parser::AccClause::Create &);
-    void Enter(const parser::AccClause::Collapse &);
-    void Enter(const parser::AccClause::Copy &);
-    void Enter(const parser::AccClause::Copyin &);
-    void Enter(const parser::AccClause::Copyout &);
-    void Enter(const parser::AccClause::Default &);
-    void Enter(const parser::AccClause::DefaultAsync &);
-    void Enter(const parser::AccClause::Delete &);
-    void Enter(const parser::AccClause::Detach &);
-    void Enter(const parser::AccClause::Device &);
-    void Enter(const parser::AccClause::DeviceNum &);
-    void Enter(const parser::AccClause::Deviceptr &);
-    void Enter(const parser::AccClause::DeviceResident &);
-    void Enter(const parser::AccClause::DeviceType &);
-    void Enter(const parser::AccClause::Finalize &);
-    void Enter(const parser::AccClause::Firstprivate &);
-    void Enter(const parser::AccClause::Gang &);
-    void Enter(const parser::AccClause::Host &);
-    void Enter(const parser::AccClause::If &);
-    void Enter(const parser::AccClause::IfPresent &);
-    void Enter(const parser::AccClause::Independent &);
-    void Enter(const parser::AccClause::Link &);
-    void Enter(const parser::AccClause::NoCreate &);
-    void Enter(const parser::AccClause::Nohost &);
-    void Enter(const parser::AccClause::NumGangs &);
-    void Enter(const parser::AccClause::NumWorkers &);
-    void Enter(const parser::AccClause::Present &);
-    void Enter(const parser::AccClause::Private &);
-    void Enter(const parser::AccClause::Read &);
-    void Enter(const parser::AccClause::Reduction &);
-    void Enter(const parser::AccClause::Self &);
-    void Enter(const parser::AccClause::Seq &);
-    void Enter(const parser::AccClause::Tile &);
-    void Enter(const parser::AccClause::UseDevice &);
-    void Enter(const parser::AccClause::Vector &);
-    void Enter(const parser::AccClause::VectorLength &);
-    void Enter(const parser::AccClause::Wait &);
-    void Enter(const parser::AccClause::Worker &);
-    void Enter(const parser::AccClause::Write &);
+  void Enter(const parser::AccClause::Auto &);
+  void Enter(const parser::AccClause::Async &);
+  void Enter(const parser::AccClause::Attach &);
+  void Enter(const parser::AccClause::Bind &);
+  void Enter(const parser::AccClause::Capture &);
+  void Enter(const parser::AccClause::Create &);
+  void Enter(const parser::AccClause::Collapse &);
+  void Enter(const parser::AccClause::Copy &);
+  void Enter(const parser::AccClause::Copyin &);
+  void Enter(const parser::AccClause::Copyout &);
+  void Enter(const parser::AccClause::Default &);
+  void Enter(const parser::AccClause::DefaultAsync &);
+  void Enter(const parser::AccClause::Delete &);
+  void Enter(const parser::AccClause::Detach &);
+  void Enter(const parser::AccClause::Device &);
+  void Enter(const parser::AccClause::DeviceNum &);
+  void Enter(const parser::AccClause::Deviceptr &);
+  void Enter(const parser::AccClause::DeviceResident &);
+  void Enter(const parser::AccClause::DeviceType &);
+  void Enter(const parser::AccClause::Finalize &);
+  void Enter(const parser::AccClause::Firstprivate &);
+  void Enter(const parser::AccClause::Gang &);
+  void Enter(const parser::AccClause::Host &);
+  void Enter(const parser::AccClause::If &);
+  void Enter(const parser::AccClause::IfPresent &);
+  void Enter(const parser::AccClause::Independent &);
+  void Enter(const parser::AccClause::Link &);
+  void Enter(const parser::AccClause::NoCreate &);
+  void Enter(const parser::AccClause::Nohost &);
+  void Enter(const parser::AccClause::NumGangs &);
+  void Enter(const parser::AccClause::NumWorkers &);
+  void Enter(const parser::AccClause::Present &);
+  void Enter(const parser::AccClause::Private &);
+  void Enter(const parser::AccClause::Read &);
+  void Enter(const parser::AccClause::Reduction &);
+  void Enter(const parser::AccClause::Self &);
+  void Enter(const parser::AccClause::Seq &);
+  void Enter(const parser::AccClause::Tile &);
+  void Enter(const parser::AccClause::UseDevice &);
+  void Enter(const parser::AccClause::Vector &);
+  void Enter(const parser::AccClause::VectorLength &);
+  void Enter(const parser::AccClause::Wait &);
+  void Enter(const parser::AccClause::Worker &);
+  void Enter(const parser::AccClause::Write &);
 
 private:
-
-    bool CheckAllowedModifier(llvm::acc::Clause clause);
-    bool IsComputeConstruct(llvm::acc::Directive directive) const;
-    bool IsInsideComputeConstruct() const;
-    void CheckNotInComputeConstruct();
-    llvm::StringRef getClauseName(llvm::acc::Clause clause) override;
-    llvm::StringRef getDirectiveName(llvm::acc::Directive directive) override;
+  bool CheckAllowedModifier(llvm::acc::Clause clause);
+  bool IsComputeConstruct(llvm::acc::Directive directive) const;
+  bool IsInsideComputeConstruct() const;
+  void CheckNotInComputeConstruct();
+  llvm::StringRef getClauseName(llvm::acc::Clause clause) override;
+  llvm::StringRef getDirectiveName(llvm::acc::Directive directive) override;
 };
 
 } // namespace Fortran::semantics

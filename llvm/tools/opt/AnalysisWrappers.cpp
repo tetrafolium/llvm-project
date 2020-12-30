@@ -28,44 +28,47 @@ namespace {
 /// useful when looking for standard library functions we should constant fold
 /// or handle in alias analyses.
 struct ExternalFunctionsPassedConstants : public ModulePass {
-    static char ID; // Pass ID, replacement for typeid
-    ExternalFunctionsPassedConstants() : ModulePass(ID) {}
-    bool runOnModule(Module &M) override {
-        for (Module::iterator I = M.begin(), E = M.end(); I != E; ++I) {
-            if (!I->isDeclaration()) continue;
+  static char ID; // Pass ID, replacement for typeid
+  ExternalFunctionsPassedConstants() : ModulePass(ID) {}
+  bool runOnModule(Module &M) override {
+    for (Module::iterator I = M.begin(), E = M.end(); I != E; ++I) {
+      if (!I->isDeclaration())
+        continue;
 
-            bool PrintedFn = false;
-            for (User *U : I->users()) {
-                Instruction *UI = dyn_cast<Instruction>(U);
-                if (!UI) continue;
+      bool PrintedFn = false;
+      for (User *U : I->users()) {
+        Instruction *UI = dyn_cast<Instruction>(U);
+        if (!UI)
+          continue;
 
-                CallBase *CB = dyn_cast<CallBase>(UI);
-                if (!CB)
-                    continue;
+        CallBase *CB = dyn_cast<CallBase>(UI);
+        if (!CB)
+          continue;
 
-                for (auto AI = CB->arg_begin(), E = CB->arg_end(); AI != E; ++AI) {
-                    if (!isa<Constant>(*AI)) continue;
+        for (auto AI = CB->arg_begin(), E = CB->arg_end(); AI != E; ++AI) {
+          if (!isa<Constant>(*AI))
+            continue;
 
-                    if (!PrintedFn) {
-                        errs() << "Function '" << I->getName() << "':\n";
-                        PrintedFn = true;
-                    }
-                    errs() << *UI;
-                    break;
-                }
-            }
+          if (!PrintedFn) {
+            errs() << "Function '" << I->getName() << "':\n";
+            PrintedFn = true;
+          }
+          errs() << *UI;
+          break;
         }
-
-        return false;
+      }
     }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-    }
+    return false;
+  }
+
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+  }
 };
-}
+} // namespace
 
 char ExternalFunctionsPassedConstants::ID = 0;
 static RegisterPass<ExternalFunctionsPassedConstants>
-P1("print-externalfnconstants",
-   "Print external fn callsites passed constants");
+    P1("print-externalfnconstants",
+       "Print external fn callsites passed constants");

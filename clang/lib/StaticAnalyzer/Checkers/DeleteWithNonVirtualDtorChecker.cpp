@@ -36,120 +36,121 @@ using namespace ento;
 namespace {
 class DeleteWithNonVirtualDtorChecker
     : public Checker<check::PreStmt<CXXDeleteExpr>> {
-    mutable std::unique_ptr<BugType> BT;
+  mutable std::unique_ptr<BugType> BT;
 
-    class DeleteBugVisitor : public BugReporterVisitor {
-    public:
-        DeleteBugVisitor() : Satisfied(false) {}
-        void Profile(llvm::FoldingSetNodeID &ID) const override {
-            static int X = 0;
-            ID.AddPointer(&X);
-        }
-        PathDiagnosticPieceRef VisitNode(const ExplodedNode *N,
-                                         BugReporterContext &BRC,
-                                         PathSensitiveBugReport &BR) override;
+  class DeleteBugVisitor : public BugReporterVisitor {
+  public:
+    DeleteBugVisitor() : Satisfied(false) {}
+    void Profile(llvm::FoldingSetNodeID &ID) const override {
+      static int X = 0;
+      ID.AddPointer(&X);
+    }
+    PathDiagnosticPieceRef VisitNode(const ExplodedNode *N,
+                                     BugReporterContext &BRC,
+                                     PathSensitiveBugReport &BR) override;
 
-    private:
-        bool Satisfied;
-    };
+  private:
+    bool Satisfied;
+  };
 
 public:
-    void checkPreStmt(const CXXDeleteExpr *DE, CheckerContext &C) const;
+  void checkPreStmt(const CXXDeleteExpr *DE, CheckerContext &C) const;
 };
 } // end anonymous namespace
 
 void DeleteWithNonVirtualDtorChecker::checkPreStmt(const CXXDeleteExpr *DE,
-        CheckerContext &C) const {
-    const Expr *DeletedObj = DE->getArgument();
-    const MemRegion *MR = C.getSVal(DeletedObj).getAsRegion();
-    if (!MR)
-        return;
+                                                   CheckerContext &C) const {
+  const Expr *DeletedObj = DE->getArgument();
+  const MemRegion *MR = C.getSVal(DeletedObj).getAsRegion();
+  if (!MR)
+    return;
 
-    const auto *BaseClassRegion = MR->getAs<TypedValueRegion>();
-    const auto *DerivedClassRegion = MR->getBaseRegion()->getAs<SymbolicRegion>();
-    if (!BaseClassRegion || !DerivedClassRegion)
-        return;
+  const auto *BaseClassRegion = MR->getAs<TypedValueRegion>();
+  const auto *DerivedClassRegion = MR->getBaseRegion()->getAs<SymbolicRegion>();
+  if (!BaseClassRegion || !DerivedClassRegion)
+    return;
 
-    const auto *BaseClass = BaseClassRegion->getValueType()->getAsCXXRecordDecl();
-    const auto *DerivedClass =
-        DerivedClassRegion->getSymbol()->getType()->getPointeeCXXRecordDecl();
-    if (!BaseClass || !DerivedClass)
-        return;
+  const auto *BaseClass = BaseClassRegion->getValueType()->getAsCXXRecordDecl();
+  const auto *DerivedClass =
+      DerivedClassRegion->getSymbol()->getType()->getPointeeCXXRecordDecl();
+  if (!BaseClass || !DerivedClass)
+    return;
 
-    if (!BaseClass->hasDefinition() || !DerivedClass->hasDefinition())
-        return;
+  if (!BaseClass->hasDefinition() || !DerivedClass->hasDefinition())
+    return;
 
-    if (BaseClass->getDestructor()->isVirtual())
-        return;
+  if (BaseClass->getDestructor()->isVirtual())
+    return;
 
-    if (!DerivedClass->isDerivedFrom(BaseClass))
-        return;
+  if (!DerivedClass->isDerivedFrom(BaseClass))
+    return;
 
-    if (!BT)
-        BT.reset(new BugType(this,
-                             "Destruction of a polymorphic object with no "
-                             "virtual destructor",
-                             "Logic error"));
+  if (!BT)
+    BT.reset(new BugType(this,
+                         "Destruction of a polymorphic object with no "
+                         "virtual destructor",
+                         "Logic error"));
 
-    ExplodedNode *N = C.generateNonFatalErrorNode();
-    if (!N)
-        return;
-    auto R = std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
+  ExplodedNode *N = C.generateNonFatalErrorNode();
+  if (!N)
+    return;
+  auto R =
+      std::make_unique<PathSensitiveBugReport>(*BT, BT->getDescription(), N);
 
-    // Mark region of problematic base class for later use in the BugVisitor.
-    R->markInteresting(BaseClassRegion);
-    R->addVisitor(std::make_unique<DeleteBugVisitor>());
-    C.emitReport(std::move(R));
+  // Mark region of problematic base class for later use in the BugVisitor.
+  R->markInteresting(BaseClassRegion);
+  R->addVisitor(std::make_unique<DeleteBugVisitor>());
+  C.emitReport(std::move(R));
 }
 
 PathDiagnosticPieceRef
 DeleteWithNonVirtualDtorChecker::DeleteBugVisitor::VisitNode(
     const ExplodedNode *N, BugReporterContext &BRC,
     PathSensitiveBugReport &BR) {
-    // Stop traversal after the first conversion was found on a path.
-    if (Satisfied)
-        return nullptr;
+  // Stop traversal after the first conversion was found on a path.
+  if (Satisfied)
+    return nullptr;
 
-    const Stmt *S = N->getStmtForDiagnostics();
-    if (!S)
-        return nullptr;
+  const Stmt *S = N->getStmtForDiagnostics();
+  if (!S)
+    return nullptr;
 
-    const auto *CastE = dyn_cast<CastExpr>(S);
-    if (!CastE)
-        return nullptr;
+  const auto *CastE = dyn_cast<CastExpr>(S);
+  if (!CastE)
+    return nullptr;
 
-    // Only interested in DerivedToBase implicit casts.
-    // Explicit casts can have different CastKinds.
-    if (const auto *ImplCastE = dyn_cast<ImplicitCastExpr>(CastE)) {
-        if (ImplCastE->getCastKind() != CK_DerivedToBase)
-            return nullptr;
-    }
+  // Only interested in DerivedToBase implicit casts.
+  // Explicit casts can have different CastKinds.
+  if (const auto *ImplCastE = dyn_cast<ImplicitCastExpr>(CastE)) {
+    if (ImplCastE->getCastKind() != CK_DerivedToBase)
+      return nullptr;
+  }
 
-    // Region associated with the current cast expression.
-    const MemRegion *M = N->getSVal(CastE).getAsRegion();
-    if (!M)
-        return nullptr;
+  // Region associated with the current cast expression.
+  const MemRegion *M = N->getSVal(CastE).getAsRegion();
+  if (!M)
+    return nullptr;
 
-    // Check if target region was marked as problematic previously.
-    if (!BR.isInteresting(M))
-        return nullptr;
+  // Check if target region was marked as problematic previously.
+  if (!BR.isInteresting(M))
+    return nullptr;
 
-    // Stop traversal on this path.
-    Satisfied = true;
+  // Stop traversal on this path.
+  Satisfied = true;
 
-    SmallString<256> Buf;
-    llvm::raw_svector_ostream OS(Buf);
-    OS << "Conversion from derived to base happened here";
-    PathDiagnosticLocation Pos(S, BRC.getSourceManager(),
-                               N->getLocationContext());
-    return std::make_shared<PathDiagnosticEventPiece>(Pos, OS.str(), true);
+  SmallString<256> Buf;
+  llvm::raw_svector_ostream OS(Buf);
+  OS << "Conversion from derived to base happened here";
+  PathDiagnosticLocation Pos(S, BRC.getSourceManager(),
+                             N->getLocationContext());
+  return std::make_shared<PathDiagnosticEventPiece>(Pos, OS.str(), true);
 }
 
 void ento::registerDeleteWithNonVirtualDtorChecker(CheckerManager &mgr) {
-    mgr.registerChecker<DeleteWithNonVirtualDtorChecker>();
+  mgr.registerChecker<DeleteWithNonVirtualDtorChecker>();
 }
 
 bool ento::shouldRegisterDeleteWithNonVirtualDtorChecker(
     const CheckerManager &mgr) {
-    return true;
+  return true;
 }

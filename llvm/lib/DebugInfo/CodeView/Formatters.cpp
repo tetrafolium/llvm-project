@@ -24,24 +24,24 @@ GuidAdapter::GuidAdapter(ArrayRef<uint8_t> Guid)
     : FormatAdapter(std::move(Guid)) {}
 
 void GuidAdapter::format(raw_ostream &Stream, StringRef Style) {
-    static const char *Lookup = "0123456789ABCDEF";
+  static const char *Lookup = "0123456789ABCDEF";
 
-    assert(Item.size() == 16 && "Expected 16-byte GUID");
-    Stream << "{";
-    for (int i = 0; i < 16;) {
-        uint8_t Byte = Item[i];
-        uint8_t HighNibble = (Byte >> 4) & 0xF;
-        uint8_t LowNibble = Byte & 0xF;
-        Stream << Lookup[HighNibble] << Lookup[LowNibble];
-        ++i;
-        if (i >= 4 && i <= 10 && i % 2 == 0)
-            Stream << "-";
-    }
-    Stream << "}";
+  assert(Item.size() == 16 && "Expected 16-byte GUID");
+  Stream << "{";
+  for (int i = 0; i < 16;) {
+    uint8_t Byte = Item[i];
+    uint8_t HighNibble = (Byte >> 4) & 0xF;
+    uint8_t LowNibble = Byte & 0xF;
+    Stream << Lookup[HighNibble] << Lookup[LowNibble];
+    ++i;
+    if (i >= 4 && i <= 10 && i % 2 == 0)
+      Stream << "-";
+  }
+  Stream << "}";
 }
 
 raw_ostream &llvm::codeview::operator<<(raw_ostream &OS, const GUID &Guid) {
-    codeview::detail::GuidAdapter A(Guid.Guid);
-    A.format(OS, "");
-    return OS;
+  codeview::detail::GuidAdapter A(Guid.Guid);
+  A.format(OS, "");
+  return OS;
 }

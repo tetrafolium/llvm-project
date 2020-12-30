@@ -45,44 +45,44 @@ simple_readline(FILE *stdin, FILE *stdout, const char *prompt)
 simple_readline(FILE *stdin, FILE *stdout, char *prompt)
 #endif
 {
-    rl_instream = stdin;
-    rl_outstream = stdout;
-    char *line = readline(prompt);
-    if (!line) {
+  rl_instream = stdin;
+  rl_outstream = stdout;
+  char *line = readline(prompt);
+  if (!line) {
 #if PY_MAJOR_VERSION >= 3
-        char *ret = (char *)PyMem_RawMalloc(1);
+    char *ret = (char *)PyMem_RawMalloc(1);
 #else
-        char *ret = (char *)PyMem_Malloc(1);
+    char *ret = (char *)PyMem_Malloc(1);
 #endif
-        if (ret != NULL)
-            *ret = '\0';
-        return ret;
-    }
-    if (*line)
-        add_history(line);
-    int n = strlen(line);
-#if PY_MAJOR_VERSION >= 3
-    char *ret = (char *)PyMem_RawMalloc(n + 2);
-#else
-    char *ret = (char *)PyMem_Malloc(n + 2);
-#endif
-    if (ret) {
-        memcpy(ret, line, n);
-        free(line);
-        ret[n] = '\n';
-        ret[n + 1] = '\0';
-    }
+    if (ret != NULL)
+      *ret = '\0';
     return ret;
+  }
+  if (*line)
+    add_history(line);
+  int n = strlen(line);
+#if PY_MAJOR_VERSION >= 3
+  char *ret = (char *)PyMem_RawMalloc(n + 2);
+#else
+  char *ret = (char *)PyMem_Malloc(n + 2);
+#endif
+  if (ret) {
+    memcpy(ret, line, n);
+    free(line);
+    ret[n] = '\n';
+    ret[n + 1] = '\0';
+  }
+  return ret;
 }
 
 PyMODINIT_FUNC initlldb_readline(void) {
-    PyOS_ReadlineFunctionPointer = simple_readline;
+  PyOS_ReadlineFunctionPointer = simple_readline;
 
 #if PY_MAJOR_VERSION >= 3
-    return PyModule_Create(&readline_module);
+  return PyModule_Create(&readline_module);
 #else
-    Py_InitModule4("readline", moduleMethods, moduleDocumentation,
-                   static_cast<PyObject *>(NULL), PYTHON_API_VERSION);
+  Py_InitModule4("readline", moduleMethods, moduleDocumentation,
+                 static_cast<PyObject *>(NULL), PYTHON_API_VERSION);
 #endif
 }
 #endif

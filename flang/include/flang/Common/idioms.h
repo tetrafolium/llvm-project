@@ -57,7 +57,7 @@ namespace Fortran::common {
 //         [&](const auto &catchAll) { ... }}, variantObject);
 
 template <typename... LAMBDAS> struct visitors : LAMBDAS... {
-    using LAMBDAS::operator()...;
+  using LAMBDAS::operator()...;
 };
 
 template <typename... LAMBDAS> visitors(LAMBDAS... x) -> visitors<LAMBDAS...>;
@@ -118,8 +118,8 @@ template <typename... LAMBDAS> visitors(LAMBDAS... x) -> visitors<LAMBDAS...>;
 std::string EnumIndexToString(int index, const char *names);
 
 template <typename A> struct ListItemCount {
-    constexpr ListItemCount(std::initializer_list<A> list) : value{list.size()} {}
-    const std::size_t value;
+  constexpr ListItemCount(std::initializer_list<A> list) : value{list.size()} {}
+  const std::size_t value;
 };
 
 #define ENUM_CLASS(NAME, ...) \
@@ -137,24 +137,22 @@ template <typename A> struct ListItemCount {
 #define DEREF(p) Fortran::common::Deref(p, __FILE__, __LINE__)
 
 template <typename T> constexpr T &Deref(T *p, const char *file, int line) {
-    if (!p) {
-        Fortran::common::die("nullptr dereference at %s(%d)", file, line);
-    }
-    return *p;
+  if (!p) {
+    Fortran::common::die("nullptr dereference at %s(%d)", file, line);
+  }
+  return *p;
 }
 
 template <typename T>
 constexpr T &Deref(const std::unique_ptr<T> &p, const char *file, int line) {
-    if (!p) {
-        Fortran::common::die("nullptr dereference at %s(%d)", file, line);
-    }
-    return *p;
+  if (!p) {
+    Fortran::common::die("nullptr dereference at %s(%d)", file, line);
+  }
+  return *p;
 }
 
 // Given a const reference to a value, return a copy of the value.
-template <typename A> A Clone(const A &x) {
-    return x;
-}
+template <typename A> A Clone(const A &x) { return x; }
 
 // C++ does a weird and dangerous thing when deducing template type parameters
 // from function arguments: lvalue references are allowed to match rvalue

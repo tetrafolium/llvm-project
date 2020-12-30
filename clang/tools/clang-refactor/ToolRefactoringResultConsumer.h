@@ -20,25 +20,25 @@ namespace refactor {
 class ClangRefactorToolConsumerInterface
     : public tooling::RefactoringResultConsumer {
 public:
-    /// Called when a TU is entered.
-    void beginTU(ASTContext &Context) {
-        assert(!Diags && "Diags has been set");
-        Diags = &Context.getDiagnostics();
-    }
+  /// Called when a TU is entered.
+  void beginTU(ASTContext &Context) {
+    assert(!Diags && "Diags has been set");
+    Diags = &Context.getDiagnostics();
+  }
 
-    /// Called when the tool is done with a TU.
-    void endTU() {
-        assert(Diags && "Diags unset");
-        Diags = nullptr;
-    }
+  /// Called when the tool is done with a TU.
+  void endTU() {
+    assert(Diags && "Diags unset");
+    Diags = nullptr;
+  }
 
-    DiagnosticsEngine &getDiags() const {
-        assert(Diags && "no diags");
-        return *Diags;
-    }
+  DiagnosticsEngine &getDiags() const {
+    assert(Diags && "no diags");
+    return *Diags;
+  }
 
 private:
-    DiagnosticsEngine *Diags = nullptr;
+  DiagnosticsEngine *Diags = nullptr;
 };
 
 } // end namespace refactor

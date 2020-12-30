@@ -13,9 +13,9 @@
 #ifndef DFSAN_INTERFACE_H
 #define DFSAN_INTERFACE_H
 
+#include <sanitizer/common_interface_defs.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <sanitizer/common_interface_defs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,13 +29,13 @@ typedef uint16_t dfsan_label;
 /// which represents the union of two label identifiers (which may themselves
 /// be base or union labels).
 struct dfsan_label_info {
-    // Fields for union labels, set to 0 for base labels.
-    dfsan_label l1;
-    dfsan_label l2;
+  // Fields for union labels, set to 0 for base labels.
+  dfsan_label l1;
+  dfsan_label l2;
 
-    // Fields for base labels.
-    const char *desc;
-    void *userdata;
+  // Fields for base labels.
+  const char *desc;
+  void *userdata;
 };
 
 /// Signature of the callback argument to dfsan_set_write_callback().
@@ -111,13 +111,13 @@ void dfsan_weak_hook_strncmp(void *caller_pc, const char *s1, const char *s2,
                              size_t n, dfsan_label s1_label,
                              dfsan_label s2_label, dfsan_label n_label);
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 
 template <typename T>
 void dfsan_set_label(dfsan_label label, T &data) { // NOLINT
-    dfsan_set_label(label, (void *)&data, sizeof(T));
+  dfsan_set_label(label, (void *)&data, sizeof(T));
 }
 
 #endif
 
-#endif  // DFSAN_INTERFACE_H
+#endif // DFSAN_INTERFACE_H

@@ -32,8 +32,8 @@ CharSourceRange maybeExtendRange(CharSourceRange Range,
 template <typename T>
 CharSourceRange getExtendedRange(const T &Node, tok::TokenKind Next,
                                  ASTContext &Context) {
-    return maybeExtendRange(CharSourceRange::getTokenRange(Node.getSourceRange()),
-                            Next, Context);
+  return maybeExtendRange(CharSourceRange::getTokenRange(Node.getSourceRange()),
+                          Next, Context);
 }
 
 /// Returns the logical source range of the node extended to include associated
@@ -49,8 +49,8 @@ StringRef getText(CharSourceRange Range, const ASTContext &Context);
 /// Returns the source-code text corresponding to \p Node.
 template <typename T>
 StringRef getText(const T &Node, const ASTContext &Context) {
-    return getText(CharSourceRange::getTokenRange(Node.getSourceRange()),
-                   Context);
+  return getText(CharSourceRange::getTokenRange(Node.getSourceRange()),
+                 Context);
 }
 
 /// Returns the source text of the node, extended to include \p Next, if it
@@ -78,7 +78,7 @@ StringRef getText(const T &Node, const ASTContext &Context) {
 template <typename T>
 StringRef getExtendedText(const T &Node, tok::TokenKind Next,
                           ASTContext &Context) {
-    return getText(getExtendedRange(Node, Next, Context), Context);
+  return getText(getExtendedRange(Node, Next, Context), Context);
 }
 
 /// Determines whether \p Range is one that can be edited by a rewrite;
@@ -95,8 +95,8 @@ getRangeForEdit(const CharSourceRange &EditRange, const SourceManager &SM,
                 const LangOptions &LangOpts);
 inline llvm::Optional<CharSourceRange>
 getRangeForEdit(const CharSourceRange &EditRange, const ASTContext &Context) {
-    return getRangeForEdit(EditRange, Context.getSourceManager(),
-                           Context.getLangOpts());
+  return getRangeForEdit(EditRange, Context.getSourceManager(),
+                         Context.getLangOpts());
 }
 } // namespace tooling
 } // namespace clang

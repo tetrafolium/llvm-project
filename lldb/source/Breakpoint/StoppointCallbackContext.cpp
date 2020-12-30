@@ -18,7 +18,7 @@ StoppointCallbackContext::StoppointCallbackContext(
     : event(e), exe_ctx_ref(exe_ctx), is_synchronous(synchronously) {}
 
 void StoppointCallbackContext::Clear() {
-    event = nullptr;
-    exe_ctx_ref.Clear();
-    is_synchronous = false;
+  event = nullptr;
+  exe_ctx_ref.Clear();
+  is_synchronous = false;
 }

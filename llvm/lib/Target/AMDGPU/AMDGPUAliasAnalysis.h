@@ -29,87 +29,82 @@ class MemoryLocation;
 
 /// A simple AA result that uses TBAA metadata to answer queries.
 class AMDGPUAAResult : public AAResultBase<AMDGPUAAResult> {
-    friend AAResultBase<AMDGPUAAResult>;
+  friend AAResultBase<AMDGPUAAResult>;
 
-    const DataLayout &DL;
+  const DataLayout &DL;
 
 public:
-    explicit AMDGPUAAResult(const DataLayout &DL, Triple T) : AAResultBase(),
-        DL(DL) {}
-    AMDGPUAAResult(AMDGPUAAResult &&Arg)
-        : AAResultBase(std::move(Arg)), DL(Arg.DL) {}
+  explicit AMDGPUAAResult(const DataLayout &DL, Triple T)
+      : AAResultBase(), DL(DL) {}
+  AMDGPUAAResult(AMDGPUAAResult &&Arg)
+      : AAResultBase(std::move(Arg)), DL(Arg.DL) {}
 
-    /// Handle invalidation events from the new pass manager.
-    ///
-    /// By definition, this result is stateless and so remains valid.
-    bool invalidate(Function &, const PreservedAnalyses &) {
-        return false;
-    }
+  /// Handle invalidation events from the new pass manager.
+  ///
+  /// By definition, this result is stateless and so remains valid.
+  bool invalidate(Function &, const PreservedAnalyses &) { return false; }
 
-    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                      AAQueryInfo &AAQI);
-    bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
-                                bool OrLocal);
+  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                    AAQueryInfo &AAQI);
+  bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
+                              bool OrLocal);
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class AMDGPUAA : public AnalysisInfoMixin<AMDGPUAA> {
-    friend AnalysisInfoMixin<AMDGPUAA>;
+  friend AnalysisInfoMixin<AMDGPUAA>;
 
-    static char PassID;
+  static char PassID;
 
 public:
-    using Result = AMDGPUAAResult;
+  using Result = AMDGPUAAResult;
 
-    AMDGPUAAResult run(Function &F, AnalysisManager<Function> &AM) {
-        return AMDGPUAAResult(F.getParent()->getDataLayout(),
-                              Triple(F.getParent()->getTargetTriple()));
-    }
+  AMDGPUAAResult run(Function &F, AnalysisManager<Function> &AM) {
+    return AMDGPUAAResult(F.getParent()->getDataLayout(),
+                          Triple(F.getParent()->getTargetTriple()));
+  }
 };
 
 /// Legacy wrapper pass to provide the AMDGPUAAResult object.
 class AMDGPUAAWrapperPass : public ImmutablePass {
-    std::unique_ptr<AMDGPUAAResult> Result;
+  std::unique_ptr<AMDGPUAAResult> Result;
 
 public:
-    static char ID;
+  static char ID;
 
-    AMDGPUAAWrapperPass() : ImmutablePass(ID) {
-        initializeAMDGPUAAWrapperPassPass(*PassRegistry::getPassRegistry());
-    }
+  AMDGPUAAWrapperPass() : ImmutablePass(ID) {
+    initializeAMDGPUAAWrapperPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    AMDGPUAAResult &getResult() {
-        return *Result;
-    }
-    const AMDGPUAAResult &getResult() const {
-        return *Result;
-    }
+  AMDGPUAAResult &getResult() { return *Result; }
+  const AMDGPUAAResult &getResult() const { return *Result; }
 
-    bool doInitialization(Module &M) override {
-        Result.reset(new AMDGPUAAResult(M.getDataLayout(),
-                                        Triple(M.getTargetTriple())));
-        return false;
-    }
+  bool doInitialization(Module &M) override {
+    Result.reset(
+        new AMDGPUAAResult(M.getDataLayout(), Triple(M.getTargetTriple())));
+    return false;
+  }
 
-    bool doFinalization(Module &M) override {
-        Result.reset();
-        return false;
-    }
+  bool doFinalization(Module &M) override {
+    Result.reset();
+    return false;
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 // Wrapper around ExternalAAWrapperPass so that the default constructor gets the
 // callback.
 class AMDGPUExternalAAWrapper : public ExternalAAWrapperPass {
 public:
-    static char ID;
+  static char ID;
 
-    AMDGPUExternalAAWrapper() : ExternalAAWrapperPass(
-            [](Pass &P, Function &, AAResults &AAR) {
-        if (auto *WrapperPass = P.getAnalysisIfAvailable<AMDGPUAAWrapperPass>())
+  AMDGPUExternalAAWrapper()
+      : ExternalAAWrapperPass([](Pass &P, Function &, AAResults &AAR) {
+          if (auto *WrapperPass =
+                  P.getAnalysisIfAvailable<AMDGPUAAWrapperPass>())
             AAR.addAAResult(WrapperPass->getResult());
-    }) {}
+        }) {}
 };
 
 } // end namespace llvm

@@ -16,12 +16,12 @@
 namespace __llvm_libc {
 
 int LLVM_LIBC_ENTRYPOINT(sigemptyset)(sigset_t *set) {
-    if (!set) {
-        llvmlibc_errno = EINVAL;
-        return -1;
-    }
-    *set = __llvm_libc::Sigset::emptySet();
-    return 0;
+  if (!set) {
+    llvmlibc_errno = EINVAL;
+    return -1;
+  }
+  *set = __llvm_libc::Sigset::emptySet();
+  return 0;
 }
 
 } // namespace __llvm_libc

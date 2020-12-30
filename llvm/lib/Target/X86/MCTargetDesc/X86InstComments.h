@@ -21,6 +21,6 @@ class MCInstrInfo;
 class raw_ostream;
 bool EmitAnyX86InstComments(const MCInst *MI, raw_ostream &OS,
                             const MCInstrInfo &MCII);
-}
+} // namespace llvm
 
 #endif

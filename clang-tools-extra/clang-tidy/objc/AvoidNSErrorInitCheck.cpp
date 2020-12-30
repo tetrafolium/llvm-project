@@ -17,20 +17,20 @@ namespace tidy {
 namespace objc {
 
 void AvoidNSErrorInitCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(objcMessageExpr(hasSelector("init"),
-                                       hasReceiverType(asString("NSError *")))
-                       .bind("nserrorInit"),
-                       this);
+  Finder->addMatcher(objcMessageExpr(hasSelector("init"),
+                                     hasReceiverType(asString("NSError *")))
+                         .bind("nserrorInit"),
+                     this);
 }
 
 void AvoidNSErrorInitCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedExpr =
-        Result.Nodes.getNodeAs<ObjCMessageExpr>("nserrorInit");
-    diag(MatchedExpr->getBeginLoc(),
-         "use errorWithDomain:code:userInfo: or initWithDomain:code:userInfo: to "
-         "create a new NSError");
+  const auto *MatchedExpr =
+      Result.Nodes.getNodeAs<ObjCMessageExpr>("nserrorInit");
+  diag(MatchedExpr->getBeginLoc(),
+       "use errorWithDomain:code:userInfo: or initWithDomain:code:userInfo: to "
+       "create a new NSError");
 }
 
-}  // namespace objc
-}  // namespace tidy
-}  // namespace clang
+} // namespace objc
+} // namespace tidy
+} // namespace clang

@@ -26,38 +26,36 @@ using namespace llvm;
 
 WebAssemblySubtarget &
 WebAssemblySubtarget::initializeSubtargetDependencies(StringRef CPU,
-        StringRef FS) {
-    // Determine default and user-specified characteristics
-    LLVM_DEBUG(llvm::dbgs() << "initializeSubtargetDependencies\n");
+                                                      StringRef FS) {
+  // Determine default and user-specified characteristics
+  LLVM_DEBUG(llvm::dbgs() << "initializeSubtargetDependencies\n");
 
-    if (CPU.empty())
-        CPU = "generic";
+  if (CPU.empty())
+    CPU = "generic";
 
-    ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
-    return *this;
+  ParseSubtargetFeatures(CPU, /*TuneCPU*/ CPU, FS);
+  return *this;
 }
 
 WebAssemblySubtarget::WebAssemblySubtarget(const Triple &TT,
-        const std::string &CPU,
-        const std::string &FS,
-        const TargetMachine &TM)
+                                           const std::string &CPU,
+                                           const std::string &FS,
+                                           const TargetMachine &TM)
     : WebAssemblyGenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
       TargetTriple(TT), FrameLowering(),
       InstrInfo(initializeSubtargetDependencies(CPU, FS)), TSInfo(),
       TLInfo(TM, *this) {}
 
 bool WebAssemblySubtarget::enableAtomicExpand() const {
-    // If atomics are disabled, atomic ops are lowered instead of expanded
-    return hasAtomics();
+  // If atomics are disabled, atomic ops are lowered instead of expanded
+  return hasAtomics();
 }
 
 bool WebAssemblySubtarget::enableMachineScheduler() const {
-    // Disable the MachineScheduler for now. Even with ShouldTrackPressure set and
-    // enableMachineSchedDefaultSched overridden, it appears to have an overall
-    // negative effect for the kinds of register optimizations we're doing.
-    return false;
+  // Disable the MachineScheduler for now. Even with ShouldTrackPressure set and
+  // enableMachineSchedDefaultSched overridden, it appears to have an overall
+  // negative effect for the kinds of register optimizations we're doing.
+  return false;
 }
 
-bool WebAssemblySubtarget::useAA() const {
-    return true;
-}
+bool WebAssemblySubtarget::useAA() const { return true; }

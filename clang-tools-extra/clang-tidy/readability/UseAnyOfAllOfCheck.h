@@ -24,14 +24,14 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-use-anyofallof.html
 class UseAnyOfAllOfCheck : public ClangTidyCheck {
 public:
-    using ClangTidyCheck::ClangTidyCheck;
+  using ClangTidyCheck::ClangTidyCheck;
 
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
 
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace readability

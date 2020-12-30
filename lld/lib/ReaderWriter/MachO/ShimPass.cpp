@@ -39,89 +39,86 @@ namespace mach_o {
 
 class ShimPass : public Pass {
 public:
-    ShimPass(const MachOLinkingContext &context)
-        : _ctx(context), _archHandler(_ctx.archHandler()),
-          _stubInfo(_archHandler.stubInfo()),
-          _file(*_ctx.make_file<MachOFile>("<mach-o shim pass>")) {
-        _file.setOrdinal(_ctx.getNextOrdinalAndIncrement());
-    }
+  ShimPass(const MachOLinkingContext &context)
+      : _ctx(context), _archHandler(_ctx.archHandler()),
+        _stubInfo(_archHandler.stubInfo()),
+        _file(*_ctx.make_file<MachOFile>("<mach-o shim pass>")) {
+    _file.setOrdinal(_ctx.getNextOrdinalAndIncrement());
+  }
 
-    llvm::Error perform(SimpleFile &mergedFile) override {
-        // Scan all references in all atoms.
-        for (const DefinedAtom *atom : mergedFile.defined()) {
-            for (const Reference *ref : *atom) {
-                // Look at non-call branches.
-                if (!_archHandler.isNonCallBranch(*ref))
-                    continue;
-                const Atom *target = ref->target();
-                assert(target != nullptr);
-                if (const lld::DefinedAtom *daTarget = dyn_cast<DefinedAtom>(target)) {
-                    bool atomIsThumb = _archHandler.isThumbFunction(*atom);
-                    bool targetIsThumb = _archHandler.isThumbFunction(*daTarget);
-                    if (atomIsThumb != targetIsThumb)
-                        updateBranchToUseShim(atomIsThumb, *daTarget, ref);
-                }
-            }
+  llvm::Error perform(SimpleFile &mergedFile) override {
+    // Scan all references in all atoms.
+    for (const DefinedAtom *atom : mergedFile.defined()) {
+      for (const Reference *ref : *atom) {
+        // Look at non-call branches.
+        if (!_archHandler.isNonCallBranch(*ref))
+          continue;
+        const Atom *target = ref->target();
+        assert(target != nullptr);
+        if (const lld::DefinedAtom *daTarget = dyn_cast<DefinedAtom>(target)) {
+          bool atomIsThumb = _archHandler.isThumbFunction(*atom);
+          bool targetIsThumb = _archHandler.isThumbFunction(*daTarget);
+          if (atomIsThumb != targetIsThumb)
+            updateBranchToUseShim(atomIsThumb, *daTarget, ref);
         }
-        // Exit early if no shims needed.
-        if (_targetToShim.empty())
-            return llvm::Error::success();
-
-        // Sort shim atoms so the layout order is stable.
-        std::vector<const DefinedAtom *> shims;
-        shims.reserve(_targetToShim.size());
-        for (auto element : _targetToShim) {
-            shims.push_back(element.second);
-        }
-        std::sort(shims.begin(), shims.end(),
-        [](const DefinedAtom *l, const DefinedAtom *r) {
-            return (l->name() < r->name());
-        });
-
-        // Add all shims to master file.
-        for (const DefinedAtom *shim : shims)
-            mergedFile.addAtom(*shim);
-
-        return llvm::Error::success();
+      }
     }
+    // Exit early if no shims needed.
+    if (_targetToShim.empty())
+      return llvm::Error::success();
+
+    // Sort shim atoms so the layout order is stable.
+    std::vector<const DefinedAtom *> shims;
+    shims.reserve(_targetToShim.size());
+    for (auto element : _targetToShim) {
+      shims.push_back(element.second);
+    }
+    std::sort(shims.begin(), shims.end(),
+              [](const DefinedAtom *l, const DefinedAtom *r) {
+                return (l->name() < r->name());
+              });
+
+    // Add all shims to master file.
+    for (const DefinedAtom *shim : shims)
+      mergedFile.addAtom(*shim);
+
+    return llvm::Error::success();
+  }
 
 private:
+  void updateBranchToUseShim(bool thumbToArm, const DefinedAtom &target,
+                             const Reference *ref) {
+    // Make file-format specific stub and other support atoms.
+    const DefinedAtom *shim = this->getShim(thumbToArm, target);
+    assert(shim != nullptr);
+    // Switch branch site to target shim atom.
+    const_cast<Reference *>(ref)->setTarget(shim);
+  }
 
-    void updateBranchToUseShim(bool thumbToArm, const DefinedAtom& target,
-                               const Reference *ref) {
-        // Make file-format specific stub and other support atoms.
-        const DefinedAtom *shim = this->getShim(thumbToArm, target);
-        assert(shim != nullptr);
-        // Switch branch site to target shim atom.
-        const_cast<Reference *>(ref)->setTarget(shim);
+  const DefinedAtom *getShim(bool thumbToArm, const DefinedAtom &target) {
+    auto pos = _targetToShim.find(&target);
+    if (pos != _targetToShim.end()) {
+      // Reuse an existing shim.
+      assert(pos->second != nullptr);
+      return pos->second;
+    } else {
+      // There is no existing shim, so create a new one.
+      const DefinedAtom *shim =
+          _archHandler.createShim(_file, thumbToArm, target);
+      _targetToShim[&target] = shim;
+      return shim;
     }
+  }
 
-    const DefinedAtom* getShim(bool thumbToArm, const DefinedAtom& target) {
-        auto pos = _targetToShim.find(&target);
-        if ( pos != _targetToShim.end() ) {
-            // Reuse an existing shim.
-            assert(pos->second != nullptr);
-            return pos->second;
-        } else {
-            // There is no existing shim, so create a new one.
-            const DefinedAtom *shim = _archHandler.createShim(_file, thumbToArm,
-                                      target);
-            _targetToShim[&target] = shim;
-            return shim;
-        }
-    }
-
-    const MachOLinkingContext &_ctx;
-    mach_o::ArchHandler                            &_archHandler;
-    const ArchHandler::StubInfo                    &_stubInfo;
-    MachOFile                                      &_file;
-    llvm::DenseMap<const Atom*, const DefinedAtom*> _targetToShim;
+  const MachOLinkingContext &_ctx;
+  mach_o::ArchHandler &_archHandler;
+  const ArchHandler::StubInfo &_stubInfo;
+  MachOFile &_file;
+  llvm::DenseMap<const Atom *, const DefinedAtom *> _targetToShim;
 };
 
-
-
 void addShimPass(PassManager &pm, const MachOLinkingContext &ctx) {
-    pm.add(std::make_unique<ShimPass>(ctx));
+  pm.add(std::make_unique<ShimPass>(ctx));
 }
 
 } // end namespace mach_o

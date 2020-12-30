@@ -38,7 +38,7 @@ namespace mlir {
 /// materializations and type conversions for bufferization.
 class BufferizeTypeConverter : public TypeConverter {
 public:
-    BufferizeTypeConverter();
+  BufferizeTypeConverter();
 };
 
 /// Marks ops used by bufferization for type conversion materializations as

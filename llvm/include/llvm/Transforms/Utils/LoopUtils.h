@@ -43,8 +43,8 @@ class LPPassManager;
 class Instruction;
 struct RuntimeCheckingPtrGroup;
 typedef std::pair<const RuntimeCheckingPtrGroup *,
-        const RuntimeCheckingPtrGroup *>
-        RuntimePointerCheck;
+                  const RuntimeCheckingPtrGroup *>
+    RuntimePointerCheck;
 
 template <typename T> class Optional;
 template <typename T, unsigned N> class SmallSetVector;
@@ -115,36 +115,26 @@ bool formLCSSARecursively(Loop &L, const DominatorTree &DT, const LoopInfo *LI,
 /// are too many) is determined in the constructors when using MemorySSA.
 class SinkAndHoistLICMFlags {
 public:
-    // Explicitly set limits.
-    SinkAndHoistLICMFlags(unsigned LicmMssaOptCap,
-                          unsigned LicmMssaNoAccForPromotionCap, bool IsSink,
-                          Loop *L = nullptr, MemorySSA *MSSA = nullptr);
-    // Use default limits.
-    SinkAndHoistLICMFlags(bool IsSink, Loop *L = nullptr,
-                          MemorySSA *MSSA = nullptr);
+  // Explicitly set limits.
+  SinkAndHoistLICMFlags(unsigned LicmMssaOptCap,
+                        unsigned LicmMssaNoAccForPromotionCap, bool IsSink,
+                        Loop *L = nullptr, MemorySSA *MSSA = nullptr);
+  // Use default limits.
+  SinkAndHoistLICMFlags(bool IsSink, Loop *L = nullptr,
+                        MemorySSA *MSSA = nullptr);
 
-    void setIsSink(bool B) {
-        IsSink = B;
-    }
-    bool getIsSink() {
-        return IsSink;
-    }
-    bool tooManyMemoryAccesses() {
-        return NoOfMemAccTooLarge;
-    }
-    bool tooManyClobberingCalls() {
-        return LicmMssaOptCounter >= LicmMssaOptCap;
-    }
-    void incrementClobberingCalls() {
-        ++LicmMssaOptCounter;
-    }
+  void setIsSink(bool B) { IsSink = B; }
+  bool getIsSink() { return IsSink; }
+  bool tooManyMemoryAccesses() { return NoOfMemAccTooLarge; }
+  bool tooManyClobberingCalls() { return LicmMssaOptCounter >= LicmMssaOptCap; }
+  void incrementClobberingCalls() { ++LicmMssaOptCounter; }
 
 protected:
-    bool NoOfMemAccTooLarge = false;
-    unsigned LicmMssaOptCounter = 0;
-    unsigned LicmMssaOptCap;
-    unsigned LicmMssaNoAccForPromotionCap;
-    bool IsSink;
+  bool NoOfMemAccTooLarge = false;
+  unsigned LicmMssaOptCounter = 0;
+  unsigned LicmMssaOptCap;
+  unsigned LicmMssaNoAccForPromotionCap;
+  bool IsSink;
 };
 
 /// Walk the specified region of the CFG (defined by all blocks
@@ -207,7 +197,7 @@ bool promoteLoopAccessesToScalars(
 /// Does a BFS from a given node to all of its children inside a given loop.
 /// The returned vector of nodes includes the starting point.
 SmallVector<DomTreeNode *, 16> collectChildrenInLoop(DomTreeNode *N,
-        const Loop *CurLoop);
+                                                     const Loop *CurLoop);
 
 /// Returns the instructions that use values defined in the loop.
 SmallVector<Instruction *, 8> findDefsUsedOutsideOfLoop(Loop *L);
@@ -218,7 +208,7 @@ SmallVector<Instruction *, 8> findDefsUsedOutsideOfLoop(Loop *L);
 /// operand or null otherwise.  If the string metadata is not found return
 /// Optional's not-a-value.
 Optional<const MDOperand *> findStringMetadataForLoop(const Loop *TheLoop,
-        StringRef Name);
+                                                      StringRef Name);
 
 /// Find named metadata for a loop with an integer value.
 llvm::Optional<int> getOptionalIntLoopAttribute(Loop *TheLoop, StringRef Name);
@@ -227,17 +217,17 @@ llvm::Optional<int> getOptionalIntLoopAttribute(Loop *TheLoop, StringRef Name);
 /// "llvm.loop.vectorize.scalable.enable") for a loop and use it to construct a
 /// ElementCount. If the metadata "llvm.loop.vectorize.width" cannot be found
 /// then None is returned.
-Optional<ElementCount>
-getOptionalElementCountLoopAttribute(Loop *TheLoop);
+Optional<ElementCount> getOptionalElementCountLoopAttribute(Loop *TheLoop);
 
 /// Create a new loop identifier for a loop created from a loop transformation.
 ///
 /// @param OrigLoopID The loop ID of the loop before the transformation.
 /// @param FollowupAttrs List of attribute names that contain attributes to be
 ///                      added to the new loop ID.
-/// @param InheritOptionsAttrsPrefix Selects which attributes should be inherited
-///                                  from the original loop. The following values
-///                                  are considered:
+/// @param InheritOptionsAttrsPrefix Selects which attributes should be
+/// inherited
+///                                  from the original loop. The following
+///                                  values are considered:
 ///        nullptr   : Inherit all attributes from @p OrigLoopID.
 ///        ""        : Do not inherit any attribute from @p OrigLoopID; only use
 ///                    those specified by a followup attribute.
@@ -262,34 +252,35 @@ makeFollowupLoopID(MDNode *OrigLoopID, ArrayRef<StringRef> FollowupAttrs,
 /// Look for the loop attribute that disables all transformation heuristic.
 bool hasDisableAllTransformsHint(const Loop *L);
 
-/// Look for the loop attribute that disables the LICM transformation heuristics.
+/// Look for the loop attribute that disables the LICM transformation
+/// heuristics.
 bool hasDisableLICMTransformsHint(const Loop *L);
 
 /// The mode sets how eager a transformation should be applied.
 enum TransformationMode {
-    /// The pass can use heuristics to determine whether a transformation should
-    /// be applied.
-    TM_Unspecified,
+  /// The pass can use heuristics to determine whether a transformation should
+  /// be applied.
+  TM_Unspecified,
 
-    /// The transformation should be applied without considering a cost model.
-    TM_Enable,
+  /// The transformation should be applied without considering a cost model.
+  TM_Enable,
 
-    /// The transformation should not be applied.
-    TM_Disable,
+  /// The transformation should not be applied.
+  TM_Disable,
 
-    /// Force is a flag and should not be used alone.
-    TM_Force = 0x04,
+  /// Force is a flag and should not be used alone.
+  TM_Force = 0x04,
 
-    /// The transformation was directed by the user, e.g. by a #pragma in
-    /// the source code. If the transformation could not be applied, a
-    /// warning should be emitted.
-    TM_ForcedByUser = TM_Enable | TM_Force,
+  /// The transformation was directed by the user, e.g. by a #pragma in
+  /// the source code. If the transformation could not be applied, a
+  /// warning should be emitted.
+  TM_ForcedByUser = TM_Enable | TM_Force,
 
-    /// The transformation must not be applied. For instance, `#pragma clang loop
-    /// unroll(disable)` explicitly forbids any unrolling to take place. Unlike
-    /// general loop metadata, it must not be dropped. Most passes should not
-    /// behave differently under TM_Disable and TM_SuppressedByUser.
-    TM_SuppressedByUser = TM_Disable | TM_Force
+  /// The transformation must not be applied. For instance, `#pragma clang loop
+  /// unroll(disable)` explicitly forbids any unrolling to take place. Unlike
+  /// general loop metadata, it must not be dropped. Most passes should not
+  /// behave differently under TM_Disable and TM_SuppressedByUser.
+  TM_SuppressedByUser = TM_Disable | TM_Force
 };
 
 /// @{
@@ -370,7 +361,7 @@ getOrderedReduction(IRBuilderBase &Builder, Value *Acc, Value *Src, unsigned Op,
 /// Fast-math-flags are propagated using the IRBuilder's setting.
 Value *getShuffleReduction(IRBuilderBase &Builder, Value *Src, unsigned Op,
                            RecurrenceDescriptor::MinMaxRecurrenceKind
-                           MinMaxKind = RecurrenceDescriptor::MRK_Invalid,
+                               MinMaxKind = RecurrenceDescriptor::MRK_Invalid,
                            ArrayRef<Value *> RedOps = None);
 
 /// Create a target reduction of the given vector. The reduction operation
@@ -475,8 +466,8 @@ void appendLoopsToWorklist(LoopInfo &, SmallPriorityWorklist<Loop *, 4> &);
 
 /// Recursively clone the specified loop and all of its children,
 /// mapping the blocks with the specified map.
-Loop *cloneLoop(Loop *L, Loop *PL, ValueToValueMapTy &VM,
-                LoopInfo *LI, LPPassManager *LPM);
+Loop *cloneLoop(Loop *L, Loop *PL, ValueToValueMapTy &VM, LoopInfo *LI,
+                LPPassManager *LPM);
 
 /// Add code that checks at runtime if the accessed arrays in \p PointerChecks
 /// overlap.

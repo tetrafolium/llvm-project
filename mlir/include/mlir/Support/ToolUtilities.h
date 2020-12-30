@@ -25,7 +25,7 @@ namespace mlir {
 struct LogicalResult;
 
 using ChunkBufferHandler = function_ref<LogicalResult(
-                               std::unique_ptr<llvm::MemoryBuffer> chunkBuffer, raw_ostream &os)>;
+    std::unique_ptr<llvm::MemoryBuffer> chunkBuffer, raw_ostream &os)>;
 
 /// Splits the specified buffer on a marker (`// -----`), processes each chunk
 /// independently according to the normal `processChunkBuffer` logic, and writes

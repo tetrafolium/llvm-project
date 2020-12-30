@@ -15,8 +15,6 @@ namespace __llvm_libc {
 
 // TODO: Currently restricted to default locale.
 // These should be extended using locale information.
-int LLVM_LIBC_ENTRYPOINT(islower)(int c) {
-    return internal::islower(c);
-}
+int LLVM_LIBC_ENTRYPOINT(islower)(int c) { return internal::islower(c); }
 
 } // namespace __llvm_libc

@@ -32,14 +32,14 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/google-global-names-in-headers.html
 class GlobalNamesInHeadersCheck : public ClangTidyCheck {
 public:
-    GlobalNamesInHeadersCheck(StringRef Name, ClangTidyContext *Context);
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  GlobalNamesInHeadersCheck(StringRef Name, ClangTidyContext *Context);
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const std::string RawStringHeaderFileExtensions;
-    utils::FileExtensionsSet HeaderFileExtensions;
+  const std::string RawStringHeaderFileExtensions;
+  utils::FileExtensionsSet HeaderFileExtensions;
 };
 
 } // namespace readability

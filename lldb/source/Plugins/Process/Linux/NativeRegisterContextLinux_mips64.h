@@ -25,116 +25,110 @@ class NativeProcessLinux;
 
 class NativeRegisterContextLinux_mips64 : public NativeRegisterContextLinux {
 public:
-    NativeRegisterContextLinux_mips64(const ArchSpec &target_arch,
-                                      NativeThreadProtocol &native_thread);
+  NativeRegisterContextLinux_mips64(const ArchSpec &target_arch,
+                                    NativeThreadProtocol &native_thread);
 
-    uint32_t GetRegisterSetCount() const override;
+  uint32_t GetRegisterSetCount() const override;
 
-    lldb::addr_t GetPCfromBreakpointLocation(
-        lldb::addr_t fail_value = LLDB_INVALID_ADDRESS) override;
+  lldb::addr_t GetPCfromBreakpointLocation(
+      lldb::addr_t fail_value = LLDB_INVALID_ADDRESS) override;
 
-    lldb::addr_t GetWatchpointHitAddress(uint32_t wp_index) override;
+  lldb::addr_t GetWatchpointHitAddress(uint32_t wp_index) override;
 
-    const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
+  const RegisterSet *GetRegisterSet(uint32_t set_index) const override;
 
-    Status ReadRegister(const RegisterInfo *reg_info,
-                        RegisterValue &reg_value) override;
+  Status ReadRegister(const RegisterInfo *reg_info,
+                      RegisterValue &reg_value) override;
 
-    Status WriteRegister(const RegisterInfo *reg_info,
-                         const RegisterValue &reg_value) override;
+  Status WriteRegister(const RegisterInfo *reg_info,
+                       const RegisterValue &reg_value) override;
 
-    Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
+  Status ReadAllRegisterValues(lldb::DataBufferSP &data_sp) override;
 
-    Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
+  Status WriteAllRegisterValues(const lldb::DataBufferSP &data_sp) override;
 
-    Status ReadCP1();
+  Status ReadCP1();
 
-    Status WriteCP1();
+  Status WriteCP1();
 
-    uint8_t *ReturnFPOffset(uint8_t reg_index, uint32_t byte_offset);
+  uint8_t *ReturnFPOffset(uint8_t reg_index, uint32_t byte_offset);
 
-    Status IsWatchpointHit(uint32_t wp_index, bool &is_hit) override;
+  Status IsWatchpointHit(uint32_t wp_index, bool &is_hit) override;
 
-    Status GetWatchpointHitIndex(uint32_t &wp_index,
-                                 lldb::addr_t trap_addr) override;
+  Status GetWatchpointHitIndex(uint32_t &wp_index,
+                               lldb::addr_t trap_addr) override;
 
-    Status IsWatchpointVacant(uint32_t wp_index, bool &is_vacant) override;
+  Status IsWatchpointVacant(uint32_t wp_index, bool &is_vacant) override;
 
-    bool ClearHardwareWatchpoint(uint32_t wp_index) override;
+  bool ClearHardwareWatchpoint(uint32_t wp_index) override;
 
-    Status ClearAllHardwareWatchpoints() override;
+  Status ClearAllHardwareWatchpoints() override;
 
-    Status SetHardwareWatchpointWithIndex(lldb::addr_t addr, size_t size,
-                                          uint32_t watch_flags,
-                                          uint32_t wp_index);
+  Status SetHardwareWatchpointWithIndex(lldb::addr_t addr, size_t size,
+                                        uint32_t watch_flags,
+                                        uint32_t wp_index);
 
-    uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size,
-                                   uint32_t watch_flags) override;
+  uint32_t SetHardwareWatchpoint(lldb::addr_t addr, size_t size,
+                                 uint32_t watch_flags) override;
 
-    lldb::addr_t GetWatchpointAddress(uint32_t wp_index) override;
+  lldb::addr_t GetWatchpointAddress(uint32_t wp_index) override;
 
-    uint32_t NumSupportedHardwareWatchpoints() override;
+  uint32_t NumSupportedHardwareWatchpoints() override;
 
-    static bool IsMSAAvailable();
+  static bool IsMSAAvailable();
 
 protected:
-    Status Read_SR_Config(uint32_t offset, const char *reg_name, uint32_t size,
-                          RegisterValue &value);
+  Status Read_SR_Config(uint32_t offset, const char *reg_name, uint32_t size,
+                        RegisterValue &value);
 
-    Status ReadRegisterRaw(uint32_t reg_index, RegisterValue &value) override;
+  Status ReadRegisterRaw(uint32_t reg_index, RegisterValue &value) override;
 
-    Status WriteRegisterRaw(uint32_t reg_index,
-                            const RegisterValue &value) override;
+  Status WriteRegisterRaw(uint32_t reg_index,
+                          const RegisterValue &value) override;
 
-    Status DoReadWatchPointRegisterValue(lldb::tid_t tid, void *watch_readback);
+  Status DoReadWatchPointRegisterValue(lldb::tid_t tid, void *watch_readback);
 
-    Status DoWriteWatchPointRegisterValue(lldb::tid_t tid, void *watch_readback);
+  Status DoWriteWatchPointRegisterValue(lldb::tid_t tid, void *watch_readback);
 
-    bool IsFR0();
+  bool IsFR0();
 
-    bool IsFRE();
+  bool IsFRE();
 
-    bool IsFPR(uint32_t reg_index) const;
+  bool IsFPR(uint32_t reg_index) const;
 
-    bool IsMSA(uint32_t reg_index) const;
+  bool IsMSA(uint32_t reg_index) const;
 
-    void *GetGPRBuffer() override {
-        return &m_gpr;
-    }
+  void *GetGPRBuffer() override { return &m_gpr; }
 
-    void *GetFPRBuffer() override {
-        return &m_fpr;
-    }
+  void *GetFPRBuffer() override { return &m_fpr; }
 
-    size_t GetFPRSize() override {
-        return sizeof(FPR_linux_mips);
-    }
+  size_t GetFPRSize() override { return sizeof(FPR_linux_mips); }
 
 private:
-    // Info about register ranges.
-    struct RegInfo {
-        uint32_t num_registers;
-        uint32_t num_gpr_registers;
-        uint32_t num_fpr_registers;
+  // Info about register ranges.
+  struct RegInfo {
+    uint32_t num_registers;
+    uint32_t num_gpr_registers;
+    uint32_t num_fpr_registers;
 
-        uint32_t last_gpr;
-        uint32_t first_fpr;
-        uint32_t last_fpr;
-        uint32_t first_msa;
-        uint32_t last_msa;
-    };
+    uint32_t last_gpr;
+    uint32_t first_fpr;
+    uint32_t last_fpr;
+    uint32_t first_msa;
+    uint32_t last_msa;
+  };
 
-    RegInfo m_reg_info;
+  RegInfo m_reg_info;
 
-    GPR_linux_mips m_gpr;
+  GPR_linux_mips m_gpr;
 
-    FPR_linux_mips m_fpr;
+  FPR_linux_mips m_fpr;
 
-    MSA_linux_mips m_msa;
+  MSA_linux_mips m_msa;
 
-    lldb::addr_t hw_addr_map[MAX_NUM_WP];
+  lldb::addr_t hw_addr_map[MAX_NUM_WP];
 
-    struct iovec m_iovec;
+  struct iovec m_iovec;
 };
 
 } // namespace process_linux

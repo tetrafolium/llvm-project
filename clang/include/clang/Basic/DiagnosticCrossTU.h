@@ -20,7 +20,7 @@ enum {
 #define CROSSTUSTART
 #include "clang/Basic/DiagnosticCrossTUKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_CROSSTU_DIAGNOSTICS
+  NUM_BUILTIN_CROSSTU_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

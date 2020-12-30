@@ -15,69 +15,67 @@
 using namespace llvm;
 
 LegalizeMutation LegalizeMutations::changeTo(unsigned TypeIdx, LLT Ty) {
-    return
-    [=](const LegalityQuery &Query) {
-        return std::make_pair(TypeIdx, Ty);
-    };
+  return
+      [=](const LegalityQuery &Query) { return std::make_pair(TypeIdx, Ty); };
 }
 
 LegalizeMutation LegalizeMutations::changeTo(unsigned TypeIdx,
-        unsigned FromTypeIdx) {
-    return [=](const LegalityQuery &Query) {
-        return std::make_pair(TypeIdx, Query.Types[FromTypeIdx]);
-    };
+                                             unsigned FromTypeIdx) {
+  return [=](const LegalityQuery &Query) {
+    return std::make_pair(TypeIdx, Query.Types[FromTypeIdx]);
+  };
 }
 
 LegalizeMutation LegalizeMutations::changeElementTo(unsigned TypeIdx,
-        unsigned FromTypeIdx) {
-    return [=](const LegalityQuery &Query) {
-        const LLT OldTy = Query.Types[TypeIdx];
-        const LLT NewTy = Query.Types[FromTypeIdx];
-        return std::make_pair(TypeIdx, OldTy.changeElementType(NewTy));
-    };
+                                                    unsigned FromTypeIdx) {
+  return [=](const LegalityQuery &Query) {
+    const LLT OldTy = Query.Types[TypeIdx];
+    const LLT NewTy = Query.Types[FromTypeIdx];
+    return std::make_pair(TypeIdx, OldTy.changeElementType(NewTy));
+  };
 }
 
 LegalizeMutation LegalizeMutations::changeElementTo(unsigned TypeIdx,
-        LLT NewEltTy) {
-    return [=](const LegalityQuery &Query) {
-        const LLT OldTy = Query.Types[TypeIdx];
-        return std::make_pair(TypeIdx, OldTy.changeElementType(NewEltTy));
-    };
+                                                    LLT NewEltTy) {
+  return [=](const LegalityQuery &Query) {
+    const LLT OldTy = Query.Types[TypeIdx];
+    return std::make_pair(TypeIdx, OldTy.changeElementType(NewEltTy));
+  };
 }
 
 LegalizeMutation LegalizeMutations::changeElementSizeTo(unsigned TypeIdx,
-        unsigned FromTypeIdx) {
-    return [=](const LegalityQuery &Query) {
-        const LLT OldTy = Query.Types[TypeIdx];
-        const LLT NewTy = Query.Types[FromTypeIdx];
-        const LLT NewEltTy = LLT::scalar(NewTy.getScalarSizeInBits());
-        return std::make_pair(TypeIdx, OldTy.changeElementType(NewEltTy));
-    };
+                                                        unsigned FromTypeIdx) {
+  return [=](const LegalityQuery &Query) {
+    const LLT OldTy = Query.Types[TypeIdx];
+    const LLT NewTy = Query.Types[FromTypeIdx];
+    const LLT NewEltTy = LLT::scalar(NewTy.getScalarSizeInBits());
+    return std::make_pair(TypeIdx, OldTy.changeElementType(NewEltTy));
+  };
 }
 
 LegalizeMutation LegalizeMutations::widenScalarOrEltToNextPow2(unsigned TypeIdx,
-        unsigned Min) {
-    return [=](const LegalityQuery &Query) {
-        const LLT Ty = Query.Types[TypeIdx];
-        unsigned NewEltSizeInBits =
-            std::max(1u << Log2_32_Ceil(Ty.getScalarSizeInBits()), Min);
-        return std::make_pair(TypeIdx, Ty.changeElementSize(NewEltSizeInBits));
-    };
+                                                               unsigned Min) {
+  return [=](const LegalityQuery &Query) {
+    const LLT Ty = Query.Types[TypeIdx];
+    unsigned NewEltSizeInBits =
+        std::max(1u << Log2_32_Ceil(Ty.getScalarSizeInBits()), Min);
+    return std::make_pair(TypeIdx, Ty.changeElementSize(NewEltSizeInBits));
+  };
 }
 
 LegalizeMutation LegalizeMutations::moreElementsToNextPow2(unsigned TypeIdx,
-        unsigned Min) {
-    return [=](const LegalityQuery &Query) {
-        const LLT VecTy = Query.Types[TypeIdx];
-        unsigned NewNumElements =
-            std::max(1u << Log2_32_Ceil(VecTy.getNumElements()), Min);
-        return std::make_pair(TypeIdx,
-                              LLT::vector(NewNumElements, VecTy.getElementType()));
-    };
+                                                           unsigned Min) {
+  return [=](const LegalityQuery &Query) {
+    const LLT VecTy = Query.Types[TypeIdx];
+    unsigned NewNumElements =
+        std::max(1u << Log2_32_Ceil(VecTy.getNumElements()), Min);
+    return std::make_pair(TypeIdx,
+                          LLT::vector(NewNumElements, VecTy.getElementType()));
+  };
 }
 
 LegalizeMutation LegalizeMutations::scalarize(unsigned TypeIdx) {
-    return [=](const LegalityQuery &Query) {
-        return std::make_pair(TypeIdx, Query.Types[TypeIdx].getElementType());
-    };
+  return [=](const LegalityQuery &Query) {
+    return std::make_pair(TypeIdx, Query.Types[TypeIdx].getElementType());
+  };
 }

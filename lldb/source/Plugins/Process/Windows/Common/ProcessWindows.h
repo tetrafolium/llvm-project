@@ -22,101 +22,98 @@ class HostProcess;
 
 class ProcessWindows : public Process, public ProcessDebugger {
 public:
-    // Static functions.
-    static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
-                                          lldb::ListenerSP listener_sp,
-                                          const FileSpec *,
-                                          bool can_connect);
+  // Static functions.
+  static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
+                                        lldb::ListenerSP listener_sp,
+                                        const FileSpec *, bool can_connect);
 
-    static void Initialize();
+  static void Initialize();
 
-    static void Terminate();
+  static void Terminate();
 
-    static lldb_private::ConstString GetPluginNameStatic();
+  static lldb_private::ConstString GetPluginNameStatic();
 
-    static const char *GetPluginDescriptionStatic();
+  static const char *GetPluginDescriptionStatic();
 
-    // Constructors and destructors
-    ProcessWindows(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp);
+  // Constructors and destructors
+  ProcessWindows(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp);
 
-    ~ProcessWindows();
+  ~ProcessWindows();
 
-    size_t GetSTDOUT(char *buf, size_t buf_size, Status &error) override;
-    size_t GetSTDERR(char *buf, size_t buf_size, Status &error) override;
-    size_t PutSTDIN(const char *buf, size_t buf_size, Status &error) override;
+  size_t GetSTDOUT(char *buf, size_t buf_size, Status &error) override;
+  size_t GetSTDERR(char *buf, size_t buf_size, Status &error) override;
+  size_t PutSTDIN(const char *buf, size_t buf_size, Status &error) override;
 
-    // lldb_private::Process overrides
-    ConstString GetPluginName() override;
-    uint32_t GetPluginVersion() override;
+  // lldb_private::Process overrides
+  ConstString GetPluginName() override;
+  uint32_t GetPluginVersion() override;
 
-    Status EnableBreakpointSite(BreakpointSite *bp_site) override;
-    Status DisableBreakpointSite(BreakpointSite *bp_site) override;
+  Status EnableBreakpointSite(BreakpointSite *bp_site) override;
+  Status DisableBreakpointSite(BreakpointSite *bp_site) override;
 
-    Status DoDetach(bool keep_stopped) override;
-    Status DoLaunch(Module *exe_module, ProcessLaunchInfo &launch_info) override;
-    Status DoAttachToProcessWithID(
-        lldb::pid_t pid,
-        const lldb_private::ProcessAttachInfo &attach_info) override;
-    Status DoResume() override;
-    Status DoDestroy() override;
-    Status DoHalt(bool &caused_stop) override;
+  Status DoDetach(bool keep_stopped) override;
+  Status DoLaunch(Module *exe_module, ProcessLaunchInfo &launch_info) override;
+  Status DoAttachToProcessWithID(
+      lldb::pid_t pid,
+      const lldb_private::ProcessAttachInfo &attach_info) override;
+  Status DoResume() override;
+  Status DoDestroy() override;
+  Status DoHalt(bool &caused_stop) override;
 
-    void DidLaunch() override;
-    void DidAttach(lldb_private::ArchSpec &arch_spec) override;
+  void DidLaunch() override;
+  void DidAttach(lldb_private::ArchSpec &arch_spec) override;
 
-    void RefreshStateAfterStop() override;
+  void RefreshStateAfterStop() override;
 
-    bool CanDebug(lldb::TargetSP target_sp,
-                  bool plugin_specified_by_name) override;
-    bool DestroyRequiresHalt() override {
-        return false;
-    }
-    bool UpdateThreadList(ThreadList &old_thread_list,
-                          ThreadList &new_thread_list) override;
-    bool IsAlive() override;
+  bool CanDebug(lldb::TargetSP target_sp,
+                bool plugin_specified_by_name) override;
+  bool DestroyRequiresHalt() override { return false; }
+  bool UpdateThreadList(ThreadList &old_thread_list,
+                        ThreadList &new_thread_list) override;
+  bool IsAlive() override;
 
-    size_t DoReadMemory(lldb::addr_t vm_addr, void *buf, size_t size,
-                        Status &error) override;
-    size_t DoWriteMemory(lldb::addr_t vm_addr, const void *buf, size_t size,
-                         Status &error) override;
-    lldb::addr_t DoAllocateMemory(size_t size, uint32_t permissions,
-                                  Status &error) override;
-    Status DoDeallocateMemory(lldb::addr_t ptr) override;
-    Status GetMemoryRegionInfo(lldb::addr_t vm_addr,
-                               MemoryRegionInfo &info) override;
+  size_t DoReadMemory(lldb::addr_t vm_addr, void *buf, size_t size,
+                      Status &error) override;
+  size_t DoWriteMemory(lldb::addr_t vm_addr, const void *buf, size_t size,
+                       Status &error) override;
+  lldb::addr_t DoAllocateMemory(size_t size, uint32_t permissions,
+                                Status &error) override;
+  Status DoDeallocateMemory(lldb::addr_t ptr) override;
+  Status GetMemoryRegionInfo(lldb::addr_t vm_addr,
+                             MemoryRegionInfo &info) override;
 
-    lldb::addr_t GetImageInfoAddress() override;
+  lldb::addr_t GetImageInfoAddress() override;
 
-    DynamicLoaderWindowsDYLD *GetDynamicLoader() override;
+  DynamicLoaderWindowsDYLD *GetDynamicLoader() override;
 
-    // IDebugDelegate overrides.
-    void OnExitProcess(uint32_t exit_code) override;
-    void OnDebuggerConnected(lldb::addr_t image_base) override;
-    ExceptionResult OnDebugException(bool first_chance,
-                                     const ExceptionRecord &record) override;
-    void OnCreateThread(const HostThread &thread) override;
-    void OnExitThread(lldb::tid_t thread_id, uint32_t exit_code) override;
-    void OnLoadDll(const ModuleSpec &module_spec,
-                   lldb::addr_t module_addr) override;
-    void OnUnloadDll(lldb::addr_t module_addr) override;
-    void OnDebugString(const std::string &string) override;
-    void OnDebuggerError(const Status &error, uint32_t type) override;
+  // IDebugDelegate overrides.
+  void OnExitProcess(uint32_t exit_code) override;
+  void OnDebuggerConnected(lldb::addr_t image_base) override;
+  ExceptionResult OnDebugException(bool first_chance,
+                                   const ExceptionRecord &record) override;
+  void OnCreateThread(const HostThread &thread) override;
+  void OnExitThread(lldb::tid_t thread_id, uint32_t exit_code) override;
+  void OnLoadDll(const ModuleSpec &module_spec,
+                 lldb::addr_t module_addr) override;
+  void OnUnloadDll(lldb::addr_t module_addr) override;
+  void OnDebugString(const std::string &string) override;
+  void OnDebuggerError(const Status &error, uint32_t type) override;
 
-    Status GetWatchpointSupportInfo(uint32_t &num) override;
-    Status GetWatchpointSupportInfo(uint32_t &num, bool &after) override;
-    Status EnableWatchpoint(Watchpoint *wp, bool notify = true) override;
-    Status DisableWatchpoint(Watchpoint *wp, bool notify = true) override;
+  Status GetWatchpointSupportInfo(uint32_t &num) override;
+  Status GetWatchpointSupportInfo(uint32_t &num, bool &after) override;
+  Status EnableWatchpoint(Watchpoint *wp, bool notify = true) override;
+  Status DisableWatchpoint(Watchpoint *wp, bool notify = true) override;
 
 private:
-    struct WatchpointInfo {
-        uint32_t slot_id;
-        lldb::addr_t address;
-        uint32_t size;
-        bool read;
-        bool write;
-    };
-    std::map<lldb::break_id_t, WatchpointInfo> m_watchpoints;
-    std::vector<lldb::break_id_t> m_watchpoint_ids;
+  struct WatchpointInfo {
+    uint32_t slot_id;
+    lldb::addr_t address;
+    uint32_t size;
+    bool read;
+    bool write;
+  };
+  std::map<lldb::break_id_t, WatchpointInfo> m_watchpoints;
+  std::vector<lldb::break_id_t> m_watchpoint_ids;
 };
 } // namespace lldb_private
 

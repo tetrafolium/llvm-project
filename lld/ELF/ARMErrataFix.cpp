@@ -72,32 +72,30 @@ using namespace lld::elf;
 
 class elf::Patch657417Section : public SyntheticSection {
 public:
-    Patch657417Section(InputSection *p, uint64_t off, uint32_t instr, bool isARM);
+  Patch657417Section(InputSection *p, uint64_t off, uint32_t instr, bool isARM);
 
-    void writeTo(uint8_t *buf) override;
+  void writeTo(uint8_t *buf) override;
 
-    size_t getSize() const override {
-        return 4;
-    }
+  size_t getSize() const override { return 4; }
 
-    // Get the virtual address of the branch instruction at patcheeOffset.
-    uint64_t getBranchAddr() const;
+  // Get the virtual address of the branch instruction at patcheeOffset.
+  uint64_t getBranchAddr() const;
 
-    static bool classof(const SectionBase *d) {
-        return d->kind() == InputSectionBase::Synthetic && d->name ==".text.patch";
-    }
+  static bool classof(const SectionBase *d) {
+    return d->kind() == InputSectionBase::Synthetic && d->name == ".text.patch";
+  }
 
-    // The Section we are patching.
-    const InputSection *patchee;
-    // The offset of the instruction in the Patchee section we are patching.
-    uint64_t patcheeOffset;
-    // A label for the start of the Patch that we can use as a relocation target.
-    Symbol *patchSym;
-    // A decoding of the branch instruction at patcheeOffset.
-    uint32_t instr;
-    // True If the patch is to be written in ARM state, otherwise the patch will
-    // be written in Thumb state.
-    bool isARM;
+  // The Section we are patching.
+  const InputSection *patchee;
+  // The offset of the instruction in the Patchee section we are patching.
+  uint64_t patcheeOffset;
+  // A label for the start of the Patch that we can use as a relocation target.
+  Symbol *patchSym;
+  // A decoding of the branch instruction at patcheeOffset.
+  uint32_t instr;
+  // True If the patch is to be written in ARM state, otherwise the patch will
+  // be written in Thumb state.
+  bool isARM;
 };
 
 // Return true if the half-word, when taken as the first of a pair of halfwords
@@ -110,7 +108,7 @@ public:
 //
 // We test only the first halfword, looking for op != 0b00.
 static bool is32bitInstruction(uint16_t hw) {
-    return (hw & 0xe000) == 0xe000 && (hw & 0x1800) != 0x0000;
+  return (hw & 0xe000) == 0xe000 && (hw & 0x1800) != 0x0000;
 }
 
 // Reference from ARM Architecture Reference Manual ARMv7-A and ARMv7-R edition
@@ -123,24 +121,18 @@ static bool is32bitInstruction(uint16_t hw) {
 // op1 == 1x1               | Branch with Link (BL.W)
 
 static bool isBcc(uint32_t instr) {
-    return (instr & 0xf800d000) == 0xf0008000 &&
-           (instr & 0x03800000) != 0x03800000;
+  return (instr & 0xf800d000) == 0xf0008000 &&
+         (instr & 0x03800000) != 0x03800000;
 }
 
-static bool isB(uint32_t instr) {
-    return (instr & 0xf800d000) == 0xf0009000;
-}
+static bool isB(uint32_t instr) { return (instr & 0xf800d000) == 0xf0009000; }
 
-static bool isBLX(uint32_t instr) {
-    return (instr & 0xf800d000) == 0xf000c000;
-}
+static bool isBLX(uint32_t instr) { return (instr & 0xf800d000) == 0xf000c000; }
 
-static bool isBL(uint32_t instr) {
-    return (instr & 0xf800d000) == 0xf000d000;
-}
+static bool isBL(uint32_t instr) { return (instr & 0xf800d000) == 0xf000d000; }
 
 static bool is32bitBranch(uint32_t instr) {
-    return isBcc(instr) || isB(instr) || isBL(instr) || isBLX(instr);
+  return isBcc(instr) || isB(instr) || isBL(instr) || isBLX(instr);
 }
 
 Patch657417Section::Patch657417Section(InputSection *p, uint64_t off,
@@ -148,53 +140,53 @@ Patch657417Section::Patch657417Section(InputSection *p, uint64_t off,
     : SyntheticSection(SHF_ALLOC | SHF_EXECINSTR, SHT_PROGBITS, 4,
                        ".text.patch"),
       patchee(p), patcheeOffset(off), instr(instr), isARM(isARM) {
-    parent = p->getParent();
-    patchSym = addSyntheticLocal(
-                   saver.save("__CortexA8657417_" + utohexstr(getBranchAddr())), STT_FUNC,
-                   isARM ? 0 : 1, getSize(), *this);
-    addSyntheticLocal(saver.save(isARM ? "$a" : "$t"), STT_NOTYPE, 0, 0, *this);
+  parent = p->getParent();
+  patchSym = addSyntheticLocal(
+      saver.save("__CortexA8657417_" + utohexstr(getBranchAddr())), STT_FUNC,
+      isARM ? 0 : 1, getSize(), *this);
+  addSyntheticLocal(saver.save(isARM ? "$a" : "$t"), STT_NOTYPE, 0, 0, *this);
 }
 
 uint64_t Patch657417Section::getBranchAddr() const {
-    return patchee->getVA(patcheeOffset);
+  return patchee->getVA(patcheeOffset);
 }
 
 // Given a branch instruction instr at sourceAddr work out its destination
 // address. This is only used when the branch instruction has no relocation.
 static uint64_t getThumbDestAddr(uint64_t sourceAddr, uint32_t instr) {
-    uint8_t buf[4];
-    write16le(buf, instr >> 16);
-    write16le(buf + 2, instr & 0x0000ffff);
-    int64_t offset;
-    if (isBcc(instr))
-        offset = target->getImplicitAddend(buf, R_ARM_THM_JUMP19);
-    else if (isB(instr))
-        offset = target->getImplicitAddend(buf, R_ARM_THM_JUMP24);
-    else
-        offset = target->getImplicitAddend(buf, R_ARM_THM_CALL);
-    return sourceAddr + offset + 4;
+  uint8_t buf[4];
+  write16le(buf, instr >> 16);
+  write16le(buf + 2, instr & 0x0000ffff);
+  int64_t offset;
+  if (isBcc(instr))
+    offset = target->getImplicitAddend(buf, R_ARM_THM_JUMP19);
+  else if (isB(instr))
+    offset = target->getImplicitAddend(buf, R_ARM_THM_JUMP24);
+  else
+    offset = target->getImplicitAddend(buf, R_ARM_THM_CALL);
+  return sourceAddr + offset + 4;
 }
 
 void Patch657417Section::writeTo(uint8_t *buf) {
-    // The base instruction of the patch is always a 32-bit unconditional branch.
-    if (isARM)
-        write32le(buf, 0xea000000);
-    else
-        write32le(buf, 0x9000f000);
-    // If we have a relocation then apply it.
-    if (!relocations.empty()) {
-        relocateAlloc(buf, buf + getSize());
-        return;
-    }
+  // The base instruction of the patch is always a 32-bit unconditional branch.
+  if (isARM)
+    write32le(buf, 0xea000000);
+  else
+    write32le(buf, 0x9000f000);
+  // If we have a relocation then apply it.
+  if (!relocations.empty()) {
+    relocateAlloc(buf, buf + getSize());
+    return;
+  }
 
-    // If we don't have a relocation then we must calculate and write the offset
-    // ourselves.
-    // Get the destination offset from the addend in the branch instruction.
-    // We cannot use the instruction in the patchee section as this will have
-    // been altered to point to us!
-    uint64_t s = getThumbDestAddr(getBranchAddr(), instr);
-    uint64_t p = getVA(4);
-    target->relocateNoSym(buf, isARM ? R_ARM_JUMP24 : R_ARM_THM_JUMP24, s - p);
+  // If we don't have a relocation then we must calculate and write the offset
+  // ourselves.
+  // Get the destination offset from the addend in the branch instruction.
+  // We cannot use the instruction in the patchee section as this will have
+  // been altered to point to us!
+  uint64_t s = getThumbDestAddr(getBranchAddr(), instr);
+  uint64_t p = getVA(4);
+  target->relocateNoSym(buf, isARM ? R_ARM_JUMP24 : R_ARM_THM_JUMP24, s - p);
 }
 
 // Given a branch instruction spanning two 4KiB regions, at offset off from the
@@ -202,23 +194,23 @@ void Patch657417Section::writeTo(uint8_t *buf) {
 // first of the two 4Kib regions.
 static bool branchDestInFirstRegion(const InputSection *isec, uint64_t off,
                                     uint32_t instr, const Relocation *r) {
-    uint64_t sourceAddr = isec->getVA(0) + off;
-    assert((sourceAddr & 0xfff) == 0xffe);
-    uint64_t destAddr = sourceAddr;
-    // If there is a branch relocation at the same offset we must use this to
-    // find the destination address as the branch could be indirected via a thunk
-    // or the PLT.
-    if (r) {
-        uint64_t dst = (r->expr == R_PLT_PC) ? r->sym->getPltVA() : r->sym->getVA();
-        // Account for Thumb PC bias, usually cancelled to 0 by addend of -4.
-        destAddr = dst + r->addend + 4;
-    } else {
-        // If there is no relocation, we must have an intra-section branch
-        // We must extract the offset from the addend manually.
-        destAddr = getThumbDestAddr(sourceAddr, instr);
-    }
+  uint64_t sourceAddr = isec->getVA(0) + off;
+  assert((sourceAddr & 0xfff) == 0xffe);
+  uint64_t destAddr = sourceAddr;
+  // If there is a branch relocation at the same offset we must use this to
+  // find the destination address as the branch could be indirected via a thunk
+  // or the PLT.
+  if (r) {
+    uint64_t dst = (r->expr == R_PLT_PC) ? r->sym->getPltVA() : r->sym->getVA();
+    // Account for Thumb PC bias, usually cancelled to 0 by addend of -4.
+    destAddr = dst + r->addend + 4;
+  } else {
+    // If there is no relocation, we must have an intra-section branch
+    // We must extract the offset from the addend manually.
+    destAddr = getThumbDestAddr(sourceAddr, instr);
+  }
 
-    return (destAddr & 0xfffff000) == (sourceAddr & 0xfffff000);
+  return (destAddr & 0xfffff000) == (sourceAddr & 0xfffff000);
 }
 
 // Return true if a branch can reach a patch section placed after isec.
@@ -226,22 +218,22 @@ static bool branchDestInFirstRegion(const InputSection *isec, uint64_t off,
 static bool patchInRange(const InputSection *isec, uint64_t off,
                          uint32_t instr) {
 
-    // We need the branch at source to reach a patch section placed immediately
-    // after isec. As there can be more than one patch in the patch section we
-    // add 0x100 as contingency to account for worst case of 1 branch every 4KiB
-    // for a 1 MiB range.
-    return target->inBranchRange(
-               isBcc(instr) ? R_ARM_THM_JUMP19 : R_ARM_THM_JUMP24, isec->getVA(off),
-               isec->getVA() + isec->getSize() + 0x100);
+  // We need the branch at source to reach a patch section placed immediately
+  // after isec. As there can be more than one patch in the patch section we
+  // add 0x100 as contingency to account for worst case of 1 branch every 4KiB
+  // for a 1 MiB range.
+  return target->inBranchRange(
+      isBcc(instr) ? R_ARM_THM_JUMP19 : R_ARM_THM_JUMP24, isec->getVA(off),
+      isec->getVA() + isec->getSize() + 0x100);
 }
 
 struct ScanResult {
-    // Offset of branch within its InputSection.
-    uint64_t off;
-    // Cached decoding of the branch instruction.
-    uint32_t instr;
-    // Branch relocation at off. Will be nullptr if no relocation exists.
-    Relocation *rel;
+  // Offset of branch within its InputSection.
+  uint64_t off;
+  // Cached decoding of the branch instruction.
+  uint32_t instr;
+  // Branch relocation at off. Will be nullptr if no relocation exists.
+  Relocation *rel;
 };
 
 // Detect the erratum sequence, returning the offset of the branch instruction
@@ -250,157 +242,157 @@ struct ScanResult {
 // as there must be at least one 32-bit non-branch instruction before the
 // branch so the minimum offset for a patch is 4.
 static ScanResult scanCortexA8Errata657417(InputSection *isec, uint64_t &off,
-        uint64_t limit) {
-    uint64_t isecAddr = isec->getVA(0);
-    // Advance Off so that (isecAddr + off) modulo 0x1000 is at least 0xffa. We
-    // need to check for a 32-bit instruction immediately before a 32-bit branch
-    // at 0xffe modulo 0x1000.
-    off = alignTo(isecAddr + off, 0x1000, 0xffa) - isecAddr;
-    if (off >= limit || limit - off < 8) {
-        // Need at least 2 4-byte sized instructions to trigger erratum.
-        off = limit;
-        return {0, 0, nullptr};
-    }
+                                           uint64_t limit) {
+  uint64_t isecAddr = isec->getVA(0);
+  // Advance Off so that (isecAddr + off) modulo 0x1000 is at least 0xffa. We
+  // need to check for a 32-bit instruction immediately before a 32-bit branch
+  // at 0xffe modulo 0x1000.
+  off = alignTo(isecAddr + off, 0x1000, 0xffa) - isecAddr;
+  if (off >= limit || limit - off < 8) {
+    // Need at least 2 4-byte sized instructions to trigger erratum.
+    off = limit;
+    return {0, 0, nullptr};
+  }
 
-    ScanResult scanRes = {0, 0, nullptr};
-    const uint8_t *buf = isec->data().begin();
-    // ARMv7-A Thumb 32-bit instructions are encoded 2 consecutive
-    // little-endian halfwords.
-    const ulittle16_t *instBuf = reinterpret_cast<const ulittle16_t *>(buf + off);
-    uint16_t hw11 = *instBuf++;
-    uint16_t hw12 = *instBuf++;
-    uint16_t hw21 = *instBuf++;
-    uint16_t hw22 = *instBuf++;
-    if (is32bitInstruction(hw11) && is32bitInstruction(hw21)) {
-        uint32_t instr1 = (hw11 << 16) | hw12;
-        uint32_t instr2 = (hw21 << 16) | hw22;
-        if (!is32bitBranch(instr1) && is32bitBranch(instr2)) {
-            // Find a relocation for the branch if it exists. This will be used
-            // to determine the target.
-            uint64_t branchOff = off + 4;
-            auto relIt = llvm::find_if(isec->relocations, [=](const Relocation &r) {
-                return r.offset == branchOff &&
-                       (r.type == R_ARM_THM_JUMP19 || r.type == R_ARM_THM_JUMP24 ||
-                        r.type == R_ARM_THM_CALL);
-            });
-            if (relIt != isec->relocations.end())
-                scanRes.rel = &(*relIt);
-            if (branchDestInFirstRegion(isec, branchOff, instr2, scanRes.rel)) {
-                if (patchInRange(isec, branchOff, instr2)) {
-                    scanRes.off = branchOff;
-                    scanRes.instr = instr2;
-                } else {
-                    warn(toString(isec->file) +
-                         ": skipping cortex-a8 657417 erratum sequence, section " +
-                         isec->name + " is too large to patch");
-                }
-            }
+  ScanResult scanRes = {0, 0, nullptr};
+  const uint8_t *buf = isec->data().begin();
+  // ARMv7-A Thumb 32-bit instructions are encoded 2 consecutive
+  // little-endian halfwords.
+  const ulittle16_t *instBuf = reinterpret_cast<const ulittle16_t *>(buf + off);
+  uint16_t hw11 = *instBuf++;
+  uint16_t hw12 = *instBuf++;
+  uint16_t hw21 = *instBuf++;
+  uint16_t hw22 = *instBuf++;
+  if (is32bitInstruction(hw11) && is32bitInstruction(hw21)) {
+    uint32_t instr1 = (hw11 << 16) | hw12;
+    uint32_t instr2 = (hw21 << 16) | hw22;
+    if (!is32bitBranch(instr1) && is32bitBranch(instr2)) {
+      // Find a relocation for the branch if it exists. This will be used
+      // to determine the target.
+      uint64_t branchOff = off + 4;
+      auto relIt = llvm::find_if(isec->relocations, [=](const Relocation &r) {
+        return r.offset == branchOff &&
+               (r.type == R_ARM_THM_JUMP19 || r.type == R_ARM_THM_JUMP24 ||
+                r.type == R_ARM_THM_CALL);
+      });
+      if (relIt != isec->relocations.end())
+        scanRes.rel = &(*relIt);
+      if (branchDestInFirstRegion(isec, branchOff, instr2, scanRes.rel)) {
+        if (patchInRange(isec, branchOff, instr2)) {
+          scanRes.off = branchOff;
+          scanRes.instr = instr2;
+        } else {
+          warn(toString(isec->file) +
+               ": skipping cortex-a8 657417 erratum sequence, section " +
+               isec->name + " is too large to patch");
         }
+      }
     }
-    off += 0x1000;
-    return scanRes;
+  }
+  off += 0x1000;
+  return scanRes;
 }
 
 void ARMErr657417Patcher::init() {
-    // The Arm ABI permits a mix of ARM, Thumb and Data in the same
-    // InputSection. We must only scan Thumb instructions to avoid false
-    // matches. We use the mapping symbols in the InputObjects to identify this
-    // data, caching the results in sectionMap so we don't have to recalculate
-    // it each pass.
+  // The Arm ABI permits a mix of ARM, Thumb and Data in the same
+  // InputSection. We must only scan Thumb instructions to avoid false
+  // matches. We use the mapping symbols in the InputObjects to identify this
+  // data, caching the results in sectionMap so we don't have to recalculate
+  // it each pass.
 
-    // The ABI Section 4.5.5 Mapping symbols; defines local symbols that describe
-    // half open intervals [Symbol Value, Next Symbol Value) of code and data
-    // within sections. If there is no next symbol then the half open interval is
-    // [Symbol Value, End of section). The type, code or data, is determined by
-    // the mapping symbol name, $a for Arm code, $t for Thumb code, $d for data.
-    auto isArmMapSymbol = [](const Symbol *s) {
-        return s->getName() == "$a" || s->getName().startswith("$a.");
-    };
-    auto isThumbMapSymbol = [](const Symbol *s) {
-        return s->getName() == "$t" || s->getName().startswith("$t.");
-    };
-    auto isDataMapSymbol = [](const Symbol *s) {
-        return s->getName() == "$d" || s->getName().startswith("$d.");
-    };
+  // The ABI Section 4.5.5 Mapping symbols; defines local symbols that describe
+  // half open intervals [Symbol Value, Next Symbol Value) of code and data
+  // within sections. If there is no next symbol then the half open interval is
+  // [Symbol Value, End of section). The type, code or data, is determined by
+  // the mapping symbol name, $a for Arm code, $t for Thumb code, $d for data.
+  auto isArmMapSymbol = [](const Symbol *s) {
+    return s->getName() == "$a" || s->getName().startswith("$a.");
+  };
+  auto isThumbMapSymbol = [](const Symbol *s) {
+    return s->getName() == "$t" || s->getName().startswith("$t.");
+  };
+  auto isDataMapSymbol = [](const Symbol *s) {
+    return s->getName() == "$d" || s->getName().startswith("$d.");
+  };
 
-    // Collect mapping symbols for every executable InputSection.
-    for (InputFile *file : objectFiles) {
-        auto *f = cast<ObjFile<ELF32LE>>(file);
-        for (Symbol *s : f->getLocalSymbols()) {
-            auto *def = dyn_cast<Defined>(s);
-            if (!def)
-                continue;
-            if (!isArmMapSymbol(def) && !isThumbMapSymbol(def) &&
-                    !isDataMapSymbol(def))
-                continue;
-            if (auto *sec = dyn_cast_or_null<InputSection>(def->section))
-                if (sec->flags & SHF_EXECINSTR)
-                    sectionMap[sec].push_back(def);
-        }
+  // Collect mapping symbols for every executable InputSection.
+  for (InputFile *file : objectFiles) {
+    auto *f = cast<ObjFile<ELF32LE>>(file);
+    for (Symbol *s : f->getLocalSymbols()) {
+      auto *def = dyn_cast<Defined>(s);
+      if (!def)
+        continue;
+      if (!isArmMapSymbol(def) && !isThumbMapSymbol(def) &&
+          !isDataMapSymbol(def))
+        continue;
+      if (auto *sec = dyn_cast_or_null<InputSection>(def->section))
+        if (sec->flags & SHF_EXECINSTR)
+          sectionMap[sec].push_back(def);
     }
-    // For each InputSection make sure the mapping symbols are in sorted in
-    // ascending order and are in alternating Thumb, non-Thumb order.
-    for (auto &kv : sectionMap) {
-        std::vector<const Defined *> &mapSyms = kv.second;
-        llvm::stable_sort(mapSyms, [](const Defined *a, const Defined *b) {
-            return a->value < b->value;
-        });
-        mapSyms.erase(std::unique(mapSyms.begin(), mapSyms.end(),
-        [=](const Defined *a, const Defined *b) {
-            return (isThumbMapSymbol(a) ==
-                    isThumbMapSymbol(b));
-        }),
-        mapSyms.end());
-        // Always start with a Thumb Mapping Symbol
-        if (!mapSyms.empty() && !isThumbMapSymbol(mapSyms.front()))
-            mapSyms.erase(mapSyms.begin());
-    }
-    initialized = true;
+  }
+  // For each InputSection make sure the mapping symbols are in sorted in
+  // ascending order and are in alternating Thumb, non-Thumb order.
+  for (auto &kv : sectionMap) {
+    std::vector<const Defined *> &mapSyms = kv.second;
+    llvm::stable_sort(mapSyms, [](const Defined *a, const Defined *b) {
+      return a->value < b->value;
+    });
+    mapSyms.erase(std::unique(mapSyms.begin(), mapSyms.end(),
+                              [=](const Defined *a, const Defined *b) {
+                                return (isThumbMapSymbol(a) ==
+                                        isThumbMapSymbol(b));
+                              }),
+                  mapSyms.end());
+    // Always start with a Thumb Mapping Symbol
+    if (!mapSyms.empty() && !isThumbMapSymbol(mapSyms.front()))
+      mapSyms.erase(mapSyms.begin());
+  }
+  initialized = true;
 }
 
 void ARMErr657417Patcher::insertPatches(
     InputSectionDescription &isd, std::vector<Patch657417Section *> &patches) {
-    uint64_t spacing = 0x100000 - 0x7500;
-    uint64_t isecLimit;
-    uint64_t prevIsecLimit = isd.sections.front()->outSecOff;
-    uint64_t patchUpperBound = prevIsecLimit + spacing;
-    uint64_t outSecAddr = isd.sections.front()->getParent()->addr;
+  uint64_t spacing = 0x100000 - 0x7500;
+  uint64_t isecLimit;
+  uint64_t prevIsecLimit = isd.sections.front()->outSecOff;
+  uint64_t patchUpperBound = prevIsecLimit + spacing;
+  uint64_t outSecAddr = isd.sections.front()->getParent()->addr;
 
-    // Set the outSecOff of patches to the place where we want to insert them.
-    // We use a similar strategy to initial thunk placement, using 1 MiB as the
-    // range of the Thumb-2 conditional branch with a contingency accounting for
-    // thunk generation.
-    auto patchIt = patches.begin();
-    auto patchEnd = patches.end();
-    for (const InputSection *isec : isd.sections) {
-        isecLimit = isec->outSecOff + isec->getSize();
-        if (isecLimit > patchUpperBound) {
-            for (; patchIt != patchEnd; ++patchIt) {
-                if ((*patchIt)->getBranchAddr() - outSecAddr >= prevIsecLimit)
-                    break;
-                (*patchIt)->outSecOff = prevIsecLimit;
-            }
-            patchUpperBound = prevIsecLimit + spacing;
-        }
-        prevIsecLimit = isecLimit;
+  // Set the outSecOff of patches to the place where we want to insert them.
+  // We use a similar strategy to initial thunk placement, using 1 MiB as the
+  // range of the Thumb-2 conditional branch with a contingency accounting for
+  // thunk generation.
+  auto patchIt = patches.begin();
+  auto patchEnd = patches.end();
+  for (const InputSection *isec : isd.sections) {
+    isecLimit = isec->outSecOff + isec->getSize();
+    if (isecLimit > patchUpperBound) {
+      for (; patchIt != patchEnd; ++patchIt) {
+        if ((*patchIt)->getBranchAddr() - outSecAddr >= prevIsecLimit)
+          break;
+        (*patchIt)->outSecOff = prevIsecLimit;
+      }
+      patchUpperBound = prevIsecLimit + spacing;
     }
-    for (; patchIt != patchEnd; ++patchIt)
-        (*patchIt)->outSecOff = isecLimit;
+    prevIsecLimit = isecLimit;
+  }
+  for (; patchIt != patchEnd; ++patchIt)
+    (*patchIt)->outSecOff = isecLimit;
 
-    // Merge all patch sections. We use the outSecOff assigned above to
-    // determine the insertion point. This is ok as we only merge into an
-    // InputSectionDescription once per pass, and at the end of the pass
-    // assignAddresses() will recalculate all the outSecOff values.
-    std::vector<InputSection *> tmp;
-    tmp.reserve(isd.sections.size() + patches.size());
-    auto mergeCmp = [](const InputSection *a, const InputSection *b) {
-        if (a->outSecOff != b->outSecOff)
-            return a->outSecOff < b->outSecOff;
-        return isa<Patch657417Section>(a) && !isa<Patch657417Section>(b);
-    };
-    std::merge(isd.sections.begin(), isd.sections.end(), patches.begin(),
-               patches.end(), std::back_inserter(tmp), mergeCmp);
-    isd.sections = std::move(tmp);
+  // Merge all patch sections. We use the outSecOff assigned above to
+  // determine the insertion point. This is ok as we only merge into an
+  // InputSectionDescription once per pass, and at the end of the pass
+  // assignAddresses() will recalculate all the outSecOff values.
+  std::vector<InputSection *> tmp;
+  tmp.reserve(isd.sections.size() + patches.size());
+  auto mergeCmp = [](const InputSection *a, const InputSection *b) {
+    if (a->outSecOff != b->outSecOff)
+      return a->outSecOff < b->outSecOff;
+    return isa<Patch657417Section>(a) && !isa<Patch657417Section>(b);
+  };
+  std::merge(isd.sections.begin(), isd.sections.end(), patches.begin(),
+             patches.end(), std::back_inserter(tmp), mergeCmp);
+  isd.sections = std::move(tmp);
 }
 
 // Given a branch instruction described by ScanRes redirect it to a patch
@@ -411,67 +403,67 @@ void ARMErr657417Patcher::insertPatches(
 static void implementPatch(ScanResult sr, InputSection *isec,
                            std::vector<Patch657417Section *> &patches) {
 
-    log("detected cortex-a8-657419 erratum sequence starting at " +
-        utohexstr(isec->getVA(sr.off)) + " in unpatched output.");
-    Patch657417Section *psec;
-    // We have two cases to deal with.
-    // Case 1. There is a relocation at patcheeOffset to a symbol. The
-    // unconditional branch in the patch must have a relocation so that any
-    // further redirection via the PLT or a Thunk happens as normal. At
-    // patcheeOffset we redirect the existing relocation to a Symbol defined at
-    // the start of the patch section.
-    //
-    // Case 2. There is no relocation at patcheeOffset. We are unlikely to have
-    // a symbol that we can use as a target for a relocation in the patch section.
-    // Luckily we know that the destination cannot be indirected via the PLT or
-    // a Thunk so we can just write the destination directly.
-    if (sr.rel) {
-        // Case 1. We have an existing relocation to redirect to patch and a
-        // Symbol target.
+  log("detected cortex-a8-657419 erratum sequence starting at " +
+      utohexstr(isec->getVA(sr.off)) + " in unpatched output.");
+  Patch657417Section *psec;
+  // We have two cases to deal with.
+  // Case 1. There is a relocation at patcheeOffset to a symbol. The
+  // unconditional branch in the patch must have a relocation so that any
+  // further redirection via the PLT or a Thunk happens as normal. At
+  // patcheeOffset we redirect the existing relocation to a Symbol defined at
+  // the start of the patch section.
+  //
+  // Case 2. There is no relocation at patcheeOffset. We are unlikely to have
+  // a symbol that we can use as a target for a relocation in the patch section.
+  // Luckily we know that the destination cannot be indirected via the PLT or
+  // a Thunk so we can just write the destination directly.
+  if (sr.rel) {
+    // Case 1. We have an existing relocation to redirect to patch and a
+    // Symbol target.
 
-        // Create a branch relocation for the unconditional branch in the patch.
-        // This can be redirected via the PLT or Thunks.
-        RelType patchRelType = R_ARM_THM_JUMP24;
-        int64_t patchRelAddend = sr.rel->addend;
-        bool destIsARM = false;
-        if (isBL(sr.instr) || isBLX(sr.instr)) {
-            // The final target of the branch may be ARM or Thumb, if the target
-            // is ARM then we write the patch in ARM state to avoid a state change
-            // Thunk from the patch to the target.
-            uint64_t dstSymAddr = (sr.rel->expr == R_PLT_PC) ? sr.rel->sym->getPltVA()
-                                  : sr.rel->sym->getVA();
-            destIsARM = (dstSymAddr & 1) == 0;
-        }
-        psec = make<Patch657417Section>(isec, sr.off, sr.instr, destIsARM);
-        if (destIsARM) {
-            // The patch will be in ARM state. Use an ARM relocation and account for
-            // the larger ARM PC-bias of 8 rather than Thumb's 4.
-            patchRelType = R_ARM_JUMP24;
-            patchRelAddend -= 4;
-        }
-        psec->relocations.push_back(
-            Relocation{sr.rel->expr, patchRelType, 0, patchRelAddend, sr.rel->sym});
-        // Redirect the existing branch relocation to the patch.
-        sr.rel->expr = R_PC;
-        sr.rel->addend = -4;
-        sr.rel->sym = psec->patchSym;
-    } else {
-        // Case 2. We do not have a relocation to the patch. Add a relocation of the
-        // appropriate type to the patch at patcheeOffset.
-
-        // The destination is ARM if we have a BLX.
-        psec = make<Patch657417Section>(isec, sr.off, sr.instr, isBLX(sr.instr));
-        RelType type;
-        if (isBcc(sr.instr))
-            type = R_ARM_THM_JUMP19;
-        else if (isB(sr.instr))
-            type = R_ARM_THM_JUMP24;
-        else
-            type = R_ARM_THM_CALL;
-        isec->relocations.push_back(
-            Relocation{R_PC, type, sr.off, -4, psec->patchSym});
+    // Create a branch relocation for the unconditional branch in the patch.
+    // This can be redirected via the PLT or Thunks.
+    RelType patchRelType = R_ARM_THM_JUMP24;
+    int64_t patchRelAddend = sr.rel->addend;
+    bool destIsARM = false;
+    if (isBL(sr.instr) || isBLX(sr.instr)) {
+      // The final target of the branch may be ARM or Thumb, if the target
+      // is ARM then we write the patch in ARM state to avoid a state change
+      // Thunk from the patch to the target.
+      uint64_t dstSymAddr = (sr.rel->expr == R_PLT_PC) ? sr.rel->sym->getPltVA()
+                                                       : sr.rel->sym->getVA();
+      destIsARM = (dstSymAddr & 1) == 0;
     }
-    patches.push_back(psec);
+    psec = make<Patch657417Section>(isec, sr.off, sr.instr, destIsARM);
+    if (destIsARM) {
+      // The patch will be in ARM state. Use an ARM relocation and account for
+      // the larger ARM PC-bias of 8 rather than Thumb's 4.
+      patchRelType = R_ARM_JUMP24;
+      patchRelAddend -= 4;
+    }
+    psec->relocations.push_back(
+        Relocation{sr.rel->expr, patchRelType, 0, patchRelAddend, sr.rel->sym});
+    // Redirect the existing branch relocation to the patch.
+    sr.rel->expr = R_PC;
+    sr.rel->addend = -4;
+    sr.rel->sym = psec->patchSym;
+  } else {
+    // Case 2. We do not have a relocation to the patch. Add a relocation of the
+    // appropriate type to the patch at patcheeOffset.
+
+    // The destination is ARM if we have a BLX.
+    psec = make<Patch657417Section>(isec, sr.off, sr.instr, isBLX(sr.instr));
+    RelType type;
+    if (isBcc(sr.instr))
+      type = R_ARM_THM_JUMP19;
+    else if (isB(sr.instr))
+      type = R_ARM_THM_JUMP24;
+    else
+      type = R_ARM_THM_CALL;
+    isec->relocations.push_back(
+        Relocation{R_PC, type, sr.off, -4, psec->patchSym});
+  }
+  patches.push_back(psec);
 }
 
 // Scan all the instructions in InputSectionDescription, for each instance of
@@ -480,55 +472,55 @@ static void implementPatch(ScanResult sr, InputSection *isec,
 std::vector<Patch657417Section *>
 ARMErr657417Patcher::patchInputSectionDescription(
     InputSectionDescription &isd) {
-    std::vector<Patch657417Section *> patches;
-    for (InputSection *isec : isd.sections) {
-        // LLD doesn't use the erratum sequence in SyntheticSections.
-        if (isa<SyntheticSection>(isec))
-            continue;
-        // Use sectionMap to make sure we only scan Thumb code and not Arm or inline
-        // data. We have already sorted mapSyms in ascending order and removed
-        // consecutive mapping symbols of the same type. Our range of executable
-        // instructions to scan is therefore [thumbSym->value, nonThumbSym->value)
-        // or [thumbSym->value, section size).
-        std::vector<const Defined *> &mapSyms = sectionMap[isec];
+  std::vector<Patch657417Section *> patches;
+  for (InputSection *isec : isd.sections) {
+    // LLD doesn't use the erratum sequence in SyntheticSections.
+    if (isa<SyntheticSection>(isec))
+      continue;
+    // Use sectionMap to make sure we only scan Thumb code and not Arm or inline
+    // data. We have already sorted mapSyms in ascending order and removed
+    // consecutive mapping symbols of the same type. Our range of executable
+    // instructions to scan is therefore [thumbSym->value, nonThumbSym->value)
+    // or [thumbSym->value, section size).
+    std::vector<const Defined *> &mapSyms = sectionMap[isec];
 
-        auto thumbSym = mapSyms.begin();
-        while (thumbSym != mapSyms.end()) {
-            auto nonThumbSym = std::next(thumbSym);
-            uint64_t off = (*thumbSym)->value;
-            uint64_t limit = (nonThumbSym == mapSyms.end()) ? isec->data().size()
-                             : (*nonThumbSym)->value;
+    auto thumbSym = mapSyms.begin();
+    while (thumbSym != mapSyms.end()) {
+      auto nonThumbSym = std::next(thumbSym);
+      uint64_t off = (*thumbSym)->value;
+      uint64_t limit = (nonThumbSym == mapSyms.end()) ? isec->data().size()
+                                                      : (*nonThumbSym)->value;
 
-            while (off < limit) {
-                ScanResult sr = scanCortexA8Errata657417(isec, off, limit);
-                if (sr.off)
-                    implementPatch(sr, isec, patches);
-            }
-            if (nonThumbSym == mapSyms.end())
-                break;
-            thumbSym = std::next(nonThumbSym);
-        }
+      while (off < limit) {
+        ScanResult sr = scanCortexA8Errata657417(isec, off, limit);
+        if (sr.off)
+          implementPatch(sr, isec, patches);
+      }
+      if (nonThumbSym == mapSyms.end())
+        break;
+      thumbSym = std::next(nonThumbSym);
     }
-    return patches;
+  }
+  return patches;
 }
 
 bool ARMErr657417Patcher::createFixes() {
-    if (!initialized)
-        init();
+  if (!initialized)
+    init();
 
-    bool addressesChanged = false;
-    for (OutputSection *os : outputSections) {
-        if (!(os->flags & SHF_ALLOC) || !(os->flags & SHF_EXECINSTR))
-            continue;
-        for (BaseCommand *bc : os->sectionCommands)
-            if (auto *isd = dyn_cast<InputSectionDescription>(bc)) {
-                std::vector<Patch657417Section *> patches =
-                    patchInputSectionDescription(*isd);
-                if (!patches.empty()) {
-                    insertPatches(*isd, patches);
-                    addressesChanged = true;
-                }
-            }
-    }
-    return addressesChanged;
+  bool addressesChanged = false;
+  for (OutputSection *os : outputSections) {
+    if (!(os->flags & SHF_ALLOC) || !(os->flags & SHF_EXECINSTR))
+      continue;
+    for (BaseCommand *bc : os->sectionCommands)
+      if (auto *isd = dyn_cast<InputSectionDescription>(bc)) {
+        std::vector<Patch657417Section *> patches =
+            patchInputSectionDescription(*isd);
+        if (!patches.empty()) {
+          insertPatches(*isd, patches);
+          addressesChanged = true;
+        }
+      }
+  }
+  return addressesChanged;
 }

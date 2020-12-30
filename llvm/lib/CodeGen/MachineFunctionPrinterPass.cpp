@@ -26,36 +26,34 @@ namespace {
 /// MachineFunction.
 ///
 struct MachineFunctionPrinterPass : public MachineFunctionPass {
-    static char ID;
+  static char ID;
 
-    raw_ostream &OS;
-    const std::string Banner;
+  raw_ostream &OS;
+  const std::string Banner;
 
-    MachineFunctionPrinterPass() : MachineFunctionPass(ID), OS(dbgs()) { }
-    MachineFunctionPrinterPass(raw_ostream &os, const std::string &banner)
-        : MachineFunctionPass(ID), OS(os), Banner(banner) {}
+  MachineFunctionPrinterPass() : MachineFunctionPass(ID), OS(dbgs()) {}
+  MachineFunctionPrinterPass(raw_ostream &os, const std::string &banner)
+      : MachineFunctionPass(ID), OS(os), Banner(banner) {}
 
-    StringRef getPassName() const override {
-        return "MachineFunction Printer";
-    }
+  StringRef getPassName() const override { return "MachineFunction Printer"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-        AU.addUsedIfAvailable<SlotIndexes>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+    AU.addUsedIfAvailable<SlotIndexes>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override {
-        if (!isFunctionInPrintList(MF.getName()))
-            return false;
-        OS << "# " << Banner << ":\n";
-        MF.print(OS, getAnalysisIfAvailable<SlotIndexes>());
-        return false;
-    }
+  bool runOnMachineFunction(MachineFunction &MF) override {
+    if (!isFunctionInPrintList(MF.getName()))
+      return false;
+    OS << "# " << Banner << ":\n";
+    MF.print(OS, getAnalysisIfAvailable<SlotIndexes>());
+    return false;
+  }
 };
 
 char MachineFunctionPrinterPass::ID = 0;
-}
+} // namespace
 
 char &llvm::MachineFunctionPrinterPassID = MachineFunctionPrinterPass::ID;
 INITIALIZE_PASS(MachineFunctionPrinterPass, "machineinstr-printer",
@@ -65,9 +63,9 @@ namespace llvm {
 /// Returns a newly-created MachineFunction Printer pass. The
 /// default banner is empty.
 ///
-MachineFunctionPass *createMachineFunctionPrinterPass(raw_ostream &OS,
-        const std::string &Banner) {
-    return new MachineFunctionPrinterPass(OS, Banner);
+MachineFunctionPass *
+createMachineFunctionPrinterPass(raw_ostream &OS, const std::string &Banner) {
+  return new MachineFunctionPrinterPass(OS, Banner);
 }
 
-}
+} // namespace llvm

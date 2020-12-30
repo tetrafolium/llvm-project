@@ -19,25 +19,25 @@
 namespace __llvm_libc {
 
 int LLVM_LIBC_ENTRYPOINT(thrd_join)(thrd_t *thread, int *retval) {
-    FutexData *clear_tid_address =
-        reinterpret_cast<FutexData *>(thread->__clear_tid);
+  FutexData *clear_tid_address =
+      reinterpret_cast<FutexData *>(thread->__clear_tid);
 
-    // The kernel should set the value at the clear tid address to zero.
-    // If not, it is a spurious wake and we should continue to wait on
-    // the futex.
-    while (atomic_load(clear_tid_address) != 0) {
-        // We cannot do a FUTEX_WAIT_PRIVATE here as the kernel does a
-        // FUTEX_WAKE and not a FUTEX_WAKE_PRIVATE.
-        __llvm_libc::syscall(SYS_futex, clear_tid_address, FUTEX_WAIT,
-                             ThreadParams::ClearTIDValue, nullptr);
-    }
+  // The kernel should set the value at the clear tid address to zero.
+  // If not, it is a spurious wake and we should continue to wait on
+  // the futex.
+  while (atomic_load(clear_tid_address) != 0) {
+    // We cannot do a FUTEX_WAIT_PRIVATE here as the kernel does a
+    // FUTEX_WAKE and not a FUTEX_WAKE_PRIVATE.
+    __llvm_libc::syscall(SYS_futex, clear_tid_address, FUTEX_WAIT,
+                         ThreadParams::ClearTIDValue, nullptr);
+  }
 
-    *retval = thread->__retval;
+  *retval = thread->__retval;
 
-    if (__llvm_libc::munmap(thread->__stack, thread->__stack_size) == -1)
-        return thrd_error;
+  if (__llvm_libc::munmap(thread->__stack, thread->__stack_size) == -1)
+    return thrd_error;
 
-    return thrd_success;
+  return thrd_success;
 }
 
 } // namespace __llvm_libc

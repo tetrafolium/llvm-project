@@ -18,78 +18,76 @@
 namespace lldb_private {
 
 class ThreadPlanStepInRange : public ThreadPlanStepRange,
-    public ThreadPlanShouldStopHere {
+                              public ThreadPlanShouldStopHere {
 public:
-    ThreadPlanStepInRange(Thread &thread, const AddressRange &range,
-                          const SymbolContext &addr_context,
-                          lldb::RunMode stop_others,
-                          LazyBool step_in_avoids_code_without_debug_info,
-                          LazyBool step_out_avoids_code_without_debug_info);
+  ThreadPlanStepInRange(Thread &thread, const AddressRange &range,
+                        const SymbolContext &addr_context,
+                        lldb::RunMode stop_others,
+                        LazyBool step_in_avoids_code_without_debug_info,
+                        LazyBool step_out_avoids_code_without_debug_info);
 
-    ~ThreadPlanStepInRange() override;
+  ~ThreadPlanStepInRange() override;
 
-    void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
+  void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
 
-    bool ShouldStop(Event *event_ptr) override;
+  bool ShouldStop(Event *event_ptr) override;
 
-    void SetAvoidRegexp(const char *name);
+  void SetAvoidRegexp(const char *name);
 
-    void SetStepInTarget(const char *target) {
-        m_step_into_target.SetCString(target);
-    }
+  void SetStepInTarget(const char *target) {
+    m_step_into_target.SetCString(target);
+  }
 
-    static void SetDefaultFlagValue(uint32_t new_value);
+  static void SetDefaultFlagValue(uint32_t new_value);
 
-    bool IsVirtualStep() override;
+  bool IsVirtualStep() override;
 
-    // Plans that are implementing parts of a step in might need to follow the
-    // behavior of this plan w.r.t. StepThrough.  They can get that from here.
-    static uint32_t GetDefaultFlagsValue() {
-        return s_default_flag_values;
-    }
+  // Plans that are implementing parts of a step in might need to follow the
+  // behavior of this plan w.r.t. StepThrough.  They can get that from here.
+  static uint32_t GetDefaultFlagsValue() { return s_default_flag_values; }
 
 protected:
-    static bool DefaultShouldStopHereCallback(ThreadPlan *current_plan,
-            Flags &flags,
-            lldb::FrameComparison operation,
-            Status &status, void *baton);
+  static bool DefaultShouldStopHereCallback(ThreadPlan *current_plan,
+                                            Flags &flags,
+                                            lldb::FrameComparison operation,
+                                            Status &status, void *baton);
 
-    bool DoWillResume(lldb::StateType resume_state, bool current_plan) override;
+  bool DoWillResume(lldb::StateType resume_state, bool current_plan) override;
 
-    bool DoPlanExplainsStop(Event *event_ptr) override;
+  bool DoPlanExplainsStop(Event *event_ptr) override;
 
-    void SetFlagsToDefault() override {
-        GetFlags().Set(ThreadPlanStepInRange::s_default_flag_values);
-    }
+  void SetFlagsToDefault() override {
+    GetFlags().Set(ThreadPlanStepInRange::s_default_flag_values);
+  }
 
-    void SetCallbacks() {
-        ThreadPlanShouldStopHere::ThreadPlanShouldStopHereCallbacks callbacks(
-            ThreadPlanStepInRange::DefaultShouldStopHereCallback, nullptr);
-        SetShouldStopHereCallbacks(&callbacks, nullptr);
-    }
+  void SetCallbacks() {
+    ThreadPlanShouldStopHere::ThreadPlanShouldStopHereCallbacks callbacks(
+        ThreadPlanStepInRange::DefaultShouldStopHereCallback, nullptr);
+    SetShouldStopHereCallbacks(&callbacks, nullptr);
+  }
 
-    bool FrameMatchesAvoidCriteria();
+  bool FrameMatchesAvoidCriteria();
 
 private:
-    void SetupAvoidNoDebug(LazyBool step_in_avoids_code_without_debug_info,
-                           LazyBool step_out_avoids_code_without_debug_info);
-    // Need an appropriate marker for the current stack so we can tell step out
-    // from step in.
+  void SetupAvoidNoDebug(LazyBool step_in_avoids_code_without_debug_info,
+                         LazyBool step_out_avoids_code_without_debug_info);
+  // Need an appropriate marker for the current stack so we can tell step out
+  // from step in.
 
-    static uint32_t s_default_flag_values; // These are the default flag values
-    // for the ThreadPlanStepThrough.
-    lldb::ThreadPlanSP m_sub_plan_sp;      // Keep track of the last plan we were
-    // running.  If it fails, we should stop.
-    std::unique_ptr<RegularExpression> m_avoid_regexp_up;
-    bool m_step_past_prologue; // FIXME: For now hard-coded to true, we could put
-    // a switch in for this if there's
-    // demand for that.
-    bool m_virtual_step; // true if we've just done a "virtual step", i.e. just
-    // moved the inline stack depth.
-    ConstString m_step_into_target;
-    ThreadPlanStepInRange(const ThreadPlanStepInRange &) = delete;
-    const ThreadPlanStepInRange &
-    operator=(const ThreadPlanStepInRange &) = delete;
+  static uint32_t s_default_flag_values; // These are the default flag values
+  // for the ThreadPlanStepThrough.
+  lldb::ThreadPlanSP m_sub_plan_sp; // Keep track of the last plan we were
+  // running.  If it fails, we should stop.
+  std::unique_ptr<RegularExpression> m_avoid_regexp_up;
+  bool m_step_past_prologue; // FIXME: For now hard-coded to true, we could put
+  // a switch in for this if there's
+  // demand for that.
+  bool m_virtual_step; // true if we've just done a "virtual step", i.e. just
+  // moved the inline stack depth.
+  ConstString m_step_into_target;
+  ThreadPlanStepInRange(const ThreadPlanStepInRange &) = delete;
+  const ThreadPlanStepInRange &
+  operator=(const ThreadPlanStepInRange &) = delete;
 };
 
 } // namespace lldb_private

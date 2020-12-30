@@ -26,25 +26,25 @@ Tester::Tester(StringRef scriptName, ArrayRef<std::string> scriptArgs)
 /// otherwise.
 bool Tester::isInteresting(StringRef testCase) const {
 
-    std::vector<StringRef> testerArgs;
-    testerArgs.push_back(testCase);
+  std::vector<StringRef> testerArgs;
+  testerArgs.push_back(testCase);
 
-    for (const std::string &arg : testScriptArgs)
-        testerArgs.push_back(arg);
+  for (const std::string &arg : testScriptArgs)
+    testerArgs.push_back(arg);
 
-    testerArgs.push_back(testCase);
+  testerArgs.push_back(testCase);
 
-    std::string errMsg;
-    int result = llvm::sys::ExecuteAndWait(
-                     testScript, testerArgs, /*Env=*/None, /*Redirects=*/None,
-                     /*SecondsToWait=*/0, /*MemoryLimit=*/0, &errMsg);
+  std::string errMsg;
+  int result = llvm::sys::ExecuteAndWait(
+      testScript, testerArgs, /*Env=*/None, /*Redirects=*/None,
+      /*SecondsToWait=*/0, /*MemoryLimit=*/0, &errMsg);
 
-    if (result < 0)
-        llvm::report_fatal_error("Error running interestingness test: " + errMsg,
-                                 false);
+  if (result < 0)
+    llvm::report_fatal_error("Error running interestingness test: " + errMsg,
+                             false);
 
-    if (!result)
-        return false;
+  if (!result)
+    return false;
 
-    return true;
+  return true;
 }

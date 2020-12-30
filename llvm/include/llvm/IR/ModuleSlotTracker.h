@@ -27,55 +27,51 @@ class Value;
 /// If the IR changes from underneath \a ModuleSlotTracker, strings like
 /// "<badref>" will be printed, or, worse, the wrong slots entirely.
 class ModuleSlotTracker {
-    /// Storage for a slot tracker.
-    std::unique_ptr<SlotTracker> MachineStorage;
-    bool ShouldCreateStorage = false;
-    bool ShouldInitializeAllMetadata = false;
+  /// Storage for a slot tracker.
+  std::unique_ptr<SlotTracker> MachineStorage;
+  bool ShouldCreateStorage = false;
+  bool ShouldInitializeAllMetadata = false;
 
-    const Module *M = nullptr;
-    const Function *F = nullptr;
-    SlotTracker *Machine = nullptr;
+  const Module *M = nullptr;
+  const Function *F = nullptr;
+  SlotTracker *Machine = nullptr;
 
 public:
-    /// Wrap a preinitialized SlotTracker.
-    ModuleSlotTracker(SlotTracker &Machine, const Module *M,
-                      const Function *F = nullptr);
+  /// Wrap a preinitialized SlotTracker.
+  ModuleSlotTracker(SlotTracker &Machine, const Module *M,
+                    const Function *F = nullptr);
 
-    /// Construct a slot tracker from a module.
-    ///
-    /// If \a M is \c nullptr, uses a null slot tracker.  Otherwise, initializes
-    /// a slot tracker, and initializes all metadata slots.  \c
-    /// ShouldInitializeAllMetadata defaults to true because this is expected to
-    /// be shared between multiple callers, and otherwise MDNode references will
-    /// not match up.
-    explicit ModuleSlotTracker(const Module *M,
-                               bool ShouldInitializeAllMetadata = true);
+  /// Construct a slot tracker from a module.
+  ///
+  /// If \a M is \c nullptr, uses a null slot tracker.  Otherwise, initializes
+  /// a slot tracker, and initializes all metadata slots.  \c
+  /// ShouldInitializeAllMetadata defaults to true because this is expected to
+  /// be shared between multiple callers, and otherwise MDNode references will
+  /// not match up.
+  explicit ModuleSlotTracker(const Module *M,
+                             bool ShouldInitializeAllMetadata = true);
 
-    /// Destructor to clean up storage.
-    ~ModuleSlotTracker();
+  /// Destructor to clean up storage.
+  ~ModuleSlotTracker();
 
-    /// Lazily creates a slot tracker.
-    SlotTracker *getMachine();
+  /// Lazily creates a slot tracker.
+  SlotTracker *getMachine();
 
-    const Module *getModule() const {
-        return M;
-    }
-    const Function *getCurrentFunction() const {
-        return F;
-    }
+  const Module *getModule() const { return M; }
+  const Function *getCurrentFunction() const { return F; }
 
-    /// Incorporate the given function.
-    ///
-    /// Purge the currently incorporated function and incorporate \c F.  If \c F
-    /// is currently incorporated, this is a no-op.
-    void incorporateFunction(const Function &F);
+  /// Incorporate the given function.
+  ///
+  /// Purge the currently incorporated function and incorporate \c F.  If \c F
+  /// is currently incorporated, this is a no-op.
+  void incorporateFunction(const Function &F);
 
-    /// Return the slot number of the specified local value.
-    ///
-    /// A function that defines this value should be incorporated prior to calling
-    /// this method.
-    /// Return -1 if the value is not in the function's SlotTracker.
-    int getLocalSlot(const Value *V);
+  /// Return the slot number of the specified local value.
+  ///
+  /// A function that defines this value should be incorporated prior to calling
+  /// this method.
+  /// Return -1 if the value is not in the function's SlotTracker.
+  int getLocalSlot(const Value *V);
 };
 
 } // end namespace llvm

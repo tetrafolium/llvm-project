@@ -17,12 +17,12 @@ class Diagnostic;
 } // namespace mlir
 
 inline mlir::Diagnostic &unwrap(MlirDiagnostic diagnostic) {
-    assert(diagnostic.ptr && "unexpected null diagnostic");
-    return *(static_cast<mlir::Diagnostic *>(diagnostic.ptr));
+  assert(diagnostic.ptr && "unexpected null diagnostic");
+  return *(static_cast<mlir::Diagnostic *>(diagnostic.ptr));
 }
 
 inline MlirDiagnostic wrap(mlir::Diagnostic &diagnostic) {
-    return {&diagnostic};
+  return {&diagnostic};
 }
 
 #endif // MLIR_CAPI_DIAGNOSTICS_H

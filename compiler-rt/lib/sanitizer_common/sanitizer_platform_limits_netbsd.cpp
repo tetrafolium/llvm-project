@@ -526,8 +526,8 @@ struct urio_command {
 
 namespace __sanitizer {
 void *__sanitizer_get_link_map_by_dlopen_handle(void *handle) {
-    void *p = nullptr;
-    return internal_dlinfo(handle, RTLD_DI_LINKMAP, &p) == 0 ? p : nullptr;
+  void *p = nullptr;
+  return internal_dlinfo(handle, RTLD_DI_LINKMAP, &p) == 0 ? p : nullptr;
 }
 
 unsigned struct_utsname_sz = sizeof(struct utsname);
@@ -654,12 +654,12 @@ int af_inet = (int)AF_INET;
 int af_inet6 = (int)AF_INET6;
 
 uptr __sanitizer_in_addr_sz(int af) {
-    if (af == AF_INET)
-        return sizeof(struct in_addr);
-    else if (af == AF_INET6)
-        return sizeof(struct in6_addr);
-    else
-        return 0;
+  if (af == AF_INET)
+    return sizeof(struct in_addr);
+  else if (af == AF_INET6)
+    return sizeof(struct in6_addr);
+  else
+    return 0;
 }
 
 unsigned struct_ElfW_Phdr_sz = sizeof(Elf_Phdr);
@@ -672,9 +672,9 @@ unsigned path_max = PATH_MAX;
 int struct_ttyent_sz = sizeof(struct ttyent);
 
 struct __sanitizer_nvlist_ref_t {
-    void *buf;
-    uptr len;
-    int flags;
+  void *buf;
+  uptr len;
+  int flags;
 };
 
 typedef __sanitizer_nvlist_ref_t nvlist_ref_t;
@@ -2700,39 +2700,39 @@ CHECK_SIZE_AND_OFFSET(modctl_load_t, ml_propslen);
 
 // Compat with 9.0
 struct statvfs90 {
-    unsigned long f_flag;
-    unsigned long f_bsize;
-    unsigned long f_frsize;
-    unsigned long f_iosize;
+  unsigned long f_flag;
+  unsigned long f_bsize;
+  unsigned long f_frsize;
+  unsigned long f_iosize;
 
-    u64 f_blocks;
-    u64 f_bfree;
-    u64 f_bavail;
-    u64 f_bresvd;
+  u64 f_blocks;
+  u64 f_bfree;
+  u64 f_bavail;
+  u64 f_bresvd;
 
-    u64 f_files;
-    u64 f_ffree;
-    u64 f_favail;
-    u64 f_fresvd;
+  u64 f_files;
+  u64 f_ffree;
+  u64 f_favail;
+  u64 f_fresvd;
 
-    u64 f_syncreads;
-    u64 f_syncwrites;
+  u64 f_syncreads;
+  u64 f_syncwrites;
 
-    u64 f_asyncreads;
-    u64 f_asyncwrites;
+  u64 f_asyncreads;
+  u64 f_asyncwrites;
 
-    struct {
-        s32 __fsid_val[2];
-    } f_fsidx;
-    unsigned long f_fsid;
-    unsigned long f_namemax;
-    u32 f_owner;
+  struct {
+    s32 __fsid_val[2];
+  } f_fsidx;
+  unsigned long f_fsid;
+  unsigned long f_namemax;
+  u32 f_owner;
 
-    u32 f_spare[4];
+  u32 f_spare[4];
 
-    char f_fstypename[32];
-    char f_mntonname[32];
-    char f_mntfromname[32];
+  char f_fstypename[32];
+  char f_mntonname[32];
+  char f_mntfromname[32];
 };
 unsigned struct_statvfs90_sz = sizeof(struct statvfs90);
 

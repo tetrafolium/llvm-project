@@ -21,20 +21,20 @@ class PDBStringTable;
 
 class NativeEnumInjectedSources : public IPDBEnumChildren<IPDBInjectedSource> {
 public:
-    NativeEnumInjectedSources(PDBFile &File, const InjectedSourceStream &IJS,
-                              const PDBStringTable &Strings);
+  NativeEnumInjectedSources(PDBFile &File, const InjectedSourceStream &IJS,
+                            const PDBStringTable &Strings);
 
-    uint32_t getChildCount() const override;
-    std::unique_ptr<IPDBInjectedSource>
-    getChildAtIndex(uint32_t Index) const override;
-    std::unique_ptr<IPDBInjectedSource> getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  std::unique_ptr<IPDBInjectedSource>
+  getChildAtIndex(uint32_t Index) const override;
+  std::unique_ptr<IPDBInjectedSource> getNext() override;
+  void reset() override;
 
 private:
-    PDBFile &File;
-    const InjectedSourceStream &Stream;
-    const PDBStringTable &Strings;
-    InjectedSourceStream::const_iterator Cur;
+  PDBFile &File;
+  const InjectedSourceStream &Stream;
+  const PDBStringTable &Strings;
+  InjectedSourceStream::const_iterator Cur;
 };
 
 } // namespace pdb

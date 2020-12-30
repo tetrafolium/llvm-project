@@ -33,43 +33,41 @@ HistoryUnwind::HistoryUnwind(Thread &thread, std::vector<lldb::addr_t> pcs,
 HistoryUnwind::~HistoryUnwind() {}
 
 void HistoryUnwind::DoClear() {
-    std::lock_guard<std::recursive_mutex> guard(m_unwind_mutex);
-    m_pcs.clear();
+  std::lock_guard<std::recursive_mutex> guard(m_unwind_mutex);
+  m_pcs.clear();
 }
 
 lldb::RegisterContextSP
 HistoryUnwind::DoCreateRegisterContextForFrame(StackFrame *frame) {
-    RegisterContextSP rctx;
-    if (frame) {
-        addr_t pc = frame->GetFrameCodeAddress().GetLoadAddress(
-                        &frame->GetThread()->GetProcess()->GetTarget());
-        if (pc != LLDB_INVALID_ADDRESS) {
-            rctx = std::make_shared<RegisterContextHistory>(
-                       *frame->GetThread().get(), frame->GetConcreteFrameIndex(),
-                       frame->GetThread()->GetProcess()->GetAddressByteSize(), pc);
-        }
+  RegisterContextSP rctx;
+  if (frame) {
+    addr_t pc = frame->GetFrameCodeAddress().GetLoadAddress(
+        &frame->GetThread()->GetProcess()->GetTarget());
+    if (pc != LLDB_INVALID_ADDRESS) {
+      rctx = std::make_shared<RegisterContextHistory>(
+          *frame->GetThread().get(), frame->GetConcreteFrameIndex(),
+          frame->GetThread()->GetProcess()->GetAddressByteSize(), pc);
     }
-    return rctx;
+  }
+  return rctx;
 }
 
 bool HistoryUnwind::DoGetFrameInfoAtIndex(uint32_t frame_idx, lldb::addr_t &cfa,
-        lldb::addr_t &pc,
-        bool &behaves_like_zeroth_frame) {
-    // FIXME do not throw away the lock after we acquire it..
-    std::unique_lock<std::recursive_mutex> guard(m_unwind_mutex);
-    guard.unlock();
-    if (frame_idx < m_pcs.size()) {
-        cfa = frame_idx;
-        pc = m_pcs[frame_idx];
-        if (m_pcs_are_call_addresses)
-            behaves_like_zeroth_frame = true;
-        else
-            behaves_like_zeroth_frame = (frame_idx == 0);
-        return true;
-    }
-    return false;
+                                          lldb::addr_t &pc,
+                                          bool &behaves_like_zeroth_frame) {
+  // FIXME do not throw away the lock after we acquire it..
+  std::unique_lock<std::recursive_mutex> guard(m_unwind_mutex);
+  guard.unlock();
+  if (frame_idx < m_pcs.size()) {
+    cfa = frame_idx;
+    pc = m_pcs[frame_idx];
+    if (m_pcs_are_call_addresses)
+      behaves_like_zeroth_frame = true;
+    else
+      behaves_like_zeroth_frame = (frame_idx == 0);
+    return true;
+  }
+  return false;
 }
 
-uint32_t HistoryUnwind::DoGetFrameCount() {
-    return m_pcs.size();
-}
+uint32_t HistoryUnwind::DoGetFrameCount() { return m_pcs.size(); }

@@ -17,46 +17,46 @@ namespace object {
 class COFFObjectFile;
 class SymbolRef;
 struct coff_section;
-}
+} // namespace object
 
 namespace Win64EH {
 class Dumper {
-    ScopedPrinter &SW;
-    raw_ostream &OS;
+  ScopedPrinter &SW;
+  raw_ostream &OS;
 
 public:
-    typedef std::error_code (*SymbolResolver)(const object::coff_section *,
-            uint64_t, object::SymbolRef &,
-            void *);
+  typedef std::error_code (*SymbolResolver)(const object::coff_section *,
+                                            uint64_t, object::SymbolRef &,
+                                            void *);
 
-    struct Context {
-        const object::COFFObjectFile &COFF;
-        SymbolResolver ResolveSymbol;
-        void *UserData;
+  struct Context {
+    const object::COFFObjectFile &COFF;
+    SymbolResolver ResolveSymbol;
+    void *UserData;
 
-        Context(const object::COFFObjectFile &COFF, SymbolResolver Resolver,
-                void *UserData)
-            : COFF(COFF), ResolveSymbol(Resolver), UserData(UserData) {}
-    };
+    Context(const object::COFFObjectFile &COFF, SymbolResolver Resolver,
+            void *UserData)
+        : COFF(COFF), ResolveSymbol(Resolver), UserData(UserData) {}
+  };
 
 private:
-    void printRuntimeFunctionEntry(const Context &Ctx,
-                                   const object::coff_section *Section,
-                                   uint64_t SectionOffset,
-                                   const RuntimeFunction &RF);
-    void printUnwindCode(const UnwindInfo& UI, ArrayRef<UnwindCode> UC);
-    void printUnwindInfo(const Context &Ctx, const object::coff_section *Section,
-                         off_t Offset, const UnwindInfo &UI);
-    void printRuntimeFunction(const Context &Ctx,
-                              const object::coff_section *Section,
-                              uint64_t SectionOffset, const RuntimeFunction &RF);
+  void printRuntimeFunctionEntry(const Context &Ctx,
+                                 const object::coff_section *Section,
+                                 uint64_t SectionOffset,
+                                 const RuntimeFunction &RF);
+  void printUnwindCode(const UnwindInfo &UI, ArrayRef<UnwindCode> UC);
+  void printUnwindInfo(const Context &Ctx, const object::coff_section *Section,
+                       off_t Offset, const UnwindInfo &UI);
+  void printRuntimeFunction(const Context &Ctx,
+                            const object::coff_section *Section,
+                            uint64_t SectionOffset, const RuntimeFunction &RF);
 
 public:
-    Dumper(ScopedPrinter &SW) : SW(SW), OS(SW.getOStream()) {}
+  Dumper(ScopedPrinter &SW) : SW(SW), OS(SW.getOStream()) {}
 
-    void printData(const Context &Ctx);
+  void printData(const Context &Ctx);
 };
-}
-}
+} // namespace Win64EH
+} // namespace llvm
 
 #endif

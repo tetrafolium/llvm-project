@@ -17,28 +17,26 @@ namespace scudo {
 
 template <uptr Size> class FlatByteMap {
 public:
-    void initLinkerInitialized() {}
-    void init() {
-        memset(Map, 0, sizeof(Map));
-    }
+  void initLinkerInitialized() {}
+  void init() { memset(Map, 0, sizeof(Map)); }
 
-    void unmapTestOnly() {}
+  void unmapTestOnly() {}
 
-    void set(uptr Index, u8 Value) {
-        DCHECK_LT(Index, Size);
-        DCHECK_EQ(0U, Map[Index]);
-        Map[Index] = Value;
-    }
-    u8 operator[](uptr Index) {
-        DCHECK_LT(Index, Size);
-        return Map[Index];
-    }
+  void set(uptr Index, u8 Value) {
+    DCHECK_LT(Index, Size);
+    DCHECK_EQ(0U, Map[Index]);
+    Map[Index] = Value;
+  }
+  u8 operator[](uptr Index) {
+    DCHECK_LT(Index, Size);
+    return Map[Index];
+  }
 
-    void disable() {}
-    void enable() {}
+  void disable() {}
+  void enable() {}
 
 private:
-    u8 Map[Size];
+  u8 Map[Size];
 };
 
 } // namespace scudo

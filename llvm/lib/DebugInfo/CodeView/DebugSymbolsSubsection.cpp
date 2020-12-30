@@ -12,22 +12,22 @@ using namespace llvm;
 using namespace llvm::codeview;
 
 Error DebugSymbolsSubsectionRef::initialize(BinaryStreamReader Reader) {
-    return Reader.readArray(Records, Reader.getLength());
+  return Reader.readArray(Records, Reader.getLength());
 }
 
 uint32_t DebugSymbolsSubsection::calculateSerializedSize() const {
-    return Length;
+  return Length;
 }
 
 Error DebugSymbolsSubsection::commit(BinaryStreamWriter &Writer) const {
-    for (const auto &Record : Records) {
-        if (auto EC = Writer.writeBytes(Record.RecordData))
-            return EC;
-    }
-    return Error::success();
+  for (const auto &Record : Records) {
+    if (auto EC = Writer.writeBytes(Record.RecordData))
+      return EC;
+  }
+  return Error::success();
 }
 
 void DebugSymbolsSubsection::addSymbol(CVSymbol Symbol) {
-    Records.push_back(Symbol);
-    Length += Symbol.length();
+  Records.push_back(Symbol);
+  Length += Symbol.length();
 }

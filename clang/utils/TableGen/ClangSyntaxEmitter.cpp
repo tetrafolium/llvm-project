@@ -41,99 +41,97 @@ using llvm::formatv;
 // stable and useful way, where abstract Node subclasses correspond to ranges.
 class Hierarchy {
 public:
-    Hierarchy(const llvm::RecordKeeper &Records) {
-        for (llvm::Record *T : Records.getAllDerivedDefinitions("NodeType"))
-            add(T);
-        for (llvm::Record *Derived : Records.getAllDerivedDefinitions("NodeType"))
-            if (llvm::Record *Base = Derived->getValueAsOptionalDef("base"))
-                link(Derived, Base);
-        for (NodeType &N : AllTypes) {
-            llvm::sort(N.Derived, [](const NodeType *L, const NodeType *R) {
-                return L->Record->getName() < R->Record->getName();
-            });
-            // Alternatives nodes must have subclasses, External nodes may do.
-            assert(N.Record->isSubClassOf("Alternatives") ||
-                   N.Record->isSubClassOf("External") || N.Derived.empty());
-            assert(!N.Record->isSubClassOf("Alternatives") || !N.Derived.empty());
-        }
+  Hierarchy(const llvm::RecordKeeper &Records) {
+    for (llvm::Record *T : Records.getAllDerivedDefinitions("NodeType"))
+      add(T);
+    for (llvm::Record *Derived : Records.getAllDerivedDefinitions("NodeType"))
+      if (llvm::Record *Base = Derived->getValueAsOptionalDef("base"))
+        link(Derived, Base);
+    for (NodeType &N : AllTypes) {
+      llvm::sort(N.Derived, [](const NodeType *L, const NodeType *R) {
+        return L->Record->getName() < R->Record->getName();
+      });
+      // Alternatives nodes must have subclasses, External nodes may do.
+      assert(N.Record->isSubClassOf("Alternatives") ||
+             N.Record->isSubClassOf("External") || N.Derived.empty());
+      assert(!N.Record->isSubClassOf("Alternatives") || !N.Derived.empty());
     }
+  }
 
-    struct NodeType {
-        const llvm::Record *Record = nullptr;
-        const NodeType *Base = nullptr;
-        std::vector<const NodeType *> Derived;
-        llvm::StringRef name() const {
-            return Record->getName();
-        }
-    };
+  struct NodeType {
+    const llvm::Record *Record = nullptr;
+    const NodeType *Base = nullptr;
+    std::vector<const NodeType *> Derived;
+    llvm::StringRef name() const { return Record->getName(); }
+  };
 
-    NodeType &get(llvm::StringRef Name = "Node") {
-        auto NI = ByName.find(Name);
-        assert(NI != ByName.end() && "no such node");
-        return *NI->second;
-    }
+  NodeType &get(llvm::StringRef Name = "Node") {
+    auto NI = ByName.find(Name);
+    assert(NI != ByName.end() && "no such node");
+    return *NI->second;
+  }
 
-    // Traverse the hierarchy in pre-order (base classes before derived).
-    void visit(llvm::function_ref<void(const NodeType &)> CB,
-               const NodeType *Start = nullptr) {
-        if (Start == nullptr)
-            Start = &get();
-        CB(*Start);
-        for (const NodeType *D : Start->Derived)
-            visit(CB, D);
-    }
+  // Traverse the hierarchy in pre-order (base classes before derived).
+  void visit(llvm::function_ref<void(const NodeType &)> CB,
+             const NodeType *Start = nullptr) {
+    if (Start == nullptr)
+      Start = &get();
+    CB(*Start);
+    for (const NodeType *D : Start->Derived)
+      visit(CB, D);
+  }
 
 private:
-    void add(const llvm::Record *R) {
-        AllTypes.emplace_back();
-        AllTypes.back().Record = R;
-        bool Inserted = ByName.try_emplace(R->getName(), &AllTypes.back()).second;
-        assert(Inserted && "Duplicate node name");
-        (void)Inserted;
-    }
+  void add(const llvm::Record *R) {
+    AllTypes.emplace_back();
+    AllTypes.back().Record = R;
+    bool Inserted = ByName.try_emplace(R->getName(), &AllTypes.back()).second;
+    assert(Inserted && "Duplicate node name");
+    (void)Inserted;
+  }
 
-    void link(const llvm::Record *Derived, const llvm::Record *Base) {
-        auto &CN = get(Derived->getName()), &PN = get(Base->getName());
-        assert(CN.Base == nullptr && "setting base twice");
-        PN.Derived.push_back(&CN);
-        CN.Base = &PN;
-    }
+  void link(const llvm::Record *Derived, const llvm::Record *Base) {
+    auto &CN = get(Derived->getName()), &PN = get(Base->getName());
+    assert(CN.Base == nullptr && "setting base twice");
+    PN.Derived.push_back(&CN);
+    CN.Base = &PN;
+  }
 
-    std::deque<NodeType> AllTypes;
-    llvm::DenseMap<llvm::StringRef, NodeType *> ByName;
+  std::deque<NodeType> AllTypes;
+  llvm::DenseMap<llvm::StringRef, NodeType *> ByName;
 };
 
 const Hierarchy::NodeType &firstConcrete(const Hierarchy::NodeType &N) {
-    return N.Derived.empty() ? N : firstConcrete(*N.Derived.front());
+  return N.Derived.empty() ? N : firstConcrete(*N.Derived.front());
 }
 const Hierarchy::NodeType &lastConcrete(const Hierarchy::NodeType &N) {
-    return N.Derived.empty() ? N : lastConcrete(*N.Derived.back());
+  return N.Derived.empty() ? N : lastConcrete(*N.Derived.back());
 }
 
 struct SyntaxConstraint {
-    SyntaxConstraint(const llvm::Record &R) {
-        if (R.isSubClassOf("Optional")) {
-            *this = SyntaxConstraint(*R.getValueAsDef("inner"));
-        } else if (R.isSubClassOf("AnyToken")) {
-            NodeType = "Leaf";
-        } else if (R.isSubClassOf("NodeType")) {
-            NodeType = R.getName().str();
-        } else {
-            assert(false && "Unhandled Syntax kind");
-        }
+  SyntaxConstraint(const llvm::Record &R) {
+    if (R.isSubClassOf("Optional")) {
+      *this = SyntaxConstraint(*R.getValueAsDef("inner"));
+    } else if (R.isSubClassOf("AnyToken")) {
+      NodeType = "Leaf";
+    } else if (R.isSubClassOf("NodeType")) {
+      NodeType = R.getName().str();
+    } else {
+      assert(false && "Unhandled Syntax kind");
     }
+  }
 
-    std::string NodeType;
-    // optional and leaf types also go here, once we want to use them.
+  std::string NodeType;
+  // optional and leaf types also go here, once we want to use them.
 };
 
 } // namespace
 
 void clang::EmitClangSyntaxNodeList(llvm::RecordKeeper &Records,
                                     llvm::raw_ostream &OS) {
-    llvm::emitSourceFileHeader("Syntax tree node list", OS);
-    Hierarchy H(Records);
-    OS << R"cpp(
+  llvm::emitSourceFileHeader("Syntax tree node list", OS);
+  Hierarchy H(Records);
+  OS << R"cpp(
 #ifndef NODE
 #define NODE(Kind, Base)
 #endif

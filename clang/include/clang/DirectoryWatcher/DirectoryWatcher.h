@@ -63,60 +63,60 @@ namespace clang {
 /// watcher, restart watching with new instance and hope it won't repeat.
 class DirectoryWatcher {
 public:
-    struct Event {
-        enum class EventKind {
-            Removed,
-            /// Content of a file was modified.
-            Modified,
-            /// The watched directory got deleted.
-            WatchedDirRemoved,
-            /// The DirectoryWatcher that originated this event is no longer valid and
-            /// its behavior is unspecified.
-            ///
-            /// The prime case is kernel signalling to OS-specific implementation of
-            /// DirectoryWatcher some resource limit being hit.
-            /// *Usually* kernel starts dropping or squashing events together after
-            /// that and so would DirectoryWatcher. This means that *some* events
-            /// might still be passed to Receiver but this behavior is unspecified.
-            ///
-            /// Another case is after the watched directory itself is deleted.
-            /// WatcherGotInvalidated will be received at least once during
-            /// DirectoryWatcher instance lifetime - when handling errors this is done
-            /// on best effort basis, when an instance is being destroyed then this is
-            /// guaranteed.
-            ///
-            /// The only proper response to this kind of event is to destruct the
-            /// originating DirectoryWatcher instance and create a new one.
-            WatcherGotInvalidated
-        };
-
-        EventKind Kind;
-        /// Filename that this event is related to or an empty string in
-        /// case this event is related to the watched directory itself.
-        std::string Filename;
-
-        Event(EventKind Kind, llvm::StringRef Filename)
-            : Kind(Kind), Filename(Filename) {}
+  struct Event {
+    enum class EventKind {
+      Removed,
+      /// Content of a file was modified.
+      Modified,
+      /// The watched directory got deleted.
+      WatchedDirRemoved,
+      /// The DirectoryWatcher that originated this event is no longer valid and
+      /// its behavior is unspecified.
+      ///
+      /// The prime case is kernel signalling to OS-specific implementation of
+      /// DirectoryWatcher some resource limit being hit.
+      /// *Usually* kernel starts dropping or squashing events together after
+      /// that and so would DirectoryWatcher. This means that *some* events
+      /// might still be passed to Receiver but this behavior is unspecified.
+      ///
+      /// Another case is after the watched directory itself is deleted.
+      /// WatcherGotInvalidated will be received at least once during
+      /// DirectoryWatcher instance lifetime - when handling errors this is done
+      /// on best effort basis, when an instance is being destroyed then this is
+      /// guaranteed.
+      ///
+      /// The only proper response to this kind of event is to destruct the
+      /// originating DirectoryWatcher instance and create a new one.
+      WatcherGotInvalidated
     };
 
-    /// llvm fatal_error if \param Path doesn't exist or isn't a directory.
-    /// Returns llvm::Expected Error if OS kernel API told us we can't start
-    /// watching. In such case it's unclear whether just retrying has any chance
-    /// to succeed.
-    static llvm::Expected<std::unique_ptr<DirectoryWatcher>>
-            create(llvm::StringRef Path,
-                   std::function<void(llvm::ArrayRef<DirectoryWatcher::Event> Events,
-                                      bool IsInitial)>
-                   Receiver,
-                   bool WaitForInitialSync);
+    EventKind Kind;
+    /// Filename that this event is related to or an empty string in
+    /// case this event is related to the watched directory itself.
+    std::string Filename;
 
-    virtual ~DirectoryWatcher() = default;
-    DirectoryWatcher(const DirectoryWatcher &) = delete;
-    DirectoryWatcher &operator=(const DirectoryWatcher &) = delete;
-    DirectoryWatcher(DirectoryWatcher &&) = default;
+    Event(EventKind Kind, llvm::StringRef Filename)
+        : Kind(Kind), Filename(Filename) {}
+  };
+
+  /// llvm fatal_error if \param Path doesn't exist or isn't a directory.
+  /// Returns llvm::Expected Error if OS kernel API told us we can't start
+  /// watching. In such case it's unclear whether just retrying has any chance
+  /// to succeed.
+  static llvm::Expected<std::unique_ptr<DirectoryWatcher>>
+  create(llvm::StringRef Path,
+         std::function<void(llvm::ArrayRef<DirectoryWatcher::Event> Events,
+                            bool IsInitial)>
+             Receiver,
+         bool WaitForInitialSync);
+
+  virtual ~DirectoryWatcher() = default;
+  DirectoryWatcher(const DirectoryWatcher &) = delete;
+  DirectoryWatcher &operator=(const DirectoryWatcher &) = delete;
+  DirectoryWatcher(DirectoryWatcher &&) = default;
 
 protected:
-    DirectoryWatcher() = default;
+  DirectoryWatcher() = default;
 };
 
 } // namespace clang

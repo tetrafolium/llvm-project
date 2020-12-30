@@ -28,4 +28,4 @@ const float huge_valf = std::numeric_limits<float>::infinity();
 const float huge_valf = HUGE_VALF;
 #endif
 
-}
+} // namespace llvm

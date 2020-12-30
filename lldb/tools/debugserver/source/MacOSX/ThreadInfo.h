@@ -14,14 +14,12 @@ namespace ThreadInfo {
 
 class QoS {
 public:
-    QoS() : constant_name(), printable_name(), enum_value(UINT32_MAX) {}
-    bool IsValid() {
-        return enum_value != UINT32_MAX;
-    }
-    std::string constant_name;
-    std::string printable_name;
-    uint32_t enum_value;
+  QoS() : constant_name(), printable_name(), enum_value(UINT32_MAX) {}
+  bool IsValid() { return enum_value != UINT32_MAX; }
+  std::string constant_name;
+  std::string printable_name;
+  uint32_t enum_value;
 };
-};
+}; // namespace ThreadInfo
 
 #endif // LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_THREADINFO_H

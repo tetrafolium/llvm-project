@@ -660,7 +660,8 @@ static void addChildMember(std::vector<NewArchiveMember> &Members,
     Expected<std::string> FileNameOrErr(M.getName());
     failIfError(FileNameOrErr.takeError());
     if (sys::path::is_absolute(*FileNameOrErr)) {
-      NMOrErr->MemberName = Saver.save(sys::path::convert_to_slash(*FileNameOrErr));
+      NMOrErr->MemberName =
+          Saver.save(sys::path::convert_to_slash(*FileNameOrErr));
     } else {
       FileNameOrErr = M.getFullName();
       failIfError(FileNameOrErr.takeError());
@@ -1028,7 +1029,16 @@ static int performOperation(ArchiveOperation Operation,
 }
 
 static void runMRIScript() {
-  enum class MRICommand { AddLib, AddMod, Create, CreateThin, Delete, Save, End, Invalid };
+  enum class MRICommand {
+    AddLib,
+    AddMod,
+    Create,
+    CreateThin,
+    Delete,
+    Save,
+    End,
+    Invalid
+  };
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> Buf = MemoryBuffer::getSTDIN();
   failIfError(Buf.getError());
@@ -1062,15 +1072,15 @@ static void runMRIScript() {
 
     switch (Command) {
     case MRICommand::AddLib: {
-  object::Archive &Lib = readLibrary(Rest);
-  {
-    Error Err = Error::success();
-    for (auto &Member : Lib.children(Err))
-      addChildMember(NewMembers, Member, /*FlattenArchive=*/Thin);
-    failIfError(std::move(Err));
-  }
-  break;
-}
+      object::Archive &Lib = readLibrary(Rest);
+      {
+        Error Err = Error::success();
+        for (auto &Member : Lib.children(Err))
+          addChildMember(NewMembers, Member, /*FlattenArchive=*/Thin);
+        failIfError(std::move(Err));
+      }
+      break;
+    }
     case MRICommand::AddMod:
       addMember(NewMembers, Rest);
       break;
@@ -1086,11 +1096,11 @@ static void runMRIScript() {
       ArchiveName = std::string(Rest);
       break;
     case MRICommand::Delete: {
-  llvm::erase_if(NewMembers, [=](NewArchiveMember &M) {
-    return comparePaths(M.MemberName, Rest);
-  });
-  break;
-}
+      llvm::erase_if(NewMembers, [=](NewArchiveMember &M) {
+        return comparePaths(M.MemberName, Rest);
+      });
+      break;
+    }
     case MRICommand::Save:
       Saved = true;
       break;

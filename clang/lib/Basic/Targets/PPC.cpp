@@ -29,197 +29,196 @@ const Builtin::Info PPCTargetInfo::BuiltinInfo[] = {
 /// handleTargetFeatures - Perform initialization based on the user
 /// configured set of features.
 bool PPCTargetInfo::handleTargetFeatures(std::vector<std::string> &Features,
-        DiagnosticsEngine &Diags) {
-    FloatABI = HardFloat;
-    for (const auto &Feature : Features) {
-        if (Feature == "+altivec") {
-            HasAltivec = true;
-        } else if (Feature == "+vsx") {
-            HasVSX = true;
-        } else if (Feature == "+bpermd") {
-            HasBPERMD = true;
-        } else if (Feature == "+extdiv") {
-            HasExtDiv = true;
-        } else if (Feature == "+power8-vector") {
-            HasP8Vector = true;
-        } else if (Feature == "+crypto") {
-            HasP8Crypto = true;
-        } else if (Feature == "+direct-move") {
-            HasDirectMove = true;
-        } else if (Feature == "+htm") {
-            HasHTM = true;
-        } else if (Feature == "+float128") {
-            HasFloat128 = true;
-        } else if (Feature == "+power9-vector") {
-            HasP9Vector = true;
-        } else if (Feature == "+power10-vector") {
-            HasP10Vector = true;
-        } else if (Feature == "+pcrelative-memops") {
-            HasPCRelativeMemops = true;
-        } else if (Feature == "+spe") {
-            HasSPE = true;
-            LongDoubleWidth = LongDoubleAlign = 64;
-            LongDoubleFormat = &llvm::APFloat::IEEEdouble();
-        } else if (Feature == "-hard-float") {
-            FloatABI = SoftFloat;
-        } else if (Feature == "+paired-vector-memops") {
-            PairedVectorMemops = true;
-        } else if (Feature == "+mma") {
-            HasMMA = true;
-        }
-        // TODO: Finish this list and add an assert that we've handled them
-        // all.
+                                         DiagnosticsEngine &Diags) {
+  FloatABI = HardFloat;
+  for (const auto &Feature : Features) {
+    if (Feature == "+altivec") {
+      HasAltivec = true;
+    } else if (Feature == "+vsx") {
+      HasVSX = true;
+    } else if (Feature == "+bpermd") {
+      HasBPERMD = true;
+    } else if (Feature == "+extdiv") {
+      HasExtDiv = true;
+    } else if (Feature == "+power8-vector") {
+      HasP8Vector = true;
+    } else if (Feature == "+crypto") {
+      HasP8Crypto = true;
+    } else if (Feature == "+direct-move") {
+      HasDirectMove = true;
+    } else if (Feature == "+htm") {
+      HasHTM = true;
+    } else if (Feature == "+float128") {
+      HasFloat128 = true;
+    } else if (Feature == "+power9-vector") {
+      HasP9Vector = true;
+    } else if (Feature == "+power10-vector") {
+      HasP10Vector = true;
+    } else if (Feature == "+pcrelative-memops") {
+      HasPCRelativeMemops = true;
+    } else if (Feature == "+spe") {
+      HasSPE = true;
+      LongDoubleWidth = LongDoubleAlign = 64;
+      LongDoubleFormat = &llvm::APFloat::IEEEdouble();
+    } else if (Feature == "-hard-float") {
+      FloatABI = SoftFloat;
+    } else if (Feature == "+paired-vector-memops") {
+      PairedVectorMemops = true;
+    } else if (Feature == "+mma") {
+      HasMMA = true;
     }
+    // TODO: Finish this list and add an assert that we've handled them
+    // all.
+  }
 
-    return true;
+  return true;
 }
 
 /// PPCTargetInfo::getTargetDefines - Return a set of the PowerPC-specific
 /// #defines that are not tied to a specific subtarget.
 void PPCTargetInfo::getTargetDefines(const LangOptions &Opts,
                                      MacroBuilder &Builder) const {
-    // Target identification.
-    Builder.defineMacro("__ppc__");
-    Builder.defineMacro("__PPC__");
-    Builder.defineMacro("_ARCH_PPC");
-    Builder.defineMacro("__powerpc__");
-    Builder.defineMacro("__POWERPC__");
-    if (PointerWidth == 64) {
-        Builder.defineMacro("_ARCH_PPC64");
-        Builder.defineMacro("__powerpc64__");
-        Builder.defineMacro("__ppc64__");
-        Builder.defineMacro("__PPC64__");
-    }
+  // Target identification.
+  Builder.defineMacro("__ppc__");
+  Builder.defineMacro("__PPC__");
+  Builder.defineMacro("_ARCH_PPC");
+  Builder.defineMacro("__powerpc__");
+  Builder.defineMacro("__POWERPC__");
+  if (PointerWidth == 64) {
+    Builder.defineMacro("_ARCH_PPC64");
+    Builder.defineMacro("__powerpc64__");
+    Builder.defineMacro("__ppc64__");
+    Builder.defineMacro("__PPC64__");
+  }
 
-    // Target properties.
-    if (getTriple().getArch() == llvm::Triple::ppc64le) {
-        Builder.defineMacro("_LITTLE_ENDIAN");
-    } else {
-        if (!getTriple().isOSNetBSD() &&
-                !getTriple().isOSOpenBSD())
-            Builder.defineMacro("_BIG_ENDIAN");
-    }
+  // Target properties.
+  if (getTriple().getArch() == llvm::Triple::ppc64le) {
+    Builder.defineMacro("_LITTLE_ENDIAN");
+  } else {
+    if (!getTriple().isOSNetBSD() && !getTriple().isOSOpenBSD())
+      Builder.defineMacro("_BIG_ENDIAN");
+  }
 
-    // ABI options.
-    if (ABI == "elfv1")
-        Builder.defineMacro("_CALL_ELF", "1");
-    if (ABI == "elfv2")
-        Builder.defineMacro("_CALL_ELF", "2");
+  // ABI options.
+  if (ABI == "elfv1")
+    Builder.defineMacro("_CALL_ELF", "1");
+  if (ABI == "elfv2")
+    Builder.defineMacro("_CALL_ELF", "2");
 
-    // This typically is only for a new enough linker (bfd >= 2.16.2 or gold), but
-    // our support post-dates this and it should work on all 64-bit ppc linux
-    // platforms. It is guaranteed to work on all elfv2 platforms.
-    if (getTriple().getOS() == llvm::Triple::Linux && PointerWidth == 64)
-        Builder.defineMacro("_CALL_LINUX", "1");
+  // This typically is only for a new enough linker (bfd >= 2.16.2 or gold), but
+  // our support post-dates this and it should work on all 64-bit ppc linux
+  // platforms. It is guaranteed to work on all elfv2 platforms.
+  if (getTriple().getOS() == llvm::Triple::Linux && PointerWidth == 64)
+    Builder.defineMacro("_CALL_LINUX", "1");
 
-    // Subtarget options.
-    if (!getTriple().isOSAIX()) {
-        Builder.defineMacro("__NATURAL_ALIGNMENT__");
-    }
-    Builder.defineMacro("__REGISTER_PREFIX__", "");
+  // Subtarget options.
+  if (!getTriple().isOSAIX()) {
+    Builder.defineMacro("__NATURAL_ALIGNMENT__");
+  }
+  Builder.defineMacro("__REGISTER_PREFIX__", "");
 
-    // FIXME: Should be controlled by command line option.
-    if (LongDoubleWidth == 128) {
-        Builder.defineMacro("__LONG_DOUBLE_128__");
-        Builder.defineMacro("__LONGDOUBLE128");
-        if (Opts.PPCIEEELongDouble)
-            Builder.defineMacro("__LONG_DOUBLE_IEEE128__");
-        else
-            Builder.defineMacro("__LONG_DOUBLE_IBM128__");
-    }
+  // FIXME: Should be controlled by command line option.
+  if (LongDoubleWidth == 128) {
+    Builder.defineMacro("__LONG_DOUBLE_128__");
+    Builder.defineMacro("__LONGDOUBLE128");
+    if (Opts.PPCIEEELongDouble)
+      Builder.defineMacro("__LONG_DOUBLE_IEEE128__");
+    else
+      Builder.defineMacro("__LONG_DOUBLE_IBM128__");
+  }
 
-    // Define this for elfv2 (64-bit only) or 64-bit darwin.
-    if (ABI == "elfv2" ||
-            (getTriple().getOS() == llvm::Triple::Darwin && PointerWidth == 64))
-        Builder.defineMacro("__STRUCT_PARM_ALIGN__", "16");
+  // Define this for elfv2 (64-bit only) or 64-bit darwin.
+  if (ABI == "elfv2" ||
+      (getTriple().getOS() == llvm::Triple::Darwin && PointerWidth == 64))
+    Builder.defineMacro("__STRUCT_PARM_ALIGN__", "16");
 
-    if (ArchDefs & ArchDefineName)
-        Builder.defineMacro(Twine("_ARCH_", StringRef(CPU).upper()));
-    if (ArchDefs & ArchDefinePpcgr)
-        Builder.defineMacro("_ARCH_PPCGR");
-    if (ArchDefs & ArchDefinePpcsq)
-        Builder.defineMacro("_ARCH_PPCSQ");
-    if (ArchDefs & ArchDefine440)
-        Builder.defineMacro("_ARCH_440");
-    if (ArchDefs & ArchDefine603)
-        Builder.defineMacro("_ARCH_603");
-    if (ArchDefs & ArchDefine604)
-        Builder.defineMacro("_ARCH_604");
-    if (ArchDefs & ArchDefinePwr4)
-        Builder.defineMacro("_ARCH_PWR4");
-    if (ArchDefs & ArchDefinePwr5)
-        Builder.defineMacro("_ARCH_PWR5");
-    if (ArchDefs & ArchDefinePwr5x)
-        Builder.defineMacro("_ARCH_PWR5X");
-    if (ArchDefs & ArchDefinePwr6)
-        Builder.defineMacro("_ARCH_PWR6");
-    if (ArchDefs & ArchDefinePwr6x)
-        Builder.defineMacro("_ARCH_PWR6X");
-    if (ArchDefs & ArchDefinePwr7)
-        Builder.defineMacro("_ARCH_PWR7");
-    if (ArchDefs & ArchDefinePwr8)
-        Builder.defineMacro("_ARCH_PWR8");
-    if (ArchDefs & ArchDefinePwr9)
-        Builder.defineMacro("_ARCH_PWR9");
-    if (ArchDefs & ArchDefinePwr10)
-        Builder.defineMacro("_ARCH_PWR10");
-    if (ArchDefs & ArchDefineA2)
-        Builder.defineMacro("_ARCH_A2");
-    if (ArchDefs & ArchDefineE500)
-        Builder.defineMacro("__NO_LWSYNC__");
-    if (ArchDefs & ArchDefineFuture)
-        Builder.defineMacro("_ARCH_PWR_FUTURE");
+  if (ArchDefs & ArchDefineName)
+    Builder.defineMacro(Twine("_ARCH_", StringRef(CPU).upper()));
+  if (ArchDefs & ArchDefinePpcgr)
+    Builder.defineMacro("_ARCH_PPCGR");
+  if (ArchDefs & ArchDefinePpcsq)
+    Builder.defineMacro("_ARCH_PPCSQ");
+  if (ArchDefs & ArchDefine440)
+    Builder.defineMacro("_ARCH_440");
+  if (ArchDefs & ArchDefine603)
+    Builder.defineMacro("_ARCH_603");
+  if (ArchDefs & ArchDefine604)
+    Builder.defineMacro("_ARCH_604");
+  if (ArchDefs & ArchDefinePwr4)
+    Builder.defineMacro("_ARCH_PWR4");
+  if (ArchDefs & ArchDefinePwr5)
+    Builder.defineMacro("_ARCH_PWR5");
+  if (ArchDefs & ArchDefinePwr5x)
+    Builder.defineMacro("_ARCH_PWR5X");
+  if (ArchDefs & ArchDefinePwr6)
+    Builder.defineMacro("_ARCH_PWR6");
+  if (ArchDefs & ArchDefinePwr6x)
+    Builder.defineMacro("_ARCH_PWR6X");
+  if (ArchDefs & ArchDefinePwr7)
+    Builder.defineMacro("_ARCH_PWR7");
+  if (ArchDefs & ArchDefinePwr8)
+    Builder.defineMacro("_ARCH_PWR8");
+  if (ArchDefs & ArchDefinePwr9)
+    Builder.defineMacro("_ARCH_PWR9");
+  if (ArchDefs & ArchDefinePwr10)
+    Builder.defineMacro("_ARCH_PWR10");
+  if (ArchDefs & ArchDefineA2)
+    Builder.defineMacro("_ARCH_A2");
+  if (ArchDefs & ArchDefineE500)
+    Builder.defineMacro("__NO_LWSYNC__");
+  if (ArchDefs & ArchDefineFuture)
+    Builder.defineMacro("_ARCH_PWR_FUTURE");
 
-    if (HasAltivec) {
-        Builder.defineMacro("__VEC__", "10206");
-        Builder.defineMacro("__ALTIVEC__");
-    }
-    if (HasSPE) {
-        Builder.defineMacro("__SPE__");
-        Builder.defineMacro("__NO_FPRS__");
-    }
-    if (HasVSX)
-        Builder.defineMacro("__VSX__");
-    if (HasP8Vector)
-        Builder.defineMacro("__POWER8_VECTOR__");
-    if (HasP8Crypto)
-        Builder.defineMacro("__CRYPTO__");
-    if (HasHTM)
-        Builder.defineMacro("__HTM__");
-    if (HasFloat128)
-        Builder.defineMacro("__FLOAT128__");
-    if (HasP9Vector)
-        Builder.defineMacro("__POWER9_VECTOR__");
-    if (HasMMA)
-        Builder.defineMacro("__MMA__");
-    if (HasP10Vector)
-        Builder.defineMacro("__POWER10_VECTOR__");
+  if (HasAltivec) {
+    Builder.defineMacro("__VEC__", "10206");
+    Builder.defineMacro("__ALTIVEC__");
+  }
+  if (HasSPE) {
+    Builder.defineMacro("__SPE__");
+    Builder.defineMacro("__NO_FPRS__");
+  }
+  if (HasVSX)
+    Builder.defineMacro("__VSX__");
+  if (HasP8Vector)
+    Builder.defineMacro("__POWER8_VECTOR__");
+  if (HasP8Crypto)
+    Builder.defineMacro("__CRYPTO__");
+  if (HasHTM)
+    Builder.defineMacro("__HTM__");
+  if (HasFloat128)
+    Builder.defineMacro("__FLOAT128__");
+  if (HasP9Vector)
+    Builder.defineMacro("__POWER9_VECTOR__");
+  if (HasMMA)
+    Builder.defineMacro("__MMA__");
+  if (HasP10Vector)
+    Builder.defineMacro("__POWER10_VECTOR__");
 
-    Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1");
-    Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2");
-    Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4");
-    if (PointerWidth == 64)
-        Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
+  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1");
+  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2");
+  Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4");
+  if (PointerWidth == 64)
+    Builder.defineMacro("__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8");
 
-    // We have support for the bswap intrinsics so we can define this.
-    Builder.defineMacro("__HAVE_BSWAP__", "1");
+  // We have support for the bswap intrinsics so we can define this.
+  Builder.defineMacro("__HAVE_BSWAP__", "1");
 
-    // FIXME: The following are not yet generated here by Clang, but are
-    //        generated by GCC:
-    //
-    //   _SOFT_FLOAT_
-    //   __RECIP_PRECISION__
-    //   __APPLE_ALTIVEC__
-    //   __RECIP__
-    //   __RECIPF__
-    //   __RSQRTE__
-    //   __RSQRTEF__
-    //   _SOFT_DOUBLE_
-    //   __NO_LWSYNC__
-    //   __CMODEL_MEDIUM__
-    //   __CMODEL_LARGE__
-    //   _CALL_SYSV
-    //   _CALL_DARWIN
+  // FIXME: The following are not yet generated here by Clang, but are
+  //        generated by GCC:
+  //
+  //   _SOFT_FLOAT_
+  //   __RECIP_PRECISION__
+  //   __APPLE_ALTIVEC__
+  //   __RECIP__
+  //   __RECIPF__
+  //   __RSQRTE__
+  //   __RSQRTEF__
+  //   _SOFT_DOUBLE_
+  //   __NO_LWSYNC__
+  //   __CMODEL_MEDIUM__
+  //   __CMODEL_LARGE__
+  //   _CALL_SYSV
+  //   _CALL_DARWIN
 }
 
 // Handle explicit options being passed to the compiler here: if we've
@@ -236,174 +235,173 @@ void PPCTargetInfo::getTargetDefines(const LangOptions &Opts,
 static bool ppcUserFeaturesCheck(DiagnosticsEngine &Diags,
                                  const std::vector<std::string> &FeaturesVec) {
 
-    // vsx was not explicitly turned off.
-    if (llvm::find(FeaturesVec, "-vsx") == FeaturesVec.end())
-        return true;
+  // vsx was not explicitly turned off.
+  if (llvm::find(FeaturesVec, "-vsx") == FeaturesVec.end())
+    return true;
 
-    auto FindVSXSubfeature = [&](StringRef Feature, StringRef Option) {
-        if (llvm::find(FeaturesVec, Feature) != FeaturesVec.end()) {
-            Diags.Report(diag::err_opt_not_valid_with_opt) << Option << "-mno-vsx";
-            return true;
-        }
-        return false;
-    };
+  auto FindVSXSubfeature = [&](StringRef Feature, StringRef Option) {
+    if (llvm::find(FeaturesVec, Feature) != FeaturesVec.end()) {
+      Diags.Report(diag::err_opt_not_valid_with_opt) << Option << "-mno-vsx";
+      return true;
+    }
+    return false;
+  };
 
-    bool Found = FindVSXSubfeature("+power8-vector", "-mpower8-vector");
-    Found |= FindVSXSubfeature("+direct-move", "-mdirect-move");
-    Found |= FindVSXSubfeature("+float128", "-mfloat128");
-    Found |= FindVSXSubfeature("+power9-vector", "-mpower9-vector");
-    Found |= FindVSXSubfeature("+paired-vector-memops", "-mpaired-vector-memops");
-    Found |= FindVSXSubfeature("+mma", "-mmma");
-    Found |= FindVSXSubfeature("+power10-vector", "-mpower10-vector");
+  bool Found = FindVSXSubfeature("+power8-vector", "-mpower8-vector");
+  Found |= FindVSXSubfeature("+direct-move", "-mdirect-move");
+  Found |= FindVSXSubfeature("+float128", "-mfloat128");
+  Found |= FindVSXSubfeature("+power9-vector", "-mpower9-vector");
+  Found |= FindVSXSubfeature("+paired-vector-memops", "-mpaired-vector-memops");
+  Found |= FindVSXSubfeature("+mma", "-mmma");
+  Found |= FindVSXSubfeature("+power10-vector", "-mpower10-vector");
 
-    // Return false if any vsx subfeatures was found.
-    return !Found;
+  // Return false if any vsx subfeatures was found.
+  return !Found;
 }
 
 bool PPCTargetInfo::initFeatureMap(
     llvm::StringMap<bool> &Features, DiagnosticsEngine &Diags, StringRef CPU,
     const std::vector<std::string> &FeaturesVec) const {
-    Features["altivec"] = llvm::StringSwitch<bool>(CPU)
-                          .Case("7400", true)
-                          .Case("g4", true)
-                          .Case("7450", true)
-                          .Case("g4+", true)
-                          .Case("970", true)
-                          .Case("g5", true)
-                          .Case("pwr6", true)
-                          .Case("pwr7", true)
-                          .Case("pwr8", true)
-                          .Case("pwr9", true)
-                          .Case("ppc64", true)
-                          .Case("ppc64le", true)
-                          .Default(false);
+  Features["altivec"] = llvm::StringSwitch<bool>(CPU)
+                            .Case("7400", true)
+                            .Case("g4", true)
+                            .Case("7450", true)
+                            .Case("g4+", true)
+                            .Case("970", true)
+                            .Case("g5", true)
+                            .Case("pwr6", true)
+                            .Case("pwr7", true)
+                            .Case("pwr8", true)
+                            .Case("pwr9", true)
+                            .Case("ppc64", true)
+                            .Case("ppc64le", true)
+                            .Default(false);
 
-    Features["power9-vector"] = (CPU == "pwr9");
-    Features["crypto"] = llvm::StringSwitch<bool>(CPU)
-                         .Case("ppc64le", true)
-                         .Case("pwr9", true)
-                         .Case("pwr8", true)
-                         .Default(false);
-    Features["power8-vector"] = llvm::StringSwitch<bool>(CPU)
+  Features["power9-vector"] = (CPU == "pwr9");
+  Features["crypto"] = llvm::StringSwitch<bool>(CPU)
+                           .Case("ppc64le", true)
+                           .Case("pwr9", true)
+                           .Case("pwr8", true)
+                           .Default(false);
+  Features["power8-vector"] = llvm::StringSwitch<bool>(CPU)
+                                  .Case("ppc64le", true)
+                                  .Case("pwr9", true)
+                                  .Case("pwr8", true)
+                                  .Default(false);
+  Features["bpermd"] = llvm::StringSwitch<bool>(CPU)
+                           .Case("ppc64le", true)
+                           .Case("pwr9", true)
+                           .Case("pwr8", true)
+                           .Case("pwr7", true)
+                           .Default(false);
+  Features["extdiv"] = llvm::StringSwitch<bool>(CPU)
+                           .Case("ppc64le", true)
+                           .Case("pwr9", true)
+                           .Case("pwr8", true)
+                           .Case("pwr7", true)
+                           .Default(false);
+  Features["direct-move"] = llvm::StringSwitch<bool>(CPU)
                                 .Case("ppc64le", true)
                                 .Case("pwr9", true)
                                 .Case("pwr8", true)
                                 .Default(false);
-    Features["bpermd"] = llvm::StringSwitch<bool>(CPU)
-                         .Case("ppc64le", true)
-                         .Case("pwr9", true)
-                         .Case("pwr8", true)
-                         .Case("pwr7", true)
-                         .Default(false);
-    Features["extdiv"] = llvm::StringSwitch<bool>(CPU)
-                         .Case("ppc64le", true)
-                         .Case("pwr9", true)
-                         .Case("pwr8", true)
-                         .Case("pwr7", true)
-                         .Default(false);
-    Features["direct-move"] = llvm::StringSwitch<bool>(CPU)
-                              .Case("ppc64le", true)
-                              .Case("pwr9", true)
-                              .Case("pwr8", true)
-                              .Default(false);
-    Features["vsx"] = llvm::StringSwitch<bool>(CPU)
-                      .Case("ppc64le", true)
-                      .Case("pwr9", true)
-                      .Case("pwr8", true)
-                      .Case("pwr7", true)
-                      .Default(false);
-    Features["htm"] = llvm::StringSwitch<bool>(CPU)
-                      .Case("ppc64le", true)
-                      .Case("pwr9", true)
-                      .Case("pwr8", true)
-                      .Default(false);
-    Features["float128"] = llvm::StringSwitch<bool>(CPU)
-                           .Case("pwr9", true)
-                           .Default(false);
+  Features["vsx"] = llvm::StringSwitch<bool>(CPU)
+                        .Case("ppc64le", true)
+                        .Case("pwr9", true)
+                        .Case("pwr8", true)
+                        .Case("pwr7", true)
+                        .Default(false);
+  Features["htm"] = llvm::StringSwitch<bool>(CPU)
+                        .Case("ppc64le", true)
+                        .Case("pwr9", true)
+                        .Case("pwr8", true)
+                        .Default(false);
+  Features["float128"] =
+      llvm::StringSwitch<bool>(CPU).Case("pwr9", true).Default(false);
 
-    Features["spe"] = llvm::StringSwitch<bool>(CPU)
-                      .Case("8548", true)
-                      .Case("e500", true)
-                      .Default(false);
+  Features["spe"] = llvm::StringSwitch<bool>(CPU)
+                        .Case("8548", true)
+                        .Case("e500", true)
+                        .Default(false);
 
-    // Power10 includes all the same features as Power9 plus any features specific
-    // to the Power10 core.
-    if (CPU == "pwr10" || CPU == "power10") {
-        initFeatureMap(Features, Diags, "pwr9", FeaturesVec);
-        addP10SpecificFeatures(Features);
-    }
+  // Power10 includes all the same features as Power9 plus any features specific
+  // to the Power10 core.
+  if (CPU == "pwr10" || CPU == "power10") {
+    initFeatureMap(Features, Diags, "pwr9", FeaturesVec);
+    addP10SpecificFeatures(Features);
+  }
 
-    // Future CPU should include all of the features of Power 10 as well as any
-    // additional features (yet to be determined) specific to it.
-    if (CPU == "future") {
-        initFeatureMap(Features, Diags, "pwr10", FeaturesVec);
-        addFutureSpecificFeatures(Features);
-    }
+  // Future CPU should include all of the features of Power 10 as well as any
+  // additional features (yet to be determined) specific to it.
+  if (CPU == "future") {
+    initFeatureMap(Features, Diags, "pwr10", FeaturesVec);
+    addFutureSpecificFeatures(Features);
+  }
 
-    if (!ppcUserFeaturesCheck(Diags, FeaturesVec))
-        return false;
+  if (!ppcUserFeaturesCheck(Diags, FeaturesVec))
+    return false;
 
-    if (!(ArchDefs & ArchDefinePwr9) && (ArchDefs & ArchDefinePpcgr) &&
-            llvm::find(FeaturesVec, "+float128") != FeaturesVec.end()) {
-        // We have __float128 on PPC but not power 9 and above.
-        Diags.Report(diag::err_opt_not_valid_with_opt) << "-mfloat128" << CPU;
-        return false;
-    }
+  if (!(ArchDefs & ArchDefinePwr9) && (ArchDefs & ArchDefinePpcgr) &&
+      llvm::find(FeaturesVec, "+float128") != FeaturesVec.end()) {
+    // We have __float128 on PPC but not power 9 and above.
+    Diags.Report(diag::err_opt_not_valid_with_opt) << "-mfloat128" << CPU;
+    return false;
+  }
 
-    if (!(ArchDefs & ArchDefinePwr10) &&
-            llvm::find(FeaturesVec, "+mma") != FeaturesVec.end()) {
-        // We have MMA on PPC but not power 10 and above.
-        Diags.Report(diag::err_opt_not_valid_with_opt) << "-mmma" << CPU;
-        return false;
-    }
+  if (!(ArchDefs & ArchDefinePwr10) &&
+      llvm::find(FeaturesVec, "+mma") != FeaturesVec.end()) {
+    // We have MMA on PPC but not power 10 and above.
+    Diags.Report(diag::err_opt_not_valid_with_opt) << "-mmma" << CPU;
+    return false;
+  }
 
-    return TargetInfo::initFeatureMap(Features, Diags, CPU, FeaturesVec);
+  return TargetInfo::initFeatureMap(Features, Diags, CPU, FeaturesVec);
 }
 
 // Add any Power10 specific features.
 void PPCTargetInfo::addP10SpecificFeatures(
     llvm::StringMap<bool> &Features) const {
-    Features["htm"] = false; // HTM was removed for P10.
-    Features["paired-vector-memops"] = true;
-    Features["mma"] = true;
-    Features["power10-vector"] = true;
-    Features["pcrelative-memops"] = true;
-    return;
+  Features["htm"] = false; // HTM was removed for P10.
+  Features["paired-vector-memops"] = true;
+  Features["mma"] = true;
+  Features["power10-vector"] = true;
+  Features["pcrelative-memops"] = true;
+  return;
 }
 
 // Add features specific to the "Future" CPU.
 void PPCTargetInfo::addFutureSpecificFeatures(
     llvm::StringMap<bool> &Features) const {
-    return;
+  return;
 }
 
 bool PPCTargetInfo::hasFeature(StringRef Feature) const {
-    return llvm::StringSwitch<bool>(Feature)
-           .Case("powerpc", true)
-           .Case("altivec", HasAltivec)
-           .Case("vsx", HasVSX)
-           .Case("power8-vector", HasP8Vector)
-           .Case("crypto", HasP8Crypto)
-           .Case("direct-move", HasDirectMove)
-           .Case("htm", HasHTM)
-           .Case("bpermd", HasBPERMD)
-           .Case("extdiv", HasExtDiv)
-           .Case("float128", HasFloat128)
-           .Case("power9-vector", HasP9Vector)
-           .Case("paired-vector-memops", PairedVectorMemops)
-           .Case("power10-vector", HasP10Vector)
-           .Case("pcrelative-memops", HasPCRelativeMemops)
-           .Case("spe", HasSPE)
-           .Case("mma", HasMMA)
-           .Default(false);
+  return llvm::StringSwitch<bool>(Feature)
+      .Case("powerpc", true)
+      .Case("altivec", HasAltivec)
+      .Case("vsx", HasVSX)
+      .Case("power8-vector", HasP8Vector)
+      .Case("crypto", HasP8Crypto)
+      .Case("direct-move", HasDirectMove)
+      .Case("htm", HasHTM)
+      .Case("bpermd", HasBPERMD)
+      .Case("extdiv", HasExtDiv)
+      .Case("float128", HasFloat128)
+      .Case("power9-vector", HasP9Vector)
+      .Case("paired-vector-memops", PairedVectorMemops)
+      .Case("power10-vector", HasP10Vector)
+      .Case("pcrelative-memops", HasPCRelativeMemops)
+      .Case("spe", HasSPE)
+      .Case("mma", HasMMA)
+      .Default(false);
 }
 
 void PPCTargetInfo::setFeatureEnabled(llvm::StringMap<bool> &Features,
                                       StringRef Name, bool Enabled) const {
-    if (Enabled) {
-        // If we're enabling any of the vsx based features then enable vsx and
-        // altivec. We'll diagnose any problems later.
-        bool FeatureHasVSX = llvm::StringSwitch<bool>(Name)
+  if (Enabled) {
+    // If we're enabling any of the vsx based features then enable vsx and
+    // altivec. We'll diagnose any problems later.
+    bool FeatureHasVSX = llvm::StringSwitch<bool>(Name)
                              .Case("vsx", true)
                              .Case("direct-move", true)
                              .Case("power8-vector", true)
@@ -413,35 +411,35 @@ void PPCTargetInfo::setFeatureEnabled(llvm::StringMap<bool> &Features,
                              .Case("float128", true)
                              .Case("mma", true)
                              .Default(false);
-        if (FeatureHasVSX)
-            Features["vsx"] = Features["altivec"] = true;
-        if (Name == "power9-vector")
-            Features["power8-vector"] = true;
-        else if (Name == "power10-vector")
-            Features["power8-vector"] = Features["power9-vector"] = true;
-        if (Name == "pcrel")
-            Features["pcrelative-memops"] = true;
-        else
-            Features[Name] = true;
-    } else {
-        // If we're disabling altivec or vsx go ahead and disable all of the vsx
-        // features.
-        if ((Name == "altivec") || (Name == "vsx"))
-            Features["vsx"] = Features["direct-move"] = Features["power8-vector"] =
-                                  Features["float128"] = Features["power9-vector"] =
-                                              Features["paired-vector-memops"] = Features["mma"] =
-                                                      Features["power10-vector"] = false;
-        if (Name == "power8-vector")
-            Features["power9-vector"] = Features["paired-vector-memops"] =
-                                            Features["mma"] = Features["power10-vector"] = false;
-        else if (Name == "power9-vector")
-            Features["paired-vector-memops"] = Features["mma"] =
-                                                   Features["power10-vector"] = false;
-        if (Name == "pcrel")
-            Features["pcrelative-memops"] = false;
-        else
-            Features[Name] = false;
-    }
+    if (FeatureHasVSX)
+      Features["vsx"] = Features["altivec"] = true;
+    if (Name == "power9-vector")
+      Features["power8-vector"] = true;
+    else if (Name == "power10-vector")
+      Features["power8-vector"] = Features["power9-vector"] = true;
+    if (Name == "pcrel")
+      Features["pcrelative-memops"] = true;
+    else
+      Features[Name] = true;
+  } else {
+    // If we're disabling altivec or vsx go ahead and disable all of the vsx
+    // features.
+    if ((Name == "altivec") || (Name == "vsx"))
+      Features["vsx"] = Features["direct-move"] = Features["power8-vector"] =
+          Features["float128"] = Features["power9-vector"] =
+              Features["paired-vector-memops"] = Features["mma"] =
+                  Features["power10-vector"] = false;
+    if (Name == "power8-vector")
+      Features["power9-vector"] = Features["paired-vector-memops"] =
+          Features["mma"] = Features["power10-vector"] = false;
+    else if (Name == "power9-vector")
+      Features["paired-vector-memops"] = Features["mma"] =
+          Features["power10-vector"] = false;
+    if (Name == "pcrel")
+      Features["pcrelative-memops"] = false;
+    else
+      Features[Name] = false;
+  }
 }
 
 const char *const PPCTargetInfo::GCCRegNames[] = {
@@ -457,11 +455,10 @@ const char *const PPCTargetInfo::GCCRegNames[] = {
     "v4",  "v5",     "v6",   "v7",      "v8",      "v9",  "v10", "v11", "v12",
     "v13", "v14",    "v15",  "v16",     "v17",     "v18", "v19", "v20", "v21",
     "v22", "v23",    "v24",  "v25",     "v26",     "v27", "v28", "v29", "v30",
-    "v31", "vrsave", "vscr", "spe_acc", "spefscr", "sfp"
-};
+    "v31", "vrsave", "vscr", "spe_acc", "spefscr", "sfp"};
 
 ArrayRef<const char *> PPCTargetInfo::getGCCRegNames() const {
-    return llvm::makeArrayRef(GCCRegNames);
+  return llvm::makeArrayRef(GCCRegNames);
 }
 
 const TargetInfo::GCCRegAlias PPCTargetInfo::GCCRegAliases[] = {
@@ -487,7 +484,7 @@ const TargetInfo::GCCRegAlias PPCTargetInfo::GCCRegAliases[] = {
 };
 
 ArrayRef<TargetInfo::GCCRegAlias> PPCTargetInfo::getGCCRegAliases() const {
-    return llvm::makeArrayRef(GCCRegAliases);
+  return llvm::makeArrayRef(GCCRegAliases);
 }
 
 // PPC ELFABIv2 DWARF Definitoin "Table 2.26. Mappings of Common Registers".
@@ -514,10 +511,10 @@ const TargetInfo::AddlRegName GCCAddlRegNames[] = {
 };
 
 ArrayRef<TargetInfo::AddlRegName> PPCTargetInfo::getGCCAddlRegNames() const {
-    if (ABI == "elfv2")
-        return llvm::makeArrayRef(GCCAddlRegNames);
-    else
-        return TargetInfo::getGCCAddlRegNames();
+  if (ABI == "elfv2")
+    return llvm::makeArrayRef(GCCAddlRegNames);
+  else
+    return TargetInfo::getGCCAddlRegNames();
 }
 
 static constexpr llvm::StringLiteral ValidCPUNames[] = {
@@ -531,28 +528,27 @@ static constexpr llvm::StringLiteral ValidCPUNames[] = {
     {"power6x"}, {"pwr6x"},   {"power7"},    {"pwr7"},    {"power8"},
     {"pwr8"},    {"power9"},  {"pwr9"},      {"power10"}, {"pwr10"},
     {"powerpc"}, {"ppc"},     {"powerpc64"}, {"ppc64"},   {"powerpc64le"},
-    {"ppc64le"}, {"future"}
-};
+    {"ppc64le"}, {"future"}};
 
 bool PPCTargetInfo::isValidCPUName(StringRef Name) const {
-    return llvm::find(ValidCPUNames, Name) != std::end(ValidCPUNames);
+  return llvm::find(ValidCPUNames, Name) != std::end(ValidCPUNames);
 }
 
 void PPCTargetInfo::fillValidCPUList(SmallVectorImpl<StringRef> &Values) const {
-    Values.append(std::begin(ValidCPUNames), std::end(ValidCPUNames));
+  Values.append(std::begin(ValidCPUNames), std::end(ValidCPUNames));
 }
 
 void PPCTargetInfo::adjust(LangOptions &Opts) {
-    if (HasAltivec)
-        Opts.AltiVec = 1;
-    TargetInfo::adjust(Opts);
-    if (LongDoubleFormat != &llvm::APFloat::IEEEdouble())
-        LongDoubleFormat = Opts.PPCIEEELongDouble
+  if (HasAltivec)
+    Opts.AltiVec = 1;
+  TargetInfo::adjust(Opts);
+  if (LongDoubleFormat != &llvm::APFloat::IEEEdouble())
+    LongDoubleFormat = Opts.PPCIEEELongDouble
                            ? &llvm::APFloat::IEEEquad()
                            : &llvm::APFloat::PPCDoubleDouble();
 }
 
 ArrayRef<Builtin::Info> PPCTargetInfo::getTargetBuiltins() const {
-    return llvm::makeArrayRef(BuiltinInfo, clang::PPC::LastTSBuiltin -
-                              Builtin::FirstTSBuiltin);
+  return llvm::makeArrayRef(BuiltinInfo, clang::PPC::LastTSBuiltin -
+                                             Builtin::FirstTSBuiltin);
 }

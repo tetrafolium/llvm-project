@@ -1,4 +1,5 @@
-//===-- SBBreakpointName.h ------------------------------------------*- C++ -*-===//
+//===-- SBBreakpointName.h ------------------------------------------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -17,104 +18,105 @@ namespace lldb {
 
 class LLDB_API SBBreakpointName {
 public:
-//  typedef bool (*BreakpointHitCallback)(void *baton, SBProcess &process,
-//                                        SBThread &thread,
-//                                        lldb::SBBreakpointLocation &location);
+  //  typedef bool (*BreakpointHitCallback)(void *baton, SBProcess &process,
+  //                                        SBThread &thread,
+  //                                        lldb::SBBreakpointLocation
+  //                                        &location);
 
-    SBBreakpointName();
+  SBBreakpointName();
 
-    SBBreakpointName(SBTarget &target, const char *name);
+  SBBreakpointName(SBTarget &target, const char *name);
 
-    SBBreakpointName(SBBreakpoint &bkpt, const char *name);
+  SBBreakpointName(SBBreakpoint &bkpt, const char *name);
 
-    SBBreakpointName(const lldb::SBBreakpointName &rhs);
+  SBBreakpointName(const lldb::SBBreakpointName &rhs);
 
-    ~SBBreakpointName();
+  ~SBBreakpointName();
 
-    const lldb::SBBreakpointName &operator=(const lldb::SBBreakpointName &rhs);
+  const lldb::SBBreakpointName &operator=(const lldb::SBBreakpointName &rhs);
 
-    // Tests to see if the opaque breakpoint object in this object matches the
-    // opaque breakpoint object in "rhs".
-    bool operator==(const lldb::SBBreakpointName &rhs);
+  // Tests to see if the opaque breakpoint object in this object matches the
+  // opaque breakpoint object in "rhs".
+  bool operator==(const lldb::SBBreakpointName &rhs);
 
-    bool operator!=(const lldb::SBBreakpointName &rhs);
+  bool operator!=(const lldb::SBBreakpointName &rhs);
 
-    explicit operator bool() const;
+  explicit operator bool() const;
 
-    bool IsValid() const;
+  bool IsValid() const;
 
-    const char *GetName() const;
+  const char *GetName() const;
 
-    void SetEnabled(bool enable);
+  void SetEnabled(bool enable);
 
-    bool IsEnabled();
+  bool IsEnabled();
 
-    void SetOneShot(bool one_shot);
+  void SetOneShot(bool one_shot);
 
-    bool IsOneShot() const;
+  bool IsOneShot() const;
 
-    void SetIgnoreCount(uint32_t count);
+  void SetIgnoreCount(uint32_t count);
 
-    uint32_t GetIgnoreCount() const;
+  uint32_t GetIgnoreCount() const;
 
-    void SetCondition(const char *condition);
+  void SetCondition(const char *condition);
 
-    const char *GetCondition();
+  const char *GetCondition();
 
-    void SetAutoContinue(bool auto_continue);
+  void SetAutoContinue(bool auto_continue);
 
-    bool GetAutoContinue();
+  bool GetAutoContinue();
 
-    void SetThreadID(lldb::tid_t sb_thread_id);
+  void SetThreadID(lldb::tid_t sb_thread_id);
 
-    lldb::tid_t GetThreadID();
+  lldb::tid_t GetThreadID();
 
-    void SetThreadIndex(uint32_t index);
+  void SetThreadIndex(uint32_t index);
 
-    uint32_t GetThreadIndex() const;
+  uint32_t GetThreadIndex() const;
 
-    void SetThreadName(const char *thread_name);
+  void SetThreadName(const char *thread_name);
 
-    const char *GetThreadName() const;
+  const char *GetThreadName() const;
 
-    void SetQueueName(const char *queue_name);
+  void SetQueueName(const char *queue_name);
 
-    const char *GetQueueName() const;
+  const char *GetQueueName() const;
 
-    void SetCallback(SBBreakpointHitCallback callback, void *baton);
+  void SetCallback(SBBreakpointHitCallback callback, void *baton);
 
-    void SetScriptCallbackFunction(const char *callback_function_name);
+  void SetScriptCallbackFunction(const char *callback_function_name);
 
-    SBError SetScriptCallbackFunction(const char *callback_function_name,
-                                      SBStructuredData &extra_args);
+  SBError SetScriptCallbackFunction(const char *callback_function_name,
+                                    SBStructuredData &extra_args);
 
-    void SetCommandLineCommands(lldb::SBStringList &commands);
+  void SetCommandLineCommands(lldb::SBStringList &commands);
 
-    bool GetCommandLineCommands(lldb::SBStringList &commands);
+  bool GetCommandLineCommands(lldb::SBStringList &commands);
 
-    SBError SetScriptCallbackBody(const char *script_body_text);
+  SBError SetScriptCallbackBody(const char *script_body_text);
 
-    const char *GetHelpString() const;
-    void SetHelpString(const char *help_string);
+  const char *GetHelpString() const;
+  void SetHelpString(const char *help_string);
 
-    bool GetAllowList() const;
-    void SetAllowList(bool value);
+  bool GetAllowList() const;
+  void SetAllowList(bool value);
 
-    bool GetAllowDelete();
-    void SetAllowDelete(bool value);
+  bool GetAllowDelete();
+  void SetAllowDelete(bool value);
 
-    bool GetAllowDisable();
-    void SetAllowDisable(bool value);
+  bool GetAllowDisable();
+  void SetAllowDisable(bool value);
 
-    bool GetDescription(lldb::SBStream &description);
+  bool GetDescription(lldb::SBStream &description);
 
 private:
-    friend class SBTarget;
+  friend class SBTarget;
 
-    lldb_private::BreakpointName *GetBreakpointName() const;
-    void UpdateName(lldb_private::BreakpointName &bp_name);
+  lldb_private::BreakpointName *GetBreakpointName() const;
+  void UpdateName(lldb_private::BreakpointName &bp_name);
 
-    std::unique_ptr<SBBreakpointNameImpl> m_impl_up;
+  std::unique_ptr<SBBreakpointNameImpl> m_impl_up;
 };
 
 } // namespace lldb

@@ -38,7 +38,7 @@ bool expandRemainder(BinaryOperator *Rem);
 /// 32bit and 64bit scalar division.
 ///
 /// Replace Div with generated code.
-bool expandDivision(BinaryOperator* Div);
+bool expandDivision(BinaryOperator *Div);
 
 /// Generate code to calculate the remainder of two integers, replacing Rem
 /// with the generated code. Uses ExpandReminder with a 32bit Rem which
@@ -67,6 +67,6 @@ bool expandDivisionUpTo32Bits(BinaryOperator *Div);
 /// Replace Rem with generated code.
 bool expandDivisionUpTo64Bits(BinaryOperator *Div);
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

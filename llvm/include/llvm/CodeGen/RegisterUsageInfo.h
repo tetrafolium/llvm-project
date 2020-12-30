@@ -33,37 +33,36 @@ class LLVMTargetMachine;
 
 class PhysicalRegisterUsageInfo : public ImmutablePass {
 public:
-    static char ID;
+  static char ID;
 
-    PhysicalRegisterUsageInfo() : ImmutablePass(ID) {
-        PassRegistry &Registry = *PassRegistry::getPassRegistry();
-        initializePhysicalRegisterUsageInfoPass(Registry);
-    }
+  PhysicalRegisterUsageInfo() : ImmutablePass(ID) {
+    PassRegistry &Registry = *PassRegistry::getPassRegistry();
+    initializePhysicalRegisterUsageInfoPass(Registry);
+  }
 
-    /// Set TargetMachine which is used to print analysis.
-    void setTargetMachine(const LLVMTargetMachine &TM);
+  /// Set TargetMachine which is used to print analysis.
+  void setTargetMachine(const LLVMTargetMachine &TM);
 
-    bool doInitialization(Module &M) override;
+  bool doInitialization(Module &M) override;
 
-    bool doFinalization(Module &M) override;
+  bool doFinalization(Module &M) override;
 
-    /// To store RegMask for given Function *.
-    void storeUpdateRegUsageInfo(const Function &FP,
-                                 ArrayRef<uint32_t> RegMask);
+  /// To store RegMask for given Function *.
+  void storeUpdateRegUsageInfo(const Function &FP, ArrayRef<uint32_t> RegMask);
 
-    /// To query stored RegMask for given Function *, it will returns ane empty
-    /// array if function is not known.
-    ArrayRef<uint32_t> getRegUsageInfo(const Function &FP);
+  /// To query stored RegMask for given Function *, it will returns ane empty
+  /// array if function is not known.
+  ArrayRef<uint32_t> getRegUsageInfo(const Function &FP);
 
-    void print(raw_ostream &OS, const Module *M = nullptr) const override;
+  void print(raw_ostream &OS, const Module *M = nullptr) const override;
 
 private:
-    /// A Dense map from Function * to RegMask.
-    /// In RegMask 0 means register used (clobbered) by function.
-    /// and 1 means content of register will be preserved around function call.
-    DenseMap<const Function *, std::vector<uint32_t>> RegMasks;
+  /// A Dense map from Function * to RegMask.
+  /// In RegMask 0 means register used (clobbered) by function.
+  /// and 1 means content of register will be preserved around function call.
+  DenseMap<const Function *, std::vector<uint32_t>> RegMasks;
 
-    const LLVMTargetMachine *TM;
+  const LLVMTargetMachine *TM;
 };
 
 } // end namespace llvm

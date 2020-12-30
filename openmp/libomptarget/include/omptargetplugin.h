@@ -49,7 +49,7 @@ int32_t __tgt_rtl_init_device(int32_t ID);
 // Individual entries in the table may also be NULL, when the corresponding
 // offload region is not supported on the target device.
 __tgt_target_table *__tgt_rtl_load_binary(int32_t ID,
-        __tgt_device_image *Image);
+                                          __tgt_device_image *Image);
 
 // Allocate data on the particular target device, of the specified size.
 // HostPtr is a address of the host data the allocated target data
@@ -110,8 +110,8 @@ int32_t __tgt_rtl_run_target_region(int32_t ID, void *Entry, void **Args,
 
 // Asynchronous version of __tgt_rtl_run_target_region
 int32_t __tgt_rtl_run_target_region_async(int32_t ID, void *Entry, void **Args,
-        ptrdiff_t *Offsets, int32_t NumArgs,
-        __tgt_async_info *AsyncInfoPtr);
+                                          ptrdiff_t *Offsets, int32_t NumArgs,
+                                          __tgt_async_info *AsyncInfoPtr);
 
 // Similar to __tgt_rtl_run_target_region, but additionally specify the
 // number of teams to be created and a number of threads in each team. If
@@ -119,9 +119,9 @@ int32_t __tgt_rtl_run_target_region_async(int32_t ID, void *Entry, void **Args,
 // However, AsyncInfoPtr may be ignored on some platforms, like x86_64. In that
 // case, it is synchronous.
 int32_t __tgt_rtl_run_target_team_region(int32_t ID, void *Entry, void **Args,
-        ptrdiff_t *Offsets, int32_t NumArgs,
-        int32_t NumTeams, int32_t ThreadLimit,
-        uint64_t loop_tripcount);
+                                         ptrdiff_t *Offsets, int32_t NumArgs,
+                                         int32_t NumTeams, int32_t ThreadLimit,
+                                         uint64_t loop_tripcount);
 
 // Asynchronous version of __tgt_rtl_run_target_team_region
 int32_t __tgt_rtl_run_target_team_region_async(

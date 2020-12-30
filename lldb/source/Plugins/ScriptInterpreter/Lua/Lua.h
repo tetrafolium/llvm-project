@@ -22,24 +22,24 @@
 namespace lldb_private {
 
 extern "C" {
-    int luaopen_lldb(lua_State *L);
+int luaopen_lldb(lua_State *L);
 }
 
 class Lua {
 public:
-    Lua();
-    ~Lua();
+  Lua();
+  ~Lua();
 
-    llvm::Error Run(llvm::StringRef buffer);
-    llvm::Error RegisterBreakpointCallback(void *baton, const char *body);
-    llvm::Expected<bool>
-    CallBreakpointCallback(void *baton, lldb::StackFrameSP stop_frame_sp,
-                           lldb::BreakpointLocationSP bp_loc_sp);
-    llvm::Error LoadModule(llvm::StringRef filename);
-    llvm::Error ChangeIO(FILE *out, FILE *err);
+  llvm::Error Run(llvm::StringRef buffer);
+  llvm::Error RegisterBreakpointCallback(void *baton, const char *body);
+  llvm::Expected<bool>
+  CallBreakpointCallback(void *baton, lldb::StackFrameSP stop_frame_sp,
+                         lldb::BreakpointLocationSP bp_loc_sp);
+  llvm::Error LoadModule(llvm::StringRef filename);
+  llvm::Error ChangeIO(FILE *out, FILE *err);
 
 private:
-    lua_State *m_lua_state;
+  lua_State *m_lua_state;
 };
 
 } // namespace lldb_private

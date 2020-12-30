@@ -36,20 +36,20 @@ using namespace llvm;
 namespace {
 class WebAssemblyPrepareForLiveIntervals final : public MachineFunctionPass {
 public:
-    static char ID; // Pass identification, replacement for typeid
-    WebAssemblyPrepareForLiveIntervals() : MachineFunctionPass(ID) {}
+  static char ID; // Pass identification, replacement for typeid
+  WebAssemblyPrepareForLiveIntervals() : MachineFunctionPass(ID) {}
 
 private:
-    StringRef getPassName() const override {
-        return "WebAssembly Prepare For LiveIntervals";
-    }
+  StringRef getPassName() const override {
+    return "WebAssembly Prepare For LiveIntervals";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 };
 } // end anonymous namespace
 
@@ -58,70 +58,70 @@ INITIALIZE_PASS(WebAssemblyPrepareForLiveIntervals, DEBUG_TYPE,
                 "Fix up code for LiveIntervals", false, false)
 
 FunctionPass *llvm::createWebAssemblyPrepareForLiveIntervals() {
-    return new WebAssemblyPrepareForLiveIntervals();
+  return new WebAssemblyPrepareForLiveIntervals();
 }
 
 // Test whether the given register has an ARGUMENT def.
 static bool hasArgumentDef(unsigned Reg, const MachineRegisterInfo &MRI) {
-    for (const auto &Def : MRI.def_instructions(Reg))
-        if (WebAssembly::isArgument(Def.getOpcode()))
-            return true;
-    return false;
+  for (const auto &Def : MRI.def_instructions(Reg))
+    if (WebAssembly::isArgument(Def.getOpcode()))
+      return true;
+  return false;
 }
 
 bool WebAssemblyPrepareForLiveIntervals::runOnMachineFunction(
     MachineFunction &MF) {
-    LLVM_DEBUG({
-        dbgs() << "********** Prepare For LiveIntervals **********\n"
-               << "********** Function: " << MF.getName() << '\n';
-    });
+  LLVM_DEBUG({
+    dbgs() << "********** Prepare For LiveIntervals **********\n"
+           << "********** Function: " << MF.getName() << '\n';
+  });
 
-    bool Changed = false;
-    MachineRegisterInfo &MRI = MF.getRegInfo();
-    const auto &TII = *MF.getSubtarget<WebAssemblySubtarget>().getInstrInfo();
-    MachineBasicBlock &Entry = *MF.begin();
+  bool Changed = false;
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const auto &TII = *MF.getSubtarget<WebAssemblySubtarget>().getInstrInfo();
+  MachineBasicBlock &Entry = *MF.begin();
 
-    assert(!mustPreserveAnalysisID(LiveIntervalsID) &&
-           "LiveIntervals shouldn't be active yet!");
+  assert(!mustPreserveAnalysisID(LiveIntervalsID) &&
+         "LiveIntervals shouldn't be active yet!");
 
-    // We don't preserve SSA form.
-    MRI.leaveSSA();
+  // We don't preserve SSA form.
+  MRI.leaveSSA();
 
-    // BranchFolding and perhaps other passes don't preserve IMPLICIT_DEF
-    // instructions. LiveIntervals requires that all paths to virtual register
-    // uses provide a definition. Insert IMPLICIT_DEFs in the entry block to
-    // conservatively satisfy this.
-    //
-    // TODO: This is fairly heavy-handed; find a better approach.
-    //
-    for (unsigned I = 0, E = MRI.getNumVirtRegs(); I < E; ++I) {
-        unsigned Reg = Register::index2VirtReg(I);
+  // BranchFolding and perhaps other passes don't preserve IMPLICIT_DEF
+  // instructions. LiveIntervals requires that all paths to virtual register
+  // uses provide a definition. Insert IMPLICIT_DEFs in the entry block to
+  // conservatively satisfy this.
+  //
+  // TODO: This is fairly heavy-handed; find a better approach.
+  //
+  for (unsigned I = 0, E = MRI.getNumVirtRegs(); I < E; ++I) {
+    unsigned Reg = Register::index2VirtReg(I);
 
-        // Skip unused registers.
-        if (MRI.use_nodbg_empty(Reg))
-            continue;
+    // Skip unused registers.
+    if (MRI.use_nodbg_empty(Reg))
+      continue;
 
-        // Skip registers that have an ARGUMENT definition.
-        if (hasArgumentDef(Reg, MRI))
-            continue;
+    // Skip registers that have an ARGUMENT definition.
+    if (hasArgumentDef(Reg, MRI))
+      continue;
 
-        BuildMI(Entry, Entry.begin(), DebugLoc(),
-                TII.get(WebAssembly::IMPLICIT_DEF), Reg);
-        Changed = true;
+    BuildMI(Entry, Entry.begin(), DebugLoc(),
+            TII.get(WebAssembly::IMPLICIT_DEF), Reg);
+    Changed = true;
+  }
+
+  // Move ARGUMENT_* instructions to the top of the entry block, so that their
+  // liveness reflects the fact that these really are live-in values.
+  for (auto MII = Entry.begin(), MIE = Entry.end(); MII != MIE;) {
+    MachineInstr &MI = *MII++;
+    if (WebAssembly::isArgument(MI.getOpcode())) {
+      MI.removeFromParent();
+      Entry.insert(Entry.begin(), &MI);
     }
+  }
 
-    // Move ARGUMENT_* instructions to the top of the entry block, so that their
-    // liveness reflects the fact that these really are live-in values.
-    for (auto MII = Entry.begin(), MIE = Entry.end(); MII != MIE;) {
-        MachineInstr &MI = *MII++;
-        if (WebAssembly::isArgument(MI.getOpcode())) {
-            MI.removeFromParent();
-            Entry.insert(Entry.begin(), &MI);
-        }
-    }
+  // Ok, we're now ready to run the LiveIntervals analysis again.
+  MF.getProperties().set(MachineFunctionProperties::Property::TracksLiveness);
 
-    // Ok, we're now ready to run the LiveIntervals analysis again.
-    MF.getProperties().set(MachineFunctionProperties::Property::TracksLiveness);
-
-    return Changed;
+  return Changed;
 }

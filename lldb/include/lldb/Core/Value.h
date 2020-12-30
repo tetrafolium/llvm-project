@@ -31,157 +31,145 @@ class Module;
 class Stream;
 class Type;
 class Variable;
-}
+} // namespace lldb_private
 
 namespace lldb_private {
 
 class Value {
 public:
-    // Values Less than zero are an error, greater than or equal to zero returns
-    // what the Scalar result is.
-    enum ValueType {
-        // m_value contains...
-        // ============================
-        eValueTypeScalar,      // raw scalar value
-        eValueTypeFileAddress, // file address value
-        eValueTypeLoadAddress, // load address value
-        eValueTypeHostAddress  // host address value (for memory in the process that
-        // is using liblldb)
-    };
+  // Values Less than zero are an error, greater than or equal to zero returns
+  // what the Scalar result is.
+  enum ValueType {
+    // m_value contains...
+    // ============================
+    eValueTypeScalar,      // raw scalar value
+    eValueTypeFileAddress, // file address value
+    eValueTypeLoadAddress, // load address value
+    eValueTypeHostAddress  // host address value (for memory in the process that
+                           // is using liblldb)
+  };
 
-    enum ContextType // Type that describes Value::m_context
-    {
-        // m_context contains...
-        // ====================
-        eContextTypeInvalid,      // undefined
-        eContextTypeRegisterInfo, // RegisterInfo * (can be a scalar or a vector
-        // register)
-        eContextTypeLLDBType,     // lldb_private::Type *
-        eContextTypeVariable      // lldb_private::Variable *
-    };
+  enum ContextType // Type that describes Value::m_context
+  {
+    // m_context contains...
+    // ====================
+    eContextTypeInvalid,      // undefined
+    eContextTypeRegisterInfo, // RegisterInfo * (can be a scalar or a vector
+                              // register)
+    eContextTypeLLDBType, // lldb_private::Type *
+    eContextTypeVariable  // lldb_private::Variable *
+  };
 
-    Value();
-    Value(const Scalar &scalar);
-    Value(const void *bytes, int len);
-    Value(const Value &rhs);
+  Value();
+  Value(const Scalar &scalar);
+  Value(const void *bytes, int len);
+  Value(const Value &rhs);
 
-    void SetBytes(const void *bytes, int len);
+  void SetBytes(const void *bytes, int len);
 
-    void AppendBytes(const void *bytes, int len);
+  void AppendBytes(const void *bytes, int len);
 
-    Value &operator=(const Value &rhs);
+  Value &operator=(const Value &rhs);
 
-    const CompilerType &GetCompilerType();
+  const CompilerType &GetCompilerType();
 
-    void SetCompilerType(const CompilerType &compiler_type);
+  void SetCompilerType(const CompilerType &compiler_type);
 
-    ValueType GetValueType() const;
+  ValueType GetValueType() const;
 
-    AddressType GetValueAddressType() const;
+  AddressType GetValueAddressType() const;
 
-    ContextType GetContextType() const {
-        return m_context_type;
+  ContextType GetContextType() const { return m_context_type; }
+
+  void SetValueType(ValueType value_type) { m_value_type = value_type; }
+
+  void ClearContext() {
+    m_context = nullptr;
+    m_context_type = eContextTypeInvalid;
+  }
+
+  void SetContext(ContextType context_type, void *p) {
+    m_context_type = context_type;
+    m_context = p;
+    if (m_context_type == eContextTypeRegisterInfo) {
+      RegisterInfo *reg_info = GetRegisterInfo();
+      if (reg_info->encoding == lldb::eEncodingVector)
+        SetValueType(eValueTypeScalar);
     }
+  }
 
-    void SetValueType(ValueType value_type) {
-        m_value_type = value_type;
-    }
+  RegisterInfo *GetRegisterInfo() const;
 
-    void ClearContext() {
-        m_context = nullptr;
-        m_context_type = eContextTypeInvalid;
-    }
+  Type *GetType();
 
-    void SetContext(ContextType context_type, void *p) {
-        m_context_type = context_type;
-        m_context = p;
-        if (m_context_type == eContextTypeRegisterInfo) {
-            RegisterInfo *reg_info = GetRegisterInfo();
-            if (reg_info->encoding == lldb::eEncodingVector)
-                SetValueType(eValueTypeScalar);
-        }
-    }
+  Scalar &ResolveValue(ExecutionContext *exe_ctx);
 
-    RegisterInfo *GetRegisterInfo() const;
+  const Scalar &GetScalar() const { return m_value; }
 
-    Type *GetType();
+  Scalar &GetScalar() { return m_value; }
 
-    Scalar &ResolveValue(ExecutionContext *exe_ctx);
+  size_t ResizeData(size_t len);
 
-    const Scalar &GetScalar() const {
-        return m_value;
-    }
+  size_t AppendDataToHostBuffer(const Value &rhs);
 
-    Scalar &GetScalar() {
-        return m_value;
-    }
+  DataBufferHeap &GetBuffer() { return m_data_buffer; }
 
-    size_t ResizeData(size_t len);
+  const DataBufferHeap &GetBuffer() const { return m_data_buffer; }
 
-    size_t AppendDataToHostBuffer(const Value &rhs);
+  bool ValueOf(ExecutionContext *exe_ctx);
 
-    DataBufferHeap &GetBuffer() {
-        return m_data_buffer;
-    }
+  Variable *GetVariable();
 
-    const DataBufferHeap &GetBuffer() const {
-        return m_data_buffer;
-    }
+  void Dump(Stream *strm);
 
-    bool ValueOf(ExecutionContext *exe_ctx);
+  lldb::Format GetValueDefaultFormat();
 
-    Variable *GetVariable();
+  uint64_t GetValueByteSize(Status *error_ptr, ExecutionContext *exe_ctx);
 
-    void Dump(Stream *strm);
+  Status GetValueAsData(ExecutionContext *exe_ctx, DataExtractor &data,
+                        Module *module); // Can be nullptr
 
-    lldb::Format GetValueDefaultFormat();
+  static const char *GetValueTypeAsCString(ValueType context_type);
 
-    uint64_t GetValueByteSize(Status *error_ptr, ExecutionContext *exe_ctx);
+  static const char *GetContextTypeAsCString(ContextType context_type);
 
-    Status GetValueAsData(ExecutionContext *exe_ctx, DataExtractor &data,
-                          Module *module); // Can be nullptr
+  /// Convert this value's file address to a load address, if possible.
+  void ConvertToLoadAddress(Module *module, Target *target);
 
-    static const char *GetValueTypeAsCString(ValueType context_type);
+  bool GetData(DataExtractor &data);
 
-    static const char *GetContextTypeAsCString(ContextType context_type);
-
-    /// Convert this value's file address to a load address, if possible.
-    void ConvertToLoadAddress(Module *module, Target *target);
-
-    bool GetData(DataExtractor &data);
-
-    void Clear();
+  void Clear();
 
 protected:
-    Scalar m_value;
-    CompilerType m_compiler_type;
-    void *m_context;
-    ValueType m_value_type;
-    ContextType m_context_type;
-    DataBufferHeap m_data_buffer;
+  Scalar m_value;
+  CompilerType m_compiler_type;
+  void *m_context;
+  ValueType m_value_type;
+  ContextType m_context_type;
+  DataBufferHeap m_data_buffer;
 };
 
 class ValueList {
 public:
-    ValueList() : m_values() {}
+  ValueList() : m_values() {}
 
-    ValueList(const ValueList &rhs);
+  ValueList(const ValueList &rhs);
 
-    ~ValueList() = default;
+  ~ValueList() = default;
 
-    const ValueList &operator=(const ValueList &rhs);
+  const ValueList &operator=(const ValueList &rhs);
 
-    // void InsertValue (Value *value, size_t idx);
-    void PushValue(const Value &value);
+  // void InsertValue (Value *value, size_t idx);
+  void PushValue(const Value &value);
 
-    size_t GetSize();
-    Value *GetValueAtIndex(size_t idx);
-    void Clear();
+  size_t GetSize();
+  Value *GetValueAtIndex(size_t idx);
+  void Clear();
 
 private:
-    typedef std::vector<Value> collection;
+  typedef std::vector<Value> collection;
 
-    collection m_values;
+  collection m_values;
 };
 
 } // namespace lldb_private

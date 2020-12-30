@@ -48,31 +48,31 @@ void invoke_malloc_hook(void *ptr, uptr size);
 void invoke_free_hook(void *ptr);
 
 enum MBlockType {
-    MBlockScopedBuf,
-    MBlockString,
-    MBlockStackTrace,
-    MBlockShadowStack,
-    MBlockSync,
-    MBlockClock,
-    MBlockThreadContex,
-    MBlockDeadInfo,
-    MBlockRacyStacks,
-    MBlockRacyAddresses,
-    MBlockAtExit,
-    MBlockFlag,
-    MBlockReport,
-    MBlockReportMop,
-    MBlockReportThread,
-    MBlockReportMutex,
-    MBlockReportLoc,
-    MBlockReportStack,
-    MBlockSuppression,
-    MBlockExpectRace,
-    MBlockSignal,
-    MBlockJmpBuf,
+  MBlockScopedBuf,
+  MBlockString,
+  MBlockStackTrace,
+  MBlockShadowStack,
+  MBlockSync,
+  MBlockClock,
+  MBlockThreadContex,
+  MBlockDeadInfo,
+  MBlockRacyStacks,
+  MBlockRacyAddresses,
+  MBlockAtExit,
+  MBlockFlag,
+  MBlockReport,
+  MBlockReportMop,
+  MBlockReportThread,
+  MBlockReportMutex,
+  MBlockReportLoc,
+  MBlockReportStack,
+  MBlockSuppression,
+  MBlockExpectRace,
+  MBlockSignal,
+  MBlockJmpBuf,
 
-    // This must be the last.
-    MBlockTypeCount
+  // This must be the last.
+  MBlockTypeCount
 };
 
 // For internal data structures.
@@ -81,8 +81,8 @@ void internal_free(void *p);
 
 template <typename T>
 void DestroyAndFree(T *p) {
-    p->~T();
-    internal_free(p);
+  p->~T();
+  internal_free(p);
 }
 
 }  // namespace __tsan

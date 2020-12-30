@@ -18,13 +18,13 @@ class LinePrinter;
 
 class EnumDumper : public PDBSymDumper {
 public:
-    EnumDumper(LinePrinter &P);
+  EnumDumper(LinePrinter &P);
 
-    void start(const PDBSymbolTypeEnum &Symbol);
+  void start(const PDBSymbolTypeEnum &Symbol);
 
 private:
-    LinePrinter &Printer;
+  LinePrinter &Printer;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 #endif

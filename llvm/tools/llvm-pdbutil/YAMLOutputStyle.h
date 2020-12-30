@@ -21,27 +21,27 @@ class ModuleDebugStreamRef;
 
 class YAMLOutputStyle : public OutputStyle {
 public:
-    YAMLOutputStyle(PDBFile &File);
+  YAMLOutputStyle(PDBFile &File);
 
-    Error dump() override;
+  Error dump() override;
 
 private:
-    Error dumpStringTable();
-    Error dumpFileHeaders();
-    Error dumpStreamMetadata();
-    Error dumpStreamDirectory();
-    Error dumpPDBStream();
-    Error dumpDbiStream();
-    Error dumpTpiStream();
-    Error dumpIpiStream();
-    Error dumpPublics();
+  Error dumpStringTable();
+  Error dumpFileHeaders();
+  Error dumpStreamMetadata();
+  Error dumpStreamDirectory();
+  Error dumpPDBStream();
+  Error dumpDbiStream();
+  Error dumpTpiStream();
+  Error dumpIpiStream();
+  Error dumpPublics();
 
-    void flush();
+  void flush();
 
-    PDBFile &File;
-    llvm::yaml::Output Out;
+  PDBFile &File;
+  llvm::yaml::Output Out;
 
-    yaml::PdbObject Obj;
+  yaml::PdbObject Obj;
 };
 } // namespace pdb
 } // namespace llvm

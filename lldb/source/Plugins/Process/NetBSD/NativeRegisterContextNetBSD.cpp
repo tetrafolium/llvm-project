@@ -21,14 +21,14 @@ using namespace lldb_private::process_netbsd;
 // clang-format on
 
 Status NativeRegisterContextNetBSD::DoRegisterSet(int ptrace_req, void *buf) {
-    return NativeProcessNetBSD::PtraceWrapper(ptrace_req, GetProcessPid(), buf,
-            m_thread.GetID());
+  return NativeProcessNetBSD::PtraceWrapper(ptrace_req, GetProcessPid(), buf,
+                                            m_thread.GetID());
 }
 
 NativeProcessNetBSD &NativeRegisterContextNetBSD::GetProcess() {
-    return static_cast<NativeProcessNetBSD &>(m_thread.GetProcess());
+  return static_cast<NativeProcessNetBSD &>(m_thread.GetProcess());
 }
 
 ::pid_t NativeRegisterContextNetBSD::GetProcessPid() {
-    return GetProcess().GetID();
+  return GetProcess().GetID();
 }

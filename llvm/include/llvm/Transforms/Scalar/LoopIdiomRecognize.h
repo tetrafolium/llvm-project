@@ -26,21 +26,21 @@ class LPMUpdater;
 /// Options to disable Loop Idiom Recognize, which can be shared with other
 /// passes.
 struct DisableLIRP {
-    /// When true, the entire pass is disabled.
-    static bool All;
+  /// When true, the entire pass is disabled.
+  static bool All;
 
-    /// When true, Memset is disabled.
-    static bool Memset;
+  /// When true, Memset is disabled.
+  static bool Memset;
 
-    /// When true, Memcpy is disabled.
-    static bool Memcpy;
+  /// When true, Memcpy is disabled.
+  static bool Memcpy;
 };
 
 /// Performs Loop Idiom Recognize Pass.
 class LoopIdiomRecognizePass : public PassInfoMixin<LoopIdiomRecognizePass> {
 public:
-    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
+  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 } // end namespace llvm

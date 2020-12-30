@@ -17,32 +17,32 @@ namespace lldb_private {
 class UserIDResolver;
 
 class HostInfoWindows : public HostInfoBase {
-    friend class HostInfoBase;
+  friend class HostInfoBase;
 
 private:
-    // Static class, unconstructable.
-    HostInfoWindows();
-    ~HostInfoWindows();
+  // Static class, unconstructable.
+  HostInfoWindows();
+  ~HostInfoWindows();
 
 public:
-    static void Initialize();
-    static void Terminate();
+  static void Initialize();
+  static void Terminate();
 
-    static size_t GetPageSize();
-    static UserIDResolver &GetUserIDResolver();
+  static size_t GetPageSize();
+  static UserIDResolver &GetUserIDResolver();
 
-    static llvm::VersionTuple GetOSVersion();
-    static bool GetOSBuildString(std::string &s);
-    static bool GetOSKernelDescription(std::string &s);
-    static bool GetHostname(std::string &s);
-    static FileSpec GetProgramFileSpec();
-    static FileSpec GetDefaultShell();
+  static llvm::VersionTuple GetOSVersion();
+  static bool GetOSBuildString(std::string &s);
+  static bool GetOSKernelDescription(std::string &s);
+  static bool GetHostname(std::string &s);
+  static FileSpec GetProgramFileSpec();
+  static FileSpec GetDefaultShell();
 
-    static bool GetEnvironmentVar(const std::string &var_name, std::string &var);
+  static bool GetEnvironmentVar(const std::string &var_name, std::string &var);
 
 private:
-    static FileSpec m_program_filespec;
+  static FileSpec m_program_filespec;
 };
-}
+} // namespace lldb_private
 
 #endif

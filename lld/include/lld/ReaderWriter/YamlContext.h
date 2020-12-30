@@ -22,7 +22,7 @@ namespace mach_o {
 namespace normalized {
 struct NormalizedFile;
 }
-}
+} // namespace mach_o
 
 using lld::mach_o::normalized::NormalizedFile;
 
@@ -30,11 +30,11 @@ using lld::mach_o::normalized::NormalizedFile;
 /// object.  We need to support hetergenous yaml documents which each require
 /// different context info.  This struct supports all clients.
 struct YamlContext {
-    const LinkingContext *_ctx = nullptr;
-    const Registry *_registry = nullptr;
-    File *_file = nullptr;
-    NormalizedFile *_normalizeMachOFile = nullptr;
-    StringRef _path;
+  const LinkingContext *_ctx = nullptr;
+  const Registry *_registry = nullptr;
+  File *_file = nullptr;
+  NormalizedFile *_normalizeMachOFile = nullptr;
+  StringRef _path;
 };
 
 } // end namespace lld

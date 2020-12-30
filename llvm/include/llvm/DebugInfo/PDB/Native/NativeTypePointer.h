@@ -20,38 +20,38 @@ namespace pdb {
 
 class NativeTypePointer : public NativeRawSymbol {
 public:
-    // Create a pointer record for a simple type.
-    NativeTypePointer(NativeSession &Session, SymIndexId Id,
-                      codeview::TypeIndex TI);
+  // Create a pointer record for a simple type.
+  NativeTypePointer(NativeSession &Session, SymIndexId Id,
+                    codeview::TypeIndex TI);
 
-    // Create a pointer record for a non-simple type.
-    NativeTypePointer(NativeSession &Session, SymIndexId Id,
-                      codeview::TypeIndex TI, codeview::PointerRecord PR);
-    ~NativeTypePointer() override;
+  // Create a pointer record for a non-simple type.
+  NativeTypePointer(NativeSession &Session, SymIndexId Id,
+                    codeview::TypeIndex TI, codeview::PointerRecord PR);
+  ~NativeTypePointer() override;
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    SymIndexId getClassParentId() const override;
-    bool isConstType() const override;
-    uint64_t getLength() const override;
-    bool isReference() const override;
-    bool isRValueReference() const override;
-    bool isPointerToDataMember() const override;
-    bool isPointerToMemberFunction() const override;
-    SymIndexId getTypeId() const override;
-    bool isRestrictedType() const override;
-    bool isVolatileType() const override;
-    bool isUnalignedType() const override;
+  SymIndexId getClassParentId() const override;
+  bool isConstType() const override;
+  uint64_t getLength() const override;
+  bool isReference() const override;
+  bool isRValueReference() const override;
+  bool isPointerToDataMember() const override;
+  bool isPointerToMemberFunction() const override;
+  SymIndexId getTypeId() const override;
+  bool isRestrictedType() const override;
+  bool isVolatileType() const override;
+  bool isUnalignedType() const override;
 
-    bool isSingleInheritance() const override;
-    bool isMultipleInheritance() const override;
-    bool isVirtualInheritance() const override;
+  bool isSingleInheritance() const override;
+  bool isMultipleInheritance() const override;
+  bool isVirtualInheritance() const override;
 
 protected:
-    bool isMemberPointer() const;
-    codeview::TypeIndex TI;
-    Optional<codeview::PointerRecord> Record;
+  bool isMemberPointer() const;
+  codeview::TypeIndex TI;
+  Optional<codeview::PointerRecord> Record;
 };
 
 } // namespace pdb

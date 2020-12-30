@@ -23,12 +23,12 @@ namespace exegesis {
 
 class SerialSnippetGenerator : public SnippetGenerator {
 public:
-    using SnippetGenerator::SnippetGenerator;
-    ~SerialSnippetGenerator() override;
+  using SnippetGenerator::SnippetGenerator;
+  ~SerialSnippetGenerator() override;
 
-    Expected<std::vector<CodeTemplate>>
-                                     generateCodeTemplates(InstructionTemplate Variant,
-                                             const BitVector &ForbiddenRegisters) const override;
+  Expected<std::vector<CodeTemplate>>
+  generateCodeTemplates(InstructionTemplate Variant,
+                        const BitVector &ForbiddenRegisters) const override;
 };
 
 } // namespace exegesis

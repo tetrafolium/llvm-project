@@ -22,15 +22,15 @@ namespace misc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/misc-redundant-expression.html
 class RedundantExpressionCheck : public ClangTidyCheck {
 public:
-    RedundantExpressionCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  RedundantExpressionCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void checkArithmeticExpr(const ast_matchers::MatchFinder::MatchResult &R);
-    void checkBitwiseExpr(const ast_matchers::MatchFinder::MatchResult &R);
-    void checkRelationalExpr(const ast_matchers::MatchFinder::MatchResult &R);
+  void checkArithmeticExpr(const ast_matchers::MatchFinder::MatchResult &R);
+  void checkBitwiseExpr(const ast_matchers::MatchFinder::MatchResult &R);
+  void checkRelationalExpr(const ast_matchers::MatchFinder::MatchResult &R);
 };
 
 } // namespace misc

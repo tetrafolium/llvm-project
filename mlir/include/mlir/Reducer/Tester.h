@@ -32,16 +32,16 @@ namespace mlir {
 /// case file.
 class Tester {
 public:
-    Tester(StringRef testScript, ArrayRef<std::string> testScriptArgs);
+  Tester(StringRef testScript, ArrayRef<std::string> testScriptArgs);
 
-    /// Runs the interestingness testing script on a MLIR test case file. Returns
-    /// true if the interesting behavior is present in the test case or false
-    /// otherwise.
-    bool isInteresting(StringRef testCase) const;
+  /// Runs the interestingness testing script on a MLIR test case file. Returns
+  /// true if the interesting behavior is present in the test case or false
+  /// otherwise.
+  bool isInteresting(StringRef testCase) const;
 
 private:
-    StringRef testScript;
-    ArrayRef<std::string> testScriptArgs;
+  StringRef testScript;
+  ArrayRef<std::string> testScriptArgs;
 };
 
 } // end namespace mlir

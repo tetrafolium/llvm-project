@@ -32,60 +32,42 @@ namespace Fortran::runtime {
 class Lock {
 public:
 #if USE_PTHREADS
-    Lock() {
-        pthread_mutex_init(&mutex_, nullptr);
+  Lock() { pthread_mutex_init(&mutex_, nullptr); }
+  ~Lock() { pthread_mutex_destroy(&mutex_); }
+  void Take() {
+    while (pthread_mutex_lock(&mutex_)) {
     }
-    ~Lock() {
-        pthread_mutex_destroy(&mutex_);
-    }
-    void Take() {
-        while (pthread_mutex_lock(&mutex_)) {
-        }
-    }
-    bool Try() {
-        return pthread_mutex_trylock(&mutex_) == 0;
-    }
-    void Drop() {
-        pthread_mutex_unlock(&mutex_);
-    }
+  }
+  bool Try() { return pthread_mutex_trylock(&mutex_) == 0; }
+  void Drop() { pthread_mutex_unlock(&mutex_); }
 #else
-    void Take() {
-        mutex_.lock();
-    }
-    bool Try() {
-        return mutex_.try_lock();
-    }
-    void Drop() {
-        mutex_.unlock();
-    }
+  void Take() { mutex_.lock(); }
+  bool Try() { return mutex_.try_lock(); }
+  void Drop() { mutex_.unlock(); }
 #endif
 
-    void CheckLocked(const Terminator &terminator) {
-        if (Try()) {
-            Drop();
-            terminator.Crash("Lock::CheckLocked() failed");
-        }
+  void CheckLocked(const Terminator &terminator) {
+    if (Try()) {
+      Drop();
+      terminator.Crash("Lock::CheckLocked() failed");
     }
+  }
 
 private:
 #if USE_PTHREADS
-    pthread_mutex_t mutex_ {};
+  pthread_mutex_t mutex_{};
 #else
-    std::mutex mutex_;
+  std::mutex mutex_;
 #endif
 };
 
 class CriticalSection {
 public:
-    explicit CriticalSection(Lock &lock) : lock_{lock} {
-        lock_.Take();
-    }
-    ~CriticalSection() {
-        lock_.Drop();
-    }
+  explicit CriticalSection(Lock &lock) : lock_{lock} { lock_.Take(); }
+  ~CriticalSection() { lock_.Drop(); }
 
 private:
-    Lock &lock_;
+  Lock &lock_;
 };
 } // namespace Fortran::runtime
 

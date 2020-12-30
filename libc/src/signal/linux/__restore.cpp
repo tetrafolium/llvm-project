@@ -16,11 +16,9 @@
 namespace __llvm_libc {
 
 extern "C" void __restore_rt()
-__attribute__((no_sanitize("thread", "memory", "undefined", "fuzzer"),
-               hidden));
+    __attribute__((no_sanitize("thread", "memory", "undefined", "fuzzer"),
+                   hidden));
 
-extern "C" void __restore_rt() {
-    __llvm_libc::syscall(SYS_rt_sigreturn);
-}
+extern "C" void __restore_rt() { __llvm_libc::syscall(SYS_rt_sigreturn); }
 
 } // namespace __llvm_libc

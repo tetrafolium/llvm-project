@@ -34,34 +34,34 @@
 namespace __sanitizer {
 
 struct DTLS {
-    // Array of DTLS chunks for the current Thread.
-    // If beg == 0, the chunk is unused.
-    struct DTV {
-        uptr beg, size;
-    };
-    struct DTVBlock {
-        atomic_uintptr_t next;
-        DTV dtvs[(4096UL - sizeof(next)) / sizeof(DTLS::DTV)];
-    };
+  // Array of DTLS chunks for the current Thread.
+  // If beg == 0, the chunk is unused.
+  struct DTV {
+    uptr beg, size;
+  };
+  struct DTVBlock {
+    atomic_uintptr_t next;
+    DTV dtvs[(4096UL - sizeof(next)) / sizeof(DTLS::DTV)];
+  };
 
-    static_assert(sizeof(DTVBlock) <= 4096UL, "Unexpected block size");
+  static_assert(sizeof(DTVBlock) <= 4096UL, "Unexpected block size");
 
-    atomic_uintptr_t dtv_block;
+  atomic_uintptr_t dtv_block;
 
-    // Auxiliary fields, don't access them outside sanitizer_tls_get_addr.cpp
-    uptr last_memalign_size;
-    uptr last_memalign_ptr;
+  // Auxiliary fields, don't access them outside sanitizer_tls_get_addr.cpp
+  uptr last_memalign_size;
+  uptr last_memalign_ptr;
 };
 
 template <typename Fn>
 void ForEachDVT(DTLS *dtls, const Fn &fn) {
-    DTLS::DTVBlock *block =
-        (DTLS::DTVBlock *)atomic_load(&dtls->dtv_block, memory_order_acquire);
-    while (block) {
-        int id = 0;
-        for (auto &d : block->dtvs) fn(d, id++);
-        block = (DTLS::DTVBlock *)atomic_load(&block->next, memory_order_acquire);
-    }
+  DTLS::DTVBlock *block =
+      (DTLS::DTVBlock *)atomic_load(&dtls->dtv_block, memory_order_acquire);
+  while (block) {
+    int id = 0;
+    for (auto &d : block->dtvs) fn(d, id++);
+    block = (DTLS::DTVBlock *)atomic_load(&block->next, memory_order_acquire);
+  }
 }
 
 // Returns pointer and size of a linker-allocated TLS block.

@@ -21,108 +21,103 @@
 #include "llvm/Support/Format.h"
 #include "llvm/Support/raw_ostream.h"
 
-
 namespace lldb_private {
 
 namespace minidump {
 
 class ProcessMinidump : public PostMortemProcess {
 public:
-    static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
-                                          lldb::ListenerSP listener_sp,
-                                          const FileSpec *crash_file_path,
-                                          bool can_connect);
+  static lldb::ProcessSP CreateInstance(lldb::TargetSP target_sp,
+                                        lldb::ListenerSP listener_sp,
+                                        const FileSpec *crash_file_path,
+                                        bool can_connect);
 
-    static void Initialize();
+  static void Initialize();
 
-    static void Terminate();
+  static void Terminate();
 
-    static ConstString GetPluginNameStatic();
+  static ConstString GetPluginNameStatic();
 
-    static const char *GetPluginDescriptionStatic();
+  static const char *GetPluginDescriptionStatic();
 
-    ProcessMinidump(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp,
-                    const FileSpec &core_file, lldb::DataBufferSP code_data);
+  ProcessMinidump(lldb::TargetSP target_sp, lldb::ListenerSP listener_sp,
+                  const FileSpec &core_file, lldb::DataBufferSP code_data);
 
-    ~ProcessMinidump() override;
+  ~ProcessMinidump() override;
 
-    bool CanDebug(lldb::TargetSP target_sp,
-                  bool plugin_specified_by_name) override;
+  bool CanDebug(lldb::TargetSP target_sp,
+                bool plugin_specified_by_name) override;
 
-    CommandObject *GetPluginCommandObject() override;
+  CommandObject *GetPluginCommandObject() override;
 
-    Status DoLoadCore() override;
+  Status DoLoadCore() override;
 
-    DynamicLoader *GetDynamicLoader() override {
-        return nullptr;
-    }
+  DynamicLoader *GetDynamicLoader() override { return nullptr; }
 
-    ConstString GetPluginName() override;
+  ConstString GetPluginName() override;
 
-    uint32_t GetPluginVersion() override;
+  uint32_t GetPluginVersion() override;
 
-    SystemRuntime *GetSystemRuntime() override {
-        return nullptr;
-    }
+  SystemRuntime *GetSystemRuntime() override { return nullptr; }
 
-    Status DoDestroy() override;
+  Status DoDestroy() override;
 
-    void RefreshStateAfterStop() override;
+  void RefreshStateAfterStop() override;
 
-    bool IsAlive() override;
+  bool IsAlive() override;
 
-    bool WarnBeforeDetach() const override;
+  bool WarnBeforeDetach() const override;
 
-    size_t ReadMemory(lldb::addr_t addr, void *buf, size_t size,
+  size_t ReadMemory(lldb::addr_t addr, void *buf, size_t size,
+                    Status &error) override;
+
+  size_t DoReadMemory(lldb::addr_t addr, void *buf, size_t size,
                       Status &error) override;
 
-    size_t DoReadMemory(lldb::addr_t addr, void *buf, size_t size,
-                        Status &error) override;
+  ArchSpec GetArchitecture();
 
-    ArchSpec GetArchitecture();
+  Status GetMemoryRegionInfo(lldb::addr_t load_addr,
+                             MemoryRegionInfo &range_info) override;
 
-    Status GetMemoryRegionInfo(lldb::addr_t load_addr,
-                               MemoryRegionInfo &range_info) override;
+  Status
+  GetMemoryRegions(lldb_private::MemoryRegionInfos &region_list) override;
 
-    Status GetMemoryRegions(
-        lldb_private::MemoryRegionInfos &region_list) override;
+  bool GetProcessInfo(ProcessInstanceInfo &info) override;
 
-    bool GetProcessInfo(ProcessInstanceInfo &info) override;
+  Status WillResume() override {
+    Status error;
+    error.SetErrorStringWithFormat(
+        "error: %s does not support resuming processes",
+        GetPluginName().GetCString());
+    return error;
+  }
 
-    Status WillResume() override {
-        Status error;
-        error.SetErrorStringWithFormat(
-            "error: %s does not support resuming processes",
-            GetPluginName().GetCString());
-        return error;
-    }
-
-    llvm::Optional<MinidumpParser> m_minidump_parser;
+  llvm::Optional<MinidumpParser> m_minidump_parser;
 
 protected:
-    void Clear();
+  void Clear();
 
-    bool UpdateThreadList(ThreadList &old_thread_list,
-                          ThreadList &new_thread_list) override;
+  bool UpdateThreadList(ThreadList &old_thread_list,
+                        ThreadList &new_thread_list) override;
 
-    void ReadModuleList();
+  void ReadModuleList();
 
-    lldb::ModuleSP GetOrCreateModule(lldb_private::UUID minidump_uuid,
-                                     llvm::StringRef name,
-                                     lldb_private::ModuleSpec module_spec);
+  lldb::ModuleSP GetOrCreateModule(lldb_private::UUID minidump_uuid,
+                                   llvm::StringRef name,
+                                   lldb_private::ModuleSpec module_spec);
 
-    JITLoaderList &GetJITLoaders() override;
+  JITLoaderList &GetJITLoaders() override;
 
 private:
-    FileSpec m_core_file;
-    lldb::DataBufferSP m_core_data;
-    llvm::ArrayRef<minidump::Thread> m_thread_list;
-    const minidump::ExceptionStream *m_active_exception;
-    lldb::CommandObjectSP m_command_sp;
-    bool m_is_wow64;
-    llvm::Optional<MemoryRegionInfos> m_memory_regions;
+  FileSpec m_core_file;
+  lldb::DataBufferSP m_core_data;
+  llvm::ArrayRef<minidump::Thread> m_thread_list;
+  const minidump::ExceptionStream *m_active_exception;
+  lldb::CommandObjectSP m_command_sp;
+  bool m_is_wow64;
+  llvm::Optional<MemoryRegionInfos> m_memory_regions;
 
-    void BuildMemoryRegions();
+  void BuildMemoryRegions();
 };
 
 } // namespace minidump

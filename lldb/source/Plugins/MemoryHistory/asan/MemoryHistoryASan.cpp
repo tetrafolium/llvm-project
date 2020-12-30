@@ -31,44 +31,44 @@ using namespace lldb_private;
 LLDB_PLUGIN_DEFINE(MemoryHistoryASan)
 
 MemoryHistorySP MemoryHistoryASan::CreateInstance(const ProcessSP &process_sp) {
-    if (!process_sp.get())
-        return nullptr;
+  if (!process_sp.get())
+    return nullptr;
 
-    Target &target = process_sp->GetTarget();
+  Target &target = process_sp->GetTarget();
 
-    const ModuleList &target_modules = target.GetImages();
-    std::lock_guard<std::recursive_mutex> guard(target_modules.GetMutex());
-    const size_t num_modules = target_modules.GetSize();
-    for (size_t i = 0; i < num_modules; ++i) {
-        Module *module_pointer = target_modules.GetModulePointerAtIndexUnlocked(i);
+  const ModuleList &target_modules = target.GetImages();
+  std::lock_guard<std::recursive_mutex> guard(target_modules.GetMutex());
+  const size_t num_modules = target_modules.GetSize();
+  for (size_t i = 0; i < num_modules; ++i) {
+    Module *module_pointer = target_modules.GetModulePointerAtIndexUnlocked(i);
 
-        const Symbol *symbol = module_pointer->FindFirstSymbolWithNameAndType(
-                                   ConstString("__asan_get_alloc_stack"), lldb::eSymbolTypeAny);
+    const Symbol *symbol = module_pointer->FindFirstSymbolWithNameAndType(
+        ConstString("__asan_get_alloc_stack"), lldb::eSymbolTypeAny);
 
-        if (symbol != nullptr)
-            return MemoryHistorySP(new MemoryHistoryASan(process_sp));
-    }
+    if (symbol != nullptr)
+      return MemoryHistorySP(new MemoryHistoryASan(process_sp));
+  }
 
-    return MemoryHistorySP();
+  return MemoryHistorySP();
 }
 
 void MemoryHistoryASan::Initialize() {
-    PluginManager::RegisterPlugin(
-        GetPluginNameStatic(), "ASan memory history provider.", CreateInstance);
+  PluginManager::RegisterPlugin(
+      GetPluginNameStatic(), "ASan memory history provider.", CreateInstance);
 }
 
 void MemoryHistoryASan::Terminate() {
-    PluginManager::UnregisterPlugin(CreateInstance);
+  PluginManager::UnregisterPlugin(CreateInstance);
 }
 
 ConstString MemoryHistoryASan::GetPluginNameStatic() {
-    static ConstString g_name("asan");
-    return g_name;
+  static ConstString g_name("asan");
+  return g_name;
 }
 
 MemoryHistoryASan::MemoryHistoryASan(const ProcessSP &process_sp) {
-    if (process_sp)
-        m_process_wp = process_sp;
+  if (process_sp)
+    m_process_wp = process_sp;
 }
 
 const char *memory_history_asan_command_prefix = R"(
@@ -94,9 +94,9 @@ const char *memory_history_asan_command_format =
     data t;
 
     t.alloc_count = __asan_get_alloc_stack((void *)0x%)" PRIx64
-        R"(, t.alloc_trace, 256, &t.alloc_tid);
+    R"(, t.alloc_trace, 256, &t.alloc_tid);
     t.free_count = __asan_get_free_stack((void *)0x%)" PRIx64
-        R"(, t.free_trace, 256, &t.free_tid);
+    R"(, t.free_trace, 256, &t.free_tid);
 
     t;
 )";

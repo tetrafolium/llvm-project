@@ -15,15 +15,15 @@ namespace tidy {
 namespace android {
 
 void CloexecMemfdCreateCheck::registerMatchers(MatchFinder *Finder) {
-    auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
-    registerMatchersImpl(
-        Finder, functionDecl(returns(isInteger()), hasName("memfd_create"),
-                             hasParameter(0, CharPointerType),
-                             hasParameter(1, hasType(isInteger()))));
+  auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
+  registerMatchersImpl(
+      Finder, functionDecl(returns(isInteger()), hasName("memfd_create"),
+                           hasParameter(0, CharPointerType),
+                           hasParameter(1, hasType(isInteger()))));
 }
 
 void CloexecMemfdCreateCheck::check(const MatchFinder::MatchResult &Result) {
-    insertMacroFlag(Result, "MFD_CLOEXEC", /*ArgPos=*/1);
+  insertMacroFlag(Result, "MFD_CLOEXEC", /*ArgPos=*/1);
 }
 
 } // namespace android

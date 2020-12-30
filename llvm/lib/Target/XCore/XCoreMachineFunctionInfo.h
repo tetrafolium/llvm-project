@@ -25,79 +25,69 @@ namespace llvm {
 /// XCoreFunctionInfo - This class is derived from MachineFunction private
 /// XCore target-specific information for each MachineFunction.
 class XCoreFunctionInfo : public MachineFunctionInfo {
-    bool LRSpillSlotSet = false;
-    int LRSpillSlot;
-    bool FPSpillSlotSet = false;
-    int FPSpillSlot;
-    bool EHSpillSlotSet = false;
-    int EHSpillSlot[2];
-    unsigned ReturnStackOffset;
-    bool ReturnStackOffsetSet = false;
-    int VarArgsFrameIndex = 0;
-    mutable int CachedEStackSize = -1;
-    std::vector<std::pair<MachineBasicBlock::iterator, CalleeSavedInfo>>
-            SpillLabels;
+  bool LRSpillSlotSet = false;
+  int LRSpillSlot;
+  bool FPSpillSlotSet = false;
+  int FPSpillSlot;
+  bool EHSpillSlotSet = false;
+  int EHSpillSlot[2];
+  unsigned ReturnStackOffset;
+  bool ReturnStackOffsetSet = false;
+  int VarArgsFrameIndex = 0;
+  mutable int CachedEStackSize = -1;
+  std::vector<std::pair<MachineBasicBlock::iterator, CalleeSavedInfo>>
+      SpillLabels;
 
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    XCoreFunctionInfo() = default;
+  XCoreFunctionInfo() = default;
 
-    explicit XCoreFunctionInfo(MachineFunction &MF) {}
+  explicit XCoreFunctionInfo(MachineFunction &MF) {}
 
-    ~XCoreFunctionInfo() override = default;
+  ~XCoreFunctionInfo() override = default;
 
-    void setVarArgsFrameIndex(int off) {
-        VarArgsFrameIndex = off;
-    }
-    int getVarArgsFrameIndex() const {
-        return VarArgsFrameIndex;
-    }
+  void setVarArgsFrameIndex(int off) { VarArgsFrameIndex = off; }
+  int getVarArgsFrameIndex() const { return VarArgsFrameIndex; }
 
-    int createLRSpillSlot(MachineFunction &MF);
-    bool hasLRSpillSlot() {
-        return LRSpillSlotSet;
-    }
-    int getLRSpillSlot() const {
-        assert(LRSpillSlotSet && "LR Spill slot not set");
-        return LRSpillSlot;
-    }
+  int createLRSpillSlot(MachineFunction &MF);
+  bool hasLRSpillSlot() { return LRSpillSlotSet; }
+  int getLRSpillSlot() const {
+    assert(LRSpillSlotSet && "LR Spill slot not set");
+    return LRSpillSlot;
+  }
 
-    int createFPSpillSlot(MachineFunction &MF);
-    bool hasFPSpillSlot() {
-        return FPSpillSlotSet;
-    }
-    int getFPSpillSlot() const {
-        assert(FPSpillSlotSet && "FP Spill slot not set");
-        return FPSpillSlot;
-    }
+  int createFPSpillSlot(MachineFunction &MF);
+  bool hasFPSpillSlot() { return FPSpillSlotSet; }
+  int getFPSpillSlot() const {
+    assert(FPSpillSlotSet && "FP Spill slot not set");
+    return FPSpillSlot;
+  }
 
-    const int* createEHSpillSlot(MachineFunction &MF);
-    bool hasEHSpillSlot() {
-        return EHSpillSlotSet;
-    }
-    const int* getEHSpillSlot() const {
-        assert(EHSpillSlotSet && "EH Spill slot not set");
-        return EHSpillSlot;
-    }
+  const int *createEHSpillSlot(MachineFunction &MF);
+  bool hasEHSpillSlot() { return EHSpillSlotSet; }
+  const int *getEHSpillSlot() const {
+    assert(EHSpillSlotSet && "EH Spill slot not set");
+    return EHSpillSlot;
+  }
 
-    void setReturnStackOffset(unsigned value) {
-        assert(!ReturnStackOffsetSet && "Return stack offset set twice");
-        ReturnStackOffset = value;
-        ReturnStackOffsetSet = true;
-    }
+  void setReturnStackOffset(unsigned value) {
+    assert(!ReturnStackOffsetSet && "Return stack offset set twice");
+    ReturnStackOffset = value;
+    ReturnStackOffsetSet = true;
+  }
 
-    unsigned getReturnStackOffset() const {
-        assert(ReturnStackOffsetSet && "Return stack offset not set");
-        return ReturnStackOffset;
-    }
+  unsigned getReturnStackOffset() const {
+    assert(ReturnStackOffsetSet && "Return stack offset not set");
+    return ReturnStackOffset;
+  }
 
-    bool isLargeFrame(const MachineFunction &MF) const;
+  bool isLargeFrame(const MachineFunction &MF) const;
 
-    std::vector<std::pair<MachineBasicBlock::iterator, CalleeSavedInfo>> &
-    getSpillLabels() {
-        return SpillLabels;
-    }
+  std::vector<std::pair<MachineBasicBlock::iterator, CalleeSavedInfo>> &
+  getSpillLabels() {
+    return SpillLabels;
+  }
 };
 
 } // end namespace llvm

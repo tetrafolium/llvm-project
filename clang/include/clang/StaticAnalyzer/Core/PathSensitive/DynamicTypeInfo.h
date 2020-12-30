@@ -18,43 +18,35 @@ namespace ento {
 /// of a region in a given state along the analysis path.
 class DynamicTypeInfo {
 public:
-    DynamicTypeInfo() : DynTy(QualType()) {}
+  DynamicTypeInfo() : DynTy(QualType()) {}
 
-    DynamicTypeInfo(QualType Ty, bool CanBeSub = true)
-        : DynTy(Ty), CanBeASubClass(CanBeSub) {}
+  DynamicTypeInfo(QualType Ty, bool CanBeSub = true)
+      : DynTy(Ty), CanBeASubClass(CanBeSub) {}
 
-    /// Returns false if the type information is precise (the type 'DynTy' is
-    /// the only type in the lattice), true otherwise.
-    bool canBeASubClass() const {
-        return CanBeASubClass;
-    }
+  /// Returns false if the type information is precise (the type 'DynTy' is
+  /// the only type in the lattice), true otherwise.
+  bool canBeASubClass() const { return CanBeASubClass; }
 
-    /// Returns true if the dynamic type info is available.
-    bool isValid() const {
-        return !DynTy.isNull();
-    }
+  /// Returns true if the dynamic type info is available.
+  bool isValid() const { return !DynTy.isNull(); }
 
-    /// Returns the currently inferred upper bound on the runtime type.
-    QualType getType() const {
-        return DynTy;
-    }
+  /// Returns the currently inferred upper bound on the runtime type.
+  QualType getType() const { return DynTy; }
 
-    operator bool() const {
-        return isValid();
-    }
+  operator bool() const { return isValid(); }
 
-    bool operator==(const DynamicTypeInfo &RHS) const {
-        return DynTy == RHS.DynTy && CanBeASubClass == RHS.CanBeASubClass;
-    }
+  bool operator==(const DynamicTypeInfo &RHS) const {
+    return DynTy == RHS.DynTy && CanBeASubClass == RHS.CanBeASubClass;
+  }
 
-    void Profile(llvm::FoldingSetNodeID &ID) const {
-        ID.Add(DynTy);
-        ID.AddBoolean(CanBeASubClass);
-    }
+  void Profile(llvm::FoldingSetNodeID &ID) const {
+    ID.Add(DynTy);
+    ID.AddBoolean(CanBeASubClass);
+  }
 
 private:
-    QualType DynTy;
-    bool CanBeASubClass;
+  QualType DynTy;
+  bool CanBeASubClass;
 };
 
 } // namespace ento

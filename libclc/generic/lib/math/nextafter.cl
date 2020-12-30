@@ -1,5 +1,5 @@
-#include <clc/clc.h>
 #include "../clcmacro.h"
+#include <clc/clc.h>
 
 _CLC_DEFINE_BINARY_BUILTIN(float, nextafter, __builtin_nextafterf, float, float)
 
@@ -7,6 +7,7 @@ _CLC_DEFINE_BINARY_BUILTIN(float, nextafter, __builtin_nextafterf, float, float)
 
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
-_CLC_DEFINE_BINARY_BUILTIN(double, nextafter, __builtin_nextafter, double, double)
+_CLC_DEFINE_BINARY_BUILTIN(double, nextafter, __builtin_nextafter, double,
+                           double)
 
 #endif

@@ -22,19 +22,19 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-oop57-cpp.html
 class NonTrivialTypesLibcMemoryCallsCheck : public ClangTidyCheck {
 public:
-    NonTrivialTypesLibcMemoryCallsCheck(StringRef Name,
-                                        ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus && !LangOpts.ObjC;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  NonTrivialTypesLibcMemoryCallsCheck(StringRef Name,
+                                      ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus && !LangOpts.ObjC;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const std::string MemSetNames;
-    const std::string MemCpyNames;
-    const std::string MemCmpNames;
+  const std::string MemSetNames;
+  const std::string MemCpyNames;
+  const std::string MemCmpNames;
 };
 
 } // namespace cert

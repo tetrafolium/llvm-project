@@ -17,38 +17,38 @@ namespace lldb_private {
 
 class StringLexer {
 public:
-    typedef std::string::size_type Position;
-    typedef std::string::size_type Size;
+  typedef std::string::size_type Position;
+  typedef std::string::size_type Size;
 
-    typedef std::string::value_type Character;
+  typedef std::string::value_type Character;
 
-    StringLexer(std::string s);
+  StringLexer(std::string s);
 
-    // These APIs are not bounds-checked.  Use HasAtLeast() if you're not sure.
-    Character Peek();
+  // These APIs are not bounds-checked.  Use HasAtLeast() if you're not sure.
+  Character Peek();
 
-    bool NextIf(Character c);
+  bool NextIf(Character c);
 
-    std::pair<bool, Character> NextIf(std::initializer_list<Character> cs);
+  std::pair<bool, Character> NextIf(std::initializer_list<Character> cs);
 
-    bool AdvanceIf(const std::string &token);
+  bool AdvanceIf(const std::string &token);
 
-    Character Next();
+  Character Next();
 
-    bool HasAtLeast(Size s);
+  bool HasAtLeast(Size s);
 
-    std::string GetUnlexed();
+  std::string GetUnlexed();
 
-    // This will assert if there are less than s characters preceding the cursor.
-    void PutBack(Size s);
+  // This will assert if there are less than s characters preceding the cursor.
+  void PutBack(Size s);
 
-    StringLexer &operator=(const StringLexer &rhs);
+  StringLexer &operator=(const StringLexer &rhs);
 
 private:
-    std::string m_data;
-    Position m_position;
+  std::string m_data;
+  Position m_position;
 
-    void Consume();
+  void Consume();
 };
 
 } // namespace lldb_private

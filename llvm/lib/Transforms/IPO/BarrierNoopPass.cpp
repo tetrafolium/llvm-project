@@ -30,22 +30,17 @@ namespace {
 /// when they are phrased as non-module passes.
 class BarrierNoop : public ModulePass {
 public:
-    static char ID; // Pass identification.
+  static char ID; // Pass identification.
 
-    BarrierNoop() : ModulePass(ID) {
-        initializeBarrierNoopPass(*PassRegistry::getPassRegistry());
-    }
+  BarrierNoop() : ModulePass(ID) {
+    initializeBarrierNoopPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnModule(Module &M) override {
-        return false;
-    }
+  bool runOnModule(Module &M) override { return false; }
 };
-}
+} // namespace
 
-ModulePass *llvm::createBarrierNoopPass() {
-    return new BarrierNoop();
-}
+ModulePass *llvm::createBarrierNoopPass() { return new BarrierNoop(); }
 
 char BarrierNoop::ID = 0;
-INITIALIZE_PASS(BarrierNoop, "barrier", "A No-Op Barrier Pass",
-                false, false)
+INITIALIZE_PASS(BarrierNoop, "barrier", "A No-Op Barrier Pass", false, false)

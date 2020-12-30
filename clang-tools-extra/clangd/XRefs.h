@@ -41,18 +41,18 @@ class ParsedAST;
 //  - a declaration and an equal definition (e.g. inline function, or class)
 // For some types of symbol, e.g. macros, definition == declaration always.
 struct LocatedSymbol {
-    // The (unqualified) name of the symbol.
-    std::string Name;
-    // The canonical or best declaration: where most users find its interface.
-    Location PreferredDeclaration;
-    // Where the symbol is defined, if known. May equal PreferredDeclaration.
-    llvm::Optional<Location> Definition;
+  // The (unqualified) name of the symbol.
+  std::string Name;
+  // The canonical or best declaration: where most users find its interface.
+  Location PreferredDeclaration;
+  // Where the symbol is defined, if known. May equal PreferredDeclaration.
+  llvm::Optional<Location> Definition;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &, const LocatedSymbol &);
 /// Get definition of symbol at a specified \p Pos.
 /// Multiple locations may be returned, corresponding to distinct symbols.
 std::vector<LocatedSymbol> locateSymbolAt(ParsedAST &AST, Position Pos,
-        const SymbolIndex *Index = nullptr);
+                                          const SymbolIndex *Index = nullptr);
 
 // Tries to provide a textual fallback for locating a symbol by looking up the
 // word under the cursor as a symbol name in the index.
@@ -69,23 +69,23 @@ locateSymbolTextually(const SpelledWord &Word, ParsedAST &AST,
 // used to resolve it.
 // (This is for internal use by locateSymbolAt, and is exposed for testing).
 const syntax::Token *findNearbyIdentifier(const SpelledWord &Word,
-        const syntax::TokenBuffer &TB);
+                                          const syntax::TokenBuffer &TB);
 
 /// Get all document links
 std::vector<DocumentLink> getDocumentLinks(ParsedAST &AST);
 
 /// Returns highlights for all usages of a symbol at \p Pos.
 std::vector<DocumentHighlight> findDocumentHighlights(ParsedAST &AST,
-        Position Pos);
+                                                      Position Pos);
 
 struct ReferencesResult {
-    std::vector<Location> References;
-    bool HasMore = false;
+  std::vector<Location> References;
+  bool HasMore = false;
 };
 
 /// Returns implementations of the virtual function at a specified \p Pos.
 std::vector<LocatedSymbol> findImplementations(ParsedAST &AST, Position Pos,
-        const SymbolIndex *Index);
+                                               const SymbolIndex *Index);
 
 /// Returns references of the symbol at a specified \p Pos.
 /// \p Limit limits the number of results returned (0 means no limit).
@@ -119,7 +119,7 @@ incomingCalls(const CallHierarchyItem &Item, const SymbolIndex *Index);
 
 /// Returns all decls that are referenced in the \p FD except local symbols.
 llvm::DenseSet<const Decl *> getNonLocalDeclRefs(ParsedAST &AST,
-        const FunctionDecl *FD);
+                                                 const FunctionDecl *FD);
 } // namespace clangd
 } // namespace clang
 

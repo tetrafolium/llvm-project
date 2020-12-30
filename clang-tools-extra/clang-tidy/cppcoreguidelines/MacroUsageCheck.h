@@ -25,27 +25,27 @@ namespace cppcoreguidelines {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-macro-usage.html
 class MacroUsageCheck : public ClangTidyCheck {
 public:
-    MacroUsageCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          AllowedRegexp(Options.get("AllowedRegexp", "^DEBUG_*")),
-          CheckCapsOnly(Options.get("CheckCapsOnly", false)),
-          IgnoreCommandLineMacros(Options.get("IgnoreCommandLineMacros", true)) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void warnMacro(const MacroDirective *MD, StringRef MacroName);
-    void warnNaming(const MacroDirective *MD, StringRef MacroName);
+  MacroUsageCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        AllowedRegexp(Options.get("AllowedRegexp", "^DEBUG_*")),
+        CheckCapsOnly(Options.get("CheckCapsOnly", false)),
+        IgnoreCommandLineMacros(Options.get("IgnoreCommandLineMacros", true)) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void warnMacro(const MacroDirective *MD, StringRef MacroName);
+  void warnNaming(const MacroDirective *MD, StringRef MacroName);
 
 private:
-    /// A regular expression that defines how allowed macros must look like.
-    std::string AllowedRegexp;
-    /// Control if only the check shall only test on CAPS_ONLY macros.
-    bool CheckCapsOnly;
-    /// Should the macros without a valid location be diagnosed?
-    bool IgnoreCommandLineMacros;
+  /// A regular expression that defines how allowed macros must look like.
+  std::string AllowedRegexp;
+  /// Control if only the check shall only test on CAPS_ONLY macros.
+  bool CheckCapsOnly;
+  /// Should the macros without a valid location be diagnosed?
+  bool IgnoreCommandLineMacros;
 };
 
 } // namespace cppcoreguidelines

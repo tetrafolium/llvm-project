@@ -46,7 +46,7 @@ LLVM_C_EXTERN_C_BEGIN
  */
 typedef LLVMOrcObjectLayerRef (
     *LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction)(
-        void *Ctx, LLVMOrcExecutionSessionRef ES, const char *Triple);
+    void *Ctx, LLVMOrcExecutionSessionRef ES, const char *Triple);
 
 /**
  * A reference to an orc::LLJITBuilder instance.
@@ -170,8 +170,8 @@ LLVMErrorRef LLVMOrcLLJITAddObjectFile(LLVMOrcLLJITRef J, LLVMOrcJITDylibRef JD,
  * RT.
  */
 LLVMErrorRef LLVMOrcLLJITAddObjectFileWithRT(LLVMOrcLLJITRef J,
-        LLVMOrcResourceTrackerRef RT,
-        LLVMMemoryBufferRef ObjBuffer);
+                                             LLVMOrcResourceTrackerRef RT,
+                                             LLVMMemoryBufferRef ObjBuffer);
 
 /**
  * Add an IR module to the given JITDylib in the given LLJIT instance. This
@@ -183,8 +183,8 @@ LLVMErrorRef LLVMOrcLLJITAddObjectFileWithRT(LLVMOrcLLJITRef J,
  * JITDylib's default resource tracker.
  */
 LLVMErrorRef LLVMOrcLLJITAddLLVMIRModule(LLVMOrcLLJITRef J,
-        LLVMOrcJITDylibRef JD,
-        LLVMOrcThreadSafeModuleRef TSM);
+                                         LLVMOrcJITDylibRef JD,
+                                         LLVMOrcThreadSafeModuleRef TSM);
 
 /**
  * Add an IR module to the given ResourceTracker's JITDylib in the given LLJIT
@@ -196,8 +196,8 @@ LLVMErrorRef LLVMOrcLLJITAddLLVMIRModule(LLVMOrcLLJITRef J,
  * RT.
  */
 LLVMErrorRef LLVMOrcLLJITAddLLVMIRModuleWithRT(LLVMOrcLLJITRef J,
-        LLVMOrcResourceTrackerRef JD,
-        LLVMOrcThreadSafeModuleRef TSM);
+                                               LLVMOrcResourceTrackerRef JD,
+                                               LLVMOrcThreadSafeModuleRef TSM);
 
 /**
  * Look up the given symbol in the main JITDylib of the given LLJIT instance.

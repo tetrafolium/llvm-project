@@ -20,107 +20,103 @@ using namespace mlir::tblgen;
 //===----------------------------------------------------------------------===//
 
 InterfaceMethod::InterfaceMethod(const llvm::Record *def) : def(def) {
-    llvm::DagInit *args = def->getValueAsDag("arguments");
-    for (unsigned i = 0, e = args->getNumArgs(); i != e; ++i) {
-        arguments.push_back(
-        {   llvm::cast<llvm::StringInit>(args->getArg(i))->getValue(),
-            args->getArgNameStr(i)});
-    }
+  llvm::DagInit *args = def->getValueAsDag("arguments");
+  for (unsigned i = 0, e = args->getNumArgs(); i != e; ++i) {
+    arguments.push_back(
+        {llvm::cast<llvm::StringInit>(args->getArg(i))->getValue(),
+         args->getArgNameStr(i)});
+  }
 }
 
 StringRef InterfaceMethod::getReturnType() const {
-    return def->getValueAsString("returnType");
+  return def->getValueAsString("returnType");
 }
 
 // Return the name of this method.
 StringRef InterfaceMethod::getName() const {
-    return def->getValueAsString("name");
+  return def->getValueAsString("name");
 }
 
 // Return if this method is static.
 bool InterfaceMethod::isStatic() const {
-    return def->isSubClassOf("StaticInterfaceMethod");
+  return def->isSubClassOf("StaticInterfaceMethod");
 }
 
 // Return the body for this method if it has one.
 llvm::Optional<StringRef> InterfaceMethod::getBody() const {
-    auto value = def->getValueAsString("body");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("body");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 // Return the default implementation for this method if it has one.
 llvm::Optional<StringRef> InterfaceMethod::getDefaultImplementation() const {
-    auto value = def->getValueAsString("defaultBody");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("defaultBody");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 // Return the description of this method if it has one.
 llvm::Optional<StringRef> InterfaceMethod::getDescription() const {
-    auto value = def->getValueAsString("description");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("description");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 ArrayRef<InterfaceMethod::Argument> InterfaceMethod::getArguments() const {
-    return arguments;
+  return arguments;
 }
 
-bool InterfaceMethod::arg_empty() const {
-    return arguments.empty();
-}
+bool InterfaceMethod::arg_empty() const { return arguments.empty(); }
 
 //===----------------------------------------------------------------------===//
 // Interface
 //===----------------------------------------------------------------------===//
 
 Interface::Interface(const llvm::Record *def) : def(def) {
-    assert(def->isSubClassOf("Interface") &&
-           "must be subclass of TableGen 'Interface' class");
+  assert(def->isSubClassOf("Interface") &&
+         "must be subclass of TableGen 'Interface' class");
 
-    auto *listInit = dyn_cast<llvm::ListInit>(def->getValueInit("methods"));
-    for (llvm::Init *init : listInit->getValues())
-        methods.emplace_back(cast<llvm::DefInit>(init)->getDef());
+  auto *listInit = dyn_cast<llvm::ListInit>(def->getValueInit("methods"));
+  for (llvm::Init *init : listInit->getValues())
+    methods.emplace_back(cast<llvm::DefInit>(init)->getDef());
 }
 
 // Return the name of this interface.
 StringRef Interface::getName() const {
-    return def->getValueAsString("cppClassName");
+  return def->getValueAsString("cppClassName");
 }
 
 // Return the C++ namespace of this interface.
 StringRef Interface::getCppNamespace() const {
-    return def->getValueAsString("cppNamespace");
+  return def->getValueAsString("cppNamespace");
 }
 
 // Return the methods of this interface.
-ArrayRef<InterfaceMethod> Interface::getMethods() const {
-    return methods;
-}
+ArrayRef<InterfaceMethod> Interface::getMethods() const { return methods; }
 
 // Return the description of this method if it has one.
 llvm::Optional<StringRef> Interface::getDescription() const {
-    auto value = def->getValueAsString("description");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("description");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 // Return the interfaces extra class declaration code.
 llvm::Optional<StringRef> Interface::getExtraClassDeclaration() const {
-    auto value = def->getValueAsString("extraClassDeclaration");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("extraClassDeclaration");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 // Return the traits extra class declaration code.
 llvm::Optional<StringRef> Interface::getExtraTraitClassDeclaration() const {
-    auto value = def->getValueAsString("extraTraitClassDeclaration");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("extraTraitClassDeclaration");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 // Return the body for this method if it has one.
 llvm::Optional<StringRef> Interface::getVerify() const {
-    // Only OpInterface supports the verify method.
-    if (!isa<OpInterface>(this))
-        return llvm::None;
-    auto value = def->getValueAsString("verify");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  // Only OpInterface supports the verify method.
+  if (!isa<OpInterface>(this))
+    return llvm::None;
+  auto value = def->getValueAsString("verify");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 //===----------------------------------------------------------------------===//
@@ -128,7 +124,7 @@ llvm::Optional<StringRef> Interface::getVerify() const {
 //===----------------------------------------------------------------------===//
 
 bool AttrInterface::classof(const Interface *interface) {
-    return interface->getDef().isSubClassOf("AttrInterface");
+  return interface->getDef().isSubClassOf("AttrInterface");
 }
 
 //===----------------------------------------------------------------------===//
@@ -136,7 +132,7 @@ bool AttrInterface::classof(const Interface *interface) {
 //===----------------------------------------------------------------------===//
 
 bool OpInterface::classof(const Interface *interface) {
-    return interface->getDef().isSubClassOf("OpInterface");
+  return interface->getDef().isSubClassOf("OpInterface");
 }
 
 //===----------------------------------------------------------------------===//
@@ -144,5 +140,5 @@ bool OpInterface::classof(const Interface *interface) {
 //===----------------------------------------------------------------------===//
 
 bool TypeInterface::classof(const Interface *interface) {
-    return interface->getDef().isSubClassOf("TypeInterface");
+  return interface->getDef().isSubClassOf("TypeInterface");
 }

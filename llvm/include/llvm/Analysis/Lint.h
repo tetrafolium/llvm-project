@@ -40,7 +40,7 @@ void lintFunction(const Function &F);
 
 class LintPass : public PassInfoMixin<LintPass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // namespace llvm

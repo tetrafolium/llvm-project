@@ -21,5 +21,5 @@ static const TagNameItem tagData[] = {
 };
 
 const TagNameMap llvm::RISCVAttrs::RISCVAttributeTags(tagData,
-        sizeof(tagData) /
-        sizeof(TagNameItem));
+                                                      sizeof(tagData) /
+                                                          sizeof(TagNameItem));

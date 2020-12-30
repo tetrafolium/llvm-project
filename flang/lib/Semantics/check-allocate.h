@@ -18,11 +18,11 @@ struct AllocateStmt;
 namespace Fortran::semantics {
 class AllocateChecker : public virtual BaseChecker {
 public:
-    AllocateChecker(SemanticsContext &context) : context_{context} {}
-    void Leave(const parser::AllocateStmt &);
+  AllocateChecker(SemanticsContext &context) : context_{context} {}
+  void Leave(const parser::AllocateStmt &);
 
 private:
-    SemanticsContext &context_;
+  SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_ALLOCATE_H_

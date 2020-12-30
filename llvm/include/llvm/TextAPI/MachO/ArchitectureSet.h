@@ -28,156 +28,134 @@ namespace MachO {
 
 class ArchitectureSet {
 private:
-    using ArchSetType = uint32_t;
+  using ArchSetType = uint32_t;
 
-    const static ArchSetType EndIndexVal =
-        std::numeric_limits<ArchSetType>::max();
-    ArchSetType ArchSet{0};
+  const static ArchSetType EndIndexVal =
+      std::numeric_limits<ArchSetType>::max();
+  ArchSetType ArchSet{0};
 
 public:
-    constexpr ArchitectureSet() = default;
-    constexpr ArchitectureSet(ArchSetType Raw) : ArchSet(Raw) {}
-    ArchitectureSet(Architecture Arch) : ArchitectureSet() {
-        set(Arch);
-    }
-    ArchitectureSet(const std::vector<Architecture> &Archs);
+  constexpr ArchitectureSet() = default;
+  constexpr ArchitectureSet(ArchSetType Raw) : ArchSet(Raw) {}
+  ArchitectureSet(Architecture Arch) : ArchitectureSet() { set(Arch); }
+  ArchitectureSet(const std::vector<Architecture> &Archs);
 
-    void set(Architecture Arch) {
-        if (Arch == AK_unknown)
-            return;
-        ArchSet |= 1U << static_cast<int>(Arch);
-    }
+  void set(Architecture Arch) {
+    if (Arch == AK_unknown)
+      return;
+    ArchSet |= 1U << static_cast<int>(Arch);
+  }
 
-    void clear(Architecture Arch) {
-        ArchSet &= ~(1U << static_cast<int>(Arch));
-    }
+  void clear(Architecture Arch) { ArchSet &= ~(1U << static_cast<int>(Arch)); }
 
-    bool has(Architecture Arch) const {
-        return ArchSet & (1U << static_cast<int>(Arch));
-    }
+  bool has(Architecture Arch) const {
+    return ArchSet & (1U << static_cast<int>(Arch));
+  }
 
-    bool contains(ArchitectureSet Archs) const {
-        return (ArchSet & Archs.ArchSet) == Archs.ArchSet;
-    }
+  bool contains(ArchitectureSet Archs) const {
+    return (ArchSet & Archs.ArchSet) == Archs.ArchSet;
+  }
 
-    size_t count() const;
+  size_t count() const;
 
-    bool empty() const {
-        return ArchSet == 0;
-    }
+  bool empty() const { return ArchSet == 0; }
 
-    ArchSetType rawValue() const {
-        return ArchSet;
-    }
+  ArchSetType rawValue() const { return ArchSet; }
 
-    bool hasX86() const {
-        return has(AK_i386) || has(AK_x86_64) || has(AK_x86_64h);
-    }
+  bool hasX86() const {
+    return has(AK_i386) || has(AK_x86_64) || has(AK_x86_64h);
+  }
 
-    template <typename Ty>
-    class arch_iterator
-        : public std::iterator<std::forward_iterator_tag, Architecture, size_t> {
-    private:
-        ArchSetType Index;
-        Ty *ArchSet;
+  template <typename Ty>
+  class arch_iterator
+      : public std::iterator<std::forward_iterator_tag, Architecture, size_t> {
+  private:
+    ArchSetType Index;
+    Ty *ArchSet;
 
-        void findNextSetBit() {
-            if (Index == EndIndexVal)
-                return;
-            while (++Index < sizeof(Ty) * 8) {
-                if (*ArchSet & (1UL << Index))
-                    return;
-            }
+    void findNextSetBit() {
+      if (Index == EndIndexVal)
+        return;
+      while (++Index < sizeof(Ty) * 8) {
+        if (*ArchSet & (1UL << Index))
+          return;
+      }
 
-            Index = EndIndexVal;
-        }
-
-    public:
-        arch_iterator(Ty *ArchSet, ArchSetType Index = 0)
-            : Index(Index), ArchSet(ArchSet) {
-            if (Index != EndIndexVal && !(*ArchSet & (1UL << Index)))
-                findNextSetBit();
-        }
-
-        Architecture operator*() const {
-            return static_cast<Architecture>(Index);
-        }
-
-        arch_iterator &operator++() {
-            findNextSetBit();
-            return *this;
-        }
-
-        arch_iterator operator++(int) {
-            auto tmp = *this;
-            findNextSetBit();
-            return tmp;
-        }
-
-        bool operator==(const arch_iterator &o) const {
-            return std::tie(Index, ArchSet) == std::tie(o.Index, o.ArchSet);
-        }
-
-        bool operator!=(const arch_iterator &o) const {
-            return !(*this == o);
-        }
-    };
-
-    ArchitectureSet operator&(const ArchitectureSet &o) {
-        return {ArchSet & o.ArchSet};
+      Index = EndIndexVal;
     }
 
-    ArchitectureSet operator|(const ArchitectureSet &o) {
-        return {ArchSet | o.ArchSet};
+  public:
+    arch_iterator(Ty *ArchSet, ArchSetType Index = 0)
+        : Index(Index), ArchSet(ArchSet) {
+      if (Index != EndIndexVal && !(*ArchSet & (1UL << Index)))
+        findNextSetBit();
     }
 
-    ArchitectureSet &operator|=(const ArchitectureSet &o) {
-        ArchSet |= o.ArchSet;
-        return *this;
+    Architecture operator*() const { return static_cast<Architecture>(Index); }
+
+    arch_iterator &operator++() {
+      findNextSetBit();
+      return *this;
     }
 
-    ArchitectureSet &operator|=(const Architecture &Arch) {
-        set(Arch);
-        return *this;
+    arch_iterator operator++(int) {
+      auto tmp = *this;
+      findNextSetBit();
+      return tmp;
     }
 
-    bool operator==(const ArchitectureSet &o) const {
-        return ArchSet == o.ArchSet;
+    bool operator==(const arch_iterator &o) const {
+      return std::tie(Index, ArchSet) == std::tie(o.Index, o.ArchSet);
     }
 
-    bool operator!=(const ArchitectureSet &o) const {
-        return ArchSet != o.ArchSet;
-    }
+    bool operator!=(const arch_iterator &o) const { return !(*this == o); }
+  };
 
-    bool operator<(const ArchitectureSet &o) const {
-        return ArchSet < o.ArchSet;
-    }
+  ArchitectureSet operator&(const ArchitectureSet &o) {
+    return {ArchSet & o.ArchSet};
+  }
 
-    using iterator = arch_iterator<ArchSetType>;
-    using const_iterator = arch_iterator<const ArchSetType>;
+  ArchitectureSet operator|(const ArchitectureSet &o) {
+    return {ArchSet | o.ArchSet};
+  }
 
-    iterator begin() {
-        return {&ArchSet};
-    }
-    iterator end() {
-        return {&ArchSet, EndIndexVal};
-    }
+  ArchitectureSet &operator|=(const ArchitectureSet &o) {
+    ArchSet |= o.ArchSet;
+    return *this;
+  }
 
-    const_iterator begin() const {
-        return {&ArchSet};
-    }
-    const_iterator end() const {
-        return {&ArchSet, EndIndexVal};
-    }
+  ArchitectureSet &operator|=(const Architecture &Arch) {
+    set(Arch);
+    return *this;
+  }
 
-    operator std::string() const;
-    operator std::vector<Architecture>() const;
-    void print(raw_ostream &OS) const;
+  bool operator==(const ArchitectureSet &o) const {
+    return ArchSet == o.ArchSet;
+  }
+
+  bool operator!=(const ArchitectureSet &o) const {
+    return ArchSet != o.ArchSet;
+  }
+
+  bool operator<(const ArchitectureSet &o) const { return ArchSet < o.ArchSet; }
+
+  using iterator = arch_iterator<ArchSetType>;
+  using const_iterator = arch_iterator<const ArchSetType>;
+
+  iterator begin() { return {&ArchSet}; }
+  iterator end() { return {&ArchSet, EndIndexVal}; }
+
+  const_iterator begin() const { return {&ArchSet}; }
+  const_iterator end() const { return {&ArchSet, EndIndexVal}; }
+
+  operator std::string() const;
+  operator std::vector<Architecture>() const;
+  void print(raw_ostream &OS) const;
 };
 
 inline ArchitectureSet operator|(const Architecture &lhs,
                                  const Architecture &rhs) {
-    return ArchitectureSet(lhs) | ArchitectureSet(rhs);
+  return ArchitectureSet(lhs) | ArchitectureSet(rhs);
 }
 
 raw_ostream &operator<<(raw_ostream &OS, ArchitectureSet Set);

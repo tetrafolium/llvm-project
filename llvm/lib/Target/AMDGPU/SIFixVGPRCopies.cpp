@@ -13,8 +13,8 @@
 
 #include "AMDGPU.h"
 #include "AMDGPUSubtarget.h"
-#include "SIInstrInfo.h"
 #include "MCTargetDesc/AMDGPUMCTargetDesc.h"
+#include "SIInstrInfo.h"
 #include "llvm/CodeGen/MachineFunctionPass.h"
 
 using namespace llvm;
@@ -25,18 +25,16 @@ namespace {
 
 class SIFixVGPRCopies : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
 public:
-    SIFixVGPRCopies() : MachineFunctionPass(ID) {
-        initializeSIFixVGPRCopiesPass(*PassRegistry::getPassRegistry());
-    }
+  SIFixVGPRCopies() : MachineFunctionPass(ID) {
+    initializeSIFixVGPRCopiesPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    StringRef getPassName() const override {
-        return "SI Fix VGPR copies";
-    }
+  StringRef getPassName() const override { return "SI Fix VGPR copies"; }
 };
 
 } // End anonymous namespace.
@@ -48,27 +46,27 @@ char SIFixVGPRCopies::ID = 0;
 char &llvm::SIFixVGPRCopiesID = SIFixVGPRCopies::ID;
 
 bool SIFixVGPRCopies::runOnMachineFunction(MachineFunction &MF) {
-    const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
-    const SIRegisterInfo *TRI = ST.getRegisterInfo();
-    const SIInstrInfo *TII = ST.getInstrInfo();
-    bool Changed = false;
+  const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
+  const SIRegisterInfo *TRI = ST.getRegisterInfo();
+  const SIInstrInfo *TII = ST.getInstrInfo();
+  bool Changed = false;
 
-    for (MachineBasicBlock &MBB : MF) {
-        for (MachineInstr &MI : MBB) {
-            switch (MI.getOpcode()) {
-            case AMDGPU::COPY:
-                if (TII->isVGPRCopy(MI) && !MI.readsRegister(AMDGPU::EXEC, TRI)) {
-                    MI.addOperand(MF,
-                                  MachineOperand::CreateReg(AMDGPU::EXEC, false, true));
-                    LLVM_DEBUG(dbgs() << "Add exec use to " << MI);
-                    Changed = true;
-                }
-                break;
-            default:
-                break;
-            }
+  for (MachineBasicBlock &MBB : MF) {
+    for (MachineInstr &MI : MBB) {
+      switch (MI.getOpcode()) {
+      case AMDGPU::COPY:
+        if (TII->isVGPRCopy(MI) && !MI.readsRegister(AMDGPU::EXEC, TRI)) {
+          MI.addOperand(MF,
+                        MachineOperand::CreateReg(AMDGPU::EXEC, false, true));
+          LLVM_DEBUG(dbgs() << "Add exec use to " << MI);
+          Changed = true;
         }
+        break;
+      default:
+        break;
+      }
     }
+  }
 
-    return Changed;
+  return Changed;
 }

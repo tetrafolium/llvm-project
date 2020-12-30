@@ -22,19 +22,19 @@ namespace Fortran::parser {
 
 class DebugParser {
 public:
-    using resultType = Success;
-    constexpr DebugParser(const DebugParser &) = default;
-    constexpr DebugParser(const char *str, std::size_t n)
-        : str_{str}, length_{n} {}
-    std::optional<Success> Parse(ParseState &) const;
+  using resultType = Success;
+  constexpr DebugParser(const DebugParser &) = default;
+  constexpr DebugParser(const char *str, std::size_t n)
+      : str_{str}, length_{n} {}
+  std::optional<Success> Parse(ParseState &) const;
 
 private:
-    const char *const str_;
-    const std::size_t length_;
+  const char *const str_;
+  const std::size_t length_;
 };
 
 constexpr DebugParser operator""_debug(const char str[], std::size_t n) {
-    return DebugParser{str, n};
+  return DebugParser{str, n};
 }
 } // namespace Fortran::parser
 #endif // FORTRAN_PARSER_DEBUG_PARSER_H_

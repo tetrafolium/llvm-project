@@ -17,14 +17,14 @@ namespace tidy {
 namespace cppcoreguidelines {
 
 void ProTypeReinterpretCastCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(cxxReinterpretCastExpr().bind("cast"), this);
+  Finder->addMatcher(cxxReinterpretCastExpr().bind("cast"), this);
 }
 
 void ProTypeReinterpretCastCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *MatchedCast =
-        Result.Nodes.getNodeAs<CXXReinterpretCastExpr>("cast");
-    diag(MatchedCast->getOperatorLoc(), "do not use reinterpret_cast");
+  const auto *MatchedCast =
+      Result.Nodes.getNodeAs<CXXReinterpretCastExpr>("cast");
+  diag(MatchedCast->getOperatorLoc(), "do not use reinterpret_cast");
 }
 
 } // namespace cppcoreguidelines

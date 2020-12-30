@@ -32,11 +32,10 @@ LLVM_C_EXTERN_C_BEGIN
  */
 
 typedef enum {
-    LLVMAbortProcessAction, /* verifier will print to stderr and abort() */
-    LLVMPrintMessageAction, /* verifier will print to stderr and return 1 */
-    LLVMReturnStatusAction  /* verifier will just return 1 */
+  LLVMAbortProcessAction, /* verifier will print to stderr and abort() */
+  LLVMPrintMessageAction, /* verifier will print to stderr and return 1 */
+  LLVMReturnStatusAction  /* verifier will just return 1 */
 } LLVMVerifierFailureAction;
-
 
 /* Verifies that a module is valid, taking the specified action if not.
    Optionally returns a human-readable description of any invalid constructs.

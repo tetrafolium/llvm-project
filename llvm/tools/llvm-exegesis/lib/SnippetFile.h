@@ -27,7 +27,7 @@ namespace exegesis {
 
 // Reads code snippets from file `Filename`.
 Expected<std::vector<BenchmarkCode>> readSnippets(const LLVMState &State,
-                                  StringRef Filename);
+                                                  StringRef Filename);
 
 } // namespace exegesis
 } // namespace llvm

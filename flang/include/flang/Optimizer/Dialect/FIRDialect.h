@@ -18,25 +18,23 @@ namespace fir {
 /// FIR dialect
 class FIROpsDialect final : public mlir::Dialect {
 public:
-    explicit FIROpsDialect(mlir::MLIRContext *ctx);
-    virtual ~FIROpsDialect();
+  explicit FIROpsDialect(mlir::MLIRContext *ctx);
+  virtual ~FIROpsDialect();
 
-    static llvm::StringRef getDialectNamespace() {
-        return "fir";
-    }
+  static llvm::StringRef getDialectNamespace() { return "fir"; }
 
-    mlir::Type parseType(mlir::DialectAsmParser &parser) const override;
-    void printType(mlir::Type ty, mlir::DialectAsmPrinter &p) const override;
+  mlir::Type parseType(mlir::DialectAsmParser &parser) const override;
+  void printType(mlir::Type ty, mlir::DialectAsmPrinter &p) const override;
 
-    mlir::Attribute parseAttribute(mlir::DialectAsmParser &parser,
-                                   mlir::Type type) const override;
-    void printAttribute(mlir::Attribute attr,
-                        mlir::DialectAsmPrinter &p) const override;
+  mlir::Attribute parseAttribute(mlir::DialectAsmParser &parser,
+                                 mlir::Type type) const override;
+  void printAttribute(mlir::Attribute attr,
+                      mlir::DialectAsmPrinter &p) const override;
 };
 
 /// Register the dialect with the provided registry.
 inline void registerFIRDialects(mlir::DialectRegistry &registry) {
-    // clang-format off
+  // clang-format off
     registry.insert<mlir::AffineDialect,
                     mlir::LLVM::LLVMDialect,
                     mlir::acc::OpenACCDialect,
@@ -45,37 +43,35 @@ inline void registerFIRDialects(mlir::DialectRegistry &registry) {
                     mlir::StandardOpsDialect,
                     mlir::vector::VectorDialect,
                     FIROpsDialect>();
-    // clang-format on
+  // clang-format on
 }
 
 /// Register the standard passes we use. This comes from registerAllPasses(),
 /// but is a smaller set since we aren't using many of the passes found there.
 inline void registerGeneralPasses() {
-    mlir::createCanonicalizerPass();
-    mlir::createCSEPass();
-    mlir::createSuperVectorizePass({});
-    mlir::createLoopUnrollPass();
-    mlir::createLoopUnrollAndJamPass();
-    mlir::createSimplifyAffineStructuresPass();
-    mlir::createLoopFusionPass();
-    mlir::createLoopInvariantCodeMotionPass();
-    mlir::createAffineLoopInvariantCodeMotionPass();
-    mlir::createPipelineDataTransferPass();
-    mlir::createLowerAffinePass();
-    mlir::createLoopTilingPass(0);
-    mlir::createLoopCoalescingPass();
-    mlir::createAffineDataCopyGenerationPass(0, 0);
-    mlir::createMemRefDataFlowOptPass();
-    mlir::createStripDebugInfoPass();
-    mlir::createPrintOpStatsPass();
-    mlir::createInlinerPass();
-    mlir::createSymbolDCEPass();
-    mlir::createLocationSnapshotPass({});
+  mlir::createCanonicalizerPass();
+  mlir::createCSEPass();
+  mlir::createSuperVectorizePass({});
+  mlir::createLoopUnrollPass();
+  mlir::createLoopUnrollAndJamPass();
+  mlir::createSimplifyAffineStructuresPass();
+  mlir::createLoopFusionPass();
+  mlir::createLoopInvariantCodeMotionPass();
+  mlir::createAffineLoopInvariantCodeMotionPass();
+  mlir::createPipelineDataTransferPass();
+  mlir::createLowerAffinePass();
+  mlir::createLoopTilingPass(0);
+  mlir::createLoopCoalescingPass();
+  mlir::createAffineDataCopyGenerationPass(0, 0);
+  mlir::createMemRefDataFlowOptPass();
+  mlir::createStripDebugInfoPass();
+  mlir::createPrintOpStatsPass();
+  mlir::createInlinerPass();
+  mlir::createSymbolDCEPass();
+  mlir::createLocationSnapshotPass({});
 }
 
-inline void registerFIRPasses() {
-    registerGeneralPasses();
-}
+inline void registerFIRPasses() { registerGeneralPasses(); }
 
 } // namespace fir
 

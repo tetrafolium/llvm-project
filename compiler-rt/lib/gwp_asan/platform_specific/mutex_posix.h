@@ -15,7 +15,7 @@
 namespace gwp_asan {
 class PlatformMutex {
 protected:
-    pthread_mutex_t Mu = PTHREAD_MUTEX_INITIALIZER;
+  pthread_mutex_t Mu = PTHREAD_MUTEX_INITIALIZER;
 };
 } // namespace gwp_asan
 

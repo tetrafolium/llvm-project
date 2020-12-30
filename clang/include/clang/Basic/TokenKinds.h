@@ -25,7 +25,7 @@ namespace tok {
 enum TokenKind : unsigned short {
 #define TOK(X) X,
 #include "clang/Basic/TokenKinds.def"
-    NUM_TOKENS
+  NUM_TOKENS
 };
 
 /// Provides a namespace for preprocessor keywords which start with a
@@ -33,7 +33,7 @@ enum TokenKind : unsigned short {
 enum PPKeywordKind {
 #define PPKEYWORD(X) pp_##X,
 #include "clang/Basic/TokenKinds.def"
-    NUM_PP_KEYWORDS
+  NUM_PP_KEYWORDS
 };
 
 /// Provides a namespace for Objective-C keywords which start with
@@ -41,13 +41,11 @@ enum PPKeywordKind {
 enum ObjCKeywordKind {
 #define OBJC_AT_KEYWORD(X) objc_##X,
 #include "clang/Basic/TokenKinds.def"
-    NUM_OBJC_KEYWORDS
+  NUM_OBJC_KEYWORDS
 };
 
 /// Defines the possible values of an on-off-switch (C99 6.10.6p2).
-enum OnOffSwitch {
-    OOS_ON, OOS_OFF, OOS_DEFAULT
-};
+enum OnOffSwitch { OOS_ON, OOS_OFF, OOS_DEFAULT };
 
 /// Determines the name of a token as used within the front end.
 ///
@@ -70,24 +68,24 @@ const char *getKeywordSpelling(TokenKind Kind) LLVM_READNONE;
 
 /// Return true if this is a raw identifier or an identifier kind.
 inline bool isAnyIdentifier(TokenKind K) {
-    return (K == tok::identifier) || (K == tok::raw_identifier);
+  return (K == tok::identifier) || (K == tok::raw_identifier);
 }
 
 /// Return true if this is a C or C++ string-literal (or
 /// C++11 user-defined-string-literal) token.
 inline bool isStringLiteral(TokenKind K) {
-    return K == tok::string_literal || K == tok::wide_string_literal ||
-           K == tok::utf8_string_literal || K == tok::utf16_string_literal ||
-           K == tok::utf32_string_literal;
+  return K == tok::string_literal || K == tok::wide_string_literal ||
+         K == tok::utf8_string_literal || K == tok::utf16_string_literal ||
+         K == tok::utf32_string_literal;
 }
 
 /// Return true if this is a "literal" kind, like a numeric
 /// constant, string, etc.
 inline bool isLiteral(TokenKind K) {
-    return K == tok::numeric_constant || K == tok::char_constant ||
-           K == tok::wide_char_constant || K == tok::utf8_char_constant ||
-           K == tok::utf16_char_constant || K == tok::utf32_char_constant ||
-           isStringLiteral(K) || K == tok::header_name;
+  return K == tok::numeric_constant || K == tok::char_constant ||
+         K == tok::wide_char_constant || K == tok::utf8_char_constant ||
+         K == tok::utf16_char_constant || K == tok::utf32_char_constant ||
+         isStringLiteral(K) || K == tok::header_name;
 }
 
 /// Return true if this is any of tok::annot_* kinds.
@@ -101,19 +99,19 @@ bool isPragmaAnnotation(TokenKind K);
 
 namespace llvm {
 template <> struct DenseMapInfo<clang::tok::PPKeywordKind> {
-    static inline clang::tok::PPKeywordKind getEmptyKey() {
-        return clang::tok::PPKeywordKind::pp_not_keyword;
-    }
-    static inline clang::tok::PPKeywordKind getTombstoneKey() {
-        return clang::tok::PPKeywordKind::NUM_PP_KEYWORDS;
-    }
-    static unsigned getHashValue(const clang::tok::PPKeywordKind &Val) {
-        return static_cast<unsigned>(Val);
-    }
-    static bool isEqual(const clang::tok::PPKeywordKind &LHS,
-                        const clang::tok::PPKeywordKind &RHS) {
-        return LHS == RHS;
-    }
+  static inline clang::tok::PPKeywordKind getEmptyKey() {
+    return clang::tok::PPKeywordKind::pp_not_keyword;
+  }
+  static inline clang::tok::PPKeywordKind getTombstoneKey() {
+    return clang::tok::PPKeywordKind::NUM_PP_KEYWORDS;
+  }
+  static unsigned getHashValue(const clang::tok::PPKeywordKind &Val) {
+    return static_cast<unsigned>(Val);
+  }
+  static bool isEqual(const clang::tok::PPKeywordKind &LHS,
+                      const clang::tok::PPKeywordKind &RHS) {
+    return LHS == RHS;
+  }
 };
 } // namespace llvm
 

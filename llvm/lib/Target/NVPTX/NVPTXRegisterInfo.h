@@ -23,37 +23,36 @@
 namespace llvm {
 class NVPTXRegisterInfo : public NVPTXGenRegisterInfo {
 private:
-    // Hold Strings that can be free'd all together with NVPTXRegisterInfo
-    ManagedStringPool ManagedStrPool;
+  // Hold Strings that can be free'd all together with NVPTXRegisterInfo
+  ManagedStringPool ManagedStrPool;
 
 public:
-    NVPTXRegisterInfo();
+  NVPTXRegisterInfo();
 
-    //------------------------------------------------------
-    // Pure virtual functions from TargetRegisterInfo
-    //------------------------------------------------------
+  //------------------------------------------------------
+  // Pure virtual functions from TargetRegisterInfo
+  //------------------------------------------------------
 
-    // NVPTX callee saved registers
-    const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+  // NVPTX callee saved registers
+  const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
-    BitVector getReservedRegs(const MachineFunction &MF) const override;
+  BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-    void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
-                             unsigned FIOperandNum,
-                             RegScavenger *RS = nullptr) const override;
+  void eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
-    Register getFrameRegister(const MachineFunction &MF) const override;
+  Register getFrameRegister(const MachineFunction &MF) const override;
 
-    ManagedStringPool *getStrPool() const {
-        return const_cast<ManagedStringPool *>(&ManagedStrPool);
-    }
+  ManagedStringPool *getStrPool() const {
+    return const_cast<ManagedStringPool *>(&ManagedStrPool);
+  }
 
-    const char *getName(unsigned RegNo) const {
-        std::stringstream O;
-        O << "reg" << RegNo;
-        return getStrPool()->getManagedString(O.str().c_str())->c_str();
-    }
-
+  const char *getName(unsigned RegNo) const {
+    std::stringstream O;
+    O << "reg" << RegNo;
+    return getStrPool()->getManagedString(O.str().c_str())->c_str();
+  }
 };
 
 std::string getNVPTXRegClassName(const TargetRegisterClass *RC);

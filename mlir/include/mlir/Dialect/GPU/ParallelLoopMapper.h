@@ -43,14 +43,14 @@ StringRef getMappingAttrName();
 
 /// Get the value of the processor in the ParallelLoopDimMapping attribute.
 inline Processor getProcessor(ParallelLoopDimMapping attr) {
-    return static_cast<Processor>(attr.processor().getInt());
+  return static_cast<Processor>(attr.processor().getInt());
 }
 
 /// Helper function to create a ParallelDimMapperAttr.
 /// TODO: Replace its uses with an auto-gened method.
 ParallelLoopDimMapping getParallelLoopDimMappingAttr(Processor processor,
-        AffineMap map,
-        AffineMap bound);
+                                                     AffineMap map,
+                                                     AffineMap bound);
 
 /// Sets the mapping attribute of a scf.parallel operation. Verifies that the
 /// mapping passed is valid.

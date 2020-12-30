@@ -51,39 +51,39 @@ using namespace llvm;
 static codegen::RegisterCodeGenFlags CGF;
 
 // Define a type for the functions that are compiled and executed
-typedef void (*LLVMFunc)(int*, int*, int*, int);
+typedef void (*LLVMFunc)(int *, int *, int *, int);
 
 // Helper function to parse command line args and find the optimization level
 static void getOptLevel(const std::vector<const char *> &ExtraArgs,
                         CodeGenOpt::Level &OLvl) {
-    // Find the optimization level from the command line args
-    OLvl = CodeGenOpt::Default;
-    for (auto &A : ExtraArgs) {
-        if (A[0] == '-' && A[1] == 'O') {
-            switch(A[2]) {
-            case '0':
-                OLvl = CodeGenOpt::None;
-                break;
-            case '1':
-                OLvl = CodeGenOpt::Less;
-                break;
-            case '2':
-                OLvl = CodeGenOpt::Default;
-                break;
-            case '3':
-                OLvl = CodeGenOpt::Aggressive;
-                break;
-            default:
-                errs() << "error: opt level must be between 0 and 3.\n";
-                std::exit(1);
-            }
-        }
+  // Find the optimization level from the command line args
+  OLvl = CodeGenOpt::Default;
+  for (auto &A : ExtraArgs) {
+    if (A[0] == '-' && A[1] == 'O') {
+      switch (A[2]) {
+      case '0':
+        OLvl = CodeGenOpt::None;
+        break;
+      case '1':
+        OLvl = CodeGenOpt::Less;
+        break;
+      case '2':
+        OLvl = CodeGenOpt::Default;
+        break;
+      case '3':
+        OLvl = CodeGenOpt::Aggressive;
+        break;
+      default:
+        errs() << "error: opt level must be between 0 and 3.\n";
+        std::exit(1);
+      }
     }
+  }
 }
 
 static void ErrorAndExit(std::string message) {
-    errs()<< "ERROR: " << message << "\n";
-    std::exit(1);
+  errs() << "ERROR: " << message << "\n";
+  std::exit(1);
 }
 
 // Helper function to add optimization passes to the TargetMachine at the
@@ -91,105 +91,105 @@ static void ErrorAndExit(std::string message) {
 static void AddOptimizationPasses(legacy::PassManagerBase &MPM,
                                   CodeGenOpt::Level OptLevel,
                                   unsigned SizeLevel) {
-    // Create and initialize a PassManagerBuilder
-    PassManagerBuilder Builder;
-    Builder.OptLevel = OptLevel;
-    Builder.SizeLevel = SizeLevel;
-    Builder.Inliner = createFunctionInliningPass(OptLevel, SizeLevel, false);
-    Builder.LoopVectorize = true;
-    Builder.populateModulePassManager(MPM);
+  // Create and initialize a PassManagerBuilder
+  PassManagerBuilder Builder;
+  Builder.OptLevel = OptLevel;
+  Builder.SizeLevel = SizeLevel;
+  Builder.Inliner = createFunctionInliningPass(OptLevel, SizeLevel, false);
+  Builder.LoopVectorize = true;
+  Builder.populateModulePassManager(MPM);
 }
 
 // Mimics the opt tool to run an optimization pass over the provided IR
 static std::string OptLLVM(const std::string &IR, CodeGenOpt::Level OLvl) {
-    // Create a module that will run the optimization passes
-    SMDiagnostic Err;
-    LLVMContext Context;
-    std::unique_ptr<Module> M = parseIR(MemoryBufferRef(IR, "IR"), Err, Context);
-    if (!M || verifyModule(*M, &errs()))
-        ErrorAndExit("Could not parse IR");
+  // Create a module that will run the optimization passes
+  SMDiagnostic Err;
+  LLVMContext Context;
+  std::unique_ptr<Module> M = parseIR(MemoryBufferRef(IR, "IR"), Err, Context);
+  if (!M || verifyModule(*M, &errs()))
+    ErrorAndExit("Could not parse IR");
 
-    Triple ModuleTriple(M->getTargetTriple());
-    const TargetOptions Options =
-        codegen::InitTargetOptionsFromCodeGenFlags(ModuleTriple);
-    std::string E;
-    const Target *TheTarget =
-        TargetRegistry::lookupTarget(codegen::getMArch(), ModuleTriple, E);
-    if (!TheTarget)
-        ErrorAndExit(E);
+  Triple ModuleTriple(M->getTargetTriple());
+  const TargetOptions Options =
+      codegen::InitTargetOptionsFromCodeGenFlags(ModuleTriple);
+  std::string E;
+  const Target *TheTarget =
+      TargetRegistry::lookupTarget(codegen::getMArch(), ModuleTriple, E);
+  if (!TheTarget)
+    ErrorAndExit(E);
 
-    std::unique_ptr<TargetMachine> TM(TheTarget->createTargetMachine(
-                                          M->getTargetTriple(), codegen::getCPUStr(), codegen::getFeaturesStr(),
-                                          Options, codegen::getExplicitRelocModel(),
-                                          codegen::getExplicitCodeModel(), OLvl));
-    if (!TM)
-        ErrorAndExit("Could not create target machine");
+  std::unique_ptr<TargetMachine> TM(TheTarget->createTargetMachine(
+      M->getTargetTriple(), codegen::getCPUStr(), codegen::getFeaturesStr(),
+      Options, codegen::getExplicitRelocModel(),
+      codegen::getExplicitCodeModel(), OLvl));
+  if (!TM)
+    ErrorAndExit("Could not create target machine");
 
-    codegen::setFunctionAttributes(codegen::getCPUStr(),
-                                   codegen::getFeaturesStr(), *M);
+  codegen::setFunctionAttributes(codegen::getCPUStr(),
+                                 codegen::getFeaturesStr(), *M);
 
-    legacy::PassManager Passes;
+  legacy::PassManager Passes;
 
-    Passes.add(new TargetLibraryInfoWrapperPass(ModuleTriple));
-    Passes.add(createTargetTransformInfoWrapperPass(TM->getTargetIRAnalysis()));
+  Passes.add(new TargetLibraryInfoWrapperPass(ModuleTriple));
+  Passes.add(createTargetTransformInfoWrapperPass(TM->getTargetIRAnalysis()));
 
-    LLVMTargetMachine &LTM = static_cast<LLVMTargetMachine &>(*TM);
-    Passes.add(LTM.createPassConfig(Passes));
+  LLVMTargetMachine &LTM = static_cast<LLVMTargetMachine &>(*TM);
+  Passes.add(LTM.createPassConfig(Passes));
 
-    Passes.add(createVerifierPass());
+  Passes.add(createVerifierPass());
 
-    AddOptimizationPasses(Passes, OLvl, 0);
+  AddOptimizationPasses(Passes, OLvl, 0);
 
-    // Add a pass that writes the optimized IR to an output stream
-    std::string outString;
-    raw_string_ostream OS(outString);
-    Passes.add(createPrintModulePass(OS, "", false));
+  // Add a pass that writes the optimized IR to an output stream
+  std::string outString;
+  raw_string_ostream OS(outString);
+  Passes.add(createPrintModulePass(OS, "", false));
 
-    Passes.run(*M);
+  Passes.run(*M);
 
-    return OS.str();
+  return OS.str();
 }
 
 // Takes a function and runs it on a set of inputs
 // First determines whether f is the optimized or unoptimized function
 static void RunFuncOnInputs(LLVMFunc f, int Arr[kNumArrays][kArraySize]) {
-    for (int i = 0; i < kNumArrays / 3; i++)
-        f(Arr[i], Arr[i + (kNumArrays / 3)], Arr[i + (2 * kNumArrays / 3)],
-          kArraySize);
+  for (int i = 0; i < kNumArrays / 3; i++)
+    f(Arr[i], Arr[i + (kNumArrays / 3)], Arr[i + (2 * kNumArrays / 3)],
+      kArraySize);
 }
 
 // Takes a string of IR and compiles it using LLVM's JIT Engine
 static void CreateAndRunJITFunc(const std::string &IR, CodeGenOpt::Level OLvl) {
-    SMDiagnostic Err;
-    LLVMContext Context;
-    std::unique_ptr<Module> M = parseIR(MemoryBufferRef(IR, "IR"), Err, Context);
-    if (!M)
-        ErrorAndExit("Could not parse IR");
+  SMDiagnostic Err;
+  LLVMContext Context;
+  std::unique_ptr<Module> M = parseIR(MemoryBufferRef(IR, "IR"), Err, Context);
+  if (!M)
+    ErrorAndExit("Could not parse IR");
 
-    Function *EntryFunc = M->getFunction("foo");
-    if (!EntryFunc)
-        ErrorAndExit("Function not found in module");
+  Function *EntryFunc = M->getFunction("foo");
+  if (!EntryFunc)
+    ErrorAndExit("Function not found in module");
 
-    std::string ErrorMsg;
-    Triple ModuleTriple(M->getTargetTriple());
+  std::string ErrorMsg;
+  Triple ModuleTriple(M->getTargetTriple());
 
-    EngineBuilder builder(std::move(M));
-    builder.setMArch(codegen::getMArch());
-    builder.setMCPU(codegen::getCPUStr());
-    builder.setMAttrs(codegen::getFeatureList());
-    builder.setErrorStr(&ErrorMsg);
-    builder.setEngineKind(EngineKind::JIT);
-    builder.setMCJITMemoryManager(std::make_unique<SectionMemoryManager>());
-    builder.setOptLevel(OLvl);
-    builder.setTargetOptions(
-        codegen::InitTargetOptionsFromCodeGenFlags(ModuleTriple));
+  EngineBuilder builder(std::move(M));
+  builder.setMArch(codegen::getMArch());
+  builder.setMCPU(codegen::getCPUStr());
+  builder.setMAttrs(codegen::getFeatureList());
+  builder.setErrorStr(&ErrorMsg);
+  builder.setEngineKind(EngineKind::JIT);
+  builder.setMCJITMemoryManager(std::make_unique<SectionMemoryManager>());
+  builder.setOptLevel(OLvl);
+  builder.setTargetOptions(
+      codegen::InitTargetOptionsFromCodeGenFlags(ModuleTriple));
 
-    std::unique_ptr<ExecutionEngine> EE(builder.create());
-    if (!EE)
-        ErrorAndExit("Could not create execution engine");
+  std::unique_ptr<ExecutionEngine> EE(builder.create());
+  if (!EE)
+    ErrorAndExit("Could not create execution engine");
 
-    EE->finalizeObject();
-    EE->runStaticConstructorsDestructors(false);
+  EE->finalizeObject();
+  EE->runStaticConstructorsDestructors(false);
 
 #if defined(__GNUC__) && !defined(__clang) &&                                  \
     ((__GNUC__ == 4) && (__GNUC_MINOR__ < 9))
@@ -203,38 +203,38 @@ static void CreateAndRunJITFunc(const std::string &IR, CodeGenOpt::Level OLvl) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
-    LLVMFunc f = reinterpret_cast<LLVMFunc>(EE->getPointerToFunction(EntryFunc));
+  LLVMFunc f = reinterpret_cast<LLVMFunc>(EE->getPointerToFunction(EntryFunc));
 #if defined(__GNUC__) && !defined(__clang) &&                                  \
     ((__GNUC__ == 4) && (__GNUC_MINOR__ < 9))
 #pragma GCC diagnostic pop
 #endif
 
-    // Figure out if we are running the optimized func or the unoptimized func
-    RunFuncOnInputs(f, (OLvl == CodeGenOpt::None) ? UnoptArrays : OptArrays);
+  // Figure out if we are running the optimized func or the unoptimized func
+  RunFuncOnInputs(f, (OLvl == CodeGenOpt::None) ? UnoptArrays : OptArrays);
 
-    EE->runStaticConstructorsDestructors(true);
+  EE->runStaticConstructorsDestructors(true);
 }
 
 // Main fuzz target called by ExampleClangLLVMProtoFuzzer.cpp
 // Mimics the lli tool to JIT the LLVM IR code and execute it
 void clang_fuzzer::HandleLLVM(const std::string &IR,
                               const std::vector<const char *> &ExtraArgs) {
-    // Populate OptArrays and UnoptArrays with the arrays from InputArrays
-    memcpy(OptArrays, InputArrays, kTotalSize);
-    memcpy(UnoptArrays, InputArrays, kTotalSize);
+  // Populate OptArrays and UnoptArrays with the arrays from InputArrays
+  memcpy(OptArrays, InputArrays, kTotalSize);
+  memcpy(UnoptArrays, InputArrays, kTotalSize);
 
-    // Parse ExtraArgs to set the optimization level
-    CodeGenOpt::Level OLvl;
-    getOptLevel(ExtraArgs, OLvl);
+  // Parse ExtraArgs to set the optimization level
+  CodeGenOpt::Level OLvl;
+  getOptLevel(ExtraArgs, OLvl);
 
-    // First we optimize the IR by running a loop vectorizer pass
-    std::string OptIR = OptLLVM(IR, OLvl);
+  // First we optimize the IR by running a loop vectorizer pass
+  std::string OptIR = OptLLVM(IR, OLvl);
 
-    CreateAndRunJITFunc(OptIR, OLvl);
-    CreateAndRunJITFunc(IR, CodeGenOpt::None);
+  CreateAndRunJITFunc(OptIR, OLvl);
+  CreateAndRunJITFunc(IR, CodeGenOpt::None);
 
-    if (memcmp(OptArrays, UnoptArrays, kTotalSize))
-        ErrorAndExit("!!!BUG!!!");
+  if (memcmp(OptArrays, UnoptArrays, kTotalSize))
+    ErrorAndExit("!!!BUG!!!");
 
-    return;
+  return;
 }

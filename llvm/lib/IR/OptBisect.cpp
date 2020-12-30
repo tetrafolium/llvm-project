@@ -29,30 +29,30 @@ static cl::opt<int> OptBisectLimit("opt-bisect-limit", cl::Hidden,
                                    cl::desc("Maximum optimization to perform"));
 
 OptBisect::OptBisect() : OptPassGate() {
-    BisectEnabled = OptBisectLimit != std::numeric_limits<int>::max();
+  BisectEnabled = OptBisectLimit != std::numeric_limits<int>::max();
 }
 
 static void printPassMessage(const StringRef &Name, int PassNum,
                              StringRef TargetDesc, bool Running) {
-    StringRef Status = Running ? "" : "NOT ";
-    errs() << "BISECT: " << Status << "running pass "
-           << "(" << PassNum << ") " << Name << " on " << TargetDesc << "\n";
+  StringRef Status = Running ? "" : "NOT ";
+  errs() << "BISECT: " << Status << "running pass "
+         << "(" << PassNum << ") " << Name << " on " << TargetDesc << "\n";
 }
 
 bool OptBisect::shouldRunPass(const Pass *P, StringRef IRDescription) {
-    assert(BisectEnabled);
+  assert(BisectEnabled);
 
-    return checkPass(P->getPassName(), IRDescription);
+  return checkPass(P->getPassName(), IRDescription);
 }
 
 bool OptBisect::checkPass(const StringRef PassName,
                           const StringRef TargetDesc) {
-    assert(BisectEnabled);
+  assert(BisectEnabled);
 
-    int CurBisectNum = ++LastBisectNum;
-    bool ShouldRun = (OptBisectLimit == -1 || CurBisectNum <= OptBisectLimit);
-    printPassMessage(PassName, CurBisectNum, TargetDesc, ShouldRun);
-    return ShouldRun;
+  int CurBisectNum = ++LastBisectNum;
+  bool ShouldRun = (OptBisectLimit == -1 || CurBisectNum <= OptBisectLimit);
+  printPassMessage(PassName, CurBisectNum, TargetDesc, ShouldRun);
+  return ShouldRun;
 }
 
 ManagedStatic<OptBisect> llvm::OptBisector;

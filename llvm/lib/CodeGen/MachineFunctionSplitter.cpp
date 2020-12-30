@@ -47,10 +47,10 @@ using namespace llvm;
 // values between 99%-ile to 100%-ile with respect to iTLB and icache metrics on
 // Intel CPUs.
 static cl::opt<unsigned>
-PercentileCutoff("mfs-psi-cutoff",
-                 cl::desc("Percentile profile summary cutoff used to "
-                          "determine cold blocks. Unused if set to zero."),
-                 cl::init(999950), cl::Hidden);
+    PercentileCutoff("mfs-psi-cutoff",
+                     cl::desc("Percentile profile summary cutoff used to "
+                              "determine cold blocks. Unused if set to zero."),
+                     cl::init(999950), cl::Hidden);
 
 static cl::opt<unsigned> ColdCountThreshold(
     "mfs-count-threshold",
@@ -62,87 +62,87 @@ namespace {
 
 class MachineFunctionSplitter : public MachineFunctionPass {
 public:
-    static char ID;
-    MachineFunctionSplitter() : MachineFunctionPass(ID) {
-        initializeMachineFunctionSplitterPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  MachineFunctionSplitter() : MachineFunctionPass(ID) {
+    initializeMachineFunctionSplitterPass(*PassRegistry::getPassRegistry());
+  }
 
-    StringRef getPassName() const override {
-        return "Machine Function Splitter Transformation";
-    }
+  StringRef getPassName() const override {
+    return "Machine Function Splitter Transformation";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    bool runOnMachineFunction(MachineFunction &F) override;
+  bool runOnMachineFunction(MachineFunction &F) override;
 };
 } // end anonymous namespace
 
 static bool isColdBlock(MachineBasicBlock &MBB,
                         const MachineBlockFrequencyInfo *MBFI,
                         ProfileSummaryInfo *PSI) {
-    Optional<uint64_t> Count = MBFI->getBlockProfileCount(&MBB);
-    if (!Count.hasValue())
-        return true;
+  Optional<uint64_t> Count = MBFI->getBlockProfileCount(&MBB);
+  if (!Count.hasValue())
+    return true;
 
-    if (PercentileCutoff > 0) {
-        return PSI->isColdCountNthPercentile(PercentileCutoff, *Count);
-    }
-    return (*Count < ColdCountThreshold);
+  if (PercentileCutoff > 0) {
+    return PSI->isColdCountNthPercentile(PercentileCutoff, *Count);
+  }
+  return (*Count < ColdCountThreshold);
 }
 
 bool MachineFunctionSplitter::runOnMachineFunction(MachineFunction &MF) {
-    // TODO: We only target functions with profile data. Static information may
-    // also be considered but we don't see performance improvements yet.
-    if (!MF.getFunction().hasProfileData())
-        return false;
+  // TODO: We only target functions with profile data. Static information may
+  // also be considered but we don't see performance improvements yet.
+  if (!MF.getFunction().hasProfileData())
+    return false;
 
-    // TODO: We don't split functions where a section attribute has been set
-    // since the split part may not be placed in a contiguous region. It may also
-    // be more beneficial to augment the linker to ensure contiguous layout of
-    // split functions within the same section as specified by the attribute.
-    if (!MF.getFunction().getSection().empty())
-        return false;
+  // TODO: We don't split functions where a section attribute has been set
+  // since the split part may not be placed in a contiguous region. It may also
+  // be more beneficial to augment the linker to ensure contiguous layout of
+  // split functions within the same section as specified by the attribute.
+  if (!MF.getFunction().getSection().empty())
+    return false;
 
-    // We don't want to proceed further for cold functions
-    // or functions of unknown hotness. Lukewarm functions have no prefix.
-    Optional<StringRef> SectionPrefix = MF.getFunction().getSectionPrefix();
-    if (SectionPrefix.hasValue() &&
-            (SectionPrefix.getValue().equals("unlikely") ||
-             SectionPrefix.getValue().equals("unknown"))) {
-        return false;
-    }
+  // We don't want to proceed further for cold functions
+  // or functions of unknown hotness. Lukewarm functions have no prefix.
+  Optional<StringRef> SectionPrefix = MF.getFunction().getSectionPrefix();
+  if (SectionPrefix.hasValue() &&
+      (SectionPrefix.getValue().equals("unlikely") ||
+       SectionPrefix.getValue().equals("unknown"))) {
+    return false;
+  }
 
-    // Renumbering blocks here preserves the order of the blocks as
-    // sortBasicBlocksAndUpdateBranches uses the numeric identifier to sort
-    // blocks. Preserving the order of blocks is essential to retaining decisions
-    // made by prior passes such as MachineBlockPlacement.
-    MF.RenumberBlocks();
-    MF.setBBSectionsType(BasicBlockSection::Preset);
-    auto *MBFI = &getAnalysis<MachineBlockFrequencyInfo>();
-    auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
+  // Renumbering blocks here preserves the order of the blocks as
+  // sortBasicBlocksAndUpdateBranches uses the numeric identifier to sort
+  // blocks. Preserving the order of blocks is essential to retaining decisions
+  // made by prior passes such as MachineBlockPlacement.
+  MF.RenumberBlocks();
+  MF.setBBSectionsType(BasicBlockSection::Preset);
+  auto *MBFI = &getAnalysis<MachineBlockFrequencyInfo>();
+  auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
 
-    for (auto &MBB : MF) {
-        // FIXME: We retain the entry block and conservatively keep all landing pad
-        // blocks as part of the original function. Once D73739 is submitted, we can
-        // improve the handling of ehpads.
-        if ((MBB.pred_empty() || MBB.isEHPad()))
-            continue;
-        if (isColdBlock(MBB, MBFI, PSI))
-            MBB.setSectionID(MBBSectionID::ColdSectionID);
-    }
+  for (auto &MBB : MF) {
+    // FIXME: We retain the entry block and conservatively keep all landing pad
+    // blocks as part of the original function. Once D73739 is submitted, we can
+    // improve the handling of ehpads.
+    if ((MBB.pred_empty() || MBB.isEHPad()))
+      continue;
+    if (isColdBlock(MBB, MBFI, PSI))
+      MBB.setSectionID(MBBSectionID::ColdSectionID);
+  }
 
-    auto Comparator = [](const MachineBasicBlock &X, const MachineBasicBlock &Y) {
-        return X.getSectionID().Type < Y.getSectionID().Type;
-    };
-    llvm::sortBasicBlocksAndUpdateBranches(MF, Comparator);
+  auto Comparator = [](const MachineBasicBlock &X, const MachineBasicBlock &Y) {
+    return X.getSectionID().Type < Y.getSectionID().Type;
+  };
+  llvm::sortBasicBlocksAndUpdateBranches(MF, Comparator);
 
-    return true;
+  return true;
 }
 
 void MachineFunctionSplitter::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.addRequired<MachineModuleInfoWrapperPass>();
-    AU.addRequired<MachineBlockFrequencyInfo>();
-    AU.addRequired<ProfileSummaryInfoWrapperPass>();
+  AU.addRequired<MachineModuleInfoWrapperPass>();
+  AU.addRequired<MachineBlockFrequencyInfo>();
+  AU.addRequired<ProfileSummaryInfoWrapperPass>();
 }
 
 char MachineFunctionSplitter::ID = 0;
@@ -151,5 +151,5 @@ INITIALIZE_PASS(MachineFunctionSplitter, "machine-function-splitter",
                 false)
 
 MachineFunctionPass *llvm::createMachineFunctionSplitterPass() {
-    return new MachineFunctionSplitter();
+  return new MachineFunctionSplitter();
 }

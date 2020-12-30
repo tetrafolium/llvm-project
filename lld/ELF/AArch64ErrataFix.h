@@ -24,24 +24,24 @@ class Patch843419Section;
 
 class AArch64Err843419Patcher {
 public:
-    // return true if Patches have been added to the OutputSections.
-    bool createFixes();
+  // return true if Patches have been added to the OutputSections.
+  bool createFixes();
 
 private:
-    std::vector<Patch843419Section *>
-    patchInputSectionDescription(InputSectionDescription &isd);
+  std::vector<Patch843419Section *>
+  patchInputSectionDescription(InputSectionDescription &isd);
 
-    void insertPatches(InputSectionDescription &isd,
-                       std::vector<Patch843419Section *> &patches);
+  void insertPatches(InputSectionDescription &isd,
+                     std::vector<Patch843419Section *> &patches);
 
-    void init();
+  void init();
 
-    // A cache of the mapping symbols defined by the InputSection sorted in order
-    // of ascending value with redundant symbols removed. These describe
-    // the ranges of code and data in an executable InputSection.
-    std::map<InputSection *, std::vector<const Defined *>> sectionMap;
+  // A cache of the mapping symbols defined by the InputSection sorted in order
+  // of ascending value with redundant symbols removed. These describe
+  // the ranges of code and data in an executable InputSection.
+  std::map<InputSection *, std::vector<const Defined *>> sectionMap;
 
-    bool initialized = false;
+  bool initialized = false;
 };
 
 } // namespace elf

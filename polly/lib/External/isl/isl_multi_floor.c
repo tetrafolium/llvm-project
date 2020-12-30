@@ -11,19 +11,19 @@
 
 /* Given f, return floor(f).
  */
-__isl_give MULTI(BASE) *FN(MULTI(BASE),floor)(__isl_take MULTI(BASE) *multi)
-{
-    int i;
+__isl_give MULTI(BASE) *
+    FN(MULTI(BASE), floor)(__isl_take MULTI(BASE) * multi) {
+  int i;
 
-    multi = FN(MULTI(BASE),cow)(multi);
-    if (!multi)
-        return NULL;
+  multi = FN(MULTI(BASE), cow)(multi);
+  if (!multi)
+    return NULL;
 
-    for (i = 0; i < multi->n; ++i) {
-        multi->u.p[i] = FN(EL,floor)(multi->u.p[i]);
-        if (!multi->u.p[i])
-            return FN(MULTI(BASE),free)(multi);
-    }
+  for (i = 0; i < multi->n; ++i) {
+    multi->u.p[i] = FN(EL, floor)(multi->u.p[i]);
+    if (!multi->u.p[i])
+      return FN(MULTI(BASE), free)(multi);
+  }
 
-    return multi;
+  return multi;
 }

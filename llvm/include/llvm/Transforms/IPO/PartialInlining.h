@@ -23,7 +23,7 @@ class Module;
 /// Pass to remove unused function declarations.
 class PartialInlinerPass : public PassInfoMixin<PartialInlinerPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &);
 };
 
 } // end namespace llvm

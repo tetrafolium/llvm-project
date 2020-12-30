@@ -19,29 +19,29 @@ namespace objc {
 
 void AvoidThrowingObjCExceptionCheck::registerMatchers(MatchFinder *Finder) {
 
-    Finder->addMatcher(objcThrowStmt().bind("throwStmt"), this);
-    Finder->addMatcher(
-        objcMessageExpr(anyOf(hasSelector("raise:format:"),
-                              hasSelector("raise:format:arguments:")),
-                        hasReceiverType(asString("NSException")))
-        .bind("raiseException"),
-        this);
+  Finder->addMatcher(objcThrowStmt().bind("throwStmt"), this);
+  Finder->addMatcher(
+      objcMessageExpr(anyOf(hasSelector("raise:format:"),
+                            hasSelector("raise:format:arguments:")),
+                      hasReceiverType(asString("NSException")))
+          .bind("raiseException"),
+      this);
 }
 
 void AvoidThrowingObjCExceptionCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *MatchedStmt =
-        Result.Nodes.getNodeAs<ObjCAtThrowStmt>("throwStmt");
-    const auto *MatchedExpr =
-        Result.Nodes.getNodeAs<ObjCMessageExpr>("raiseException");
-    auto SourceLoc = MatchedStmt == nullptr ? MatchedExpr->getSelectorStartLoc()
-                     : MatchedStmt->getThrowLoc();
-    diag(SourceLoc,
-         "pass in NSError ** instead of throwing exception to indicate "
-         "Objective-C errors");
+  const auto *MatchedStmt =
+      Result.Nodes.getNodeAs<ObjCAtThrowStmt>("throwStmt");
+  const auto *MatchedExpr =
+      Result.Nodes.getNodeAs<ObjCMessageExpr>("raiseException");
+  auto SourceLoc = MatchedStmt == nullptr ? MatchedExpr->getSelectorStartLoc()
+                                          : MatchedStmt->getThrowLoc();
+  diag(SourceLoc,
+       "pass in NSError ** instead of throwing exception to indicate "
+       "Objective-C errors");
 }
 
-}  // namespace objc
-}  // namespace google
-}  // namespace tidy
-}  // namespace clang
+} // namespace objc
+} // namespace google
+} // namespace tidy
+} // namespace clang

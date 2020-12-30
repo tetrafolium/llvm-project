@@ -20,7 +20,7 @@ enum {
 #define PARSESTART
 #include "clang/Basic/DiagnosticParseKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_PARSE_DIAGNOSTICS
+  NUM_BUILTIN_PARSE_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

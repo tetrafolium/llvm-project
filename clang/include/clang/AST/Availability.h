@@ -28,43 +28,33 @@ namespace clang {
 /// Here, 'macos 10.10' and '*' both map to an instance of this type.
 ///
 class AvailabilitySpec {
-    /// Represents the version that this specifier requires. If the host OS
-    /// version is greater than or equal to Version, the @available will evaluate
-    /// to true.
-    VersionTuple Version;
+  /// Represents the version that this specifier requires. If the host OS
+  /// version is greater than or equal to Version, the @available will evaluate
+  /// to true.
+  VersionTuple Version;
 
-    /// Name of the platform that Version corresponds to.
-    StringRef Platform;
+  /// Name of the platform that Version corresponds to.
+  StringRef Platform;
 
-    SourceLocation BeginLoc, EndLoc;
+  SourceLocation BeginLoc, EndLoc;
 
 public:
-    AvailabilitySpec(VersionTuple Version, StringRef Platform,
-                     SourceLocation BeginLoc, SourceLocation EndLoc)
-        : Version(Version), Platform(Platform), BeginLoc(BeginLoc),
-          EndLoc(EndLoc) {}
+  AvailabilitySpec(VersionTuple Version, StringRef Platform,
+                   SourceLocation BeginLoc, SourceLocation EndLoc)
+      : Version(Version), Platform(Platform), BeginLoc(BeginLoc),
+        EndLoc(EndLoc) {}
 
-    /// This constructor is used when representing the '*' case.
-    AvailabilitySpec(SourceLocation StarLoc)
-        : BeginLoc(StarLoc), EndLoc(StarLoc) {}
+  /// This constructor is used when representing the '*' case.
+  AvailabilitySpec(SourceLocation StarLoc)
+      : BeginLoc(StarLoc), EndLoc(StarLoc) {}
 
-    VersionTuple getVersion() const {
-        return Version;
-    }
-    StringRef getPlatform() const {
-        return Platform;
-    }
-    SourceLocation getBeginLoc() const {
-        return BeginLoc;
-    }
-    SourceLocation getEndLoc() const {
-        return EndLoc;
-    }
+  VersionTuple getVersion() const { return Version; }
+  StringRef getPlatform() const { return Platform; }
+  SourceLocation getBeginLoc() const { return BeginLoc; }
+  SourceLocation getEndLoc() const { return EndLoc; }
 
-    /// Returns true when this represents the '*' case.
-    bool isOtherPlatformSpec() const {
-        return Version.empty();
-    }
+  /// Returns true when this represents the '*' case.
+  bool isOtherPlatformSpec() const { return Version.empty(); }
 };
 
 } // end namespace clang

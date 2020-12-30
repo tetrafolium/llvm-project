@@ -26,10 +26,10 @@ namespace android {
 /// value.
 class CloexecOpenCheck : public CloexecCheck {
 public:
-    CloexecOpenCheck(StringRef Name, ClangTidyContext *Context)
-        : CloexecCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  CloexecOpenCheck(StringRef Name, ClangTidyContext *Context)
+      : CloexecCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace android

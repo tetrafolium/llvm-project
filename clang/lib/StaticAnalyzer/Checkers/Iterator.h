@@ -25,144 +25,129 @@ namespace iterator {
 // of operators in a common way by using a symbolic position.
 struct IteratorPosition {
 private:
+  // Container the iterator belongs to
+  const MemRegion *Cont;
 
-    // Container the iterator belongs to
-    const MemRegion *Cont;
+  // Whether iterator is valid
+  const bool Valid;
 
-    // Whether iterator is valid
-    const bool Valid;
+  // Abstract offset
+  const SymbolRef Offset;
 
-    // Abstract offset
-    const SymbolRef Offset;
-
-    IteratorPosition(const MemRegion *C, bool V, SymbolRef Of)
-        : Cont(C), Valid(V), Offset(Of) {}
+  IteratorPosition(const MemRegion *C, bool V, SymbolRef Of)
+      : Cont(C), Valid(V), Offset(Of) {}
 
 public:
-    const MemRegion *getContainer() const {
-        return Cont;
-    }
-    bool isValid() const {
-        return Valid;
-    }
-    SymbolRef getOffset() const {
-        return Offset;
-    }
+  const MemRegion *getContainer() const { return Cont; }
+  bool isValid() const { return Valid; }
+  SymbolRef getOffset() const { return Offset; }
 
-    IteratorPosition invalidate() const {
-        return IteratorPosition(Cont, false, Offset);
-    }
+  IteratorPosition invalidate() const {
+    return IteratorPosition(Cont, false, Offset);
+  }
 
-    static IteratorPosition getPosition(const MemRegion *C, SymbolRef Of) {
-        return IteratorPosition(C, true, Of);
-    }
+  static IteratorPosition getPosition(const MemRegion *C, SymbolRef Of) {
+    return IteratorPosition(C, true, Of);
+  }
 
-    IteratorPosition setTo(SymbolRef NewOf) const {
-        return IteratorPosition(Cont, Valid, NewOf);
-    }
+  IteratorPosition setTo(SymbolRef NewOf) const {
+    return IteratorPosition(Cont, Valid, NewOf);
+  }
 
-    IteratorPosition reAssign(const MemRegion *NewCont) const {
-        return IteratorPosition(NewCont, Valid, Offset);
-    }
+  IteratorPosition reAssign(const MemRegion *NewCont) const {
+    return IteratorPosition(NewCont, Valid, Offset);
+  }
 
-    bool operator==(const IteratorPosition &X) const {
-        return Cont == X.Cont && Valid == X.Valid && Offset == X.Offset;
-    }
+  bool operator==(const IteratorPosition &X) const {
+    return Cont == X.Cont && Valid == X.Valid && Offset == X.Offset;
+  }
 
-    bool operator!=(const IteratorPosition &X) const {
-        return Cont != X.Cont || Valid != X.Valid || Offset != X.Offset;
-    }
+  bool operator!=(const IteratorPosition &X) const {
+    return Cont != X.Cont || Valid != X.Valid || Offset != X.Offset;
+  }
 
-    void Profile(llvm::FoldingSetNodeID &ID) const {
-        ID.AddPointer(Cont);
-        ID.AddInteger(Valid);
-        ID.Add(Offset);
-    }
+  void Profile(llvm::FoldingSetNodeID &ID) const {
+    ID.AddPointer(Cont);
+    ID.AddInteger(Valid);
+    ID.Add(Offset);
+  }
 };
 
 // Structure to record the symbolic begin and end position of a container
 struct ContainerData {
 private:
-    const SymbolRef Begin, End;
+  const SymbolRef Begin, End;
 
-    ContainerData(SymbolRef B, SymbolRef E) : Begin(B), End(E) {}
+  ContainerData(SymbolRef B, SymbolRef E) : Begin(B), End(E) {}
 
 public:
-    static ContainerData fromBegin(SymbolRef B) {
-        return ContainerData(B, nullptr);
-    }
+  static ContainerData fromBegin(SymbolRef B) {
+    return ContainerData(B, nullptr);
+  }
 
-    static ContainerData fromEnd(SymbolRef E) {
-        return ContainerData(nullptr, E);
-    }
+  static ContainerData fromEnd(SymbolRef E) {
+    return ContainerData(nullptr, E);
+  }
 
-    SymbolRef getBegin() const {
-        return Begin;
-    }
-    SymbolRef getEnd() const {
-        return End;
-    }
+  SymbolRef getBegin() const { return Begin; }
+  SymbolRef getEnd() const { return End; }
 
-    ContainerData newBegin(SymbolRef B) const {
-        return ContainerData(B, End);
-    }
+  ContainerData newBegin(SymbolRef B) const { return ContainerData(B, End); }
 
-    ContainerData newEnd(SymbolRef E) const {
-        return ContainerData(Begin, E);
-    }
+  ContainerData newEnd(SymbolRef E) const { return ContainerData(Begin, E); }
 
-    bool operator==(const ContainerData &X) const {
-        return Begin == X.Begin && End == X.End;
-    }
+  bool operator==(const ContainerData &X) const {
+    return Begin == X.Begin && End == X.End;
+  }
 
-    bool operator!=(const ContainerData &X) const {
-        return Begin != X.Begin || End != X.End;
-    }
+  bool operator!=(const ContainerData &X) const {
+    return Begin != X.Begin || End != X.End;
+  }
 
-    void Profile(llvm::FoldingSetNodeID &ID) const {
-        ID.Add(Begin);
-        ID.Add(End);
-    }
+  void Profile(llvm::FoldingSetNodeID &ID) const {
+    ID.Add(Begin);
+    ID.Add(End);
+  }
 };
 
 class IteratorSymbolMap {};
 class IteratorRegionMap {};
 class ContainerMap {};
 
-using IteratorSymbolMapTy =
-    CLANG_ENTO_PROGRAMSTATE_MAP(SymbolRef, IteratorPosition);
-using IteratorRegionMapTy =
-    CLANG_ENTO_PROGRAMSTATE_MAP(const MemRegion *, IteratorPosition);
-using ContainerMapTy =
-    CLANG_ENTO_PROGRAMSTATE_MAP(const MemRegion *, ContainerData);
+using IteratorSymbolMapTy = CLANG_ENTO_PROGRAMSTATE_MAP(SymbolRef,
+                                                        IteratorPosition);
+using IteratorRegionMapTy = CLANG_ENTO_PROGRAMSTATE_MAP(const MemRegion *,
+                                                        IteratorPosition);
+using ContainerMapTy = CLANG_ENTO_PROGRAMSTATE_MAP(const MemRegion *,
+                                                   ContainerData);
 
 } // namespace iterator
 
-template<>
+template <>
 struct ProgramStateTrait<iterator::IteratorSymbolMap>
     : public ProgramStatePartialTrait<iterator::IteratorSymbolMapTy> {
-    static void *GDMIndex() {
-        static int Index;
-        return &Index;
-    }
+  static void *GDMIndex() {
+    static int Index;
+    return &Index;
+  }
 };
 
-template<>
+template <>
 struct ProgramStateTrait<iterator::IteratorRegionMap>
     : public ProgramStatePartialTrait<iterator::IteratorRegionMapTy> {
-    static void *GDMIndex() {
-        static int Index;
-        return &Index;
-    }
+  static void *GDMIndex() {
+    static int Index;
+    return &Index;
+  }
 };
 
-template<>
+template <>
 struct ProgramStateTrait<iterator::ContainerMap>
     : public ProgramStatePartialTrait<iterator::ContainerMapTy> {
-    static void *GDMIndex() {
-        static int Index;
-        return &Index;
-    }
+  static void *GDMIndex() {
+    static int Index;
+    return &Index;
+  }
 };
 
 namespace iterator {
@@ -189,15 +174,14 @@ bool isRandomIncrOrDecrOperator(BinaryOperatorKind OK);
 const ContainerData *getContainerData(ProgramStateRef State,
                                       const MemRegion *Cont);
 const IteratorPosition *getIteratorPosition(ProgramStateRef State,
-        const SVal &Val);
+                                            const SVal &Val);
 ProgramStateRef setIteratorPosition(ProgramStateRef State, const SVal &Val,
                                     const IteratorPosition &Pos);
 ProgramStateRef createIteratorPosition(ProgramStateRef State, const SVal &Val,
-                                       const MemRegion *Cont, const Stmt* S,
+                                       const MemRegion *Cont, const Stmt *S,
                                        const LocationContext *LCtx,
                                        unsigned blockCount);
-ProgramStateRef advancePosition(ProgramStateRef State,
-                                const SVal &Iter,
+ProgramStateRef advancePosition(ProgramStateRef State, const SVal &Iter,
                                 OverloadedOperatorKind Op,
                                 const SVal &Distance);
 ProgramStateRef assumeNoOverflow(ProgramStateRef State, SymbolRef Sym,

@@ -25,20 +25,20 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-signed-char-misuse.html
 class SignedCharMisuseCheck : public ClangTidyCheck {
 public:
-    SignedCharMisuseCheck(StringRef Name, ClangTidyContext *Context);
+  SignedCharMisuseCheck(StringRef Name, ClangTidyContext *Context);
 
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    ast_matchers::internal::BindableMatcher<clang::Stmt> charCastExpression(
-        bool IsSigned,
-        const ast_matchers::internal::Matcher<clang::QualType> &IntegerType,
-        const std::string &CastBindName) const;
+  ast_matchers::internal::BindableMatcher<clang::Stmt> charCastExpression(
+      bool IsSigned,
+      const ast_matchers::internal::Matcher<clang::QualType> &IntegerType,
+      const std::string &CastBindName) const;
 
-    const std::string CharTypdefsToIgnoreList;
-    const bool DiagnoseSignedUnsignedCharComparisons;
+  const std::string CharTypdefsToIgnoreList;
+  const bool DiagnoseSignedUnsignedCharComparisons;
 };
 
 } // namespace bugprone

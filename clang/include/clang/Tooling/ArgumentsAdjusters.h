@@ -33,7 +33,7 @@ using CommandLineArguments = std::vector<std::string>;
 /// Command line argument adjuster is responsible for command line arguments
 /// modification before the arguments are used to run a frontend action.
 using ArgumentsAdjuster = std::function<CommandLineArguments(
-                              const CommandLineArguments &, StringRef Filename)>;
+    const CommandLineArguments &, StringRef Filename)>;
 
 /// Gets an argument adjuster that converts input command line arguments
 /// to the "syntax check only" variant.
@@ -56,7 +56,7 @@ enum class ArgumentInsertPosition { BEGIN, END };
 /// Gets an argument adjuster which inserts \p Extra arguments in the
 /// specified position.
 ArgumentsAdjuster getInsertArgumentAdjuster(const CommandLineArguments &Extra,
-        ArgumentInsertPosition Pos);
+                                            ArgumentInsertPosition Pos);
 
 /// Gets an argument adjuster which inserts an \p Extra argument in the
 /// specified position.

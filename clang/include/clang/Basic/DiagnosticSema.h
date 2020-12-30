@@ -20,7 +20,7 @@ enum {
 #define SEMASTART
 #include "clang/Basic/DiagnosticSemaKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_SEMA_DIAGNOSTICS
+  NUM_BUILTIN_SEMA_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

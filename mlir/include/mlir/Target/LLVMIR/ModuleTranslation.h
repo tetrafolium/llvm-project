@@ -49,115 +49,113 @@ class LLVMFuncOp;
 /// needs to look up block and function mappings.
 class ModuleTranslation {
 public:
-    template <typename T = ModuleTranslation>
-    static std::unique_ptr<llvm::Module>
-    translateModule(Operation *m, llvm::LLVMContext &llvmContext,
-                    StringRef name = "LLVMDialectModule") {
-        if (!satisfiesLLVMModule(m))
-            return nullptr;
-        if (failed(checkSupportedModuleOps(m)))
-            return nullptr;
-        std::unique_ptr<llvm::Module> llvmModule =
-            prepareLLVMModule(m, llvmContext, name);
+  template <typename T = ModuleTranslation>
+  static std::unique_ptr<llvm::Module>
+  translateModule(Operation *m, llvm::LLVMContext &llvmContext,
+                  StringRef name = "LLVMDialectModule") {
+    if (!satisfiesLLVMModule(m))
+      return nullptr;
+    if (failed(checkSupportedModuleOps(m)))
+      return nullptr;
+    std::unique_ptr<llvm::Module> llvmModule =
+        prepareLLVMModule(m, llvmContext, name);
 
-        LLVM::ensureDistinctSuccessors(m);
+    LLVM::ensureDistinctSuccessors(m);
 
-        T translator(m, std::move(llvmModule));
-        if (failed(translator.convertFunctionSignatures()))
-            return nullptr;
-        if (failed(translator.convertGlobals()))
-            return nullptr;
-        if (failed(translator.convertFunctions()))
-            return nullptr;
+    T translator(m, std::move(llvmModule));
+    if (failed(translator.convertFunctionSignatures()))
+      return nullptr;
+    if (failed(translator.convertGlobals()))
+      return nullptr;
+    if (failed(translator.convertFunctions()))
+      return nullptr;
 
-        return std::move(translator.llvmModule);
-    }
+    return std::move(translator.llvmModule);
+  }
 
-    /// A helper method to get the single Block in an operation honoring LLVM's
-    /// module requirements.
-    static Block &getModuleBody(Operation *m) {
-        return m->getRegion(0).front();
-    }
+  /// A helper method to get the single Block in an operation honoring LLVM's
+  /// module requirements.
+  static Block &getModuleBody(Operation *m) { return m->getRegion(0).front(); }
 
 protected:
-    /// Translate the given MLIR module expressed in MLIR LLVM IR dialect into an
-    /// LLVM IR module. The MLIR LLVM IR dialect holds a pointer to an
-    /// LLVMContext, the LLVM IR module will be created in that context.
-    ModuleTranslation(Operation *module,
-                      std::unique_ptr<llvm::Module> llvmModule);
-    virtual ~ModuleTranslation();
+  /// Translate the given MLIR module expressed in MLIR LLVM IR dialect into an
+  /// LLVM IR module. The MLIR LLVM IR dialect holds a pointer to an
+  /// LLVMContext, the LLVM IR module will be created in that context.
+  ModuleTranslation(Operation *module,
+                    std::unique_ptr<llvm::Module> llvmModule);
+  virtual ~ModuleTranslation();
 
-    virtual LogicalResult convertOperation(Operation &op,
+  virtual LogicalResult convertOperation(Operation &op,
+                                         llvm::IRBuilder<> &builder);
+  virtual LogicalResult convertOmpOperation(Operation &op,
+                                            llvm::IRBuilder<> &builder);
+  virtual LogicalResult convertOmpParallel(Operation &op,
                                            llvm::IRBuilder<> &builder);
-    virtual LogicalResult convertOmpOperation(Operation &op,
-            llvm::IRBuilder<> &builder);
-    virtual LogicalResult convertOmpParallel(Operation &op,
-            llvm::IRBuilder<> &builder);
-    virtual LogicalResult convertOmpMaster(Operation &op,
-                                           llvm::IRBuilder<> &builder);
-    void convertOmpOpRegions(Region &region,
-                             DenseMap<Value, llvm::Value *> &valueMapping,
-                             DenseMap<Block *, llvm::BasicBlock *> &blockMapping,
-                             llvm::Instruction *codeGenIPBBTI,
-                             llvm::BasicBlock &continuationIP,
-                             llvm::IRBuilder<> &builder,
-                             LogicalResult &bodyGenStatus);
-    /// Converts the type from MLIR LLVM dialect to LLVM.
-    llvm::Type *convertType(LLVMType type);
+  virtual LogicalResult convertOmpMaster(Operation &op,
+                                         llvm::IRBuilder<> &builder);
+  void convertOmpOpRegions(Region &region,
+                           DenseMap<Value, llvm::Value *> &valueMapping,
+                           DenseMap<Block *, llvm::BasicBlock *> &blockMapping,
+                           llvm::Instruction *codeGenIPBBTI,
+                           llvm::BasicBlock &continuationIP,
+                           llvm::IRBuilder<> &builder,
+                           LogicalResult &bodyGenStatus);
+  /// Converts the type from MLIR LLVM dialect to LLVM.
+  llvm::Type *convertType(LLVMType type);
 
-    static std::unique_ptr<llvm::Module>
-    prepareLLVMModule(Operation *m, llvm::LLVMContext &llvmContext,
-                      StringRef name);
+  static std::unique_ptr<llvm::Module>
+  prepareLLVMModule(Operation *m, llvm::LLVMContext &llvmContext,
+                    StringRef name);
 
-    /// A helper to look up remapped operands in the value remapping table.
-    SmallVector<llvm::Value *, 8> lookupValues(ValueRange values);
+  /// A helper to look up remapped operands in the value remapping table.
+  SmallVector<llvm::Value *, 8> lookupValues(ValueRange values);
 
 private:
-    /// Check whether the module contains only supported ops directly in its body.
-    static LogicalResult checkSupportedModuleOps(Operation *m);
+  /// Check whether the module contains only supported ops directly in its body.
+  static LogicalResult checkSupportedModuleOps(Operation *m);
 
-    LogicalResult convertFunctionSignatures();
-    LogicalResult convertFunctions();
-    LogicalResult convertGlobals();
-    LogicalResult convertOneFunction(LLVMFuncOp func);
-    LogicalResult convertBlock(Block &bb, bool ignoreArguments);
+  LogicalResult convertFunctionSignatures();
+  LogicalResult convertFunctions();
+  LogicalResult convertGlobals();
+  LogicalResult convertOneFunction(LLVMFuncOp func);
+  LogicalResult convertBlock(Block &bb, bool ignoreArguments);
 
-    llvm::Constant *getLLVMConstant(llvm::Type *llvmType, Attribute attr,
-                                    Location loc);
+  llvm::Constant *getLLVMConstant(llvm::Type *llvmType, Attribute attr,
+                                  Location loc);
 
-    /// Original and translated module.
-    Operation *mlirModule;
-    std::unique_ptr<llvm::Module> llvmModule;
-    /// A converter for translating debug information.
-    std::unique_ptr<detail::DebugTranslation> debugTranslation;
+  /// Original and translated module.
+  Operation *mlirModule;
+  std::unique_ptr<llvm::Module> llvmModule;
+  /// A converter for translating debug information.
+  std::unique_ptr<detail::DebugTranslation> debugTranslation;
 
-    /// Builder for LLVM IR generation of OpenMP constructs.
-    std::unique_ptr<llvm::OpenMPIRBuilder> ompBuilder;
-    /// Precomputed pointer to OpenMP dialect. Note this can be nullptr if the
-    /// OpenMP dialect hasn't been loaded (it is always loaded if there are OpenMP
-    /// operations in the module though).
-    const Dialect *ompDialect;
-    /// Stack which stores the target block to which a branch a must be added when
-    /// a terminator is seen. A stack is required to handle nested OpenMP parallel
-    /// regions.
-    SmallVector<llvm::BasicBlock *, 4> ompContinuationIPStack;
+  /// Builder for LLVM IR generation of OpenMP constructs.
+  std::unique_ptr<llvm::OpenMPIRBuilder> ompBuilder;
+  /// Precomputed pointer to OpenMP dialect. Note this can be nullptr if the
+  /// OpenMP dialect hasn't been loaded (it is always loaded if there are OpenMP
+  /// operations in the module though).
+  const Dialect *ompDialect;
+  /// Stack which stores the target block to which a branch a must be added when
+  /// a terminator is seen. A stack is required to handle nested OpenMP parallel
+  /// regions.
+  SmallVector<llvm::BasicBlock *, 4> ompContinuationIPStack;
 
-    /// Mappings between llvm.mlir.global definitions and corresponding globals.
-    DenseMap<Operation *, llvm::GlobalValue *> globalsMapping;
+  /// Mappings between llvm.mlir.global definitions and corresponding globals.
+  DenseMap<Operation *, llvm::GlobalValue *> globalsMapping;
 
-    /// A stateful object used to translate types.
-    TypeToLLVMIRTranslator typeTranslator;
+  /// A stateful object used to translate types.
+  TypeToLLVMIRTranslator typeTranslator;
 
 protected:
-    /// Mappings between original and translated values, used for lookups.
-    llvm::StringMap<llvm::Function *> functionMapping;
-    DenseMap<Value, llvm::Value *> valueMapping;
-    DenseMap<Block *, llvm::BasicBlock *> blockMapping;
+  /// Mappings between original and translated values, used for lookups.
+  llvm::StringMap<llvm::Function *> functionMapping;
+  DenseMap<Value, llvm::Value *> valueMapping;
+  DenseMap<Block *, llvm::BasicBlock *> blockMapping;
 
-    /// A mapping between MLIR LLVM dialect terminators and LLVM IR terminators
-    /// they are converted to. This allows for conneting PHI nodes to the source
-    /// values after all operations are converted.
-    DenseMap<Operation *, llvm::Instruction *> branchMapping;
+  /// A mapping between MLIR LLVM dialect terminators and LLVM IR terminators
+  /// they are converted to. This allows for conneting PHI nodes to the source
+  /// values after all operations are converted.
+  DenseMap<Operation *, llvm::Instruction *> branchMapping;
 };
 
 } // namespace LLVM

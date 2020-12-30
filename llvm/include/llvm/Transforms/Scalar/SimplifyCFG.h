@@ -27,22 +27,22 @@ namespace llvm {
 /// other passes of the mid-level optimizer. Depending on the specified options,
 /// it may further optimize control-flow to create non-canonical forms.
 class SimplifyCFGPass : public PassInfoMixin<SimplifyCFGPass> {
-    SimplifyCFGOptions Options;
+  SimplifyCFGOptions Options;
 
 public:
-    /// The default constructor sets the pass options to create canonical IR,
-    /// rather than optimal IR. That is, by default we bypass transformations that
-    /// are likely to improve performance but make analysis for other passes more
-    /// difficult.
-    SimplifyCFGPass();
+  /// The default constructor sets the pass options to create canonical IR,
+  /// rather than optimal IR. That is, by default we bypass transformations that
+  /// are likely to improve performance but make analysis for other passes more
+  /// difficult.
+  SimplifyCFGPass();
 
-    /// Construct a pass with optional optimizations.
-    SimplifyCFGPass(const SimplifyCFGOptions &PassOptions);
+  /// Construct a pass with optional optimizations.
+  SimplifyCFGPass(const SimplifyCFGOptions &PassOptions);
 
-    /// Run the pass over the function.
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  /// Run the pass over the function.
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
-}
+} // namespace llvm
 
 #endif

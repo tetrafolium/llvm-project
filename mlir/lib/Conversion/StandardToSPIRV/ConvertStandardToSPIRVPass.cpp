@@ -23,28 +23,28 @@ namespace {
 /// A pass converting MLIR Standard operations into the SPIR-V dialect.
 class ConvertStandardToSPIRVPass
     : public ConvertStandardToSPIRVBase<ConvertStandardToSPIRVPass> {
-    void runOnOperation() override;
+  void runOnOperation() override;
 };
 } // namespace
 
 void ConvertStandardToSPIRVPass::runOnOperation() {
-    MLIRContext *context = &getContext();
-    ModuleOp module = getOperation();
+  MLIRContext *context = &getContext();
+  ModuleOp module = getOperation();
 
-    auto targetAttr = spirv::lookupTargetEnvOrDefault(module);
-    std::unique_ptr<ConversionTarget> target =
-        spirv::SPIRVConversionTarget::get(targetAttr);
+  auto targetAttr = spirv::lookupTargetEnvOrDefault(module);
+  std::unique_ptr<ConversionTarget> target =
+      spirv::SPIRVConversionTarget::get(targetAttr);
 
-    SPIRVTypeConverter typeConverter(targetAttr);
-    OwningRewritePatternList patterns;
-    populateStandardToSPIRVPatterns(context, typeConverter, patterns);
-    populateBuiltinFuncToSPIRVPatterns(context, typeConverter, patterns);
+  SPIRVTypeConverter typeConverter(targetAttr);
+  OwningRewritePatternList patterns;
+  populateStandardToSPIRVPatterns(context, typeConverter, patterns);
+  populateBuiltinFuncToSPIRVPatterns(context, typeConverter, patterns);
 
-    if (failed(applyPartialConversion(module, *target, std::move(patterns))))
-        return signalPassFailure();
+  if (failed(applyPartialConversion(module, *target, std::move(patterns))))
+    return signalPassFailure();
 }
 
 std::unique_ptr<OperationPass<ModuleOp>>
 mlir::createConvertStandardToSPIRVPass() {
-    return std::make_unique<ConvertStandardToSPIRVPass>();
+  return std::make_unique<ConvertStandardToSPIRVPass>();
 }

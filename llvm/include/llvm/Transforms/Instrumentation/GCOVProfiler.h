@@ -19,11 +19,12 @@ namespace llvm {
 /// The gcov-style instrumentation pass
 class GCOVProfilerPass : public PassInfoMixin<GCOVProfilerPass> {
 public:
-    GCOVProfilerPass(const GCOVOptions &Options = GCOVOptions::getDefault()) : GCOVOpts(Options) { }
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  GCOVProfilerPass(const GCOVOptions &Options = GCOVOptions::getDefault())
+      : GCOVOpts(Options) {}
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
 private:
-    GCOVOptions GCOVOpts;
+  GCOVOptions GCOVOpts;
 };
 
 } // namespace llvm

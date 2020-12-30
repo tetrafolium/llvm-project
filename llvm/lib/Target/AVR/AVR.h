@@ -30,8 +30,8 @@ FunctionPass *createAVRRelaxMemPass();
 FunctionPass *createAVRDynAllocaSRPass();
 FunctionPass *createAVRBranchSelectionPass();
 
-void initializeAVRExpandPseudoPass(PassRegistry&);
-void initializeAVRRelaxMemPass(PassRegistry&);
+void initializeAVRExpandPseudoPass(PassRegistry &);
+void initializeAVRRelaxMemPass(PassRegistry &);
 
 /// Contains the AVR backend.
 namespace AVR {
@@ -41,13 +41,13 @@ enum AddressSpace { DataMemory, ProgramMemory };
 
 /// Checks if a given type is a pointer to program memory.
 template <typename T> bool isProgramMemoryAddress(T *V) {
-    return cast<PointerType>(V->getType())->getAddressSpace() == ProgramMemory;
+  return cast<PointerType>(V->getType())->getAddressSpace() == ProgramMemory;
 }
 
 inline bool isProgramMemoryAccess(MemSDNode const *N) {
-    auto V = N->getMemOperand()->getValue();
+  auto V = N->getMemOperand()->getValue();
 
-    return (V != nullptr) ? isProgramMemoryAddress(V) : false;
+  return (V != nullptr) ? isProgramMemoryAddress(V) : false;
 }
 
 } // end of namespace AVR

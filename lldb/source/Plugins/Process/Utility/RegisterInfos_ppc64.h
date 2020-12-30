@@ -12,10 +12,10 @@
 
 // Computes the offset of the given GPR_PPC64 in the user data area.
 #define GPR_PPC64_OFFSET(regname) (offsetof(GPR_PPC64, regname))
-#define FPR_PPC64_OFFSET(regname) (offsetof(FPR_PPC64, regname)                \
-                                   + sizeof(GPR_PPC64))
-#define VMX_PPC64_OFFSET(regname) (offsetof(VMX_PPC64, regname)                \
-                                   + sizeof(GPR_PPC64) + sizeof(FPR_PPC64))
+#define FPR_PPC64_OFFSET(regname)                                              \
+  (offsetof(FPR_PPC64, regname) + sizeof(GPR_PPC64))
+#define VMX_PPC64_OFFSET(regname)                                              \
+  (offsetof(VMX_PPC64, regname) + sizeof(GPR_PPC64) + sizeof(FPR_PPC64))
 #define GPR_PPC64_SIZE(regname) (sizeof(((GPR_PPC64 *)NULL)->regname))
 
 #include "Utility/PPC64_DWARF_Registers.h"
@@ -24,31 +24,26 @@
 // Note that the size and offset will be updated by platform-specific classes.
 #define DEFINE_GPR_PPC64(reg, alt, lldb_kind)                                  \
   {                                                                            \
-    #reg, alt, GPR_PPC64_SIZE(reg), GPR_PPC64_OFFSET(reg), lldb::eEncodingUint,\
-                                         lldb::eFormatHex,                     \
-                                         {ppc64_dwarf::dwarf_##reg##_ppc64,    \
-                                          ppc64_dwarf::dwarf_##reg##_ppc64,    \
-                                          lldb_kind,                           \
-                                          LLDB_INVALID_REGNUM,                 \
-                                          gpr_##reg##_ppc64 },                 \
-                                          NULL, NULL, NULL, 0                  \
+#reg, alt, GPR_PPC64_SIZE(reg), GPR_PPC64_OFFSET(reg),                     \
+        lldb::eEncodingUint, lldb::eFormatHex,                                 \
+        {ppc64_dwarf::dwarf_##reg##_ppc64, ppc64_dwarf::dwarf_##reg##_ppc64,   \
+         lldb_kind, LLDB_INVALID_REGNUM, gpr_##reg##_ppc64 },                  \
+         NULL, NULL, NULL, 0                                                   \
   }
 #define DEFINE_FPR_PPC64(reg, alt, lldb_kind)                                  \
   {                                                                            \
-#reg, alt, 8, FPR_PPC64_OFFSET(reg), lldb::eEncodingIEEE754,                   \
+#reg, alt, 8, FPR_PPC64_OFFSET(reg), lldb::eEncodingIEEE754,               \
         lldb::eFormatFloat,                                                    \
-        {ppc64_dwarf::dwarf_##reg##_ppc64,                                     \
-         ppc64_dwarf::dwarf_##reg##_ppc64, lldb_kind, LLDB_INVALID_REGNUM,     \
-         fpr_##reg##_ppc64 },                                                  \
+        {ppc64_dwarf::dwarf_##reg##_ppc64, ppc64_dwarf::dwarf_##reg##_ppc64,   \
+         lldb_kind, LLDB_INVALID_REGNUM, fpr_##reg##_ppc64 },                  \
          NULL, NULL, NULL, 0                                                   \
   }
 #define DEFINE_VMX_PPC64(reg, lldb_kind)                                       \
   {                                                                            \
-#reg, NULL, 16, VMX_PPC64_OFFSET(reg), lldb::eEncodingVector,                  \
+#reg, NULL, 16, VMX_PPC64_OFFSET(reg), lldb::eEncodingVector,              \
         lldb::eFormatVectorOfUInt32,                                           \
-        {ppc64_dwarf::dwarf_##reg##_ppc64,                                     \
-         ppc64_dwarf::dwarf_##reg##_ppc64, lldb_kind, LLDB_INVALID_REGNUM,     \
-         vmx_##reg##_ppc64 },                                                  \
+        {ppc64_dwarf::dwarf_##reg##_ppc64, ppc64_dwarf::dwarf_##reg##_ppc64,   \
+         lldb_kind, LLDB_INVALID_REGNUM, vmx_##reg##_ppc64 },                  \
          NULL, NULL, NULL, 0                                                   \
   }
 
@@ -131,9 +126,8 @@
        FPR_PPC64_OFFSET(fpscr),                                                \
        lldb::eEncodingUint,                                                    \
        lldb::eFormatHex,                                                       \
-       {ppc64_dwarf::dwarf_fpscr_ppc64,                                        \
-        ppc64_dwarf::dwarf_fpscr_ppc64, LLDB_INVALID_REGNUM,                   \
-        LLDB_INVALID_REGNUM, fpr_fpscr_ppc64},                                 \
+       {ppc64_dwarf::dwarf_fpscr_ppc64, ppc64_dwarf::dwarf_fpscr_ppc64,        \
+        LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM, fpr_fpscr_ppc64},            \
        NULL,                                                                   \
        NULL,                                                                   \
        NULL,                                                                   \
@@ -188,138 +182,133 @@
        VMX_PPC64_OFFSET(vrsave),                                               \
        lldb::eEncodingUint,                                                    \
        lldb::eFormatHex,                                                       \
-       {ppc64_dwarf::dwarf_vrsave_ppc64,                                       \
-        ppc64_dwarf::dwarf_vrsave_ppc64, LLDB_INVALID_REGNUM,                  \
-        LLDB_INVALID_REGNUM, vmx_vrsave_ppc64},                                \
+       {ppc64_dwarf::dwarf_vrsave_ppc64, ppc64_dwarf::dwarf_vrsave_ppc64,      \
+        LLDB_INVALID_REGNUM, LLDB_INVALID_REGNUM, vmx_vrsave_ppc64},           \
        NULL,                                                                   \
        NULL,                                                                   \
        NULL,                                                                   \
-       0},  /* */
+       0}, /* */
 
 typedef struct _GPR_PPC64 {
-    uint64_t r0;
-    uint64_t r1;
-    uint64_t r2;
-    uint64_t r3;
-    uint64_t r4;
-    uint64_t r5;
-    uint64_t r6;
-    uint64_t r7;
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-    uint64_t r16;
-    uint64_t r17;
-    uint64_t r18;
-    uint64_t r19;
-    uint64_t r20;
-    uint64_t r21;
-    uint64_t r22;
-    uint64_t r23;
-    uint64_t r24;
-    uint64_t r25;
-    uint64_t r26;
-    uint64_t r27;
-    uint64_t r28;
-    uint64_t r29;
-    uint64_t r30;
-    uint64_t r31;
-    uint64_t cr;
-    uint64_t msr;
-    uint64_t xer;
-    uint64_t lr;
-    uint64_t ctr;
-    uint64_t pc;
-    uint64_t pad[3];
+  uint64_t r0;
+  uint64_t r1;
+  uint64_t r2;
+  uint64_t r3;
+  uint64_t r4;
+  uint64_t r5;
+  uint64_t r6;
+  uint64_t r7;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+  uint64_t r12;
+  uint64_t r13;
+  uint64_t r14;
+  uint64_t r15;
+  uint64_t r16;
+  uint64_t r17;
+  uint64_t r18;
+  uint64_t r19;
+  uint64_t r20;
+  uint64_t r21;
+  uint64_t r22;
+  uint64_t r23;
+  uint64_t r24;
+  uint64_t r25;
+  uint64_t r26;
+  uint64_t r27;
+  uint64_t r28;
+  uint64_t r29;
+  uint64_t r30;
+  uint64_t r31;
+  uint64_t cr;
+  uint64_t msr;
+  uint64_t xer;
+  uint64_t lr;
+  uint64_t ctr;
+  uint64_t pc;
+  uint64_t pad[3];
 } GPR_PPC64;
 
 typedef struct _FPR_PPC64 {
-    uint64_t f0;
-    uint64_t f1;
-    uint64_t f2;
-    uint64_t f3;
-    uint64_t f4;
-    uint64_t f5;
-    uint64_t f6;
-    uint64_t f7;
-    uint64_t f8;
-    uint64_t f9;
-    uint64_t f10;
-    uint64_t f11;
-    uint64_t f12;
-    uint64_t f13;
-    uint64_t f14;
-    uint64_t f15;
-    uint64_t f16;
-    uint64_t f17;
-    uint64_t f18;
-    uint64_t f19;
-    uint64_t f20;
-    uint64_t f21;
-    uint64_t f22;
-    uint64_t f23;
-    uint64_t f24;
-    uint64_t f25;
-    uint64_t f26;
-    uint64_t f27;
-    uint64_t f28;
-    uint64_t f29;
-    uint64_t f30;
-    uint64_t f31;
-    uint64_t fpscr;
+  uint64_t f0;
+  uint64_t f1;
+  uint64_t f2;
+  uint64_t f3;
+  uint64_t f4;
+  uint64_t f5;
+  uint64_t f6;
+  uint64_t f7;
+  uint64_t f8;
+  uint64_t f9;
+  uint64_t f10;
+  uint64_t f11;
+  uint64_t f12;
+  uint64_t f13;
+  uint64_t f14;
+  uint64_t f15;
+  uint64_t f16;
+  uint64_t f17;
+  uint64_t f18;
+  uint64_t f19;
+  uint64_t f20;
+  uint64_t f21;
+  uint64_t f22;
+  uint64_t f23;
+  uint64_t f24;
+  uint64_t f25;
+  uint64_t f26;
+  uint64_t f27;
+  uint64_t f28;
+  uint64_t f29;
+  uint64_t f30;
+  uint64_t f31;
+  uint64_t fpscr;
 } FPR_PPC64;
 
 typedef struct _VMX_PPC64 {
-    uint32_t vr0[4];
-    uint32_t vr1[4];
-    uint32_t vr2[4];
-    uint32_t vr3[4];
-    uint32_t vr4[4];
-    uint32_t vr5[4];
-    uint32_t vr6[4];
-    uint32_t vr7[4];
-    uint32_t vr8[4];
-    uint32_t vr9[4];
-    uint32_t vr10[4];
-    uint32_t vr11[4];
-    uint32_t vr12[4];
-    uint32_t vr13[4];
-    uint32_t vr14[4];
-    uint32_t vr15[4];
-    uint32_t vr16[4];
-    uint32_t vr17[4];
-    uint32_t vr18[4];
-    uint32_t vr19[4];
-    uint32_t vr20[4];
-    uint32_t vr21[4];
-    uint32_t vr22[4];
-    uint32_t vr23[4];
-    uint32_t vr24[4];
-    uint32_t vr25[4];
-    uint32_t vr26[4];
-    uint32_t vr27[4];
-    uint32_t vr28[4];
-    uint32_t vr29[4];
-    uint32_t vr30[4];
-    uint32_t vr31[4];
-    uint32_t pad[2];
-    uint32_t vscr[2];
-    uint32_t vrsave;
+  uint32_t vr0[4];
+  uint32_t vr1[4];
+  uint32_t vr2[4];
+  uint32_t vr3[4];
+  uint32_t vr4[4];
+  uint32_t vr5[4];
+  uint32_t vr6[4];
+  uint32_t vr7[4];
+  uint32_t vr8[4];
+  uint32_t vr9[4];
+  uint32_t vr10[4];
+  uint32_t vr11[4];
+  uint32_t vr12[4];
+  uint32_t vr13[4];
+  uint32_t vr14[4];
+  uint32_t vr15[4];
+  uint32_t vr16[4];
+  uint32_t vr17[4];
+  uint32_t vr18[4];
+  uint32_t vr19[4];
+  uint32_t vr20[4];
+  uint32_t vr21[4];
+  uint32_t vr22[4];
+  uint32_t vr23[4];
+  uint32_t vr24[4];
+  uint32_t vr25[4];
+  uint32_t vr26[4];
+  uint32_t vr27[4];
+  uint32_t vr28[4];
+  uint32_t vr29[4];
+  uint32_t vr30[4];
+  uint32_t vr31[4];
+  uint32_t pad[2];
+  uint32_t vscr[2];
+  uint32_t vrsave;
 } VMX_PPC64;
 
-
-static lldb_private::RegisterInfo g_register_infos_ppc64[] = {
-    PPC64_REGS
-};
+static lldb_private::RegisterInfo g_register_infos_ppc64[] = {PPC64_REGS};
 
 static_assert((sizeof(g_register_infos_ppc64) /
-               sizeof(g_register_infos_ppc64[0])) ==
-              k_num_registers_ppc64,
+               sizeof(g_register_infos_ppc64[0])) == k_num_registers_ppc64,
               "g_register_infos_powerpc64 has wrong number of register infos");
 
 #undef DEFINE_FPR_PPC64

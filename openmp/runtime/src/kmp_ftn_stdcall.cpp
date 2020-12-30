@@ -16,9 +16,9 @@
 char const __kmp_version_ftnstdcall[] =
     KMP_VERSION_PREFIX "Fortran __stdcall OMP support: "
 #ifdef USE_FTN_STDCALL
-    "yes";
+                       "yes";
 #else
-    "no";
+                       "no";
 #endif
 
 #ifdef USE_FTN_STDCALL

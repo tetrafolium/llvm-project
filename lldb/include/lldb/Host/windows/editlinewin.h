@@ -77,39 +77,39 @@
 struct EditLine {};
 
 struct LineInfo {
-    const char *buffer;
-    const char *cursor;
-    const char *lastchar;
+  const char *buffer;
+  const char *cursor;
+  const char *lastchar;
 };
 
 struct History {};
 
 struct HistEvent {
-    int num;
-    const char *str;
+  int num;
+  const char *str;
 };
 
 extern "C" {
 // edit line API
-    EditLine *el_init(const char *, FILE *, FILE *, FILE *);
-    const char *el_gets(EditLine *, int *);
-    int el_set(EditLine *, int, ...);
+EditLine *el_init(const char *, FILE *, FILE *, FILE *);
+const char *el_gets(EditLine *, int *);
+int el_set(EditLine *, int, ...);
 
-    void el_end(EditLine *);
-    void el_reset(EditLine *);
-    int el_getc(EditLine *, char *);
-    void el_push(EditLine *, const char *);
-    void el_beep(EditLine *);
-    int el_parse(EditLine *, int, const char **);
-    int el_get(EditLine *, int, ...);
-    int el_source(EditLine *, const char *);
-    void el_resize(EditLine *);
-    const LineInfo *el_line(EditLine *);
-    int el_insertstr(EditLine *, const char *);
-    void el_deletestr(EditLine *, int);
+void el_end(EditLine *);
+void el_reset(EditLine *);
+int el_getc(EditLine *, char *);
+void el_push(EditLine *, const char *);
+void el_beep(EditLine *);
+int el_parse(EditLine *, int, const char **);
+int el_get(EditLine *, int, ...);
+int el_source(EditLine *, const char *);
+void el_resize(EditLine *);
+const LineInfo *el_line(EditLine *);
+int el_insertstr(EditLine *, const char *);
+void el_deletestr(EditLine *, int);
 
 // history API
-    History *history_init(void);
-    void history_end(History *);
-    int history(History *, HistEvent *, int, ...);
+History *history_init(void);
+void history_end(History *);
+int history(History *, HistEvent *, int, ...);
 };

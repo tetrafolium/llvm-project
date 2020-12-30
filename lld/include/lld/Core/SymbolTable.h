@@ -33,69 +33,61 @@ class UndefinedAtom;
 /// if an atom has been coalesced away.
 class SymbolTable {
 public:
-    /// add atom to symbol table
-    bool add(const DefinedAtom &);
+  /// add atom to symbol table
+  bool add(const DefinedAtom &);
 
-    /// add atom to symbol table
-    bool add(const UndefinedAtom &);
+  /// add atom to symbol table
+  bool add(const UndefinedAtom &);
 
-    /// add atom to symbol table
-    bool add(const SharedLibraryAtom &);
+  /// add atom to symbol table
+  bool add(const SharedLibraryAtom &);
 
-    /// add atom to symbol table
-    bool add(const AbsoluteAtom &);
+  /// add atom to symbol table
+  bool add(const AbsoluteAtom &);
 
-    /// returns atom in symbol table for specified name (or nullptr)
-    const Atom *findByName(StringRef sym);
+  /// returns atom in symbol table for specified name (or nullptr)
+  const Atom *findByName(StringRef sym);
 
-    /// returns vector of remaining UndefinedAtoms
-    std::vector<const UndefinedAtom *> undefines();
+  /// returns vector of remaining UndefinedAtoms
+  std::vector<const UndefinedAtom *> undefines();
 
-    /// if atom has been coalesced away, return replacement, else return atom
-    const Atom *replacement(const Atom *);
+  /// if atom has been coalesced away, return replacement, else return atom
+  const Atom *replacement(const Atom *);
 
-    /// if atom has been coalesced away, return true
-    bool isCoalescedAway(const Atom *);
+  /// if atom has been coalesced away, return true
+  bool isCoalescedAway(const Atom *);
 
 private:
-    typedef llvm::DenseMap<const Atom *, const Atom *> AtomToAtom;
+  typedef llvm::DenseMap<const Atom *, const Atom *> AtomToAtom;
 
-    struct StringRefMappingInfo {
-        static StringRef getEmptyKey() {
-            return StringRef();
-        }
-        static StringRef getTombstoneKey() {
-            return StringRef(" ", 1);
-        }
-        static unsigned getHashValue(StringRef const val) {
-            return llvm::djbHash(val, 0);
-        }
-        static bool isEqual(StringRef const lhs, StringRef const rhs) {
-            return lhs.equals(rhs);
-        }
-    };
-    typedef llvm::DenseMap<StringRef, const Atom *,
-            StringRefMappingInfo> NameToAtom;
+  struct StringRefMappingInfo {
+    static StringRef getEmptyKey() { return StringRef(); }
+    static StringRef getTombstoneKey() { return StringRef(" ", 1); }
+    static unsigned getHashValue(StringRef const val) {
+      return llvm::djbHash(val, 0);
+    }
+    static bool isEqual(StringRef const lhs, StringRef const rhs) {
+      return lhs.equals(rhs);
+    }
+  };
+  typedef llvm::DenseMap<StringRef, const Atom *, StringRefMappingInfo>
+      NameToAtom;
 
-    struct AtomMappingInfo {
-        static const DefinedAtom * getEmptyKey() {
-            return nullptr;
-        }
-        static const DefinedAtom * getTombstoneKey() {
-            return (DefinedAtom*)(-1);
-        }
-        static unsigned getHashValue(const DefinedAtom * const Val);
-        static bool isEqual(const DefinedAtom * const LHS,
-                            const DefinedAtom * const RHS);
-    };
-    typedef llvm::DenseSet<const DefinedAtom*, AtomMappingInfo> AtomContentSet;
+  struct AtomMappingInfo {
+    static const DefinedAtom *getEmptyKey() { return nullptr; }
+    static const DefinedAtom *getTombstoneKey() { return (DefinedAtom *)(-1); }
+    static unsigned getHashValue(const DefinedAtom *const Val);
+    static bool isEqual(const DefinedAtom *const LHS,
+                        const DefinedAtom *const RHS);
+  };
+  typedef llvm::DenseSet<const DefinedAtom *, AtomMappingInfo> AtomContentSet;
 
-    bool addByName(const Atom &);
-    bool addByContent(const DefinedAtom &);
+  bool addByName(const Atom &);
+  bool addByContent(const DefinedAtom &);
 
-    AtomToAtom _replacedAtoms;
-    NameToAtom _nameTable;
-    AtomContentSet _contentTable;
+  AtomToAtom _replacedAtoms;
+  NameToAtom _nameTable;
+  AtomContentSet _contentTable;
 };
 
 } // namespace lld

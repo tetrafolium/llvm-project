@@ -30,12 +30,12 @@ class VPRegionBlock;
 /// Struct with utility functions that can be used to check the consistency and
 /// invariants of a VPlan, including the components of its H-CFG.
 struct VPlanVerifier {
-    /// Verify the invariants of the H-CFG starting from \p TopRegion. The
-    /// verification process comprises the following steps:
-    /// 1. Region/Block verification: Check the Region/Block verification
-    /// invariants for every region in the H-CFG.
-    void verifyHierarchicalCFG(const VPRegionBlock *TopRegion) const;
+  /// Verify the invariants of the H-CFG starting from \p TopRegion. The
+  /// verification process comprises the following steps:
+  /// 1. Region/Block verification: Check the Region/Block verification
+  /// invariants for every region in the H-CFG.
+  void verifyHierarchicalCFG(const VPRegionBlock *TopRegion) const;
 };
 } // namespace llvm
 
-#endif //LLVM_TRANSFORMS_VECTORIZE_VPLANVERIFIER_H
+#endif // LLVM_TRANSFORMS_VECTORIZE_VPLANVERIFIER_H

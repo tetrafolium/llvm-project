@@ -23,16 +23,16 @@ namespace cppcoreguidelines {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-init-variables.html
 class InitVariablesCheck : public ClangTidyCheck {
 public:
-    InitVariablesCheck(StringRef Name, ClangTidyContext *Context);
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  InitVariablesCheck(StringRef Name, ClangTidyContext *Context);
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    utils::IncludeInserter IncludeInserter;
-    const std::string MathHeader;
+  utils::IncludeInserter IncludeInserter;
+  const std::string MathHeader;
 };
 
 } // namespace cppcoreguidelines

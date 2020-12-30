@@ -54,37 +54,37 @@ namespace clang {
 namespace clangd {
 
 struct FileDistanceOptions {
-    unsigned UpCost = 2;                    // |foo/bar.h -> foo|
-    unsigned DownCost = 1;                  // |foo -> foo/bar.h|
-    unsigned IncludeCost = 2;               // |foo.cc -> included_header.h|
-    bool AllowDownTraversalFromRoot = true; // | / -> /a |
+  unsigned UpCost = 2;                    // |foo/bar.h -> foo|
+  unsigned DownCost = 1;                  // |foo -> foo/bar.h|
+  unsigned IncludeCost = 2;               // |foo.cc -> included_header.h|
+  bool AllowDownTraversalFromRoot = true; // | / -> /a |
 };
 
 struct SourceParams {
-    // Base cost for paths starting at this source.
-    unsigned Cost = 0;
-    // Limits the number of upwards traversals allowed from this source.
-    unsigned MaxUpTraversals = std::numeric_limits<unsigned>::max();
+  // Base cost for paths starting at this source.
+  unsigned Cost = 0;
+  // Limits the number of upwards traversals allowed from this source.
+  unsigned MaxUpTraversals = std::numeric_limits<unsigned>::max();
 };
 
 // Supports lookups to find the minimum distance to a file from any source.
 // This object should be reused, it memoizes intermediate computations.
 class FileDistance {
 public:
-    static constexpr unsigned Unreachable = std::numeric_limits<unsigned>::max();
-    static const llvm::hash_code RootHash;
+  static constexpr unsigned Unreachable = std::numeric_limits<unsigned>::max();
+  static const llvm::hash_code RootHash;
 
-    FileDistance(llvm::StringMap<SourceParams> Sources,
-                 const FileDistanceOptions &Opts = {});
+  FileDistance(llvm::StringMap<SourceParams> Sources,
+               const FileDistanceOptions &Opts = {});
 
-    // Computes the minimum distance from any source to the file path.
-    unsigned distance(llvm::StringRef Path);
+  // Computes the minimum distance from any source to the file path.
+  unsigned distance(llvm::StringRef Path);
 
 private:
-    // Costs computed so far. Always contains sources and their ancestors.
-    // We store hash codes only. Collisions are rare and consequences aren't dire.
-    llvm::DenseMap<llvm::hash_code, unsigned> Cache;
-    FileDistanceOptions Opts;
+  // Costs computed so far. Always contains sources and their ancestors.
+  // We store hash codes only. Collisions are rare and consequences aren't dire.
+  llvm::DenseMap<llvm::hash_code, unsigned> Cache;
+  FileDistanceOptions Opts;
 };
 
 // Supports lookups like FileDistance, but the lookup keys are URIs.
@@ -92,37 +92,37 @@ private:
 // comparison on the bodies.
 class URIDistance {
 public:
-    // \p Sources must contain absolute paths, not URIs.
-    URIDistance(llvm::StringMap<SourceParams> Sources,
-                const FileDistanceOptions &Opts = {})
-        : Sources(Sources), Opts(Opts) {}
+  // \p Sources must contain absolute paths, not URIs.
+  URIDistance(llvm::StringMap<SourceParams> Sources,
+              const FileDistanceOptions &Opts = {})
+      : Sources(Sources), Opts(Opts) {}
 
-    // Computes the minimum distance from any source to the URI.
-    // Only sources that can be mapped into the URI's scheme are considered.
-    unsigned distance(llvm::StringRef URI);
+  // Computes the minimum distance from any source to the URI.
+  // Only sources that can be mapped into the URI's scheme are considered.
+  unsigned distance(llvm::StringRef URI);
 
 private:
-    // Returns the FileDistance for a URI scheme, creating it if needed.
-    FileDistance &forScheme(llvm::StringRef Scheme);
+  // Returns the FileDistance for a URI scheme, creating it if needed.
+  FileDistance &forScheme(llvm::StringRef Scheme);
 
-    // We cache the results using the original strings so we can skip URI parsing.
-    llvm::DenseMap<llvm::hash_code, unsigned> Cache;
-    llvm::StringMap<SourceParams> Sources;
-    llvm::StringMap<std::unique_ptr<FileDistance>> ByScheme;
-    FileDistanceOptions Opts;
+  // We cache the results using the original strings so we can skip URI parsing.
+  llvm::DenseMap<llvm::hash_code, unsigned> Cache;
+  llvm::StringMap<SourceParams> Sources;
+  llvm::StringMap<std::unique_ptr<FileDistance>> ByScheme;
+  FileDistanceOptions Opts;
 };
 
 /// Support lookups like FileDistance, but the lookup keys are symbol scopes.
 /// For example, a scope "na::nb::" is converted to "/na/nb".
 class ScopeDistance {
 public:
-    /// QueryScopes[0] is the preferred scope.
-    ScopeDistance(llvm::ArrayRef<std::string> QueryScopes);
+  /// QueryScopes[0] is the preferred scope.
+  ScopeDistance(llvm::ArrayRef<std::string> QueryScopes);
 
-    unsigned distance(llvm::StringRef SymbolScope);
+  unsigned distance(llvm::StringRef SymbolScope);
 
 private:
-    FileDistance Distance;
+  FileDistance Distance;
 };
 
 } // namespace clangd

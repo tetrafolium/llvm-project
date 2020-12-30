@@ -17,40 +17,34 @@ namespace codeview {
 
 class TypeVisitorCallbacks {
 public:
-    virtual ~TypeVisitorCallbacks() = default;
+  virtual ~TypeVisitorCallbacks() = default;
 
-    /// Action to take on unknown types. By default, they are ignored.
-    virtual Error visitUnknownType(CVType &Record) {
-        return Error::success();
-    }
-    /// Paired begin/end actions for all types. Receives all record data,
-    /// including the fixed-length record prefix.  visitTypeBegin() should return
-    /// the type of the Record, or an error if it cannot be determined.  Exactly
-    /// one of the two visitTypeBegin methods will be called, depending on whether
-    /// records are being visited sequentially or randomly.  An implementation
-    /// should be prepared to handle both (or assert if it can't handle random
-    /// access visitation).
-    virtual Error visitTypeBegin(CVType &Record) {
-        return Error::success();
-    }
-    virtual Error visitTypeBegin(CVType &Record, TypeIndex Index) {
-        return Error::success();
-    }
-    virtual Error visitTypeEnd(CVType &Record) {
-        return Error::success();
-    }
+  /// Action to take on unknown types. By default, they are ignored.
+  virtual Error visitUnknownType(CVType &Record) { return Error::success(); }
+  /// Paired begin/end actions for all types. Receives all record data,
+  /// including the fixed-length record prefix.  visitTypeBegin() should return
+  /// the type of the Record, or an error if it cannot be determined.  Exactly
+  /// one of the two visitTypeBegin methods will be called, depending on whether
+  /// records are being visited sequentially or randomly.  An implementation
+  /// should be prepared to handle both (or assert if it can't handle random
+  /// access visitation).
+  virtual Error visitTypeBegin(CVType &Record) { return Error::success(); }
+  virtual Error visitTypeBegin(CVType &Record, TypeIndex Index) {
+    return Error::success();
+  }
+  virtual Error visitTypeEnd(CVType &Record) { return Error::success(); }
 
-    virtual Error visitUnknownMember(CVMemberRecord &Record) {
-        return Error::success();
-    }
+  virtual Error visitUnknownMember(CVMemberRecord &Record) {
+    return Error::success();
+  }
 
-    virtual Error visitMemberBegin(CVMemberRecord &Record) {
-        return Error::success();
-    }
+  virtual Error visitMemberBegin(CVMemberRecord &Record) {
+    return Error::success();
+  }
 
-    virtual Error visitMemberEnd(CVMemberRecord &Record) {
-        return Error::success();
-    }
+  virtual Error visitMemberEnd(CVMemberRecord &Record) {
+    return Error::success();
+  }
 
 #define TYPE_RECORD(EnumName, EnumVal, Name)                                   \
   virtual Error visitKnownRecord(CVType &CVR, Name##Record &Record) {          \

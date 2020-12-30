@@ -23,27 +23,25 @@ class StackFrame;
 
 class TargetThreadWindows : public lldb_private::Thread {
 public:
-    TargetThreadWindows(ProcessWindows &process, const HostThread &thread);
-    virtual ~TargetThreadWindows();
+  TargetThreadWindows(ProcessWindows &process, const HostThread &thread);
+  virtual ~TargetThreadWindows();
 
-    // lldb_private::Thread overrides
-    void RefreshStateAfterStop() override;
-    void WillResume(lldb::StateType resume_state) override;
-    void DidStop() override;
-    lldb::RegisterContextSP GetRegisterContext() override;
-    lldb::RegisterContextSP
-    CreateRegisterContextForFrame(StackFrame *frame) override;
-    bool CalculateStopInfo() override;
+  // lldb_private::Thread overrides
+  void RefreshStateAfterStop() override;
+  void WillResume(lldb::StateType resume_state) override;
+  void DidStop() override;
+  lldb::RegisterContextSP GetRegisterContext() override;
+  lldb::RegisterContextSP
+  CreateRegisterContextForFrame(StackFrame *frame) override;
+  bool CalculateStopInfo() override;
 
-    Status DoResume();
+  Status DoResume();
 
-    HostThread GetHostThread() const {
-        return m_host_thread;
-    }
+  HostThread GetHostThread() const { return m_host_thread; }
 
 private:
-    lldb::RegisterContextSP m_thread_reg_ctx_sp;
-    HostThread m_host_thread;
+  lldb::RegisterContextSP m_thread_reg_ctx_sp;
+  HostThread m_host_thread;
 };
 } // namespace lldb_private
 

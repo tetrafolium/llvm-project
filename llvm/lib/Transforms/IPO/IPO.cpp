@@ -23,120 +23,117 @@
 using namespace llvm;
 
 void llvm::initializeIPO(PassRegistry &Registry) {
-    initializeOpenMPOptLegacyPassPass(Registry);
-    initializeArgPromotionPass(Registry);
-    initializeAnnotation2MetadataLegacyPass(Registry);
-    initializeCalledValuePropagationLegacyPassPass(Registry);
-    initializeConstantMergeLegacyPassPass(Registry);
-    initializeCrossDSOCFIPass(Registry);
-    initializeDAEPass(Registry);
-    initializeDAHPass(Registry);
-    initializeForceFunctionAttrsLegacyPassPass(Registry);
-    initializeGlobalDCELegacyPassPass(Registry);
-    initializeGlobalOptLegacyPassPass(Registry);
-    initializeGlobalSplitPass(Registry);
-    initializeHotColdSplittingLegacyPassPass(Registry);
-    initializeIROutlinerLegacyPassPass(Registry);
-    initializeAlwaysInlinerLegacyPassPass(Registry);
-    initializeSimpleInlinerPass(Registry);
-    initializeInferFunctionAttrsLegacyPassPass(Registry);
-    initializeInternalizeLegacyPassPass(Registry);
-    initializeLoopExtractorLegacyPassPass(Registry);
-    initializeBlockExtractorLegacyPassPass(Registry);
-    initializeSingleLoopExtractorPass(Registry);
-    initializeLowerTypeTestsPass(Registry);
-    initializeMergeFunctionsLegacyPassPass(Registry);
-    initializePartialInlinerLegacyPassPass(Registry);
-    initializeAttributorLegacyPassPass(Registry);
-    initializeAttributorCGSCCLegacyPassPass(Registry);
-    initializePostOrderFunctionAttrsLegacyPassPass(Registry);
-    initializeReversePostOrderFunctionAttrsLegacyPassPass(Registry);
-    initializePruneEHPass(Registry);
-    initializeIPSCCPLegacyPassPass(Registry);
-    initializeStripDeadPrototypesLegacyPassPass(Registry);
-    initializeStripSymbolsPass(Registry);
-    initializeStripDebugDeclarePass(Registry);
-    initializeStripDeadDebugInfoPass(Registry);
-    initializeStripNonDebugSymbolsPass(Registry);
-    initializeBarrierNoopPass(Registry);
-    initializeEliminateAvailableExternallyLegacyPassPass(Registry);
-    initializeSampleProfileLoaderLegacyPassPass(Registry);
-    initializeFunctionImportLegacyPassPass(Registry);
-    initializeWholeProgramDevirtPass(Registry);
+  initializeOpenMPOptLegacyPassPass(Registry);
+  initializeArgPromotionPass(Registry);
+  initializeAnnotation2MetadataLegacyPass(Registry);
+  initializeCalledValuePropagationLegacyPassPass(Registry);
+  initializeConstantMergeLegacyPassPass(Registry);
+  initializeCrossDSOCFIPass(Registry);
+  initializeDAEPass(Registry);
+  initializeDAHPass(Registry);
+  initializeForceFunctionAttrsLegacyPassPass(Registry);
+  initializeGlobalDCELegacyPassPass(Registry);
+  initializeGlobalOptLegacyPassPass(Registry);
+  initializeGlobalSplitPass(Registry);
+  initializeHotColdSplittingLegacyPassPass(Registry);
+  initializeIROutlinerLegacyPassPass(Registry);
+  initializeAlwaysInlinerLegacyPassPass(Registry);
+  initializeSimpleInlinerPass(Registry);
+  initializeInferFunctionAttrsLegacyPassPass(Registry);
+  initializeInternalizeLegacyPassPass(Registry);
+  initializeLoopExtractorLegacyPassPass(Registry);
+  initializeBlockExtractorLegacyPassPass(Registry);
+  initializeSingleLoopExtractorPass(Registry);
+  initializeLowerTypeTestsPass(Registry);
+  initializeMergeFunctionsLegacyPassPass(Registry);
+  initializePartialInlinerLegacyPassPass(Registry);
+  initializeAttributorLegacyPassPass(Registry);
+  initializeAttributorCGSCCLegacyPassPass(Registry);
+  initializePostOrderFunctionAttrsLegacyPassPass(Registry);
+  initializeReversePostOrderFunctionAttrsLegacyPassPass(Registry);
+  initializePruneEHPass(Registry);
+  initializeIPSCCPLegacyPassPass(Registry);
+  initializeStripDeadPrototypesLegacyPassPass(Registry);
+  initializeStripSymbolsPass(Registry);
+  initializeStripDebugDeclarePass(Registry);
+  initializeStripDeadDebugInfoPass(Registry);
+  initializeStripNonDebugSymbolsPass(Registry);
+  initializeBarrierNoopPass(Registry);
+  initializeEliminateAvailableExternallyLegacyPassPass(Registry);
+  initializeSampleProfileLoaderLegacyPassPass(Registry);
+  initializeFunctionImportLegacyPassPass(Registry);
+  initializeWholeProgramDevirtPass(Registry);
 }
 
-void LLVMInitializeIPO(LLVMPassRegistryRef R) {
-    initializeIPO(*unwrap(R));
-}
+void LLVMInitializeIPO(LLVMPassRegistryRef R) { initializeIPO(*unwrap(R)); }
 
 void LLVMAddArgumentPromotionPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createArgumentPromotionPass());
+  unwrap(PM)->add(createArgumentPromotionPass());
 }
 
 void LLVMAddCalledValuePropagationPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createCalledValuePropagationPass());
+  unwrap(PM)->add(createCalledValuePropagationPass());
 }
 
 void LLVMAddConstantMergePass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createConstantMergePass());
+  unwrap(PM)->add(createConstantMergePass());
 }
 
 void LLVMAddDeadArgEliminationPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createDeadArgEliminationPass());
+  unwrap(PM)->add(createDeadArgEliminationPass());
 }
 
 void LLVMAddFunctionAttrsPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createPostOrderFunctionAttrsLegacyPass());
+  unwrap(PM)->add(createPostOrderFunctionAttrsLegacyPass());
 }
 
 void LLVMAddFunctionInliningPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createFunctionInliningPass());
+  unwrap(PM)->add(createFunctionInliningPass());
 }
 
 void LLVMAddAlwaysInlinerPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(llvm::createAlwaysInlinerLegacyPass());
+  unwrap(PM)->add(llvm::createAlwaysInlinerLegacyPass());
 }
 
 void LLVMAddGlobalDCEPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createGlobalDCEPass());
+  unwrap(PM)->add(createGlobalDCEPass());
 }
 
 void LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createGlobalOptimizerPass());
+  unwrap(PM)->add(createGlobalOptimizerPass());
 }
 
 void LLVMAddPruneEHPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createPruneEHPass());
+  unwrap(PM)->add(createPruneEHPass());
 }
 
 void LLVMAddIPSCCPPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createIPSCCPPass());
+  unwrap(PM)->add(createIPSCCPPass());
 }
 
 void LLVMAddMergeFunctionsPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createMergeFunctionsPass());
+  unwrap(PM)->add(createMergeFunctionsPass());
 }
 
 void LLVMAddInternalizePass(LLVMPassManagerRef PM, unsigned AllButMain) {
-    auto PreserveMain = [=](const GlobalValue &GV) {
-        return AllButMain && GV.getName() == "main";
-    };
-    unwrap(PM)->add(createInternalizePass(PreserveMain));
+  auto PreserveMain = [=](const GlobalValue &GV) {
+    return AllButMain && GV.getName() == "main";
+  };
+  unwrap(PM)->add(createInternalizePass(PreserveMain));
 }
 
 void LLVMAddInternalizePassWithMustPreservePredicate(
-    LLVMPassManagerRef PM,
-    void *Context,
+    LLVMPassManagerRef PM, void *Context,
     LLVMBool (*Pred)(LLVMValueRef, void *)) {
-    unwrap(PM)->add(createInternalizePass([=](const GlobalValue &GV) {
-        return Pred(wrap(&GV), Context) == 0 ? false : true;
-    }));
+  unwrap(PM)->add(createInternalizePass([=](const GlobalValue &GV) {
+    return Pred(wrap(&GV), Context) == 0 ? false : true;
+  }));
 }
 
 void LLVMAddStripDeadPrototypesPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createStripDeadPrototypesPass());
+  unwrap(PM)->add(createStripDeadPrototypesPass());
 }
 
 void LLVMAddStripSymbolsPass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createStripSymbolsPass());
+  unwrap(PM)->add(createStripSymbolsPass());
 }

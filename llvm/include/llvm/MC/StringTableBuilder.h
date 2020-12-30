@@ -22,77 +22,67 @@ class raw_ostream;
 /// Utility for building string tables with deduplicated suffixes.
 class StringTableBuilder {
 public:
-    enum Kind {
-        ELF,
-        WinCOFF,
-        MachO,
-        MachO64,
-        MachOLinked,
-        MachO64Linked,
-        RAW,
-        DWARF,
-        XCOFF
-    };
+  enum Kind {
+    ELF,
+    WinCOFF,
+    MachO,
+    MachO64,
+    MachOLinked,
+    MachO64Linked,
+    RAW,
+    DWARF,
+    XCOFF
+  };
 
 private:
-    DenseMap<CachedHashStringRef, size_t> StringIndexMap;
-    size_t Size = 0;
-    Kind K;
-    unsigned Alignment;
-    bool Finalized = false;
+  DenseMap<CachedHashStringRef, size_t> StringIndexMap;
+  size_t Size = 0;
+  Kind K;
+  unsigned Alignment;
+  bool Finalized = false;
 
-    void finalizeStringTable(bool Optimize);
-    void initSize();
+  void finalizeStringTable(bool Optimize);
+  void initSize();
 
 public:
-    StringTableBuilder(Kind K, unsigned Alignment = 1);
-    ~StringTableBuilder();
+  StringTableBuilder(Kind K, unsigned Alignment = 1);
+  ~StringTableBuilder();
 
-    /// Add a string to the builder. Returns the position of S in the
-    /// table. The position will be changed if finalize is used.
-    /// Can only be used before the table is finalized.
-    size_t add(CachedHashStringRef S);
-    size_t add(StringRef S) {
-        return add(CachedHashStringRef(S));
-    }
+  /// Add a string to the builder. Returns the position of S in the
+  /// table. The position will be changed if finalize is used.
+  /// Can only be used before the table is finalized.
+  size_t add(CachedHashStringRef S);
+  size_t add(StringRef S) { return add(CachedHashStringRef(S)); }
 
-    /// Analyze the strings and build the final table. No more strings can
-    /// be added after this point.
-    void finalize();
+  /// Analyze the strings and build the final table. No more strings can
+  /// be added after this point.
+  void finalize();
 
-    /// Finalize the string table without reording it. In this mode, offsets
-    /// returned by add will still be valid.
-    void finalizeInOrder();
+  /// Finalize the string table without reording it. In this mode, offsets
+  /// returned by add will still be valid.
+  void finalizeInOrder();
 
-    /// Get the offest of a string in the string table. Can only be used
-    /// after the table is finalized.
-    size_t getOffset(CachedHashStringRef S) const;
-    size_t getOffset(StringRef S) const {
-        return getOffset(CachedHashStringRef(S));
-    }
+  /// Get the offest of a string in the string table. Can only be used
+  /// after the table is finalized.
+  size_t getOffset(CachedHashStringRef S) const;
+  size_t getOffset(StringRef S) const {
+    return getOffset(CachedHashStringRef(S));
+  }
 
-    /// Check if a string is contained in the string table. Since this class
-    /// doesn't store the string values, this function can be used to check if
-    /// storage needs to be done prior to adding the string.
-    bool contains(StringRef S) const {
-        return contains(CachedHashStringRef(S));
-    }
-    bool contains(CachedHashStringRef S) const {
-        return StringIndexMap.count(S);
-    }
+  /// Check if a string is contained in the string table. Since this class
+  /// doesn't store the string values, this function can be used to check if
+  /// storage needs to be done prior to adding the string.
+  bool contains(StringRef S) const { return contains(CachedHashStringRef(S)); }
+  bool contains(CachedHashStringRef S) const { return StringIndexMap.count(S); }
 
-    size_t getSize() const {
-        return Size;
-    }
-    void clear();
+  size_t getSize() const { return Size; }
+  void clear();
 
-    void write(raw_ostream &OS) const;
-    void write(uint8_t *Buf) const;
+  void write(raw_ostream &OS) const;
+  void write(uint8_t *Buf) const;
 
 private:
-    bool isFinalized() const {
-        return Finalized;
-    }
+  bool isFinalized() const { return Finalized; }
 };
 
 } // end namespace llvm

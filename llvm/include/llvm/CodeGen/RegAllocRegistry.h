@@ -26,53 +26,48 @@ class FunctionPass;
 ///
 //===----------------------------------------------------------------------===//
 template <class SubClass>
-class RegisterRegAllocBase : public MachinePassRegistryNode<FunctionPass *(*)()> {
+class RegisterRegAllocBase
+    : public MachinePassRegistryNode<FunctionPass *(*)()> {
 public:
-    using FunctionPassCtor = FunctionPass *(*)();
+  using FunctionPassCtor = FunctionPass *(*)();
 
-    static MachinePassRegistry<FunctionPassCtor> Registry;
+  static MachinePassRegistry<FunctionPassCtor> Registry;
 
-    RegisterRegAllocBase(const char *N, const char *D, FunctionPassCtor C)
-        : MachinePassRegistryNode(N, D, C) {
-        Registry.Add(this);
-    }
+  RegisterRegAllocBase(const char *N, const char *D, FunctionPassCtor C)
+      : MachinePassRegistryNode(N, D, C) {
+    Registry.Add(this);
+  }
 
-    ~RegisterRegAllocBase() {
-        Registry.Remove(this);
-    }
+  ~RegisterRegAllocBase() { Registry.Remove(this); }
 
-    // Accessors.
-    SubClass *getNext() const {
-        return static_cast<SubClass *>(MachinePassRegistryNode::getNext());
-    }
+  // Accessors.
+  SubClass *getNext() const {
+    return static_cast<SubClass *>(MachinePassRegistryNode::getNext());
+  }
 
-    static SubClass *getList() {
-        return static_cast<SubClass *>(Registry.getList());
-    }
+  static SubClass *getList() {
+    return static_cast<SubClass *>(Registry.getList());
+  }
 
-    static FunctionPassCtor getDefault() {
-        return Registry.getDefault();
-    }
+  static FunctionPassCtor getDefault() { return Registry.getDefault(); }
 
-    static void setDefault(FunctionPassCtor C) {
-        Registry.setDefault(C);
-    }
+  static void setDefault(FunctionPassCtor C) { Registry.setDefault(C); }
 
-    static void setListener(MachinePassRegistryListener<FunctionPassCtor> *L) {
-        Registry.setListener(L);
-    }
+  static void setListener(MachinePassRegistryListener<FunctionPassCtor> *L) {
+    Registry.setListener(L);
+  }
 };
 
 class RegisterRegAlloc : public RegisterRegAllocBase<RegisterRegAlloc> {
 public:
-    RegisterRegAlloc(const char *N, const char *D, FunctionPassCtor C)
-        : RegisterRegAllocBase(N, D, C) {}
+  RegisterRegAlloc(const char *N, const char *D, FunctionPassCtor C)
+      : RegisterRegAllocBase(N, D, C) {}
 };
 
 /// RegisterRegAlloc's global Registry tracks allocator registration.
 template <class T>
 MachinePassRegistry<RegisterRegAlloc::FunctionPassCtor>
-RegisterRegAllocBase<T>::Registry;
+    RegisterRegAllocBase<T>::Registry;
 
 } // end namespace llvm
 

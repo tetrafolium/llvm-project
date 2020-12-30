@@ -32,86 +32,86 @@ STATISTIC(NumSimplified, "Number of redundant instructions removed");
 
 static bool runImpl(Function &F, const SimplifyQuery &SQ,
                     OptimizationRemarkEmitter *ORE) {
-    SmallPtrSet<const Instruction *, 8> S1, S2, *ToSimplify = &S1, *Next = &S2;
-    bool Changed = false;
+  SmallPtrSet<const Instruction *, 8> S1, S2, *ToSimplify = &S1, *Next = &S2;
+  bool Changed = false;
 
-    do {
-        for (BasicBlock &BB : F) {
-            // Unreachable code can take on strange forms that we are not prepared to
-            // handle. For example, an instruction may have itself as an operand.
-            if (!SQ.DT->isReachableFromEntry(&BB))
-                continue;
+  do {
+    for (BasicBlock &BB : F) {
+      // Unreachable code can take on strange forms that we are not prepared to
+      // handle. For example, an instruction may have itself as an operand.
+      if (!SQ.DT->isReachableFromEntry(&BB))
+        continue;
 
-            SmallVector<WeakTrackingVH, 8> DeadInstsInBB;
-            for (Instruction &I : BB) {
-                // The first time through the loop, ToSimplify is empty and we try to
-                // simplify all instructions. On later iterations, ToSimplify is not
-                // empty and we only bother simplifying instructions that are in it.
-                if (!ToSimplify->empty() && !ToSimplify->count(&I))
-                    continue;
+      SmallVector<WeakTrackingVH, 8> DeadInstsInBB;
+      for (Instruction &I : BB) {
+        // The first time through the loop, ToSimplify is empty and we try to
+        // simplify all instructions. On later iterations, ToSimplify is not
+        // empty and we only bother simplifying instructions that are in it.
+        if (!ToSimplify->empty() && !ToSimplify->count(&I))
+          continue;
 
-                // Don't waste time simplifying dead/unused instructions.
-                if (isInstructionTriviallyDead(&I)) {
-                    DeadInstsInBB.push_back(&I);
-                    Changed = true;
-                } else if (!I.use_empty()) {
-                    if (Value *V = SimplifyInstruction(&I, SQ, ORE)) {
-                        // Mark all uses for resimplification next time round the loop.
-                        for (User *U : I.users())
-                            Next->insert(cast<Instruction>(U));
-                        I.replaceAllUsesWith(V);
-                        ++NumSimplified;
-                        Changed = true;
-                        // A call can get simplified, but it may not be trivially dead.
-                        if (isInstructionTriviallyDead(&I))
-                            DeadInstsInBB.push_back(&I);
-                    }
-                }
-            }
-            RecursivelyDeleteTriviallyDeadInstructions(DeadInstsInBB, SQ.TLI);
+        // Don't waste time simplifying dead/unused instructions.
+        if (isInstructionTriviallyDead(&I)) {
+          DeadInstsInBB.push_back(&I);
+          Changed = true;
+        } else if (!I.use_empty()) {
+          if (Value *V = SimplifyInstruction(&I, SQ, ORE)) {
+            // Mark all uses for resimplification next time round the loop.
+            for (User *U : I.users())
+              Next->insert(cast<Instruction>(U));
+            I.replaceAllUsesWith(V);
+            ++NumSimplified;
+            Changed = true;
+            // A call can get simplified, but it may not be trivially dead.
+            if (isInstructionTriviallyDead(&I))
+              DeadInstsInBB.push_back(&I);
+          }
         }
+      }
+      RecursivelyDeleteTriviallyDeadInstructions(DeadInstsInBB, SQ.TLI);
+    }
 
-        // Place the list of instructions to simplify on the next loop iteration
-        // into ToSimplify.
-        std::swap(ToSimplify, Next);
-        Next->clear();
-    } while (!ToSimplify->empty());
+    // Place the list of instructions to simplify on the next loop iteration
+    // into ToSimplify.
+    std::swap(ToSimplify, Next);
+    Next->clear();
+  } while (!ToSimplify->empty());
 
-    return Changed;
+  return Changed;
 }
 
 namespace {
 struct InstSimplifyLegacyPass : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    InstSimplifyLegacyPass() : FunctionPass(ID) {
-        initializeInstSimplifyLegacyPassPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  InstSimplifyLegacyPass() : FunctionPass(ID) {
+    initializeInstSimplifyLegacyPassPass(*PassRegistry::getPassRegistry());
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addRequired<DominatorTreeWrapperPass>();
-        AU.addRequired<AssumptionCacheTracker>();
-        AU.addRequired<TargetLibraryInfoWrapperPass>();
-        AU.addRequired<OptimizationRemarkEmitterWrapperPass>();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addRequired<DominatorTreeWrapperPass>();
+    AU.addRequired<AssumptionCacheTracker>();
+    AU.addRequired<TargetLibraryInfoWrapperPass>();
+    AU.addRequired<OptimizationRemarkEmitterWrapperPass>();
+  }
 
-    /// Remove instructions that simplify.
-    bool runOnFunction(Function &F) override {
-        if (skipFunction(F))
-            return false;
+  /// Remove instructions that simplify.
+  bool runOnFunction(Function &F) override {
+    if (skipFunction(F))
+      return false;
 
-        const DominatorTree *DT =
-            &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-        const TargetLibraryInfo *TLI =
-            &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-        AssumptionCache *AC =
-            &getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
-        OptimizationRemarkEmitter *ORE =
-            &getAnalysis<OptimizationRemarkEmitterWrapperPass>().getORE();
-        const DataLayout &DL = F.getParent()->getDataLayout();
-        const SimplifyQuery SQ(DL, TLI, DT, AC);
-        return runImpl(F, SQ, ORE);
-    }
+    const DominatorTree *DT =
+        &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+    const TargetLibraryInfo *TLI =
+        &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+    AssumptionCache *AC =
+        &getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
+    OptimizationRemarkEmitter *ORE =
+        &getAnalysis<OptimizationRemarkEmitterWrapperPass>().getORE();
+    const DataLayout &DL = F.getParent()->getDataLayout();
+    const SimplifyQuery SQ(DL, TLI, DT, AC);
+    return runImpl(F, SQ, ORE);
+  }
 };
 } // namespace
 
@@ -127,22 +127,22 @@ INITIALIZE_PASS_END(InstSimplifyLegacyPass, "instsimplify",
 
 // Public interface to the simplify instructions pass.
 FunctionPass *llvm::createInstSimplifyLegacyPass() {
-    return new InstSimplifyLegacyPass();
+  return new InstSimplifyLegacyPass();
 }
 
 PreservedAnalyses InstSimplifyPass::run(Function &F,
                                         FunctionAnalysisManager &AM) {
-    auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
-    auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
-    auto &AC = AM.getResult<AssumptionAnalysis>(F);
-    auto &ORE = AM.getResult<OptimizationRemarkEmitterAnalysis>(F);
-    const DataLayout &DL = F.getParent()->getDataLayout();
-    const SimplifyQuery SQ(DL, &TLI, &DT, &AC);
-    bool Changed = runImpl(F, SQ, &ORE);
-    if (!Changed)
-        return PreservedAnalyses::all();
+  auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
+  auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
+  auto &AC = AM.getResult<AssumptionAnalysis>(F);
+  auto &ORE = AM.getResult<OptimizationRemarkEmitterAnalysis>(F);
+  const DataLayout &DL = F.getParent()->getDataLayout();
+  const SimplifyQuery SQ(DL, &TLI, &DT, &AC);
+  bool Changed = runImpl(F, SQ, &ORE);
+  if (!Changed)
+    return PreservedAnalyses::all();
 
-    PreservedAnalyses PA;
-    PA.preserveSet<CFGAnalyses>();
-    return PA;
+  PreservedAnalyses PA;
+  PA.preserveSet<CFGAnalyses>();
+  return PA;
 }

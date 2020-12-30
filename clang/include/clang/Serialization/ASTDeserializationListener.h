@@ -29,33 +29,32 @@ class SourceLocation;
 
 class ASTDeserializationListener {
 public:
-    virtual ~ASTDeserializationListener();
+  virtual ~ASTDeserializationListener();
 
-    /// The ASTReader was initialized.
-    virtual void ReaderInitialized(ASTReader *Reader) { }
+  /// The ASTReader was initialized.
+  virtual void ReaderInitialized(ASTReader *Reader) {}
 
-    /// An identifier was deserialized from the AST file.
-    virtual void IdentifierRead(serialization::IdentID ID,
-                                IdentifierInfo *II) { }
-    /// A macro was read from the AST file.
-    virtual void MacroRead(serialization::MacroID ID, MacroInfo *MI) { }
-    /// A type was deserialized from the AST file. The ID here has the
-    ///        qualifier bits already removed, and T is guaranteed to be locally
-    ///        unqualified.
-    virtual void TypeRead(serialization::TypeIdx Idx, QualType T) { }
-    /// A decl was deserialized from the AST file.
-    virtual void DeclRead(serialization::DeclID ID, const Decl *D) { }
-    /// A selector was read from the AST file.
-    virtual void SelectorRead(serialization::SelectorID iD, Selector Sel) {}
-    /// A macro definition was read from the AST file.
-    virtual void MacroDefinitionRead(serialization::PreprocessedEntityID,
-                                     MacroDefinitionRecord *MD) {}
-    /// A module definition was read from the AST file.
-    virtual void ModuleRead(serialization::SubmoduleID ID, Module *Mod) {}
-    /// A module import was read from the AST file.
-    virtual void ModuleImportRead(serialization::SubmoduleID ID,
-                                  SourceLocation ImportLoc) {}
+  /// An identifier was deserialized from the AST file.
+  virtual void IdentifierRead(serialization::IdentID ID, IdentifierInfo *II) {}
+  /// A macro was read from the AST file.
+  virtual void MacroRead(serialization::MacroID ID, MacroInfo *MI) {}
+  /// A type was deserialized from the AST file. The ID here has the
+  ///        qualifier bits already removed, and T is guaranteed to be locally
+  ///        unqualified.
+  virtual void TypeRead(serialization::TypeIdx Idx, QualType T) {}
+  /// A decl was deserialized from the AST file.
+  virtual void DeclRead(serialization::DeclID ID, const Decl *D) {}
+  /// A selector was read from the AST file.
+  virtual void SelectorRead(serialization::SelectorID iD, Selector Sel) {}
+  /// A macro definition was read from the AST file.
+  virtual void MacroDefinitionRead(serialization::PreprocessedEntityID,
+                                   MacroDefinitionRecord *MD) {}
+  /// A module definition was read from the AST file.
+  virtual void ModuleRead(serialization::SubmoduleID ID, Module *Mod) {}
+  /// A module import was read from the AST file.
+  virtual void ModuleImportRead(serialization::SubmoduleID ID,
+                                SourceLocation ImportLoc) {}
 };
-}
+} // namespace clang
 
 #endif

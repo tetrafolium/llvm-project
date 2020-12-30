@@ -23,10 +23,10 @@ std::string lld::getLLDVersion() {
 #define LLD_VENDOR_DISPLAY
 #endif
 #if defined(LLD_REPOSITORY) && defined(LLD_REVISION)
-    return LLD_VENDOR_DISPLAY "LLD " LLD_VERSION_STRING " (" LLD_REPOSITORY
-           " " LLD_REVISION ")";
+  return LLD_VENDOR_DISPLAY "LLD " LLD_VERSION_STRING " (" LLD_REPOSITORY
+                            " " LLD_REVISION ")";
 #else
-    return LLD_VENDOR_DISPLAY "LLD " LLD_VERSION_STRING;
+  return LLD_VENDOR_DISPLAY "LLD " LLD_VERSION_STRING;
 #endif
 #undef LLD_VENDOR_DISPLAY
 }

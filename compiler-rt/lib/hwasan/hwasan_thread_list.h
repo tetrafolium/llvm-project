@@ -47,148 +47,147 @@
 #include "hwasan_allocator.h"
 #include "hwasan_flags.h"
 #include "hwasan_thread.h"
-
 #include "sanitizer_common/sanitizer_placement_new.h"
 
 namespace __hwasan {
 
 static uptr RingBufferSize() {
-    uptr desired_bytes = flags()->stack_history_size * sizeof(uptr);
-    // FIXME: increase the limit to 8 once this bug is fixed:
-    // https://bugs.llvm.org/show_bug.cgi?id=39030
-    for (int shift = 1; shift < 7; ++shift) {
-        uptr size = 4096 * (1ULL << shift);
-        if (size >= desired_bytes)
-            return size;
-    }
-    Printf("stack history size too large: %d\n", flags()->stack_history_size);
-    CHECK(0);
-    return 0;
+  uptr desired_bytes = flags()->stack_history_size * sizeof(uptr);
+  // FIXME: increase the limit to 8 once this bug is fixed:
+  // https://bugs.llvm.org/show_bug.cgi?id=39030
+  for (int shift = 1; shift < 7; ++shift) {
+    uptr size = 4096 * (1ULL << shift);
+    if (size >= desired_bytes)
+      return size;
+  }
+  Printf("stack history size too large: %d\n", flags()->stack_history_size);
+  CHECK(0);
+  return 0;
 }
 
 struct ThreadStats {
-    uptr n_live_threads;
-    uptr total_stack_size;
+  uptr n_live_threads;
+  uptr total_stack_size;
 };
 
 class HwasanThreadList {
-public:
-    HwasanThreadList(uptr storage, uptr size)
-        : free_space_(storage), free_space_end_(storage + size) {
-        // [storage, storage + size) is used as a vector of
-        // thread_alloc_size_-sized, ring_buffer_size_*2-aligned elements.
-        // Each element contains
-        // * a ring buffer at offset 0,
-        // * a Thread object at offset ring_buffer_size_.
-        ring_buffer_size_ = RingBufferSize();
-        thread_alloc_size_ =
-            RoundUpTo(ring_buffer_size_ + sizeof(Thread), ring_buffer_size_ * 2);
-    }
+ public:
+  HwasanThreadList(uptr storage, uptr size)
+      : free_space_(storage), free_space_end_(storage + size) {
+    // [storage, storage + size) is used as a vector of
+    // thread_alloc_size_-sized, ring_buffer_size_*2-aligned elements.
+    // Each element contains
+    // * a ring buffer at offset 0,
+    // * a Thread object at offset ring_buffer_size_.
+    ring_buffer_size_ = RingBufferSize();
+    thread_alloc_size_ =
+        RoundUpTo(ring_buffer_size_ + sizeof(Thread), ring_buffer_size_ * 2);
+  }
 
-    Thread *CreateCurrentThread() {
-        Thread *t;
-        {
-            SpinMutexLock l(&list_mutex_);
-            if (!free_list_.empty()) {
-                t = free_list_.back();
-                free_list_.pop_back();
-                uptr start = (uptr)t - ring_buffer_size_;
-                internal_memset((void *)start, 0, ring_buffer_size_ + sizeof(Thread));
-            } else {
-                t = AllocThread();
-            }
-            live_list_.push_back(t);
-        }
-        t->Init((uptr)t - ring_buffer_size_, ring_buffer_size_);
-        AddThreadStats(t);
-        return t;
-    }
-
-    void DontNeedThread(Thread *t) {
+  Thread *CreateCurrentThread() {
+    Thread *t;
+    {
+      SpinMutexLock l(&list_mutex_);
+      if (!free_list_.empty()) {
+        t = free_list_.back();
+        free_list_.pop_back();
         uptr start = (uptr)t - ring_buffer_size_;
-        ReleaseMemoryPagesToOS(start, start + thread_alloc_size_);
+        internal_memset((void *)start, 0, ring_buffer_size_ + sizeof(Thread));
+      } else {
+        t = AllocThread();
+      }
+      live_list_.push_back(t);
     }
+    t->Init((uptr)t - ring_buffer_size_, ring_buffer_size_);
+    AddThreadStats(t);
+    return t;
+  }
 
-    void RemoveThreadFromLiveList(Thread *t) {
-        for (Thread *&t2 : live_list_)
-            if (t2 == t) {
-                // To remove t2, copy the last element of the list in t2's position, and
-                // pop_back(). This works even if t2 is itself the last element.
-                t2 = live_list_.back();
-                live_list_.pop_back();
-                return;
-            }
-        CHECK(0 && "thread not found in live list");
-    }
+  void DontNeedThread(Thread *t) {
+    uptr start = (uptr)t - ring_buffer_size_;
+    ReleaseMemoryPagesToOS(start, start + thread_alloc_size_);
+  }
 
-    void ReleaseThread(Thread *t) {
-        RemoveThreadStats(t);
-        t->Destroy();
-        SpinMutexLock l(&list_mutex_);
-        RemoveThreadFromLiveList(t);
-        free_list_.push_back(t);
-        DontNeedThread(t);
-    }
+  void RemoveThreadFromLiveList(Thread *t) {
+    for (Thread *&t2 : live_list_)
+      if (t2 == t) {
+        // To remove t2, copy the last element of the list in t2's position, and
+        // pop_back(). This works even if t2 is itself the last element.
+        t2 = live_list_.back();
+        live_list_.pop_back();
+        return;
+      }
+    CHECK(0 && "thread not found in live list");
+  }
 
-    Thread *GetThreadByBufferAddress(uptr p) {
-        return (Thread *)(RoundDownTo(p, ring_buffer_size_ * 2) +
-                          ring_buffer_size_);
-    }
+  void ReleaseThread(Thread *t) {
+    RemoveThreadStats(t);
+    t->Destroy();
+    SpinMutexLock l(&list_mutex_);
+    RemoveThreadFromLiveList(t);
+    free_list_.push_back(t);
+    DontNeedThread(t);
+  }
 
-    uptr MemoryUsedPerThread() {
-        uptr res = sizeof(Thread) + ring_buffer_size_;
-        if (auto sz = flags()->heap_history_size)
-            res += HeapAllocationsRingBuffer::SizeInBytes(sz);
-        return res;
-    }
+  Thread *GetThreadByBufferAddress(uptr p) {
+    return (Thread *)(RoundDownTo(p, ring_buffer_size_ * 2) +
+                      ring_buffer_size_);
+  }
 
-    template <class CB>
-    void VisitAllLiveThreads(CB cb) {
-        SpinMutexLock l(&list_mutex_);
-        for (Thread *t : live_list_) cb(t);
-    }
+  uptr MemoryUsedPerThread() {
+    uptr res = sizeof(Thread) + ring_buffer_size_;
+    if (auto sz = flags()->heap_history_size)
+      res += HeapAllocationsRingBuffer::SizeInBytes(sz);
+    return res;
+  }
 
-    void AddThreadStats(Thread *t) {
-        SpinMutexLock l(&stats_mutex_);
-        stats_.n_live_threads++;
-        stats_.total_stack_size += t->stack_size();
-    }
+  template <class CB>
+  void VisitAllLiveThreads(CB cb) {
+    SpinMutexLock l(&list_mutex_);
+    for (Thread *t : live_list_) cb(t);
+  }
 
-    void RemoveThreadStats(Thread *t) {
-        SpinMutexLock l(&stats_mutex_);
-        stats_.n_live_threads--;
-        stats_.total_stack_size -= t->stack_size();
-    }
+  void AddThreadStats(Thread *t) {
+    SpinMutexLock l(&stats_mutex_);
+    stats_.n_live_threads++;
+    stats_.total_stack_size += t->stack_size();
+  }
 
-    ThreadStats GetThreadStats() {
-        SpinMutexLock l(&stats_mutex_);
-        return stats_;
-    }
+  void RemoveThreadStats(Thread *t) {
+    SpinMutexLock l(&stats_mutex_);
+    stats_.n_live_threads--;
+    stats_.total_stack_size -= t->stack_size();
+  }
 
-private:
-    Thread *AllocThread() {
-        uptr align = ring_buffer_size_ * 2;
-        CHECK(IsAligned(free_space_, align));
-        Thread *t = (Thread *)(free_space_ + ring_buffer_size_);
-        free_space_ += thread_alloc_size_;
-        CHECK(free_space_ <= free_space_end_ && "out of thread memory");
-        return t;
-    }
+  ThreadStats GetThreadStats() {
+    SpinMutexLock l(&stats_mutex_);
+    return stats_;
+  }
 
-    uptr free_space_;
-    uptr free_space_end_;
-    uptr ring_buffer_size_;
-    uptr thread_alloc_size_;
+ private:
+  Thread *AllocThread() {
+    uptr align = ring_buffer_size_ * 2;
+    CHECK(IsAligned(free_space_, align));
+    Thread *t = (Thread *)(free_space_ + ring_buffer_size_);
+    free_space_ += thread_alloc_size_;
+    CHECK(free_space_ <= free_space_end_ && "out of thread memory");
+    return t;
+  }
 
-    InternalMmapVector<Thread *> free_list_;
-    InternalMmapVector<Thread *> live_list_;
-    SpinMutex list_mutex_;
+  uptr free_space_;
+  uptr free_space_end_;
+  uptr ring_buffer_size_;
+  uptr thread_alloc_size_;
 
-    ThreadStats stats_;
-    SpinMutex stats_mutex_;
+  InternalMmapVector<Thread *> free_list_;
+  InternalMmapVector<Thread *> live_list_;
+  SpinMutex list_mutex_;
+
+  ThreadStats stats_;
+  SpinMutex stats_mutex_;
 };
 
 void InitThreadList(uptr storage, uptr size);
 HwasanThreadList &hwasanThreadList();
 
-} // namespace
+}  // namespace __hwasan

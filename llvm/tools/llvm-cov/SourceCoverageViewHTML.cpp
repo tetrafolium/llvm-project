@@ -10,8 +10,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "CoverageReport.h"
 #include "SourceCoverageViewHTML.h"
+#include "CoverageReport.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringExtras.h"
@@ -24,44 +24,44 @@ namespace {
 
 // Return a string with the special characters in \p Str escaped.
 std::string escape(StringRef Str, const CoverageViewOptions &Opts) {
-    std::string TabExpandedResult;
-    unsigned ColNum = 0; // Record the column number.
-    for (char C : Str) {
-        if (C == '\t') {
-            // Replace '\t' with up to TabSize spaces.
-            unsigned NumSpaces = Opts.TabSize - (ColNum % Opts.TabSize);
-            TabExpandedResult.append(NumSpaces, ' ');
-            ColNum += NumSpaces;
-        } else {
-            TabExpandedResult += C;
-            if (C == '\n' || C == '\r')
-                ColNum = 0;
-            else
-                ++ColNum;
-        }
+  std::string TabExpandedResult;
+  unsigned ColNum = 0; // Record the column number.
+  for (char C : Str) {
+    if (C == '\t') {
+      // Replace '\t' with up to TabSize spaces.
+      unsigned NumSpaces = Opts.TabSize - (ColNum % Opts.TabSize);
+      TabExpandedResult.append(NumSpaces, ' ');
+      ColNum += NumSpaces;
+    } else {
+      TabExpandedResult += C;
+      if (C == '\n' || C == '\r')
+        ColNum = 0;
+      else
+        ++ColNum;
     }
-    std::string EscapedHTML;
-    {
-        raw_string_ostream OS{EscapedHTML};
-        printHTMLEscaped(TabExpandedResult, OS);
-    }
-    return EscapedHTML;
+  }
+  std::string EscapedHTML;
+  {
+    raw_string_ostream OS{EscapedHTML};
+    printHTMLEscaped(TabExpandedResult, OS);
+  }
+  return EscapedHTML;
 }
 
 // Create a \p Name tag around \p Str, and optionally set its \p ClassName.
 std::string tag(const std::string &Name, const std::string &Str,
                 const std::string &ClassName = "") {
-    std::string Tag = "<" + Name;
-    if (!ClassName.empty())
-        Tag += " class='" + ClassName + "'";
-    return Tag + ">" + Str + "</" + Name + ">";
+  std::string Tag = "<" + Name;
+  if (!ClassName.empty())
+    Tag += " class='" + ClassName + "'";
+  return Tag + ">" + Str + "</" + Name + ">";
 }
 
 // Create an anchor to \p Link with the label \p Str.
 std::string a(const std::string &Link, const std::string &Str,
               const std::string &TargetName = "") {
-    std::string Name = TargetName.empty() ? "" : ("name='" + TargetName + "' ");
-    return "<a " + Name + "href='" + Link + "'>" + Str + "</a>";
+  std::string Name = TargetName.empty() ? "" : ("name='" + TargetName + "' ");
+  return "<a " + Name + "href='" + Link + "'>" + Str + "</a>";
 }
 
 const char *BeginHeader =
@@ -587,8 +587,9 @@ void SourceCoverageViewHTML::renderLine(raw_ostream &OS, LineRef L,
         continue;
 
       Snippets[I + 1] =
-          tag("div", Snippets[I + 1] + tag("span", formatCount(CurSeg->Count),
-                                           "tooltip-content"),
+          tag("div",
+              Snippets[I + 1] +
+                  tag("span", formatCount(CurSeg->Count), "tooltip-content"),
               "tooltip");
 
       if (getOptions().Debug)
@@ -687,10 +688,10 @@ void SourceCoverageViewHTML::renderTableHeader(raw_ostream &OS,
         tag("td", tag("pre", "Source (" +
                                  a(LinkTarget, "jump to first uncovered line") +
                                  ")"));
-}
+  }
 
-renderLinePrefix(OS, ViewDepth);
-OS << tag("td", tag("pre", "Line")) << tag("td", tag("pre", "Count"))
-   << SourceLabel;
-renderLineSuffix(OS, ViewDepth);
+  renderLinePrefix(OS, ViewDepth);
+  OS << tag("td", tag("pre", "Line")) << tag("td", tag("pre", "Count"))
+     << SourceLabel;
+  renderLineSuffix(OS, ViewDepth);
 }

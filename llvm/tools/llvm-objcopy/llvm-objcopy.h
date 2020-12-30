@@ -24,7 +24,7 @@ class Archive;
 namespace objcopy {
 struct CopyConfig;
 Expected<std::vector<NewArchiveMember>>
-                                     createNewArchiveMembers(CopyConfig &Config, const object::Archive &Ar);
+createNewArchiveMembers(CopyConfig &Config, const object::Archive &Ar);
 
 } // end namespace objcopy
 } // end namespace llvm

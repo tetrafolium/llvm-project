@@ -23,28 +23,22 @@ class PDBStringTable;
 
 class InjectedSourceStream {
 public:
-    InjectedSourceStream(std::unique_ptr<msf::MappedBlockStream> Stream);
-    Error reload(const PDBStringTable &Strings);
+  InjectedSourceStream(std::unique_ptr<msf::MappedBlockStream> Stream);
+  Error reload(const PDBStringTable &Strings);
 
-    using const_iterator = HashTable<SrcHeaderBlockEntry>::const_iterator;
-    const_iterator begin() const {
-        return InjectedSourceTable.begin();
-    }
-    const_iterator end() const {
-        return InjectedSourceTable.end();
-    }
+  using const_iterator = HashTable<SrcHeaderBlockEntry>::const_iterator;
+  const_iterator begin() const { return InjectedSourceTable.begin(); }
+  const_iterator end() const { return InjectedSourceTable.end(); }
 
-    uint32_t size() const {
-        return InjectedSourceTable.size();
-    }
+  uint32_t size() const { return InjectedSourceTable.size(); }
 
 private:
-    std::unique_ptr<msf::MappedBlockStream> Stream;
+  std::unique_ptr<msf::MappedBlockStream> Stream;
 
-    const SrcHeaderBlockHeader* Header;
-    HashTable<SrcHeaderBlockEntry> InjectedSourceTable;
+  const SrcHeaderBlockHeader *Header;
+  HashTable<SrcHeaderBlockEntry> InjectedSourceTable;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

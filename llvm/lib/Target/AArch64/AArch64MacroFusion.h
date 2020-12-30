@@ -20,4 +20,4 @@ namespace llvm {
 /// to AArch64PassConfig::createMachineScheduler() to have an effect.
 std::unique_ptr<ScheduleDAGMutation> createAArch64MacroFusionDAGMutation();
 
-} // llvm
+} // namespace llvm

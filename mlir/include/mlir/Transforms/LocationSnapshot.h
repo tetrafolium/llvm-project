@@ -56,8 +56,8 @@ LogicalResult generateLocationsFromIR(StringRef fileName, StringRef tag,
 /// name, and then fused with the existing locations. Otherwise, the existing
 /// locations are replaced.
 std::unique_ptr<Pass> createLocationSnapshotPass(OpPrintingFlags flags,
-        StringRef fileName = "",
-        StringRef tag = "");
+                                                 StringRef fileName = "",
+                                                 StringRef tag = "");
 /// Overload utilizing pass options for initialization.
 std::unique_ptr<Pass> createLocationSnapshotPass();
 

@@ -20,42 +20,43 @@ using namespace clang::index;
 void FileIndexRecord::addDeclOccurence(SymbolRoleSet Roles, unsigned Offset,
                                        const Decl *D,
                                        ArrayRef<SymbolRelation> Relations) {
-    assert(D->isCanonicalDecl() &&
-           "Occurrences should be associated with their canonical decl");
+  assert(D->isCanonicalDecl() &&
+         "Occurrences should be associated with their canonical decl");
 
-    auto IsNextOccurence = [&]() -> bool {
-        if (Decls.empty())
-            return true;
-        auto &Last = Decls.back();
-        return Last.Offset < Offset;
-    };
+  auto IsNextOccurence = [&]() -> bool {
+    if (Decls.empty())
+      return true;
+    auto &Last = Decls.back();
+    return Last.Offset < Offset;
+  };
 
-    if (IsNextOccurence()) {
-        Decls.emplace_back(Roles, Offset, D, Relations);
-        return;
-    }
+  if (IsNextOccurence()) {
+    Decls.emplace_back(Roles, Offset, D, Relations);
+    return;
+  }
 
-    DeclOccurrence NewInfo(Roles, Offset, D, Relations);
-    // We keep Decls in order as we need to access them in this order in all cases.
-    auto It = llvm::upper_bound(Decls, NewInfo);
-    Decls.insert(It, std::move(NewInfo));
+  DeclOccurrence NewInfo(Roles, Offset, D, Relations);
+  // We keep Decls in order as we need to access them in this order in all
+  // cases.
+  auto It = llvm::upper_bound(Decls, NewInfo);
+  Decls.insert(It, std::move(NewInfo));
 }
 
 void FileIndexRecord::print(llvm::raw_ostream &OS) const {
-    OS << "DECLS BEGIN ---\n";
-    for (auto &DclInfo : Decls) {
-        const Decl *D = DclInfo.Dcl;
-        SourceManager &SM = D->getASTContext().getSourceManager();
-        SourceLocation Loc = SM.getFileLoc(D->getLocation());
-        PresumedLoc PLoc = SM.getPresumedLoc(Loc);
-        OS << llvm::sys::path::filename(PLoc.getFilename()) << ':' << PLoc.getLine()
-           << ':' << PLoc.getColumn();
+  OS << "DECLS BEGIN ---\n";
+  for (auto &DclInfo : Decls) {
+    const Decl *D = DclInfo.Dcl;
+    SourceManager &SM = D->getASTContext().getSourceManager();
+    SourceLocation Loc = SM.getFileLoc(D->getLocation());
+    PresumedLoc PLoc = SM.getPresumedLoc(Loc);
+    OS << llvm::sys::path::filename(PLoc.getFilename()) << ':' << PLoc.getLine()
+       << ':' << PLoc.getColumn();
 
-        if (auto ND = dyn_cast<NamedDecl>(D)) {
-            OS << ' ' << ND->getDeclName();
-        }
-
-        OS << '\n';
+    if (auto ND = dyn_cast<NamedDecl>(D)) {
+      OS << ' ' << ND->getDeclName();
     }
-    OS << "DECLS END ---\n";
+
+    OS << '\n';
+  }
+  OS << "DECLS END ---\n";
 }

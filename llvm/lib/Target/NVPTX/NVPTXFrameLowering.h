@@ -20,20 +20,20 @@ namespace llvm {
 
 class NVPTXFrameLowering : public TargetFrameLowering {
 public:
-    explicit NVPTXFrameLowering();
+  explicit NVPTXFrameLowering();
 
-    bool hasFP(const MachineFunction &MF) const override;
-    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-    StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
-                                       Register &FrameReg) const override;
+  bool hasFP(const MachineFunction &MF) const override;
+  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
 
-    MachineBasicBlock::iterator
-    eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
-                                  MachineBasicBlock::iterator I) const override;
-    DwarfFrameBase getDwarfFrameBase(const MachineFunction &MF) const override;
+  MachineBasicBlock::iterator
+  eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator I) const override;
+  DwarfFrameBase getDwarfFrameBase(const MachineFunction &MF) const override;
 };
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

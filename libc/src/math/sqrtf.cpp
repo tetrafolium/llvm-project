@@ -11,8 +11,6 @@
 
 namespace __llvm_libc {
 
-float LLVM_LIBC_ENTRYPOINT(sqrtf)(float x) {
-    return fputil::sqrt(x);
-}
+float LLVM_LIBC_ENTRYPOINT(sqrtf)(float x) { return fputil::sqrt(x); }
 
 } // namespace __llvm_libc

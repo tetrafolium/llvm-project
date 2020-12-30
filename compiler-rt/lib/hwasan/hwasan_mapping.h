@@ -14,8 +14,8 @@
 #ifndef HWASAN_MAPPING_H
 #define HWASAN_MAPPING_H
 
-#include "sanitizer_common/sanitizer_internal_defs.h"
 #include "hwasan_interface_internal.h"
+#include "sanitizer_common/sanitizer_internal_defs.h"
 
 // Typical mapping on Linux/x86_64:
 // with dynamic shadow mapped at [0x770d59f40000, 0x7f0d59f40000]:
@@ -49,15 +49,13 @@ extern uptr kHighMemStart;
 extern uptr kHighMemEnd;
 
 inline uptr MemToShadow(uptr untagged_addr) {
-    return (untagged_addr >> kShadowScale) +
-           __hwasan_shadow_memory_dynamic_address;
+  return (untagged_addr >> kShadowScale) +
+         __hwasan_shadow_memory_dynamic_address;
 }
 inline uptr ShadowToMem(uptr shadow_addr) {
-    return (shadow_addr - __hwasan_shadow_memory_dynamic_address) << kShadowScale;
+  return (shadow_addr - __hwasan_shadow_memory_dynamic_address) << kShadowScale;
 }
-inline uptr MemToShadowSize(uptr size) {
-    return size >> kShadowScale;
-}
+inline uptr MemToShadowSize(uptr size) { return size >> kShadowScale; }
 
 bool MemIsApp(uptr p);
 

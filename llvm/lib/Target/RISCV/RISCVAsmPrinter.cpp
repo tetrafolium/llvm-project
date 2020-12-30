@@ -38,51 +38,49 @@ STATISTIC(RISCVNumInstrsCompressed,
 
 namespace {
 class RISCVAsmPrinter : public AsmPrinter {
-    const MCSubtargetInfo *STI;
+  const MCSubtargetInfo *STI;
 
 public:
-    explicit RISCVAsmPrinter(TargetMachine &TM,
-                             std::unique_ptr<MCStreamer> Streamer)
-        : AsmPrinter(TM, std::move(Streamer)), STI(TM.getMCSubtargetInfo()) {}
+  explicit RISCVAsmPrinter(TargetMachine &TM,
+                           std::unique_ptr<MCStreamer> Streamer)
+      : AsmPrinter(TM, std::move(Streamer)), STI(TM.getMCSubtargetInfo()) {}
 
-    StringRef getPassName() const override {
-        return "RISCV Assembly Printer";
-    }
+  StringRef getPassName() const override { return "RISCV Assembly Printer"; }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    void emitInstruction(const MachineInstr *MI) override;
+  void emitInstruction(const MachineInstr *MI) override;
 
-    bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
-                         const char *ExtraCode, raw_ostream &OS) override;
-    bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
-                               const char *ExtraCode, raw_ostream &OS) override;
+  bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
+                       const char *ExtraCode, raw_ostream &OS) override;
+  bool PrintAsmMemoryOperand(const MachineInstr *MI, unsigned OpNo,
+                             const char *ExtraCode, raw_ostream &OS) override;
 
-    void EmitToStreamer(MCStreamer &S, const MCInst &Inst);
-    bool emitPseudoExpansionLowering(MCStreamer &OutStreamer,
-                                     const MachineInstr *MI);
+  void EmitToStreamer(MCStreamer &S, const MCInst &Inst);
+  bool emitPseudoExpansionLowering(MCStreamer &OutStreamer,
+                                   const MachineInstr *MI);
 
-    // Wrapper needed for tblgenned pseudo lowering.
-    bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const {
-        return LowerRISCVMachineOperandToMCOperand(MO, MCOp, *this);
-    }
+  // Wrapper needed for tblgenned pseudo lowering.
+  bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const {
+    return LowerRISCVMachineOperandToMCOperand(MO, MCOp, *this);
+  }
 
-    void emitStartOfAsmFile(Module &M) override;
-    void emitEndOfAsmFile(Module &M) override;
+  void emitStartOfAsmFile(Module &M) override;
+  void emitEndOfAsmFile(Module &M) override;
 
 private:
-    void emitAttributes();
+  void emitAttributes();
 };
-}
+} // namespace
 
 #define GEN_COMPRESS_INSTR
 #include "RISCVGenCompressInstEmitter.inc"
 void RISCVAsmPrinter::EmitToStreamer(MCStreamer &S, const MCInst &Inst) {
-    MCInst CInst;
-    bool Res = compressInst(CInst, Inst, *STI, OutStreamer->getContext());
-    if (Res)
-        ++RISCVNumInstrsCompressed;
-    AsmPrinter::EmitToStreamer(*OutStreamer, Res ? CInst : Inst);
+  MCInst CInst;
+  bool Res = compressInst(CInst, Inst, *STI, OutStreamer->getContext());
+  if (Res)
+    ++RISCVNumInstrsCompressed;
+  AsmPrinter::EmitToStreamer(*OutStreamer, Res ? CInst : Inst);
 }
 
 // Simple pseudo-instructions have their lowering (with expansion to real
@@ -90,125 +88,125 @@ void RISCVAsmPrinter::EmitToStreamer(MCStreamer &S, const MCInst &Inst) {
 #include "RISCVGenMCPseudoLowering.inc"
 
 void RISCVAsmPrinter::emitInstruction(const MachineInstr *MI) {
-    // Do any auto-generated pseudo lowerings.
-    if (emitPseudoExpansionLowering(*OutStreamer, MI))
-        return;
+  // Do any auto-generated pseudo lowerings.
+  if (emitPseudoExpansionLowering(*OutStreamer, MI))
+    return;
 
-    MCInst TmpInst;
-    LowerRISCVMachineInstrToMCInst(MI, TmpInst, *this);
-    EmitToStreamer(*OutStreamer, TmpInst);
+  MCInst TmpInst;
+  LowerRISCVMachineInstrToMCInst(MI, TmpInst, *this);
+  EmitToStreamer(*OutStreamer, TmpInst);
 }
 
 bool RISCVAsmPrinter::PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
                                       const char *ExtraCode, raw_ostream &OS) {
-    // First try the generic code, which knows about modifiers like 'c' and 'n'.
-    if (!AsmPrinter::PrintAsmOperand(MI, OpNo, ExtraCode, OS))
-        return false;
+  // First try the generic code, which knows about modifiers like 'c' and 'n'.
+  if (!AsmPrinter::PrintAsmOperand(MI, OpNo, ExtraCode, OS))
+    return false;
 
-    const MachineOperand &MO = MI->getOperand(OpNo);
-    if (ExtraCode && ExtraCode[0]) {
-        if (ExtraCode[1] != 0)
-            return true; // Unknown modifier.
+  const MachineOperand &MO = MI->getOperand(OpNo);
+  if (ExtraCode && ExtraCode[0]) {
+    if (ExtraCode[1] != 0)
+      return true; // Unknown modifier.
 
-        switch (ExtraCode[0]) {
-        default:
-            return true; // Unknown modifier.
-        case 'z':      // Print zero register if zero, regular printing otherwise.
-            if (MO.isImm() && MO.getImm() == 0) {
-                OS << RISCVInstPrinter::getRegisterName(RISCV::X0);
-                return false;
-            }
-            break;
-        case 'i': // Literal 'i' if operand is not a register.
-            if (!MO.isReg())
-                OS << 'i';
-            return false;
-        }
-    }
-
-    switch (MO.getType()) {
-    case MachineOperand::MO_Immediate:
-        OS << MO.getImm();
-        return false;
-    case MachineOperand::MO_Register:
-        OS << RISCVInstPrinter::getRegisterName(MO.getReg());
-        return false;
-    case MachineOperand::MO_GlobalAddress:
-        PrintSymbolOperand(MO, OS);
-        return false;
-    case MachineOperand::MO_BlockAddress: {
-        MCSymbol *Sym = GetBlockAddressSymbol(MO.getBlockAddress());
-        Sym->print(OS, MAI);
-        return false;
-    }
+    switch (ExtraCode[0]) {
     default:
-        break;
+      return true; // Unknown modifier.
+    case 'z':      // Print zero register if zero, regular printing otherwise.
+      if (MO.isImm() && MO.getImm() == 0) {
+        OS << RISCVInstPrinter::getRegisterName(RISCV::X0);
+        return false;
+      }
+      break;
+    case 'i': // Literal 'i' if operand is not a register.
+      if (!MO.isReg())
+        OS << 'i';
+      return false;
     }
+  }
 
-    return true;
+  switch (MO.getType()) {
+  case MachineOperand::MO_Immediate:
+    OS << MO.getImm();
+    return false;
+  case MachineOperand::MO_Register:
+    OS << RISCVInstPrinter::getRegisterName(MO.getReg());
+    return false;
+  case MachineOperand::MO_GlobalAddress:
+    PrintSymbolOperand(MO, OS);
+    return false;
+  case MachineOperand::MO_BlockAddress: {
+    MCSymbol *Sym = GetBlockAddressSymbol(MO.getBlockAddress());
+    Sym->print(OS, MAI);
+    return false;
+  }
+  default:
+    break;
+  }
+
+  return true;
 }
 
 bool RISCVAsmPrinter::PrintAsmMemoryOperand(const MachineInstr *MI,
-        unsigned OpNo,
-        const char *ExtraCode,
-        raw_ostream &OS) {
-    if (!ExtraCode) {
-        const MachineOperand &MO = MI->getOperand(OpNo);
-        // For now, we only support register memory operands in registers and
-        // assume there is no addend
-        if (!MO.isReg())
-            return true;
+                                            unsigned OpNo,
+                                            const char *ExtraCode,
+                                            raw_ostream &OS) {
+  if (!ExtraCode) {
+    const MachineOperand &MO = MI->getOperand(OpNo);
+    // For now, we only support register memory operands in registers and
+    // assume there is no addend
+    if (!MO.isReg())
+      return true;
 
-        OS << "0(" << RISCVInstPrinter::getRegisterName(MO.getReg()) << ")";
-        return false;
-    }
+    OS << "0(" << RISCVInstPrinter::getRegisterName(MO.getReg()) << ")";
+    return false;
+  }
 
-    return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, ExtraCode, OS);
+  return AsmPrinter::PrintAsmMemoryOperand(MI, OpNo, ExtraCode, OS);
 }
 
 bool RISCVAsmPrinter::runOnMachineFunction(MachineFunction &MF) {
-    // Set the current MCSubtargetInfo to a copy which has the correct
-    // feature bits for the current MachineFunction
-    MCSubtargetInfo &NewSTI =
-        OutStreamer->getContext().getSubtargetCopy(*TM.getMCSubtargetInfo());
-    NewSTI.setFeatureBits(MF.getSubtarget().getFeatureBits());
-    STI = &NewSTI;
+  // Set the current MCSubtargetInfo to a copy which has the correct
+  // feature bits for the current MachineFunction
+  MCSubtargetInfo &NewSTI =
+      OutStreamer->getContext().getSubtargetCopy(*TM.getMCSubtargetInfo());
+  NewSTI.setFeatureBits(MF.getSubtarget().getFeatureBits());
+  STI = &NewSTI;
 
-    SetupMachineFunction(MF);
-    emitFunctionBody();
-    return false;
+  SetupMachineFunction(MF);
+  emitFunctionBody();
+  return false;
 }
 
 void RISCVAsmPrinter::emitStartOfAsmFile(Module &M) {
-    if (TM.getTargetTriple().isOSBinFormatELF())
-        emitAttributes();
+  if (TM.getTargetTriple().isOSBinFormatELF())
+    emitAttributes();
 }
 
 void RISCVAsmPrinter::emitEndOfAsmFile(Module &M) {
-    RISCVTargetStreamer &RTS =
-        static_cast<RISCVTargetStreamer &>(*OutStreamer->getTargetStreamer());
+  RISCVTargetStreamer &RTS =
+      static_cast<RISCVTargetStreamer &>(*OutStreamer->getTargetStreamer());
 
-    if (TM.getTargetTriple().isOSBinFormatELF())
-        RTS.finishAttributeSection();
+  if (TM.getTargetTriple().isOSBinFormatELF())
+    RTS.finishAttributeSection();
 }
 
 void RISCVAsmPrinter::emitAttributes() {
-    RISCVTargetStreamer &RTS =
-        static_cast<RISCVTargetStreamer &>(*OutStreamer->getTargetStreamer());
+  RISCVTargetStreamer &RTS =
+      static_cast<RISCVTargetStreamer &>(*OutStreamer->getTargetStreamer());
 
-    const Triple &TT = TM.getTargetTriple();
-    StringRef CPU = TM.getTargetCPU();
-    StringRef FS = TM.getTargetFeatureString();
-    const RISCVTargetMachine &RTM = static_cast<const RISCVTargetMachine &>(TM);
-    /* TuneCPU doesn't impact emission of ELF attributes, ELF attributes only
-       care about arch related features, so we can set TuneCPU as CPU.  */
-    const RISCVSubtarget STI(TT, CPU, /*TuneCPU=*/CPU, FS, /*ABIName=*/"", RTM);
+  const Triple &TT = TM.getTargetTriple();
+  StringRef CPU = TM.getTargetCPU();
+  StringRef FS = TM.getTargetFeatureString();
+  const RISCVTargetMachine &RTM = static_cast<const RISCVTargetMachine &>(TM);
+  /* TuneCPU doesn't impact emission of ELF attributes, ELF attributes only
+     care about arch related features, so we can set TuneCPU as CPU.  */
+  const RISCVSubtarget STI(TT, CPU, /*TuneCPU=*/CPU, FS, /*ABIName=*/"", RTM);
 
-    RTS.emitTargetAttributes(STI);
+  RTS.emitTargetAttributes(STI);
 }
 
 // Force static initialization.
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVAsmPrinter() {
-    RegisterAsmPrinter<RISCVAsmPrinter> X(getTheRISCV32Target());
-    RegisterAsmPrinter<RISCVAsmPrinter> Y(getTheRISCV64Target());
+  RegisterAsmPrinter<RISCVAsmPrinter> X(getTheRISCV32Target());
+  RegisterAsmPrinter<RISCVAsmPrinter> Y(getTheRISCV64Target());
 }

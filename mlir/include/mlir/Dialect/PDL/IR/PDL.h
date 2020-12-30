@@ -32,5 +32,4 @@
 #define GET_OP_CLASSES
 #include "mlir/Dialect/PDL/IR/PDLOps.h.inc"
 
-
 #endif // MLIR_DIALECT_PDL_IR_PDL_H_

@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long double LLVM_LIBC_ENTRYPOINT(roundl)(long double x) {
-    return fputil::round(x);
+  return fputil::round(x);
 }
 
 } // namespace __llvm_libc

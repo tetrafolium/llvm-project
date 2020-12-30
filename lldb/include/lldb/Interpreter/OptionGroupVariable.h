@@ -18,31 +18,31 @@ namespace lldb_private {
 
 class OptionGroupVariable : public OptionGroup {
 public:
-    OptionGroupVariable(bool show_frame_options);
+  OptionGroupVariable(bool show_frame_options);
 
-    ~OptionGroupVariable() override;
+  ~OptionGroupVariable() override;
 
-    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+  llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
-                          ExecutionContext *execution_context) override;
-    Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
+  Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
+                        ExecutionContext *execution_context) override;
+  Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
 
-    void OptionParsingStarting(ExecutionContext *execution_context) override;
+  void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-    bool include_frame_options : 1,
-         show_args : 1,    // Frame option only (include_frame_options == true)
-         show_recognized_args : 1,  // Frame option only (include_frame_options ==
-         // true)
-         show_locals : 1,  // Frame option only (include_frame_options == true)
-         show_globals : 1, // Frame option only (include_frame_options == true)
-         use_regex : 1, show_scope : 1, show_decl : 1;
-    OptionValueString summary;        // the name of a named summary
-    OptionValueString summary_string; // a summary string
+  bool include_frame_options : 1,
+      show_args : 1, // Frame option only (include_frame_options == true)
+      show_recognized_args : 1, // Frame option only (include_frame_options ==
+      // true)
+      show_locals : 1,  // Frame option only (include_frame_options == true)
+      show_globals : 1, // Frame option only (include_frame_options == true)
+      use_regex : 1, show_scope : 1, show_decl : 1;
+  OptionValueString summary;        // the name of a named summary
+  OptionValueString summary_string; // a summary string
 
 private:
-    OptionGroupVariable(const OptionGroupVariable &) = delete;
-    const OptionGroupVariable &operator=(const OptionGroupVariable &) = delete;
+  OptionGroupVariable(const OptionGroupVariable &) = delete;
+  const OptionGroupVariable &operator=(const OptionGroupVariable &) = delete;
 };
 
 } // namespace lldb_private

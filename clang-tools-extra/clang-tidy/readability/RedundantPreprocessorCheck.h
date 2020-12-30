@@ -22,10 +22,10 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-redundant-preprocessor.html
 class RedundantPreprocessorCheck : public ClangTidyCheck {
 public:
-    RedundantPreprocessorCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
+  RedundantPreprocessorCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
 };
 
 } // namespace readability

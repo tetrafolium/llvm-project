@@ -25,55 +25,41 @@ namespace Fortran::runtime::io {
 // See 12.11 in Fortran 2018
 class IoErrorHandler : public Terminator {
 public:
-    using Terminator::Terminator;
-    explicit IoErrorHandler(const Terminator &that) : Terminator{that} {}
-    void Begin(const char *sourceFileName, int sourceLine);
-    void HasIoStat() {
-        flags_ |= hasIoStat;
-    }
-    void HasErrLabel() {
-        flags_ |= hasErr;
-    }
-    void HasEndLabel() {
-        flags_ |= hasEnd;
-    }
-    void HasEorLabel() {
-        flags_ |= hasEor;
-    }
-    void HasIoMsg() {
-        flags_ |= hasIoMsg;
-    }
+  using Terminator::Terminator;
+  explicit IoErrorHandler(const Terminator &that) : Terminator{that} {}
+  void Begin(const char *sourceFileName, int sourceLine);
+  void HasIoStat() { flags_ |= hasIoStat; }
+  void HasErrLabel() { flags_ |= hasErr; }
+  void HasEndLabel() { flags_ |= hasEnd; }
+  void HasEorLabel() { flags_ |= hasEor; }
+  void HasIoMsg() { flags_ |= hasIoMsg; }
 
-    bool InError() const {
-        return ioStat_ != 0;
-    }
+  bool InError() const { return ioStat_ != 0; }
 
-    void SignalError(int iostatOrErrno, const char *msg, ...);
-    void SignalError(int iostatOrErrno);
-    template <typename... X> void SignalError(const char *msg, X &&...xs) {
-        SignalError(IostatGenericError, msg, std::forward<X>(xs)...);
-    }
+  void SignalError(int iostatOrErrno, const char *msg, ...);
+  void SignalError(int iostatOrErrno);
+  template <typename... X> void SignalError(const char *msg, X &&... xs) {
+    SignalError(IostatGenericError, msg, std::forward<X>(xs)...);
+  }
 
-    void SignalErrno(); // SignalError(errno)
-    void SignalEnd(); // input only; EOF on internal write is an error
-    void SignalEor(); // non-advancing input only; EOR on write is an error
+  void SignalErrno(); // SignalError(errno)
+  void SignalEnd(); // input only; EOF on internal write is an error
+  void SignalEor(); // non-advancing input only; EOR on write is an error
 
-    int GetIoStat() const {
-        return ioStat_;
-    }
-    bool GetIoMsg(char *, std::size_t);
+  int GetIoStat() const { return ioStat_; }
+  bool GetIoMsg(char *, std::size_t);
 
 private:
-    enum Flag : std::uint8_t {
-        hasIoStat = 1, // IOSTAT=
-        hasErr = 2, // ERR=
-        hasEnd = 4, // END=
-        hasEor = 8, // EOR=
-        hasIoMsg = 16, // IOMSG=
-    };
-    std::uint8_t flags_{0};
-    int ioStat_{0};
-    OwningPtr<char> ioMsg_;
+  enum Flag : std::uint8_t {
+    hasIoStat = 1, // IOSTAT=
+    hasErr = 2, // ERR=
+    hasEnd = 4, // END=
+    hasEor = 8, // EOR=
+    hasIoMsg = 16, // IOMSG=
+  };
+  std::uint8_t flags_{0};
+  int ioStat_{0};
+  OwningPtr<char> ioMsg_;
 };
 
 } // namespace Fortran::runtime::io

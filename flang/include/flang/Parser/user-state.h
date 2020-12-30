@@ -34,123 +34,111 @@ class Success {}; // for when one must return something that's present
 
 class UserState {
 public:
-    UserState(const AllCookedSources &allCooked,
-              common::LanguageFeatureControl features)
-        : allCooked_{allCooked}, features_{features} {}
+  UserState(const AllCookedSources &allCooked,
+      common::LanguageFeatureControl features)
+      : allCooked_{allCooked}, features_{features} {}
 
-    const AllCookedSources &allCooked() const {
-        return allCooked_;
-    }
-    const common::LanguageFeatureControl &features() const {
-        return features_;
-    }
+  const AllCookedSources &allCooked() const { return allCooked_; }
+  const common::LanguageFeatureControl &features() const { return features_; }
 
-    llvm::raw_ostream *debugOutput() const {
-        return debugOutput_;
-    }
-    UserState &set_debugOutput(llvm::raw_ostream &out) {
-        debugOutput_ = &out;
-        return *this;
-    }
+  llvm::raw_ostream *debugOutput() const { return debugOutput_; }
+  UserState &set_debugOutput(llvm::raw_ostream &out) {
+    debugOutput_ = &out;
+    return *this;
+  }
 
-    ParsingLog *log() const {
-        return log_;
-    }
-    UserState &set_log(ParsingLog *log) {
-        log_ = log;
-        return *this;
-    }
+  ParsingLog *log() const { return log_; }
+  UserState &set_log(ParsingLog *log) {
+    log_ = log;
+    return *this;
+  }
 
-    bool instrumentedParse() const {
-        return instrumentedParse_;
-    }
-    UserState &set_instrumentedParse(bool yes) {
-        instrumentedParse_ = yes;
-        return *this;
-    }
+  bool instrumentedParse() const { return instrumentedParse_; }
+  UserState &set_instrumentedParse(bool yes) {
+    instrumentedParse_ = yes;
+    return *this;
+  }
 
-    void NewSubprogram() {
-        doLabels_.clear();
-        nonlabelDoConstructNestingDepth_ = 0;
-        oldStructureComponents_.clear();
-    }
+  void NewSubprogram() {
+    doLabels_.clear();
+    nonlabelDoConstructNestingDepth_ = 0;
+    oldStructureComponents_.clear();
+  }
 
-    using Label = std::uint64_t;
-    bool IsDoLabel(Label label) const {
-        auto iter{doLabels_.find(label)};
-        return iter != doLabels_.end() &&
-               iter->second >= nonlabelDoConstructNestingDepth_;
-    }
-    void NewDoLabel(Label label) {
-        doLabels_[label] = nonlabelDoConstructNestingDepth_;
-    }
+  using Label = std::uint64_t;
+  bool IsDoLabel(Label label) const {
+    auto iter{doLabels_.find(label)};
+    return iter != doLabels_.end() &&
+        iter->second >= nonlabelDoConstructNestingDepth_;
+  }
+  void NewDoLabel(Label label) {
+    doLabels_[label] = nonlabelDoConstructNestingDepth_;
+  }
 
-    void EnterNonlabelDoConstruct() {
-        ++nonlabelDoConstructNestingDepth_;
+  void EnterNonlabelDoConstruct() { ++nonlabelDoConstructNestingDepth_; }
+  void LeaveDoConstruct() {
+    if (nonlabelDoConstructNestingDepth_ > 0) {
+      --nonlabelDoConstructNestingDepth_;
     }
-    void LeaveDoConstruct() {
-        if (nonlabelDoConstructNestingDepth_ > 0) {
-            --nonlabelDoConstructNestingDepth_;
-        }
-    }
+  }
 
-    void NoteOldStructureComponent(const CharBlock &name) {
-        oldStructureComponents_.insert(name);
-    }
-    bool IsOldStructureComponent(const CharBlock &name) const {
-        return oldStructureComponents_.find(name) != oldStructureComponents_.end();
-    }
+  void NoteOldStructureComponent(const CharBlock &name) {
+    oldStructureComponents_.insert(name);
+  }
+  bool IsOldStructureComponent(const CharBlock &name) const {
+    return oldStructureComponents_.find(name) != oldStructureComponents_.end();
+  }
 
 private:
-    const AllCookedSources &allCooked_;
+  const AllCookedSources &allCooked_;
 
-    llvm::raw_ostream *debugOutput_{nullptr};
+  llvm::raw_ostream *debugOutput_{nullptr};
 
-    ParsingLog *log_{nullptr};
-    bool instrumentedParse_{false};
+  ParsingLog *log_{nullptr};
+  bool instrumentedParse_{false};
 
-    std::unordered_map<Label, int> doLabels_;
-    int nonlabelDoConstructNestingDepth_{0};
+  std::unordered_map<Label, int> doLabels_;
+  int nonlabelDoConstructNestingDepth_{0};
 
-    std::set<CharBlock> oldStructureComponents_;
+  std::set<CharBlock> oldStructureComponents_;
 
-    common::LanguageFeatureControl features_;
+  common::LanguageFeatureControl features_;
 };
 
 // Definitions of parser classes that manipulate the UserState.
 struct StartNewSubprogram {
-    using resultType = Success;
-    static std::optional<Success> Parse(ParseState &);
+  using resultType = Success;
+  static std::optional<Success> Parse(ParseState &);
 };
 
 struct CapturedLabelDoStmt {
-    using resultType = Statement<common::Indirection<LabelDoStmt>>;
-    static std::optional<resultType> Parse(ParseState &);
+  using resultType = Statement<common::Indirection<LabelDoStmt>>;
+  static std::optional<resultType> Parse(ParseState &);
 };
 
 struct EndDoStmtForCapturedLabelDoStmt {
-    using resultType = Statement<common::Indirection<EndDoStmt>>;
-    static std::optional<resultType> Parse(ParseState &);
+  using resultType = Statement<common::Indirection<EndDoStmt>>;
+  static std::optional<resultType> Parse(ParseState &);
 };
 
 struct EnterNonlabelDoConstruct {
-    using resultType = Success;
-    static std::optional<Success> Parse(ParseState &);
+  using resultType = Success;
+  static std::optional<Success> Parse(ParseState &);
 };
 
 struct LeaveDoConstruct {
-    using resultType = Success;
-    static std::optional<Success> Parse(ParseState &);
+  using resultType = Success;
+  static std::optional<Success> Parse(ParseState &);
 };
 
 struct OldStructureComponentName {
-    using resultType = Name;
-    static std::optional<Name> Parse(ParseState &);
+  using resultType = Name;
+  static std::optional<Name> Parse(ParseState &);
 };
 
 struct StructureComponents {
-    using resultType = DataComponentDefStmt;
-    static std::optional<DataComponentDefStmt> Parse(ParseState &);
+  using resultType = DataComponentDefStmt;
+  static std::optional<DataComponentDefStmt> Parse(ParseState &);
 };
 } // namespace Fortran::parser
 #endif // FORTRAN_PARSER_USER_STATE_H_

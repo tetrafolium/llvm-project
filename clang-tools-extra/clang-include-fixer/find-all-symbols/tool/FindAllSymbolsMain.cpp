@@ -63,89 +63,89 @@ namespace find_all_symbols {
 
 class YamlReporter : public SymbolReporter {
 public:
-    void reportSymbols(StringRef FileName,
-                       const SymbolInfo::SignalMap &Symbols) override {
-        int FD;
-        SmallString<128> ResultPath;
-        llvm::sys::fs::createUniqueFile(
-            OutputDir + "/" + llvm::sys::path::filename(FileName) + "-%%%%%%.yaml",
-            FD, ResultPath);
-        llvm::raw_fd_ostream OS(FD, /*shouldClose=*/true);
-        WriteSymbolInfosToStream(OS, Symbols);
-    }
+  void reportSymbols(StringRef FileName,
+                     const SymbolInfo::SignalMap &Symbols) override {
+    int FD;
+    SmallString<128> ResultPath;
+    llvm::sys::fs::createUniqueFile(
+        OutputDir + "/" + llvm::sys::path::filename(FileName) + "-%%%%%%.yaml",
+        FD, ResultPath);
+    llvm::raw_fd_ostream OS(FD, /*shouldClose=*/true);
+    WriteSymbolInfosToStream(OS, Symbols);
+  }
 };
 
 bool Merge(llvm::StringRef MergeDir, llvm::StringRef OutputFile) {
-    std::error_code EC;
-    SymbolInfo::SignalMap Symbols;
-    std::mutex SymbolMutex;
-    auto AddSymbols = [&](ArrayRef<SymbolAndSignals> NewSymbols) {
-        // Synchronize set accesses.
-        std::unique_lock<std::mutex> LockGuard(SymbolMutex);
-        for (const auto &Symbol : NewSymbols) {
-            Symbols[Symbol.Symbol] += Symbol.Signals;
-        }
-    };
-
-    // Load all symbol files in MergeDir.
-    {
-        llvm::ThreadPool Pool;
-        for (llvm::sys::fs::directory_iterator Dir(MergeDir, EC), DirEnd;
-                Dir != DirEnd && !EC; Dir.increment(EC)) {
-            // Parse YAML files in parallel.
-            Pool.async(
-            [&AddSymbols](std::string Path) {
-                auto Buffer = llvm::MemoryBuffer::getFile(Path);
-                if (!Buffer) {
-                    llvm::errs() << "Can't open " << Path << "\n";
-                    return;
-                }
-                std::vector<SymbolAndSignals> Symbols =
-                    ReadSymbolInfosFromYAML(Buffer.get()->getBuffer());
-                for (auto &Symbol : Symbols) {
-                    // Only count one occurrence per file, to avoid spam.
-                    Symbol.Signals.Seen = std::min(Symbol.Signals.Seen, 1u);
-                    Symbol.Signals.Used = std::min(Symbol.Signals.Used, 1u);
-                }
-                // FIXME: Merge without creating such a heavy contention point.
-                AddSymbols(Symbols);
-            },
-            Dir->path());
-        }
+  std::error_code EC;
+  SymbolInfo::SignalMap Symbols;
+  std::mutex SymbolMutex;
+  auto AddSymbols = [&](ArrayRef<SymbolAndSignals> NewSymbols) {
+    // Synchronize set accesses.
+    std::unique_lock<std::mutex> LockGuard(SymbolMutex);
+    for (const auto &Symbol : NewSymbols) {
+      Symbols[Symbol.Symbol] += Symbol.Signals;
     }
+  };
 
-    llvm::raw_fd_ostream OS(OutputFile, EC, llvm::sys::fs::OF_None);
-    if (EC) {
-        llvm::errs() << "Can't open '" << OutputFile << "': " << EC.message()
-                     << '\n';
-        return false;
+  // Load all symbol files in MergeDir.
+  {
+    llvm::ThreadPool Pool;
+    for (llvm::sys::fs::directory_iterator Dir(MergeDir, EC), DirEnd;
+         Dir != DirEnd && !EC; Dir.increment(EC)) {
+      // Parse YAML files in parallel.
+      Pool.async(
+          [&AddSymbols](std::string Path) {
+            auto Buffer = llvm::MemoryBuffer::getFile(Path);
+            if (!Buffer) {
+              llvm::errs() << "Can't open " << Path << "\n";
+              return;
+            }
+            std::vector<SymbolAndSignals> Symbols =
+                ReadSymbolInfosFromYAML(Buffer.get()->getBuffer());
+            for (auto &Symbol : Symbols) {
+              // Only count one occurrence per file, to avoid spam.
+              Symbol.Signals.Seen = std::min(Symbol.Signals.Seen, 1u);
+              Symbol.Signals.Used = std::min(Symbol.Signals.Used, 1u);
+            }
+            // FIXME: Merge without creating such a heavy contention point.
+            AddSymbols(Symbols);
+          },
+          Dir->path());
     }
-    WriteSymbolInfosToStream(OS, Symbols);
-    return true;
+  }
+
+  llvm::raw_fd_ostream OS(OutputFile, EC, llvm::sys::fs::OF_None);
+  if (EC) {
+    llvm::errs() << "Can't open '" << OutputFile << "': " << EC.message()
+                 << '\n';
+    return false;
+  }
+  WriteSymbolInfosToStream(OS, Symbols);
+  return true;
 }
 
-} // namespace clang
 } // namespace find_all_symbols
+} // namespace clang
 
 int main(int argc, const char **argv) {
-    CommonOptionsParser OptionsParser(argc, argv, FindAllSymbolsCategory);
-    ClangTool Tool(OptionsParser.getCompilations(),
-                   OptionsParser.getSourcePathList());
+  CommonOptionsParser OptionsParser(argc, argv, FindAllSymbolsCategory);
+  ClangTool Tool(OptionsParser.getCompilations(),
+                 OptionsParser.getSourcePathList());
 
-    std::vector<std::string> sources = OptionsParser.getSourcePathList();
-    if (sources.empty()) {
-        llvm::errs() << "Must specify at least one one source file.\n";
-        return 1;
-    }
-    if (!MergeDir.empty()) {
-        clang::find_all_symbols::Merge(MergeDir, sources[0]);
-        return 0;
-    }
+  std::vector<std::string> sources = OptionsParser.getSourcePathList();
+  if (sources.empty()) {
+    llvm::errs() << "Must specify at least one one source file.\n";
+    return 1;
+  }
+  if (!MergeDir.empty()) {
+    clang::find_all_symbols::Merge(MergeDir, sources[0]);
+    return 0;
+  }
 
-    clang::find_all_symbols::YamlReporter Reporter;
+  clang::find_all_symbols::YamlReporter Reporter;
 
-    auto Factory =
-        std::make_unique<clang::find_all_symbols::FindAllSymbolsActionFactory>(
-            &Reporter, clang::find_all_symbols::getSTLPostfixHeaderMap());
-    return Tool.run(Factory.get());
+  auto Factory =
+      std::make_unique<clang::find_all_symbols::FindAllSymbolsActionFactory>(
+          &Reporter, clang::find_all_symbols::getSTLPostfixHeaderMap());
+  return Tool.run(Factory.get());
 }

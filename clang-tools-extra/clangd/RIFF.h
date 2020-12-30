@@ -42,26 +42,26 @@ namespace riff {
 using FourCC = std::array<char, 4>;
 // Get a FourCC from a string literal, e.g. fourCC("RIFF").
 inline constexpr FourCC fourCC(const char (&Literal)[5]) {
-    return FourCC{{Literal[0], Literal[1], Literal[2], Literal[3]}};
+  return FourCC{{Literal[0], Literal[1], Literal[2], Literal[3]}};
 }
 inline constexpr llvm::StringRef fourCCStr(const FourCC &Data) {
-    return llvm::StringRef(&Data[0], Data.size());
+  return llvm::StringRef(&Data[0], Data.size());
 }
 // A chunk is a section in a RIFF container.
 struct Chunk {
-    FourCC ID;
-    llvm::StringRef Data;
+  FourCC ID;
+  llvm::StringRef Data;
 };
 inline bool operator==(const Chunk &L, const Chunk &R) {
-    return std::tie(L.ID, L.Data) == std::tie(R.ID, R.Data);
+  return std::tie(L.ID, L.Data) == std::tie(R.ID, R.Data);
 }
 // A File is a RIFF container, which is a typed chunk sequence.
 struct File {
-    FourCC Type;
-    std::vector<Chunk> Chunks;
+  FourCC Type;
+  std::vector<Chunk> Chunks;
 };
 inline bool operator==(const File &L, const File &R) {
-    return std::tie(L.Type, L.Chunks) == std::tie(R.Type, R.Chunks);
+  return std::tie(L.Type, L.Chunks) == std::tie(R.Type, R.Chunks);
 }
 
 // Reads a single chunk from the start of Stream.

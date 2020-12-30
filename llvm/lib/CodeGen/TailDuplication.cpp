@@ -30,42 +30,43 @@ using namespace llvm;
 namespace {
 
 class TailDuplicateBase : public MachineFunctionPass {
-    TailDuplicator Duplicator;
-    std::unique_ptr<MBFIWrapper> MBFIW;
-    bool PreRegAlloc;
+  TailDuplicator Duplicator;
+  std::unique_ptr<MBFIWrapper> MBFIW;
+  bool PreRegAlloc;
+
 public:
-    TailDuplicateBase(char &PassID, bool PreRegAlloc)
-        : MachineFunctionPass(PassID), PreRegAlloc(PreRegAlloc) {}
+  TailDuplicateBase(char &PassID, bool PreRegAlloc)
+      : MachineFunctionPass(PassID), PreRegAlloc(PreRegAlloc) {}
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<MachineBranchProbabilityInfo>();
-        AU.addRequired<LazyMachineBlockFrequencyInfoPass>();
-        AU.addRequired<ProfileSummaryInfoWrapperPass>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<MachineBranchProbabilityInfo>();
+    AU.addRequired<LazyMachineBlockFrequencyInfoPass>();
+    AU.addRequired<ProfileSummaryInfoWrapperPass>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 };
 
 class TailDuplicate : public TailDuplicateBase {
 public:
-    static char ID;
-    TailDuplicate() : TailDuplicateBase(ID, false) {
-        initializeTailDuplicatePass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  TailDuplicate() : TailDuplicateBase(ID, false) {
+    initializeTailDuplicatePass(*PassRegistry::getPassRegistry());
+  }
 };
 
 class EarlyTailDuplicate : public TailDuplicateBase {
 public:
-    static char ID;
-    EarlyTailDuplicate() : TailDuplicateBase(ID, true) {
-        initializeEarlyTailDuplicatePass(*PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  EarlyTailDuplicate() : TailDuplicateBase(ID, true) {
+    initializeEarlyTailDuplicatePass(*PassRegistry::getPassRegistry());
+  }
 
-    MachineFunctionProperties getClearedProperties() const override {
-        return MachineFunctionProperties()
-               .set(MachineFunctionProperties::Property::NoPHIs);
-    }
+  MachineFunctionProperties getClearedProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoPHIs);
+  }
 };
 
 } // end anonymous namespace
@@ -81,22 +82,22 @@ INITIALIZE_PASS(EarlyTailDuplicate, "early-tailduplication",
                 "Early Tail Duplication", false, false)
 
 bool TailDuplicateBase::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    auto MBPI = &getAnalysis<MachineBranchProbabilityInfo>();
-    auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
-    auto *MBFI = (PSI && PSI->hasProfileSummary()) ?
-                 &getAnalysis<LazyMachineBlockFrequencyInfoPass>().getBFI() :
-                 nullptr;
-    if (MBFI)
-        MBFIW = std::make_unique<MBFIWrapper>(*MBFI);
-    Duplicator.initMF(MF, PreRegAlloc, MBPI, MBFI ? MBFIW.get() : nullptr, PSI,
-                      /*LayoutMode=*/false);
+  auto MBPI = &getAnalysis<MachineBranchProbabilityInfo>();
+  auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
+  auto *MBFI = (PSI && PSI->hasProfileSummary())
+                   ? &getAnalysis<LazyMachineBlockFrequencyInfoPass>().getBFI()
+                   : nullptr;
+  if (MBFI)
+    MBFIW = std::make_unique<MBFIWrapper>(*MBFI);
+  Duplicator.initMF(MF, PreRegAlloc, MBPI, MBFI ? MBFIW.get() : nullptr, PSI,
+                    /*LayoutMode=*/false);
 
-    bool MadeChange = false;
-    while (Duplicator.tailDuplicateBlocks())
-        MadeChange = true;
+  bool MadeChange = false;
+  while (Duplicator.tailDuplicateBlocks())
+    MadeChange = true;
 
-    return MadeChange;
+  return MadeChange;
 }

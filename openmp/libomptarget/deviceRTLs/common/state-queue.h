@@ -25,25 +25,25 @@
 
 template <typename ElementType, uint32_t SIZE> class omptarget_nvptx_Queue {
 private:
-    ElementType elements[SIZE];
-    volatile ElementType *elementQueue[SIZE];
-    volatile uint32_t head;
-    volatile uint32_t ids[SIZE];
-    volatile uint32_t tail;
+  ElementType elements[SIZE];
+  volatile ElementType *elementQueue[SIZE];
+  volatile uint32_t head;
+  volatile uint32_t ids[SIZE];
+  volatile uint32_t tail;
 
-    static const uint32_t MAX_ID = (1u << 31) / SIZE / 2;
-    INLINE uint32_t ENQUEUE_TICKET();
-    INLINE uint32_t DEQUEUE_TICKET();
-    INLINE static uint32_t ID(uint32_t ticket);
-    INLINE bool IsServing(uint32_t slot, uint32_t id);
-    INLINE void PushElement(uint32_t slot, ElementType *element);
-    INLINE ElementType *PopElement(uint32_t slot);
-    INLINE void DoneServing(uint32_t slot, uint32_t id);
+  static const uint32_t MAX_ID = (1u << 31) / SIZE / 2;
+  INLINE uint32_t ENQUEUE_TICKET();
+  INLINE uint32_t DEQUEUE_TICKET();
+  INLINE static uint32_t ID(uint32_t ticket);
+  INLINE bool IsServing(uint32_t slot, uint32_t id);
+  INLINE void PushElement(uint32_t slot, ElementType *element);
+  INLINE ElementType *PopElement(uint32_t slot);
+  INLINE void DoneServing(uint32_t slot, uint32_t id);
 
 public:
-    INLINE omptarget_nvptx_Queue() {}
-    INLINE void Enqueue(ElementType *element);
-    INLINE ElementType *Dequeue();
+  INLINE omptarget_nvptx_Queue() {}
+  INLINE void Enqueue(ElementType *element);
+  INLINE ElementType *Dequeue();
 };
 
 #include "state-queuei.h"

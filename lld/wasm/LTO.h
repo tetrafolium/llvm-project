@@ -20,9 +20,9 @@
 #ifndef LLD_WASM_LTO_H
 #define LLD_WASM_LTO_H
 
+#include "Writer.h"
 #include "lld/Common/LLVM.h"
 #include "llvm/ADT/SmallString.h"
-#include "Writer.h"
 #include <memory>
 #include <vector>
 
@@ -40,16 +40,16 @@ class InputFile;
 
 class BitcodeCompiler {
 public:
-    BitcodeCompiler();
-    ~BitcodeCompiler();
+  BitcodeCompiler();
+  ~BitcodeCompiler();
 
-    void add(BitcodeFile &f);
-    std::vector<StringRef> compile();
+  void add(BitcodeFile &f);
+  std::vector<StringRef> compile();
 
 private:
-    std::unique_ptr<llvm::lto::LTO> ltoObj;
-    std::vector<SmallString<0>> buf;
-    std::vector<std::unique_ptr<MemoryBuffer>> files;
+  std::unique_ptr<llvm::lto::LTO> ltoObj;
+  std::vector<SmallString<0>> buf;
+  std::vector<std::unique_ptr<MemoryBuffer>> files;
 };
 } // namespace wasm
 } // namespace lld

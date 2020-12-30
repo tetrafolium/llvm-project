@@ -21,16 +21,16 @@
 
 class MyClass {
 public:
-    const static int a = 4;
-    static int b;
-    static int c;
-    int d;
+  const static int a = 4;
+  static int b;
+  static int c;
+  int d;
 };
 
 int MyClass::c = 15;
 const int MyClass::a;
 
 int main() {
-    MyClass instance_MyClass;
-    return MyClass::a;
+  MyClass instance_MyClass;
+  return MyClass::a;
 }

@@ -39,8 +39,7 @@ unsigned getDefaultMaxUsesToExploreForCaptureTracking();
 /// one value before giving up due too "too many uses". If MaxUsesToExplore
 /// is zero, a default value is assumed.
 bool PointerMayBeCaptured(const Value *V, bool ReturnCaptures,
-                          bool StoreCaptures,
-                          unsigned MaxUsesToExplore = 0);
+                          bool StoreCaptures, unsigned MaxUsesToExplore = 0);
 
 /// PointerMayBeCapturedBefore - Return true if this pointer value may be
 /// captured by the enclosing function (which is required to exist). If a
@@ -55,37 +54,37 @@ bool PointerMayBeCaptured(const Value *V, bool ReturnCaptures,
 /// MaxUsesToExplore specifies how many uses the analysis should explore for
 /// one value before giving up due too "too many uses". If MaxUsesToExplore
 /// is zero, a default value is assumed.
-bool PointerMayBeCapturedBefore(
-    const Value *V, bool ReturnCaptures, bool StoreCaptures,
-    const Instruction *I, const DominatorTree *DT, bool IncludeI = false,
-    unsigned MaxUsesToExplore = 0);
+bool PointerMayBeCapturedBefore(const Value *V, bool ReturnCaptures,
+                                bool StoreCaptures, const Instruction *I,
+                                const DominatorTree *DT, bool IncludeI = false,
+                                unsigned MaxUsesToExplore = 0);
 
 /// This callback is used in conjunction with PointerMayBeCaptured. In
 /// addition to the interface here, you'll need to provide your own getters
 /// to see whether anything was captured.
 struct CaptureTracker {
-    virtual ~CaptureTracker();
+  virtual ~CaptureTracker();
 
-    /// tooManyUses - The depth of traversal has breached a limit. There may be
-    /// capturing instructions that will not be passed into captured().
-    virtual void tooManyUses() = 0;
+  /// tooManyUses - The depth of traversal has breached a limit. There may be
+  /// capturing instructions that will not be passed into captured().
+  virtual void tooManyUses() = 0;
 
-    /// shouldExplore - This is the use of a value derived from the pointer.
-    /// To prune the search (ie., assume that none of its users could possibly
-    /// capture) return false. To search it, return true.
-    ///
-    /// U->getUser() is always an Instruction.
-    virtual bool shouldExplore(const Use *U);
+  /// shouldExplore - This is the use of a value derived from the pointer.
+  /// To prune the search (ie., assume that none of its users could possibly
+  /// capture) return false. To search it, return true.
+  ///
+  /// U->getUser() is always an Instruction.
+  virtual bool shouldExplore(const Use *U);
 
-    /// captured - Information about the pointer was captured by the user of
-    /// use U. Return true to stop the traversal or false to continue looking
-    /// for more capturing instructions.
-    virtual bool captured(const Use *U) = 0;
+  /// captured - Information about the pointer was captured by the user of
+  /// use U. Return true to stop the traversal or false to continue looking
+  /// for more capturing instructions.
+  virtual bool captured(const Use *U) = 0;
 
-    /// isDereferenceableOrNull - Overload to allow clients with additional
-    /// knowledge about pointer dereferenceability to provide it and thereby
-    /// avoid conservative responses when a pointer is compared to null.
-    virtual bool isDereferenceableOrNull(Value *O, const DataLayout &DL);
+  /// isDereferenceableOrNull - Overload to allow clients with additional
+  /// knowledge about pointer dereferenceability to provide it and thereby
+  /// avoid conservative responses when a pointer is compared to null.
+  virtual bool isDereferenceableOrNull(Value *O, const DataLayout &DL);
 };
 
 /// PointerMayBeCaptured - Visit the value and the values derived from it and

@@ -20,12 +20,12 @@
 using namespace llvm;
 
 static X86::FirstMacroFusionInstKind classifyFirst(const MachineInstr &MI) {
-    return X86::classifyFirstOpcodeInMacroFusion(MI.getOpcode());
+  return X86::classifyFirstOpcodeInMacroFusion(MI.getOpcode());
 }
 
 static X86::SecondMacroFusionInstKind classifySecond(const MachineInstr &MI) {
-    X86::CondCode CC = X86::getCondFromBranch(MI);
-    return X86::classifySecondCondCodeInMacroFusion(CC);
+  X86::CondCode CC = X86::getCondFromBranch(MI);
+  return X86::classifySecondCondCodeInMacroFusion(CC);
 }
 
 /// Check if the instr pair, FirstMI and SecondMI, should be fused
@@ -35,40 +35,39 @@ static bool shouldScheduleAdjacent(const TargetInstrInfo &TII,
                                    const TargetSubtargetInfo &TSI,
                                    const MachineInstr *FirstMI,
                                    const MachineInstr &SecondMI) {
-    const X86Subtarget &ST = static_cast<const X86Subtarget &>(TSI);
+  const X86Subtarget &ST = static_cast<const X86Subtarget &>(TSI);
 
-    // Check if this processor supports any kind of fusion.
-    if (!(ST.hasBranchFusion() || ST.hasMacroFusion()))
-        return false;
+  // Check if this processor supports any kind of fusion.
+  if (!(ST.hasBranchFusion() || ST.hasMacroFusion()))
+    return false;
 
-    const X86::SecondMacroFusionInstKind BranchKind = classifySecond(SecondMI);
+  const X86::SecondMacroFusionInstKind BranchKind = classifySecond(SecondMI);
 
-    if (BranchKind == X86::SecondMacroFusionInstKind::Invalid)
-        return false; // Second cannot be fused with anything.
+  if (BranchKind == X86::SecondMacroFusionInstKind::Invalid)
+    return false; // Second cannot be fused with anything.
 
-    if (FirstMI == nullptr)
-        return true; // We're only checking whether Second can be fused at all.
+  if (FirstMI == nullptr)
+    return true; // We're only checking whether Second can be fused at all.
 
-    const X86::FirstMacroFusionInstKind TestKind = classifyFirst(*FirstMI);
+  const X86::FirstMacroFusionInstKind TestKind = classifyFirst(*FirstMI);
 
-    if (ST.hasBranchFusion()) {
-        // Branch fusion can merge CMP and TEST with all conditional jumps.
-        return (TestKind == X86::FirstMacroFusionInstKind::Cmp ||
-                TestKind == X86::FirstMacroFusionInstKind::Test);
-    }
+  if (ST.hasBranchFusion()) {
+    // Branch fusion can merge CMP and TEST with all conditional jumps.
+    return (TestKind == X86::FirstMacroFusionInstKind::Cmp ||
+            TestKind == X86::FirstMacroFusionInstKind::Test);
+  }
 
-    if (ST.hasMacroFusion()) {
-        return X86::isMacroFused(TestKind, BranchKind);
-    }
+  if (ST.hasMacroFusion()) {
+    return X86::isMacroFused(TestKind, BranchKind);
+  }
 
-    llvm_unreachable("unknown fusion type");
+  llvm_unreachable("unknown fusion type");
 }
 
 namespace llvm {
 
-std::unique_ptr<ScheduleDAGMutation>
-createX86MacroFusionDAGMutation () {
-    return createBranchMacroFusionDAGMutation(shouldScheduleAdjacent);
+std::unique_ptr<ScheduleDAGMutation> createX86MacroFusionDAGMutation() {
+  return createBranchMacroFusionDAGMutation(shouldScheduleAdjacent);
 }
 
 } // end namespace llvm

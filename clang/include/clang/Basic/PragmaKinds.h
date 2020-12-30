@@ -12,28 +12,28 @@
 namespace clang {
 
 enum PragmaMSCommentKind {
-    PCK_Unknown,
-    PCK_Linker,   // #pragma comment(linker, ...)
-    PCK_Lib,      // #pragma comment(lib, ...)
-    PCK_Compiler, // #pragma comment(compiler, ...)
-    PCK_ExeStr,   // #pragma comment(exestr, ...)
-    PCK_User      // #pragma comment(user, ...)
+  PCK_Unknown,
+  PCK_Linker,   // #pragma comment(linker, ...)
+  PCK_Lib,      // #pragma comment(lib, ...)
+  PCK_Compiler, // #pragma comment(compiler, ...)
+  PCK_ExeStr,   // #pragma comment(exestr, ...)
+  PCK_User      // #pragma comment(user, ...)
 };
 
 enum PragmaMSStructKind {
-    PMSST_OFF, // #pragms ms_struct off
-    PMSST_ON   // #pragms ms_struct on
+  PMSST_OFF, // #pragms ms_struct off
+  PMSST_ON   // #pragms ms_struct on
 };
 
 enum PragmaFloatControlKind {
-    PFC_Unknown,
-    PFC_Precise,   // #pragma float_control(precise, [,on])
-    PFC_NoPrecise, // #pragma float_control(precise, off)
-    PFC_Except,    // #pragma float_control(except [,on])
-    PFC_NoExcept,  // #pragma float_control(except, off)
-    PFC_Push,      // #pragma float_control(push)
-    PFC_Pop        // #pragma float_control(pop)
+  PFC_Unknown,
+  PFC_Precise,   // #pragma float_control(precise, [,on])
+  PFC_NoPrecise, // #pragma float_control(precise, off)
+  PFC_Except,    // #pragma float_control(except [,on])
+  PFC_NoExcept,  // #pragma float_control(except, off)
+  PFC_Push,      // #pragma float_control(push)
+  PFC_Pop        // #pragma float_control(pop)
 };
-}
+} // namespace clang
 
 #endif

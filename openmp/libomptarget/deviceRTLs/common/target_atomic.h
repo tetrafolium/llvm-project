@@ -16,23 +16,23 @@
 #include "target_impl.h"
 
 template <typename T> INLINE T __kmpc_atomic_add(T *address, T val) {
-    return atomicAdd(address, val);
+  return atomicAdd(address, val);
 }
 
 template <typename T> INLINE T __kmpc_atomic_inc(T *address, T val) {
-    return atomicInc(address, val);
+  return atomicInc(address, val);
 }
 
 template <typename T> INLINE T __kmpc_atomic_max(T *address, T val) {
-    return atomicMax(address, val);
+  return atomicMax(address, val);
 }
 
 template <typename T> INLINE T __kmpc_atomic_exchange(T *address, T val) {
-    return atomicExch(address, val);
+  return atomicExch(address, val);
 }
 
 template <typename T> INLINE T __kmpc_atomic_cas(T *address, T compare, T val) {
-    return atomicCAS(address, compare, val);
+  return atomicCAS(address, compare, val);
 }
 
 #endif

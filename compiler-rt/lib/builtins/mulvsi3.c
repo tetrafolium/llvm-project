@@ -17,6 +17,4 @@
 
 // Effects: aborts if a * b overflows
 
-COMPILER_RT_ABI si_int __mulvsi3(si_int a, si_int b) {
-    return __mulvXi3(a, b);
-}
+COMPILER_RT_ABI si_int __mulvsi3(si_int a, si_int b) { return __mulvXi3(a, b); }

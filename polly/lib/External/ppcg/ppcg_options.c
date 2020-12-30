@@ -10,27 +10,24 @@
 
 #include "ppcg_options.h"
 
-static struct isl_arg_choice target[] = {
-    {"c",		PPCG_TARGET_C},
-    {"cuda",	PPCG_TARGET_CUDA},
-    {"opencl",      PPCG_TARGET_OPENCL},
-    {0}
-};
+static struct isl_arg_choice target[] = {{"c", PPCG_TARGET_C},
+                                         {"cuda", PPCG_TARGET_CUDA},
+                                         {"opencl", PPCG_TARGET_OPENCL},
+                                         {0}};
 
 /* Set defaults that depend on the target.
  * In particular, set --schedule-outer-coincidence iff target is a GPU.
  */
-void ppcg_options_set_target_defaults(struct ppcg_options *options)
-{
-    char *argv[2] = { NULL };
+void ppcg_options_set_target_defaults(struct ppcg_options *options) {
+  char *argv[2] = {NULL};
 
-    argv[0] = "ppcg_options_set_target_defaults";
-    if (options->target == PPCG_TARGET_C)
-        argv[1] = "--no-schedule-outer-coincidence";
-    else
-        argv[1] = "--schedule-outer-coincidence";
+  argv[0] = "ppcg_options_set_target_defaults";
+  if (options->target == PPCG_TARGET_C)
+    argv[1] = "--no-schedule-outer-coincidence";
+  else
+    argv[1] = "--schedule-outer-coincidence";
 
-    isl_options_parse(options->isl, 2, argv, ISL_ARG_ALL);
+  isl_options_parse(options->isl, 2, argv, ISL_ARG_ALL);
 }
 
 /* Callback that is called whenever the "target" option is set (to "val").
@@ -38,24 +35,22 @@ void ppcg_options_set_target_defaults(struct ppcg_options *options)
  *
  * Call ppcg_options_set_target_defaults to reset the target-dependent options.
  */
-static int set_target(void *opt, unsigned val)
-{
-    struct ppcg_options *options = opt;
+static int set_target(void *opt, unsigned val) {
+  struct ppcg_options *options = opt;
 
-    ppcg_options_set_target_defaults(options);
+  ppcg_options_set_target_defaults(options);
 
-    return 0;
+  return 0;
 }
 
 ISL_ARGS_START(struct ppcg_debug_options, ppcg_debug_options_args)
 ISL_ARG_BOOL(struct ppcg_debug_options, dump_schedule_constraints, 0,
              "dump-schedule-constraints", 0, "dump schedule constraints")
-ISL_ARG_BOOL(struct ppcg_debug_options, dump_schedule, 0,
-             "dump-schedule", 0, "dump isl computed schedule")
+ISL_ARG_BOOL(struct ppcg_debug_options, dump_schedule, 0, "dump-schedule", 0,
+             "dump isl computed schedule")
 ISL_ARG_BOOL(struct ppcg_debug_options, dump_final_schedule, 0,
              "dump-final-schedule", 0, "dump PPCG computed schedule")
-ISL_ARG_BOOL(struct ppcg_debug_options, dump_sizes, 0,
-             "dump-sizes", 0,
+ISL_ARG_BOOL(struct ppcg_debug_options, dump_sizes, 0, "dump-sizes", 0,
              "dump effectively used per kernel tile, grid and block sizes")
 ISL_ARG_BOOL(struct ppcg_debug_options, verbose, 'v', "verbose", 0, NULL)
 ISL_ARGS_END
@@ -84,8 +79,8 @@ ISL_ARG_BOOL(struct ppcg_options, group_chains, 0, "group-chains", 1,
              "consecutively in the original schedule before scheduling")
 ISL_ARG_BOOL(struct ppcg_options, reschedule, 0, "reschedule", 1,
              "replace original schedule by isl computed schedule")
-ISL_ARG_BOOL(struct ppcg_options, scale_tile_loops, 0,
-             "scale-tile-loops", 1, NULL)
+ISL_ARG_BOOL(struct ppcg_options, scale_tile_loops, 0, "scale-tile-loops", 1,
+             NULL)
 ISL_ARG_BOOL(struct ppcg_options, wrap, 0, "wrap", 1, NULL)
 ISL_ARG_BOOL(struct ppcg_options, use_shared_memory, 0, "shared-memory", 1,
              "use shared memory in kernel code")
@@ -103,8 +98,8 @@ ISL_ARG_BOOL(struct ppcg_options, isolate_full_tiles, 0, "isolate-full-tiles",
              0, "isolate full tiles from partial tiles (hybrid tiling)")
 ISL_ARG_STR(struct ppcg_options, sizes, 0, "sizes", "sizes", NULL,
             "Per kernel tile, grid and block sizes")
-ISL_ARG_INT(struct ppcg_options, max_shared_memory, 0,
-            "max-shared-memory", "size", 8192, "maximal amount of shared memory")
+ISL_ARG_INT(struct ppcg_options, max_shared_memory, 0, "max-shared-memory",
+            "size", 8192, "maximal amount of shared memory")
 ISL_ARG_BOOL(struct ppcg_options, openmp, 0, "openmp", 0,
              "Generate OpenMP macros (only for C target)")
 ISL_ARG_USER_OPT_CHOICE(struct ppcg_options, target, 0, "target", target,
@@ -128,9 +123,10 @@ ISL_ARG_BOOL(struct ppcg_options, unroll_copy_shared, 0, "unroll-copy-shared",
 ISL_ARG_BOOL(struct ppcg_options, unroll_gpu_tile, 0, "unroll-gpu-tile", 0,
              "unroll code inside tile on GPU targets")
 ISL_ARG_GROUP("opencl", &ppcg_opencl_options_args, "OpenCL options")
-ISL_ARG_STR(struct ppcg_options, save_schedule_file, 0, "save-schedule",
-            "file", NULL, "save isl computed schedule to <file>")
-ISL_ARG_STR(struct ppcg_options, load_schedule_file, 0, "load-schedule",
-            "file", NULL, "load schedule from <file>, "
+ISL_ARG_STR(struct ppcg_options, save_schedule_file, 0, "save-schedule", "file",
+            NULL, "save isl computed schedule to <file>")
+ISL_ARG_STR(struct ppcg_options, load_schedule_file, 0, "load-schedule", "file",
+            NULL,
+            "load schedule from <file>, "
             "using it instead of an isl computed schedule")
 ISL_ARGS_END

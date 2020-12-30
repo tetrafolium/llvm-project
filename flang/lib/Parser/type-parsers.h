@@ -21,10 +21,10 @@ namespace Fortran::parser {
 // separately, typically with a parsing expression wrapped up in an
 // TYPE_PARSER() macro call.
 template <typename A> struct Parser {
-    using resultType = A;
-    constexpr Parser() {}
-    constexpr Parser(const Parser &) = default;
-    static std::optional<resultType> Parse(ParseState &);
+  using resultType = A;
+  constexpr Parser() {}
+  constexpr Parser(const Parser &) = default;
+  static std::optional<resultType> Parse(ParseState &);
 };
 
 #define CONTEXT_PARSER(contextText, pexpr) \

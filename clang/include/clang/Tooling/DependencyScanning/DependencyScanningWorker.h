@@ -32,14 +32,14 @@ class DependencyScanningWorkerFilesystem;
 
 class DependencyConsumer {
 public:
-    virtual ~DependencyConsumer() {}
+  virtual ~DependencyConsumer() {}
 
-    virtual void handleFileDependency(const DependencyOutputOptions &Opts,
-                                      StringRef Filename) = 0;
+  virtual void handleFileDependency(const DependencyOutputOptions &Opts,
+                                    StringRef Filename) = 0;
 
-    virtual void handleModuleDependency(ModuleDeps MD) = 0;
+  virtual void handleModuleDependency(ModuleDeps MD) = 0;
 
-    virtual void handleContextHash(std::string Hash) = 0;
+  virtual void handleContextHash(std::string Hash) = 0;
 };
 
 /// An individual dependency scanning worker that is able to run on its own
@@ -50,33 +50,33 @@ public:
 /// using the regular processing run.
 class DependencyScanningWorker {
 public:
-    DependencyScanningWorker(DependencyScanningService &Service);
+  DependencyScanningWorker(DependencyScanningService &Service);
 
-    /// Run the dependency scanning tool for a given clang driver invocation (as
-    /// specified for the given Input in the CDB), and report the discovered
-    /// dependencies to the provided consumer.
-    ///
-    /// \returns A \c StringError with the diagnostic output if clang errors
-    /// occurred, success otherwise.
-    llvm::Error computeDependencies(const std::string &Input,
-                                    StringRef WorkingDirectory,
-                                    const CompilationDatabase &CDB,
-                                    DependencyConsumer &Consumer);
+  /// Run the dependency scanning tool for a given clang driver invocation (as
+  /// specified for the given Input in the CDB), and report the discovered
+  /// dependencies to the provided consumer.
+  ///
+  /// \returns A \c StringError with the diagnostic output if clang errors
+  /// occurred, success otherwise.
+  llvm::Error computeDependencies(const std::string &Input,
+                                  StringRef WorkingDirectory,
+                                  const CompilationDatabase &CDB,
+                                  DependencyConsumer &Consumer);
 
 private:
-    IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts;
-    std::shared_ptr<PCHContainerOperations> PCHContainerOps;
-    std::unique_ptr<ExcludedPreprocessorDirectiveSkipMapping> PPSkipMappings;
+  IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts;
+  std::shared_ptr<PCHContainerOperations> PCHContainerOps;
+  std::unique_ptr<ExcludedPreprocessorDirectiveSkipMapping> PPSkipMappings;
 
-    llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> RealFS;
-    /// The file system that is used by each worker when scanning for
-    /// dependencies. This filesystem persists accross multiple compiler
-    /// invocations.
-    llvm::IntrusiveRefCntPtr<DependencyScanningWorkerFilesystem> DepFS;
-    /// The file manager that is reused accross multiple invocations by this
-    /// worker. If null, the file manager will not be reused.
-    llvm::IntrusiveRefCntPtr<FileManager> Files;
-    ScanningOutputFormat Format;
+  llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> RealFS;
+  /// The file system that is used by each worker when scanning for
+  /// dependencies. This filesystem persists accross multiple compiler
+  /// invocations.
+  llvm::IntrusiveRefCntPtr<DependencyScanningWorkerFilesystem> DepFS;
+  /// The file manager that is reused accross multiple invocations by this
+  /// worker. If null, the file manager will not be reused.
+  llvm::IntrusiveRefCntPtr<FileManager> Files;
+  ScanningOutputFormat Format;
 };
 
 } // end namespace dependencies

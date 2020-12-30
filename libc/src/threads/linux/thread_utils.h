@@ -33,8 +33,8 @@ static_assert(sizeof(atomic_uint) == 4,
               "requires that size of `atomic_uint` be 4 bytes.");
 
 struct ThreadParams {
-    static constexpr uintptr_t DefaultStackSize = 1 << 16; // 64 KB
-    static constexpr uint32_t ClearTIDValue = 0xABCD1234;
+  static constexpr uintptr_t DefaultStackSize = 1 << 16; // 64 KB
+  static constexpr uint32_t ClearTIDValue = 0xABCD1234;
 };
 
 } // namespace __llvm_libc

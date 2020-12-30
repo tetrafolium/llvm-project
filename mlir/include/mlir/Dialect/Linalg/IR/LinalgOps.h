@@ -86,7 +86,7 @@ std::string generateLibraryCallName(Operation *op);
 /// Returns `num` AffineDimExpr dimensions at positions
 ///   [startIdx, startIdx + num) and increments `startIdx` to `startIdx + num`.
 SmallVector<AffineExpr, 4> makeAffineDimExprs(unsigned num, unsigned &startIdx,
-        MLIRContext *context);
+                                              MLIRContext *context);
 
 /// Builds the indexing expressions for a ConvOp/PoolingOp `op`. Returns the
 /// vector of AffineMaps representing:

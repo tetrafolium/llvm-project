@@ -9,5 +9,5 @@
 #include "lldb/Utility/Baton.h"
 
 void lldb_private::UntypedBaton::GetDescription(llvm::raw_ostream &s,
-        lldb::DescriptionLevel level,
-        unsigned indentation) const {}
+                                                lldb::DescriptionLevel level,
+                                                unsigned indentation) const {}

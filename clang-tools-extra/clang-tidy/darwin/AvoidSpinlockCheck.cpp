@@ -17,20 +17,20 @@ namespace tidy {
 namespace darwin {
 
 void AvoidSpinlockCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        callExpr(callee((functionDecl(hasAnyName(
-                                          "OSSpinlockLock", "OSSpinlockUnlock", "OSSpinlockTry")))))
-        .bind("spinlock"),
-        this);
+  Finder->addMatcher(
+      callExpr(callee((functionDecl(hasAnyName(
+                   "OSSpinlockLock", "OSSpinlockUnlock", "OSSpinlockTry")))))
+          .bind("spinlock"),
+      this);
 }
 
 void AvoidSpinlockCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedExpr = Result.Nodes.getNodeAs<CallExpr>("spinlock");
-    diag(MatchedExpr->getBeginLoc(),
-         "use os_unfair_lock_lock() or dispatch queue APIs instead of the "
-         "deprecated OSSpinLock");
+  const auto *MatchedExpr = Result.Nodes.getNodeAs<CallExpr>("spinlock");
+  diag(MatchedExpr->getBeginLoc(),
+       "use os_unfair_lock_lock() or dispatch queue APIs instead of the "
+       "deprecated OSSpinLock");
 }
 
-}  // namespace darwin
-}  // namespace tidy
-}  // namespace clang
+} // namespace darwin
+} // namespace tidy
+} // namespace clang

@@ -26,51 +26,49 @@ class InfoStreamBuilder;
 class PDBFile;
 
 class InfoStream {
-    friend class InfoStreamBuilder;
+  friend class InfoStreamBuilder;
 
 public:
-    InfoStream(std::unique_ptr<BinaryStream> Stream);
+  InfoStream(std::unique_ptr<BinaryStream> Stream);
 
-    Error reload();
+  Error reload();
 
-    uint32_t getStreamSize() const;
+  uint32_t getStreamSize() const;
 
-    const InfoStreamHeader *getHeader() const {
-        return Header;
-    }
+  const InfoStreamHeader *getHeader() const { return Header; }
 
-    bool containsIdStream() const;
-    PdbRaw_ImplVer getVersion() const;
-    uint32_t getSignature() const;
-    uint32_t getAge() const;
-    codeview::GUID getGuid() const;
-    uint32_t getNamedStreamMapByteSize() const;
+  bool containsIdStream() const;
+  PdbRaw_ImplVer getVersion() const;
+  uint32_t getSignature() const;
+  uint32_t getAge() const;
+  codeview::GUID getGuid() const;
+  uint32_t getNamedStreamMapByteSize() const;
 
-    PdbRaw_Features getFeatures() const;
-    ArrayRef<PdbRaw_FeatureSig> getFeatureSignatures() const;
+  PdbRaw_Features getFeatures() const;
+  ArrayRef<PdbRaw_FeatureSig> getFeatureSignatures() const;
 
-    const NamedStreamMap &getNamedStreams() const;
+  const NamedStreamMap &getNamedStreams() const;
 
-    BinarySubstreamRef getNamedStreamsBuffer() const;
+  BinarySubstreamRef getNamedStreamsBuffer() const;
 
-    Expected<uint32_t> getNamedStreamIndex(llvm::StringRef Name) const;
-    StringMap<uint32_t> named_streams() const;
+  Expected<uint32_t> getNamedStreamIndex(llvm::StringRef Name) const;
+  StringMap<uint32_t> named_streams() const;
 
 private:
-    std::unique_ptr<BinaryStream> Stream;
+  std::unique_ptr<BinaryStream> Stream;
 
-    const InfoStreamHeader *Header;
+  const InfoStreamHeader *Header;
 
-    BinarySubstreamRef SubNamedStreams;
+  BinarySubstreamRef SubNamedStreams;
 
-    std::vector<PdbRaw_FeatureSig> FeatureSignatures;
-    PdbRaw_Features Features = PdbFeatureNone;
+  std::vector<PdbRaw_FeatureSig> FeatureSignatures;
+  PdbRaw_Features Features = PdbFeatureNone;
 
-    uint32_t NamedStreamMapByteSize = 0;
+  uint32_t NamedStreamMapByteSize = 0;
 
-    NamedStreamMap NamedStreams;
+  NamedStreamMap NamedStreams;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

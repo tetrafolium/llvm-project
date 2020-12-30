@@ -17,33 +17,31 @@ NativeSourceFile::NativeSourceFile(NativeSession &Session, uint32_t FileId,
     : Session(Session), FileId(FileId), Checksum(Checksum) {}
 
 std::string NativeSourceFile::getFileName() const {
-    auto ST = Session.getPDBFile().getStringTable();
-    if (!ST) {
-        consumeError(ST.takeError());
-        return "";
-    }
-    auto FileName = ST->getStringTable().getString(Checksum.FileNameOffset);
-    if (!FileName) {
-        consumeError(FileName.takeError());
-        return "";
-    }
+  auto ST = Session.getPDBFile().getStringTable();
+  if (!ST) {
+    consumeError(ST.takeError());
+    return "";
+  }
+  auto FileName = ST->getStringTable().getString(Checksum.FileNameOffset);
+  if (!FileName) {
+    consumeError(FileName.takeError());
+    return "";
+  }
 
-    return std::string(FileName.get());
+  return std::string(FileName.get());
 }
 
-uint32_t NativeSourceFile::getUniqueId() const {
-    return FileId;
-}
+uint32_t NativeSourceFile::getUniqueId() const { return FileId; }
 
 std::string NativeSourceFile::getChecksum() const {
-    return toStringRef(Checksum.Checksum).str();
+  return toStringRef(Checksum.Checksum).str();
 }
 
 PDB_Checksum NativeSourceFile::getChecksumType() const {
-    return static_cast<PDB_Checksum>(Checksum.Kind);
+  return static_cast<PDB_Checksum>(Checksum.Kind);
 }
 
 std::unique_ptr<IPDBEnumChildren<PDBSymbolCompiland>>
 NativeSourceFile::getCompilands() const {
-    return nullptr;
+  return nullptr;
 }

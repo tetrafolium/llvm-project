@@ -16,30 +16,30 @@
 namespace lldb_private {
 
 class UnwindAssembly : public std::enable_shared_from_this<UnwindAssembly>,
-    public PluginInterface {
+                       public PluginInterface {
 public:
-    static lldb::UnwindAssemblySP FindPlugin(const ArchSpec &arch);
+  static lldb::UnwindAssemblySP FindPlugin(const ArchSpec &arch);
 
-    virtual bool
-    GetNonCallSiteUnwindPlanFromAssembly(AddressRange &func, Thread &thread,
-                                         UnwindPlan &unwind_plan) = 0;
+  virtual bool
+  GetNonCallSiteUnwindPlanFromAssembly(AddressRange &func, Thread &thread,
+                                       UnwindPlan &unwind_plan) = 0;
 
-    virtual bool AugmentUnwindPlanFromCallSite(AddressRange &func, Thread &thread,
-            UnwindPlan &unwind_plan) = 0;
+  virtual bool AugmentUnwindPlanFromCallSite(AddressRange &func, Thread &thread,
+                                             UnwindPlan &unwind_plan) = 0;
 
-    virtual bool GetFastUnwindPlan(AddressRange &func, Thread &thread,
-                                   UnwindPlan &unwind_plan) = 0;
+  virtual bool GetFastUnwindPlan(AddressRange &func, Thread &thread,
+                                 UnwindPlan &unwind_plan) = 0;
 
-    // thread may be NULL in which case we only use the Target (e.g. if this is
-    // called pre-process-launch).
-    virtual bool
-    FirstNonPrologueInsn(AddressRange &func,
-                         const lldb_private::ExecutionContext &exe_ctx,
-                         Address &first_non_prologue_insn) = 0;
+  // thread may be NULL in which case we only use the Target (e.g. if this is
+  // called pre-process-launch).
+  virtual bool
+  FirstNonPrologueInsn(AddressRange &func,
+                       const lldb_private::ExecutionContext &exe_ctx,
+                       Address &first_non_prologue_insn) = 0;
 
 protected:
-    UnwindAssembly(const ArchSpec &arch);
-    ArchSpec m_arch;
+  UnwindAssembly(const ArchSpec &arch);
+  ArchSpec m_arch;
 };
 
 } // namespace lldb_private

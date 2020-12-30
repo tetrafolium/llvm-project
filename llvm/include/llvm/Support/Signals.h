@@ -1,4 +1,5 @@
-//===- llvm/Support/Signals.h - Signal Handling support ----------*- C++ -*-===//
+//===- llvm/Support/Signals.h - Signal Handling support ----------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -29,7 +30,7 @@ void RunInterruptHandlers();
 /// This function registers signal handlers to ensure that if a signal gets
 /// delivered that the named file is removed.
 /// Remove a file if a fatal signal occurs.
-bool RemoveFileOnSignal(StringRef Filename, std::string* ErrMsg = nullptr);
+bool RemoveFileOnSignal(StringRef Filename, std::string *ErrMsg = nullptr);
 
 /// This function removes a file from the list of files to be removed on
 /// signal delivery.
@@ -119,7 +120,7 @@ void DefaultOneShotPipeSignalHandler();
 void CleanupOnSignal(uintptr_t Context);
 
 void unregisterHandlers();
-} // End sys namespace
-} // End llvm namespace
+} // namespace sys
+} // namespace llvm
 
 #endif

@@ -35,9 +35,8 @@ class Sema;
 /// \param SkipFunctionBodies Whether to skip parsing of function bodies.
 /// This option can be used, for example, to speed up searches for
 /// declarations/definitions when indexing.
-void ParseAST(Preprocessor &pp, ASTConsumer *C,
-              ASTContext &Ctx, bool PrintStats = false,
-              TranslationUnitKind TUKind = TU_Complete,
+void ParseAST(Preprocessor &pp, ASTConsumer *C, ASTContext &Ctx,
+              bool PrintStats = false, TranslationUnitKind TUKind = TU_Complete,
               CodeCompleteConsumer *CompletionConsumer = nullptr,
               bool SkipFunctionBodies = false);
 
@@ -46,6 +45,6 @@ void ParseAST(Preprocessor &pp, ASTConsumer *C,
 void ParseAST(Sema &S, bool PrintStats = false,
               bool SkipFunctionBodies = false);
 
-}  // end namespace clang
+} // end namespace clang
 
 #endif

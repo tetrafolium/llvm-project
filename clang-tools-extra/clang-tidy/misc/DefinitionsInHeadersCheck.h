@@ -33,18 +33,18 @@ namespace misc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/misc-definitions-in-headers.html
 class DefinitionsInHeadersCheck : public ClangTidyCheck {
 public:
-    DefinitionsInHeadersCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  DefinitionsInHeadersCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const bool UseHeaderFileExtension;
-    const std::string RawStringHeaderFileExtensions;
-    utils::FileExtensionsSet HeaderFileExtensions;
+  const bool UseHeaderFileExtension;
+  const std::string RawStringHeaderFileExtensions;
+  utils::FileExtensionsSet HeaderFileExtensions;
 };
 
 } // namespace misc

@@ -10,9 +10,9 @@
 
 #include "Utility/ARM_DWARF_Registers.h"
 #include "Utility/ARM_ehframe_Registers.h"
-#include "lldb/Utility/RegisterValue.h"
 #include "lldb/Utility/DataExtractor.h"
 #include "lldb/Utility/LLDBAssert.h"
+#include "lldb/Utility/RegisterValue.h"
 #include "lldb/lldb-enumerations.h"
 
 // C includes
@@ -30,14 +30,15 @@ using namespace minidump;
 #define DEF_R(i)                                                               \
   {                                                                            \
     "r" #i, nullptr, 4, OFFSET(r) + i * 4, eEncodingUint, eFormatHex,          \
-        {ehframe_r##i, dwarf_r##i, INV, INV, reg_r##i},                          \
-        nullptr, nullptr, nullptr, 0    \
+        {ehframe_r##i, dwarf_r##i, INV, INV, reg_r##i}, nullptr, nullptr,      \
+        nullptr, 0                                                             \
   }
 
 #define DEF_R_ARG(i, n)                                                        \
   {                                                                            \
     "r" #i, "arg" #n, 4, OFFSET(r) + i * 4, eEncodingUint, eFormatHex,         \
-        {ehframe_r##i, dwarf_r##i, LLDB_REGNUM_GENERIC_ARG1 + i, INV, reg_r##i}, \
+        {ehframe_r##i, dwarf_r##i, LLDB_REGNUM_GENERIC_ARG1 + i, INV,          \
+         reg_r##i},                                                            \
         nullptr, nullptr, nullptr, 0                                           \
   }
 
@@ -45,126 +46,126 @@ using namespace minidump;
   {                                                                            \
     "d" #i, nullptr, 8, OFFSET(d) + i * 8, eEncodingVector,                    \
         eFormatVectorOfUInt8, {dwarf_d##i, dwarf_d##i, INV, INV, reg_d##i},    \
-        nullptr, nullptr, nullptr, 0    \
+        nullptr, nullptr, nullptr, 0                                           \
   }
 
 #define DEF_S(i)                                                               \
   {                                                                            \
     "s" #i, nullptr, 4, OFFSET(s) + i * 4, eEncodingIEEE754, eFormatFloat,     \
-        {dwarf_s##i, dwarf_s##i, INV, INV, reg_s##i},                          \
-        nullptr, nullptr, nullptr, 0                                           \
+        {dwarf_s##i, dwarf_s##i, INV, INV, reg_s##i}, nullptr, nullptr,        \
+        nullptr, 0                                                             \
   }
 
 #define DEF_Q(i)                                                               \
   {                                                                            \
     "q" #i, nullptr, 16, OFFSET(q) + i * 16, eEncodingVector,                  \
         eFormatVectorOfUInt8, {dwarf_q##i, dwarf_q##i, INV, INV, reg_q##i},    \
-        nullptr, nullptr, nullptr, 0    \
+        nullptr, nullptr, nullptr, 0                                           \
   }
 
 // Zero based LLDB register numbers for this register context
 enum {
-    // General Purpose Registers
-    reg_r0,
-    reg_r1,
-    reg_r2,
-    reg_r3,
-    reg_r4,
-    reg_r5,
-    reg_r6,
-    reg_r7,
-    reg_r8,
-    reg_r9,
-    reg_r10,
-    reg_r11,
-    reg_r12,
-    reg_sp,
-    reg_lr,
-    reg_pc,
-    reg_cpsr,
-    // Floating Point Registers
-    reg_fpscr,
-    reg_d0,
-    reg_d1,
-    reg_d2,
-    reg_d3,
-    reg_d4,
-    reg_d5,
-    reg_d6,
-    reg_d7,
-    reg_d8,
-    reg_d9,
-    reg_d10,
-    reg_d11,
-    reg_d12,
-    reg_d13,
-    reg_d14,
-    reg_d15,
-    reg_d16,
-    reg_d17,
-    reg_d18,
-    reg_d19,
-    reg_d20,
-    reg_d21,
-    reg_d22,
-    reg_d23,
-    reg_d24,
-    reg_d25,
-    reg_d26,
-    reg_d27,
-    reg_d28,
-    reg_d29,
-    reg_d30,
-    reg_d31,
-    reg_s0,
-    reg_s1,
-    reg_s2,
-    reg_s3,
-    reg_s4,
-    reg_s5,
-    reg_s6,
-    reg_s7,
-    reg_s8,
-    reg_s9,
-    reg_s10,
-    reg_s11,
-    reg_s12,
-    reg_s13,
-    reg_s14,
-    reg_s15,
-    reg_s16,
-    reg_s17,
-    reg_s18,
-    reg_s19,
-    reg_s20,
-    reg_s21,
-    reg_s22,
-    reg_s23,
-    reg_s24,
-    reg_s25,
-    reg_s26,
-    reg_s27,
-    reg_s28,
-    reg_s29,
-    reg_s30,
-    reg_s31,
-    reg_q0,
-    reg_q1,
-    reg_q2,
-    reg_q3,
-    reg_q4,
-    reg_q5,
-    reg_q6,
-    reg_q7,
-    reg_q8,
-    reg_q9,
-    reg_q10,
-    reg_q11,
-    reg_q12,
-    reg_q13,
-    reg_q14,
-    reg_q15,
-    k_num_regs
+  // General Purpose Registers
+  reg_r0,
+  reg_r1,
+  reg_r2,
+  reg_r3,
+  reg_r4,
+  reg_r5,
+  reg_r6,
+  reg_r7,
+  reg_r8,
+  reg_r9,
+  reg_r10,
+  reg_r11,
+  reg_r12,
+  reg_sp,
+  reg_lr,
+  reg_pc,
+  reg_cpsr,
+  // Floating Point Registers
+  reg_fpscr,
+  reg_d0,
+  reg_d1,
+  reg_d2,
+  reg_d3,
+  reg_d4,
+  reg_d5,
+  reg_d6,
+  reg_d7,
+  reg_d8,
+  reg_d9,
+  reg_d10,
+  reg_d11,
+  reg_d12,
+  reg_d13,
+  reg_d14,
+  reg_d15,
+  reg_d16,
+  reg_d17,
+  reg_d18,
+  reg_d19,
+  reg_d20,
+  reg_d21,
+  reg_d22,
+  reg_d23,
+  reg_d24,
+  reg_d25,
+  reg_d26,
+  reg_d27,
+  reg_d28,
+  reg_d29,
+  reg_d30,
+  reg_d31,
+  reg_s0,
+  reg_s1,
+  reg_s2,
+  reg_s3,
+  reg_s4,
+  reg_s5,
+  reg_s6,
+  reg_s7,
+  reg_s8,
+  reg_s9,
+  reg_s10,
+  reg_s11,
+  reg_s12,
+  reg_s13,
+  reg_s14,
+  reg_s15,
+  reg_s16,
+  reg_s17,
+  reg_s18,
+  reg_s19,
+  reg_s20,
+  reg_s21,
+  reg_s22,
+  reg_s23,
+  reg_s24,
+  reg_s25,
+  reg_s26,
+  reg_s27,
+  reg_s28,
+  reg_s29,
+  reg_s30,
+  reg_s31,
+  reg_q0,
+  reg_q1,
+  reg_q2,
+  reg_q3,
+  reg_q4,
+  reg_q5,
+  reg_q6,
+  reg_q7,
+  reg_q8,
+  reg_q9,
+  reg_q10,
+  reg_q11,
+  reg_q12,
+  reg_q13,
+  reg_q14,
+  reg_q15,
+  k_num_regs
 };
 
 static RegisterInfo g_reg_info_apple_fp = {
@@ -178,8 +179,7 @@ static RegisterInfo g_reg_info_apple_fp = {
     nullptr,
     nullptr,
     nullptr,
-    0
-};
+    0};
 
 static RegisterInfo g_reg_info_fp = {
     "fp",
@@ -192,8 +192,7 @@ static RegisterInfo g_reg_info_fp = {
     nullptr,
     nullptr,
     nullptr,
-    0
-};
+    0};
 
 // Register info definitions for this register context
 static RegisterInfo g_reg_infos[] = {
@@ -210,66 +209,61 @@ static RegisterInfo g_reg_infos[] = {
     DEF_R(10),
     DEF_R(11),
     DEF_R(12),
-    {   "sp",
-        "r13",
-        4,
-        OFFSET(r) + 13 * 4,
-        eEncodingUint,
-        eFormatHex,
-        {ehframe_sp, dwarf_sp, LLDB_REGNUM_GENERIC_SP, INV, reg_sp},
-        nullptr,
-        nullptr,
-        nullptr,
-        0
-    },
-    {   "lr",
-        "r14",
-        4,
-        OFFSET(r) + 14 * 4,
-        eEncodingUint,
-        eFormatHex,
-        {ehframe_lr, dwarf_lr, LLDB_REGNUM_GENERIC_RA, INV, reg_lr},
-        nullptr,
-        nullptr,
-        nullptr,
-        0
-    },
-    {   "pc",
-        "r15",
-        4,
-        OFFSET(r) + 15 * 4,
-        eEncodingUint,
-        eFormatHex,
-        {ehframe_pc, dwarf_pc, LLDB_REGNUM_GENERIC_PC, INV, reg_pc},
-        nullptr,
-        nullptr,
-        nullptr,
-        0
-    },
-    {   "cpsr",
-        "psr",
-        4,
-        OFFSET(cpsr),
-        eEncodingUint,
-        eFormatHex,
-        {ehframe_cpsr, dwarf_cpsr, LLDB_REGNUM_GENERIC_FLAGS, INV, reg_cpsr},
-        nullptr,
-        nullptr,
-        nullptr,
-        0
-    },
-    {   "fpscr",
-        nullptr,
-        8,
-        OFFSET(fpscr),
-        eEncodingUint,
-        eFormatHex,
-        {INV, INV, INV, INV, reg_fpscr},
-        nullptr,
-        nullptr,
-        nullptr,
-        0
-    },
+    {"sp",
+     "r13",
+     4,
+     OFFSET(r) + 13 * 4,
+     eEncodingUint,
+     eFormatHex,
+     {ehframe_sp, dwarf_sp, LLDB_REGNUM_GENERIC_SP, INV, reg_sp},
+     nullptr,
+     nullptr,
+     nullptr,
+     0},
+    {"lr",
+     "r14",
+     4,
+     OFFSET(r) + 14 * 4,
+     eEncodingUint,
+     eFormatHex,
+     {ehframe_lr, dwarf_lr, LLDB_REGNUM_GENERIC_RA, INV, reg_lr},
+     nullptr,
+     nullptr,
+     nullptr,
+     0},
+    {"pc",
+     "r15",
+     4,
+     OFFSET(r) + 15 * 4,
+     eEncodingUint,
+     eFormatHex,
+     {ehframe_pc, dwarf_pc, LLDB_REGNUM_GENERIC_PC, INV, reg_pc},
+     nullptr,
+     nullptr,
+     nullptr,
+     0},
+    {"cpsr",
+     "psr",
+     4,
+     OFFSET(cpsr),
+     eEncodingUint,
+     eFormatHex,
+     {ehframe_cpsr, dwarf_cpsr, LLDB_REGNUM_GENERIC_FLAGS, INV, reg_cpsr},
+     nullptr,
+     nullptr,
+     nullptr,
+     0},
+    {"fpscr",
+     nullptr,
+     8,
+     OFFSET(fpscr),
+     eEncodingUint,
+     eFormatHex,
+     {INV, INV, INV, INV, reg_fpscr},
+     nullptr,
+     nullptr,
+     nullptr,
+     0},
     DEF_D(0),
     DEF_D(1),
     DEF_D(2),
@@ -349,8 +343,7 @@ static RegisterInfo g_reg_infos[] = {
     DEF_Q(12),
     DEF_Q(13),
     DEF_Q(14),
-    DEF_Q(15)
-};
+    DEF_Q(15)};
 
 constexpr size_t k_num_reg_infos = llvm::array_lengthof(g_reg_infos);
 
@@ -474,84 +467,84 @@ constexpr size_t k_num_reg_sets = llvm::array_lengthof(g_reg_sets);
 RegisterContextMinidump_ARM::RegisterContextMinidump_ARM(
     lldb_private::Thread &thread, const DataExtractor &data, bool apple)
     : RegisterContext(thread, 0), m_apple(apple) {
-    lldb::offset_t offset = 0;
-    m_regs.context_flags = data.GetU32(&offset);
-    for (unsigned i = 0; i < llvm::array_lengthof(m_regs.r); ++i)
-        m_regs.r[i] = data.GetU32(&offset);
-    m_regs.cpsr = data.GetU32(&offset);
-    m_regs.fpscr = data.GetU64(&offset);
-    for (unsigned i = 0; i < llvm::array_lengthof(m_regs.d); ++i)
-        m_regs.d[i] = data.GetU64(&offset);
-    lldbassert(k_num_regs == k_num_reg_infos);
+  lldb::offset_t offset = 0;
+  m_regs.context_flags = data.GetU32(&offset);
+  for (unsigned i = 0; i < llvm::array_lengthof(m_regs.r); ++i)
+    m_regs.r[i] = data.GetU32(&offset);
+  m_regs.cpsr = data.GetU32(&offset);
+  m_regs.fpscr = data.GetU64(&offset);
+  for (unsigned i = 0; i < llvm::array_lengthof(m_regs.d); ++i)
+    m_regs.d[i] = data.GetU64(&offset);
+  lldbassert(k_num_regs == k_num_reg_infos);
 }
 
 size_t RegisterContextMinidump_ARM::GetRegisterCountStatic() {
-    return k_num_regs;
+  return k_num_regs;
 }
 
 // Used for unit testing so we can verify register info is filled in for
 // all register flavors (DWARF, EH Frame, generic, etc).
 size_t RegisterContextMinidump_ARM::GetRegisterCount() {
-    return GetRegisterCountStatic();
+  return GetRegisterCountStatic();
 }
 
 // Used for unit testing so we can verify register info is filled in.
 const RegisterInfo *
 RegisterContextMinidump_ARM::GetRegisterInfoAtIndexStatic(size_t reg,
-        bool apple) {
-    if (reg < k_num_reg_infos) {
-        if (apple) {
-            if (reg == reg_r7)
-                return &g_reg_info_apple_fp;
-        } else {
-            if (reg == reg_r11)
-                return &g_reg_info_fp;
-        }
-        return &g_reg_infos[reg];
+                                                          bool apple) {
+  if (reg < k_num_reg_infos) {
+    if (apple) {
+      if (reg == reg_r7)
+        return &g_reg_info_apple_fp;
+    } else {
+      if (reg == reg_r11)
+        return &g_reg_info_fp;
     }
-    return nullptr;
+    return &g_reg_infos[reg];
+  }
+  return nullptr;
 }
 
 const RegisterInfo *
 RegisterContextMinidump_ARM::GetRegisterInfoAtIndex(size_t reg) {
-    return GetRegisterInfoAtIndexStatic(reg, m_apple);
+  return GetRegisterInfoAtIndexStatic(reg, m_apple);
 }
 
 size_t RegisterContextMinidump_ARM::GetRegisterSetCount() {
-    return k_num_reg_sets;
+  return k_num_reg_sets;
 }
 
 const RegisterSet *RegisterContextMinidump_ARM::GetRegisterSet(size_t set) {
-    if (set < k_num_reg_sets)
-        return &g_reg_sets[set];
-    return nullptr;
+  if (set < k_num_reg_sets)
+    return &g_reg_sets[set];
+  return nullptr;
 }
 
 const char *RegisterContextMinidump_ARM::GetRegisterName(unsigned reg) {
-    if (reg < k_num_reg_infos)
-        return g_reg_infos[reg].name;
-    return nullptr;
+  if (reg < k_num_reg_infos)
+    return g_reg_infos[reg].name;
+  return nullptr;
 }
 
 bool RegisterContextMinidump_ARM::ReadRegister(const RegisterInfo *reg_info,
-        RegisterValue &reg_value) {
-    Status error;
-    reg_value.SetFromMemoryData(
-        reg_info, (const uint8_t *)&m_regs + reg_info->byte_offset,
-        reg_info->byte_size, lldb::eByteOrderLittle, error);
-    return error.Success();
+                                               RegisterValue &reg_value) {
+  Status error;
+  reg_value.SetFromMemoryData(
+      reg_info, (const uint8_t *)&m_regs + reg_info->byte_offset,
+      reg_info->byte_size, lldb::eByteOrderLittle, error);
+  return error.Success();
 }
 
 bool RegisterContextMinidump_ARM::WriteRegister(const RegisterInfo *,
-        const RegisterValue &) {
-    return false;
+                                                const RegisterValue &) {
+  return false;
 }
 
 uint32_t RegisterContextMinidump_ARM::ConvertRegisterKindToRegisterNumber(
     lldb::RegisterKind kind, uint32_t num) {
-    for (size_t i = 0; i < k_num_regs; ++i) {
-        if (g_reg_infos[i].kinds[kind] == num)
-            return i;
-    }
-    return LLDB_INVALID_REGNUM;
+  for (size_t i = 0; i < k_num_regs; ++i) {
+    if (g_reg_infos[i].kinds[kind] == num)
+      return i;
+  }
+  return LLDB_INVALID_REGNUM;
 }

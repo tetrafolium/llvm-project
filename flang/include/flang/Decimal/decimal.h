@@ -30,25 +30,25 @@ namespace Fortran::decimal {
 #endif /* C++ */
 
 enum ConversionResultFlags {
-    Exact = 0,
-    Overflow = 1,
-    Inexact = 2,
-    Invalid = 4,
+  Exact = 0,
+  Overflow = 1,
+  Inexact = 2,
+  Invalid = 4,
 };
 
 struct ConversionToDecimalResult {
-    const char *str; /* may not be original buffer pointer; null if overflow */
-    size_t length; /* does not include NUL terminator */
-    int decimalExponent; /* assuming decimal point to the left of first digit */
-    enum ConversionResultFlags flags;
+  const char *str; /* may not be original buffer pointer; null if overflow */
+  size_t length; /* does not include NUL terminator */
+  int decimalExponent; /* assuming decimal point to the left of first digit */
+  enum ConversionResultFlags flags;
 };
 
 enum FortranRounding {
-    RoundNearest, /* RN and RP */
-    RoundUp, /* RU */
-    RoundDown, /* RD */
-    RoundToZero, /* RZ - no rounding */
-    RoundCompatible, /* RC: like RN, but ties go away from 0 */
+  RoundNearest, /* RN and RP */
+  RoundUp, /* RU */
+  RoundDown, /* RD */
+  RoundToZero, /* RZ - no rounding */
+  RoundCompatible, /* RC: like RN, but ties go away from 0 */
 };
 
 /* The "minimize" flag causes the fewest number of output digits
@@ -57,8 +57,8 @@ enum FortranRounding {
  * value.
  */
 enum DecimalConversionFlags {
-    Minimize = 1, /* Minimize # of digits */
-    AlwaysSign = 2, /* emit leading '+' if not negative */
+  Minimize = 1, /* Minimize # of digits */
+  AlwaysSign = 2, /* emit leading '+' if not negative */
 };
 
 /*
@@ -73,31 +73,31 @@ enum DecimalConversionFlags {
 #ifdef __cplusplus
 template <int PREC>
 ConversionToDecimalResult ConvertToDecimal(char *, size_t,
-        DecimalConversionFlags, int digits, enum FortranRounding rounding,
-        BinaryFloatingPointNumber<PREC> x);
+    DecimalConversionFlags, int digits, enum FortranRounding rounding,
+    BinaryFloatingPointNumber<PREC> x);
 
 extern template ConversionToDecimalResult ConvertToDecimal<8>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<8>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<8>);
 extern template ConversionToDecimalResult ConvertToDecimal<11>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<11>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<11>);
 extern template ConversionToDecimalResult ConvertToDecimal<24>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<24>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<24>);
 extern template ConversionToDecimalResult ConvertToDecimal<53>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<53>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<53>);
 extern template ConversionToDecimalResult ConvertToDecimal<64>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<64>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<64>);
 extern template ConversionToDecimalResult ConvertToDecimal<113>(char *, size_t,
-        enum DecimalConversionFlags, int, enum FortranRounding,
-        BinaryFloatingPointNumber<113>);
+    enum DecimalConversionFlags, int, enum FortranRounding,
+    BinaryFloatingPointNumber<113>);
 
 template <int PREC> struct ConversionToBinaryResult {
-    BinaryFloatingPointNumber<PREC> binary;
-    enum ConversionResultFlags flags { Exact };
+  BinaryFloatingPointNumber<PREC> binary;
+  enum ConversionResultFlags flags { Exact };
 };
 
 template <int PREC>
@@ -124,21 +124,21 @@ extern "C" {
 #endif /* C++ */
 
 struct NS(ConversionToDecimalResult)
-ConvertFloatToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
-                      int digits, enum NS(FortranRounding), float);
+    ConvertFloatToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
+        int digits, enum NS(FortranRounding), float);
 struct NS(ConversionToDecimalResult)
-ConvertDoubleToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
-                       int digits, enum NS(FortranRounding), double);
+    ConvertDoubleToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
+        int digits, enum NS(FortranRounding), double);
 #if __x86_64__ && !defined(_MSC_VER)
 struct NS(ConversionToDecimalResult)
-ConvertLongDoubleToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
-                           int digits, enum NS(FortranRounding), long double);
+    ConvertLongDoubleToDecimal(char *, size_t, enum NS(DecimalConversionFlags),
+        int digits, enum NS(FortranRounding), long double);
 #endif
 
 enum NS(ConversionResultFlags)
-ConvertDecimalToFloat(const char **, float *, enum NS(FortranRounding));
+    ConvertDecimalToFloat(const char **, float *, enum NS(FortranRounding));
 enum NS(ConversionResultFlags)
-ConvertDecimalToDouble(const char **, double *, enum NS(FortranRounding));
+    ConvertDecimalToDouble(const char **, double *, enum NS(FortranRounding));
 #if __x86_64__ && !defined(_MSC_VER)
 enum NS(ConversionResultFlags) ConvertDecimalToLongDouble(
     const char **, long double *, enum NS(FortranRounding));

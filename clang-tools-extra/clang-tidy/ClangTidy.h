@@ -32,24 +32,24 @@ class ClangTidyCheckFactories;
 
 class ClangTidyASTConsumerFactory {
 public:
-    ClangTidyASTConsumerFactory(
-        ClangTidyContext &Context,
-        IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFS = nullptr);
+  ClangTidyASTConsumerFactory(
+      ClangTidyContext &Context,
+      IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFS = nullptr);
 
-    /// Returns an ASTConsumer that runs the specified clang-tidy checks.
-    std::unique_ptr<clang::ASTConsumer>
-    CreateASTConsumer(clang::CompilerInstance &Compiler, StringRef File);
+  /// Returns an ASTConsumer that runs the specified clang-tidy checks.
+  std::unique_ptr<clang::ASTConsumer>
+  CreateASTConsumer(clang::CompilerInstance &Compiler, StringRef File);
 
-    /// Get the list of enabled checks.
-    std::vector<std::string> getCheckNames();
+  /// Get the list of enabled checks.
+  std::vector<std::string> getCheckNames();
 
-    /// Get the union of options from all checks.
-    ClangTidyOptions::OptionMap getCheckOptions();
+  /// Get the union of options from all checks.
+  ClangTidyOptions::OptionMap getCheckOptions();
 
 private:
-    ClangTidyContext &Context;
-    IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFS;
-    std::unique_ptr<ClangTidyCheckFactories> CheckFactories;
+  ClangTidyContext &Context;
+  IntrusiveRefCntPtr<llvm::vfs::OverlayFileSystem> OverlayFS;
+  std::unique_ptr<ClangTidyCheckFactories> CheckFactories;
 };
 
 /// Fills the list of check names that are enabled when the provided

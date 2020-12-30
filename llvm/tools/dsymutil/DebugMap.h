@@ -72,73 +72,63 @@ class DebugMapObject;
 ///     }
 /// }
 class DebugMap {
-    Triple BinaryTriple;
-    std::string BinaryPath;
-    std::vector<uint8_t> BinaryUUID;
-    using ObjectContainer = std::vector<std::unique_ptr<DebugMapObject>>;
+  Triple BinaryTriple;
+  std::string BinaryPath;
+  std::vector<uint8_t> BinaryUUID;
+  using ObjectContainer = std::vector<std::unique_ptr<DebugMapObject>>;
 
-    ObjectContainer Objects;
+  ObjectContainer Objects;
 
-    /// For YAML IO support.
-    ///@{
-    friend yaml::MappingTraits<std::unique_ptr<DebugMap>>;
-    friend yaml::MappingTraits<DebugMap>;
+  /// For YAML IO support.
+  ///@{
+  friend yaml::MappingTraits<std::unique_ptr<DebugMap>>;
+  friend yaml::MappingTraits<DebugMap>;
 
-    DebugMap() = default;
-    ///@}
+  DebugMap() = default;
+  ///@}
 
 public:
-    DebugMap(const Triple &BinaryTriple, StringRef BinaryPath,
-             ArrayRef<uint8_t> BinaryUUID = ArrayRef<uint8_t>())
-        : BinaryTriple(BinaryTriple), BinaryPath(std::string(BinaryPath)),
-          BinaryUUID(BinaryUUID.begin(), BinaryUUID.end()) {}
+  DebugMap(const Triple &BinaryTriple, StringRef BinaryPath,
+           ArrayRef<uint8_t> BinaryUUID = ArrayRef<uint8_t>())
+      : BinaryTriple(BinaryTriple), BinaryPath(std::string(BinaryPath)),
+        BinaryUUID(BinaryUUID.begin(), BinaryUUID.end()) {}
 
-    using const_iterator = ObjectContainer::const_iterator;
+  using const_iterator = ObjectContainer::const_iterator;
 
-    iterator_range<const_iterator> objects() const {
-        return make_range(begin(), end());
-    }
+  iterator_range<const_iterator> objects() const {
+    return make_range(begin(), end());
+  }
 
-    const_iterator begin() const {
-        return Objects.begin();
-    }
+  const_iterator begin() const { return Objects.begin(); }
 
-    const_iterator end() const {
-        return Objects.end();
-    }
+  const_iterator end() const { return Objects.end(); }
 
-    unsigned getNumberOfObjects() const {
-        return Objects.size();
-    }
+  unsigned getNumberOfObjects() const { return Objects.size(); }
 
-    /// This function adds an DebugMapObject to the list owned by this
-    /// debug map.
-    DebugMapObject &
-    addDebugMapObject(StringRef ObjectFilePath,
-                      sys::TimePoint<std::chrono::seconds> Timestamp,
-                      uint8_t Type = llvm::MachO::N_OSO);
+  /// This function adds an DebugMapObject to the list owned by this
+  /// debug map.
+  DebugMapObject &
+  addDebugMapObject(StringRef ObjectFilePath,
+                    sys::TimePoint<std::chrono::seconds> Timestamp,
+                    uint8_t Type = llvm::MachO::N_OSO);
 
-    const Triple &getTriple() const {
-        return BinaryTriple;
-    }
+  const Triple &getTriple() const { return BinaryTriple; }
 
-    const ArrayRef<uint8_t> getUUID() const {
-        return ArrayRef<uint8_t>(BinaryUUID);
-    }
+  const ArrayRef<uint8_t> getUUID() const {
+    return ArrayRef<uint8_t>(BinaryUUID);
+  }
 
-    StringRef getBinaryPath() const {
-        return BinaryPath;
-    }
+  StringRef getBinaryPath() const { return BinaryPath; }
 
-    void print(raw_ostream &OS) const;
+  void print(raw_ostream &OS) const;
 
 #ifndef NDEBUG
-    void dump() const;
+  void dump() const;
 #endif
 
-    /// Read a debug map for \a InputFile.
-    static ErrorOr<std::vector<std::unique_ptr<DebugMap>>>
-    parseYAMLDebugMap(StringRef InputFile, StringRef PrependPath, bool Verbose);
+  /// Read a debug map for \a InputFile.
+  static ErrorOr<std::vector<std::unique_ptr<DebugMap>>>
+  parseYAMLDebugMap(StringRef InputFile, StringRef PrependPath, bool Verbose);
 };
 
 /// The DebugMapObject represents one object file described by the DebugMap. It
@@ -146,97 +136,89 @@ public:
 /// linked binary for all the linked atoms in this object file.
 class DebugMapObject {
 public:
-    struct SymbolMapping {
-        Optional<yaml::Hex64> ObjectAddress;
-        yaml::Hex64 BinaryAddress;
-        yaml::Hex32 Size;
+  struct SymbolMapping {
+    Optional<yaml::Hex64> ObjectAddress;
+    yaml::Hex64 BinaryAddress;
+    yaml::Hex32 Size;
 
-        SymbolMapping(Optional<uint64_t> ObjectAddr, uint64_t BinaryAddress,
-                      uint32_t Size)
-            : BinaryAddress(BinaryAddress), Size(Size) {
-            if (ObjectAddr)
-                ObjectAddress = *ObjectAddr;
-        }
-
-        /// For YAML IO support
-        SymbolMapping() = default;
-    };
-
-    using YAMLSymbolMapping = std::pair<std::string, SymbolMapping>;
-    using DebugMapEntry = StringMapEntry<SymbolMapping>;
-
-    /// Adds a symbol mapping to this DebugMapObject.
-    /// \returns false if the symbol was already registered. The request
-    /// is discarded in this case.
-    bool addSymbol(StringRef SymName, Optional<uint64_t> ObjectAddress,
-                   uint64_t LinkedAddress, uint32_t Size);
-
-    /// Lookup a symbol mapping.
-    /// \returns null if the symbol isn't found.
-    const DebugMapEntry *lookupSymbol(StringRef SymbolName) const;
-
-    /// Lookup an object file address.
-    /// \returns null if the address isn't found.
-    const DebugMapEntry *lookupObjectAddress(uint64_t Address) const;
-
-    StringRef getObjectFilename() const {
-        return Filename;
+    SymbolMapping(Optional<uint64_t> ObjectAddr, uint64_t BinaryAddress,
+                  uint32_t Size)
+        : BinaryAddress(BinaryAddress), Size(Size) {
+      if (ObjectAddr)
+        ObjectAddress = *ObjectAddr;
     }
 
-    sys::TimePoint<std::chrono::seconds> getTimestamp() const {
-        return Timestamp;
-    }
+    /// For YAML IO support
+    SymbolMapping() = default;
+  };
 
-    uint8_t getType() const {
-        return Type;
-    }
+  using YAMLSymbolMapping = std::pair<std::string, SymbolMapping>;
+  using DebugMapEntry = StringMapEntry<SymbolMapping>;
 
-    iterator_range<StringMap<SymbolMapping>::const_iterator> symbols() const {
-        return make_range(Symbols.begin(), Symbols.end());
-    }
+  /// Adds a symbol mapping to this DebugMapObject.
+  /// \returns false if the symbol was already registered. The request
+  /// is discarded in this case.
+  bool addSymbol(StringRef SymName, Optional<uint64_t> ObjectAddress,
+                 uint64_t LinkedAddress, uint32_t Size);
 
-    bool empty() const {
-        return Symbols.empty();
-    }
+  /// Lookup a symbol mapping.
+  /// \returns null if the symbol isn't found.
+  const DebugMapEntry *lookupSymbol(StringRef SymbolName) const;
 
-    void addWarning(StringRef Warning) {
-        Warnings.push_back(std::string(Warning));
-    }
-    const std::vector<std::string> &getWarnings() const {
-        return Warnings;
-    }
+  /// Lookup an object file address.
+  /// \returns null if the address isn't found.
+  const DebugMapEntry *lookupObjectAddress(uint64_t Address) const;
 
-    void print(raw_ostream &OS) const;
+  StringRef getObjectFilename() const { return Filename; }
+
+  sys::TimePoint<std::chrono::seconds> getTimestamp() const {
+    return Timestamp;
+  }
+
+  uint8_t getType() const { return Type; }
+
+  iterator_range<StringMap<SymbolMapping>::const_iterator> symbols() const {
+    return make_range(Symbols.begin(), Symbols.end());
+  }
+
+  bool empty() const { return Symbols.empty(); }
+
+  void addWarning(StringRef Warning) {
+    Warnings.push_back(std::string(Warning));
+  }
+  const std::vector<std::string> &getWarnings() const { return Warnings; }
+
+  void print(raw_ostream &OS) const;
 #ifndef NDEBUG
-    void dump() const;
+  void dump() const;
 #endif
 
 private:
-    friend class DebugMap;
+  friend class DebugMap;
 
-    /// DebugMapObjects can only be constructed by the owning DebugMap.
-    DebugMapObject(StringRef ObjectFilename,
-                   sys::TimePoint<std::chrono::seconds> Timestamp, uint8_t Type);
+  /// DebugMapObjects can only be constructed by the owning DebugMap.
+  DebugMapObject(StringRef ObjectFilename,
+                 sys::TimePoint<std::chrono::seconds> Timestamp, uint8_t Type);
 
-    std::string Filename;
-    sys::TimePoint<std::chrono::seconds> Timestamp;
-    StringMap<SymbolMapping> Symbols;
-    DenseMap<uint64_t, DebugMapEntry *> AddressToMapping;
-    uint8_t Type;
+  std::string Filename;
+  sys::TimePoint<std::chrono::seconds> Timestamp;
+  StringMap<SymbolMapping> Symbols;
+  DenseMap<uint64_t, DebugMapEntry *> AddressToMapping;
+  uint8_t Type;
 
-    std::vector<std::string> Warnings;
+  std::vector<std::string> Warnings;
 
-    /// For YAMLIO support.
-    ///@{
-    friend yaml::MappingTraits<dsymutil::DebugMapObject>;
-    friend yaml::SequenceTraits<std::vector<std::unique_ptr<DebugMapObject>>>;
+  /// For YAMLIO support.
+  ///@{
+  friend yaml::MappingTraits<dsymutil::DebugMapObject>;
+  friend yaml::SequenceTraits<std::vector<std::unique_ptr<DebugMapObject>>>;
 
-    DebugMapObject() = default;
+  DebugMapObject() = default;
 
 public:
-    DebugMapObject(DebugMapObject &&) = default;
-    DebugMapObject &operator=(DebugMapObject &&) = default;
-    ///@}
+  DebugMapObject(DebugMapObject &&) = default;
+  DebugMapObject &operator=(DebugMapObject &&) = default;
+  ///@}
 };
 
 } // end namespace dsymutil
@@ -251,39 +233,37 @@ using namespace llvm::dsymutil;
 
 template <>
 struct MappingTraits<std::pair<std::string, DebugMapObject::SymbolMapping>> {
-    static void mapping(IO &io,
-                        std::pair<std::string, DebugMapObject::SymbolMapping> &s);
-    static const bool flow = true;
+  static void mapping(IO &io,
+                      std::pair<std::string, DebugMapObject::SymbolMapping> &s);
+  static const bool flow = true;
 };
 
 template <> struct MappingTraits<dsymutil::DebugMapObject> {
-    struct YamlDMO;
-    static void mapping(IO &io, dsymutil::DebugMapObject &DMO);
+  struct YamlDMO;
+  static void mapping(IO &io, dsymutil::DebugMapObject &DMO);
 };
 
 template <> struct ScalarTraits<Triple> {
-    static void output(const Triple &val, void *, raw_ostream &out);
-    static StringRef input(StringRef scalar, void *, Triple &value);
-    static QuotingType mustQuote(StringRef) {
-        return QuotingType::Single;
-    }
+  static void output(const Triple &val, void *, raw_ostream &out);
+  static StringRef input(StringRef scalar, void *, Triple &value);
+  static QuotingType mustQuote(StringRef) { return QuotingType::Single; }
 };
 
 template <>
 struct SequenceTraits<std::vector<std::unique_ptr<dsymutil::DebugMapObject>>> {
-    static size_t
-    size(IO &io, std::vector<std::unique_ptr<dsymutil::DebugMapObject>> &seq);
-    static dsymutil::DebugMapObject &
-    element(IO &, std::vector<std::unique_ptr<dsymutil::DebugMapObject>> &seq,
-            size_t index);
+  static size_t
+  size(IO &io, std::vector<std::unique_ptr<dsymutil::DebugMapObject>> &seq);
+  static dsymutil::DebugMapObject &
+  element(IO &, std::vector<std::unique_ptr<dsymutil::DebugMapObject>> &seq,
+          size_t index);
 };
 
 template <> struct MappingTraits<dsymutil::DebugMap> {
-    static void mapping(IO &io, dsymutil::DebugMap &DM);
+  static void mapping(IO &io, dsymutil::DebugMap &DM);
 };
 
 template <> struct MappingTraits<std::unique_ptr<dsymutil::DebugMap>> {
-    static void mapping(IO &io, std::unique_ptr<dsymutil::DebugMap> &DM);
+  static void mapping(IO &io, std::unique_ptr<dsymutil::DebugMap> &DM);
 };
 
 } // end namespace yaml

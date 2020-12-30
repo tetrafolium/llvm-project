@@ -47,117 +47,117 @@ namespace {
 class GpuKernelToBlobPass
     : public PassWrapper<GpuKernelToBlobPass, OperationPass<gpu::GPUModuleOp>> {
 public:
-    GpuKernelToBlobPass(LoweringCallback loweringCallback,
-                        BlobGenerator blobGenerator, StringRef triple,
-                        StringRef targetChip, StringRef features,
-                        StringRef gpuBinaryAnnotation)
-        : loweringCallback(loweringCallback), blobGenerator(blobGenerator),
-          triple(triple), targetChip(targetChip), features(features),
-          blobAnnotation(gpuBinaryAnnotation) {}
+  GpuKernelToBlobPass(LoweringCallback loweringCallback,
+                      BlobGenerator blobGenerator, StringRef triple,
+                      StringRef targetChip, StringRef features,
+                      StringRef gpuBinaryAnnotation)
+      : loweringCallback(loweringCallback), blobGenerator(blobGenerator),
+        triple(triple), targetChip(targetChip), features(features),
+        blobAnnotation(gpuBinaryAnnotation) {}
 
-    void runOnOperation() override {
-        gpu::GPUModuleOp module = getOperation();
+  void runOnOperation() override {
+    gpu::GPUModuleOp module = getOperation();
 
-        // Lower the module to an LLVM IR module using a separate context to enable
-        // multi-threaded processing.
-        llvm::LLVMContext llvmContext;
-        std::unique_ptr<llvm::Module> llvmModule =
-            loweringCallback(module, llvmContext, "LLVMDialectModule");
-        if (!llvmModule)
-            return signalPassFailure();
+    // Lower the module to an LLVM IR module using a separate context to enable
+    // multi-threaded processing.
+    llvm::LLVMContext llvmContext;
+    std::unique_ptr<llvm::Module> llvmModule =
+        loweringCallback(module, llvmContext, "LLVMDialectModule");
+    if (!llvmModule)
+      return signalPassFailure();
 
-        // Translate the llvm module to a target blob and attach the result as
-        // attribute to the module.
-        if (auto blobAttr = translateGPUModuleToBinaryAnnotation(
-                                *llvmModule, module.getLoc(), module.getName()))
-            module->setAttr(blobAnnotation, blobAttr);
-        else
-            signalPassFailure();
-    }
+    // Translate the llvm module to a target blob and attach the result as
+    // attribute to the module.
+    if (auto blobAttr = translateGPUModuleToBinaryAnnotation(
+            *llvmModule, module.getLoc(), module.getName()))
+      module->setAttr(blobAnnotation, blobAttr);
+    else
+      signalPassFailure();
+  }
 
 private:
-    std::string translateModuleToISA(llvm::Module &module,
-                                     llvm::TargetMachine &targetMachine);
+  std::string translateModuleToISA(llvm::Module &module,
+                                   llvm::TargetMachine &targetMachine);
 
-    /// Converts llvmModule to a blob with target instructions using the
-    /// user-provided generator. Location is used for error reporting and name is
-    /// forwarded to the blob generator to use in its logging mechanisms.
-    OwnedBlob convertModuleToBlob(llvm::Module &llvmModule, Location loc,
-                                  StringRef name);
+  /// Converts llvmModule to a blob with target instructions using the
+  /// user-provided generator. Location is used for error reporting and name is
+  /// forwarded to the blob generator to use in its logging mechanisms.
+  OwnedBlob convertModuleToBlob(llvm::Module &llvmModule, Location loc,
+                                StringRef name);
 
-    /// Translates llvmModule to a blob with target instructions and returns the
-    /// result as attribute.
-    StringAttr translateGPUModuleToBinaryAnnotation(llvm::Module &llvmModule,
-            Location loc, StringRef name);
+  /// Translates llvmModule to a blob with target instructions and returns the
+  /// result as attribute.
+  StringAttr translateGPUModuleToBinaryAnnotation(llvm::Module &llvmModule,
+                                                  Location loc, StringRef name);
 
-    LoweringCallback loweringCallback;
-    BlobGenerator blobGenerator;
-    llvm::Triple triple;
-    StringRef targetChip;
-    StringRef features;
-    StringRef blobAnnotation;
+  LoweringCallback loweringCallback;
+  BlobGenerator blobGenerator;
+  llvm::Triple triple;
+  StringRef targetChip;
+  StringRef features;
+  StringRef blobAnnotation;
 };
 
 } // anonymous namespace
 
 std::string
 GpuKernelToBlobPass::translateModuleToISA(llvm::Module &module,
-        llvm::TargetMachine &targetMachine) {
-    std::string targetISA;
-    {
-        llvm::raw_string_ostream stream(targetISA);
-        llvm::buffer_ostream pstream(stream);
-        llvm::legacy::PassManager codegenPasses;
-        targetMachine.addPassesToEmitFile(codegenPasses, pstream, nullptr,
-                                          llvm::CGFT_AssemblyFile);
-        codegenPasses.run(module);
-    }
+                                          llvm::TargetMachine &targetMachine) {
+  std::string targetISA;
+  {
+    llvm::raw_string_ostream stream(targetISA);
+    llvm::buffer_ostream pstream(stream);
+    llvm::legacy::PassManager codegenPasses;
+    targetMachine.addPassesToEmitFile(codegenPasses, pstream, nullptr,
+                                      llvm::CGFT_AssemblyFile);
+    codegenPasses.run(module);
+  }
 
-    return targetISA;
+  return targetISA;
 }
 
 OwnedBlob GpuKernelToBlobPass::convertModuleToBlob(llvm::Module &llvmModule,
-        Location loc,
-        StringRef name) {
-    std::unique_ptr<llvm::TargetMachine> targetMachine;
-    {
-        std::string error;
-        const llvm::Target *target =
-            llvm::TargetRegistry::lookupTarget("", triple, error);
-        if (target == nullptr) {
-            emitError(loc, "cannot initialize target triple");
-            return {};
-        }
-        targetMachine.reset(target->createTargetMachine(triple.str(), targetChip,
-                            features, {}, {}));
-        if (targetMachine == nullptr) {
-            emitError(loc, "connot initialize target machine");
-            return {};
-        }
+                                                   Location loc,
+                                                   StringRef name) {
+  std::unique_ptr<llvm::TargetMachine> targetMachine;
+  {
+    std::string error;
+    const llvm::Target *target =
+        llvm::TargetRegistry::lookupTarget("", triple, error);
+    if (target == nullptr) {
+      emitError(loc, "cannot initialize target triple");
+      return {};
     }
+    targetMachine.reset(target->createTargetMachine(triple.str(), targetChip,
+                                                    features, {}, {}));
+    if (targetMachine == nullptr) {
+      emitError(loc, "connot initialize target machine");
+      return {};
+    }
+  }
 
-    llvmModule.setDataLayout(targetMachine->createDataLayout());
+  llvmModule.setDataLayout(targetMachine->createDataLayout());
 
-    auto targetISA = translateModuleToISA(llvmModule, *targetMachine);
+  auto targetISA = translateModuleToISA(llvmModule, *targetMachine);
 
-    return blobGenerator(targetISA, loc, name);
+  return blobGenerator(targetISA, loc, name);
 }
 
 StringAttr GpuKernelToBlobPass::translateGPUModuleToBinaryAnnotation(
     llvm::Module &llvmModule, Location loc, StringRef name) {
-    auto blob = convertModuleToBlob(llvmModule, loc, name);
-    if (!blob)
-        return {};
-    return StringAttr::get({blob->data(), blob->size()}, loc->getContext());
+  auto blob = convertModuleToBlob(llvmModule, loc, name);
+  if (!blob)
+    return {};
+  return StringAttr::get({blob->data(), blob->size()}, loc->getContext());
 }
 
 std::unique_ptr<OperationPass<gpu::GPUModuleOp>>
-        mlir::createConvertGPUKernelToBlobPass(LoweringCallback loweringCallback,
-                BlobGenerator blobGenerator,
-                StringRef triple, StringRef targetChip,
-                StringRef features,
-StringRef gpuBinaryAnnotation) {
-    return std::make_unique<GpuKernelToBlobPass>(loweringCallback, blobGenerator,
-            triple, targetChip, features,
-            gpuBinaryAnnotation);
+mlir::createConvertGPUKernelToBlobPass(LoweringCallback loweringCallback,
+                                       BlobGenerator blobGenerator,
+                                       StringRef triple, StringRef targetChip,
+                                       StringRef features,
+                                       StringRef gpuBinaryAnnotation) {
+  return std::make_unique<GpuKernelToBlobPass>(loweringCallback, blobGenerator,
+                                               triple, targetChip, features,
+                                               gpuBinaryAnnotation);
 }

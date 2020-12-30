@@ -26,72 +26,70 @@ namespace detail {
 
 /// Base storage class appearing in an affine expression.
 struct AffineExprStorage : public StorageUniquer::BaseStorage {
-    MLIRContext *context;
-    AffineExprKind kind;
+  MLIRContext *context;
+  AffineExprKind kind;
 };
 
 /// A binary operation appearing in an affine expression.
 struct AffineBinaryOpExprStorage : public AffineExprStorage {
-    using KeyTy = std::tuple<unsigned, AffineExpr, AffineExpr>;
+  using KeyTy = std::tuple<unsigned, AffineExpr, AffineExpr>;
 
-    bool operator==(const KeyTy &key) const {
-        return static_cast<AffineExprKind>(std::get<0>(key)) == kind &&
-               std::get<1>(key) == lhs && std::get<2>(key) == rhs;
-    }
+  bool operator==(const KeyTy &key) const {
+    return static_cast<AffineExprKind>(std::get<0>(key)) == kind &&
+           std::get<1>(key) == lhs && std::get<2>(key) == rhs;
+  }
 
-    static AffineBinaryOpExprStorage *
-    construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
-        auto *result = allocator.allocate<AffineBinaryOpExprStorage>();
-        result->kind = static_cast<AffineExprKind>(std::get<0>(key));
-        result->lhs = std::get<1>(key);
-        result->rhs = std::get<2>(key);
-        result->context = result->lhs.getContext();
-        return result;
-    }
+  static AffineBinaryOpExprStorage *
+  construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
+    auto *result = allocator.allocate<AffineBinaryOpExprStorage>();
+    result->kind = static_cast<AffineExprKind>(std::get<0>(key));
+    result->lhs = std::get<1>(key);
+    result->rhs = std::get<2>(key);
+    result->context = result->lhs.getContext();
+    return result;
+  }
 
-    AffineExpr lhs;
-    AffineExpr rhs;
+  AffineExpr lhs;
+  AffineExpr rhs;
 };
 
 /// A dimensional or symbolic identifier appearing in an affine expression.
 struct AffineDimExprStorage : public AffineExprStorage {
-    using KeyTy = std::pair<unsigned, unsigned>;
+  using KeyTy = std::pair<unsigned, unsigned>;
 
-    bool operator==(const KeyTy &key) const {
-        return kind == static_cast<AffineExprKind>(key.first) &&
-               position == key.second;
-    }
+  bool operator==(const KeyTy &key) const {
+    return kind == static_cast<AffineExprKind>(key.first) &&
+           position == key.second;
+  }
 
-    static AffineDimExprStorage *
-    construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
-        auto *result = allocator.allocate<AffineDimExprStorage>();
-        result->kind = static_cast<AffineExprKind>(key.first);
-        result->position = key.second;
-        return result;
-    }
+  static AffineDimExprStorage *
+  construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
+    auto *result = allocator.allocate<AffineDimExprStorage>();
+    result->kind = static_cast<AffineExprKind>(key.first);
+    result->position = key.second;
+    return result;
+  }
 
-    /// Position of this identifier in the argument list.
-    unsigned position;
+  /// Position of this identifier in the argument list.
+  unsigned position;
 };
 
 /// An integer constant appearing in affine expression.
 struct AffineConstantExprStorage : public AffineExprStorage {
-    using KeyTy = int64_t;
+  using KeyTy = int64_t;
 
-    bool operator==(const KeyTy &key) const {
-        return constant == key;
-    }
+  bool operator==(const KeyTy &key) const { return constant == key; }
 
-    static AffineConstantExprStorage *
-    construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
-        auto *result = allocator.allocate<AffineConstantExprStorage>();
-        result->kind = AffineExprKind::Constant;
-        result->constant = key;
-        return result;
-    }
+  static AffineConstantExprStorage *
+  construct(StorageUniquer::StorageAllocator &allocator, const KeyTy &key) {
+    auto *result = allocator.allocate<AffineConstantExprStorage>();
+    result->kind = AffineExprKind::Constant;
+    result->constant = key;
+    return result;
+  }
 
-    // The constant.
-    int64_t constant;
+  // The constant.
+  int64_t constant;
 };
 
 } // end namespace detail

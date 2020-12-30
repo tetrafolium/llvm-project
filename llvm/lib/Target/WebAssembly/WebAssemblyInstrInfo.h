@@ -36,40 +36,38 @@ int16_t getNamedOperandIdx(uint16_t Opcode, uint16_t NamedIndex);
 class WebAssemblySubtarget;
 
 class WebAssemblyInstrInfo final : public WebAssemblyGenInstrInfo {
-    const WebAssemblyRegisterInfo RI;
+  const WebAssemblyRegisterInfo RI;
 
 public:
-    explicit WebAssemblyInstrInfo(const WebAssemblySubtarget &STI);
+  explicit WebAssemblyInstrInfo(const WebAssemblySubtarget &STI);
 
-    const WebAssemblyRegisterInfo &getRegisterInfo() const {
-        return RI;
-    }
+  const WebAssemblyRegisterInfo &getRegisterInfo() const { return RI; }
 
-    bool isReallyTriviallyReMaterializable(const MachineInstr &MI,
-                                           AAResults *AA) const override;
+  bool isReallyTriviallyReMaterializable(const MachineInstr &MI,
+                                         AAResults *AA) const override;
 
-    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
-                     const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
-                     bool KillSrc) const override;
-    MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
-                                         unsigned OpIdx1,
-                                         unsigned OpIdx2) const override;
+  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
+                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                   bool KillSrc) const override;
+  MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
+                                       unsigned OpIdx1,
+                                       unsigned OpIdx2) const override;
 
-    bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-                       MachineBasicBlock *&FBB,
-                       SmallVectorImpl<MachineOperand> &Cond,
-                       bool AllowModify = false) const override;
-    unsigned removeBranch(MachineBasicBlock &MBB,
-                          int *BytesRemoved = nullptr) const override;
-    unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-                          MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
-                          const DebugLoc &DL,
-                          int *BytesAdded = nullptr) const override;
-    bool
-    reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+  bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                     MachineBasicBlock *&FBB,
+                     SmallVectorImpl<MachineOperand> &Cond,
+                     bool AllowModify = false) const override;
+  unsigned removeBranch(MachineBasicBlock &MBB,
+                        int *BytesRemoved = nullptr) const override;
+  unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                        const DebugLoc &DL,
+                        int *BytesAdded = nullptr) const override;
+  bool
+  reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
 
-    ArrayRef<std::pair<int, const char *>>
-                                        getSerializableTargetIndices() const override;
+  ArrayRef<std::pair<int, const char *>>
+  getSerializableTargetIndices() const override;
 };
 
 } // end namespace llvm

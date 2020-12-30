@@ -24,50 +24,44 @@
 namespace llvm {
 
 class VETTIImpl : public BasicTTIImplBase<VETTIImpl> {
-    using BaseT = BasicTTIImplBase<VETTIImpl>;
-    friend BaseT;
+  using BaseT = BasicTTIImplBase<VETTIImpl>;
+  friend BaseT;
 
-    const VESubtarget *ST;
-    const VETargetLowering *TLI;
+  const VESubtarget *ST;
+  const VETargetLowering *TLI;
 
-    const VESubtarget *getST() const {
-        return ST;
-    }
-    const VETargetLowering *getTLI() const {
-        return TLI;
-    }
+  const VESubtarget *getST() const { return ST; }
+  const VETargetLowering *getTLI() const { return TLI; }
 
-    bool enableVPU() const {
-        return getST()->enableVPU();
-    }
+  bool enableVPU() const { return getST()->enableVPU(); }
 
 public:
-    explicit VETTIImpl(const VETargetMachine *TM, const Function &F)
-        : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
-          TLI(ST->getTargetLowering()) {}
+  explicit VETTIImpl(const VETargetMachine *TM, const Function &F)
+      : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
+        TLI(ST->getTargetLowering()) {}
 
-    unsigned getNumberOfRegisters(unsigned ClassID) const {
-        bool VectorRegs = (ClassID == 1);
-        if (VectorRegs) {
-            // TODO report vregs once vector isel is stable.
-            return 0;
-        }
-
-        return 64;
+  unsigned getNumberOfRegisters(unsigned ClassID) const {
+    bool VectorRegs = (ClassID == 1);
+    if (VectorRegs) {
+      // TODO report vregs once vector isel is stable.
+      return 0;
     }
 
-    unsigned getRegisterBitWidth(bool Vector) const {
-        if (Vector) {
-            // TODO report vregs once vector isel is stable.
-            return 0;
-        }
-        return 64;
-    }
+    return 64;
+  }
 
-    unsigned getMinVectorRegisterBitWidth() const {
-        // TODO report vregs once vector isel is stable.
-        return 0;
+  unsigned getRegisterBitWidth(bool Vector) const {
+    if (Vector) {
+      // TODO report vregs once vector isel is stable.
+      return 0;
     }
+    return 64;
+  }
+
+  unsigned getMinVectorRegisterBitWidth() const {
+    // TODO report vregs once vector isel is stable.
+    return 0;
+  }
 };
 
 } // namespace llvm

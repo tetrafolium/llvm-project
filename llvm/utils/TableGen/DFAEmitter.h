@@ -40,66 +40,66 @@ class StringRef;
 /// include/llvm/Support/Automaton.h.
 class DfaEmitter {
 public:
-    // The type of an NFA state. The initial state is always zero.
-    using state_type = uint64_t;
-    // The type of an action.
-    using action_type = uint64_t;
+  // The type of an NFA state. The initial state is always zero.
+  using state_type = uint64_t;
+  // The type of an action.
+  using action_type = uint64_t;
 
-    DfaEmitter() = default;
-    virtual ~DfaEmitter() = default;
+  DfaEmitter() = default;
+  virtual ~DfaEmitter() = default;
 
-    void addTransition(state_type From, state_type To, action_type A);
-    void emit(StringRef Name, raw_ostream &OS);
+  void addTransition(state_type From, state_type To, action_type A);
+  void emit(StringRef Name, raw_ostream &OS);
 
 protected:
-    /// Emit the C++ type of an action to OS.
-    virtual void printActionType(raw_ostream &OS);
-    /// Emit the C++ value of an action A to OS.
-    virtual void printActionValue(action_type A, raw_ostream &OS);
+  /// Emit the C++ type of an action to OS.
+  virtual void printActionType(raw_ostream &OS);
+  /// Emit the C++ value of an action A to OS.
+  virtual void printActionValue(action_type A, raw_ostream &OS);
 
 private:
-    /// The state type of deterministic states. These are only used internally to
-    /// this class. This is an ID into the DfaStates UniqueVector.
-    using dfa_state_type = unsigned;
+  /// The state type of deterministic states. These are only used internally to
+  /// this class. This is an ID into the DfaStates UniqueVector.
+  using dfa_state_type = unsigned;
 
-    /// The actual representation of a DFA state, which is a union of one or more
-    /// NFA states.
-    using DfaState = SmallVector<state_type, 4>;
+  /// The actual representation of a DFA state, which is a union of one or more
+  /// NFA states.
+  using DfaState = SmallVector<state_type, 4>;
 
-    /// A DFA transition consists of a set of NFA states transitioning to a
-    /// new set of NFA states. The DfaTransitionInfo tracks, for every
-    /// transitioned-from NFA state, a set of valid transitioned-to states.
-    ///
-    /// Emission of this transition relation allows algorithmic determination of
-    /// the possible candidate NFA paths taken under a given input sequence to
-    /// reach a given DFA state.
-    using DfaTransitionInfo = SmallVector<std::pair<state_type, state_type>, 4>;
+  /// A DFA transition consists of a set of NFA states transitioning to a
+  /// new set of NFA states. The DfaTransitionInfo tracks, for every
+  /// transitioned-from NFA state, a set of valid transitioned-to states.
+  ///
+  /// Emission of this transition relation allows algorithmic determination of
+  /// the possible candidate NFA paths taken under a given input sequence to
+  /// reach a given DFA state.
+  using DfaTransitionInfo = SmallVector<std::pair<state_type, state_type>, 4>;
 
-    /// The set of all possible actions.
-    std::set<action_type> Actions;
+  /// The set of all possible actions.
+  std::set<action_type> Actions;
 
-    /// The set of nondeterministic transitions. A state-action pair can
-    /// transition to multiple target states.
-    std::map<std::pair<state_type, action_type>, std::vector<state_type>>
-            NfaTransitions;
-    std::set<state_type> NfaStates;
-    unsigned NumNfaTransitions = 0;
+  /// The set of nondeterministic transitions. A state-action pair can
+  /// transition to multiple target states.
+  std::map<std::pair<state_type, action_type>, std::vector<state_type>>
+      NfaTransitions;
+  std::set<state_type> NfaStates;
+  unsigned NumNfaTransitions = 0;
 
-    /// The set of deterministic states. DfaStates.getId(DfaState) returns an ID,
-    /// which is dfa_state_type. Note that because UniqueVector reserves state
-    /// zero, the initial DFA state is always 1.
-    UniqueVector<DfaState> DfaStates;
-    /// The set of deterministic transitions. A state-action pair has only a
-    /// single target state.
-    std::map<std::pair<dfa_state_type, action_type>,
-        std::pair<dfa_state_type, DfaTransitionInfo>>
-        DfaTransitions;
+  /// The set of deterministic states. DfaStates.getId(DfaState) returns an ID,
+  /// which is dfa_state_type. Note that because UniqueVector reserves state
+  /// zero, the initial DFA state is always 1.
+  UniqueVector<DfaState> DfaStates;
+  /// The set of deterministic transitions. A state-action pair has only a
+  /// single target state.
+  std::map<std::pair<dfa_state_type, action_type>,
+           std::pair<dfa_state_type, DfaTransitionInfo>>
+      DfaTransitions;
 
-    /// Visit all NFA states and construct the DFA.
-    void constructDfa();
-    /// Visit a single DFA state and construct all possible transitions to new DFA
-    /// states.
-    void visitDfaState(const DfaState &DS);
+  /// Visit all NFA states and construct the DFA.
+  void constructDfa();
+  /// Visit a single DFA state and construct all possible transitions to new DFA
+  /// states.
+  void visitDfaState(const DfaState &DS);
 };
 
 } // namespace llvm

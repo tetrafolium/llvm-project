@@ -14,24 +14,24 @@
 namespace llvm {
 
 class MCAsmInfoCOFF : public MCAsmInfo {
-    virtual void anchor();
+  virtual void anchor();
 
 protected:
-    explicit MCAsmInfoCOFF();
+  explicit MCAsmInfoCOFF();
 };
 
 class MCAsmInfoMicrosoft : public MCAsmInfoCOFF {
-    void anchor() override;
+  void anchor() override;
 
 protected:
-    explicit MCAsmInfoMicrosoft();
+  explicit MCAsmInfoMicrosoft();
 };
 
 class MCAsmInfoGNUCOFF : public MCAsmInfoCOFF {
-    void anchor() override;
+  void anchor() override;
 
 protected:
-    explicit MCAsmInfoGNUCOFF();
+  explicit MCAsmInfoGNUCOFF();
 };
 
 } // end namespace llvm

@@ -18,24 +18,22 @@ namespace lldb_private {
 
 class OptionGroupUUID : public OptionGroup {
 public:
-    OptionGroupUUID();
+  OptionGroupUUID();
 
-    ~OptionGroupUUID() override;
+  ~OptionGroupUUID() override;
 
-    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+  llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
-                          ExecutionContext *execution_context) override;
-    Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
+  Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
+                        ExecutionContext *execution_context) override;
+  Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
 
-    void OptionParsingStarting(ExecutionContext *execution_context) override;
+  void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-    const OptionValueUUID &GetOptionValue() const {
-        return m_uuid;
-    }
+  const OptionValueUUID &GetOptionValue() const { return m_uuid; }
 
 protected:
-    OptionValueUUID m_uuid;
+  OptionValueUUID m_uuid;
 };
 
 } // namespace lldb_private

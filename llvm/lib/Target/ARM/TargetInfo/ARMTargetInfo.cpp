@@ -11,30 +11,30 @@
 using namespace llvm;
 
 Target &llvm::getTheARMLETarget() {
-    static Target TheARMLETarget;
-    return TheARMLETarget;
+  static Target TheARMLETarget;
+  return TheARMLETarget;
 }
 Target &llvm::getTheARMBETarget() {
-    static Target TheARMBETarget;
-    return TheARMBETarget;
+  static Target TheARMBETarget;
+  return TheARMBETarget;
 }
 Target &llvm::getTheThumbLETarget() {
-    static Target TheThumbLETarget;
-    return TheThumbLETarget;
+  static Target TheThumbLETarget;
+  return TheThumbLETarget;
 }
 Target &llvm::getTheThumbBETarget() {
-    static Target TheThumbBETarget;
-    return TheThumbBETarget;
+  static Target TheThumbBETarget;
+  return TheThumbBETarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeARMTargetInfo() {
-    RegisterTarget<Triple::arm, /*HasJIT=*/true> X(getTheARMLETarget(), "arm",
-                   "ARM", "ARM");
-    RegisterTarget<Triple::armeb, /*HasJIT=*/true> Y(getTheARMBETarget(), "armeb",
-                   "ARM (big endian)", "ARM");
+  RegisterTarget<Triple::arm, /*HasJIT=*/true> X(getTheARMLETarget(), "arm",
+                                                 "ARM", "ARM");
+  RegisterTarget<Triple::armeb, /*HasJIT=*/true> Y(getTheARMBETarget(), "armeb",
+                                                   "ARM (big endian)", "ARM");
 
-    RegisterTarget<Triple::thumb, /*HasJIT=*/true> A(getTheThumbLETarget(),
-                   "thumb", "Thumb", "ARM");
-    RegisterTarget<Triple::thumbeb, /*HasJIT=*/true> B(
-                       getTheThumbBETarget(), "thumbeb", "Thumb (big endian)", "ARM");
+  RegisterTarget<Triple::thumb, /*HasJIT=*/true> A(getTheThumbLETarget(),
+                                                   "thumb", "Thumb", "ARM");
+  RegisterTarget<Triple::thumbeb, /*HasJIT=*/true> B(
+      getTheThumbBETarget(), "thumbeb", "Thumb (big endian)", "ARM");
 }

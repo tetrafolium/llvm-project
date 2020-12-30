@@ -22,24 +22,24 @@ class ASTContext;
 class ObjCMessageExpr;
 
 class ObjCNoReturn {
-    /// Cached "raise" selector.
-    Selector RaiseSel;
+  /// Cached "raise" selector.
+  Selector RaiseSel;
 
-    /// Cached identifier for "NSException".
-    IdentifierInfo *NSExceptionII;
+  /// Cached identifier for "NSException".
+  IdentifierInfo *NSExceptionII;
 
-    enum { NUM_RAISE_SELECTORS = 2 };
+  enum { NUM_RAISE_SELECTORS = 2 };
 
-    /// Cached set of selectors in NSException that are 'noreturn'.
-    Selector NSExceptionInstanceRaiseSelectors[NUM_RAISE_SELECTORS];
+  /// Cached set of selectors in NSException that are 'noreturn'.
+  Selector NSExceptionInstanceRaiseSelectors[NUM_RAISE_SELECTORS];
 
 public:
-    ObjCNoReturn(ASTContext &C);
+  ObjCNoReturn(ASTContext &C);
 
-    /// Return true if the given message expression is known to never
-    /// return.
-    bool isImplicitNoReturn(const ObjCMessageExpr *ME);
+  /// Return true if the given message expression is known to never
+  /// return.
+  bool isImplicitNoReturn(const ObjCMessageExpr *ME);
 };
-}
+} // namespace clang
 
 #endif

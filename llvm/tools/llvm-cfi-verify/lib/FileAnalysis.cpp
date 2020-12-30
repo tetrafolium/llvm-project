@@ -35,7 +35,6 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 
-
 using Instr = llvm::cfi_verify::FileAnalysis::Instr;
 using LLVMSymbolizer = llvm::symbolize::LLVMSymbolizer;
 
@@ -53,62 +52,62 @@ static cl::opt<bool, true> IgnoreDWARFArg(
     cl::location(IgnoreDWARFFlag), cl::init(false));
 
 StringRef stringCFIProtectionStatus(CFIProtectionStatus Status) {
-    switch (Status) {
-    case CFIProtectionStatus::PROTECTED:
-        return "PROTECTED";
-    case CFIProtectionStatus::FAIL_NOT_INDIRECT_CF:
-        return "FAIL_NOT_INDIRECT_CF";
-    case CFIProtectionStatus::FAIL_ORPHANS:
-        return "FAIL_ORPHANS";
-    case CFIProtectionStatus::FAIL_BAD_CONDITIONAL_BRANCH:
-        return "FAIL_BAD_CONDITIONAL_BRANCH";
-    case CFIProtectionStatus::FAIL_REGISTER_CLOBBERED:
-        return "FAIL_REGISTER_CLOBBERED";
-    case CFIProtectionStatus::FAIL_INVALID_INSTRUCTION:
-        return "FAIL_INVALID_INSTRUCTION";
-    }
-    llvm_unreachable("Attempted to stringify an unknown enum value.");
+  switch (Status) {
+  case CFIProtectionStatus::PROTECTED:
+    return "PROTECTED";
+  case CFIProtectionStatus::FAIL_NOT_INDIRECT_CF:
+    return "FAIL_NOT_INDIRECT_CF";
+  case CFIProtectionStatus::FAIL_ORPHANS:
+    return "FAIL_ORPHANS";
+  case CFIProtectionStatus::FAIL_BAD_CONDITIONAL_BRANCH:
+    return "FAIL_BAD_CONDITIONAL_BRANCH";
+  case CFIProtectionStatus::FAIL_REGISTER_CLOBBERED:
+    return "FAIL_REGISTER_CLOBBERED";
+  case CFIProtectionStatus::FAIL_INVALID_INSTRUCTION:
+    return "FAIL_INVALID_INSTRUCTION";
+  }
+  llvm_unreachable("Attempted to stringify an unknown enum value.");
 }
 
 Expected<FileAnalysis> FileAnalysis::Create(StringRef Filename) {
-    // Open the filename provided.
-    Expected<object::OwningBinary<object::Binary>> BinaryOrErr =
-                object::createBinary(Filename);
-    if (!BinaryOrErr)
-        return BinaryOrErr.takeError();
+  // Open the filename provided.
+  Expected<object::OwningBinary<object::Binary>> BinaryOrErr =
+      object::createBinary(Filename);
+  if (!BinaryOrErr)
+    return BinaryOrErr.takeError();
 
-    // Construct the object and allow it to take ownership of the binary.
-    object::OwningBinary<object::Binary> Binary = std::move(BinaryOrErr.get());
-    FileAnalysis Analysis(std::move(Binary));
+  // Construct the object and allow it to take ownership of the binary.
+  object::OwningBinary<object::Binary> Binary = std::move(BinaryOrErr.get());
+  FileAnalysis Analysis(std::move(Binary));
 
-    Analysis.Object = dyn_cast<object::ObjectFile>(Analysis.Binary.getBinary());
-    if (!Analysis.Object)
-        return make_error<UnsupportedDisassembly>("Failed to cast object");
+  Analysis.Object = dyn_cast<object::ObjectFile>(Analysis.Binary.getBinary());
+  if (!Analysis.Object)
+    return make_error<UnsupportedDisassembly>("Failed to cast object");
 
-    switch (Analysis.Object->getArch()) {
-    case Triple::x86:
-    case Triple::x86_64:
-    case Triple::aarch64:
-    case Triple::aarch64_be:
-        break;
-    default:
-        return make_error<UnsupportedDisassembly>("Unsupported architecture.");
-    }
+  switch (Analysis.Object->getArch()) {
+  case Triple::x86:
+  case Triple::x86_64:
+  case Triple::aarch64:
+  case Triple::aarch64_be:
+    break;
+  default:
+    return make_error<UnsupportedDisassembly>("Unsupported architecture.");
+  }
 
-    Analysis.ObjectTriple = Analysis.Object->makeTriple();
-    Analysis.Features = Analysis.Object->getFeatures();
+  Analysis.ObjectTriple = Analysis.Object->makeTriple();
+  Analysis.Features = Analysis.Object->getFeatures();
 
-    // Init the rest of the object.
-    if (auto InitResponse = Analysis.initialiseDisassemblyMembers())
-        return std::move(InitResponse);
+  // Init the rest of the object.
+  if (auto InitResponse = Analysis.initialiseDisassemblyMembers())
+    return std::move(InitResponse);
 
-    if (auto SectionParseResponse = Analysis.parseCodeSections())
-        return std::move(SectionParseResponse);
+  if (auto SectionParseResponse = Analysis.parseCodeSections())
+    return std::move(SectionParseResponse);
 
-    if (auto SymbolTableParseResponse = Analysis.parseSymbolTable())
-        return std::move(SymbolTableParseResponse);
+  if (auto SymbolTableParseResponse = Analysis.parseSymbolTable())
+    return std::move(SymbolTableParseResponse);
 
-    return std::move(Analysis);
+  return std::move(Analysis);
 }
 
 FileAnalysis::FileAnalysis(object::OwningBinary<object::Binary> Binary)
@@ -120,467 +119,467 @@ FileAnalysis::FileAnalysis(const Triple &ObjectTriple,
 
 const Instr *
 FileAnalysis::getPrevInstructionSequential(const Instr &InstrMeta) const {
-    std::map<uint64_t, Instr>::const_iterator KV =
-        Instructions.find(InstrMeta.VMAddress);
-    if (KV == Instructions.end() || KV == Instructions.begin())
-        return nullptr;
+  std::map<uint64_t, Instr>::const_iterator KV =
+      Instructions.find(InstrMeta.VMAddress);
+  if (KV == Instructions.end() || KV == Instructions.begin())
+    return nullptr;
 
-    if (!(--KV)->second.Valid)
-        return nullptr;
+  if (!(--KV)->second.Valid)
+    return nullptr;
 
-    return &KV->second;
+  return &KV->second;
 }
 
 const Instr *
 FileAnalysis::getNextInstructionSequential(const Instr &InstrMeta) const {
-    std::map<uint64_t, Instr>::const_iterator KV =
-        Instructions.find(InstrMeta.VMAddress);
-    if (KV == Instructions.end() || ++KV == Instructions.end())
-        return nullptr;
+  std::map<uint64_t, Instr>::const_iterator KV =
+      Instructions.find(InstrMeta.VMAddress);
+  if (KV == Instructions.end() || ++KV == Instructions.end())
+    return nullptr;
 
-    if (!KV->second.Valid)
-        return nullptr;
+  if (!KV->second.Valid)
+    return nullptr;
 
-    return &KV->second;
+  return &KV->second;
 }
 
 bool FileAnalysis::usesRegisterOperand(const Instr &InstrMeta) const {
-    for (const auto &Operand : InstrMeta.Instruction) {
-        if (Operand.isReg())
-            return true;
-    }
-    return false;
+  for (const auto &Operand : InstrMeta.Instruction) {
+    if (Operand.isReg())
+      return true;
+  }
+  return false;
 }
 
 const Instr *FileAnalysis::getInstruction(uint64_t Address) const {
-    const auto &InstrKV = Instructions.find(Address);
-    if (InstrKV == Instructions.end())
-        return nullptr;
+  const auto &InstrKV = Instructions.find(Address);
+  if (InstrKV == Instructions.end())
+    return nullptr;
 
-    return &InstrKV->second;
+  return &InstrKV->second;
 }
 
 const Instr &FileAnalysis::getInstructionOrDie(uint64_t Address) const {
-    const auto &InstrKV = Instructions.find(Address);
-    assert(InstrKV != Instructions.end() && "Address doesn't exist.");
-    return InstrKV->second;
+  const auto &InstrKV = Instructions.find(Address);
+  assert(InstrKV != Instructions.end() && "Address doesn't exist.");
+  return InstrKV->second;
 }
 
 bool FileAnalysis::isCFITrap(const Instr &InstrMeta) const {
-    const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
-    return InstrDesc.isTrap() || willTrapOnCFIViolation(InstrMeta);
+  const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
+  return InstrDesc.isTrap() || willTrapOnCFIViolation(InstrMeta);
 }
 
 bool FileAnalysis::willTrapOnCFIViolation(const Instr &InstrMeta) const {
-    const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
-    if (!InstrDesc.isCall())
-        return false;
-    uint64_t Target;
-    if (!MIA->evaluateBranch(InstrMeta.Instruction, InstrMeta.VMAddress,
-                             InstrMeta.InstructionSize, Target))
-        return false;
-    return TrapOnFailFunctionAddresses.count(Target) > 0;
+  const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
+  if (!InstrDesc.isCall())
+    return false;
+  uint64_t Target;
+  if (!MIA->evaluateBranch(InstrMeta.Instruction, InstrMeta.VMAddress,
+                           InstrMeta.InstructionSize, Target))
+    return false;
+  return TrapOnFailFunctionAddresses.count(Target) > 0;
 }
 
 bool FileAnalysis::canFallThrough(const Instr &InstrMeta) const {
-    if (!InstrMeta.Valid)
-        return false;
+  if (!InstrMeta.Valid)
+    return false;
 
-    if (isCFITrap(InstrMeta))
-        return false;
+  if (isCFITrap(InstrMeta))
+    return false;
 
-    const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
-    if (InstrDesc.mayAffectControlFlow(InstrMeta.Instruction, *RegisterInfo))
-        return InstrDesc.isConditionalBranch();
+  const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
+  if (InstrDesc.mayAffectControlFlow(InstrMeta.Instruction, *RegisterInfo))
+    return InstrDesc.isConditionalBranch();
 
-    return true;
+  return true;
 }
 
 const Instr *
 FileAnalysis::getDefiniteNextInstruction(const Instr &InstrMeta) const {
-    if (!InstrMeta.Valid)
-        return nullptr;
+  if (!InstrMeta.Valid)
+    return nullptr;
 
-    if (isCFITrap(InstrMeta))
-        return nullptr;
+  if (isCFITrap(InstrMeta))
+    return nullptr;
 
-    const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
-    const Instr *NextMetaPtr;
-    if (InstrDesc.mayAffectControlFlow(InstrMeta.Instruction, *RegisterInfo)) {
-        if (InstrDesc.isConditionalBranch())
-            return nullptr;
+  const auto &InstrDesc = MII->get(InstrMeta.Instruction.getOpcode());
+  const Instr *NextMetaPtr;
+  if (InstrDesc.mayAffectControlFlow(InstrMeta.Instruction, *RegisterInfo)) {
+    if (InstrDesc.isConditionalBranch())
+      return nullptr;
 
-        uint64_t Target;
-        if (!MIA->evaluateBranch(InstrMeta.Instruction, InstrMeta.VMAddress,
-                                 InstrMeta.InstructionSize, Target))
-            return nullptr;
+    uint64_t Target;
+    if (!MIA->evaluateBranch(InstrMeta.Instruction, InstrMeta.VMAddress,
+                             InstrMeta.InstructionSize, Target))
+      return nullptr;
 
-        NextMetaPtr = getInstruction(Target);
-    } else {
-        NextMetaPtr =
-            getInstruction(InstrMeta.VMAddress + InstrMeta.InstructionSize);
-    }
+    NextMetaPtr = getInstruction(Target);
+  } else {
+    NextMetaPtr =
+        getInstruction(InstrMeta.VMAddress + InstrMeta.InstructionSize);
+  }
 
-    if (!NextMetaPtr || !NextMetaPtr->Valid)
-        return nullptr;
+  if (!NextMetaPtr || !NextMetaPtr->Valid)
+    return nullptr;
 
-    return NextMetaPtr;
+  return NextMetaPtr;
 }
 
 std::set<const Instr *>
 FileAnalysis::getDirectControlFlowXRefs(const Instr &InstrMeta) const {
-    std::set<const Instr *> CFCrossReferences;
-    const Instr *PrevInstruction = getPrevInstructionSequential(InstrMeta);
+  std::set<const Instr *> CFCrossReferences;
+  const Instr *PrevInstruction = getPrevInstructionSequential(InstrMeta);
 
-    if (PrevInstruction && canFallThrough(*PrevInstruction))
-        CFCrossReferences.insert(PrevInstruction);
+  if (PrevInstruction && canFallThrough(*PrevInstruction))
+    CFCrossReferences.insert(PrevInstruction);
 
-    const auto &TargetRefsKV = StaticBranchTargetings.find(InstrMeta.VMAddress);
-    if (TargetRefsKV == StaticBranchTargetings.end())
-        return CFCrossReferences;
+  const auto &TargetRefsKV = StaticBranchTargetings.find(InstrMeta.VMAddress);
+  if (TargetRefsKV == StaticBranchTargetings.end())
+    return CFCrossReferences;
 
-    for (uint64_t SourceInstrAddress : TargetRefsKV->second) {
-        const auto &SourceInstrKV = Instructions.find(SourceInstrAddress);
-        if (SourceInstrKV == Instructions.end()) {
-            errs() << "Failed to find source instruction at address "
-                   << format_hex(SourceInstrAddress, 2)
-                   << " for the cross-reference to instruction at address "
-                   << format_hex(InstrMeta.VMAddress, 2) << ".\n";
-            continue;
-        }
-
-        CFCrossReferences.insert(&SourceInstrKV->second);
+  for (uint64_t SourceInstrAddress : TargetRefsKV->second) {
+    const auto &SourceInstrKV = Instructions.find(SourceInstrAddress);
+    if (SourceInstrKV == Instructions.end()) {
+      errs() << "Failed to find source instruction at address "
+             << format_hex(SourceInstrAddress, 2)
+             << " for the cross-reference to instruction at address "
+             << format_hex(InstrMeta.VMAddress, 2) << ".\n";
+      continue;
     }
 
-    return CFCrossReferences;
+    CFCrossReferences.insert(&SourceInstrKV->second);
+  }
+
+  return CFCrossReferences;
 }
 
 const std::set<object::SectionedAddress> &
 FileAnalysis::getIndirectInstructions() const {
-    return IndirectInstructions;
+  return IndirectInstructions;
 }
 
 const MCRegisterInfo *FileAnalysis::getRegisterInfo() const {
-    return RegisterInfo.get();
+  return RegisterInfo.get();
 }
 
-const MCInstrInfo *FileAnalysis::getMCInstrInfo() const {
-    return MII.get();
-}
+const MCInstrInfo *FileAnalysis::getMCInstrInfo() const { return MII.get(); }
 
 const MCInstrAnalysis *FileAnalysis::getMCInstrAnalysis() const {
-    return MIA.get();
+  return MIA.get();
 }
 
 Expected<DIInliningInfo>
 FileAnalysis::symbolizeInlinedCode(object::SectionedAddress Address) {
-    assert(Symbolizer != nullptr && "Symbolizer is invalid.");
+  assert(Symbolizer != nullptr && "Symbolizer is invalid.");
 
-    return Symbolizer->symbolizeInlinedCode(std::string(Object->getFileName()),
-                                            Address);
+  return Symbolizer->symbolizeInlinedCode(std::string(Object->getFileName()),
+                                          Address);
 }
 
 CFIProtectionStatus
 FileAnalysis::validateCFIProtection(const GraphResult &Graph) const {
-    const Instr *InstrMetaPtr = getInstruction(Graph.BaseAddress);
-    if (!InstrMetaPtr)
-        return CFIProtectionStatus::FAIL_INVALID_INSTRUCTION;
+  const Instr *InstrMetaPtr = getInstruction(Graph.BaseAddress);
+  if (!InstrMetaPtr)
+    return CFIProtectionStatus::FAIL_INVALID_INSTRUCTION;
 
-    const auto &InstrDesc = MII->get(InstrMetaPtr->Instruction.getOpcode());
-    if (!InstrDesc.mayAffectControlFlow(InstrMetaPtr->Instruction, *RegisterInfo))
-        return CFIProtectionStatus::FAIL_NOT_INDIRECT_CF;
+  const auto &InstrDesc = MII->get(InstrMetaPtr->Instruction.getOpcode());
+  if (!InstrDesc.mayAffectControlFlow(InstrMetaPtr->Instruction, *RegisterInfo))
+    return CFIProtectionStatus::FAIL_NOT_INDIRECT_CF;
 
-    if (!usesRegisterOperand(*InstrMetaPtr))
-        return CFIProtectionStatus::FAIL_NOT_INDIRECT_CF;
+  if (!usesRegisterOperand(*InstrMetaPtr))
+    return CFIProtectionStatus::FAIL_NOT_INDIRECT_CF;
 
-    if (!Graph.OrphanedNodes.empty())
-        return CFIProtectionStatus::FAIL_ORPHANS;
+  if (!Graph.OrphanedNodes.empty())
+    return CFIProtectionStatus::FAIL_ORPHANS;
 
-    for (const auto &BranchNode : Graph.ConditionalBranchNodes) {
-        if (!BranchNode.CFIProtection)
-            return CFIProtectionStatus::FAIL_BAD_CONDITIONAL_BRANCH;
-    }
+  for (const auto &BranchNode : Graph.ConditionalBranchNodes) {
+    if (!BranchNode.CFIProtection)
+      return CFIProtectionStatus::FAIL_BAD_CONDITIONAL_BRANCH;
+  }
 
-    if (indirectCFOperandClobber(Graph) != Graph.BaseAddress)
-        return CFIProtectionStatus::FAIL_REGISTER_CLOBBERED;
+  if (indirectCFOperandClobber(Graph) != Graph.BaseAddress)
+    return CFIProtectionStatus::FAIL_REGISTER_CLOBBERED;
 
-    return CFIProtectionStatus::PROTECTED;
+  return CFIProtectionStatus::PROTECTED;
 }
 
-uint64_t FileAnalysis::indirectCFOperandClobber(const GraphResult &Graph) const {
-    assert(Graph.OrphanedNodes.empty() && "Orphaned nodes should be empty.");
+uint64_t
+FileAnalysis::indirectCFOperandClobber(const GraphResult &Graph) const {
+  assert(Graph.OrphanedNodes.empty() && "Orphaned nodes should be empty.");
 
-    // Get the set of registers we must check to ensure they're not clobbered.
-    const Instr &IndirectCF = getInstructionOrDie(Graph.BaseAddress);
-    DenseSet<unsigned> RegisterNumbers;
-    for (const auto &Operand : IndirectCF.Instruction) {
-        if (Operand.isReg())
-            RegisterNumbers.insert(Operand.getReg());
-    }
-    assert(RegisterNumbers.size() && "Zero register operands on indirect CF.");
+  // Get the set of registers we must check to ensure they're not clobbered.
+  const Instr &IndirectCF = getInstructionOrDie(Graph.BaseAddress);
+  DenseSet<unsigned> RegisterNumbers;
+  for (const auto &Operand : IndirectCF.Instruction) {
+    if (Operand.isReg())
+      RegisterNumbers.insert(Operand.getReg());
+  }
+  assert(RegisterNumbers.size() && "Zero register operands on indirect CF.");
 
-    // Now check all branches to indirect CFs and ensure no clobbering happens.
-    for (const auto &Branch : Graph.ConditionalBranchNodes) {
-        uint64_t Node;
-        if (Branch.IndirectCFIsOnTargetPath)
-            Node = Branch.Target;
-        else
-            Node = Branch.Fallthrough;
+  // Now check all branches to indirect CFs and ensure no clobbering happens.
+  for (const auto &Branch : Graph.ConditionalBranchNodes) {
+    uint64_t Node;
+    if (Branch.IndirectCFIsOnTargetPath)
+      Node = Branch.Target;
+    else
+      Node = Branch.Fallthrough;
 
-        // Some architectures (e.g., AArch64) cannot load in an indirect branch, so
-        // we allow them one load.
-        bool canLoad = !MII->get(IndirectCF.Instruction.getOpcode()).mayLoad();
+    // Some architectures (e.g., AArch64) cannot load in an indirect branch, so
+    // we allow them one load.
+    bool canLoad = !MII->get(IndirectCF.Instruction.getOpcode()).mayLoad();
 
-        // We walk backwards from the indirect CF.  It is the last node returned by
-        // Graph.flattenAddress, so we skip it since we already handled it.
-        DenseSet<unsigned> CurRegisterNumbers = RegisterNumbers;
-        std::vector<uint64_t> Nodes = Graph.flattenAddress(Node);
-        for (auto I = Nodes.rbegin() + 1, E = Nodes.rend(); I != E; ++I) {
-            Node = *I;
-            const Instr &NodeInstr = getInstructionOrDie(Node);
-            const auto &InstrDesc = MII->get(NodeInstr.Instruction.getOpcode());
+    // We walk backwards from the indirect CF.  It is the last node returned by
+    // Graph.flattenAddress, so we skip it since we already handled it.
+    DenseSet<unsigned> CurRegisterNumbers = RegisterNumbers;
+    std::vector<uint64_t> Nodes = Graph.flattenAddress(Node);
+    for (auto I = Nodes.rbegin() + 1, E = Nodes.rend(); I != E; ++I) {
+      Node = *I;
+      const Instr &NodeInstr = getInstructionOrDie(Node);
+      const auto &InstrDesc = MII->get(NodeInstr.Instruction.getOpcode());
 
-            for (auto RI = CurRegisterNumbers.begin(), RE = CurRegisterNumbers.end();
-                    RI != RE; ++RI) {
-                unsigned RegNum = *RI;
-                if (InstrDesc.hasDefOfPhysReg(NodeInstr.Instruction, RegNum,
-                                              *RegisterInfo)) {
-                    if (!canLoad || !InstrDesc.mayLoad())
-                        return Node;
-                    canLoad = false;
-                    CurRegisterNumbers.erase(RI);
-                    // Add the registers this load reads to those we check for clobbers.
-                    for (unsigned i = InstrDesc.getNumDefs(),
-                            e = InstrDesc.getNumOperands(); i != e; i++) {
-                        const auto Operand = NodeInstr.Instruction.getOperand(i);
-                        if (Operand.isReg())
-                            CurRegisterNumbers.insert(Operand.getReg());
-                    }
-                    break;
-                }
-            }
+      for (auto RI = CurRegisterNumbers.begin(), RE = CurRegisterNumbers.end();
+           RI != RE; ++RI) {
+        unsigned RegNum = *RI;
+        if (InstrDesc.hasDefOfPhysReg(NodeInstr.Instruction, RegNum,
+                                      *RegisterInfo)) {
+          if (!canLoad || !InstrDesc.mayLoad())
+            return Node;
+          canLoad = false;
+          CurRegisterNumbers.erase(RI);
+          // Add the registers this load reads to those we check for clobbers.
+          for (unsigned i = InstrDesc.getNumDefs(),
+                        e = InstrDesc.getNumOperands();
+               i != e; i++) {
+            const auto Operand = NodeInstr.Instruction.getOperand(i);
+            if (Operand.isReg())
+              CurRegisterNumbers.insert(Operand.getReg());
+          }
+          break;
         }
+      }
     }
+  }
 
-    return Graph.BaseAddress;
+  return Graph.BaseAddress;
 }
 
 void FileAnalysis::printInstruction(const Instr &InstrMeta,
                                     raw_ostream &OS) const {
-    Printer->printInst(&InstrMeta.Instruction, 0, "", *SubtargetInfo.get(), OS);
+  Printer->printInst(&InstrMeta.Instruction, 0, "", *SubtargetInfo.get(), OS);
 }
 
 Error FileAnalysis::initialiseDisassemblyMembers() {
-    std::string TripleName = ObjectTriple.getTriple();
-    ArchName = "";
-    MCPU = "";
-    std::string ErrorString;
+  std::string TripleName = ObjectTriple.getTriple();
+  ArchName = "";
+  MCPU = "";
+  std::string ErrorString;
 
-    Symbolizer.reset(new LLVMSymbolizer());
+  Symbolizer.reset(new LLVMSymbolizer());
 
-    ObjectTarget =
-        TargetRegistry::lookupTarget(ArchName, ObjectTriple, ErrorString);
-    if (!ObjectTarget)
-        return make_error<UnsupportedDisassembly>(
-                   (Twine("Couldn't find target \"") + ObjectTriple.getTriple() +
-                    "\", failed with error: " + ErrorString)
-                   .str());
+  ObjectTarget =
+      TargetRegistry::lookupTarget(ArchName, ObjectTriple, ErrorString);
+  if (!ObjectTarget)
+    return make_error<UnsupportedDisassembly>(
+        (Twine("Couldn't find target \"") + ObjectTriple.getTriple() +
+         "\", failed with error: " + ErrorString)
+            .str());
 
-    RegisterInfo.reset(ObjectTarget->createMCRegInfo(TripleName));
-    if (!RegisterInfo)
-        return make_error<UnsupportedDisassembly>(
-                   "Failed to initialise RegisterInfo.");
+  RegisterInfo.reset(ObjectTarget->createMCRegInfo(TripleName));
+  if (!RegisterInfo)
+    return make_error<UnsupportedDisassembly>(
+        "Failed to initialise RegisterInfo.");
 
-    MCTargetOptions MCOptions;
-    AsmInfo.reset(
-        ObjectTarget->createMCAsmInfo(*RegisterInfo, TripleName, MCOptions));
-    if (!AsmInfo)
-        return make_error<UnsupportedDisassembly>("Failed to initialise AsmInfo.");
+  MCTargetOptions MCOptions;
+  AsmInfo.reset(
+      ObjectTarget->createMCAsmInfo(*RegisterInfo, TripleName, MCOptions));
+  if (!AsmInfo)
+    return make_error<UnsupportedDisassembly>("Failed to initialise AsmInfo.");
 
-    SubtargetInfo.reset(ObjectTarget->createMCSubtargetInfo(
-                            TripleName, MCPU, Features.getString()));
-    if (!SubtargetInfo)
-        return make_error<UnsupportedDisassembly>(
-                   "Failed to initialise SubtargetInfo.");
+  SubtargetInfo.reset(ObjectTarget->createMCSubtargetInfo(
+      TripleName, MCPU, Features.getString()));
+  if (!SubtargetInfo)
+    return make_error<UnsupportedDisassembly>(
+        "Failed to initialise SubtargetInfo.");
 
-    MII.reset(ObjectTarget->createMCInstrInfo());
-    if (!MII)
-        return make_error<UnsupportedDisassembly>("Failed to initialise MII.");
+  MII.reset(ObjectTarget->createMCInstrInfo());
+  if (!MII)
+    return make_error<UnsupportedDisassembly>("Failed to initialise MII.");
 
-    Context.reset(new MCContext(AsmInfo.get(), RegisterInfo.get(), &MOFI));
+  Context.reset(new MCContext(AsmInfo.get(), RegisterInfo.get(), &MOFI));
 
-    Disassembler.reset(
-        ObjectTarget->createMCDisassembler(*SubtargetInfo, *Context));
+  Disassembler.reset(
+      ObjectTarget->createMCDisassembler(*SubtargetInfo, *Context));
 
-    if (!Disassembler)
-        return make_error<UnsupportedDisassembly>(
-                   "No disassembler available for target");
+  if (!Disassembler)
+    return make_error<UnsupportedDisassembly>(
+        "No disassembler available for target");
 
-    MIA.reset(ObjectTarget->createMCInstrAnalysis(MII.get()));
+  MIA.reset(ObjectTarget->createMCInstrAnalysis(MII.get()));
 
-    Printer.reset(ObjectTarget->createMCInstPrinter(
-                      ObjectTriple, AsmInfo->getAssemblerDialect(), *AsmInfo, *MII,
-                      *RegisterInfo));
+  Printer.reset(ObjectTarget->createMCInstPrinter(
+      ObjectTriple, AsmInfo->getAssemblerDialect(), *AsmInfo, *MII,
+      *RegisterInfo));
 
-    return Error::success();
+  return Error::success();
 }
 
 Error FileAnalysis::parseCodeSections() {
-    if (!IgnoreDWARFFlag) {
-        std::unique_ptr<DWARFContext> DWARF = DWARFContext::create(*Object);
-        if (!DWARF)
-            return make_error<StringError>("Could not create DWARF information.",
-                                           inconvertibleErrorCode());
+  if (!IgnoreDWARFFlag) {
+    std::unique_ptr<DWARFContext> DWARF = DWARFContext::create(*Object);
+    if (!DWARF)
+      return make_error<StringError>("Could not create DWARF information.",
+                                     inconvertibleErrorCode());
 
-        bool LineInfoValid = false;
+    bool LineInfoValid = false;
 
-        for (auto &Unit : DWARF->compile_units()) {
-            const auto &LineTable = DWARF->getLineTableForUnit(Unit.get());
-            if (LineTable && !LineTable->Rows.empty()) {
-                LineInfoValid = true;
-                break;
-            }
-        }
-
-        if (!LineInfoValid)
-            return make_error<StringError>(
-                       "DWARF line information missing. Did you compile with '-g'?",
-                       inconvertibleErrorCode());
+    for (auto &Unit : DWARF->compile_units()) {
+      const auto &LineTable = DWARF->getLineTableForUnit(Unit.get());
+      if (LineTable && !LineTable->Rows.empty()) {
+        LineInfoValid = true;
+        break;
+      }
     }
 
-    for (const object::SectionRef &Section : Object->sections()) {
-        // Ensure only executable sections get analysed.
-        if (!(object::ELFSectionRef(Section).getFlags() & ELF::SHF_EXECINSTR))
-            continue;
+    if (!LineInfoValid)
+      return make_error<StringError>(
+          "DWARF line information missing. Did you compile with '-g'?",
+          inconvertibleErrorCode());
+  }
 
-        // Avoid checking the PLT since it produces spurious failures on AArch64
-        // when ignoring DWARF data.
-        Expected<StringRef> NameOrErr = Section.getName();
-        if (NameOrErr && *NameOrErr == ".plt")
-            continue;
-        consumeError(NameOrErr.takeError());
+  for (const object::SectionRef &Section : Object->sections()) {
+    // Ensure only executable sections get analysed.
+    if (!(object::ELFSectionRef(Section).getFlags() & ELF::SHF_EXECINSTR))
+      continue;
 
-        Expected<StringRef> Contents = Section.getContents();
-        if (!Contents)
-            return Contents.takeError();
-        ArrayRef<uint8_t> SectionBytes = arrayRefFromStringRef(*Contents);
+    // Avoid checking the PLT since it produces spurious failures on AArch64
+    // when ignoring DWARF data.
+    Expected<StringRef> NameOrErr = Section.getName();
+    if (NameOrErr && *NameOrErr == ".plt")
+      continue;
+    consumeError(NameOrErr.takeError());
 
-        parseSectionContents(SectionBytes,
-        {Section.getAddress(), Section.getIndex()});
-    }
-    return Error::success();
+    Expected<StringRef> Contents = Section.getContents();
+    if (!Contents)
+      return Contents.takeError();
+    ArrayRef<uint8_t> SectionBytes = arrayRefFromStringRef(*Contents);
+
+    parseSectionContents(SectionBytes,
+                         {Section.getAddress(), Section.getIndex()});
+  }
+  return Error::success();
 }
 
 void FileAnalysis::parseSectionContents(ArrayRef<uint8_t> SectionBytes,
                                         object::SectionedAddress Address) {
-    assert(Symbolizer && "Symbolizer is uninitialised.");
-    MCInst Instruction;
-    Instr InstrMeta;
-    uint64_t InstructionSize;
+  assert(Symbolizer && "Symbolizer is uninitialised.");
+  MCInst Instruction;
+  Instr InstrMeta;
+  uint64_t InstructionSize;
 
-    for (uint64_t Byte = 0; Byte < SectionBytes.size();) {
-        bool ValidInstruction =
-            Disassembler->getInstruction(Instruction, InstructionSize,
-                                         SectionBytes.drop_front(Byte), 0,
-                                         outs()) == MCDisassembler::Success;
+  for (uint64_t Byte = 0; Byte < SectionBytes.size();) {
+    bool ValidInstruction =
+        Disassembler->getInstruction(Instruction, InstructionSize,
+                                     SectionBytes.drop_front(Byte), 0,
+                                     outs()) == MCDisassembler::Success;
 
-        Byte += InstructionSize;
+    Byte += InstructionSize;
 
-        uint64_t VMAddress = Address.Address + Byte - InstructionSize;
-        InstrMeta.Instruction = Instruction;
-        InstrMeta.VMAddress = VMAddress;
-        InstrMeta.InstructionSize = InstructionSize;
-        InstrMeta.Valid = ValidInstruction;
+    uint64_t VMAddress = Address.Address + Byte - InstructionSize;
+    InstrMeta.Instruction = Instruction;
+    InstrMeta.VMAddress = VMAddress;
+    InstrMeta.InstructionSize = InstructionSize;
+    InstrMeta.Valid = ValidInstruction;
 
-        addInstruction(InstrMeta);
+    addInstruction(InstrMeta);
 
-        if (!ValidInstruction)
-            continue;
+    if (!ValidInstruction)
+      continue;
 
-        // Skip additional parsing for instructions that do not affect the control
-        // flow.
-        const auto &InstrDesc = MII->get(Instruction.getOpcode());
-        if (!InstrDesc.mayAffectControlFlow(Instruction, *RegisterInfo))
-            continue;
+    // Skip additional parsing for instructions that do not affect the control
+    // flow.
+    const auto &InstrDesc = MII->get(Instruction.getOpcode());
+    if (!InstrDesc.mayAffectControlFlow(Instruction, *RegisterInfo))
+      continue;
 
-        uint64_t Target;
-        if (MIA->evaluateBranch(Instruction, VMAddress, InstructionSize, Target)) {
-            // If the target can be evaluated, it's not indirect.
-            StaticBranchTargetings[Target].push_back(VMAddress);
-            continue;
-        }
-
-        if (!usesRegisterOperand(InstrMeta))
-            continue;
-
-        if (InstrDesc.isReturn())
-            continue;
-
-        // Check if this instruction exists in the range of the DWARF metadata.
-        if (!IgnoreDWARFFlag) {
-            auto LineInfo =
-                Symbolizer->symbolizeCode(std::string(Object->getFileName()),
-            {VMAddress, Address.SectionIndex});
-            if (!LineInfo) {
-                handleAllErrors(LineInfo.takeError(), [](const ErrorInfoBase &E) {
-                    errs() << "Symbolizer failed to get line: " << E.message() << "\n";
-                });
-                continue;
-            }
-
-            if (LineInfo->FileName == DILineInfo::BadString)
-                continue;
-        }
-
-        IndirectInstructions.insert({VMAddress, Address.SectionIndex});
+    uint64_t Target;
+    if (MIA->evaluateBranch(Instruction, VMAddress, InstructionSize, Target)) {
+      // If the target can be evaluated, it's not indirect.
+      StaticBranchTargetings[Target].push_back(VMAddress);
+      continue;
     }
+
+    if (!usesRegisterOperand(InstrMeta))
+      continue;
+
+    if (InstrDesc.isReturn())
+      continue;
+
+    // Check if this instruction exists in the range of the DWARF metadata.
+    if (!IgnoreDWARFFlag) {
+      auto LineInfo =
+          Symbolizer->symbolizeCode(std::string(Object->getFileName()),
+                                    {VMAddress, Address.SectionIndex});
+      if (!LineInfo) {
+        handleAllErrors(LineInfo.takeError(), [](const ErrorInfoBase &E) {
+          errs() << "Symbolizer failed to get line: " << E.message() << "\n";
+        });
+        continue;
+      }
+
+      if (LineInfo->FileName == DILineInfo::BadString)
+        continue;
+    }
+
+    IndirectInstructions.insert({VMAddress, Address.SectionIndex});
+  }
 }
 
 void FileAnalysis::addInstruction(const Instr &Instruction) {
-    const auto &KV =
-        Instructions.insert(std::make_pair(Instruction.VMAddress, Instruction));
-    if (!KV.second) {
-        errs() << "Failed to add instruction at address "
-               << format_hex(Instruction.VMAddress, 2)
-               << ": Instruction at this address already exists.\n";
-        exit(EXIT_FAILURE);
-    }
+  const auto &KV =
+      Instructions.insert(std::make_pair(Instruction.VMAddress, Instruction));
+  if (!KV.second) {
+    errs() << "Failed to add instruction at address "
+           << format_hex(Instruction.VMAddress, 2)
+           << ": Instruction at this address already exists.\n";
+    exit(EXIT_FAILURE);
+  }
 }
 
 Error FileAnalysis::parseSymbolTable() {
-    // Functions that will trap on CFI violations.
-    SmallSet<StringRef, 4> TrapOnFailFunctions;
-    TrapOnFailFunctions.insert("__cfi_slowpath");
-    TrapOnFailFunctions.insert("__cfi_slowpath_diag");
-    TrapOnFailFunctions.insert("abort");
+  // Functions that will trap on CFI violations.
+  SmallSet<StringRef, 4> TrapOnFailFunctions;
+  TrapOnFailFunctions.insert("__cfi_slowpath");
+  TrapOnFailFunctions.insert("__cfi_slowpath_diag");
+  TrapOnFailFunctions.insert("abort");
 
-    // Look through the list of symbols for functions that will trap on CFI
-    // violations.
-    for (auto &Sym : Object->symbols()) {
-        auto SymNameOrErr = Sym.getName();
-        if (!SymNameOrErr)
-            consumeError(SymNameOrErr.takeError());
-        else if (TrapOnFailFunctions.count(*SymNameOrErr) > 0) {
-            auto AddrOrErr = Sym.getAddress();
-            if (!AddrOrErr)
-                consumeError(AddrOrErr.takeError());
-            else
-                TrapOnFailFunctionAddresses.insert(*AddrOrErr);
-        }
+  // Look through the list of symbols for functions that will trap on CFI
+  // violations.
+  for (auto &Sym : Object->symbols()) {
+    auto SymNameOrErr = Sym.getName();
+    if (!SymNameOrErr)
+      consumeError(SymNameOrErr.takeError());
+    else if (TrapOnFailFunctions.count(*SymNameOrErr) > 0) {
+      auto AddrOrErr = Sym.getAddress();
+      if (!AddrOrErr)
+        consumeError(AddrOrErr.takeError());
+      else
+        TrapOnFailFunctionAddresses.insert(*AddrOrErr);
     }
-    if (auto *ElfObject = dyn_cast<object::ELFObjectFileBase>(Object)) {
-        for (const auto &Addr : ElfObject->getPltAddresses()) {
-            if (!Addr.first)
-                continue;
-            object::SymbolRef Sym(*Addr.first, Object);
-            auto SymNameOrErr = Sym.getName();
-            if (!SymNameOrErr)
-                consumeError(SymNameOrErr.takeError());
-            else if (TrapOnFailFunctions.count(*SymNameOrErr) > 0)
-                TrapOnFailFunctionAddresses.insert(Addr.second);
-        }
+  }
+  if (auto *ElfObject = dyn_cast<object::ELFObjectFileBase>(Object)) {
+    for (const auto &Addr : ElfObject->getPltAddresses()) {
+      if (!Addr.first)
+        continue;
+      object::SymbolRef Sym(*Addr.first, Object);
+      auto SymNameOrErr = Sym.getName();
+      if (!SymNameOrErr)
+        consumeError(SymNameOrErr.takeError());
+      else if (TrapOnFailFunctions.count(*SymNameOrErr) > 0)
+        TrapOnFailFunctionAddresses.insert(Addr.second);
     }
-    return Error::success();
+  }
+  return Error::success();
 }
 
 UnsupportedDisassembly::UnsupportedDisassembly(StringRef Text)
@@ -588,11 +587,11 @@ UnsupportedDisassembly::UnsupportedDisassembly(StringRef Text)
 
 char UnsupportedDisassembly::ID;
 void UnsupportedDisassembly::log(raw_ostream &OS) const {
-    OS << "Could not initialise disassembler: " << Text;
+  OS << "Could not initialise disassembler: " << Text;
 }
 
 std::error_code UnsupportedDisassembly::convertToErrorCode() const {
-    return std::error_code();
+  return std::error_code();
 }
 
 } // namespace cfi_verify

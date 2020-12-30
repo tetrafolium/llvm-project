@@ -74,67 +74,67 @@ extern char **environ;
 // TODO: Eliminate direct memory allocations, use string operations instead.
 
 static inline void *allocate(size_t size) {
-    void *ptr = KMP_INTERNAL_MALLOC(size);
-    if (ptr == NULL) {
-        KMP_FATAL(MemoryAllocFailed);
-    }
-    return ptr;
+  void *ptr = KMP_INTERNAL_MALLOC(size);
+  if (ptr == NULL) {
+    KMP_FATAL(MemoryAllocFailed);
+  }
+  return ptr;
 } // allocate
 
 char *__kmp_env_get(char const *name) {
 
-    char *result = NULL;
+  char *result = NULL;
 
 #if KMP_OS_UNIX
-    char const *value = getenv(name);
-    if (value != NULL) {
-        size_t len = KMP_STRLEN(value) + 1;
-        result = (char *)KMP_INTERNAL_MALLOC(len);
-        if (result == NULL) {
-            KMP_FATAL(MemoryAllocFailed);
-        }
-        KMP_STRNCPY_S(result, len, value, len);
+  char const *value = getenv(name);
+  if (value != NULL) {
+    size_t len = KMP_STRLEN(value) + 1;
+    result = (char *)KMP_INTERNAL_MALLOC(len);
+    if (result == NULL) {
+      KMP_FATAL(MemoryAllocFailed);
     }
+    KMP_STRNCPY_S(result, len, value, len);
+  }
 #elif KMP_OS_WINDOWS
-    /* We use GetEnvironmentVariable for Windows* OS instead of getenv because the
-       act of loading a DLL on Windows* OS makes any user-set environment
-       variables (i.e. with putenv()) unavailable. getenv() apparently gets a
-       clean copy of the env variables as they existed at the start of the run.
-       JH 12/23/2002 */
-    DWORD rc;
-    rc = GetEnvironmentVariable(name, NULL, 0);
-    if (!rc) {
-        DWORD error = GetLastError();
-        if (error != ERROR_ENVVAR_NOT_FOUND) {
-            __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
-        }
-        // Variable is not found, it's ok, just continue.
-    } else {
-        DWORD len = rc;
-        result = (char *)KMP_INTERNAL_MALLOC(len);
-        if (result == NULL) {
-            KMP_FATAL(MemoryAllocFailed);
-        }
-        rc = GetEnvironmentVariable(name, result, len);
-        if (!rc) {
-            // GetEnvironmentVariable() may return 0 if variable is empty.
-            // In such a case GetLastError() returns ERROR_SUCCESS.
-            DWORD error = GetLastError();
-            if (error != ERROR_SUCCESS) {
-                // Unexpected error. The variable should be in the environment,
-                // and buffer should be large enough.
-                __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error),
-                            __kmp_msg_null);
-                KMP_INTERNAL_FREE((void *)result);
-                result = NULL;
-            }
-        }
+  /* We use GetEnvironmentVariable for Windows* OS instead of getenv because the
+     act of loading a DLL on Windows* OS makes any user-set environment
+     variables (i.e. with putenv()) unavailable. getenv() apparently gets a
+     clean copy of the env variables as they existed at the start of the run.
+     JH 12/23/2002 */
+  DWORD rc;
+  rc = GetEnvironmentVariable(name, NULL, 0);
+  if (!rc) {
+    DWORD error = GetLastError();
+    if (error != ERROR_ENVVAR_NOT_FOUND) {
+      __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
     }
+    // Variable is not found, it's ok, just continue.
+  } else {
+    DWORD len = rc;
+    result = (char *)KMP_INTERNAL_MALLOC(len);
+    if (result == NULL) {
+      KMP_FATAL(MemoryAllocFailed);
+    }
+    rc = GetEnvironmentVariable(name, result, len);
+    if (!rc) {
+      // GetEnvironmentVariable() may return 0 if variable is empty.
+      // In such a case GetLastError() returns ERROR_SUCCESS.
+      DWORD error = GetLastError();
+      if (error != ERROR_SUCCESS) {
+        // Unexpected error. The variable should be in the environment,
+        // and buffer should be large enough.
+        __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error),
+                    __kmp_msg_null);
+        KMP_INTERNAL_FREE((void *)result);
+        result = NULL;
+      }
+    }
+  }
 #else
 #error Unknown or unsupported OS.
 #endif
 
-    return result;
+  return result;
 
 } // func __kmp_env_get
 
@@ -142,28 +142,28 @@ char *__kmp_env_get(char const *name) {
 
 void __kmp_env_free(char const **value) {
 
-    KMP_DEBUG_ASSERT(value != NULL);
-    KMP_INTERNAL_FREE(CCAST(char *, *value));
-    *value = NULL;
+  KMP_DEBUG_ASSERT(value != NULL);
+  KMP_INTERNAL_FREE(CCAST(char *, *value));
+  *value = NULL;
 
 } // func __kmp_env_free
 
 int __kmp_env_exists(char const *name) {
 
 #if KMP_OS_UNIX
-    char const *value = getenv(name);
-    return ((value == NULL) ? (0) : (1));
+  char const *value = getenv(name);
+  return ((value == NULL) ? (0) : (1));
 #elif KMP_OS_WINDOWS
-    DWORD rc;
-    rc = GetEnvironmentVariable(name, NULL, 0);
-    if (rc == 0) {
-        DWORD error = GetLastError();
-        if (error != ERROR_ENVVAR_NOT_FOUND) {
-            __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
-        }
-        return 0;
+  DWORD rc;
+  rc = GetEnvironmentVariable(name, NULL, 0);
+  if (rc == 0) {
+    DWORD error = GetLastError();
+    if (error != ERROR_ENVVAR_NOT_FOUND) {
+      __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
     }
-    return 1;
+    return 0;
+  }
+  return 1;
 #else
 #error Unknown or unsupported OS.
 #endif
@@ -173,34 +173,34 @@ int __kmp_env_exists(char const *name) {
 void __kmp_env_set(char const *name, char const *value, int overwrite) {
 
 #if KMP_OS_UNIX
-    int rc = setenv(name, value, overwrite);
-    if (rc != 0) {
-        // Dead code. I tried to put too many variables into Linux* OS
-        // environment on IA-32 architecture. When application consumes
-        // more than ~2.5 GB of memory, entire system feels bad. Sometimes
-        // application is killed (by OS?), sometimes system stops
-        // responding... But this error message never appears. --ln
-        __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_HNT(NotEnoughMemory),
-                    __kmp_msg_null);
-    }
+  int rc = setenv(name, value, overwrite);
+  if (rc != 0) {
+    // Dead code. I tried to put too many variables into Linux* OS
+    // environment on IA-32 architecture. When application consumes
+    // more than ~2.5 GB of memory, entire system feels bad. Sometimes
+    // application is killed (by OS?), sometimes system stops
+    // responding... But this error message never appears. --ln
+    __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_HNT(NotEnoughMemory),
+                __kmp_msg_null);
+  }
 #elif KMP_OS_WINDOWS
-    BOOL rc;
-    if (!overwrite) {
-        rc = GetEnvironmentVariable(name, NULL, 0);
-        if (rc) {
-            // Variable exists, do not overwrite.
-            return;
-        }
-        DWORD error = GetLastError();
-        if (error != ERROR_ENVVAR_NOT_FOUND) {
-            __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
-        }
+  BOOL rc;
+  if (!overwrite) {
+    rc = GetEnvironmentVariable(name, NULL, 0);
+    if (rc) {
+      // Variable exists, do not overwrite.
+      return;
     }
-    rc = SetEnvironmentVariable(name, value);
-    if (!rc) {
-        DWORD error = GetLastError();
-        __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
+    DWORD error = GetLastError();
+    if (error != ERROR_ENVVAR_NOT_FOUND) {
+      __kmp_fatal(KMP_MSG(CantGetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
     }
+  }
+  rc = SetEnvironmentVariable(name, value);
+  if (!rc) {
+    DWORD error = GetLastError();
+    __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
+  }
 #else
 #error Unknown or unsupported OS.
 #endif
@@ -210,13 +210,13 @@ void __kmp_env_set(char const *name, char const *value, int overwrite) {
 void __kmp_env_unset(char const *name) {
 
 #if KMP_OS_UNIX
-    unsetenv(name);
+  unsetenv(name);
 #elif KMP_OS_WINDOWS
-    BOOL rc = SetEnvironmentVariable(name, NULL);
-    if (!rc) {
-        DWORD error = GetLastError();
-        __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
-    }
+  BOOL rc = SetEnvironmentVariable(name, NULL);
+  if (!rc) {
+    DWORD error = GetLastError();
+    __kmp_fatal(KMP_MSG(CantSetEnvVar, name), KMP_ERR(error), __kmp_msg_null);
+  }
 #else
 #error Unknown or unsupported OS.
 #endif
@@ -236,59 +236,59 @@ void __kmp_env_unset(char const *name) {
 static void
 ___kmp_env_blk_parse_string(kmp_env_blk_t *block, // M: Env block to fill.
                             char const *env // I: String to parse.
-                           ) {
+) {
 
-    char const chr_delimiter = '|';
-    char const str_delimiter[] = {chr_delimiter, 0};
+  char const chr_delimiter = '|';
+  char const str_delimiter[] = {chr_delimiter, 0};
 
-    char *bulk = NULL;
-    kmp_env_var_t *vars = NULL;
-    int count = 0; // Number of used elements in vars array.
-    int delimiters = 0; // Number of delimiters in input string.
+  char *bulk = NULL;
+  kmp_env_var_t *vars = NULL;
+  int count = 0; // Number of used elements in vars array.
+  int delimiters = 0; // Number of delimiters in input string.
 
-    // Copy original string, we will modify the copy.
-    bulk = __kmp_str_format("%s", env);
+  // Copy original string, we will modify the copy.
+  bulk = __kmp_str_format("%s", env);
 
-    // Loop thru all the vars in environment block. Count delimiters (maximum
-    // number of variables is number of delimiters plus one).
-    {
-        char const *ptr = bulk;
-        for (;;) {
-            ptr = strchr(ptr, chr_delimiter);
-            if (ptr == NULL) {
-                break;
-            }
-            ++delimiters;
-            ptr += 1;
-        }
+  // Loop thru all the vars in environment block. Count delimiters (maximum
+  // number of variables is number of delimiters plus one).
+  {
+    char const *ptr = bulk;
+    for (;;) {
+      ptr = strchr(ptr, chr_delimiter);
+      if (ptr == NULL) {
+        break;
+      }
+      ++delimiters;
+      ptr += 1;
     }
+  }
 
-    // Allocate vars array.
-    vars = (kmp_env_var_t *)allocate((delimiters + 1) * sizeof(kmp_env_var_t));
+  // Allocate vars array.
+  vars = (kmp_env_var_t *)allocate((delimiters + 1) * sizeof(kmp_env_var_t));
 
-    // Loop thru all the variables.
-    {
-        char *var; // Pointer to variable (both name and value).
-        char *name; // Pointer to name of variable.
-        char *value; // Pointer to value.
-        char *buf; // Buffer for __kmp_str_token() function.
-        var = __kmp_str_token(bulk, str_delimiter, &buf); // Get the first var.
-        while (var != NULL) {
-            // Save found variable in vars array.
-            __kmp_str_split(var, '=', &name, &value);
-            KMP_DEBUG_ASSERT(count < delimiters + 1);
-            vars[count].name = name;
-            vars[count].value = value;
-            ++count;
-            // Get the next var.
-            var = __kmp_str_token(NULL, str_delimiter, &buf);
-        }
+  // Loop thru all the variables.
+  {
+    char *var; // Pointer to variable (both name and value).
+    char *name; // Pointer to name of variable.
+    char *value; // Pointer to value.
+    char *buf; // Buffer for __kmp_str_token() function.
+    var = __kmp_str_token(bulk, str_delimiter, &buf); // Get the first var.
+    while (var != NULL) {
+      // Save found variable in vars array.
+      __kmp_str_split(var, '=', &name, &value);
+      KMP_DEBUG_ASSERT(count < delimiters + 1);
+      vars[count].name = name;
+      vars[count].value = value;
+      ++count;
+      // Get the next var.
+      var = __kmp_str_token(NULL, str_delimiter, &buf);
     }
+  }
 
-    // Fill out result.
-    block->bulk = bulk;
-    block->vars = vars;
-    block->count = count;
+  // Fill out result.
+  block->bulk = bulk;
+  block->vars = vars;
+  block->count = count;
 }
 
 /* Windows* OS (actually, DOS) environment block is a piece of memory with
@@ -307,66 +307,66 @@ static void ___kmp_env_blk_parse_windows(
     char const *env // I: Pointer to Windows* OS (DOS) environment block.
 ) {
 
-    char *bulk = NULL;
-    kmp_env_var_t *vars = NULL;
-    int count = 0; // Number of used elements in vars array.
-    int size = 0; // Size of bulk.
+  char *bulk = NULL;
+  kmp_env_var_t *vars = NULL;
+  int count = 0; // Number of used elements in vars array.
+  int size = 0; // Size of bulk.
 
-    char *name; // Pointer to name of variable.
-    char *value; // Pointer to value.
+  char *name; // Pointer to name of variable.
+  char *value; // Pointer to value.
 
-    if (env != NULL) {
+  if (env != NULL) {
 
-        // Loop thru all the vars in environment block. Count variables, find size
-        // of block.
-        {
-            char const *var; // Pointer to beginning of var.
-            int len; // Length of variable.
-            count = 0;
-            var =
-                env; // The first variable starts and beginning of environment block.
-            len = KMP_STRLEN(var);
-            while (len != 0) {
-                ++count;
-                size = size + len + 1;
-                var = var + len +
-                      1; // Move pointer to the beginning of the next variable.
-                len = KMP_STRLEN(var);
-            }
-            size =
-                size + 1; // Total size of env block, including terminating zero byte.
-        }
-
-        // Copy original block to bulk, we will modify bulk, not original block.
-        bulk = (char *)allocate(size);
-        KMP_MEMCPY_S(bulk, size, env, size);
-        // Allocate vars array.
-        vars = (kmp_env_var_t *)allocate(count * sizeof(kmp_env_var_t));
-
-        // Loop thru all the vars, now in bulk.
-        {
-            char *var; // Pointer to beginning of var.
-            int len; // Length of variable.
-            count = 0;
-            var = bulk;
-            len = KMP_STRLEN(var);
-            while (len != 0) {
-                // Save variable in vars array.
-                __kmp_str_split(var, '=', &name, &value);
-                vars[count].name = name;
-                vars[count].value = value;
-                ++count;
-                // Get the next var.
-                var = var + len + 1;
-                len = KMP_STRLEN(var);
-            }
-        }
+    // Loop thru all the vars in environment block. Count variables, find size
+    // of block.
+    {
+      char const *var; // Pointer to beginning of var.
+      int len; // Length of variable.
+      count = 0;
+      var =
+          env; // The first variable starts and beginning of environment block.
+      len = KMP_STRLEN(var);
+      while (len != 0) {
+        ++count;
+        size = size + len + 1;
+        var = var + len +
+              1; // Move pointer to the beginning of the next variable.
+        len = KMP_STRLEN(var);
+      }
+      size =
+          size + 1; // Total size of env block, including terminating zero byte.
     }
 
-    // Fill out result.
-    block->bulk = bulk;
-    block->vars = vars;
-    block->count = count;
+    // Copy original block to bulk, we will modify bulk, not original block.
+    bulk = (char *)allocate(size);
+    KMP_MEMCPY_S(bulk, size, env, size);
+    // Allocate vars array.
+    vars = (kmp_env_var_t *)allocate(count * sizeof(kmp_env_var_t));
+
+    // Loop thru all the vars, now in bulk.
+    {
+      char *var; // Pointer to beginning of var.
+      int len; // Length of variable.
+      count = 0;
+      var = bulk;
+      len = KMP_STRLEN(var);
+      while (len != 0) {
+        // Save variable in vars array.
+        __kmp_str_split(var, '=', &name, &value);
+        vars[count].name = name;
+        vars[count].value = value;
+        ++count;
+        // Get the next var.
+        var = var + len + 1;
+        len = KMP_STRLEN(var);
+      }
+    }
+  }
+
+  // Fill out result.
+  block->bulk = bulk;
+  block->vars = vars;
+  block->count = count;
 }
 #endif
 
@@ -379,93 +379,93 @@ static void ___kmp_env_blk_parse_windows(
 static void
 ___kmp_env_blk_parse_unix(kmp_env_blk_t *block, // M: Env block to fill.
                           char **env // I: Unix environment to parse.
-                         ) {
+) {
 
-    char *bulk = NULL;
-    kmp_env_var_t *vars = NULL;
-    int count = 0;
-    int size = 0; // Size of bulk.
+  char *bulk = NULL;
+  kmp_env_var_t *vars = NULL;
+  int count = 0;
+  int size = 0; // Size of bulk.
 
-    // Count number of variables and length of required bulk.
-    {
-        count = 0;
-        size = 0;
-        while (env[count] != NULL) {
-            size += KMP_STRLEN(env[count]) + 1;
-            ++count;
-        }
+  // Count number of variables and length of required bulk.
+  {
+    count = 0;
+    size = 0;
+    while (env[count] != NULL) {
+      size += KMP_STRLEN(env[count]) + 1;
+      ++count;
     }
+  }
 
-    // Allocate memory.
-    bulk = (char *)allocate(size);
-    vars = (kmp_env_var_t *)allocate(count * sizeof(kmp_env_var_t));
+  // Allocate memory.
+  bulk = (char *)allocate(size);
+  vars = (kmp_env_var_t *)allocate(count * sizeof(kmp_env_var_t));
 
-    // Loop thru all the vars.
-    {
-        char *var; // Pointer to beginning of var.
-        char *name; // Pointer to name of variable.
-        char *value; // Pointer to value.
-        int len; // Length of variable.
-        int i;
-        var = bulk;
-        for (i = 0; i < count; ++i) {
-            // Copy variable to bulk.
-            len = KMP_STRLEN(env[i]);
-            KMP_MEMCPY_S(var, size, env[i], len + 1);
-            // Save found variable in vars array.
-            __kmp_str_split(var, '=', &name, &value);
-            vars[i].name = name;
-            vars[i].value = value;
-            // Move pointer.
-            var += len + 1;
-        }
+  // Loop thru all the vars.
+  {
+    char *var; // Pointer to beginning of var.
+    char *name; // Pointer to name of variable.
+    char *value; // Pointer to value.
+    int len; // Length of variable.
+    int i;
+    var = bulk;
+    for (i = 0; i < count; ++i) {
+      // Copy variable to bulk.
+      len = KMP_STRLEN(env[i]);
+      KMP_MEMCPY_S(var, size, env[i], len + 1);
+      // Save found variable in vars array.
+      __kmp_str_split(var, '=', &name, &value);
+      vars[i].name = name;
+      vars[i].value = value;
+      // Move pointer.
+      var += len + 1;
     }
+  }
 
-    // Fill out result.
-    block->bulk = bulk;
-    block->vars = vars;
-    block->count = count;
+  // Fill out result.
+  block->bulk = bulk;
+  block->vars = vars;
+  block->count = count;
 }
 
 void __kmp_env_blk_init(kmp_env_blk_t *block, // M: Block to initialize.
                         char const *bulk // I: Initialization string, or NULL.
-                       ) {
+) {
 
-    if (bulk != NULL) {
-        ___kmp_env_blk_parse_string(block, bulk);
-    } else {
+  if (bulk != NULL) {
+    ___kmp_env_blk_parse_string(block, bulk);
+  } else {
 #if KMP_OS_UNIX
-        ___kmp_env_blk_parse_unix(block, environ);
+    ___kmp_env_blk_parse_unix(block, environ);
 #elif KMP_OS_WINDOWS
-        {
-            char *mem = GetEnvironmentStrings();
-            if (mem == NULL) {
-                DWORD error = GetLastError();
-                __kmp_fatal(KMP_MSG(CantGetEnvironment), KMP_ERR(error),
-                            __kmp_msg_null);
-            }
-            ___kmp_env_blk_parse_windows(block, mem);
-            FreeEnvironmentStrings(mem);
-        }
+    {
+      char *mem = GetEnvironmentStrings();
+      if (mem == NULL) {
+        DWORD error = GetLastError();
+        __kmp_fatal(KMP_MSG(CantGetEnvironment), KMP_ERR(error),
+                    __kmp_msg_null);
+      }
+      ___kmp_env_blk_parse_windows(block, mem);
+      FreeEnvironmentStrings(mem);
+    }
 #else
 #error Unknown or unsupported OS.
 #endif
-    }
+  }
 
 } // __kmp_env_blk_init
 
 static int ___kmp_env_var_cmp( // Comparison function for qsort().
     kmp_env_var_t const *lhs, kmp_env_var_t const *rhs) {
-    return strcmp(lhs->name, rhs->name);
+  return strcmp(lhs->name, rhs->name);
 }
 
 void __kmp_env_blk_sort(
     kmp_env_blk_t *block // M: Block of environment variables to sort.
 ) {
 
-    qsort(CCAST(kmp_env_var_t *, block->vars), block->count,
-          sizeof(kmp_env_var_t),
-          (int (*)(void const *, void const *)) & ___kmp_env_var_cmp);
+  qsort(CCAST(kmp_env_var_t *, block->vars), block->count,
+        sizeof(kmp_env_var_t),
+        (int (*)(void const *, void const *)) & ___kmp_env_var_cmp);
 
 } // __kmp_env_block_sort
 
@@ -473,27 +473,26 @@ void __kmp_env_blk_free(
     kmp_env_blk_t *block // M: Block of environment variables to free.
 ) {
 
-    KMP_INTERNAL_FREE(CCAST(kmp_env_var_t *, block->vars));
-    __kmp_str_free(&(block->bulk));
+  KMP_INTERNAL_FREE(CCAST(kmp_env_var_t *, block->vars));
+  __kmp_str_free(&(block->bulk));
 
-    block->count = 0;
-    block->vars = NULL;
+  block->count = 0;
+  block->vars = NULL;
 
 } // __kmp_env_blk_free
 
 char const * // R: Value of variable or NULL if variable does not exist.
-__kmp_env_blk_var(
-    kmp_env_blk_t *block, // I: Block of environment variables.
-    char const *name // I: Name of variable to find.
+__kmp_env_blk_var(kmp_env_blk_t *block, // I: Block of environment variables.
+                  char const *name // I: Name of variable to find.
 ) {
 
-    int i;
-    for (i = 0; i < block->count; ++i) {
-        if (strcmp(block->vars[i].name, name) == 0) {
-            return block->vars[i].value;
-        }
+  int i;
+  for (i = 0; i < block->count; ++i) {
+    if (strcmp(block->vars[i].name, name) == 0) {
+      return block->vars[i].value;
     }
-    return NULL;
+  }
+  return NULL;
 
 } // __kmp_env_block_var
 

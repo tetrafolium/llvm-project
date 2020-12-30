@@ -17,46 +17,46 @@ MCAsmParserExtension::MCAsmParserExtension() = default;
 MCAsmParserExtension::~MCAsmParserExtension() = default;
 
 void MCAsmParserExtension::Initialize(MCAsmParser &Parser) {
-    this->Parser = &Parser;
+  this->Parser = &Parser;
 }
 
 /// ParseDirectiveCGProfile
 ///  ::= .cg_profile identifier, identifier, <number>
 bool MCAsmParserExtension::ParseDirectiveCGProfile(StringRef, SMLoc) {
-    StringRef From;
-    SMLoc FromLoc = getLexer().getLoc();
-    if (getParser().parseIdentifier(From))
-        return TokError("expected identifier in directive");
+  StringRef From;
+  SMLoc FromLoc = getLexer().getLoc();
+  if (getParser().parseIdentifier(From))
+    return TokError("expected identifier in directive");
 
-    if (getLexer().isNot(AsmToken::Comma))
-        return TokError("expected a comma");
-    Lex();
+  if (getLexer().isNot(AsmToken::Comma))
+    return TokError("expected a comma");
+  Lex();
 
-    StringRef To;
-    SMLoc ToLoc = getLexer().getLoc();
-    if (getParser().parseIdentifier(To))
-        return TokError("expected identifier in directive");
+  StringRef To;
+  SMLoc ToLoc = getLexer().getLoc();
+  if (getParser().parseIdentifier(To))
+    return TokError("expected identifier in directive");
 
-    if (getLexer().isNot(AsmToken::Comma))
-        return TokError("expected a comma");
-    Lex();
+  if (getLexer().isNot(AsmToken::Comma))
+    return TokError("expected a comma");
+  Lex();
 
-    int64_t Count;
-    if (getParser().parseIntToken(
-                Count, "expected integer count in '.cg_profile' directive"))
-        return true;
+  int64_t Count;
+  if (getParser().parseIntToken(
+          Count, "expected integer count in '.cg_profile' directive"))
+    return true;
 
-    if (getLexer().isNot(AsmToken::EndOfStatement))
-        return TokError("unexpected token in directive");
+  if (getLexer().isNot(AsmToken::EndOfStatement))
+    return TokError("unexpected token in directive");
 
-    MCSymbol *FromSym = getContext().getOrCreateSymbol(From);
-    MCSymbol *ToSym = getContext().getOrCreateSymbol(To);
+  MCSymbol *FromSym = getContext().getOrCreateSymbol(From);
+  MCSymbol *ToSym = getContext().getOrCreateSymbol(To);
 
-    getStreamer().emitCGProfileEntry(
-        MCSymbolRefExpr::create(FromSym, MCSymbolRefExpr::VK_None, getContext(),
-                                FromLoc),
-        MCSymbolRefExpr::create(ToSym, MCSymbolRefExpr::VK_None, getContext(),
-                                ToLoc),
-        Count);
-    return false;
+  getStreamer().emitCGProfileEntry(
+      MCSymbolRefExpr::create(FromSym, MCSymbolRefExpr::VK_None, getContext(),
+                              FromLoc),
+      MCSymbolRefExpr::create(ToSym, MCSymbolRefExpr::VK_None, getContext(),
+                              ToLoc),
+      Count);
+  return false;
 }

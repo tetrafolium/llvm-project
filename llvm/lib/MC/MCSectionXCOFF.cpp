@@ -16,67 +16,62 @@ using namespace llvm;
 MCSectionXCOFF::~MCSectionXCOFF() = default;
 
 void MCSectionXCOFF::printCsectDirective(raw_ostream &OS) const {
-    OS << "\t.csect " << QualName->getName() << "," << Log2_32(getAlignment())
-       << '\n';
+  OS << "\t.csect " << QualName->getName() << "," << Log2_32(getAlignment())
+     << '\n';
 }
 
 void MCSectionXCOFF::PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
-        raw_ostream &OS,
-        const MCExpr *Subsection) const {
-    if (getKind().isText()) {
-        if (getMappingClass() != XCOFF::XMC_PR)
-            report_fatal_error("Unhandled storage-mapping class for .text csect");
+                                          raw_ostream &OS,
+                                          const MCExpr *Subsection) const {
+  if (getKind().isText()) {
+    if (getMappingClass() != XCOFF::XMC_PR)
+      report_fatal_error("Unhandled storage-mapping class for .text csect");
 
-        printCsectDirective(OS);
-        return;
+    printCsectDirective(OS);
+    return;
+  }
+
+  if (getKind().isReadOnly()) {
+    if (getMappingClass() != XCOFF::XMC_RO)
+      report_fatal_error("Unhandled storage-mapping class for .rodata csect.");
+    printCsectDirective(OS);
+    return;
+  }
+
+  if (getKind().isData()) {
+    switch (getMappingClass()) {
+    case XCOFF::XMC_RW:
+    case XCOFF::XMC_DS:
+      printCsectDirective(OS);
+      break;
+    case XCOFF::XMC_TC:
+    case XCOFF::XMC_TE:
+      break;
+    case XCOFF::XMC_TC0:
+      OS << "\t.toc\n";
+      break;
+    default:
+      report_fatal_error("Unhandled storage-mapping class for .data csect.");
     }
+    return;
+  }
 
-    if (getKind().isReadOnly()) {
-        if (getMappingClass() != XCOFF::XMC_RO)
-            report_fatal_error("Unhandled storage-mapping class for .rodata csect.");
-        printCsectDirective(OS);
-        return;
-    }
+  if (getKind().isBSSLocal() || getKind().isCommon()) {
+    assert((getMappingClass() == XCOFF::XMC_RW ||
+            getMappingClass() == XCOFF::XMC_BS) &&
+           "Generated a storage-mapping class for a common/bss csect we don't "
+           "understand how to switch to.");
+    assert(getCSectType() == XCOFF::XTY_CM &&
+           "wrong csect type for .bss csect");
+    // Don't have to print a directive for switching to section for commons.
+    // '.comm' and '.lcomm' directives for the variable will create the needed
+    // csect.
+    return;
+  }
 
-    if (getKind().isData()) {
-        switch (getMappingClass()) {
-        case XCOFF::XMC_RW:
-        case XCOFF::XMC_DS:
-            printCsectDirective(OS);
-            break;
-        case XCOFF::XMC_TC:
-        case XCOFF::XMC_TE:
-            break;
-        case XCOFF::XMC_TC0:
-            OS << "\t.toc\n";
-            break;
-        default:
-            report_fatal_error(
-                "Unhandled storage-mapping class for .data csect.");
-        }
-        return;
-    }
-
-    if (getKind().isBSSLocal() || getKind().isCommon()) {
-        assert((getMappingClass() == XCOFF::XMC_RW ||
-                getMappingClass() == XCOFF::XMC_BS) &&
-               "Generated a storage-mapping class for a common/bss csect we don't "
-               "understand how to switch to.");
-        assert(getCSectType() == XCOFF::XTY_CM &&
-               "wrong csect type for .bss csect");
-        // Don't have to print a directive for switching to section for commons.
-        // '.comm' and '.lcomm' directives for the variable will create the needed
-        // csect.
-        return;
-    }
-
-    report_fatal_error("Printing for this SectionKind is unimplemented.");
+  report_fatal_error("Printing for this SectionKind is unimplemented.");
 }
 
-bool MCSectionXCOFF::UseCodeAlign() const {
-    return getKind().isText();
-}
+bool MCSectionXCOFF::UseCodeAlign() const { return getKind().isText(); }
 
-bool MCSectionXCOFF::isVirtualSection() const {
-    return XCOFF::XTY_CM == Type;
-}
+bool MCSectionXCOFF::isVirtualSection() const { return XCOFF::XTY_CM == Type; }

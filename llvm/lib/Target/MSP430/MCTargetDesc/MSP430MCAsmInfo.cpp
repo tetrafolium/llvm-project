@@ -13,17 +13,17 @@
 #include "MSP430MCAsmInfo.h"
 using namespace llvm;
 
-void MSP430MCAsmInfo::anchor() { }
+void MSP430MCAsmInfo::anchor() {}
 
 MSP430MCAsmInfo::MSP430MCAsmInfo(const Triple &TT,
                                  const MCTargetOptions &Options) {
-    CodePointerSize = CalleeSaveStackSlotSize = 2;
+  CodePointerSize = CalleeSaveStackSlotSize = 2;
 
-    CommentString = ";";
-    SeparatorString = "{";
+  CommentString = ";";
+  SeparatorString = "{";
 
-    AlignmentIsInBytes = false;
-    UsesELFSectionDirectiveForBSS = true;
+  AlignmentIsInBytes = false;
+  UsesELFSectionDirectiveForBSS = true;
 
-    SupportsDebugInformation = true;
+  SupportsDebugInformation = true;
 }

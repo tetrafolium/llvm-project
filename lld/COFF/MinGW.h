@@ -24,17 +24,17 @@ namespace coff {
 // symbols for MinGW.
 class AutoExporter {
 public:
-    AutoExporter();
+  AutoExporter();
 
-    void addWholeArchive(StringRef path);
+  void addWholeArchive(StringRef path);
 
-    llvm::StringSet<> excludeSymbols;
-    llvm::StringSet<> excludeSymbolPrefixes;
-    llvm::StringSet<> excludeSymbolSuffixes;
-    llvm::StringSet<> excludeLibs;
-    llvm::StringSet<> excludeObjects;
+  llvm::StringSet<> excludeSymbols;
+  llvm::StringSet<> excludeSymbolPrefixes;
+  llvm::StringSet<> excludeSymbolSuffixes;
+  llvm::StringSet<> excludeLibs;
+  llvm::StringSet<> excludeObjects;
 
-    bool shouldExport(Defined *sym) const;
+  bool shouldExport(Defined *sym) const;
 };
 
 void writeDefFile(StringRef name);
@@ -48,9 +48,9 @@ void writeDefFile(StringRef name);
 //
 // This data structure is instantiated for each -wrap option.
 struct WrappedSymbol {
-    Symbol *sym;
-    Symbol *real;
-    Symbol *wrap;
+  Symbol *sym;
+  Symbol *real;
+  Symbol *wrap;
 };
 
 std::vector<WrappedSymbol> addWrappedSymbols(llvm::opt::InputArgList &args);

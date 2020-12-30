@@ -24,7 +24,7 @@
 #include <inttypes.h>
 
 struct winsize {
-    long ws_col;
+  long ws_col;
 };
 
 typedef unsigned char cc_t;
@@ -48,20 +48,20 @@ typedef unsigned int tcflag_t;
 
 #define NCCS 32
 struct termios {
-    tcflag_t c_iflag; // input mode flags
-    tcflag_t c_oflag; // output mode flags
-    tcflag_t c_cflag; // control mode flags
-    tcflag_t c_lflag; // local mode flags
-    cc_t c_line;      // line discipline
-    cc_t c_cc[NCCS];  // control characters
-    speed_t c_ispeed; // input speed
-    speed_t c_ospeed; // output speed
+  tcflag_t c_iflag; // input mode flags
+  tcflag_t c_oflag; // output mode flags
+  tcflag_t c_cflag; // control mode flags
+  tcflag_t c_lflag; // local mode flags
+  cc_t c_line;      // line discipline
+  cc_t c_cc[NCCS];  // control characters
+  speed_t c_ispeed; // input speed
+  speed_t c_ospeed; // output speed
 };
 
 #ifdef _MSC_VER
 struct timeval {
-    long tv_sec;
-    long tv_usec;
+  long tv_sec;
+  long tv_usec;
 };
 typedef long pid_t;
 #define PATH_MAX MAX_PATH

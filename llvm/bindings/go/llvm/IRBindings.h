@@ -27,10 +27,10 @@ extern "C" {
 #endif
 
 struct LLVMDebugLocMetadata {
-    unsigned Line;
-    unsigned Col;
-    LLVMMetadataRef Scope;
-    LLVMMetadataRef InlinedAt;
+  unsigned Line;
+  unsigned Col;
+  LLVMMetadataRef Scope;
+  LLVMMetadataRef InlinedAt;
 };
 
 LLVMMetadataRef LLVMConstantAsMetadata(LLVMValueRef Val);

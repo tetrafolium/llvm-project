@@ -19,25 +19,25 @@
 namespace llvm {
 
 enum AddressSpace {
-    ADDRESS_SPACE_GENERIC = 0,
-    ADDRESS_SPACE_GLOBAL = 1,
-    ADDRESS_SPACE_SHARED = 3,
-    ADDRESS_SPACE_CONST = 4,
-    ADDRESS_SPACE_LOCAL = 5,
+  ADDRESS_SPACE_GENERIC = 0,
+  ADDRESS_SPACE_GLOBAL = 1,
+  ADDRESS_SPACE_SHARED = 3,
+  ADDRESS_SPACE_CONST = 4,
+  ADDRESS_SPACE_LOCAL = 5,
 
-    // NVVM Internal
-    ADDRESS_SPACE_PARAM = 101
+  // NVVM Internal
+  ADDRESS_SPACE_PARAM = 101
 };
 
 namespace NVPTXII {
 enum {
-    // These must be kept in sync with TSFlags in NVPTXInstrFormats.td
-    IsTexFlag = 0x80,
-    IsSuldMask = 0x300,
-    IsSuldShift = 8,
-    IsSustFlag = 0x400,
-    IsSurfTexQueryFlag = 0x800,
-    IsTexModeUnifiedFlag = 0x1000
+  // These must be kept in sync with TSFlags in NVPTXInstrFormats.td
+  IsTexFlag = 0x80,
+  IsSuldMask = 0x300,
+  IsSuldShift = 8,
+  IsSustFlag = 0x400,
+  IsSurfTexQueryFlag = 0x800,
+  IsTexModeUnifiedFlag = 0x1000
 };
 } // namespace NVPTXII
 

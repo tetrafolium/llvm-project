@@ -27,27 +27,27 @@ class Mangler;
 /// AArch64MCInstLower - This class is used to lower an MachineInstr
 /// into an MCInst.
 class LLVM_LIBRARY_VISIBILITY AArch64MCInstLower {
-    MCContext &Ctx;
-    AsmPrinter &Printer;
-    Triple TargetTriple;
+  MCContext &Ctx;
+  AsmPrinter &Printer;
+  Triple TargetTriple;
 
 public:
-    AArch64MCInstLower(MCContext &ctx, AsmPrinter &printer);
+  AArch64MCInstLower(MCContext &ctx, AsmPrinter &printer);
 
-    bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const;
-    void Lower(const MachineInstr *MI, MCInst &OutMI) const;
+  bool lowerOperand(const MachineOperand &MO, MCOperand &MCOp) const;
+  void Lower(const MachineInstr *MI, MCInst &OutMI) const;
 
-    MCOperand lowerSymbolOperandDarwin(const MachineOperand &MO,
-                                       MCSymbol *Sym) const;
-    MCOperand lowerSymbolOperandELF(const MachineOperand &MO,
-                                    MCSymbol *Sym) const;
-    MCOperand lowerSymbolOperandCOFF(const MachineOperand &MO,
+  MCOperand lowerSymbolOperandDarwin(const MachineOperand &MO,
                                      MCSymbol *Sym) const;
-    MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
+  MCOperand lowerSymbolOperandELF(const MachineOperand &MO,
+                                  MCSymbol *Sym) const;
+  MCOperand lowerSymbolOperandCOFF(const MachineOperand &MO,
+                                   MCSymbol *Sym) const;
+  MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym) const;
 
-    MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
-    MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
+  MCSymbol *GetGlobalAddressSymbol(const MachineOperand &MO) const;
+  MCSymbol *GetExternalSymbolSymbol(const MachineOperand &MO) const;
 };
-}
+} // namespace llvm
 
 #endif

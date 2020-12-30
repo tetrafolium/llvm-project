@@ -110,29 +110,17 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #endif // _MSC_VER
 
 // empty functions
-inline int posix_openpt(int flag) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
+inline int posix_openpt(int flag) { LLVM_BUILTIN_UNREACHABLE; }
 
 inline int strerror_r(int errnum, char *buf, size_t buflen) {
-    LLVM_BUILTIN_UNREACHABLE;
+  LLVM_BUILTIN_UNREACHABLE;
 }
 
-inline int unlockpt(int fd) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
-inline int grantpt(int fd) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
-inline char *ptsname(int fd) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
+inline int unlockpt(int fd) { LLVM_BUILTIN_UNREACHABLE; }
+inline int grantpt(int fd) { LLVM_BUILTIN_UNREACHABLE; }
+inline char *ptsname(int fd) { LLVM_BUILTIN_UNREACHABLE; }
 
-inline pid_t fork(void) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
-inline pid_t setsid(void) {
-    LLVM_BUILTIN_UNREACHABLE;
-}
+inline pid_t fork(void) { LLVM_BUILTIN_UNREACHABLE; }
+inline pid_t setsid(void) { LLVM_BUILTIN_UNREACHABLE; }
 
 #endif

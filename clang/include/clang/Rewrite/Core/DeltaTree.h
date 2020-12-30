@@ -23,26 +23,26 @@ namespace clang {
 /// efficiently tell us the full accumulated delta for a specific file offset
 /// as well, without traversing the whole tree.
 class DeltaTree {
-    void *Root;    // "DeltaTreeNode *"
+  void *Root; // "DeltaTreeNode *"
 
 public:
-    DeltaTree();
+  DeltaTree();
 
-    // Note: Currently we only support copying when the RHS is empty.
-    DeltaTree(const DeltaTree &RHS);
+  // Note: Currently we only support copying when the RHS is empty.
+  DeltaTree(const DeltaTree &RHS);
 
-    DeltaTree &operator=(const DeltaTree &) = delete;
-    ~DeltaTree();
+  DeltaTree &operator=(const DeltaTree &) = delete;
+  ~DeltaTree();
 
-    /// getDeltaAt - Return the accumulated delta at the specified file offset.
-    /// This includes all insertions or delections that occurred *before* the
-    /// specified file index.
-    int getDeltaAt(unsigned FileIndex) const;
+  /// getDeltaAt - Return the accumulated delta at the specified file offset.
+  /// This includes all insertions or delections that occurred *before* the
+  /// specified file index.
+  int getDeltaAt(unsigned FileIndex) const;
 
-    /// AddDelta - When a change is made that shifts around the text buffer,
-    /// this method is used to record that info.  It inserts a delta of 'Delta'
-    /// into the current DeltaTree at offset FileIndex.
-    void AddDelta(unsigned FileIndex, int Delta);
+  /// AddDelta - When a change is made that shifts around the text buffer,
+  /// this method is used to record that info.  It inserts a delta of 'Delta'
+  /// into the current DeltaTree at offset FileIndex.
+  void AddDelta(unsigned FileIndex, int Delta);
 };
 
 } // namespace clang

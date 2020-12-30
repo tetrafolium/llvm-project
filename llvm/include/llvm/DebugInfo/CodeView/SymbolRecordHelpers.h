@@ -18,34 +18,34 @@ namespace codeview {
 /// "parent" and "end" fields, which contain the offset of the S_END or
 /// S_INLINESITE_END record.
 inline bool symbolOpensScope(SymbolKind Kind) {
-    switch (Kind) {
-    case SymbolKind::S_GPROC32:
-    case SymbolKind::S_LPROC32:
-    case SymbolKind::S_LPROC32_ID:
-    case SymbolKind::S_GPROC32_ID:
-    case SymbolKind::S_BLOCK32:
-    case SymbolKind::S_SEPCODE:
-    case SymbolKind::S_THUNK32:
-    case SymbolKind::S_INLINESITE:
-    case SymbolKind::S_INLINESITE2:
-        return true;
-    default:
-        break;
-    }
-    return false;
+  switch (Kind) {
+  case SymbolKind::S_GPROC32:
+  case SymbolKind::S_LPROC32:
+  case SymbolKind::S_LPROC32_ID:
+  case SymbolKind::S_GPROC32_ID:
+  case SymbolKind::S_BLOCK32:
+  case SymbolKind::S_SEPCODE:
+  case SymbolKind::S_THUNK32:
+  case SymbolKind::S_INLINESITE:
+  case SymbolKind::S_INLINESITE2:
+    return true;
+  default:
+    break;
+  }
+  return false;
 }
 
 /// Return true if this ssymbol ends a scope.
 inline bool symbolEndsScope(SymbolKind Kind) {
-    switch (Kind) {
-    case SymbolKind::S_END:
-    case SymbolKind::S_PROC_ID_END:
-    case SymbolKind::S_INLINESITE_END:
-        return true;
-    default:
-        break;
-    }
-    return false;
+  switch (Kind) {
+  case SymbolKind::S_END:
+  case SymbolKind::S_PROC_ID_END:
+  case SymbolKind::S_INLINESITE_END:
+    return true;
+  default:
+    break;
+  }
+  return false;
 }
 
 /// Given a symbol P for which symbolOpensScope(P) == true, return the

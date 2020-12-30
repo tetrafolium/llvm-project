@@ -15,12 +15,12 @@
 namespace Fortran::semantics {
 class SelectRankConstructChecker : public virtual BaseChecker {
 public:
-    SelectRankConstructChecker(SemanticsContext &context) : context_{context} {}
-    void Leave(const parser::SelectRankConstruct &);
+  SelectRankConstructChecker(SemanticsContext &context) : context_{context} {}
+  void Leave(const parser::SelectRankConstruct &);
 
 private:
-    const SomeExpr *GetExprFromSelector(const parser::Selector &);
-    SemanticsContext &context_;
+  const SomeExpr *GetExprFromSelector(const parser::Selector &);
+  SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_SELECT_STMT_H_

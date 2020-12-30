@@ -26,20 +26,20 @@ namespace clangd {
 /// Represents a shard loaded from storage, stores contents in \p Shard and
 /// metadata about the source file that generated this shard.
 struct LoadedShard {
-    /// Path of the source file that produced this shard.
-    Path AbsolutePath;
-    /// Digest of the source file contents that produced this shard.
-    FileDigest Digest = {};
-    /// Whether the RefSlab in Shard should be used for updating symbol reference
-    /// counts when building an index.
-    bool CountReferences = false;
-    /// Whether the indexing action producing that shard had errors.
-    bool HadErrors = false;
-    /// Path to a TU that is depending on this shard.
-    Path DependentTU;
-    /// Will be nullptr when index storage couldn't provide a valid shard for
-    /// AbsolutePath.
-    std::unique_ptr<IndexFileIn> Shard;
+  /// Path of the source file that produced this shard.
+  Path AbsolutePath;
+  /// Digest of the source file contents that produced this shard.
+  FileDigest Digest = {};
+  /// Whether the RefSlab in Shard should be used for updating symbol reference
+  /// counts when building an index.
+  bool CountReferences = false;
+  /// Whether the indexing action producing that shard had errors.
+  bool HadErrors = false;
+  /// Path to a TU that is depending on this shard.
+  Path DependentTU;
+  /// Will be nullptr when index storage couldn't provide a valid shard for
+  /// AbsolutePath.
+  std::unique_ptr<IndexFileIn> Shard;
 };
 
 /// Loads all shards for the TU \p MainFile from \p Storage.

@@ -14,9 +14,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclObjC.h"
+#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/Checker.h"
 #include "clang/StaticAnalyzer/Core/CheckerManager.h"
@@ -36,46 +36,46 @@ static bool IsCFError(QualType T, IdentifierInfo *II);
 //===----------------------------------------------------------------------===//
 
 namespace {
-class NSErrorMethodChecker
-    : public Checker< check::ASTDecl<ObjCMethodDecl> > {
-    mutable IdentifierInfo *II;
+class NSErrorMethodChecker : public Checker<check::ASTDecl<ObjCMethodDecl>> {
+  mutable IdentifierInfo *II;
 
 public:
-    NSErrorMethodChecker() : II(nullptr) {}
+  NSErrorMethodChecker() : II(nullptr) {}
 
-    void checkASTDecl(const ObjCMethodDecl *D,
-                      AnalysisManager &mgr, BugReporter &BR) const;
+  void checkASTDecl(const ObjCMethodDecl *D, AnalysisManager &mgr,
+                    BugReporter &BR) const;
 };
-}
+} // namespace
 
 void NSErrorMethodChecker::checkASTDecl(const ObjCMethodDecl *D,
                                         AnalysisManager &mgr,
                                         BugReporter &BR) const {
-    if (!D->isThisDeclarationADefinition())
-        return;
-    if (!D->getReturnType()->isVoidType())
-        return;
+  if (!D->isThisDeclarationADefinition())
+    return;
+  if (!D->getReturnType()->isVoidType())
+    return;
 
-    if (!II)
-        II = &D->getASTContext().Idents.get("NSError");
+  if (!II)
+    II = &D->getASTContext().Idents.get("NSError");
 
-    bool hasNSError = false;
-    for (const auto *I : D->parameters())  {
-        if (IsNSError(I->getType(), II)) {
-            hasNSError = true;
-            break;
-        }
+  bool hasNSError = false;
+  for (const auto *I : D->parameters()) {
+    if (IsNSError(I->getType(), II)) {
+      hasNSError = true;
+      break;
     }
+  }
 
-    if (hasNSError) {
-        const char *err = "Method accepting NSError** "
-                          "should have a non-void return value to indicate whether or not an "
-                          "error occurred";
-        PathDiagnosticLocation L =
-            PathDiagnosticLocation::create(D, BR.getSourceManager());
-        BR.EmitBasicReport(D, this, "Bad return type when passing NSError**",
-                           "Coding conventions (Apple)", err, L);
-    }
+  if (hasNSError) {
+    const char *err =
+        "Method accepting NSError** "
+        "should have a non-void return value to indicate whether or not an "
+        "error occurred";
+    PathDiagnosticLocation L =
+        PathDiagnosticLocation::create(D, BR.getSourceManager());
+    BR.EmitBasicReport(D, this, "Bad return type when passing NSError**",
+                       "Coding conventions (Apple)", err, L);
+  }
 }
 
 //===----------------------------------------------------------------------===//
@@ -83,57 +83,57 @@ void NSErrorMethodChecker::checkASTDecl(const ObjCMethodDecl *D,
 //===----------------------------------------------------------------------===//
 
 namespace {
-class CFErrorFunctionChecker
-    : public Checker< check::ASTDecl<FunctionDecl> > {
-    mutable IdentifierInfo *II;
+class CFErrorFunctionChecker : public Checker<check::ASTDecl<FunctionDecl>> {
+  mutable IdentifierInfo *II;
 
 public:
-    CFErrorFunctionChecker() : II(nullptr) {}
+  CFErrorFunctionChecker() : II(nullptr) {}
 
-    void checkASTDecl(const FunctionDecl *D,
-                      AnalysisManager &mgr, BugReporter &BR) const;
+  void checkASTDecl(const FunctionDecl *D, AnalysisManager &mgr,
+                    BugReporter &BR) const;
 };
-}
+} // namespace
 
 static bool hasReservedReturnType(const FunctionDecl *D) {
-    if (isa<CXXConstructorDecl>(D))
-        return true;
+  if (isa<CXXConstructorDecl>(D))
+    return true;
 
-    // operators delete and delete[] are required to have 'void' return type
-    auto OperatorKind = D->getOverloadedOperator();
-    return OperatorKind == OO_Delete || OperatorKind == OO_Array_Delete;
+  // operators delete and delete[] are required to have 'void' return type
+  auto OperatorKind = D->getOverloadedOperator();
+  return OperatorKind == OO_Delete || OperatorKind == OO_Array_Delete;
 }
 
 void CFErrorFunctionChecker::checkASTDecl(const FunctionDecl *D,
-        AnalysisManager &mgr,
-        BugReporter &BR) const {
-    if (!D->doesThisDeclarationHaveABody())
-        return;
-    if (!D->getReturnType()->isVoidType())
-        return;
-    if (hasReservedReturnType(D))
-        return;
+                                          AnalysisManager &mgr,
+                                          BugReporter &BR) const {
+  if (!D->doesThisDeclarationHaveABody())
+    return;
+  if (!D->getReturnType()->isVoidType())
+    return;
+  if (hasReservedReturnType(D))
+    return;
 
-    if (!II)
-        II = &D->getASTContext().Idents.get("CFErrorRef");
+  if (!II)
+    II = &D->getASTContext().Idents.get("CFErrorRef");
 
-    bool hasCFError = false;
-    for (auto I : D->parameters())  {
-        if (IsCFError(I->getType(), II)) {
-            hasCFError = true;
-            break;
-        }
+  bool hasCFError = false;
+  for (auto I : D->parameters()) {
+    if (IsCFError(I->getType(), II)) {
+      hasCFError = true;
+      break;
     }
+  }
 
-    if (hasCFError) {
-        const char *err = "Function accepting CFErrorRef* "
-                          "should have a non-void return value to indicate whether or not an "
-                          "error occurred";
-        PathDiagnosticLocation L =
-            PathDiagnosticLocation::create(D, BR.getSourceManager());
-        BR.EmitBasicReport(D, this, "Bad return type when passing CFErrorRef*",
-                           "Coding conventions (Apple)", err, L);
-    }
+  if (hasCFError) {
+    const char *err =
+        "Function accepting CFErrorRef* "
+        "should have a non-void return value to indicate whether or not an "
+        "error occurred";
+    PathDiagnosticLocation L =
+        PathDiagnosticLocation::create(D, BR.getSourceManager());
+    BR.EmitBasicReport(D, this, "Bad return type when passing CFErrorRef*",
+                       "Coding conventions (Apple)", err, L);
+  }
 }
 
 //===----------------------------------------------------------------------===//
@@ -144,207 +144,206 @@ namespace {
 
 class NSErrorDerefBug : public BugType {
 public:
-    NSErrorDerefBug(const CheckerNameRef Checker)
-        : BugType(Checker, "NSError** null dereference",
-                  "Coding conventions (Apple)") {}
+  NSErrorDerefBug(const CheckerNameRef Checker)
+      : BugType(Checker, "NSError** null dereference",
+                "Coding conventions (Apple)") {}
 };
 
 class CFErrorDerefBug : public BugType {
 public:
-    CFErrorDerefBug(const CheckerNameRef Checker)
-        : BugType(Checker, "CFErrorRef* null dereference",
-                  "Coding conventions (Apple)") {}
+  CFErrorDerefBug(const CheckerNameRef Checker)
+      : BugType(Checker, "CFErrorRef* null dereference",
+                "Coding conventions (Apple)") {}
 };
 
-}
+} // namespace
 
 namespace {
 class NSOrCFErrorDerefChecker
-    : public Checker< check::Location,
-      check::Event<ImplicitNullDerefEvent> > {
-    mutable IdentifierInfo *NSErrorII, *CFErrorII;
-    mutable std::unique_ptr<NSErrorDerefBug> NSBT;
-    mutable std::unique_ptr<CFErrorDerefBug> CFBT;
-public:
-    DefaultBool ShouldCheckNSError, ShouldCheckCFError;
-    CheckerNameRef NSErrorName, CFErrorName;
-    NSOrCFErrorDerefChecker() : NSErrorII(nullptr), CFErrorII(nullptr) {}
+    : public Checker<check::Location, check::Event<ImplicitNullDerefEvent>> {
+  mutable IdentifierInfo *NSErrorII, *CFErrorII;
+  mutable std::unique_ptr<NSErrorDerefBug> NSBT;
+  mutable std::unique_ptr<CFErrorDerefBug> CFBT;
 
-    void checkLocation(SVal loc, bool isLoad, const Stmt *S,
-                       CheckerContext &C) const;
-    void checkEvent(ImplicitNullDerefEvent event) const;
+public:
+  DefaultBool ShouldCheckNSError, ShouldCheckCFError;
+  CheckerNameRef NSErrorName, CFErrorName;
+  NSOrCFErrorDerefChecker() : NSErrorII(nullptr), CFErrorII(nullptr) {}
+
+  void checkLocation(SVal loc, bool isLoad, const Stmt *S,
+                     CheckerContext &C) const;
+  void checkEvent(ImplicitNullDerefEvent event) const;
 };
-}
+} // namespace
 
 typedef llvm::ImmutableMap<SymbolRef, unsigned> ErrorOutFlag;
 REGISTER_TRAIT_WITH_PROGRAMSTATE(NSErrorOut, ErrorOutFlag)
 REGISTER_TRAIT_WITH_PROGRAMSTATE(CFErrorOut, ErrorOutFlag)
 
-template <typename T>
-static bool hasFlag(SVal val, ProgramStateRef state) {
-    if (SymbolRef sym = val.getAsSymbol())
-        if (const unsigned *attachedFlags = state->get<T>(sym))
-            return *attachedFlags;
-    return false;
+template <typename T> static bool hasFlag(SVal val, ProgramStateRef state) {
+  if (SymbolRef sym = val.getAsSymbol())
+    if (const unsigned *attachedFlags = state->get<T>(sym))
+      return *attachedFlags;
+  return false;
 }
 
 template <typename T>
 static void setFlag(ProgramStateRef state, SVal val, CheckerContext &C) {
-    // We tag the symbol that the SVal wraps.
-    if (SymbolRef sym = val.getAsSymbol())
-        C.addTransition(state->set<T>(sym, true));
+  // We tag the symbol that the SVal wraps.
+  if (SymbolRef sym = val.getAsSymbol())
+    C.addTransition(state->set<T>(sym, true));
 }
 
 static QualType parameterTypeFromSVal(SVal val, CheckerContext &C) {
-    const StackFrameContext * SFC = C.getStackFrame();
-    if (Optional<loc::MemRegionVal> X = val.getAs<loc::MemRegionVal>()) {
-        const MemRegion* R = X->getRegion();
-        if (const VarRegion *VR = R->getAs<VarRegion>())
-            if (const StackArgumentsSpaceRegion *
-                    stackReg = dyn_cast<StackArgumentsSpaceRegion>(VR->getMemorySpace()))
-                if (stackReg->getStackFrame() == SFC)
-                    return VR->getValueType();
-    }
+  const StackFrameContext *SFC = C.getStackFrame();
+  if (Optional<loc::MemRegionVal> X = val.getAs<loc::MemRegionVal>()) {
+    const MemRegion *R = X->getRegion();
+    if (const VarRegion *VR = R->getAs<VarRegion>())
+      if (const StackArgumentsSpaceRegion *stackReg =
+              dyn_cast<StackArgumentsSpaceRegion>(VR->getMemorySpace()))
+        if (stackReg->getStackFrame() == SFC)
+          return VR->getValueType();
+  }
 
-    return QualType();
+  return QualType();
 }
 
 void NSOrCFErrorDerefChecker::checkLocation(SVal loc, bool isLoad,
-        const Stmt *S,
-        CheckerContext &C) const {
-    if (!isLoad)
-        return;
-    if (loc.isUndef() || !loc.getAs<Loc>())
-        return;
+                                            const Stmt *S,
+                                            CheckerContext &C) const {
+  if (!isLoad)
+    return;
+  if (loc.isUndef() || !loc.getAs<Loc>())
+    return;
 
-    ASTContext &Ctx = C.getASTContext();
-    ProgramStateRef state = C.getState();
+  ASTContext &Ctx = C.getASTContext();
+  ProgramStateRef state = C.getState();
 
-    // If we are loading from NSError**/CFErrorRef* parameter, mark the resulting
-    // SVal so that we can later check it when handling the
-    // ImplicitNullDerefEvent event.
-    // FIXME: Cumbersome! Maybe add hook at construction of SVals at start of
-    // function ?
+  // If we are loading from NSError**/CFErrorRef* parameter, mark the resulting
+  // SVal so that we can later check it when handling the
+  // ImplicitNullDerefEvent event.
+  // FIXME: Cumbersome! Maybe add hook at construction of SVals at start of
+  // function ?
 
-    QualType parmT = parameterTypeFromSVal(loc, C);
-    if (parmT.isNull())
-        return;
+  QualType parmT = parameterTypeFromSVal(loc, C);
+  if (parmT.isNull())
+    return;
 
-    if (!NSErrorII)
-        NSErrorII = &Ctx.Idents.get("NSError");
-    if (!CFErrorII)
-        CFErrorII = &Ctx.Idents.get("CFErrorRef");
+  if (!NSErrorII)
+    NSErrorII = &Ctx.Idents.get("NSError");
+  if (!CFErrorII)
+    CFErrorII = &Ctx.Idents.get("CFErrorRef");
 
-    if (ShouldCheckNSError && IsNSError(parmT, NSErrorII)) {
-        setFlag<NSErrorOut>(state, state->getSVal(loc.castAs<Loc>()), C);
-        return;
-    }
+  if (ShouldCheckNSError && IsNSError(parmT, NSErrorII)) {
+    setFlag<NSErrorOut>(state, state->getSVal(loc.castAs<Loc>()), C);
+    return;
+  }
 
-    if (ShouldCheckCFError && IsCFError(parmT, CFErrorII)) {
-        setFlag<CFErrorOut>(state, state->getSVal(loc.castAs<Loc>()), C);
-        return;
-    }
+  if (ShouldCheckCFError && IsCFError(parmT, CFErrorII)) {
+    setFlag<CFErrorOut>(state, state->getSVal(loc.castAs<Loc>()), C);
+    return;
+  }
 }
 
 void NSOrCFErrorDerefChecker::checkEvent(ImplicitNullDerefEvent event) const {
-    if (event.IsLoad)
-        return;
+  if (event.IsLoad)
+    return;
 
-    SVal loc = event.Location;
-    ProgramStateRef state = event.SinkNode->getState();
-    BugReporter &BR = *event.BR;
+  SVal loc = event.Location;
+  ProgramStateRef state = event.SinkNode->getState();
+  BugReporter &BR = *event.BR;
 
-    bool isNSError = hasFlag<NSErrorOut>(loc, state);
-    bool isCFError = false;
-    if (!isNSError)
-        isCFError = hasFlag<CFErrorOut>(loc, state);
+  bool isNSError = hasFlag<NSErrorOut>(loc, state);
+  bool isCFError = false;
+  if (!isNSError)
+    isCFError = hasFlag<CFErrorOut>(loc, state);
 
-    if (!(isNSError || isCFError))
-        return;
+  if (!(isNSError || isCFError))
+    return;
 
-    // Storing to possible null NSError/CFErrorRef out parameter.
-    SmallString<128> Buf;
-    llvm::raw_svector_ostream os(Buf);
+  // Storing to possible null NSError/CFErrorRef out parameter.
+  SmallString<128> Buf;
+  llvm::raw_svector_ostream os(Buf);
 
-    os << "Potential null dereference.  According to coding standards ";
-    os << (isNSError
-           ? "in 'Creating and Returning NSError Objects' the parameter"
-           : "documented in CoreFoundation/CFError.h the parameter");
+  os << "Potential null dereference.  According to coding standards ";
+  os << (isNSError ? "in 'Creating and Returning NSError Objects' the parameter"
+                   : "documented in CoreFoundation/CFError.h the parameter");
 
-    os  << " may be null";
+  os << " may be null";
 
-    BugType *bug = nullptr;
-    if (isNSError) {
-        if (!NSBT)
-            NSBT.reset(new NSErrorDerefBug(NSErrorName));
-        bug = NSBT.get();
-    }
-    else {
-        if (!CFBT)
-            CFBT.reset(new CFErrorDerefBug(CFErrorName));
-        bug = CFBT.get();
-    }
-    BR.emitReport(
-        std::make_unique<PathSensitiveBugReport>(*bug, os.str(), event.SinkNode));
+  BugType *bug = nullptr;
+  if (isNSError) {
+    if (!NSBT)
+      NSBT.reset(new NSErrorDerefBug(NSErrorName));
+    bug = NSBT.get();
+  } else {
+    if (!CFBT)
+      CFBT.reset(new CFErrorDerefBug(CFErrorName));
+    bug = CFBT.get();
+  }
+  BR.emitReport(
+      std::make_unique<PathSensitiveBugReport>(*bug, os.str(), event.SinkNode));
 }
 
 static bool IsNSError(QualType T, IdentifierInfo *II) {
 
-    const PointerType* PPT = T->getAs<PointerType>();
-    if (!PPT)
-        return false;
-
-    const ObjCObjectPointerType* PT =
-        PPT->getPointeeType()->getAs<ObjCObjectPointerType>();
-
-    if (!PT)
-        return false;
-
-    const ObjCInterfaceDecl *ID = PT->getInterfaceDecl();
-
-    // FIXME: Can ID ever be NULL?
-    if (ID)
-        return II == ID->getIdentifier();
-
+  const PointerType *PPT = T->getAs<PointerType>();
+  if (!PPT)
     return false;
+
+  const ObjCObjectPointerType *PT =
+      PPT->getPointeeType()->getAs<ObjCObjectPointerType>();
+
+  if (!PT)
+    return false;
+
+  const ObjCInterfaceDecl *ID = PT->getInterfaceDecl();
+
+  // FIXME: Can ID ever be NULL?
+  if (ID)
+    return II == ID->getIdentifier();
+
+  return false;
 }
 
 static bool IsCFError(QualType T, IdentifierInfo *II) {
-    const PointerType* PPT = T->getAs<PointerType>();
-    if (!PPT) return false;
+  const PointerType *PPT = T->getAs<PointerType>();
+  if (!PPT)
+    return false;
 
-    const TypedefType* TT = PPT->getPointeeType()->getAs<TypedefType>();
-    if (!TT) return false;
+  const TypedefType *TT = PPT->getPointeeType()->getAs<TypedefType>();
+  if (!TT)
+    return false;
 
-    return TT->getDecl()->getIdentifier() == II;
+  return TT->getDecl()->getIdentifier() == II;
 }
 
 void ento::registerNSOrCFErrorDerefChecker(CheckerManager &mgr) {
-    mgr.registerChecker<NSOrCFErrorDerefChecker>();
+  mgr.registerChecker<NSOrCFErrorDerefChecker>();
 }
 
 bool ento::shouldRegisterNSOrCFErrorDerefChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }
 
 void ento::registerNSErrorChecker(CheckerManager &mgr) {
-    mgr.registerChecker<NSErrorMethodChecker>();
-    NSOrCFErrorDerefChecker *checker = mgr.getChecker<NSOrCFErrorDerefChecker>();
-    checker->ShouldCheckNSError = true;
-    checker->NSErrorName = mgr.getCurrentCheckerName();
+  mgr.registerChecker<NSErrorMethodChecker>();
+  NSOrCFErrorDerefChecker *checker = mgr.getChecker<NSOrCFErrorDerefChecker>();
+  checker->ShouldCheckNSError = true;
+  checker->NSErrorName = mgr.getCurrentCheckerName();
 }
 
 bool ento::shouldRegisterNSErrorChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }
 
 void ento::registerCFErrorChecker(CheckerManager &mgr) {
-    mgr.registerChecker<CFErrorFunctionChecker>();
-    NSOrCFErrorDerefChecker *checker = mgr.getChecker<NSOrCFErrorDerefChecker>();
-    checker->ShouldCheckCFError = true;
-    checker->CFErrorName = mgr.getCurrentCheckerName();
+  mgr.registerChecker<CFErrorFunctionChecker>();
+  NSOrCFErrorDerefChecker *checker = mgr.getChecker<NSOrCFErrorDerefChecker>();
+  checker->ShouldCheckCFError = true;
+  checker->CFErrorName = mgr.getCurrentCheckerName();
 }
 
 bool ento::shouldRegisterCFErrorChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

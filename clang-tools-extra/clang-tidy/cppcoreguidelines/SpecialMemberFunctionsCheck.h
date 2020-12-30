@@ -24,50 +24,50 @@ namespace cppcoreguidelines {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-special-member-functions.html
 class SpecialMemberFunctionsCheck : public ClangTidyCheck {
 public:
-    SpecialMemberFunctionsCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
+  SpecialMemberFunctionsCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void onEndOfTranslationUnit() override;
+
+  enum class SpecialMemberFunctionKind : uint8_t {
+    Destructor,
+    DefaultDestructor,
+    NonDefaultDestructor,
+    CopyConstructor,
+    CopyAssignment,
+    MoveConstructor,
+    MoveAssignment
+  };
+
+  struct SpecialMemberFunctionData {
+    SpecialMemberFunctionKind FunctionKind;
+    bool IsDeleted;
+
+    bool operator==(const SpecialMemberFunctionData &Other) {
+      return (Other.FunctionKind == FunctionKind) &&
+             (Other.IsDeleted == IsDeleted);
     }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void onEndOfTranslationUnit() override;
+  };
 
-    enum class SpecialMemberFunctionKind : uint8_t {
-        Destructor,
-        DefaultDestructor,
-        NonDefaultDestructor,
-        CopyConstructor,
-        CopyAssignment,
-        MoveConstructor,
-        MoveAssignment
-    };
+  using ClassDefId = std::pair<SourceLocation, std::string>;
 
-    struct SpecialMemberFunctionData {
-        SpecialMemberFunctionKind FunctionKind;
-        bool IsDeleted;
-
-        bool operator==(const SpecialMemberFunctionData &Other) {
-            return (Other.FunctionKind == FunctionKind) &&
-                   (Other.IsDeleted == IsDeleted);
-        }
-    };
-
-    using ClassDefId = std::pair<SourceLocation, std::string>;
-
-    using ClassDefiningSpecialMembersMap =
-        llvm::DenseMap<ClassDefId,
-        llvm::SmallVector<SpecialMemberFunctionData, 5>>;
+  using ClassDefiningSpecialMembersMap =
+      llvm::DenseMap<ClassDefId,
+                     llvm::SmallVector<SpecialMemberFunctionData, 5>>;
 
 private:
-    void checkForMissingMembers(
-        const ClassDefId &ID,
-        llvm::ArrayRef<SpecialMemberFunctionData> DefinedSpecialMembers);
+  void checkForMissingMembers(
+      const ClassDefId &ID,
+      llvm::ArrayRef<SpecialMemberFunctionData> DefinedSpecialMembers);
 
-    const bool AllowMissingMoveFunctions;
-    const bool AllowSoleDefaultDtor;
-    const bool AllowMissingMoveFunctionsWhenCopyIsDeleted;
-    ClassDefiningSpecialMembersMap ClassWithSpecialMembers;
+  const bool AllowMissingMoveFunctions;
+  const bool AllowSoleDefaultDtor;
+  const bool AllowMissingMoveFunctionsWhenCopyIsDeleted;
+  ClassDefiningSpecialMembersMap ClassWithSpecialMembers;
 };
 
 } // namespace cppcoreguidelines
@@ -81,34 +81,34 @@ namespace llvm {
 template <>
 struct DenseMapInfo<
     clang::tidy::cppcoreguidelines::SpecialMemberFunctionsCheck::ClassDefId> {
-    using ClassDefId =
-        clang::tidy::cppcoreguidelines::SpecialMemberFunctionsCheck::ClassDefId;
+  using ClassDefId =
+      clang::tidy::cppcoreguidelines::SpecialMemberFunctionsCheck::ClassDefId;
 
-    static inline ClassDefId getEmptyKey() {
-        return ClassDefId(DenseMapInfo<clang::SourceLocation>::getEmptyKey(),
-                          "EMPTY");
-    }
+  static inline ClassDefId getEmptyKey() {
+    return ClassDefId(DenseMapInfo<clang::SourceLocation>::getEmptyKey(),
+                      "EMPTY");
+  }
 
-    static inline ClassDefId getTombstoneKey() {
-        return ClassDefId(DenseMapInfo<clang::SourceLocation>::getTombstoneKey(),
-                          "TOMBSTONE");
-    }
+  static inline ClassDefId getTombstoneKey() {
+    return ClassDefId(DenseMapInfo<clang::SourceLocation>::getTombstoneKey(),
+                      "TOMBSTONE");
+  }
 
-    static unsigned getHashValue(ClassDefId Val) {
-        assert(Val != getEmptyKey() && "Cannot hash the empty key!");
-        assert(Val != getTombstoneKey() && "Cannot hash the tombstone key!");
+  static unsigned getHashValue(ClassDefId Val) {
+    assert(Val != getEmptyKey() && "Cannot hash the empty key!");
+    assert(Val != getTombstoneKey() && "Cannot hash the tombstone key!");
 
-        std::hash<ClassDefId::second_type> SecondHash;
-        return Val.first.getHashValue() + SecondHash(Val.second);
-    }
+    std::hash<ClassDefId::second_type> SecondHash;
+    return Val.first.getHashValue() + SecondHash(Val.second);
+  }
 
-    static bool isEqual(const ClassDefId &LHS, const ClassDefId &RHS) {
-        if (RHS == getEmptyKey())
-            return LHS == getEmptyKey();
-        if (RHS == getTombstoneKey())
-            return LHS == getTombstoneKey();
-        return LHS == RHS;
-    }
+  static bool isEqual(const ClassDefId &LHS, const ClassDefId &RHS) {
+    if (RHS == getEmptyKey())
+      return LHS == getEmptyKey();
+    if (RHS == getTombstoneKey())
+      return LHS == getTombstoneKey();
+    return LHS == RHS;
+  }
 };
 
 } // namespace llvm

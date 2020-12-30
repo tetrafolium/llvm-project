@@ -18,15 +18,15 @@ class raw_ostream;
 namespace pdb {
 
 class PDBSymbolTypeCustom : public PDBSymbol {
-    DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::CustomType)
+  DECLARE_PDB_SYMBOL_CONCRETE_TYPE(PDB_SymType::CustomType)
 public:
-    void dump(PDBSymDumper &Dumper) const override;
+  void dump(PDBSymDumper &Dumper) const override;
 
-    FORWARD_SYMBOL_METHOD(getOemId)
-    FORWARD_SYMBOL_METHOD(getOemSymbolId)
+  FORWARD_SYMBOL_METHOD(getOemId)
+  FORWARD_SYMBOL_METHOD(getOemSymbolId)
 };
 
+} // namespace pdb
 } // namespace llvm
-}
 
 #endif // LLVM_DEBUGINFO_PDB_PDBSYMBOLTYPECUSTOM_H

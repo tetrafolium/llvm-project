@@ -21,28 +21,28 @@ namespace llvm {
 // Fuse AES crypto encoding or decoding.
 static bool isAESPair(const MachineInstr *FirstMI,
                       const MachineInstr &SecondMI) {
-    // Assume the 1st instr to be a wildcard if it is unspecified.
-    switch(SecondMI.getOpcode()) {
-    // AES encode.
-    case ARM::AESMC :
-        return FirstMI == nullptr || FirstMI->getOpcode() == ARM::AESE;
-    // AES decode.
-    case ARM::AESIMC:
-        return FirstMI == nullptr || FirstMI->getOpcode() == ARM::AESD;
-    }
+  // Assume the 1st instr to be a wildcard if it is unspecified.
+  switch (SecondMI.getOpcode()) {
+  // AES encode.
+  case ARM::AESMC:
+    return FirstMI == nullptr || FirstMI->getOpcode() == ARM::AESE;
+  // AES decode.
+  case ARM::AESIMC:
+    return FirstMI == nullptr || FirstMI->getOpcode() == ARM::AESD;
+  }
 
-    return false;
+  return false;
 }
 
 // Fuse literal generation.
 static bool isLiteralsPair(const MachineInstr *FirstMI,
                            const MachineInstr &SecondMI) {
-    // Assume the 1st instr to be a wildcard if it is unspecified.
-    if ((FirstMI == nullptr || FirstMI->getOpcode() == ARM::MOVi16) &&
-            SecondMI.getOpcode() == ARM::MOVTi16)
-        return true;
+  // Assume the 1st instr to be a wildcard if it is unspecified.
+  if ((FirstMI == nullptr || FirstMI->getOpcode() == ARM::MOVi16) &&
+      SecondMI.getOpcode() == ARM::MOVTi16)
+    return true;
 
-    return false;
+  return false;
 }
 
 /// Check if the instr pair, FirstMI and SecondMI, should be fused
@@ -52,18 +52,18 @@ static bool shouldScheduleAdjacent(const TargetInstrInfo &TII,
                                    const TargetSubtargetInfo &TSI,
                                    const MachineInstr *FirstMI,
                                    const MachineInstr &SecondMI) {
-    const ARMSubtarget &ST = static_cast<const ARMSubtarget&>(TSI);
+  const ARMSubtarget &ST = static_cast<const ARMSubtarget &>(TSI);
 
-    if (ST.hasFuseAES() && isAESPair(FirstMI, SecondMI))
-        return true;
-    if (ST.hasFuseLiterals() && isLiteralsPair(FirstMI, SecondMI))
-        return true;
+  if (ST.hasFuseAES() && isAESPair(FirstMI, SecondMI))
+    return true;
+  if (ST.hasFuseLiterals() && isLiteralsPair(FirstMI, SecondMI))
+    return true;
 
-    return false;
+  return false;
 }
 
-std::unique_ptr<ScheduleDAGMutation> createARMMacroFusionDAGMutation () {
-    return createMacroFusionDAGMutation(shouldScheduleAdjacent);
+std::unique_ptr<ScheduleDAGMutation> createARMMacroFusionDAGMutation() {
+  return createMacroFusionDAGMutation(shouldScheduleAdjacent);
 }
 
 } // end namespace llvm

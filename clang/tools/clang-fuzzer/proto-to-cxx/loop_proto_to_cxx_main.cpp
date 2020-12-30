@@ -10,7 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 #include <fstream>
 #include <iostream>
 #include <streambuf>
@@ -19,12 +18,12 @@
 #include "proto_to_cxx.h"
 
 int main(int argc, char **argv) {
-    for (int i = 1; i < argc; i++) {
-        std::fstream in(argv[i]);
-        std::string str((std::istreambuf_iterator<char>(in)),
-                        std::istreambuf_iterator<char>());
-        std::cout << "// " << argv[i] << std::endl;
-        std::cout << clang_fuzzer::LoopProtoToCxx(
-                      reinterpret_cast<const uint8_t *>(str.data()), str.size());
-    }
+  for (int i = 1; i < argc; i++) {
+    std::fstream in(argv[i]);
+    std::string str((std::istreambuf_iterator<char>(in)),
+                    std::istreambuf_iterator<char>());
+    std::cout << "// " << argv[i] << std::endl;
+    std::cout << clang_fuzzer::LoopProtoToCxx(
+        reinterpret_cast<const uint8_t *>(str.data()), str.size());
+  }
 }

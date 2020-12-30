@@ -35,8 +35,8 @@
 #include "llvm/ExecutionEngine/Orc/Core.h"
 #include "llvm/ExecutionEngine/Orc/ExecutionUtils.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
-#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/ExecutionEngine/Orc/TargetProcess/TargetExecutionUtils.h"
+#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/ModuleSummaryIndex.h"
@@ -56,7 +56,7 @@ using namespace llvm::orc;
 
 // Path of the module summary index file.
 cl::opt<std::string> IndexFile{cl::desc("<module summary index>"),
-    cl::Positional, cl::init("-")};
+                               cl::Positional, cl::init("-")};
 
 // Describe a fail state that is caused by the given ModuleSummaryIndex
 // providing multiple definitions of the given global value name. It will dump
@@ -65,31 +65,31 @@ cl::opt<std::string> IndexFile{cl::desc("<module summary index>"),
 class DuplicateDefinitionInSummary
     : public ErrorInfo<DuplicateDefinitionInSummary> {
 public:
-    static char ID;
+  static char ID;
 
-    DuplicateDefinitionInSummary(std::string GlobalValueName, ValueInfo VI)
-        : GlobalValueName(std::move(GlobalValueName)) {
-        ModulePaths.reserve(VI.getSummaryList().size());
-        for (const auto &S : VI.getSummaryList())
-            ModulePaths.push_back(S->modulePath().str());
-        llvm::sort(ModulePaths);
-    }
+  DuplicateDefinitionInSummary(std::string GlobalValueName, ValueInfo VI)
+      : GlobalValueName(std::move(GlobalValueName)) {
+    ModulePaths.reserve(VI.getSummaryList().size());
+    for (const auto &S : VI.getSummaryList())
+      ModulePaths.push_back(S->modulePath().str());
+    llvm::sort(ModulePaths);
+  }
 
-    void log(raw_ostream &OS) const override {
-        OS << "Duplicate symbol for global value '" << GlobalValueName
-           << "' (GUID: " << GlobalValue::getGUID(GlobalValueName) << ") in:\n";
-        for (const std::string &Path : ModulePaths) {
-            OS << "    " << Path << "\n";
-        }
+  void log(raw_ostream &OS) const override {
+    OS << "Duplicate symbol for global value '" << GlobalValueName
+       << "' (GUID: " << GlobalValue::getGUID(GlobalValueName) << ") in:\n";
+    for (const std::string &Path : ModulePaths) {
+      OS << "    " << Path << "\n";
     }
+  }
 
-    std::error_code convertToErrorCode() const override {
-        return inconvertibleErrorCode();
-    }
+  std::error_code convertToErrorCode() const override {
+    return inconvertibleErrorCode();
+  }
 
 private:
-    std::string GlobalValueName;
-    std::vector<std::string> ModulePaths;
+  std::string GlobalValueName;
+  std::vector<std::string> ModulePaths;
 };
 
 // Describe a fail state where the given global value name was not found in the
@@ -98,32 +98,32 @@ private:
 class DefinitionNotFoundInSummary
     : public ErrorInfo<DefinitionNotFoundInSummary> {
 public:
-    static char ID;
+  static char ID;
 
-    DefinitionNotFoundInSummary(std::string GlobalValueName,
-                                ModuleSummaryIndex &Index)
-        : GlobalValueName(std::move(GlobalValueName)) {
-        ModulePaths.reserve(Index.modulePaths().size());
-        for (const auto &Entry : Index.modulePaths())
-            ModulePaths.push_back(Entry.first().str());
-        llvm::sort(ModulePaths);
-    }
+  DefinitionNotFoundInSummary(std::string GlobalValueName,
+                              ModuleSummaryIndex &Index)
+      : GlobalValueName(std::move(GlobalValueName)) {
+    ModulePaths.reserve(Index.modulePaths().size());
+    for (const auto &Entry : Index.modulePaths())
+      ModulePaths.push_back(Entry.first().str());
+    llvm::sort(ModulePaths);
+  }
 
-    void log(raw_ostream &OS) const override {
-        OS << "No symbol for global value '" << GlobalValueName
-           << "' (GUID: " << GlobalValue::getGUID(GlobalValueName) << ") in:\n";
-        for (const std::string &Path : ModulePaths) {
-            OS << "    " << Path << "\n";
-        }
+  void log(raw_ostream &OS) const override {
+    OS << "No symbol for global value '" << GlobalValueName
+       << "' (GUID: " << GlobalValue::getGUID(GlobalValueName) << ") in:\n";
+    for (const std::string &Path : ModulePaths) {
+      OS << "    " << Path << "\n";
     }
+  }
 
-    std::error_code convertToErrorCode() const override {
-        return llvm::inconvertibleErrorCode();
-    }
+  std::error_code convertToErrorCode() const override {
+    return llvm::inconvertibleErrorCode();
+  }
 
 private:
-    std::string GlobalValueName;
-    std::vector<std::string> ModulePaths;
+  std::string GlobalValueName;
+  std::vector<std::string> ModulePaths;
 };
 
 char DuplicateDefinitionInSummary::ID = 0;
@@ -134,108 +134,108 @@ char DefinitionNotFoundInSummary::ID = 0;
 // build directory of the covered modules.
 Expected<StringRef> getMainModulePath(StringRef FunctionName,
                                       ModuleSummaryIndex &Index) {
-    // Summaries use unmangled names.
-    GlobalValue::GUID G = GlobalValue::getGUID(FunctionName);
-    ValueInfo VI = Index.getValueInfo(G);
+  // Summaries use unmangled names.
+  GlobalValue::GUID G = GlobalValue::getGUID(FunctionName);
+  ValueInfo VI = Index.getValueInfo(G);
 
-    // We need a unique definition, otherwise don't try further.
-    if (!VI || VI.getSummaryList().empty())
-        return make_error<DefinitionNotFoundInSummary>(FunctionName.str(), Index);
-    if (VI.getSummaryList().size() > 1)
-        return make_error<DuplicateDefinitionInSummary>(FunctionName.str(), VI);
+  // We need a unique definition, otherwise don't try further.
+  if (!VI || VI.getSummaryList().empty())
+    return make_error<DefinitionNotFoundInSummary>(FunctionName.str(), Index);
+  if (VI.getSummaryList().size() > 1)
+    return make_error<DuplicateDefinitionInSummary>(FunctionName.str(), VI);
 
-    GlobalValueSummary *S = VI.getSummaryList().front()->getBaseObject();
-    if (!isa<FunctionSummary>(S))
-        return createStringError(inconvertibleErrorCode(),
-                                 "Entry point is not a function: " + FunctionName);
+  GlobalValueSummary *S = VI.getSummaryList().front()->getBaseObject();
+  if (!isa<FunctionSummary>(S))
+    return createStringError(inconvertibleErrorCode(),
+                             "Entry point is not a function: " + FunctionName);
 
-    // Return a reference. ModuleSummaryIndex owns the module paths.
-    return S->modulePath();
+  // Return a reference. ModuleSummaryIndex owns the module paths.
+  return S->modulePath();
 }
 
 // Parse the bitcode module from the given path into a ThreadSafeModule.
 Expected<ThreadSafeModule> loadModule(StringRef Path,
                                       orc::ThreadSafeContext TSCtx) {
-    outs() << "About to load module: " << Path << "\n";
+  outs() << "About to load module: " << Path << "\n";
 
-    Expected<std::unique_ptr<MemoryBuffer>> BitcodeBuffer =
-            errorOrToExpected(MemoryBuffer::getFile(Path));
-    if (!BitcodeBuffer)
-        return BitcodeBuffer.takeError();
+  Expected<std::unique_ptr<MemoryBuffer>> BitcodeBuffer =
+      errorOrToExpected(MemoryBuffer::getFile(Path));
+  if (!BitcodeBuffer)
+    return BitcodeBuffer.takeError();
 
-    MemoryBufferRef BitcodeBufferRef = (**BitcodeBuffer).getMemBufferRef();
-    Expected<std::unique_ptr<Module>> M =
-                                       parseBitcodeFile(BitcodeBufferRef, *TSCtx.getContext());
-    if (!M)
-        return M.takeError();
+  MemoryBufferRef BitcodeBufferRef = (**BitcodeBuffer).getMemBufferRef();
+  Expected<std::unique_ptr<Module>> M =
+      parseBitcodeFile(BitcodeBufferRef, *TSCtx.getContext());
+  if (!M)
+    return M.takeError();
 
-    return ThreadSafeModule(std::move(*M), std::move(TSCtx));
+  return ThreadSafeModule(std::move(*M), std::move(TSCtx));
 }
 
 int main(int Argc, char *Argv[]) {
-    InitLLVM X(Argc, Argv);
+  InitLLVM X(Argc, Argv);
 
-    InitializeNativeTarget();
-    InitializeNativeTargetAsmPrinter();
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
 
-    cl::ParseCommandLineOptions(Argc, Argv, "LLJITWithThinLTOSummaries");
+  cl::ParseCommandLineOptions(Argc, Argv, "LLJITWithThinLTOSummaries");
 
-    ExitOnError ExitOnErr;
-    ExitOnErr.setBanner(std::string(Argv[0]) + ": ");
+  ExitOnError ExitOnErr;
+  ExitOnErr.setBanner(std::string(Argv[0]) + ": ");
 
-    // (1) Read the index file and parse the module summary index.
-    std::unique_ptr<MemoryBuffer> SummaryBuffer =
-        ExitOnErr(errorOrToExpected(MemoryBuffer::getFile(IndexFile)));
+  // (1) Read the index file and parse the module summary index.
+  std::unique_ptr<MemoryBuffer> SummaryBuffer =
+      ExitOnErr(errorOrToExpected(MemoryBuffer::getFile(IndexFile)));
 
-    std::unique_ptr<ModuleSummaryIndex> SummaryIndex =
-        ExitOnErr(getModuleSummaryIndex(SummaryBuffer->getMemBufferRef()));
+  std::unique_ptr<ModuleSummaryIndex> SummaryIndex =
+      ExitOnErr(getModuleSummaryIndex(SummaryBuffer->getMemBufferRef()));
 
-    // (2) Find the path of the module that defines "main".
-    std::string MainFunctionName = "main";
-    StringRef MainModulePath =
-        ExitOnErr(getMainModulePath(MainFunctionName, *SummaryIndex));
+  // (2) Find the path of the module that defines "main".
+  std::string MainFunctionName = "main";
+  StringRef MainModulePath =
+      ExitOnErr(getMainModulePath(MainFunctionName, *SummaryIndex));
 
-    // (3) Parse the main module and create a matching LLJIT.
-    ThreadSafeContext TSCtx(std::make_unique<LLVMContext>());
-    ThreadSafeModule MainModule = ExitOnErr(loadModule(MainModulePath, TSCtx));
+  // (3) Parse the main module and create a matching LLJIT.
+  ThreadSafeContext TSCtx(std::make_unique<LLVMContext>());
+  ThreadSafeModule MainModule = ExitOnErr(loadModule(MainModulePath, TSCtx));
 
-    auto Builder = LLJITBuilder();
+  auto Builder = LLJITBuilder();
 
-    MainModule.withModuleDo([&](Module &M) {
-        if (M.getTargetTriple().empty()) {
-            Builder.setJITTargetMachineBuilder(
-                ExitOnErr(JITTargetMachineBuilder::detectHost()));
-        } else {
-            Builder.setJITTargetMachineBuilder(
-                JITTargetMachineBuilder(Triple(M.getTargetTriple())));
-        }
-        if (!M.getDataLayout().getStringRepresentation().empty())
-            Builder.setDataLayout(M.getDataLayout());
-    });
+  MainModule.withModuleDo([&](Module &M) {
+    if (M.getTargetTriple().empty()) {
+      Builder.setJITTargetMachineBuilder(
+          ExitOnErr(JITTargetMachineBuilder::detectHost()));
+    } else {
+      Builder.setJITTargetMachineBuilder(
+          JITTargetMachineBuilder(Triple(M.getTargetTriple())));
+    }
+    if (!M.getDataLayout().getStringRepresentation().empty())
+      Builder.setDataLayout(M.getDataLayout());
+  });
 
-    auto J = ExitOnErr(Builder.create());
+  auto J = ExitOnErr(Builder.create());
 
-    // (4) Add all modules to the LLJIT that are covered by the index.
-    JITDylib &JD = J->getMainJITDylib();
+  // (4) Add all modules to the LLJIT that are covered by the index.
+  JITDylib &JD = J->getMainJITDylib();
 
-    for (const auto &Entry : SummaryIndex->modulePaths()) {
-        StringRef Path = Entry.first();
-        ThreadSafeModule M = (Path == MainModulePath)
+  for (const auto &Entry : SummaryIndex->modulePaths()) {
+    StringRef Path = Entry.first();
+    ThreadSafeModule M = (Path == MainModulePath)
                              ? std::move(MainModule)
                              : ExitOnErr(loadModule(Path, TSCtx));
-        ExitOnErr(J->addIRModule(JD, std::move(M)));
-    }
+    ExitOnErr(J->addIRModule(JD, std::move(M)));
+  }
 
-    // (5) Look up and run the JIT'd function.
-    auto MainSym = ExitOnErr(J->lookup(MainFunctionName));
+  // (5) Look up and run the JIT'd function.
+  auto MainSym = ExitOnErr(J->lookup(MainFunctionName));
 
-    using MainFnPtr = int (*)(int, char *[]);
-    MainFnPtr MainFunction =
-        jitTargetAddressToFunction<MainFnPtr>(MainSym.getAddress());
+  using MainFnPtr = int (*)(int, char *[]);
+  MainFnPtr MainFunction =
+      jitTargetAddressToFunction<MainFnPtr>(MainSym.getAddress());
 
-    int Result = runAsMain(MainFunction, {}, MainModulePath);
-    outs() << "'" << MainFunctionName << "' finished with exit code: " << Result
-           << "\n";
+  int Result = runAsMain(MainFunction, {}, MainModulePath);
+  outs() << "'" << MainFunctionName << "' finished with exit code: " << Result
+         << "\n";
 
-    return 0;
+  return 0;
 }

@@ -1,18 +1,18 @@
 #ifndef ISL_VEC_PRIVATE_H
 #define ISL_VEC_PRIVATE_H
 
-#include <isl_blk.h>
 #include <isl/vec.h>
+#include <isl_blk.h>
 
 struct isl_vec {
-    int ref;
+  int ref;
 
-    struct isl_ctx *ctx;
+  struct isl_ctx *ctx;
 
-    unsigned size;
-    isl_int *el;
+  unsigned size;
+  isl_int *el;
 
-    struct isl_blk block;
+  struct isl_blk block;
 };
 
 uint32_t isl_vec_get_hash(__isl_keep isl_vec *vec);

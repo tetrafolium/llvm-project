@@ -22,17 +22,17 @@ class NativeSession;
 
 class NativeEnumSymbols : public IPDBEnumChildren<PDBSymbol> {
 public:
-    NativeEnumSymbols(NativeSession &Session, std::vector<SymIndexId> Symbols);
+  NativeEnumSymbols(NativeSession &Session, std::vector<SymIndexId> Symbols);
 
-    uint32_t getChildCount() const override;
-    std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
-    std::unique_ptr<PDBSymbol> getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
+  std::unique_ptr<PDBSymbol> getNext() override;
+  void reset() override;
 
 private:
-    std::vector<SymIndexId> Symbols;
-    uint32_t Index;
-    NativeSession &Session;
+  std::vector<SymIndexId> Symbols;
+  uint32_t Index;
+  NativeSession &Session;
 };
 
 } // namespace pdb

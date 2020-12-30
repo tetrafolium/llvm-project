@@ -262,14 +262,14 @@ using namespace Modularize;
 
 // Option to specify a file name for a list of header files to check.
 static cl::list<std::string>
-ListFileNames(cl::Positional, cl::value_desc("list"),
-              cl::desc("<list of one or more header list files>"),
-              cl::CommaSeparated);
+    ListFileNames(cl::Positional, cl::value_desc("list"),
+                  cl::desc("<list of one or more header list files>"),
+                  cl::CommaSeparated);
 
 // Collect all other arguments, which will be passed to the front end.
 static cl::list<std::string>
-CC1Arguments(cl::ConsumeAfter,
-             cl::desc("<arguments to be passed to front end>..."));
+    CC1Arguments(cl::ConsumeAfter,
+                 cl::desc("<arguments to be passed to front end>..."));
 
 // Option to specify a prefix to be prepended to the header names.
 static cl::opt<std::string> HeaderPrefix(
@@ -291,44 +291,41 @@ static cl::opt<std::string> ModuleMapPath(
 // This will cause assistant to exclude these files.
 static cl::opt<std::string> ProblemFilesList(
     "problem-files-list", cl::init(""),
-    cl::desc(
-        "List of files with compilation or modularization problems for"
-        " assistant mode.  This will be excluded."));
+    cl::desc("List of files with compilation or modularization problems for"
+             " assistant mode.  This will be excluded."));
 
 // Option for assistant mode, telling modularize the name of the root module.
 static cl::opt<std::string>
-RootModule("root-module", cl::init(""),
-           cl::desc("Specify the name of the root module."));
+    RootModule("root-module", cl::init(""),
+               cl::desc("Specify the name of the root module."));
 
 // Option for limiting the #include-inside-extern-or-namespace-block
 // check to only those headers explicitly listed in the header list.
 // This is a work-around for private includes that purposefully get
 // included inside blocks.
-static cl::opt<bool>
-BlockCheckHeaderListOnly("block-check-header-list-only", cl::init(false),
-                         cl::desc("Only warn if #include directives are inside extern or namespace"
-                                  " blocks if the included header is in the header list."));
+static cl::opt<bool> BlockCheckHeaderListOnly(
+    "block-check-header-list-only", cl::init(false),
+    cl::desc("Only warn if #include directives are inside extern or namespace"
+             " blocks if the included header is in the header list."));
 
 // Option for include paths for coverage check.
 static cl::list<std::string>
-IncludePaths("I", cl::desc("Include path for coverage check."),
-             cl::ZeroOrMore, cl::value_desc("path"));
+    IncludePaths("I", cl::desc("Include path for coverage check."),
+                 cl::ZeroOrMore, cl::value_desc("path"));
 
 // Option for disabling the coverage check.
-static cl::opt<bool>
-NoCoverageCheck("no-coverage-check", cl::init(false),
-                cl::desc("Don't do the coverage check."));
+static cl::opt<bool> NoCoverageCheck("no-coverage-check", cl::init(false),
+                                     cl::desc("Don't do the coverage check."));
 
 // Option for just doing the coverage check.
-static cl::opt<bool>
-CoverageCheckOnly("coverage-check-only", cl::init(false),
-                  cl::desc("Only do the coverage check."));
+static cl::opt<bool> CoverageCheckOnly("coverage-check-only", cl::init(false),
+                                       cl::desc("Only do the coverage check."));
 
 // Option for displaying lists of good, bad, and mixed files.
-static cl::opt<bool>
-DisplayFileLists("display-file-lists", cl::init(false),
-                 cl::desc("Display lists of good files (no compile errors), problem files,"
-                          " and a combined list with problem files preceded by a '#'."));
+static cl::opt<bool> DisplayFileLists(
+    "display-file-lists", cl::init(false),
+    cl::desc("Display lists of good files (no compile errors), problem files,"
+             " and a combined list with problem files preceded by a '#'."));
 
 // Save the program name for error messages.
 const char *Argv0;
@@ -337,15 +334,15 @@ std::string CommandLine;
 
 // Helper function for finding the input file in an arguments list.
 static std::string findInputFile(const CommandLineArguments &CLArgs) {
-    const unsigned IncludedFlagsBitmask = options::CC1Option;
-    unsigned MissingArgIndex, MissingArgCount;
-    SmallVector<const char *, 256> Argv;
-    for (auto I = CLArgs.begin(), E = CLArgs.end(); I != E; ++I)
-        Argv.push_back(I->c_str());
-    InputArgList Args = getDriverOptTable().ParseArgs(
-                            Argv, MissingArgIndex, MissingArgCount, IncludedFlagsBitmask);
-    std::vector<std::string> Inputs = Args.getAllArgValues(OPT_INPUT);
-    return ModularizeUtilities::getCanonicalPath(Inputs.back());
+  const unsigned IncludedFlagsBitmask = options::CC1Option;
+  unsigned MissingArgIndex, MissingArgCount;
+  SmallVector<const char *, 256> Argv;
+  for (auto I = CLArgs.begin(), E = CLArgs.end(); I != E; ++I)
+    Argv.push_back(I->c_str());
+  InputArgList Args = getDriverOptTable().ParseArgs(
+      Argv, MissingArgIndex, MissingArgCount, IncludedFlagsBitmask);
+  std::vector<std::string> Inputs = Args.getAllArgValues(OPT_INPUT);
+  return ModularizeUtilities::getCanonicalPath(Inputs.back());
 }
 
 // This arguments adjuster inserts "-include (file)" arguments for header
@@ -353,683 +350,638 @@ static std::string findInputFile(const CommandLineArguments &CLArgs) {
 // if no other "-x" option is present.
 static ArgumentsAdjuster
 getModularizeArgumentsAdjuster(DependencyMap &Dependencies) {
-    return [&Dependencies](const CommandLineArguments &Args,
-    StringRef /*unused*/) {
+  return
+      [&Dependencies](const CommandLineArguments &Args, StringRef /*unused*/) {
         std::string InputFile = findInputFile(Args);
         DependentsVector &FileDependents = Dependencies[InputFile];
         CommandLineArguments NewArgs(Args);
         if (int Count = FileDependents.size()) {
-            for (int Index = 0; Index < Count; ++Index) {
-                NewArgs.push_back("-include");
-                std::string File(std::string("\"") + FileDependents[Index] +
-                                 std::string("\""));
-                NewArgs.push_back(FileDependents[Index]);
-            }
+          for (int Index = 0; Index < Count; ++Index) {
+            NewArgs.push_back("-include");
+            std::string File(std::string("\"") + FileDependents[Index] +
+                             std::string("\""));
+            NewArgs.push_back(FileDependents[Index]);
+          }
         }
         // Ignore warnings.  (Insert after "clang_tool" at beginning.)
         NewArgs.insert(NewArgs.begin() + 1, "-w");
         // Since we are compiling .h files, assume C++ unless given a -x option.
         if (!llvm::is_contained(NewArgs, "-x")) {
-            NewArgs.insert(NewArgs.begin() + 2, "-x");
-            NewArgs.insert(NewArgs.begin() + 3, "c++");
+          NewArgs.insert(NewArgs.begin() + 2, "-x");
+          NewArgs.insert(NewArgs.begin() + 3, "c++");
         }
         return NewArgs;
-    };
+      };
 }
 
 // FIXME: The Location class seems to be something that we might
 // want to design to be applicable to a wider range of tools, and stick it
 // somewhere into Tooling/ in mainline
 struct Location {
-    const FileEntry *File;
-    unsigned Line, Column;
+  const FileEntry *File;
+  unsigned Line, Column;
 
-    Location() : File(), Line(), Column() {}
+  Location() : File(), Line(), Column() {}
 
-    Location(SourceManager &SM, SourceLocation Loc) : File(), Line(), Column() {
-        Loc = SM.getExpansionLoc(Loc);
-        if (Loc.isInvalid())
-            return;
+  Location(SourceManager &SM, SourceLocation Loc) : File(), Line(), Column() {
+    Loc = SM.getExpansionLoc(Loc);
+    if (Loc.isInvalid())
+      return;
 
-        std::pair<FileID, unsigned> Decomposed = SM.getDecomposedLoc(Loc);
-        File = SM.getFileEntryForID(Decomposed.first);
-        if (!File)
-            return;
+    std::pair<FileID, unsigned> Decomposed = SM.getDecomposedLoc(Loc);
+    File = SM.getFileEntryForID(Decomposed.first);
+    if (!File)
+      return;
 
-        Line = SM.getLineNumber(Decomposed.first, Decomposed.second);
-        Column = SM.getColumnNumber(Decomposed.first, Decomposed.second);
-    }
+    Line = SM.getLineNumber(Decomposed.first, Decomposed.second);
+    Column = SM.getColumnNumber(Decomposed.first, Decomposed.second);
+  }
 
-    operator bool() const {
-        return File != nullptr;
-    }
+  operator bool() const { return File != nullptr; }
 
-    friend bool operator==(const Location &X, const Location &Y) {
-        return X.File == Y.File && X.Line == Y.Line && X.Column == Y.Column;
-    }
+  friend bool operator==(const Location &X, const Location &Y) {
+    return X.File == Y.File && X.Line == Y.Line && X.Column == Y.Column;
+  }
 
-    friend bool operator!=(const Location &X, const Location &Y) {
-        return !(X == Y);
-    }
+  friend bool operator!=(const Location &X, const Location &Y) {
+    return !(X == Y);
+  }
 
-    friend bool operator<(const Location &X, const Location &Y) {
-        if (X.File != Y.File)
-            return X.File < Y.File;
-        if (X.Line != Y.Line)
-            return X.Line < Y.Line;
-        return X.Column < Y.Column;
-    }
-    friend bool operator>(const Location &X, const Location &Y) {
-        return Y < X;
-    }
-    friend bool operator<=(const Location &X, const Location &Y) {
-        return !(Y < X);
-    }
-    friend bool operator>=(const Location &X, const Location &Y) {
-        return !(X < Y);
-    }
+  friend bool operator<(const Location &X, const Location &Y) {
+    if (X.File != Y.File)
+      return X.File < Y.File;
+    if (X.Line != Y.Line)
+      return X.Line < Y.Line;
+    return X.Column < Y.Column;
+  }
+  friend bool operator>(const Location &X, const Location &Y) { return Y < X; }
+  friend bool operator<=(const Location &X, const Location &Y) {
+    return !(Y < X);
+  }
+  friend bool operator>=(const Location &X, const Location &Y) {
+    return !(X < Y);
+  }
 };
 
 struct Entry {
-    enum EntryKind {
-        EK_Tag,
-        EK_Value,
-        EK_Macro,
+  enum EntryKind {
+    EK_Tag,
+    EK_Value,
+    EK_Macro,
 
-        EK_NumberOfKinds
-    } Kind;
+    EK_NumberOfKinds
+  } Kind;
 
-    Location Loc;
+  Location Loc;
 
-    StringRef getKindName() {
-        return getKindName(Kind);
-    }
-    static StringRef getKindName(EntryKind kind);
+  StringRef getKindName() { return getKindName(Kind); }
+  static StringRef getKindName(EntryKind kind);
 };
 
 // Return a string representing the given kind.
 StringRef Entry::getKindName(Entry::EntryKind kind) {
-    switch (kind) {
-    case EK_Tag:
-        return "tag";
-    case EK_Value:
-        return "value";
-    case EK_Macro:
-        return "macro";
-    case EK_NumberOfKinds:
-        break;
-    }
-    llvm_unreachable("invalid Entry kind");
+  switch (kind) {
+  case EK_Tag:
+    return "tag";
+  case EK_Value:
+    return "value";
+  case EK_Macro:
+    return "macro";
+  case EK_NumberOfKinds:
+    break;
+  }
+  llvm_unreachable("invalid Entry kind");
 }
 
 struct HeaderEntry {
-    std::string Name;
-    Location Loc;
+  std::string Name;
+  Location Loc;
 
-    friend bool operator==(const HeaderEntry &X, const HeaderEntry &Y) {
-        return X.Loc == Y.Loc && X.Name == Y.Name;
-    }
-    friend bool operator!=(const HeaderEntry &X, const HeaderEntry &Y) {
-        return !(X == Y);
-    }
-    friend bool operator<(const HeaderEntry &X, const HeaderEntry &Y) {
-        return X.Loc < Y.Loc || (X.Loc == Y.Loc && X.Name < Y.Name);
-    }
-    friend bool operator>(const HeaderEntry &X, const HeaderEntry &Y) {
-        return Y < X;
-    }
-    friend bool operator<=(const HeaderEntry &X, const HeaderEntry &Y) {
-        return !(Y < X);
-    }
-    friend bool operator>=(const HeaderEntry &X, const HeaderEntry &Y) {
-        return !(X < Y);
-    }
+  friend bool operator==(const HeaderEntry &X, const HeaderEntry &Y) {
+    return X.Loc == Y.Loc && X.Name == Y.Name;
+  }
+  friend bool operator!=(const HeaderEntry &X, const HeaderEntry &Y) {
+    return !(X == Y);
+  }
+  friend bool operator<(const HeaderEntry &X, const HeaderEntry &Y) {
+    return X.Loc < Y.Loc || (X.Loc == Y.Loc && X.Name < Y.Name);
+  }
+  friend bool operator>(const HeaderEntry &X, const HeaderEntry &Y) {
+    return Y < X;
+  }
+  friend bool operator<=(const HeaderEntry &X, const HeaderEntry &Y) {
+    return !(Y < X);
+  }
+  friend bool operator>=(const HeaderEntry &X, const HeaderEntry &Y) {
+    return !(X < Y);
+  }
 };
 
 typedef std::vector<HeaderEntry> HeaderContents;
 
-class EntityMap : public StringMap<SmallVector<Entry, 2> > {
+class EntityMap : public StringMap<SmallVector<Entry, 2>> {
 public:
-    DenseMap<const FileEntry *, HeaderContents> HeaderContentMismatches;
+  DenseMap<const FileEntry *, HeaderContents> HeaderContentMismatches;
 
-    void add(const std::string &Name, enum Entry::EntryKind Kind, Location Loc) {
-        // Record this entity in its header.
-        HeaderEntry HE = { Name, Loc };
-        CurHeaderContents[Loc.File].push_back(HE);
+  void add(const std::string &Name, enum Entry::EntryKind Kind, Location Loc) {
+    // Record this entity in its header.
+    HeaderEntry HE = {Name, Loc};
+    CurHeaderContents[Loc.File].push_back(HE);
 
-        // Check whether we've seen this entry before.
-        SmallVector<Entry, 2> &Entries = (*this)[Name];
-        for (unsigned I = 0, N = Entries.size(); I != N; ++I) {
-            if (Entries[I].Kind == Kind && Entries[I].Loc == Loc)
-                return;
-        }
-
-        // We have not seen this entry before; record it.
-        Entry E = { Kind, Loc };
-        Entries.push_back(E);
+    // Check whether we've seen this entry before.
+    SmallVector<Entry, 2> &Entries = (*this)[Name];
+    for (unsigned I = 0, N = Entries.size(); I != N; ++I) {
+      if (Entries[I].Kind == Kind && Entries[I].Loc == Loc)
+        return;
     }
 
-    void mergeCurHeaderContents() {
-        for (DenseMap<const FileEntry *, HeaderContents>::iterator
-                H = CurHeaderContents.begin(),
-                HEnd = CurHeaderContents.end();
-                H != HEnd; ++H) {
-            // Sort contents.
-            llvm::sort(H->second);
+    // We have not seen this entry before; record it.
+    Entry E = {Kind, Loc};
+    Entries.push_back(E);
+  }
 
-            // Check whether we've seen this header before.
-            DenseMap<const FileEntry *, HeaderContents>::iterator KnownH =
-                AllHeaderContents.find(H->first);
-            if (KnownH == AllHeaderContents.end()) {
-                // We haven't seen this header before; record its contents.
-                AllHeaderContents.insert(*H);
-                continue;
-            }
+  void mergeCurHeaderContents() {
+    for (DenseMap<const FileEntry *, HeaderContents>::iterator
+             H = CurHeaderContents.begin(),
+             HEnd = CurHeaderContents.end();
+         H != HEnd; ++H) {
+      // Sort contents.
+      llvm::sort(H->second);
 
-            // If the header contents are the same, we're done.
-            if (H->second == KnownH->second)
-                continue;
+      // Check whether we've seen this header before.
+      DenseMap<const FileEntry *, HeaderContents>::iterator KnownH =
+          AllHeaderContents.find(H->first);
+      if (KnownH == AllHeaderContents.end()) {
+        // We haven't seen this header before; record its contents.
+        AllHeaderContents.insert(*H);
+        continue;
+      }
 
-            // Determine what changed.
-            std::set_symmetric_difference(
-                H->second.begin(), H->second.end(), KnownH->second.begin(),
-                KnownH->second.end(),
-                std::back_inserter(HeaderContentMismatches[H->first]));
-        }
+      // If the header contents are the same, we're done.
+      if (H->second == KnownH->second)
+        continue;
 
-        CurHeaderContents.clear();
+      // Determine what changed.
+      std::set_symmetric_difference(
+          H->second.begin(), H->second.end(), KnownH->second.begin(),
+          KnownH->second.end(),
+          std::back_inserter(HeaderContentMismatches[H->first]));
     }
+
+    CurHeaderContents.clear();
+  }
 
 private:
-    DenseMap<const FileEntry *, HeaderContents> CurHeaderContents;
-    DenseMap<const FileEntry *, HeaderContents> AllHeaderContents;
+  DenseMap<const FileEntry *, HeaderContents> CurHeaderContents;
+  DenseMap<const FileEntry *, HeaderContents> AllHeaderContents;
 };
 
 class CollectEntitiesVisitor
     : public RecursiveASTVisitor<CollectEntitiesVisitor> {
 public:
-    CollectEntitiesVisitor(SourceManager &SM, EntityMap &Entities,
-                           Preprocessor &PP, PreprocessorTracker &PPTracker,
-                           int &HadErrors)
-        : SM(SM), Entities(Entities), PP(PP), PPTracker(PPTracker),
-          HadErrors(HadErrors) {}
+  CollectEntitiesVisitor(SourceManager &SM, EntityMap &Entities,
+                         Preprocessor &PP, PreprocessorTracker &PPTracker,
+                         int &HadErrors)
+      : SM(SM), Entities(Entities), PP(PP), PPTracker(PPTracker),
+        HadErrors(HadErrors) {}
 
-    bool TraverseStmt(Stmt *S) {
-        return true;
-    }
-    bool TraverseType(QualType T) {
-        return true;
-    }
-    bool TraverseTypeLoc(TypeLoc TL) {
-        return true;
-    }
-    bool TraverseNestedNameSpecifier(NestedNameSpecifier *NNS) {
-        return true;
-    }
-    bool TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
-        return true;
-    }
-    bool TraverseDeclarationNameInfo(DeclarationNameInfo NameInfo) {
-        return true;
-    }
-    bool TraverseTemplateName(TemplateName Template) {
-        return true;
-    }
-    bool TraverseTemplateArgument(const TemplateArgument &Arg) {
-        return true;
-    }
-    bool TraverseTemplateArgumentLoc(const TemplateArgumentLoc &ArgLoc) {
-        return true;
-    }
-    bool TraverseTemplateArguments(const TemplateArgument *Args,
-                                   unsigned NumArgs) {
-        return true;
-    }
-    bool TraverseConstructorInitializer(CXXCtorInitializer *Init) {
-        return true;
-    }
-    bool TraverseLambdaCapture(LambdaExpr *LE, const LambdaCapture *C,
-                               Expr *Init) {
-        return true;
-    }
+  bool TraverseStmt(Stmt *S) { return true; }
+  bool TraverseType(QualType T) { return true; }
+  bool TraverseTypeLoc(TypeLoc TL) { return true; }
+  bool TraverseNestedNameSpecifier(NestedNameSpecifier *NNS) { return true; }
+  bool TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
+    return true;
+  }
+  bool TraverseDeclarationNameInfo(DeclarationNameInfo NameInfo) {
+    return true;
+  }
+  bool TraverseTemplateName(TemplateName Template) { return true; }
+  bool TraverseTemplateArgument(const TemplateArgument &Arg) { return true; }
+  bool TraverseTemplateArgumentLoc(const TemplateArgumentLoc &ArgLoc) {
+    return true;
+  }
+  bool TraverseTemplateArguments(const TemplateArgument *Args,
+                                 unsigned NumArgs) {
+    return true;
+  }
+  bool TraverseConstructorInitializer(CXXCtorInitializer *Init) { return true; }
+  bool TraverseLambdaCapture(LambdaExpr *LE, const LambdaCapture *C,
+                             Expr *Init) {
+    return true;
+  }
 
-    // Check 'extern "*" {}' block for #include directives.
-    bool VisitLinkageSpecDecl(LinkageSpecDecl *D) {
-        // Bail if not a block.
-        if (!D->hasBraces())
-            return true;
-        SourceRange BlockRange = D->getSourceRange();
-        const char *LinkageLabel;
-        switch (D->getLanguage()) {
-        case LinkageSpecDecl::lang_c:
-            LinkageLabel = "extern \"C\" {}";
-            break;
-        case LinkageSpecDecl::lang_cxx:
-            LinkageLabel = "extern \"C++\" {}";
-            break;
-        }
-        if (!PPTracker.checkForIncludesInBlock(PP, BlockRange, LinkageLabel,
-                                               errs()))
-            HadErrors = 1;
-        return true;
+  // Check 'extern "*" {}' block for #include directives.
+  bool VisitLinkageSpecDecl(LinkageSpecDecl *D) {
+    // Bail if not a block.
+    if (!D->hasBraces())
+      return true;
+    SourceRange BlockRange = D->getSourceRange();
+    const char *LinkageLabel;
+    switch (D->getLanguage()) {
+    case LinkageSpecDecl::lang_c:
+      LinkageLabel = "extern \"C\" {}";
+      break;
+    case LinkageSpecDecl::lang_cxx:
+      LinkageLabel = "extern \"C++\" {}";
+      break;
     }
+    if (!PPTracker.checkForIncludesInBlock(PP, BlockRange, LinkageLabel,
+                                           errs()))
+      HadErrors = 1;
+    return true;
+  }
 
-    // Check 'namespace (name) {}' block for #include directives.
-    bool VisitNamespaceDecl(const NamespaceDecl *D) {
-        SourceRange BlockRange = D->getSourceRange();
-        std::string Label("namespace ");
-        Label += D->getName();
-        Label += " {}";
-        if (!PPTracker.checkForIncludesInBlock(PP, BlockRange, Label.c_str(),
-                                               errs()))
-            HadErrors = 1;
-        return true;
-    }
+  // Check 'namespace (name) {}' block for #include directives.
+  bool VisitNamespaceDecl(const NamespaceDecl *D) {
+    SourceRange BlockRange = D->getSourceRange();
+    std::string Label("namespace ");
+    Label += D->getName();
+    Label += " {}";
+    if (!PPTracker.checkForIncludesInBlock(PP, BlockRange, Label.c_str(),
+                                           errs()))
+      HadErrors = 1;
+    return true;
+  }
 
-    // Collect definition entities.
-    bool VisitNamedDecl(NamedDecl *ND) {
-        // We only care about file-context variables.
-        if (!ND->getDeclContext()->isFileContext())
-            return true;
+  // Collect definition entities.
+  bool VisitNamedDecl(NamedDecl *ND) {
+    // We only care about file-context variables.
+    if (!ND->getDeclContext()->isFileContext())
+      return true;
 
-        // Skip declarations that tend to be properly multiply-declared.
-        if (isa<NamespaceDecl>(ND) || isa<UsingDirectiveDecl>(ND) ||
-                isa<NamespaceAliasDecl>(ND) ||
-                isa<ClassTemplateSpecializationDecl>(ND) || isa<UsingDecl>(ND) ||
-                isa<ClassTemplateDecl>(ND) || isa<TemplateTypeParmDecl>(ND) ||
-                isa<TypeAliasTemplateDecl>(ND) || isa<UsingShadowDecl>(ND) ||
-                isa<FunctionDecl>(ND) || isa<FunctionTemplateDecl>(ND) ||
-                (isa<TagDecl>(ND) &&
-                 !cast<TagDecl>(ND)->isThisDeclarationADefinition()))
-            return true;
+    // Skip declarations that tend to be properly multiply-declared.
+    if (isa<NamespaceDecl>(ND) || isa<UsingDirectiveDecl>(ND) ||
+        isa<NamespaceAliasDecl>(ND) ||
+        isa<ClassTemplateSpecializationDecl>(ND) || isa<UsingDecl>(ND) ||
+        isa<ClassTemplateDecl>(ND) || isa<TemplateTypeParmDecl>(ND) ||
+        isa<TypeAliasTemplateDecl>(ND) || isa<UsingShadowDecl>(ND) ||
+        isa<FunctionDecl>(ND) || isa<FunctionTemplateDecl>(ND) ||
+        (isa<TagDecl>(ND) &&
+         !cast<TagDecl>(ND)->isThisDeclarationADefinition()))
+      return true;
 
-        // Skip anonymous declarations.
-        if (!ND->getDeclName())
-            return true;
+    // Skip anonymous declarations.
+    if (!ND->getDeclName())
+      return true;
 
-        // Get the qualified name.
-        std::string Name;
-        llvm::raw_string_ostream OS(Name);
-        ND->printQualifiedName(OS);
-        OS.flush();
-        if (Name.empty())
-            return true;
+    // Get the qualified name.
+    std::string Name;
+    llvm::raw_string_ostream OS(Name);
+    ND->printQualifiedName(OS);
+    OS.flush();
+    if (Name.empty())
+      return true;
 
-        Location Loc(SM, ND->getLocation());
-        if (!Loc)
-            return true;
+    Location Loc(SM, ND->getLocation());
+    if (!Loc)
+      return true;
 
-        Entities.add(Name, isa<TagDecl>(ND) ? Entry::EK_Tag : Entry::EK_Value, Loc);
-        return true;
-    }
+    Entities.add(Name, isa<TagDecl>(ND) ? Entry::EK_Tag : Entry::EK_Value, Loc);
+    return true;
+  }
 
 private:
-    SourceManager &SM;
-    EntityMap &Entities;
-    Preprocessor &PP;
-    PreprocessorTracker &PPTracker;
-    int &HadErrors;
+  SourceManager &SM;
+  EntityMap &Entities;
+  Preprocessor &PP;
+  PreprocessorTracker &PPTracker;
+  int &HadErrors;
 };
 
 class CollectEntitiesConsumer : public ASTConsumer {
 public:
-    CollectEntitiesConsumer(EntityMap &Entities,
-                            PreprocessorTracker &preprocessorTracker,
-                            Preprocessor &PP, StringRef InFile, int &HadErrors)
-        : Entities(Entities), PPTracker(preprocessorTracker), PP(PP),
-          HadErrors(HadErrors) {
-        PPTracker.handlePreprocessorEntry(PP, InFile);
-    }
+  CollectEntitiesConsumer(EntityMap &Entities,
+                          PreprocessorTracker &preprocessorTracker,
+                          Preprocessor &PP, StringRef InFile, int &HadErrors)
+      : Entities(Entities), PPTracker(preprocessorTracker), PP(PP),
+        HadErrors(HadErrors) {
+    PPTracker.handlePreprocessorEntry(PP, InFile);
+  }
 
-    ~CollectEntitiesConsumer() override {
-        PPTracker.handlePreprocessorExit();
-    }
+  ~CollectEntitiesConsumer() override { PPTracker.handlePreprocessorExit(); }
 
-    void HandleTranslationUnit(ASTContext &Ctx) override {
-        SourceManager &SM = Ctx.getSourceManager();
+  void HandleTranslationUnit(ASTContext &Ctx) override {
+    SourceManager &SM = Ctx.getSourceManager();
 
-        // Collect declared entities.
-        CollectEntitiesVisitor(SM, Entities, PP, PPTracker, HadErrors)
+    // Collect declared entities.
+    CollectEntitiesVisitor(SM, Entities, PP, PPTracker, HadErrors)
         .TraverseDecl(Ctx.getTranslationUnitDecl());
 
-        // Collect macro definitions.
-        for (Preprocessor::macro_iterator M = PP.macro_begin(),
-                MEnd = PP.macro_end();
-                M != MEnd; ++M) {
-            Location Loc(SM, M->second.getLatest()->getLocation());
-            if (!Loc)
-                continue;
+    // Collect macro definitions.
+    for (Preprocessor::macro_iterator M = PP.macro_begin(),
+                                      MEnd = PP.macro_end();
+         M != MEnd; ++M) {
+      Location Loc(SM, M->second.getLatest()->getLocation());
+      if (!Loc)
+        continue;
 
-            Entities.add(M->first->getName().str(), Entry::EK_Macro, Loc);
-        }
-
-        // Merge header contents.
-        Entities.mergeCurHeaderContents();
+      Entities.add(M->first->getName().str(), Entry::EK_Macro, Loc);
     }
 
+    // Merge header contents.
+    Entities.mergeCurHeaderContents();
+  }
+
 private:
-    EntityMap &Entities;
-    PreprocessorTracker &PPTracker;
-    Preprocessor &PP;
-    int &HadErrors;
+  EntityMap &Entities;
+  PreprocessorTracker &PPTracker;
+  Preprocessor &PP;
+  int &HadErrors;
 };
 
 class CollectEntitiesAction : public SyntaxOnlyAction {
 public:
-    CollectEntitiesAction(EntityMap &Entities,
-                          PreprocessorTracker &preprocessorTracker,
-                          int &HadErrors)
-        : Entities(Entities), PPTracker(preprocessorTracker),
-          HadErrors(HadErrors) {}
+  CollectEntitiesAction(EntityMap &Entities,
+                        PreprocessorTracker &preprocessorTracker,
+                        int &HadErrors)
+      : Entities(Entities), PPTracker(preprocessorTracker),
+        HadErrors(HadErrors) {}
 
 protected:
-    std::unique_ptr<clang::ASTConsumer>
-    CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override {
-        return std::make_unique<CollectEntitiesConsumer>(
-                   Entities, PPTracker, CI.getPreprocessor(), InFile, HadErrors);
-    }
+  std::unique_ptr<clang::ASTConsumer>
+  CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override {
+    return std::make_unique<CollectEntitiesConsumer>(
+        Entities, PPTracker, CI.getPreprocessor(), InFile, HadErrors);
+  }
 
 private:
-    EntityMap &Entities;
-    PreprocessorTracker &PPTracker;
-    int &HadErrors;
+  EntityMap &Entities;
+  PreprocessorTracker &PPTracker;
+  int &HadErrors;
 };
 
 class ModularizeFrontendActionFactory : public FrontendActionFactory {
 public:
-    ModularizeFrontendActionFactory(EntityMap &Entities,
-                                    PreprocessorTracker &preprocessorTracker,
-                                    int &HadErrors)
-        : Entities(Entities), PPTracker(preprocessorTracker),
-          HadErrors(HadErrors) {}
+  ModularizeFrontendActionFactory(EntityMap &Entities,
+                                  PreprocessorTracker &preprocessorTracker,
+                                  int &HadErrors)
+      : Entities(Entities), PPTracker(preprocessorTracker),
+        HadErrors(HadErrors) {}
 
-    std::unique_ptr<FrontendAction> create() override {
-        return std::make_unique<CollectEntitiesAction>(Entities, PPTracker,
-                HadErrors);
-    }
+  std::unique_ptr<FrontendAction> create() override {
+    return std::make_unique<CollectEntitiesAction>(Entities, PPTracker,
+                                                   HadErrors);
+  }
 
 private:
-    EntityMap &Entities;
-    PreprocessorTracker &PPTracker;
-    int &HadErrors;
+  EntityMap &Entities;
+  PreprocessorTracker &PPTracker;
+  int &HadErrors;
 };
 
-class CompileCheckVisitor
-    : public RecursiveASTVisitor<CompileCheckVisitor> {
+class CompileCheckVisitor : public RecursiveASTVisitor<CompileCheckVisitor> {
 public:
-    CompileCheckVisitor() {}
+  CompileCheckVisitor() {}
 
-    bool TraverseStmt(Stmt *S) {
-        return true;
-    }
-    bool TraverseType(QualType T) {
-        return true;
-    }
-    bool TraverseTypeLoc(TypeLoc TL) {
-        return true;
-    }
-    bool TraverseNestedNameSpecifier(NestedNameSpecifier *NNS) {
-        return true;
-    }
-    bool TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
-        return true;
-    }
-    bool TraverseDeclarationNameInfo(DeclarationNameInfo NameInfo) {
-        return true;
-    }
-    bool TraverseTemplateName(TemplateName Template) {
-        return true;
-    }
-    bool TraverseTemplateArgument(const TemplateArgument &Arg) {
-        return true;
-    }
-    bool TraverseTemplateArgumentLoc(const TemplateArgumentLoc &ArgLoc) {
-        return true;
-    }
-    bool TraverseTemplateArguments(const TemplateArgument *Args,
-                                   unsigned NumArgs) {
-        return true;
-    }
-    bool TraverseConstructorInitializer(CXXCtorInitializer *Init) {
-        return true;
-    }
-    bool TraverseLambdaCapture(LambdaExpr *LE, const LambdaCapture *C,
-                               Expr *Init) {
-        return true;
-    }
+  bool TraverseStmt(Stmt *S) { return true; }
+  bool TraverseType(QualType T) { return true; }
+  bool TraverseTypeLoc(TypeLoc TL) { return true; }
+  bool TraverseNestedNameSpecifier(NestedNameSpecifier *NNS) { return true; }
+  bool TraverseNestedNameSpecifierLoc(NestedNameSpecifierLoc NNS) {
+    return true;
+  }
+  bool TraverseDeclarationNameInfo(DeclarationNameInfo NameInfo) {
+    return true;
+  }
+  bool TraverseTemplateName(TemplateName Template) { return true; }
+  bool TraverseTemplateArgument(const TemplateArgument &Arg) { return true; }
+  bool TraverseTemplateArgumentLoc(const TemplateArgumentLoc &ArgLoc) {
+    return true;
+  }
+  bool TraverseTemplateArguments(const TemplateArgument *Args,
+                                 unsigned NumArgs) {
+    return true;
+  }
+  bool TraverseConstructorInitializer(CXXCtorInitializer *Init) { return true; }
+  bool TraverseLambdaCapture(LambdaExpr *LE, const LambdaCapture *C,
+                             Expr *Init) {
+    return true;
+  }
 
-    // Check 'extern "*" {}' block for #include directives.
-    bool VisitLinkageSpecDecl(LinkageSpecDecl *D) {
-        return true;
-    }
+  // Check 'extern "*" {}' block for #include directives.
+  bool VisitLinkageSpecDecl(LinkageSpecDecl *D) { return true; }
 
-    // Check 'namespace (name) {}' block for #include directives.
-    bool VisitNamespaceDecl(const NamespaceDecl *D) {
-        return true;
-    }
+  // Check 'namespace (name) {}' block for #include directives.
+  bool VisitNamespaceDecl(const NamespaceDecl *D) { return true; }
 
-    // Collect definition entities.
-    bool VisitNamedDecl(NamedDecl *ND) {
-        return true;
-    }
+  // Collect definition entities.
+  bool VisitNamedDecl(NamedDecl *ND) { return true; }
 };
 
 class CompileCheckConsumer : public ASTConsumer {
 public:
-    CompileCheckConsumer() {}
+  CompileCheckConsumer() {}
 
-    void HandleTranslationUnit(ASTContext &Ctx) override {
-        CompileCheckVisitor().TraverseDecl(Ctx.getTranslationUnitDecl());
-    }
+  void HandleTranslationUnit(ASTContext &Ctx) override {
+    CompileCheckVisitor().TraverseDecl(Ctx.getTranslationUnitDecl());
+  }
 };
 
 class CompileCheckAction : public SyntaxOnlyAction {
 public:
-    CompileCheckAction() {}
+  CompileCheckAction() {}
 
 protected:
-    std::unique_ptr<clang::ASTConsumer>
-    CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override {
-        return std::make_unique<CompileCheckConsumer>();
-    }
+  std::unique_ptr<clang::ASTConsumer>
+  CreateASTConsumer(CompilerInstance &CI, StringRef InFile) override {
+    return std::make_unique<CompileCheckConsumer>();
+  }
 };
 
 class CompileCheckFrontendActionFactory : public FrontendActionFactory {
 public:
-    CompileCheckFrontendActionFactory() {}
+  CompileCheckFrontendActionFactory() {}
 
-    std::unique_ptr<FrontendAction> create() override {
-        return std::make_unique<CompileCheckAction>();
-    }
+  std::unique_ptr<FrontendAction> create() override {
+    return std::make_unique<CompileCheckAction>();
+  }
 };
 
 int main(int Argc, const char **Argv) {
 
-    // Save program name for error messages.
-    Argv0 = Argv[0];
+  // Save program name for error messages.
+  Argv0 = Argv[0];
 
-    // Save program arguments for use in module.modulemap comment.
-    CommandLine = std::string(sys::path::stem(sys::path::filename(Argv0)));
-    for (int ArgIndex = 1; ArgIndex < Argc; ArgIndex++) {
-        CommandLine.append(" ");
-        CommandLine.append(Argv[ArgIndex]);
-    }
+  // Save program arguments for use in module.modulemap comment.
+  CommandLine = std::string(sys::path::stem(sys::path::filename(Argv0)));
+  for (int ArgIndex = 1; ArgIndex < Argc; ArgIndex++) {
+    CommandLine.append(" ");
+    CommandLine.append(Argv[ArgIndex]);
+  }
 
-    // This causes options to be parsed.
-    cl::ParseCommandLineOptions(Argc, Argv, "modularize.\n");
+  // This causes options to be parsed.
+  cl::ParseCommandLineOptions(Argc, Argv, "modularize.\n");
 
-    // No go if we have no header list file.
-    if (ListFileNames.size() == 0) {
-        cl::PrintHelpMessage();
-        return 1;
-    }
+  // No go if we have no header list file.
+  if (ListFileNames.size() == 0) {
+    cl::PrintHelpMessage();
+    return 1;
+  }
 
-    std::unique_ptr<ModularizeUtilities> ModUtil;
-    int HadErrors = 0;
+  std::unique_ptr<ModularizeUtilities> ModUtil;
+  int HadErrors = 0;
 
-    ModUtil.reset(
-        ModularizeUtilities::createModularizeUtilities(
-            ListFileNames, HeaderPrefix, ProblemFilesList));
+  ModUtil.reset(ModularizeUtilities::createModularizeUtilities(
+      ListFileNames, HeaderPrefix, ProblemFilesList));
 
-    // Get header file names and dependencies.
-    if (ModUtil->loadAllHeaderListsAndDependencies())
-        HadErrors = 1;
+  // Get header file names and dependencies.
+  if (ModUtil->loadAllHeaderListsAndDependencies())
+    HadErrors = 1;
 
-    // If we are in assistant mode, output the module map and quit.
-    if (ModuleMapPath.length() != 0) {
-        if (!createModuleMap(ModuleMapPath, ModUtil->HeaderFileNames,
-                             ModUtil->ProblemFileNames,
-                             ModUtil->Dependencies, HeaderPrefix, RootModule))
-            return 1; // Failed.
-        return 0;   // Success - Skip checks in assistant mode.
-    }
+  // If we are in assistant mode, output the module map and quit.
+  if (ModuleMapPath.length() != 0) {
+    if (!createModuleMap(ModuleMapPath, ModUtil->HeaderFileNames,
+                         ModUtil->ProblemFileNames, ModUtil->Dependencies,
+                         HeaderPrefix, RootModule))
+      return 1; // Failed.
+    return 0;   // Success - Skip checks in assistant mode.
+  }
 
-    // If we're doing module maps.
-    if (!NoCoverageCheck && ModUtil->HasModuleMap) {
-        // Do coverage check.
-        if (ModUtil->doCoverageCheck(IncludePaths, CommandLine))
-            HadErrors = 1;
-    }
+  // If we're doing module maps.
+  if (!NoCoverageCheck && ModUtil->HasModuleMap) {
+    // Do coverage check.
+    if (ModUtil->doCoverageCheck(IncludePaths, CommandLine))
+      HadErrors = 1;
+  }
 
-    // Bail early if only doing the coverage check.
-    if (CoverageCheckOnly)
-        return HadErrors;
-
-    // Create the compilation database.
-    SmallString<256> PathBuf;
-    sys::fs::current_path(PathBuf);
-    std::unique_ptr<CompilationDatabase> Compilations;
-    Compilations.reset(
-        new FixedCompilationDatabase(Twine(PathBuf), CC1Arguments));
-
-    // Create preprocessor tracker, to watch for macro and conditional problems.
-    std::unique_ptr<PreprocessorTracker> PPTracker(
-        PreprocessorTracker::create(ModUtil->HeaderFileNames,
-                                    BlockCheckHeaderListOnly));
-
-    // Coolect entities here.
-    EntityMap Entities;
-
-    // Because we can't easily determine which files failed
-    // during the tool run, if we're collecting the file lists
-    // for display, we do a first compile pass on individual
-    // files to find which ones don't compile stand-alone.
-    if (DisplayFileLists) {
-        // First, make a pass to just get compile errors.
-        for (auto &CompileCheckFile : ModUtil->HeaderFileNames) {
-            llvm::SmallVector<std::string, 32> CompileCheckFileArray;
-            CompileCheckFileArray.push_back(CompileCheckFile);
-            ClangTool CompileCheckTool(*Compilations, CompileCheckFileArray);
-            CompileCheckTool.appendArgumentsAdjuster(
-                getModularizeArgumentsAdjuster(ModUtil->Dependencies));
-            int CompileCheckFileErrors = 0;
-            // FIXME: use newFrontendActionFactory.
-            CompileCheckFrontendActionFactory CompileCheckFactory;
-            CompileCheckFileErrors |= CompileCheckTool.run(&CompileCheckFactory);
-            if (CompileCheckFileErrors != 0) {
-                ModUtil->addUniqueProblemFile(CompileCheckFile);   // Save problem file.
-                HadErrors |= 1;
-            }
-            else
-                ModUtil->addNoCompileErrorsFile(CompileCheckFile); // Save good file.
-        }
-    }
-
-    // Then we make another pass on the good files to do the rest of the work.
-    ClangTool Tool(*Compilations,
-                   (DisplayFileLists ? ModUtil->GoodFileNames : ModUtil->HeaderFileNames));
-    Tool.appendArgumentsAdjuster(
-        getModularizeArgumentsAdjuster(ModUtil->Dependencies));
-    ModularizeFrontendActionFactory Factory(Entities, *PPTracker, HadErrors);
-    HadErrors |= Tool.run(&Factory);
-
-    // Create a place to save duplicate entity locations, separate bins per kind.
-    typedef SmallVector<Location, 8> LocationArray;
-    typedef SmallVector<LocationArray, Entry::EK_NumberOfKinds> EntryBinArray;
-    EntryBinArray EntryBins;
-    int KindIndex;
-    for (KindIndex = 0; KindIndex < Entry::EK_NumberOfKinds; ++KindIndex) {
-        LocationArray Array;
-        EntryBins.push_back(Array);
-    }
-
-    // Check for the same entity being defined in multiple places.
-    for (EntityMap::iterator E = Entities.begin(), EEnd = Entities.end();
-            E != EEnd; ++E) {
-        // If only one occurrence, exit early.
-        if (E->second.size() == 1)
-            continue;
-        // Clear entity locations.
-        for (EntryBinArray::iterator CI = EntryBins.begin(), CE = EntryBins.end();
-                CI != CE; ++CI) {
-            CI->clear();
-        }
-        // Walk the entities of a single name, collecting the locations,
-        // separated into separate bins.
-        for (unsigned I = 0, N = E->second.size(); I != N; ++I) {
-            EntryBins[E->second[I].Kind].push_back(E->second[I].Loc);
-        }
-        // Report any duplicate entity definition errors.
-        int KindIndex = 0;
-        for (EntryBinArray::iterator DI = EntryBins.begin(), DE = EntryBins.end();
-                DI != DE; ++DI, ++KindIndex) {
-            int ECount = DI->size();
-            // If only 1 occurrence of this entity, skip it, we only report duplicates.
-            if (ECount <= 1)
-                continue;
-            LocationArray::iterator FI = DI->begin();
-            StringRef kindName = Entry::getKindName((Entry::EntryKind)KindIndex);
-            errs() << "error: " << kindName << " '" << E->first()
-                   << "' defined at multiple locations:\n";
-            for (LocationArray::iterator FE = DI->end(); FI != FE; ++FI) {
-                errs() << "    " << FI->File->getName() << ":" << FI->Line << ":"
-                       << FI->Column << "\n";
-                ModUtil->addUniqueProblemFile(std::string(FI->File->getName()));
-            }
-            HadErrors = 1;
-        }
-    }
-
-    // Complain about macro instance in header files that differ based on how
-    // they are included.
-    if (PPTracker->reportInconsistentMacros(errs()))
-        HadErrors = 1;
-
-    // Complain about preprocessor conditional directives in header files that
-    // differ based on how they are included.
-    if (PPTracker->reportInconsistentConditionals(errs()))
-        HadErrors = 1;
-
-    // Complain about any headers that have contents that differ based on how
-    // they are included.
-    // FIXME: Could we provide information about which preprocessor conditionals
-    // are involved?
-    for (DenseMap<const FileEntry *, HeaderContents>::iterator
-            H = Entities.HeaderContentMismatches.begin(),
-            HEnd = Entities.HeaderContentMismatches.end();
-            H != HEnd; ++H) {
-        if (H->second.empty()) {
-            errs() << "internal error: phantom header content mismatch\n";
-            continue;
-        }
-
-        HadErrors = 1;
-        ModUtil->addUniqueProblemFile(std::string(H->first->getName()));
-        errs() << "error: header '" << H->first->getName()
-               << "' has different contents depending on how it was included.\n";
-        for (unsigned I = 0, N = H->second.size(); I != N; ++I) {
-            errs() << "note: '" << H->second[I].Name << "' in "
-                   << H->second[I].Loc.File->getName() << " at "
-                   << H->second[I].Loc.Line << ":" << H->second[I].Loc.Column
-                   << " not always provided\n";
-        }
-    }
-
-    if (DisplayFileLists) {
-        ModUtil->displayProblemFiles();
-        ModUtil->displayGoodFiles();
-        ModUtil->displayCombinedFiles();
-    }
-
+  // Bail early if only doing the coverage check.
+  if (CoverageCheckOnly)
     return HadErrors;
+
+  // Create the compilation database.
+  SmallString<256> PathBuf;
+  sys::fs::current_path(PathBuf);
+  std::unique_ptr<CompilationDatabase> Compilations;
+  Compilations.reset(
+      new FixedCompilationDatabase(Twine(PathBuf), CC1Arguments));
+
+  // Create preprocessor tracker, to watch for macro and conditional problems.
+  std::unique_ptr<PreprocessorTracker> PPTracker(PreprocessorTracker::create(
+      ModUtil->HeaderFileNames, BlockCheckHeaderListOnly));
+
+  // Coolect entities here.
+  EntityMap Entities;
+
+  // Because we can't easily determine which files failed
+  // during the tool run, if we're collecting the file lists
+  // for display, we do a first compile pass on individual
+  // files to find which ones don't compile stand-alone.
+  if (DisplayFileLists) {
+    // First, make a pass to just get compile errors.
+    for (auto &CompileCheckFile : ModUtil->HeaderFileNames) {
+      llvm::SmallVector<std::string, 32> CompileCheckFileArray;
+      CompileCheckFileArray.push_back(CompileCheckFile);
+      ClangTool CompileCheckTool(*Compilations, CompileCheckFileArray);
+      CompileCheckTool.appendArgumentsAdjuster(
+          getModularizeArgumentsAdjuster(ModUtil->Dependencies));
+      int CompileCheckFileErrors = 0;
+      // FIXME: use newFrontendActionFactory.
+      CompileCheckFrontendActionFactory CompileCheckFactory;
+      CompileCheckFileErrors |= CompileCheckTool.run(&CompileCheckFactory);
+      if (CompileCheckFileErrors != 0) {
+        ModUtil->addUniqueProblemFile(CompileCheckFile); // Save problem file.
+        HadErrors |= 1;
+      } else
+        ModUtil->addNoCompileErrorsFile(CompileCheckFile); // Save good file.
+    }
+  }
+
+  // Then we make another pass on the good files to do the rest of the work.
+  ClangTool Tool(*Compilations, (DisplayFileLists ? ModUtil->GoodFileNames
+                                                  : ModUtil->HeaderFileNames));
+  Tool.appendArgumentsAdjuster(
+      getModularizeArgumentsAdjuster(ModUtil->Dependencies));
+  ModularizeFrontendActionFactory Factory(Entities, *PPTracker, HadErrors);
+  HadErrors |= Tool.run(&Factory);
+
+  // Create a place to save duplicate entity locations, separate bins per kind.
+  typedef SmallVector<Location, 8> LocationArray;
+  typedef SmallVector<LocationArray, Entry::EK_NumberOfKinds> EntryBinArray;
+  EntryBinArray EntryBins;
+  int KindIndex;
+  for (KindIndex = 0; KindIndex < Entry::EK_NumberOfKinds; ++KindIndex) {
+    LocationArray Array;
+    EntryBins.push_back(Array);
+  }
+
+  // Check for the same entity being defined in multiple places.
+  for (EntityMap::iterator E = Entities.begin(), EEnd = Entities.end();
+       E != EEnd; ++E) {
+    // If only one occurrence, exit early.
+    if (E->second.size() == 1)
+      continue;
+    // Clear entity locations.
+    for (EntryBinArray::iterator CI = EntryBins.begin(), CE = EntryBins.end();
+         CI != CE; ++CI) {
+      CI->clear();
+    }
+    // Walk the entities of a single name, collecting the locations,
+    // separated into separate bins.
+    for (unsigned I = 0, N = E->second.size(); I != N; ++I) {
+      EntryBins[E->second[I].Kind].push_back(E->second[I].Loc);
+    }
+    // Report any duplicate entity definition errors.
+    int KindIndex = 0;
+    for (EntryBinArray::iterator DI = EntryBins.begin(), DE = EntryBins.end();
+         DI != DE; ++DI, ++KindIndex) {
+      int ECount = DI->size();
+      // If only 1 occurrence of this entity, skip it, we only report
+      // duplicates.
+      if (ECount <= 1)
+        continue;
+      LocationArray::iterator FI = DI->begin();
+      StringRef kindName = Entry::getKindName((Entry::EntryKind)KindIndex);
+      errs() << "error: " << kindName << " '" << E->first()
+             << "' defined at multiple locations:\n";
+      for (LocationArray::iterator FE = DI->end(); FI != FE; ++FI) {
+        errs() << "    " << FI->File->getName() << ":" << FI->Line << ":"
+               << FI->Column << "\n";
+        ModUtil->addUniqueProblemFile(std::string(FI->File->getName()));
+      }
+      HadErrors = 1;
+    }
+  }
+
+  // Complain about macro instance in header files that differ based on how
+  // they are included.
+  if (PPTracker->reportInconsistentMacros(errs()))
+    HadErrors = 1;
+
+  // Complain about preprocessor conditional directives in header files that
+  // differ based on how they are included.
+  if (PPTracker->reportInconsistentConditionals(errs()))
+    HadErrors = 1;
+
+  // Complain about any headers that have contents that differ based on how
+  // they are included.
+  // FIXME: Could we provide information about which preprocessor conditionals
+  // are involved?
+  for (DenseMap<const FileEntry *, HeaderContents>::iterator
+           H = Entities.HeaderContentMismatches.begin(),
+           HEnd = Entities.HeaderContentMismatches.end();
+       H != HEnd; ++H) {
+    if (H->second.empty()) {
+      errs() << "internal error: phantom header content mismatch\n";
+      continue;
+    }
+
+    HadErrors = 1;
+    ModUtil->addUniqueProblemFile(std::string(H->first->getName()));
+    errs() << "error: header '" << H->first->getName()
+           << "' has different contents depending on how it was included.\n";
+    for (unsigned I = 0, N = H->second.size(); I != N; ++I) {
+      errs() << "note: '" << H->second[I].Name << "' in "
+             << H->second[I].Loc.File->getName() << " at "
+             << H->second[I].Loc.Line << ":" << H->second[I].Loc.Column
+             << " not always provided\n";
+    }
+  }
+
+  if (DisplayFileLists) {
+    ModUtil->displayProblemFiles();
+    ModUtil->displayGoodFiles();
+    ModUtil->displayCombinedFiles();
+  }
+
+  return HadErrors;
 }

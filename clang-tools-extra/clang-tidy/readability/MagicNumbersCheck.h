@@ -24,82 +24,83 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-magic-numbers.html
 class MagicNumbersCheck : public ClangTidyCheck {
 public:
-    MagicNumbersCheck(StringRef Name, ClangTidyContext *Context);
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  MagicNumbersCheck(StringRef Name, ClangTidyContext *Context);
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    bool isConstant(const clang::ast_matchers::MatchFinder::MatchResult &Result,
-                    const clang::Expr &ExprResult) const;
+  bool isConstant(const clang::ast_matchers::MatchFinder::MatchResult &Result,
+                  const clang::Expr &ExprResult) const;
 
-    bool isIgnoredValue(const IntegerLiteral *Literal) const;
-    bool isIgnoredValue(const FloatingLiteral *Literal) const;
+  bool isIgnoredValue(const IntegerLiteral *Literal) const;
+  bool isIgnoredValue(const FloatingLiteral *Literal) const;
 
-    bool isSyntheticValue(const clang::SourceManager *,
-                          const FloatingLiteral *) const {
-        return false;
-    }
-    bool isSyntheticValue(const clang::SourceManager *SourceManager,
-                          const IntegerLiteral *Literal) const;
+  bool isSyntheticValue(const clang::SourceManager *,
+                        const FloatingLiteral *) const {
+    return false;
+  }
+  bool isSyntheticValue(const clang::SourceManager *SourceManager,
+                        const IntegerLiteral *Literal) const;
 
-    bool isBitFieldWidth(const clang::ast_matchers::MatchFinder::MatchResult &,
-                         const FloatingLiteral &) const {
-        return false;
-    }
+  bool isBitFieldWidth(const clang::ast_matchers::MatchFinder::MatchResult &,
+                       const FloatingLiteral &) const {
+    return false;
+  }
 
-    bool isBitFieldWidth(const clang::ast_matchers::MatchFinder::MatchResult &Result,
-                         const IntegerLiteral &Literal) const;
+  bool
+  isBitFieldWidth(const clang::ast_matchers::MatchFinder::MatchResult &Result,
+                  const IntegerLiteral &Literal) const;
 
-    template <typename L>
-    void checkBoundMatch(const ast_matchers::MatchFinder::MatchResult &Result,
-                         const char *BoundName) {
-        const L *MatchedLiteral = Result.Nodes.getNodeAs<L>(BoundName);
-        if (!MatchedLiteral)
-            return;
+  template <typename L>
+  void checkBoundMatch(const ast_matchers::MatchFinder::MatchResult &Result,
+                       const char *BoundName) {
+    const L *MatchedLiteral = Result.Nodes.getNodeAs<L>(BoundName);
+    if (!MatchedLiteral)
+      return;
 
-        if (Result.SourceManager->isMacroBodyExpansion(
-                    MatchedLiteral->getLocation()))
-            return;
+    if (Result.SourceManager->isMacroBodyExpansion(
+            MatchedLiteral->getLocation()))
+      return;
 
-        if (isIgnoredValue(MatchedLiteral))
-            return;
+    if (isIgnoredValue(MatchedLiteral))
+      return;
 
-        if (isConstant(Result, *MatchedLiteral))
-            return;
+    if (isConstant(Result, *MatchedLiteral))
+      return;
 
-        if (isSyntheticValue(Result.SourceManager, MatchedLiteral))
-            return;
+    if (isSyntheticValue(Result.SourceManager, MatchedLiteral))
+      return;
 
-        if (isBitFieldWidth(Result, *MatchedLiteral))
-            return;
+    if (isBitFieldWidth(Result, *MatchedLiteral))
+      return;
 
-        const StringRef LiteralSourceText = Lexer::getSourceText(
-                                                CharSourceRange::getTokenRange(MatchedLiteral->getSourceRange()),
-                                                *Result.SourceManager, getLangOpts());
+    const StringRef LiteralSourceText = Lexer::getSourceText(
+        CharSourceRange::getTokenRange(MatchedLiteral->getSourceRange()),
+        *Result.SourceManager, getLangOpts());
 
-        diag(MatchedLiteral->getLocation(),
-             "%0 is a magic number; consider replacing it with a named constant")
-                << LiteralSourceText;
-    }
+    diag(MatchedLiteral->getLocation(),
+         "%0 is a magic number; consider replacing it with a named constant")
+        << LiteralSourceText;
+  }
 
-    const bool IgnoreAllFloatingPointValues;
-    const bool IgnoreBitFieldsWidths;
-    const bool IgnorePowersOf2IntegerValues;
-    const std::string RawIgnoredIntegerValues;
-    const std::string RawIgnoredFloatingPointValues;
+  const bool IgnoreAllFloatingPointValues;
+  const bool IgnoreBitFieldsWidths;
+  const bool IgnorePowersOf2IntegerValues;
+  const std::string RawIgnoredIntegerValues;
+  const std::string RawIgnoredFloatingPointValues;
 
-    constexpr static unsigned SensibleNumberOfMagicValueExceptions = 16;
+  constexpr static unsigned SensibleNumberOfMagicValueExceptions = 16;
 
-    constexpr static llvm::APFloat::roundingMode DefaultRoundingMode =
-        llvm::APFloat::rmNearestTiesToEven;
+  constexpr static llvm::APFloat::roundingMode DefaultRoundingMode =
+      llvm::APFloat::rmNearestTiesToEven;
 
-    llvm::SmallVector<int64_t, SensibleNumberOfMagicValueExceptions>
-    IgnoredIntegerValues;
-    llvm::SmallVector<float, SensibleNumberOfMagicValueExceptions>
-    IgnoredFloatingPointValues;
-    llvm::SmallVector<double, SensibleNumberOfMagicValueExceptions>
-    IgnoredDoublePointValues;
+  llvm::SmallVector<int64_t, SensibleNumberOfMagicValueExceptions>
+      IgnoredIntegerValues;
+  llvm::SmallVector<float, SensibleNumberOfMagicValueExceptions>
+      IgnoredFloatingPointValues;
+  llvm::SmallVector<double, SensibleNumberOfMagicValueExceptions>
+      IgnoredDoublePointValues;
 };
 
 } // namespace readability

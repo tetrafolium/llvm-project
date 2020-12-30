@@ -39,10 +39,10 @@ CreateModernObjCRewriter(const std::string &InFile,
 /// CreateHTMLPrinter - Create an AST consumer which rewrites source code to
 /// HTML with syntax highlighting suitable for viewing in a web-browser.
 std::unique_ptr<ASTConsumer> CreateHTMLPrinter(std::unique_ptr<raw_ostream> OS,
-        Preprocessor &PP,
-        bool SyntaxHighlight = true,
-        bool HighlightMacros = true);
+                                               Preprocessor &PP,
+                                               bool SyntaxHighlight = true,
+                                               bool HighlightMacros = true);
 
-} // end clang namespace
+} // namespace clang
 
 #endif

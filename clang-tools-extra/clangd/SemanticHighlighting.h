@@ -38,38 +38,38 @@ namespace clangd {
 class ParsedAST;
 
 enum class HighlightingKind {
-    Variable = 0,
-    LocalVariable,
-    Parameter,
-    Function,
-    Method,
-    StaticMethod,
-    Field,
-    StaticField,
-    Class,
-    Enum,
-    EnumConstant,
-    Typedef,
-    DependentType,
-    DependentName,
-    Namespace,
-    TemplateParameter,
-    Concept,
-    Primitive,
-    Macro,
+  Variable = 0,
+  LocalVariable,
+  Parameter,
+  Function,
+  Method,
+  StaticMethod,
+  Field,
+  StaticField,
+  Class,
+  Enum,
+  EnumConstant,
+  Typedef,
+  DependentType,
+  DependentName,
+  Namespace,
+  TemplateParameter,
+  Concept,
+  Primitive,
+  Macro,
 
-    // This one is different from the other kinds as it's a line style
-    // rather than a token style.
-    InactiveCode,
+  // This one is different from the other kinds as it's a line style
+  // rather than a token style.
+  InactiveCode,
 
-    LastKind = InactiveCode
+  LastKind = InactiveCode
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, HighlightingKind K);
 
 // Contains all information needed for the highlighting a token.
 struct HighlightingToken {
-    HighlightingKind Kind;
-    Range R;
+  HighlightingKind Kind;
+  Range R;
 };
 
 bool operator==(const HighlightingToken &L, const HighlightingToken &R);
@@ -77,9 +77,9 @@ bool operator<(const HighlightingToken &L, const HighlightingToken &R);
 
 /// Contains all information about highlightings on a single line.
 struct LineHighlightings {
-    int Line;
-    std::vector<HighlightingToken> Tokens;
-    bool IsInactive;
+  int Line;
+  std::vector<HighlightingToken> Tokens;
+  bool IsInactive;
 };
 
 bool operator==(const LineHighlightings &L, const LineHighlightings &R);
@@ -91,7 +91,7 @@ std::vector<HighlightingToken> getSemanticHighlightings(ParsedAST &AST);
 std::vector<SemanticToken> toSemanticTokens(llvm::ArrayRef<HighlightingToken>);
 llvm::StringRef toSemanticTokenType(HighlightingKind Kind);
 std::vector<SemanticTokensEdit> diffTokens(llvm::ArrayRef<SemanticToken> Before,
-        llvm::ArrayRef<SemanticToken> After);
+                                           llvm::ArrayRef<SemanticToken> After);
 
 /// Converts a HighlightingKind to a corresponding TextMate scope
 /// (https://manual.macromates.com/en/language_grammars).

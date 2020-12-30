@@ -42,8 +42,8 @@ typedef uint64_t LLVMOrcJITTargetAddress;
  * Represents generic linkage flags for a symbol definition.
  */
 typedef enum {
-    LLVMJITSymbolGenericFlagsExported = 1U << 0,
-    LLVMJITSymbolGenericFlagsWeak = 1U << 1
+  LLVMJITSymbolGenericFlagsExported = 1U << 0,
+  LLVMJITSymbolGenericFlagsWeak = 1U << 1
 } LLVMJITSymbolGenericFlags;
 
 /**
@@ -55,16 +55,16 @@ typedef uint8_t LLVMJITTargetSymbolFlags;
  * Represents the linkage flags for a symbol definition.
  */
 typedef struct {
-    uint8_t GenericFlags;
-    uint8_t TargetFlags;
+  uint8_t GenericFlags;
+  uint8_t TargetFlags;
 } LLVMJITSymbolFlags;
 
 /**
  * Represents an evaluated symbol address and flags.
  */
 typedef struct {
-    LLVMOrcJITTargetAddress Address;
-    LLVMJITSymbolFlags Flags;
+  LLVMOrcJITTargetAddress Address;
+  LLVMJITSymbolFlags Flags;
 } LLVMJITEvaluatedSymbol;
 
 /**
@@ -92,8 +92,8 @@ typedef struct LLVMOrcOpaqueSymbolStringPoolEntry
  * Represents a pair of a symbol name and an evaluated symbol.
  */
 typedef struct {
-    LLVMOrcSymbolStringPoolEntryRef Name;
-    LLVMJITEvaluatedSymbol Sym;
+  LLVMOrcSymbolStringPoolEntryRef Name;
+  LLVMJITEvaluatedSymbol Sym;
 } LLVMJITCSymbolMapPair;
 
 /**
@@ -109,8 +109,8 @@ typedef LLVMJITCSymbolMapPair *LLVMOrcCSymbolMapPairs;
  * This enum should be kept in sync with llvm::orc::LookupKind.
  */
 typedef enum {
-    LLVMOrcLookupKindStatic,
-    LLVMOrcLookupKindDLSym
+  LLVMOrcLookupKindStatic,
+  LLVMOrcLookupKindDLSym
 } LLVMOrcLookupKind;
 
 /**
@@ -120,8 +120,8 @@ typedef enum {
  * This enum should be kept in sync with llvm::orc::JITDylibLookupFlags.
  */
 typedef enum {
-    LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly,
-    LLVMOrcJITDylibLookupFlagsMatchAllSymbols
+  LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly,
+  LLVMOrcJITDylibLookupFlagsMatchAllSymbols
 } LLVMOrcJITDylibLookupFlags;
 
 /**
@@ -129,16 +129,16 @@ typedef enum {
  * llvm::orc::SymbolLookupFlags.
  */
 typedef enum {
-    LLVMOrcSymbolLookupFlagsRequiredSymbol,
-    LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol
+  LLVMOrcSymbolLookupFlagsRequiredSymbol,
+  LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol
 } LLVMOrcSymbolLookupFlags;
 
 /**
  * An element type for a symbol lookup set.
  */
 typedef struct {
-    LLVMOrcSymbolStringPoolEntryRef Name;
-    LLVMOrcSymbolLookupFlags LookupFlags;
+  LLVMOrcSymbolStringPoolEntryRef Name;
+  LLVMOrcSymbolLookupFlags LookupFlags;
 } LLVMOrcCLookupSetElement;
 
 /**
@@ -172,8 +172,7 @@ typedef struct LLVMOrcOpaqueResourceTracker *LLVMOrcResourceTrackerRef;
 /**
  * A reference to an orc::DefinitionGenerator.
  */
-typedef struct LLVMOrcOpaqueDefinitionGenerator
-    *LLVMOrcDefinitionGeneratorRef;
+typedef struct LLVMOrcOpaqueDefinitionGenerator *LLVMOrcDefinitionGeneratorRef;
 
 /**
  * An opaque lookup state object. Instances of this type can be captured to
@@ -339,8 +338,7 @@ LLVMErrorRef LLVMOrcResourceTrackerRemove(LLVMOrcResourceTrackerRef RT);
  * ownership has not been passed to a JITDylib (e.g. because some error
  * prevented the client from calling LLVMOrcJITDylibAddGenerator).
  */
-void LLVMOrcDisposeDefinitionGenerator(
-    LLVMOrcDefinitionGeneratorRef DG);
+void LLVMOrcDisposeDefinitionGenerator(LLVMOrcDefinitionGeneratorRef DG);
 
 /**
  * Dispose of a MaterializationUnit.
@@ -365,7 +363,7 @@ LLVMOrcAbsoluteSymbols(LLVMOrcCSymbolMapPairs Syms, size_t NumPairs);
  */
 LLVMOrcJITDylibRef
 LLVMOrcExecutionSessionCreateBareJITDylib(LLVMOrcExecutionSessionRef ES,
-        const char *Name);
+                                          const char *Name);
 
 /**
  * Create a JITDylib.

@@ -67,51 +67,49 @@ namespace SymbolRewriter {
 /// SymbolRewriter pass.
 class RewriteDescriptor {
 public:
-    enum class Type {
-        Invalid,        /// invalid
-        Function,       /// function - descriptor rewrites a function
-        GlobalVariable, /// global variable - descriptor rewrites a global variable
-        NamedAlias,     /// named alias - descriptor rewrites a global alias
-    };
+  enum class Type {
+    Invalid,        /// invalid
+    Function,       /// function - descriptor rewrites a function
+    GlobalVariable, /// global variable - descriptor rewrites a global variable
+    NamedAlias,     /// named alias - descriptor rewrites a global alias
+  };
 
-    RewriteDescriptor(const RewriteDescriptor &) = delete;
-    RewriteDescriptor &operator=(const RewriteDescriptor &) = delete;
-    virtual ~RewriteDescriptor() = default;
+  RewriteDescriptor(const RewriteDescriptor &) = delete;
+  RewriteDescriptor &operator=(const RewriteDescriptor &) = delete;
+  virtual ~RewriteDescriptor() = default;
 
-    Type getType() const {
-        return Kind;
-    }
+  Type getType() const { return Kind; }
 
-    virtual bool performOnModule(Module &M) = 0;
+  virtual bool performOnModule(Module &M) = 0;
 
 protected:
-    explicit RewriteDescriptor(Type T) : Kind(T) {}
+  explicit RewriteDescriptor(Type T) : Kind(T) {}
 
 private:
-    const Type Kind;
+  const Type Kind;
 };
 
 using RewriteDescriptorList = std::list<std::unique_ptr<RewriteDescriptor>>;
 
 class RewriteMapParser {
 public:
-    bool parse(const std::string &MapFile, RewriteDescriptorList *Descriptors);
+  bool parse(const std::string &MapFile, RewriteDescriptorList *Descriptors);
 
 private:
-    bool parse(std::unique_ptr<MemoryBuffer> &MapFile, RewriteDescriptorList *DL);
-    bool parseEntry(yaml::Stream &Stream, yaml::KeyValueNode &Entry,
-                    RewriteDescriptorList *DL);
-    bool parseRewriteFunctionDescriptor(yaml::Stream &Stream,
-                                        yaml::ScalarNode *Key,
-                                        yaml::MappingNode *Value,
-                                        RewriteDescriptorList *DL);
-    bool parseRewriteGlobalVariableDescriptor(yaml::Stream &Stream,
-            yaml::ScalarNode *Key,
-            yaml::MappingNode *Value,
-            RewriteDescriptorList *DL);
-    bool parseRewriteGlobalAliasDescriptor(yaml::Stream &YS, yaml::ScalarNode *K,
-                                           yaml::MappingNode *V,
-                                           RewriteDescriptorList *DL);
+  bool parse(std::unique_ptr<MemoryBuffer> &MapFile, RewriteDescriptorList *DL);
+  bool parseEntry(yaml::Stream &Stream, yaml::KeyValueNode &Entry,
+                  RewriteDescriptorList *DL);
+  bool parseRewriteFunctionDescriptor(yaml::Stream &Stream,
+                                      yaml::ScalarNode *Key,
+                                      yaml::MappingNode *Value,
+                                      RewriteDescriptorList *DL);
+  bool parseRewriteGlobalVariableDescriptor(yaml::Stream &Stream,
+                                            yaml::ScalarNode *Key,
+                                            yaml::MappingNode *Value,
+                                            RewriteDescriptorList *DL);
+  bool parseRewriteGlobalAliasDescriptor(yaml::Stream &YS, yaml::ScalarNode *K,
+                                         yaml::MappingNode *V,
+                                         RewriteDescriptorList *DL);
 };
 
 } // end namespace SymbolRewriter
@@ -121,25 +119,23 @@ ModulePass *createRewriteSymbolsPass(SymbolRewriter::RewriteDescriptorList &);
 
 class RewriteSymbolPass : public PassInfoMixin<RewriteSymbolPass> {
 public:
-    RewriteSymbolPass() {
-        loadAndParseMapFiles();
-    }
+  RewriteSymbolPass() { loadAndParseMapFiles(); }
 
-    RewriteSymbolPass(SymbolRewriter::RewriteDescriptorList &DL) {
-        Descriptors.splice(Descriptors.begin(), DL);
-    }
+  RewriteSymbolPass(SymbolRewriter::RewriteDescriptorList &DL) {
+    Descriptors.splice(Descriptors.begin(), DL);
+  }
 
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 
-    // Glue for old PM
-    bool runImpl(Module &M);
+  // Glue for old PM
+  bool runImpl(Module &M);
 
 private:
-    void loadAndParseMapFiles();
+  void loadAndParseMapFiles();
 
-    SymbolRewriter::RewriteDescriptorList Descriptors;
+  SymbolRewriter::RewriteDescriptorList Descriptors;
 };
 
 } // end namespace llvm
 
-#endif //LLVM_TRANSFORMS_UTILS_SYMBOLREWRITER_H
+#endif // LLVM_TRANSFORMS_UTILS_SYMBOLREWRITER_H

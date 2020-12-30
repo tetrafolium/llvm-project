@@ -25,24 +25,24 @@ PseudoTerminal::PseudoTerminal()
 // to release any file descriptors that are needed beyond the lifespan
 // of this object.
 PseudoTerminal::~PseudoTerminal() {
-    ClosePrimary();
-    CloseSecondary();
+  ClosePrimary();
+  CloseSecondary();
 }
 
 // Close the primary file descriptor if it is valid.
 void PseudoTerminal::ClosePrimary() {
-    if (m_primary_fd > 0) {
-        ::close(m_primary_fd);
-        m_primary_fd = invalid_fd;
-    }
+  if (m_primary_fd > 0) {
+    ::close(m_primary_fd);
+    m_primary_fd = invalid_fd;
+  }
 }
 
 // Close the secondary file descriptor if it is valid.
 void PseudoTerminal::CloseSecondary() {
-    if (m_secondary_fd > 0) {
-        ::close(m_secondary_fd);
-        m_secondary_fd = invalid_fd;
-    }
+  if (m_secondary_fd > 0) {
+    ::close(m_secondary_fd);
+    m_secondary_fd = invalid_fd;
+  }
 }
 
 // Open the first available pseudo terminal with OFLAG as the
@@ -55,25 +55,25 @@ void PseudoTerminal::CloseSecondary() {
 // RETURNS:
 //  Zero when successful, non-zero indicating an error occurred.
 PseudoTerminal::Status PseudoTerminal::OpenFirstAvailablePrimary(int oflag) {
-    // Open the primary side of a pseudo terminal
-    m_primary_fd = ::posix_openpt(oflag);
-    if (m_primary_fd < 0) {
-        return err_posix_openpt_failed;
-    }
+  // Open the primary side of a pseudo terminal
+  m_primary_fd = ::posix_openpt(oflag);
+  if (m_primary_fd < 0) {
+    return err_posix_openpt_failed;
+  }
 
-    // Grant access to the secondary pseudo terminal
-    if (::grantpt(m_primary_fd) < 0) {
-        ClosePrimary();
-        return err_grantpt_failed;
-    }
+  // Grant access to the secondary pseudo terminal
+  if (::grantpt(m_primary_fd) < 0) {
+    ClosePrimary();
+    return err_grantpt_failed;
+  }
 
-    // Clear the lock flag on the secondary pseudo terminal
-    if (::unlockpt(m_primary_fd) < 0) {
-        ClosePrimary();
-        return err_unlockpt_failed;
-    }
+  // Clear the lock flag on the secondary pseudo terminal
+  if (::unlockpt(m_primary_fd) < 0) {
+    ClosePrimary();
+    return err_unlockpt_failed;
+  }
 
-    return success;
+  return success;
 }
 
 // Open the secondary pseudo terminal for the current primary pseudo
@@ -85,20 +85,20 @@ PseudoTerminal::Status PseudoTerminal::OpenFirstAvailablePrimary(int oflag) {
 // RETURNS:
 //  Zero when successful, non-zero indicating an error occurred.
 PseudoTerminal::Status PseudoTerminal::OpenSecondary(int oflag) {
-    CloseSecondary();
+  CloseSecondary();
 
-    // Open the primary side of a pseudo terminal
-    const char *secondary_name = SecondaryName();
+  // Open the primary side of a pseudo terminal
+  const char *secondary_name = SecondaryName();
 
-    if (secondary_name == NULL)
-        return err_ptsname_failed;
+  if (secondary_name == NULL)
+    return err_ptsname_failed;
 
-    m_secondary_fd = ::open(secondary_name, oflag);
+  m_secondary_fd = ::open(secondary_name, oflag);
 
-    if (m_secondary_fd < 0)
-        return err_open_secondary_failed;
+  if (m_secondary_fd < 0)
+    return err_open_secondary_failed;
 
-    return success;
+  return success;
 }
 
 // Get the name of the secondary pseudo terminal. A primary pseudo terminal
@@ -111,9 +111,9 @@ PseudoTerminal::Status PseudoTerminal::OpenSecondary(int oflag) {
 //  that comes from static memory, so a copy of the string should be
 //  made as subsequent calls can change this value.
 const char *PseudoTerminal::SecondaryName() const {
-    if (m_primary_fd < 0)
-        return NULL;
-    return ::ptsname(m_primary_fd);
+  if (m_primary_fd < 0)
+    return NULL;
+  return ::ptsname(m_primary_fd);
 }
 
 // Fork a child process that and have its stdio routed to a pseudo
@@ -137,43 +137,43 @@ const char *PseudoTerminal::SecondaryName() const {
 //  in the child process: zero
 
 pid_t PseudoTerminal::Fork(PseudoTerminal::Status &error) {
-    pid_t pid = invalid_pid;
-    error = OpenFirstAvailablePrimary(O_RDWR | O_NOCTTY);
+  pid_t pid = invalid_pid;
+  error = OpenFirstAvailablePrimary(O_RDWR | O_NOCTTY);
 
-    if (error == 0) {
-        // Successfully opened our primary pseudo terminal
+  if (error == 0) {
+    // Successfully opened our primary pseudo terminal
 
-        pid = ::fork();
-        if (pid < 0) {
-            // Fork failed
-            error = err_fork_failed;
-        } else if (pid == 0) {
-            // Child Process
-            ::setsid();
+    pid = ::fork();
+    if (pid < 0) {
+      // Fork failed
+      error = err_fork_failed;
+    } else if (pid == 0) {
+      // Child Process
+      ::setsid();
 
-            error = OpenSecondary(O_RDWR);
-            if (error == 0) {
-                // Successfully opened secondary
-                // We are done with the primary in the child process so lets close it
-                ClosePrimary();
+      error = OpenSecondary(O_RDWR);
+      if (error == 0) {
+        // Successfully opened secondary
+        // We are done with the primary in the child process so lets close it
+        ClosePrimary();
 
 #if defined(TIOCSCTTY)
-                // Acquire the controlling terminal
-                if (::ioctl(m_secondary_fd, TIOCSCTTY, (char *)0) < 0)
-                    error = err_failed_to_acquire_controlling_terminal;
+        // Acquire the controlling terminal
+        if (::ioctl(m_secondary_fd, TIOCSCTTY, (char *)0) < 0)
+          error = err_failed_to_acquire_controlling_terminal;
 #endif
-                // Duplicate all stdio file descriptors to the secondary pseudo terminal
-                if (::dup2(m_secondary_fd, STDIN_FILENO) != STDIN_FILENO)
-                    error = error ? error : err_dup2_failed_on_stdin;
-                if (::dup2(m_secondary_fd, STDOUT_FILENO) != STDOUT_FILENO)
-                    error = error ? error : err_dup2_failed_on_stdout;
-                if (::dup2(m_secondary_fd, STDERR_FILENO) != STDERR_FILENO)
-                    error = error ? error : err_dup2_failed_on_stderr;
-            }
-        } else {
-            // Parent Process
-            // Do nothing and let the pid get returned!
-        }
+        // Duplicate all stdio file descriptors to the secondary pseudo terminal
+        if (::dup2(m_secondary_fd, STDIN_FILENO) != STDIN_FILENO)
+          error = error ? error : err_dup2_failed_on_stdin;
+        if (::dup2(m_secondary_fd, STDOUT_FILENO) != STDOUT_FILENO)
+          error = error ? error : err_dup2_failed_on_stdout;
+        if (::dup2(m_secondary_fd, STDERR_FILENO) != STDERR_FILENO)
+          error = error ? error : err_dup2_failed_on_stderr;
+      }
+    } else {
+      // Parent Process
+      // Do nothing and let the pid get returned!
     }
-    return pid;
+  }
+  return pid;
 }

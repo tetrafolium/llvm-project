@@ -44,126 +44,124 @@ static const unsigned NVPTXAddrSpaceMap[] = {
 /// https://docs.nvidia.com/cuda/archive/10.0/ptx-writers-guide-to-interoperability/index.html#cuda-specific-dwarf
 static const int NVPTXDWARFAddrSpaceMap[] = {
     -1, // Default, opencl_private or opencl_generic - not defined
-        5,  // opencl_global
-        -1,
-        8,  // opencl_local or cuda_shared
-        4,  // opencl_constant or cuda_constant
-    };
+    5,  // opencl_global
+    -1,
+    8, // opencl_local or cuda_shared
+    4, // opencl_constant or cuda_constant
+};
 
 class LLVM_LIBRARY_VISIBILITY NVPTXTargetInfo : public TargetInfo {
-    static const char *const GCCRegNames[];
-    static const Builtin::Info BuiltinInfo[];
-    CudaArch GPU;
-    uint32_t PTXVersion;
-    std::unique_ptr<TargetInfo> HostTarget;
+  static const char *const GCCRegNames[];
+  static const Builtin::Info BuiltinInfo[];
+  CudaArch GPU;
+  uint32_t PTXVersion;
+  std::unique_ptr<TargetInfo> HostTarget;
 
 public:
-    NVPTXTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts,
-                    unsigned TargetPointerWidth);
+  NVPTXTargetInfo(const llvm::Triple &Triple, const TargetOptions &Opts,
+                  unsigned TargetPointerWidth);
 
-    void getTargetDefines(const LangOptions &Opts,
-                          MacroBuilder &Builder) const override;
+  void getTargetDefines(const LangOptions &Opts,
+                        MacroBuilder &Builder) const override;
 
-    ArrayRef<Builtin::Info> getTargetBuiltins() const override;
+  ArrayRef<Builtin::Info> getTargetBuiltins() const override;
 
-    bool
-    initFeatureMap(llvm::StringMap<bool> &Features, DiagnosticsEngine &Diags,
-                   StringRef CPU,
-                   const std::vector<std::string> &FeaturesVec) const override {
-        Features[CudaArchToString(GPU)] = true;
-        Features["ptx" + std::to_string(PTXVersion)] = true;
-        return TargetInfo::initFeatureMap(Features, Diags, CPU, FeaturesVec);
+  bool
+  initFeatureMap(llvm::StringMap<bool> &Features, DiagnosticsEngine &Diags,
+                 StringRef CPU,
+                 const std::vector<std::string> &FeaturesVec) const override {
+    Features[CudaArchToString(GPU)] = true;
+    Features["ptx" + std::to_string(PTXVersion)] = true;
+    return TargetInfo::initFeatureMap(Features, Diags, CPU, FeaturesVec);
+  }
+
+  bool hasFeature(StringRef Feature) const override;
+
+  ArrayRef<const char *> getGCCRegNames() const override;
+
+  ArrayRef<TargetInfo::GCCRegAlias> getGCCRegAliases() const override {
+    // No aliases.
+    return None;
+  }
+
+  bool validateAsmConstraint(const char *&Name,
+                             TargetInfo::ConstraintInfo &Info) const override {
+    switch (*Name) {
+    default:
+      return false;
+    case 'c':
+    case 'h':
+    case 'r':
+    case 'l':
+    case 'f':
+    case 'd':
+      Info.setAllowsRegister();
+      return true;
     }
+  }
 
-    bool hasFeature(StringRef Feature) const override;
+  const char *getClobbers() const override {
+    // FIXME: Is this really right?
+    return "";
+  }
 
-    ArrayRef<const char *> getGCCRegNames() const override;
+  BuiltinVaListKind getBuiltinVaListKind() const override {
+    // FIXME: implement
+    return TargetInfo::CharPtrBuiltinVaList;
+  }
 
-    ArrayRef<TargetInfo::GCCRegAlias> getGCCRegAliases() const override {
-        // No aliases.
-        return None;
-    }
+  bool isValidCPUName(StringRef Name) const override {
+    return StringToCudaArch(Name) != CudaArch::UNKNOWN;
+  }
 
-    bool validateAsmConstraint(const char *&Name,
-                               TargetInfo::ConstraintInfo &Info) const override {
-        switch (*Name) {
-        default:
-            return false;
-        case 'c':
-        case 'h':
-        case 'r':
-        case 'l':
-        case 'f':
-        case 'd':
-            Info.setAllowsRegister();
-            return true;
-        }
-    }
+  void fillValidCPUList(SmallVectorImpl<StringRef> &Values) const override {
+    for (int i = static_cast<int>(CudaArch::SM_20);
+         i < static_cast<int>(CudaArch::LAST); ++i)
+      Values.emplace_back(CudaArchToString(static_cast<CudaArch>(i)));
+  }
 
-    const char *getClobbers() const override {
-        // FIXME: Is this really right?
-        return "";
-    }
+  bool setCPU(const std::string &Name) override {
+    GPU = StringToCudaArch(Name);
+    return GPU != CudaArch::UNKNOWN;
+  }
 
-    BuiltinVaListKind getBuiltinVaListKind() const override {
-        // FIXME: implement
-        return TargetInfo::CharPtrBuiltinVaList;
-    }
+  void setSupportedOpenCLOpts() override {
+    auto &Opts = getSupportedOpenCLOpts();
+    Opts.support("cl_clang_storage_class_specifiers");
 
-    bool isValidCPUName(StringRef Name) const override {
-        return StringToCudaArch(Name) != CudaArch::UNKNOWN;
-    }
+    Opts.support("cl_khr_fp64");
+    Opts.support("cl_khr_byte_addressable_store");
+    Opts.support("cl_khr_global_int32_base_atomics");
+    Opts.support("cl_khr_global_int32_extended_atomics");
+    Opts.support("cl_khr_local_int32_base_atomics");
+    Opts.support("cl_khr_local_int32_extended_atomics");
+  }
 
-    void fillValidCPUList(SmallVectorImpl<StringRef> &Values) const override {
-        for (int i = static_cast<int>(CudaArch::SM_20);
-                i < static_cast<int>(CudaArch::LAST); ++i)
-            Values.emplace_back(CudaArchToString(static_cast<CudaArch>(i)));
-    }
+  /// \returns If a target requires an address within a target specific address
+  /// space \p AddressSpace to be converted in order to be used, then return the
+  /// corresponding target specific DWARF address space.
+  ///
+  /// \returns Otherwise return None and no conversion will be emitted in the
+  /// DWARF.
+  Optional<unsigned>
+  getDWARFAddressSpace(unsigned AddressSpace) const override {
+    if (AddressSpace >= llvm::array_lengthof(NVPTXDWARFAddrSpaceMap) ||
+        NVPTXDWARFAddrSpaceMap[AddressSpace] < 0)
+      return llvm::None;
+    return NVPTXDWARFAddrSpaceMap[AddressSpace];
+  }
 
-    bool setCPU(const std::string &Name) override {
-        GPU = StringToCudaArch(Name);
-        return GPU != CudaArch::UNKNOWN;
-    }
+  CallingConvCheckResult checkCallingConvention(CallingConv CC) const override {
+    // CUDA compilations support all of the host's calling conventions.
+    //
+    // TODO: We should warn if you apply a non-default CC to anything other than
+    // a host function.
+    if (HostTarget)
+      return HostTarget->checkCallingConvention(CC);
+    return CCCR_Warning;
+  }
 
-    void setSupportedOpenCLOpts() override {
-        auto &Opts = getSupportedOpenCLOpts();
-        Opts.support("cl_clang_storage_class_specifiers");
-
-        Opts.support("cl_khr_fp64");
-        Opts.support("cl_khr_byte_addressable_store");
-        Opts.support("cl_khr_global_int32_base_atomics");
-        Opts.support("cl_khr_global_int32_extended_atomics");
-        Opts.support("cl_khr_local_int32_base_atomics");
-        Opts.support("cl_khr_local_int32_extended_atomics");
-    }
-
-    /// \returns If a target requires an address within a target specific address
-    /// space \p AddressSpace to be converted in order to be used, then return the
-    /// corresponding target specific DWARF address space.
-    ///
-    /// \returns Otherwise return None and no conversion will be emitted in the
-    /// DWARF.
-    Optional<unsigned>
-    getDWARFAddressSpace(unsigned AddressSpace) const override {
-        if (AddressSpace >= llvm::array_lengthof(NVPTXDWARFAddrSpaceMap) ||
-                NVPTXDWARFAddrSpaceMap[AddressSpace] < 0)
-            return llvm::None;
-        return NVPTXDWARFAddrSpaceMap[AddressSpace];
-    }
-
-    CallingConvCheckResult checkCallingConvention(CallingConv CC) const override {
-        // CUDA compilations support all of the host's calling conventions.
-        //
-        // TODO: We should warn if you apply a non-default CC to anything other than
-        // a host function.
-        if (HostTarget)
-            return HostTarget->checkCallingConvention(CC);
-        return CCCR_Warning;
-    }
-
-    bool hasExtIntType() const override {
-        return true;
-    }
+  bool hasExtIntType() const override { return true; }
 };
 } // namespace targets
 } // namespace clang

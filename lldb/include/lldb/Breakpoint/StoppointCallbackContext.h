@@ -25,25 +25,25 @@ namespace lldb_private {
 
 class StoppointCallbackContext {
 public:
-    StoppointCallbackContext();
+  StoppointCallbackContext();
 
-    StoppointCallbackContext(Event *event, const ExecutionContext &exe_ctx,
-                             bool synchronously = false);
+  StoppointCallbackContext(Event *event, const ExecutionContext &exe_ctx,
+                           bool synchronously = false);
 
-    /// Clear the object's state.
-    ///
-    /// Sets the event, process and thread to NULL, and the frame index to an
-    /// invalid value.
-    void Clear();
+  /// Clear the object's state.
+  ///
+  /// Sets the event, process and thread to NULL, and the frame index to an
+  /// invalid value.
+  void Clear();
 
-    // Member variables
-    Event *event; // This is the event, the callback can modify this to indicate
-    // the meaning of the breakpoint hit
-    ExecutionContextRef
-    exe_ctx_ref;     // This tells us where we have stopped, what thread.
-    bool is_synchronous; // Is the callback being executed synchronously with the
-    // breakpoint,
-    // or asynchronously as the event is retrieved?
+  // Member variables
+  Event *event; // This is the event, the callback can modify this to indicate
+  // the meaning of the breakpoint hit
+  ExecutionContextRef
+      exe_ctx_ref;     // This tells us where we have stopped, what thread.
+  bool is_synchronous; // Is the callback being executed synchronously with the
+                       // breakpoint,
+                       // or asynchronously as the event is retrieved?
 };
 
 } // namespace lldb_private

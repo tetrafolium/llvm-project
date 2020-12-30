@@ -13,13 +13,9 @@ using namespace mlir;
 using namespace mlir::tblgen;
 
 bool NamedTypeConstraint::hasPredicate() const {
-    return !constraint.getPredicate().isNull();
+  return !constraint.getPredicate().isNull();
 }
 
-bool NamedTypeConstraint::isOptional() const {
-    return constraint.isOptional();
-}
+bool NamedTypeConstraint::isOptional() const { return constraint.isOptional(); }
 
-bool NamedTypeConstraint::isVariadic() const {
-    return constraint.isVariadic();
-}
+bool NamedTypeConstraint::isVariadic() const { return constraint.isVariadic(); }

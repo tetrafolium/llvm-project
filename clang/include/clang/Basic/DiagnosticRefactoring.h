@@ -20,7 +20,7 @@ enum {
 #define REFACTORINGSTART
 #include "clang/Basic/DiagnosticRefactoringKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_REFACTORING_DIAGNOSTICS
+  NUM_BUILTIN_REFACTORING_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

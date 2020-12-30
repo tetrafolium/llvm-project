@@ -17,59 +17,59 @@
 using namespace llvm;
 
 unsigned AddressPool::getIndex(const MCSymbol *Sym, bool TLS) {
-    HasBeenUsed = true;
-    auto IterBool =
-        Pool.insert(std::make_pair(Sym, AddressPoolEntry(Pool.size(), TLS)));
-    return IterBool.first->second.Number;
+  HasBeenUsed = true;
+  auto IterBool =
+      Pool.insert(std::make_pair(Sym, AddressPoolEntry(Pool.size(), TLS)));
+  return IterBool.first->second.Number;
 }
 
 MCSymbol *AddressPool::emitHeader(AsmPrinter &Asm, MCSection *Section) {
-    static const uint8_t AddrSize = Asm.getDataLayout().getPointerSize();
-    StringRef Prefix = "debug_addr_";
-    MCSymbol *BeginLabel = Asm.createTempSymbol(Prefix + "start");
-    MCSymbol *EndLabel = Asm.createTempSymbol(Prefix + "end");
+  static const uint8_t AddrSize = Asm.getDataLayout().getPointerSize();
+  StringRef Prefix = "debug_addr_";
+  MCSymbol *BeginLabel = Asm.createTempSymbol(Prefix + "start");
+  MCSymbol *EndLabel = Asm.createTempSymbol(Prefix + "end");
 
-    Asm.emitDwarfUnitLength(EndLabel, BeginLabel, "Length of contribution");
-    Asm.OutStreamer->emitLabel(BeginLabel);
-    Asm.OutStreamer->AddComment("DWARF version number");
-    Asm.emitInt16(Asm.getDwarfVersion());
-    Asm.OutStreamer->AddComment("Address size");
-    Asm.emitInt8(AddrSize);
-    Asm.OutStreamer->AddComment("Segment selector size");
-    Asm.emitInt8(0); // TODO: Support non-zero segment_selector_size.
+  Asm.emitDwarfUnitLength(EndLabel, BeginLabel, "Length of contribution");
+  Asm.OutStreamer->emitLabel(BeginLabel);
+  Asm.OutStreamer->AddComment("DWARF version number");
+  Asm.emitInt16(Asm.getDwarfVersion());
+  Asm.OutStreamer->AddComment("Address size");
+  Asm.emitInt8(AddrSize);
+  Asm.OutStreamer->AddComment("Segment selector size");
+  Asm.emitInt8(0); // TODO: Support non-zero segment_selector_size.
 
-    return EndLabel;
+  return EndLabel;
 }
 
 // Emit addresses into the section given.
 void AddressPool::emit(AsmPrinter &Asm, MCSection *AddrSection) {
-    if (isEmpty())
-        return;
+  if (isEmpty())
+    return;
 
-    // Start the dwarf addr section.
-    Asm.OutStreamer->SwitchSection(AddrSection);
+  // Start the dwarf addr section.
+  Asm.OutStreamer->SwitchSection(AddrSection);
 
-    MCSymbol *EndLabel = nullptr;
+  MCSymbol *EndLabel = nullptr;
 
-    if (Asm.getDwarfVersion() >= 5)
-        EndLabel = emitHeader(Asm, AddrSection);
+  if (Asm.getDwarfVersion() >= 5)
+    EndLabel = emitHeader(Asm, AddrSection);
 
-    // Define the symbol that marks the start of the contribution.
-    // It is referenced via DW_AT_addr_base.
-    Asm.OutStreamer->emitLabel(AddressTableBaseSym);
+  // Define the symbol that marks the start of the contribution.
+  // It is referenced via DW_AT_addr_base.
+  Asm.OutStreamer->emitLabel(AddressTableBaseSym);
 
-    // Order the address pool entries by ID
-    SmallVector<const MCExpr *, 64> Entries(Pool.size());
+  // Order the address pool entries by ID
+  SmallVector<const MCExpr *, 64> Entries(Pool.size());
 
-    for (const auto &I : Pool)
-        Entries[I.second.Number] =
-            I.second.TLS
+  for (const auto &I : Pool)
+    Entries[I.second.Number] =
+        I.second.TLS
             ? Asm.getObjFileLowering().getDebugThreadLocalSymbol(I.first)
             : MCSymbolRefExpr::create(I.first, Asm.OutContext);
 
-    for (const MCExpr *Entry : Entries)
-        Asm.OutStreamer->emitValue(Entry, Asm.getDataLayout().getPointerSize());
+  for (const MCExpr *Entry : Entries)
+    Asm.OutStreamer->emitValue(Entry, Asm.getDataLayout().getPointerSize());
 
-    if (EndLabel)
-        Asm.OutStreamer->emitLabel(EndLabel);
+  if (EndLabel)
+    Asm.OutStreamer->emitLabel(EndLabel);
 }

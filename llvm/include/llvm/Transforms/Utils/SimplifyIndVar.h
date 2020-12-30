@@ -34,18 +34,16 @@ class TargetTransformInfo;
 /// simplified by this utility.
 class IVVisitor {
 protected:
-    const DominatorTree *DT = nullptr;
+  const DominatorTree *DT = nullptr;
 
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    IVVisitor() = default;
-    virtual ~IVVisitor() = default;
+  IVVisitor() = default;
+  virtual ~IVVisitor() = default;
 
-    const DominatorTree *getDomTree() const {
-        return DT;
-    }
-    virtual void visitCast(CastInst *Cast) = 0;
+  const DominatorTree *getDomTree() const { return DT; }
+  virtual void visitCast(CastInst *Cast) = 0;
 };
 
 /// simplifyUsersOfIV - Simplify instructions that use this induction variable
@@ -62,23 +60,23 @@ bool simplifyLoopIVs(Loop *L, ScalarEvolution *SE, DominatorTree *DT,
                      SmallVectorImpl<WeakTrackingVH> &Dead);
 
 /// Collect information about induction variables that are used by sign/zero
-/// extend operations. This information is recorded by CollectExtend and provides
-/// the input to WidenIV.
+/// extend operations. This information is recorded by CollectExtend and
+/// provides the input to WidenIV.
 struct WideIVInfo {
-    PHINode *NarrowIV = nullptr;
+  PHINode *NarrowIV = nullptr;
 
-    // Widest integer type created [sz]ext
-    Type *WidestNativeType = nullptr;
+  // Widest integer type created [sz]ext
+  Type *WidestNativeType = nullptr;
 
-    // Was a sext user seen before a zext?
-    bool IsSigned = false;
+  // Was a sext user seen before a zext?
+  bool IsSigned = false;
 };
 
 /// Widen Induction Variables - Extend the width of an IV to cover its
 /// widest uses.
-PHINode *createWideIV(WideIVInfo &WI,
-                      LoopInfo *LI, ScalarEvolution *SE, SCEVExpander &Rewriter,
-                      DominatorTree *DT, SmallVectorImpl<WeakTrackingVH> &DeadInsts,
+PHINode *createWideIV(WideIVInfo &WI, LoopInfo *LI, ScalarEvolution *SE,
+                      SCEVExpander &Rewriter, DominatorTree *DT,
+                      SmallVectorImpl<WeakTrackingVH> &DeadInsts,
                       unsigned &NumElimExt, unsigned &NumWidened,
                       bool HasGuards, bool UsePostIncrementRanges);
 

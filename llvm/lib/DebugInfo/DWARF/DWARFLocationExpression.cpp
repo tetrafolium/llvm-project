@@ -14,6 +14,6 @@ using namespace llvm;
 
 raw_ostream &llvm::operator<<(raw_ostream &OS,
                               const DWARFLocationExpression &Loc) {
-    return OS << Loc.Range << ": "
-           << formatv("{0}", make_range(Loc.Expr.begin(), Loc.Expr.end()));
+  return OS << Loc.Range << ": "
+            << formatv("{0}", make_range(Loc.Expr.begin(), Loc.Expr.end()));
 }

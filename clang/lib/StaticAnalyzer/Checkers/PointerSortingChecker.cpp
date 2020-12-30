@@ -27,35 +27,33 @@ constexpr llvm::StringLiteral WarnAtNode = "sort";
 
 class PointerSortingChecker : public Checker<check::ASTCodeBody> {
 public:
-    void checkASTCodeBody(const Decl *D,
-                          AnalysisManager &AM,
-                          BugReporter &BR) const;
+  void checkASTCodeBody(const Decl *D, AnalysisManager &AM,
+                        BugReporter &BR) const;
 };
 
 static void emitDiagnostics(const BoundNodes &Match, const Decl *D,
                             BugReporter &BR, AnalysisManager &AM,
                             const PointerSortingChecker *Checker) {
-    auto *ADC = AM.getAnalysisDeclContext(D);
+  auto *ADC = AM.getAnalysisDeclContext(D);
 
-    const auto *MarkedStmt = Match.getNodeAs<CallExpr>(WarnAtNode);
-    assert(MarkedStmt);
+  const auto *MarkedStmt = Match.getNodeAs<CallExpr>(WarnAtNode);
+  assert(MarkedStmt);
 
-    auto Range = MarkedStmt->getSourceRange();
-    auto Location = PathDiagnosticLocation::createBegin(MarkedStmt,
-                    BR.getSourceManager(),
-                    ADC);
-    std::string Diagnostics;
-    llvm::raw_string_ostream OS(Diagnostics);
-    OS << "Sorting pointer-like elements "
-       << "can result in non-deterministic ordering";
+  auto Range = MarkedStmt->getSourceRange();
+  auto Location = PathDiagnosticLocation::createBegin(
+      MarkedStmt, BR.getSourceManager(), ADC);
+  std::string Diagnostics;
+  llvm::raw_string_ostream OS(Diagnostics);
+  OS << "Sorting pointer-like elements "
+     << "can result in non-deterministic ordering";
 
-    BR.EmitBasicReport(ADC->getDecl(), Checker,
-                       "Sorting of pointer-like elements", "Non-determinism",
-                       OS.str(), Location, Range);
+  BR.EmitBasicReport(ADC->getDecl(), Checker,
+                     "Sorting of pointer-like elements", "Non-determinism",
+                     OS.str(), Location, Range);
 }
 
 decltype(auto) callsName(const char *FunctionName) {
-    return callee(functionDecl(hasName(FunctionName)));
+  return callee(functionDecl(hasName(FunctionName)));
 }
 
 // FIXME: Currently we simply check if std::sort is used with pointer-like
@@ -67,49 +65,41 @@ decltype(auto) callsName(const char *FunctionName) {
 // which we don't want to do things with more than once, we might use
 // sort-unique-erase and the sort call will emit a report.
 auto matchSortWithPointers() -> decltype(decl()) {
-    // Match any of these function calls.
-    auto SortFuncM = anyOf(
-                         callsName("std::is_sorted"),
-                         callsName("std::nth_element"),
-                         callsName("std::partial_sort"),
-                         callsName("std::partition"),
-                         callsName("std::sort"),
-                         callsName("std::stable_partition"),
-                         callsName("std::stable_sort")
-                     );
+  // Match any of these function calls.
+  auto SortFuncM =
+      anyOf(callsName("std::is_sorted"), callsName("std::nth_element"),
+            callsName("std::partial_sort"), callsName("std::partition"),
+            callsName("std::sort"), callsName("std::stable_partition"),
+            callsName("std::stable_sort"));
 
-    // Match only if the container has pointer-type elements.
-    auto IteratesPointerEltsM = hasArgument(0,
-                                            hasType(cxxRecordDecl(has(
-                                                    fieldDecl(hasType(hasCanonicalType(
-                                                            pointsTo(hasCanonicalType(pointerType()))
-                                                            )))
-                                                    ))));
+  // Match only if the container has pointer-type elements.
+  auto IteratesPointerEltsM = hasArgument(
+      0, hasType(cxxRecordDecl(has(fieldDecl(hasType(
+             hasCanonicalType(pointsTo(hasCanonicalType(pointerType())))))))));
 
-    auto PointerSortM = traverse(
-                            TK_AsIs,
-                            stmt(callExpr(allOf(SortFuncM, IteratesPointerEltsM))).bind(WarnAtNode));
+  auto PointerSortM = traverse(
+      TK_AsIs,
+      stmt(callExpr(allOf(SortFuncM, IteratesPointerEltsM))).bind(WarnAtNode));
 
-    return decl(forEachDescendant(PointerSortM));
+  return decl(forEachDescendant(PointerSortM));
 }
 
-void PointerSortingChecker::checkASTCodeBody(const Decl *D,
-        AnalysisManager &AM,
-        BugReporter &BR) const {
-    auto MatcherM = matchSortWithPointers();
+void PointerSortingChecker::checkASTCodeBody(const Decl *D, AnalysisManager &AM,
+                                             BugReporter &BR) const {
+  auto MatcherM = matchSortWithPointers();
 
-    auto Matches = match(MatcherM, *D, AM.getASTContext());
-    for (const auto &Match : Matches)
-        emitDiagnostics(Match, D, BR, AM, this);
+  auto Matches = match(MatcherM, *D, AM.getASTContext());
+  for (const auto &Match : Matches)
+    emitDiagnostics(Match, D, BR, AM, this);
 }
 
 } // end of anonymous namespace
 
 void ento::registerPointerSortingChecker(CheckerManager &Mgr) {
-    Mgr.registerChecker<PointerSortingChecker>();
+  Mgr.registerChecker<PointerSortingChecker>();
 }
 
 bool ento::shouldRegisterPointerSortingChecker(const CheckerManager &mgr) {
-    const LangOptions &LO = mgr.getLangOpts();
-    return LO.CPlusPlus;
+  const LangOptions &LO = mgr.getLangOpts();
+  return LO.CPlusPlus;
 }

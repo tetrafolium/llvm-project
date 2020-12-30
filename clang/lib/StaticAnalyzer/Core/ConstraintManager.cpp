@@ -24,20 +24,20 @@ ConstraintManager::~ConstraintManager() = default;
 
 static DefinedSVal getLocFromSymbol(const ProgramStateRef &State,
                                     SymbolRef Sym) {
-    const MemRegion *R =
-        State->getStateManager().getRegionManager().getSymbolicRegion(Sym);
-    return loc::MemRegionVal(R);
+  const MemRegion *R =
+      State->getStateManager().getRegionManager().getSymbolicRegion(Sym);
+  return loc::MemRegionVal(R);
 }
 
 ConditionTruthVal ConstraintManager::checkNull(ProgramStateRef State,
-        SymbolRef Sym) {
-    QualType Ty = Sym->getType();
-    DefinedSVal V = Loc::isLocType(Ty) ? getLocFromSymbol(State, Sym)
-                    : nonloc::SymbolVal(Sym);
-    const ProgramStatePair &P = assumeDual(State, V);
-    if (P.first && !P.second)
-        return ConditionTruthVal(false);
-    if (!P.first && P.second)
-        return ConditionTruthVal(true);
-    return {};
+                                               SymbolRef Sym) {
+  QualType Ty = Sym->getType();
+  DefinedSVal V = Loc::isLocType(Ty) ? getLocFromSymbol(State, Sym)
+                                     : nonloc::SymbolVal(Sym);
+  const ProgramStatePair &P = assumeDual(State, V);
+  if (P.first && !P.second)
+    return ConditionTruthVal(false);
+  if (!P.first && P.second)
+    return ConditionTruthVal(true);
+  return {};
 }

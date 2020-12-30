@@ -15,40 +15,40 @@ namespace clang {
 using namespace llvm;
 
 Optional<sys::fs::file_status> getFileStatus(StringRef Path) {
-    sys::fs::file_status Status;
-    std::error_code EC = status(Path, Status);
-    if (EC)
-        return None;
-    return Status;
+  sys::fs::file_status Status;
+  std::error_code EC = status(Path, Status);
+  if (EC)
+    return None;
+  return Status;
 }
 
 std::vector<std::string> scanDirectory(StringRef Path) {
-    using namespace llvm::sys;
-    std::vector<std::string> Result;
+  using namespace llvm::sys;
+  std::vector<std::string> Result;
 
-    std::error_code EC;
-    for (auto It = fs::directory_iterator(Path, EC),
+  std::error_code EC;
+  for (auto It = fs::directory_iterator(Path, EC),
             End = fs::directory_iterator();
-            !EC && It != End; It.increment(EC)) {
-        auto status = getFileStatus(It->path());
-        if (!status.hasValue())
-            continue;
-        Result.emplace_back(sys::path::filename(It->path()));
-    }
+       !EC && It != End; It.increment(EC)) {
+    auto status = getFileStatus(It->path());
+    if (!status.hasValue())
+      continue;
+    Result.emplace_back(sys::path::filename(It->path()));
+  }
 
-    return Result;
+  return Result;
 }
 
 std::vector<DirectoryWatcher::Event>
 getAsFileEvents(const std::vector<std::string> &Scan) {
-    std::vector<DirectoryWatcher::Event> Events;
-    Events.reserve(Scan.size());
+  std::vector<DirectoryWatcher::Event> Events;
+  Events.reserve(Scan.size());
 
-    for (const auto &File : Scan) {
-        Events.emplace_back(DirectoryWatcher::Event{
-            DirectoryWatcher::Event::EventKind::Modified, File});
-    }
-    return Events;
+  for (const auto &File : Scan) {
+    Events.emplace_back(DirectoryWatcher::Event{
+        DirectoryWatcher::Event::EventKind::Modified, File});
+  }
+  return Events;
 }
 
 } // namespace clang

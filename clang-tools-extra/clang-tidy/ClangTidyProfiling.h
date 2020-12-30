@@ -24,34 +24,34 @@ namespace tidy {
 
 class ClangTidyProfiling {
 public:
-    struct StorageParams {
-        llvm::sys::TimePoint<> Timestamp;
-        std::string SourceFilename;
-        std::string StoreFilename;
+  struct StorageParams {
+    llvm::sys::TimePoint<> Timestamp;
+    std::string SourceFilename;
+    std::string StoreFilename;
 
-        StorageParams() = default;
+    StorageParams() = default;
 
-        StorageParams(llvm::StringRef ProfilePrefix, llvm::StringRef SourceFile);
-    };
+    StorageParams(llvm::StringRef ProfilePrefix, llvm::StringRef SourceFile);
+  };
 
 private:
-    llvm::Optional<llvm::TimerGroup> TG;
+  llvm::Optional<llvm::TimerGroup> TG;
 
-    llvm::Optional<StorageParams> Storage;
+  llvm::Optional<StorageParams> Storage;
 
-    void printUserFriendlyTable(llvm::raw_ostream &OS);
-    void printAsJSON(llvm::raw_ostream &OS);
+  void printUserFriendlyTable(llvm::raw_ostream &OS);
+  void printAsJSON(llvm::raw_ostream &OS);
 
-    void storeProfileData();
+  void storeProfileData();
 
 public:
-    llvm::StringMap<llvm::TimeRecord> Records;
+  llvm::StringMap<llvm::TimeRecord> Records;
 
-    ClangTidyProfiling() = default;
+  ClangTidyProfiling() = default;
 
-    ClangTidyProfiling(llvm::Optional<StorageParams> Storage);
+  ClangTidyProfiling(llvm::Optional<StorageParams> Storage);
 
-    ~ClangTidyProfiling();
+  ~ClangTidyProfiling();
 };
 
 } // end namespace tidy

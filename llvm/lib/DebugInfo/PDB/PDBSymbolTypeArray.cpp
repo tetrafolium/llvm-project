@@ -16,9 +16,9 @@ using namespace llvm;
 using namespace llvm::pdb;
 
 void PDBSymbolTypeArray::dump(PDBSymDumper &Dumper) const {
-    Dumper.dump(*this);
+  Dumper.dump(*this);
 }
 
 void PDBSymbolTypeArray::dumpRight(PDBSymDumper &Dumper) const {
-    Dumper.dumpRight(*this);
+  Dumper.dumpRight(*this);
 }

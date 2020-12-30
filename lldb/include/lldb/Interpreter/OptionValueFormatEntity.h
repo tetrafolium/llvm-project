@@ -16,60 +16,50 @@ namespace lldb_private {
 
 class OptionValueFormatEntity : public OptionValue {
 public:
-    OptionValueFormatEntity(const char *default_format);
+  OptionValueFormatEntity(const char *default_format);
 
-    ~OptionValueFormatEntity() override {}
+  ~OptionValueFormatEntity() override {}
 
-    // Virtual subclass pure virtual overrides
+  // Virtual subclass pure virtual overrides
 
-    OptionValue::Type GetType() const override {
-        return eTypeFormatEntity;
-    }
+  OptionValue::Type GetType() const override { return eTypeFormatEntity; }
 
-    void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
-                   uint32_t dump_mask) override;
+  void DumpValue(const ExecutionContext *exe_ctx, Stream &strm,
+                 uint32_t dump_mask) override;
 
-    Status
-    SetValueFromString(llvm::StringRef value,
-                       VarSetOperationType op = eVarSetOperationAssign) override;
-    Status
-    SetValueFromString(const char *,
-                       VarSetOperationType = eVarSetOperationAssign) = delete;
+  Status
+  SetValueFromString(llvm::StringRef value,
+                     VarSetOperationType op = eVarSetOperationAssign) override;
+  Status
+  SetValueFromString(const char *,
+                     VarSetOperationType = eVarSetOperationAssign) = delete;
 
-    void Clear() override;
+  void Clear() override;
 
-    lldb::OptionValueSP DeepCopy() const override;
+  lldb::OptionValueSP DeepCopy() const override;
 
-    void AutoComplete(CommandInterpreter &interpreter,
-                      CompletionRequest &request) override;
+  void AutoComplete(CommandInterpreter &interpreter,
+                    CompletionRequest &request) override;
 
-    // Subclass specific functions
+  // Subclass specific functions
 
-    FormatEntity::Entry &GetCurrentValue() {
-        return m_current_entry;
-    }
+  FormatEntity::Entry &GetCurrentValue() { return m_current_entry; }
 
-    const FormatEntity::Entry &GetCurrentValue() const {
-        return m_current_entry;
-    }
+  const FormatEntity::Entry &GetCurrentValue() const { return m_current_entry; }
 
-    void SetCurrentValue(const FormatEntity::Entry &value) {
-        m_current_entry = value;
-    }
+  void SetCurrentValue(const FormatEntity::Entry &value) {
+    m_current_entry = value;
+  }
 
-    FormatEntity::Entry &GetDefaultValue() {
-        return m_default_entry;
-    }
+  FormatEntity::Entry &GetDefaultValue() { return m_default_entry; }
 
-    const FormatEntity::Entry &GetDefaultValue() const {
-        return m_default_entry;
-    }
+  const FormatEntity::Entry &GetDefaultValue() const { return m_default_entry; }
 
 protected:
-    std::string m_current_format;
-    std::string m_default_format;
-    FormatEntity::Entry m_current_entry;
-    FormatEntity::Entry m_default_entry;
+  std::string m_current_format;
+  std::string m_default_format;
+  FormatEntity::Entry m_current_entry;
+  FormatEntity::Entry m_default_entry;
 };
 
 } // namespace lldb_private

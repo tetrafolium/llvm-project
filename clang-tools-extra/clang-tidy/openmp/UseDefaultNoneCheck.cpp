@@ -22,37 +22,37 @@ namespace tidy {
 namespace openmp {
 
 void UseDefaultNoneCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        ompExecutableDirective(
-            allOf(isAllowedToContainClauseKind(llvm::omp::OMPC_default),
-                  anyOf(unless(hasAnyClause(ompDefaultClause())),
-                        hasAnyClause(ompDefaultClause(unless(isNoneKind()))
-                                     .bind("clause")))))
-        .bind("directive"),
-        this);
+  Finder->addMatcher(
+      ompExecutableDirective(
+          allOf(isAllowedToContainClauseKind(llvm::omp::OMPC_default),
+                anyOf(unless(hasAnyClause(ompDefaultClause())),
+                      hasAnyClause(ompDefaultClause(unless(isNoneKind()))
+                                       .bind("clause")))))
+          .bind("directive"),
+      this);
 }
 
 void UseDefaultNoneCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *Directive =
-        Result.Nodes.getNodeAs<OMPExecutableDirective>("directive");
-    assert(Directive != nullptr && "Expected to match some directive.");
+  const auto *Directive =
+      Result.Nodes.getNodeAs<OMPExecutableDirective>("directive");
+  assert(Directive != nullptr && "Expected to match some directive.");
 
-    if (const auto *Clause = Result.Nodes.getNodeAs<OMPDefaultClause>("clause")) {
-        diag(Directive->getBeginLoc(),
-             "OpenMP directive '%0' specifies 'default(%1)' clause, consider using "
-             "'default(none)' clause instead")
-                << getOpenMPDirectiveName(Directive->getDirectiveKind())
-                << getOpenMPSimpleClauseTypeName(Clause->getClauseKind(),
-                        unsigned(Clause->getDefaultKind()));
-        diag(Clause->getBeginLoc(), "existing 'default' clause specified here",
-             DiagnosticIDs::Note);
-        return;
-    }
-
+  if (const auto *Clause = Result.Nodes.getNodeAs<OMPDefaultClause>("clause")) {
     diag(Directive->getBeginLoc(),
-         "OpenMP directive '%0' does not specify 'default' clause, consider "
-         "specifying 'default(none)' clause")
-            << getOpenMPDirectiveName(Directive->getDirectiveKind());
+         "OpenMP directive '%0' specifies 'default(%1)' clause, consider using "
+         "'default(none)' clause instead")
+        << getOpenMPDirectiveName(Directive->getDirectiveKind())
+        << getOpenMPSimpleClauseTypeName(Clause->getClauseKind(),
+                                         unsigned(Clause->getDefaultKind()));
+    diag(Clause->getBeginLoc(), "existing 'default' clause specified here",
+         DiagnosticIDs::Note);
+    return;
+  }
+
+  diag(Directive->getBeginLoc(),
+       "OpenMP directive '%0' does not specify 'default' clause, consider "
+       "specifying 'default(none)' clause")
+      << getOpenMPDirectiveName(Directive->getDirectiveKind());
 }
 
 } // namespace openmp

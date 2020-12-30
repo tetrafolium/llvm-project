@@ -40,157 +40,130 @@ class MachineDominanceFrontier;
 // An exception catch part is defined as a BB with catch instruction and all
 // other BBs dominated by this BB.
 class WebAssemblyException {
-    MachineBasicBlock *EHPad = nullptr;
+  MachineBasicBlock *EHPad = nullptr;
 
-    WebAssemblyException *ParentException = nullptr;
-    std::vector<std::unique_ptr<WebAssemblyException>> SubExceptions;
-    std::vector<MachineBasicBlock *> Blocks;
-    SmallPtrSet<const MachineBasicBlock *, 8> BlockSet;
+  WebAssemblyException *ParentException = nullptr;
+  std::vector<std::unique_ptr<WebAssemblyException>> SubExceptions;
+  std::vector<MachineBasicBlock *> Blocks;
+  SmallPtrSet<const MachineBasicBlock *, 8> BlockSet;
 
 public:
-    WebAssemblyException(MachineBasicBlock *EHPad) : EHPad(EHPad) {}
-    WebAssemblyException(const WebAssemblyException &) = delete;
-    const WebAssemblyException &operator=(const WebAssemblyException &) = delete;
+  WebAssemblyException(MachineBasicBlock *EHPad) : EHPad(EHPad) {}
+  WebAssemblyException(const WebAssemblyException &) = delete;
+  const WebAssemblyException &operator=(const WebAssemblyException &) = delete;
 
-    MachineBasicBlock *getEHPad() const {
-        return EHPad;
-    }
-    MachineBasicBlock *getHeader() const {
-        return EHPad;
-    }
-    WebAssemblyException *getParentException() const {
-        return ParentException;
-    }
-    void setParentException(WebAssemblyException *WE) {
-        ParentException = WE;
-    }
+  MachineBasicBlock *getEHPad() const { return EHPad; }
+  MachineBasicBlock *getHeader() const { return EHPad; }
+  WebAssemblyException *getParentException() const { return ParentException; }
+  void setParentException(WebAssemblyException *WE) { ParentException = WE; }
 
-    bool contains(const WebAssemblyException *WE) const {
-        if (WE == this)
-            return true;
-        if (!WE)
-            return false;
-        return contains(WE->getParentException());
-    }
-    bool contains(const MachineBasicBlock *MBB) const {
-        return BlockSet.count(MBB);
-    }
+  bool contains(const WebAssemblyException *WE) const {
+    if (WE == this)
+      return true;
+    if (!WE)
+      return false;
+    return contains(WE->getParentException());
+  }
+  bool contains(const MachineBasicBlock *MBB) const {
+    return BlockSet.count(MBB);
+  }
 
-    void addBlock(MachineBasicBlock *MBB) {
-        Blocks.push_back(MBB);
-        BlockSet.insert(MBB);
-    }
-    ArrayRef<MachineBasicBlock *> getBlocks() const {
-        return Blocks;
-    }
-    using block_iterator = typename ArrayRef<MachineBasicBlock *>::const_iterator;
-    block_iterator block_begin() const {
-        return getBlocks().begin();
-    }
-    block_iterator block_end() const {
-        return getBlocks().end();
-    }
-    inline iterator_range<block_iterator> blocks() const {
-        return make_range(block_begin(), block_end());
-    }
-    unsigned getNumBlocks() const {
-        return Blocks.size();
-    }
-    std::vector<MachineBasicBlock *> &getBlocksVector() {
-        return Blocks;
-    }
+  void addBlock(MachineBasicBlock *MBB) {
+    Blocks.push_back(MBB);
+    BlockSet.insert(MBB);
+  }
+  ArrayRef<MachineBasicBlock *> getBlocks() const { return Blocks; }
+  using block_iterator = typename ArrayRef<MachineBasicBlock *>::const_iterator;
+  block_iterator block_begin() const { return getBlocks().begin(); }
+  block_iterator block_end() const { return getBlocks().end(); }
+  inline iterator_range<block_iterator> blocks() const {
+    return make_range(block_begin(), block_end());
+  }
+  unsigned getNumBlocks() const { return Blocks.size(); }
+  std::vector<MachineBasicBlock *> &getBlocksVector() { return Blocks; }
 
-    const std::vector<std::unique_ptr<WebAssemblyException>> &getSubExceptions() const {
-        return SubExceptions;
-    }
-    std::vector<std::unique_ptr<WebAssemblyException>> &getSubExceptions() {
-        return SubExceptions;
-    }
-    void addSubException(std::unique_ptr<WebAssemblyException> E) {
-        SubExceptions.push_back(std::move(E));
-    }
-    using iterator = typename decltype(SubExceptions)::const_iterator;
-    iterator begin() const {
-        return SubExceptions.begin();
-    }
-    iterator end() const {
-        return SubExceptions.end();
-    }
+  const std::vector<std::unique_ptr<WebAssemblyException>> &
+  getSubExceptions() const {
+    return SubExceptions;
+  }
+  std::vector<std::unique_ptr<WebAssemblyException>> &getSubExceptions() {
+    return SubExceptions;
+  }
+  void addSubException(std::unique_ptr<WebAssemblyException> E) {
+    SubExceptions.push_back(std::move(E));
+  }
+  using iterator = typename decltype(SubExceptions)::const_iterator;
+  iterator begin() const { return SubExceptions.begin(); }
+  iterator end() const { return SubExceptions.end(); }
 
-    void reserveBlocks(unsigned Size) {
-        Blocks.reserve(Size);
-    }
-    void reverseBlock(unsigned From = 0) {
-        std::reverse(Blocks.begin() + From, Blocks.end());
-    }
+  void reserveBlocks(unsigned Size) { Blocks.reserve(Size); }
+  void reverseBlock(unsigned From = 0) {
+    std::reverse(Blocks.begin() + From, Blocks.end());
+  }
 
-    // Return the nesting level. An outermost one has depth 1.
-    unsigned getExceptionDepth() const {
-        unsigned D = 1;
-        for (const WebAssemblyException *CurException = ParentException;
-                CurException; CurException = CurException->ParentException)
-            ++D;
-        return D;
-    }
+  // Return the nesting level. An outermost one has depth 1.
+  unsigned getExceptionDepth() const {
+    unsigned D = 1;
+    for (const WebAssemblyException *CurException = ParentException;
+         CurException; CurException = CurException->ParentException)
+      ++D;
+    return D;
+  }
 
-    void print(raw_ostream &OS, unsigned Depth = 0) const;
-    void dump() const;
+  void print(raw_ostream &OS, unsigned Depth = 0) const;
+  void dump() const;
 };
 
 raw_ostream &operator<<(raw_ostream &OS, const WebAssemblyException &WE);
 
 class WebAssemblyExceptionInfo final : public MachineFunctionPass {
-    // Mapping of basic blocks to the innermost exception they occur in
-    DenseMap<const MachineBasicBlock *, WebAssemblyException *> BBMap;
-    std::vector<std::unique_ptr<WebAssemblyException>> TopLevelExceptions;
+  // Mapping of basic blocks to the innermost exception they occur in
+  DenseMap<const MachineBasicBlock *, WebAssemblyException *> BBMap;
+  std::vector<std::unique_ptr<WebAssemblyException>> TopLevelExceptions;
 
-    void discoverAndMapException(WebAssemblyException *WE,
-                                 const MachineDominatorTree &MDT,
-                                 const MachineDominanceFrontier &MDF);
-    WebAssemblyException *getOutermostException(MachineBasicBlock *MBB) const;
+  void discoverAndMapException(WebAssemblyException *WE,
+                               const MachineDominatorTree &MDT,
+                               const MachineDominanceFrontier &MDF);
+  WebAssemblyException *getOutermostException(MachineBasicBlock *MBB) const;
 
 public:
-    static char ID;
-    WebAssemblyExceptionInfo() : MachineFunctionPass(ID) {
-        initializeWebAssemblyExceptionInfoPass(*PassRegistry::getPassRegistry());
-    }
-    ~WebAssemblyExceptionInfo() override {
-        releaseMemory();
-    }
-    WebAssemblyExceptionInfo(const WebAssemblyExceptionInfo &) = delete;
-    WebAssemblyExceptionInfo &
-    operator=(const WebAssemblyExceptionInfo &) = delete;
+  static char ID;
+  WebAssemblyExceptionInfo() : MachineFunctionPass(ID) {
+    initializeWebAssemblyExceptionInfoPass(*PassRegistry::getPassRegistry());
+  }
+  ~WebAssemblyExceptionInfo() override { releaseMemory(); }
+  WebAssemblyExceptionInfo(const WebAssemblyExceptionInfo &) = delete;
+  WebAssemblyExceptionInfo &
+  operator=(const WebAssemblyExceptionInfo &) = delete;
 
-    bool runOnMachineFunction(MachineFunction &) override;
-    void releaseMemory() override;
-    void recalculate(MachineDominatorTree &MDT,
-                     const MachineDominanceFrontier &MDF);
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnMachineFunction(MachineFunction &) override;
+  void releaseMemory() override;
+  void recalculate(MachineDominatorTree &MDT,
+                   const MachineDominanceFrontier &MDF);
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    bool empty() const {
-        return TopLevelExceptions.empty();
+  bool empty() const { return TopLevelExceptions.empty(); }
+
+  // Return the innermost exception that MBB lives in. If the block is not in an
+  // exception, null is returned.
+  WebAssemblyException *getExceptionFor(const MachineBasicBlock *MBB) const {
+    return BBMap.lookup(MBB);
+  }
+
+  void changeExceptionFor(MachineBasicBlock *MBB, WebAssemblyException *WE) {
+    if (!WE) {
+      BBMap.erase(MBB);
+      return;
     }
+    BBMap[MBB] = WE;
+  }
 
-    // Return the innermost exception that MBB lives in. If the block is not in an
-    // exception, null is returned.
-    WebAssemblyException *getExceptionFor(const MachineBasicBlock *MBB) const {
-        return BBMap.lookup(MBB);
-    }
+  void addTopLevelException(std::unique_ptr<WebAssemblyException> WE) {
+    assert(!WE->getParentException() && "Not a top level exception!");
+    TopLevelExceptions.push_back(std::move(WE));
+  }
 
-    void changeExceptionFor(MachineBasicBlock *MBB, WebAssemblyException *WE) {
-        if (!WE) {
-            BBMap.erase(MBB);
-            return;
-        }
-        BBMap[MBB] = WE;
-    }
-
-    void addTopLevelException(std::unique_ptr<WebAssemblyException> WE) {
-        assert(!WE->getParentException() && "Not a top level exception!");
-        TopLevelExceptions.push_back(std::move(WE));
-    }
-
-    void print(raw_ostream &OS, const Module *M = nullptr) const override;
+  void print(raw_ostream &OS, const Module *M = nullptr) const override;
 };
 
 } // end namespace llvm

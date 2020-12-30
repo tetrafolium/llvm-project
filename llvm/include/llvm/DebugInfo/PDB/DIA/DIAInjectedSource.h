@@ -18,18 +18,18 @@ class DIASession;
 
 class DIAInjectedSource : public IPDBInjectedSource {
 public:
-    explicit DIAInjectedSource(CComPtr<IDiaInjectedSource> DiaSourceFile);
+  explicit DIAInjectedSource(CComPtr<IDiaInjectedSource> DiaSourceFile);
 
-    uint32_t getCrc32() const override;
-    uint64_t getCodeByteSize() const override;
-    std::string getFileName() const override;
-    std::string getObjectFileName() const override;
-    std::string getVirtualFileName() const override;
-    uint32_t getCompression() const override;
-    std::string getCode() const override;
+  uint32_t getCrc32() const override;
+  uint64_t getCodeByteSize() const override;
+  std::string getFileName() const override;
+  std::string getObjectFileName() const override;
+  std::string getVirtualFileName() const override;
+  uint32_t getCompression() const override;
+  std::string getCode() const override;
 
 private:
-    CComPtr<IDiaInjectedSource> SourceFile;
+  CComPtr<IDiaInjectedSource> SourceFile;
 };
 } // namespace pdb
 } // namespace llvm

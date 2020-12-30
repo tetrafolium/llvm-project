@@ -24,9 +24,9 @@ class LPMUpdater;
 class WarnMissedTransformationsPass
     : public PassInfoMixin<WarnMissedTransformationsPass> {
 public:
-    explicit WarnMissedTransformationsPass() {}
+  explicit WarnMissedTransformationsPass() {}
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 // Legacy pass manager boilerplate.

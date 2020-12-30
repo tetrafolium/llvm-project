@@ -17,45 +17,43 @@ namespace tidy {
 namespace matchers {
 
 AST_MATCHER(BinaryOperator, isRelationalOperator) {
-    return Node.isRelationalOp();
+  return Node.isRelationalOp();
 }
 
-AST_MATCHER(BinaryOperator, isEqualityOperator) {
-    return Node.isEqualityOp();
-}
+AST_MATCHER(BinaryOperator, isEqualityOperator) { return Node.isEqualityOp(); }
 
 AST_MATCHER(QualType, isExpensiveToCopy) {
-    llvm::Optional<bool> IsExpensive =
-        utils::type_traits::isExpensiveToCopy(Node, Finder->getASTContext());
-    return IsExpensive && *IsExpensive;
+  llvm::Optional<bool> IsExpensive =
+      utils::type_traits::isExpensiveToCopy(Node, Finder->getASTContext());
+  return IsExpensive && *IsExpensive;
 }
 
 AST_MATCHER(RecordDecl, isTriviallyDefaultConstructible) {
-    return utils::type_traits::recordIsTriviallyDefaultConstructible(
-               Node, Finder->getASTContext());
+  return utils::type_traits::recordIsTriviallyDefaultConstructible(
+      Node, Finder->getASTContext());
 }
 
 AST_MATCHER(QualType, isTriviallyDestructible) {
-    return utils::type_traits::isTriviallyDestructible(Node);
+  return utils::type_traits::isTriviallyDestructible(Node);
 }
 
 // Returns QualType matcher for references to const.
 AST_MATCHER_FUNCTION(ast_matchers::TypeMatcher, isReferenceToConst) {
-    using namespace ast_matchers;
-    return referenceType(pointee(qualType(isConstQualified())));
+  using namespace ast_matchers;
+  return referenceType(pointee(qualType(isConstQualified())));
 }
 
 // Returns QualType matcher for pointers to const.
 AST_MATCHER_FUNCTION(ast_matchers::TypeMatcher, isPointerToConst) {
-    using namespace ast_matchers;
-    return pointerType(pointee(qualType(isConstQualified())));
+  using namespace ast_matchers;
+  return pointerType(pointee(qualType(isConstQualified())));
 }
 
 AST_MATCHER_P(NamedDecl, matchesAnyListedName, std::vector<std::string>,
               NameList) {
-    return llvm::any_of(NameList, [&Node](const std::string &Name) {
-        return llvm::Regex(Name).match(Node.getName());
-    });
+  return llvm::any_of(NameList, [&Node](const std::string &Name) {
+    return llvm::Regex(Name).match(Node.getName());
+  });
 }
 
 } // namespace matchers

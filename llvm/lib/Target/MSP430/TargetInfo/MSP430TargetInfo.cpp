@@ -11,11 +11,11 @@
 using namespace llvm;
 
 Target &llvm::getTheMSP430Target() {
-    static Target TheMSP430Target;
-    return TheMSP430Target;
+  static Target TheMSP430Target;
+  return TheMSP430Target;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMSP430TargetInfo() {
-    RegisterTarget<Triple::msp430> X(getTheMSP430Target(), "msp430",
-                                     "MSP430 [experimental]", "MSP430");
+  RegisterTarget<Triple::msp430> X(getTheMSP430Target(), "msp430",
+                                   "MSP430 [experimental]", "MSP430");
 }

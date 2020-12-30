@@ -27,39 +27,33 @@ using namespace llvm;
 void MCLOHDirective::emit_impl(raw_ostream &OutStream,
                                const MachObjectWriter &ObjWriter,
                                const MCAsmLayout &Layout) const {
-    encodeULEB128(Kind, OutStream);
-    encodeULEB128(Args.size(), OutStream);
-    for (const MCSymbol *Arg : Args)
-        encodeULEB128(ObjWriter.getSymbolAddress(*Arg, Layout), OutStream);
+  encodeULEB128(Kind, OutStream);
+  encodeULEB128(Args.size(), OutStream);
+  for (const MCSymbol *Arg : Args)
+    encodeULEB128(ObjWriter.getSymbolAddress(*Arg, Layout), OutStream);
 }
 
 void MCLOHDirective::emit(MachObjectWriter &ObjWriter,
                           const MCAsmLayout &Layout) const {
-    raw_ostream &OutStream = ObjWriter.W.OS;
-    emit_impl(OutStream, ObjWriter, Layout);
+  raw_ostream &OutStream = ObjWriter.W.OS;
+  emit_impl(OutStream, ObjWriter, Layout);
 }
 
 uint64_t MCLOHDirective::getEmitSize(const MachObjectWriter &ObjWriter,
                                      const MCAsmLayout &Layout) const {
-    class raw_counting_ostream : public raw_ostream {
-        uint64_t Count = 0;
+  class raw_counting_ostream : public raw_ostream {
+    uint64_t Count = 0;
 
-        void write_impl(const char *, size_t size) override {
-            Count += size;
-        }
+    void write_impl(const char *, size_t size) override { Count += size; }
 
-        uint64_t current_pos() const override {
-            return Count;
-        }
+    uint64_t current_pos() const override { return Count; }
 
-    public:
-        raw_counting_ostream() = default;
-        ~raw_counting_ostream() override {
-            flush();
-        }
-    };
+  public:
+    raw_counting_ostream() = default;
+    ~raw_counting_ostream() override { flush(); }
+  };
 
-    raw_counting_ostream OutStream;
-    emit_impl(OutStream, ObjWriter, Layout);
-    return OutStream.tell();
+  raw_counting_ostream OutStream;
+  emit_impl(OutStream, ObjWriter, Layout);
+  return OutStream.tell();
 }

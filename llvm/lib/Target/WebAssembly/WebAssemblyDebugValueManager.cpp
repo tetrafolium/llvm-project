@@ -20,34 +20,34 @@ using namespace llvm;
 
 WebAssemblyDebugValueManager::WebAssemblyDebugValueManager(
     MachineInstr *Instr) {
-    Instr->collectDebugValues(DbgValues);
+  Instr->collectDebugValues(DbgValues);
 }
 
 void WebAssemblyDebugValueManager::move(MachineInstr *Insert) {
-    MachineBasicBlock *MBB = Insert->getParent();
-    for (MachineInstr *DBI : reverse(DbgValues))
-        MBB->splice(Insert, DBI->getParent(), DBI);
+  MachineBasicBlock *MBB = Insert->getParent();
+  for (MachineInstr *DBI : reverse(DbgValues))
+    MBB->splice(Insert, DBI->getParent(), DBI);
 }
 
 void WebAssemblyDebugValueManager::updateReg(unsigned Reg) {
-    for (auto *DBI : DbgValues)
-        DBI->getDebugOperand(0).setReg(Reg);
+  for (auto *DBI : DbgValues)
+    DBI->getDebugOperand(0).setReg(Reg);
 }
 
 void WebAssemblyDebugValueManager::clone(MachineInstr *Insert,
-        unsigned NewReg) {
-    MachineBasicBlock *MBB = Insert->getParent();
-    MachineFunction *MF = MBB->getParent();
-    for (MachineInstr *DBI : reverse(DbgValues)) {
-        MachineInstr *Clone = MF->CloneMachineInstr(DBI);
-        Clone->getDebugOperand(0).setReg(NewReg);
-        MBB->insert(Insert, Clone);
-    }
+                                         unsigned NewReg) {
+  MachineBasicBlock *MBB = Insert->getParent();
+  MachineFunction *MF = MBB->getParent();
+  for (MachineInstr *DBI : reverse(DbgValues)) {
+    MachineInstr *Clone = MF->CloneMachineInstr(DBI);
+    Clone->getDebugOperand(0).setReg(NewReg);
+    MBB->insert(Insert, Clone);
+  }
 }
 
 void WebAssemblyDebugValueManager::replaceWithLocal(unsigned LocalId) {
-    for (auto *DBI : DbgValues) {
-        MachineOperand &Op = DBI->getDebugOperand(0);
-        Op.ChangeToTargetIndex(llvm::WebAssembly::TI_LOCAL, LocalId);
-    }
+  for (auto *DBI : DbgValues) {
+    MachineOperand &Op = DBI->getDebugOperand(0);
+    Op.ChangeToTargetIndex(llvm::WebAssembly::TI_LOCAL, LocalId);
+  }
 }

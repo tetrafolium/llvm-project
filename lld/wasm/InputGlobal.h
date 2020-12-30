@@ -22,40 +22,32 @@ namespace wasm {
 // combined to form the final GLOBALS section.
 class InputGlobal {
 public:
-    InputGlobal(const WasmGlobal &g, ObjFile *f)
-        : file(f), global(g), live(!config->gcSections) {}
+  InputGlobal(const WasmGlobal &g, ObjFile *f)
+      : file(f), global(g), live(!config->gcSections) {}
 
-    StringRef getName() const {
-        return global.SymbolName;
-    }
-    const WasmGlobalType &getType() const {
-        return global.Type;
-    }
+  StringRef getName() const { return global.SymbolName; }
+  const WasmGlobalType &getType() const { return global.Type; }
 
-    uint32_t getGlobalIndex() const {
-        return globalIndex.getValue();
-    }
-    bool hasGlobalIndex() const {
-        return globalIndex.hasValue();
-    }
-    void setGlobalIndex(uint32_t index) {
-        assert(!hasGlobalIndex());
-        globalIndex = index;
-    }
+  uint32_t getGlobalIndex() const { return globalIndex.getValue(); }
+  bool hasGlobalIndex() const { return globalIndex.hasValue(); }
+  void setGlobalIndex(uint32_t index) {
+    assert(!hasGlobalIndex());
+    globalIndex = index;
+  }
 
-    ObjFile *file;
-    WasmGlobal global;
+  ObjFile *file;
+  WasmGlobal global;
 
-    bool live = false;
+  bool live = false;
 
 protected:
-    llvm::Optional<uint32_t> globalIndex;
+  llvm::Optional<uint32_t> globalIndex;
 };
 
 } // namespace wasm
 
 inline std::string toString(const wasm::InputGlobal *g) {
-    return (toString(g->file) + ":(" + g->getName() + ")").str();
+  return (toString(g->file) + ":(" + g->getName() + ")").str();
 }
 
 } // namespace lld

@@ -17,48 +17,35 @@
 using namespace llvm;
 
 LogBuilder::~LogBuilder() {
-    if (consumer)
-        consumer->logf(*this);
+  if (consumer)
+    consumer->logf(*this);
 }
 
-StringRef LogBuilder::getFormat() const {
-    return Format;
-}
+StringRef LogBuilder::getFormat() const { return Format; }
 
-unsigned LogBuilder::getNumArguments() const {
-    return Arguments.size();
-}
-Value *LogBuilder::getArgument(unsigned I) const {
-    return Arguments[I];
-}
+unsigned LogBuilder::getNumArguments() const { return Arguments.size(); }
+Value *LogBuilder::getArgument(unsigned I) const { return Arguments[I]; }
 
-DiffLogBuilder::~DiffLogBuilder() {
-    consumer.logd(*this);
-}
+DiffLogBuilder::~DiffLogBuilder() { consumer.logd(*this); }
 
 void DiffLogBuilder::addMatch(Instruction *L, Instruction *R) {
-    Diff.push_back(DiffRecord(L, R));
+  Diff.push_back(DiffRecord(L, R));
 }
 void DiffLogBuilder::addLeft(Instruction *L) {
-    // HACK: VS 2010 has a bug in the stdlib that requires this.
-    Diff.push_back(DiffRecord(L, DiffRecord::second_type(nullptr)));
+  // HACK: VS 2010 has a bug in the stdlib that requires this.
+  Diff.push_back(DiffRecord(L, DiffRecord::second_type(nullptr)));
 }
 void DiffLogBuilder::addRight(Instruction *R) {
-    // HACK: VS 2010 has a bug in the stdlib that requires this.
-    Diff.push_back(DiffRecord(DiffRecord::first_type(nullptr), R));
+  // HACK: VS 2010 has a bug in the stdlib that requires this.
+  Diff.push_back(DiffRecord(DiffRecord::first_type(nullptr), R));
 }
 
-unsigned DiffLogBuilder::getNumLines() const {
-    return Diff.size();
-}
+unsigned DiffLogBuilder::getNumLines() const { return Diff.size(); }
 
 DiffChange DiffLogBuilder::getLineKind(unsigned I) const {
-    return (Diff[I].first ? (Diff[I].second ? DC_match : DC_left)
-            : DC_right);
+  return (Diff[I].first ? (Diff[I].second ? DC_match : DC_left) : DC_right);
 }
-Instruction *DiffLogBuilder::getLeft(unsigned I) const {
-    return Diff[I].first;
-}
+Instruction *DiffLogBuilder::getLeft(unsigned I) const { return Diff[I].first; }
 Instruction *DiffLogBuilder::getRight(unsigned I) const {
-    return Diff[I].second;
+  return Diff[I].second;
 }

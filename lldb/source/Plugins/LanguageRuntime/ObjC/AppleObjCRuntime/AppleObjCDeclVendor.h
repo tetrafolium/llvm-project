@@ -21,31 +21,31 @@ class AppleObjCExternalASTSource;
 
 class AppleObjCDeclVendor : public ClangDeclVendor {
 public:
-    AppleObjCDeclVendor(ObjCLanguageRuntime &runtime);
+  AppleObjCDeclVendor(ObjCLanguageRuntime &runtime);
 
-    static bool classof(const DeclVendor *vendor) {
-        return vendor->GetKind() == eAppleObjCDeclVendor;
-    }
+  static bool classof(const DeclVendor *vendor) {
+    return vendor->GetKind() == eAppleObjCDeclVendor;
+  }
 
-    uint32_t FindDecls(ConstString name, bool append, uint32_t max_matches,
-                       std::vector<CompilerDecl> &decls) override;
+  uint32_t FindDecls(ConstString name, bool append, uint32_t max_matches,
+                     std::vector<CompilerDecl> &decls) override;
 
-    friend class AppleObjCExternalASTSource;
+  friend class AppleObjCExternalASTSource;
 
 private:
-    clang::ObjCInterfaceDecl *GetDeclForISA(ObjCLanguageRuntime::ObjCISA isa);
-    bool FinishDecl(clang::ObjCInterfaceDecl *decl);
+  clang::ObjCInterfaceDecl *GetDeclForISA(ObjCLanguageRuntime::ObjCISA isa);
+  bool FinishDecl(clang::ObjCInterfaceDecl *decl);
 
-    ObjCLanguageRuntime &m_runtime;
-    TypeSystemClang m_ast_ctx;
-    ObjCLanguageRuntime::EncodingToTypeSP m_type_realizer_sp;
-    AppleObjCExternalASTSource *m_external_source;
+  ObjCLanguageRuntime &m_runtime;
+  TypeSystemClang m_ast_ctx;
+  ObjCLanguageRuntime::EncodingToTypeSP m_type_realizer_sp;
+  AppleObjCExternalASTSource *m_external_source;
 
-    typedef llvm::DenseMap<ObjCLanguageRuntime::ObjCISA,
-            clang::ObjCInterfaceDecl *>
-            ISAToInterfaceMap;
+  typedef llvm::DenseMap<ObjCLanguageRuntime::ObjCISA,
+                         clang::ObjCInterfaceDecl *>
+      ISAToInterfaceMap;
 
-    ISAToInterfaceMap m_isa_to_interface;
+  ISAToInterfaceMap m_isa_to_interface;
 };
 
 } // namespace lldb_private

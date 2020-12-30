@@ -24,9 +24,9 @@ namespace tooling {
 class FileMatchTrieNode;
 
 struct PathComparator {
-    virtual ~PathComparator() = default;
+  virtual ~PathComparator() = default;
 
-    virtual bool equivalent(StringRef FileA, StringRef FileB) const = 0;
+  virtual bool equivalent(StringRef FileA, StringRef FileB) const = 0;
 };
 
 /// A trie to efficiently match against the entries of the compilation
@@ -55,31 +55,30 @@ struct PathComparator {
 /// >1 equivalent files: Match is ambiguous, return error.
 class FileMatchTrie {
 public:
-    FileMatchTrie();
+  FileMatchTrie();
 
-    /// Construct a new \c FileMatchTrie with the given \c PathComparator.
-    ///
-    /// The \c FileMatchTrie takes ownership of 'Comparator'. Used for testing.
-    FileMatchTrie(PathComparator* Comparator);
+  /// Construct a new \c FileMatchTrie with the given \c PathComparator.
+  ///
+  /// The \c FileMatchTrie takes ownership of 'Comparator'. Used for testing.
+  FileMatchTrie(PathComparator *Comparator);
 
-    ~FileMatchTrie();
+  ~FileMatchTrie();
 
-    /// Insert a new absolute path. Relative paths are ignored.
-    void insert(StringRef NewPath);
+  /// Insert a new absolute path. Relative paths are ignored.
+  void insert(StringRef NewPath);
 
-    /// Finds the corresponding file in this trie.
-    ///
-    /// Returns file name stored in this trie that is equivalent to 'FileName'
-    /// according to 'Comparator', if it can be uniquely identified. If there
-    /// are no matches an empty \c StringRef is returned. If there are ambiguous
-    /// matches, an empty \c StringRef is returned and a corresponding message
-    /// written to 'Error'.
-    StringRef findEquivalent(StringRef FileName,
-                             raw_ostream &Error) const;
+  /// Finds the corresponding file in this trie.
+  ///
+  /// Returns file name stored in this trie that is equivalent to 'FileName'
+  /// according to 'Comparator', if it can be uniquely identified. If there
+  /// are no matches an empty \c StringRef is returned. If there are ambiguous
+  /// matches, an empty \c StringRef is returned and a corresponding message
+  /// written to 'Error'.
+  StringRef findEquivalent(StringRef FileName, raw_ostream &Error) const;
 
 private:
-    FileMatchTrieNode *Root;
-    std::unique_ptr<PathComparator> Comparator;
+  FileMatchTrieNode *Root;
+  std::unique_ptr<PathComparator> Comparator;
 };
 
 } // namespace tooling

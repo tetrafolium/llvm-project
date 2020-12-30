@@ -17,34 +17,33 @@ using namespace llvm;
 namespace {
 class ARMWinCOFFStreamer : public MCWinCOFFStreamer {
 public:
-    ARMWinCOFFStreamer(MCContext &C, std::unique_ptr<MCAsmBackend> AB,
-                       std::unique_ptr<MCCodeEmitter> CE,
-                       std::unique_ptr<MCObjectWriter> OW)
-        : MCWinCOFFStreamer(C, std::move(AB), std::move(CE), std::move(OW)) {}
+  ARMWinCOFFStreamer(MCContext &C, std::unique_ptr<MCAsmBackend> AB,
+                     std::unique_ptr<MCCodeEmitter> CE,
+                     std::unique_ptr<MCObjectWriter> OW)
+      : MCWinCOFFStreamer(C, std::move(AB), std::move(CE), std::move(OW)) {}
 
-    void emitThumbFunc(MCSymbol *Symbol) override;
-    void finishImpl() override;
+  void emitThumbFunc(MCSymbol *Symbol) override;
+  void finishImpl() override;
 };
 
 void ARMWinCOFFStreamer::emitThumbFunc(MCSymbol *Symbol) {
-    getAssembler().setIsThumbFunc(Symbol);
+  getAssembler().setIsThumbFunc(Symbol);
 }
 
 void ARMWinCOFFStreamer::finishImpl() {
-    emitFrames(nullptr);
+  emitFrames(nullptr);
 
-    MCWinCOFFStreamer::finishImpl();
+  MCWinCOFFStreamer::finishImpl();
 }
-}
+} // namespace
 
 MCStreamer *llvm::createARMWinCOFFStreamer(
     MCContext &Context, std::unique_ptr<MCAsmBackend> &&MAB,
     std::unique_ptr<MCObjectWriter> &&OW,
     std::unique_ptr<MCCodeEmitter> &&Emitter, bool RelaxAll,
     bool IncrementalLinkerCompatible) {
-    auto *S = new ARMWinCOFFStreamer(Context, std::move(MAB), std::move(Emitter),
-                                     std::move(OW));
-    S->getAssembler().setIncrementalLinkerCompatible(IncrementalLinkerCompatible);
-    return S;
+  auto *S = new ARMWinCOFFStreamer(Context, std::move(MAB), std::move(Emitter),
+                                   std::move(OW));
+  S->getAssembler().setIncrementalLinkerCompatible(IncrementalLinkerCompatible);
+  return S;
 }
-

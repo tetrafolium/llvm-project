@@ -25,7 +25,7 @@ class Function;
 /// Pass to forward loads in a loop around the backedge to subsequent
 /// iterations.
 struct LoopLoadEliminationPass : public PassInfoMixin<LoopLoadEliminationPass> {
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

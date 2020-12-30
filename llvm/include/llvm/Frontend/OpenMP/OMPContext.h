@@ -73,8 +73,8 @@ StringRef getOpenMPContextTraitSelectorName(TraitSelector Kind);
 /// Parse \p Str and return the trait property it matches in the set \p Set and
 /// selector \p Selector or TraitProperty::invalid.
 TraitProperty getOpenMPContextTraitPropertyKind(TraitSet Set,
-        TraitSelector Selector,
-        StringRef Str);
+                                                TraitSelector Selector,
+                                                StringRef Str);
 
 /// Return the trait property for a singleton selector \p Selector.
 TraitProperty getOpenMPContextTraitPropertyForSelector(TraitSelector Selector);
@@ -83,7 +83,7 @@ TraitProperty getOpenMPContextTraitPropertyForSelector(TraitSelector Selector);
 /// be the raw string we parsed (\p RawString) if we do not translate the
 /// property into a (distinct) enum.
 StringRef getOpenMPContextTraitPropertyName(TraitProperty Kind,
-        StringRef RawString);
+                                            StringRef RawString);
 
 /// Return a textual representation of the trait property \p Kind with selector
 /// and set name included.
@@ -97,7 +97,7 @@ std::string listOpenMPContextTraitSelectors(TraitSet Set);
 
 /// Return a string listing all trait properties for \p Set and \p Selector.
 std::string listOpenMPContextTraitProperties(TraitSet Set,
-        TraitSelector Selector);
+                                             TraitSelector Selector);
 ///}
 
 /// Return true if \p Selector can be nested in \p Set. Also sets
@@ -110,72 +110,70 @@ bool isValidTraitSelectorForTraitSet(TraitSelector Selector, TraitSet Set,
 
 /// Return true if \p Property can be nested in \p Selector and \p Set.
 bool isValidTraitPropertyForTraitSetAndSelector(TraitProperty Property,
-        TraitSelector Selector,
-        TraitSet Set);
+                                                TraitSelector Selector,
+                                                TraitSet Set);
 
 /// Variant match information describes the required traits and how they are
 /// scored (via the ScoresMap). In addition, the required consturct nesting is
 /// decribed as well.
 struct VariantMatchInfo {
-    /// Add the trait \p Property to the required trait set. \p RawString is the
-    /// string we parsed and derived \p Property from. If \p Score is not null, it
-    /// recorded as well. If \p Property is in the `construct` set it is recorded
-    /// in-order in the ConstructTraits as well.
-    void addTrait(TraitProperty Property, StringRef RawString,
-                  APInt *Score = nullptr) {
-        addTrait(getOpenMPContextTraitSetForProperty(Property), Property, RawString,
-                 Score);
-    }
-    /// Add the trait \p Property which is in set \p Set to the required trait
-    /// set. \p RawString is the string we parsed and derived \p Property from. If
-    /// \p Score is not null, it recorded as well. If \p Set is the `construct`
-    /// set it is recorded in-order in the ConstructTraits as well.
-    void addTrait(TraitSet Set, TraitProperty Property, StringRef RawString,
-                  APInt *Score = nullptr) {
-        if (Score)
-            ScoreMap[Property] = *Score;
+  /// Add the trait \p Property to the required trait set. \p RawString is the
+  /// string we parsed and derived \p Property from. If \p Score is not null, it
+  /// recorded as well. If \p Property is in the `construct` set it is recorded
+  /// in-order in the ConstructTraits as well.
+  void addTrait(TraitProperty Property, StringRef RawString,
+                APInt *Score = nullptr) {
+    addTrait(getOpenMPContextTraitSetForProperty(Property), Property, RawString,
+             Score);
+  }
+  /// Add the trait \p Property which is in set \p Set to the required trait
+  /// set. \p RawString is the string we parsed and derived \p Property from. If
+  /// \p Score is not null, it recorded as well. If \p Set is the `construct`
+  /// set it is recorded in-order in the ConstructTraits as well.
+  void addTrait(TraitSet Set, TraitProperty Property, StringRef RawString,
+                APInt *Score = nullptr) {
+    if (Score)
+      ScoreMap[Property] = *Score;
 
-        // Special handling for `device={isa(...)}` as we do not match the enum but
-        // the raw string.
-        if (Property == TraitProperty::device_isa___ANY)
-            ISATraits.push_back(RawString);
+    // Special handling for `device={isa(...)}` as we do not match the enum but
+    // the raw string.
+    if (Property == TraitProperty::device_isa___ANY)
+      ISATraits.push_back(RawString);
 
-        RequiredTraits.set(unsigned(Property));
-        if (Set == TraitSet::construct)
-            ConstructTraits.push_back(Property);
-    }
+    RequiredTraits.set(unsigned(Property));
+    if (Set == TraitSet::construct)
+      ConstructTraits.push_back(Property);
+  }
 
-    BitVector RequiredTraits = BitVector(unsigned(TraitProperty::Last) + 1);
-    SmallVector<StringRef, 8> ISATraits;
-    SmallVector<TraitProperty, 8> ConstructTraits;
-    SmallDenseMap<TraitProperty, APInt> ScoreMap;
+  BitVector RequiredTraits = BitVector(unsigned(TraitProperty::Last) + 1);
+  SmallVector<StringRef, 8> ISATraits;
+  SmallVector<TraitProperty, 8> ConstructTraits;
+  SmallDenseMap<TraitProperty, APInt> ScoreMap;
 };
 
 /// The context for a source location is made up of active property traits,
 /// e.g., device={kind(host)}, and constructs traits which describe the nesting
 /// in OpenMP constructs at the location.
 struct OMPContext {
-    OMPContext(bool IsDeviceCompilation, Triple TargetTriple);
-    virtual ~OMPContext() = default;
+  OMPContext(bool IsDeviceCompilation, Triple TargetTriple);
+  virtual ~OMPContext() = default;
 
-    void addTrait(TraitProperty Property) {
-        addTrait(getOpenMPContextTraitSetForProperty(Property), Property);
-    }
-    void addTrait(TraitSet Set, TraitProperty Property) {
-        ActiveTraits.set(unsigned(Property));
-        if (Set == TraitSet::construct)
-            ConstructTraits.push_back(Property);
-    }
+  void addTrait(TraitProperty Property) {
+    addTrait(getOpenMPContextTraitSetForProperty(Property), Property);
+  }
+  void addTrait(TraitSet Set, TraitProperty Property) {
+    ActiveTraits.set(unsigned(Property));
+    if (Set == TraitSet::construct)
+      ConstructTraits.push_back(Property);
+  }
 
-    /// Hook for users to check if an ISA trait matches. The trait is described as
-    /// the string that got parsed and it depends on the target and context if
-    /// this matches or not.
-    virtual bool matchesISATrait(StringRef) const {
-        return false;
-    }
+  /// Hook for users to check if an ISA trait matches. The trait is described as
+  /// the string that got parsed and it depends on the target and context if
+  /// this matches or not.
+  virtual bool matchesISATrait(StringRef) const { return false; }
 
-    BitVector ActiveTraits = BitVector(unsigned(TraitProperty::Last) + 1);
-    SmallVector<TraitProperty, 8> ConstructTraits;
+  BitVector ActiveTraits = BitVector(unsigned(TraitProperty::Last) + 1);
+  SmallVector<TraitProperty, 8> ConstructTraits;
 };
 
 /// Return true if \p VMI is applicable in \p Ctx, that is, all traits required
@@ -194,18 +192,18 @@ int getBestVariantMatchForContext(const SmallVectorImpl<VariantMatchInfo> &VMIs,
 } // namespace omp
 
 template <> struct DenseMapInfo<omp::TraitProperty> {
-    static inline omp::TraitProperty getEmptyKey() {
-        return omp::TraitProperty(-1);
-    }
-    static inline omp::TraitProperty getTombstoneKey() {
-        return omp::TraitProperty(-2);
-    }
-    static unsigned getHashValue(omp::TraitProperty val) {
-        return std::hash<unsigned> {}(unsigned(val));
-    }
-    static bool isEqual(omp::TraitProperty LHS, omp::TraitProperty RHS) {
-        return LHS == RHS;
-    }
+  static inline omp::TraitProperty getEmptyKey() {
+    return omp::TraitProperty(-1);
+  }
+  static inline omp::TraitProperty getTombstoneKey() {
+    return omp::TraitProperty(-2);
+  }
+  static unsigned getHashValue(omp::TraitProperty val) {
+    return std::hash<unsigned>{}(unsigned(val));
+  }
+  static bool isEqual(omp::TraitProperty LHS, omp::TraitProperty RHS) {
+    return LHS == RHS;
+  }
 };
 
 } // end namespace llvm

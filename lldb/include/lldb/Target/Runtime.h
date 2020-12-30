@@ -14,23 +14,19 @@
 namespace lldb_private {
 class Runtime {
 public:
-    Runtime(Process *process) : m_process(process) {}
-    virtual ~Runtime() = default;
-    Runtime(const Runtime &) = delete;
-    const Runtime &operator=(const Runtime &) = delete;
+  Runtime(Process *process) : m_process(process) {}
+  virtual ~Runtime() = default;
+  Runtime(const Runtime &) = delete;
+  const Runtime &operator=(const Runtime &) = delete;
 
-    Process *GetProcess() {
-        return m_process;
-    }
-    Target &GetTargetRef() {
-        return m_process->GetTarget();
-    }
+  Process *GetProcess() { return m_process; }
+  Target &GetTargetRef() { return m_process->GetTarget(); }
 
-    /// Called when modules have been loaded in the process.
-    virtual void ModulesDidLoad(const ModuleList &module_list) = 0;
+  /// Called when modules have been loaded in the process.
+  virtual void ModulesDidLoad(const ModuleList &module_list) = 0;
 
 protected:
-    Process *m_process;
+  Process *m_process;
 };
 } // namespace lldb_private
 

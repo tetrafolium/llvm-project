@@ -19,66 +19,66 @@
 using namespace llvm;
 
 void CodeExpander::emit(raw_ostream &OS) const {
-    StringRef Current = Code;
+  StringRef Current = Code;
 
-    while (!Current.empty()) {
-        size_t Pos = Current.find_first_of("$\n\\");
-        if (Pos == StringRef::npos) {
-            OS << Current;
-            Current = "";
-            continue;
-        }
-
-        OS << Current.substr(0, Pos);
-        Current = Current.substr(Pos);
-
-        if (Current.startswith("\n")) {
-            OS << "\n" << Indent;
-            Current = Current.drop_front(1);
-            continue;
-        }
-
-        if (Current.startswith("\\$") || Current.startswith("\\\\")) {
-            OS << Current[1];
-            Current = Current.drop_front(2);
-            continue;
-        }
-
-        if (Current.startswith("\\")) {
-            Current = Current.drop_front(1);
-            continue;
-        }
-
-        if (Current.startswith("${")) {
-            StringRef StartVar = Current;
-            Current = Current.drop_front(2);
-            StringRef Var;
-            std::tie(Var, Current) = Current.split("}");
-
-            // Warn if we split because no terminator was found.
-            StringRef EndVar = StartVar.drop_front(2 /* ${ */ + Var.size());
-            if (EndVar.empty()) {
-                PrintWarning(Loc, "Unterminated expansion '${" + Var + "'");
-                PrintNote("Code: [{" + Code + "}]");
-            }
-
-            auto ValueI = Expansions.find(Var);
-            if (ValueI == Expansions.end()) {
-                PrintError(Loc,
-                           "Attempt to expand an undeclared variable '" + Var + "'");
-                PrintNote("Code: [{" + Code + "}]");
-            }
-            if (ShowExpansions)
-                OS << "/*$" << Var << "{*/";
-            OS << Expansions.lookup(Var);
-            if (ShowExpansions)
-                OS << "/*}*/";
-            continue;
-        }
-
-        PrintWarning(Loc, "Assuming missing escape character: \\$");
-        PrintNote("Code: [{" + Code + "}]");
-        OS << "$";
-        Current = Current.drop_front(1);
+  while (!Current.empty()) {
+    size_t Pos = Current.find_first_of("$\n\\");
+    if (Pos == StringRef::npos) {
+      OS << Current;
+      Current = "";
+      continue;
     }
+
+    OS << Current.substr(0, Pos);
+    Current = Current.substr(Pos);
+
+    if (Current.startswith("\n")) {
+      OS << "\n" << Indent;
+      Current = Current.drop_front(1);
+      continue;
+    }
+
+    if (Current.startswith("\\$") || Current.startswith("\\\\")) {
+      OS << Current[1];
+      Current = Current.drop_front(2);
+      continue;
+    }
+
+    if (Current.startswith("\\")) {
+      Current = Current.drop_front(1);
+      continue;
+    }
+
+    if (Current.startswith("${")) {
+      StringRef StartVar = Current;
+      Current = Current.drop_front(2);
+      StringRef Var;
+      std::tie(Var, Current) = Current.split("}");
+
+      // Warn if we split because no terminator was found.
+      StringRef EndVar = StartVar.drop_front(2 /* ${ */ + Var.size());
+      if (EndVar.empty()) {
+        PrintWarning(Loc, "Unterminated expansion '${" + Var + "'");
+        PrintNote("Code: [{" + Code + "}]");
+      }
+
+      auto ValueI = Expansions.find(Var);
+      if (ValueI == Expansions.end()) {
+        PrintError(Loc,
+                   "Attempt to expand an undeclared variable '" + Var + "'");
+        PrintNote("Code: [{" + Code + "}]");
+      }
+      if (ShowExpansions)
+        OS << "/*$" << Var << "{*/";
+      OS << Expansions.lookup(Var);
+      if (ShowExpansions)
+        OS << "/*}*/";
+      continue;
+    }
+
+    PrintWarning(Loc, "Assuming missing escape character: \\$");
+    PrintNote("Code: [{" + Code + "}]");
+    OS << "$";
+    Current = Current.drop_front(1);
+  }
 }

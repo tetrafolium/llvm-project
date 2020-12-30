@@ -20,16 +20,16 @@ namespace performance {
 /// http://clang.llvm.org/extra/clang-tidy/checks/performance-no-automatic-move.html
 class NoAutomaticMoveCheck : public ClangTidyCheck {
 public:
-    NoAutomaticMoveCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  NoAutomaticMoveCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
 private:
-    const std::vector<std::string> AllowedTypes;
+  const std::vector<std::string> AllowedTypes;
 };
 
 } // namespace performance

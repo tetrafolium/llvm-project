@@ -30,159 +30,127 @@ struct WebAssemblyFunctionInfo;
 /// This class is derived from MachineFunctionInfo and contains private
 /// WebAssembly-specific information for each MachineFunction.
 class WebAssemblyFunctionInfo final : public MachineFunctionInfo {
-    std::vector<MVT> Params;
-    std::vector<MVT> Results;
-    std::vector<MVT> Locals;
+  std::vector<MVT> Params;
+  std::vector<MVT> Results;
+  std::vector<MVT> Locals;
 
-    /// A mapping from CodeGen vreg index to WebAssembly register number.
-    std::vector<unsigned> WARegs;
+  /// A mapping from CodeGen vreg index to WebAssembly register number.
+  std::vector<unsigned> WARegs;
 
-    /// A mapping from CodeGen vreg index to a boolean value indicating whether
-    /// the given register is considered to be "stackified", meaning it has been
-    /// determined or made to meet the stack requirements:
-    ///   - single use (per path)
-    ///   - single def (per path)
-    ///   - defined and used in LIFO order with other stack registers
-    BitVector VRegStackified;
+  /// A mapping from CodeGen vreg index to a boolean value indicating whether
+  /// the given register is considered to be "stackified", meaning it has been
+  /// determined or made to meet the stack requirements:
+  ///   - single use (per path)
+  ///   - single def (per path)
+  ///   - defined and used in LIFO order with other stack registers
+  BitVector VRegStackified;
 
-    // A virtual register holding the pointer to the vararg buffer for vararg
-    // functions. It is created and set in TLI::LowerFormalArguments and read by
-    // TLI::LowerVASTART
-    unsigned VarargVreg = -1U;
+  // A virtual register holding the pointer to the vararg buffer for vararg
+  // functions. It is created and set in TLI::LowerFormalArguments and read by
+  // TLI::LowerVASTART
+  unsigned VarargVreg = -1U;
 
-    // A virtual register holding the base pointer for functions that have
-    // overaligned values on the user stack.
-    unsigned BasePtrVreg = -1U;
-    // A virtual register holding the frame base. This is either FP or SP
-    // after it has been replaced by a vreg
-    unsigned FrameBaseVreg = -1U;
-    // The local holding the frame base. This is either FP or SP
-    // after WebAssemblyExplicitLocals
-    unsigned FrameBaseLocal = -1U;
+  // A virtual register holding the base pointer for functions that have
+  // overaligned values on the user stack.
+  unsigned BasePtrVreg = -1U;
+  // A virtual register holding the frame base. This is either FP or SP
+  // after it has been replaced by a vreg
+  unsigned FrameBaseVreg = -1U;
+  // The local holding the frame base. This is either FP or SP
+  // after WebAssemblyExplicitLocals
+  unsigned FrameBaseLocal = -1U;
 
-    // Function properties.
-    bool CFGStackified = false;
+  // Function properties.
+  bool CFGStackified = false;
 
 public:
-    explicit WebAssemblyFunctionInfo(MachineFunction &MF) {}
-    ~WebAssemblyFunctionInfo() override;
-    void initializeBaseYamlFields(const yaml::WebAssemblyFunctionInfo &YamlMFI);
+  explicit WebAssemblyFunctionInfo(MachineFunction &MF) {}
+  ~WebAssemblyFunctionInfo() override;
+  void initializeBaseYamlFields(const yaml::WebAssemblyFunctionInfo &YamlMFI);
 
-    void addParam(MVT VT) {
-        Params.push_back(VT);
-    }
-    const std::vector<MVT> &getParams() const {
-        return Params;
-    }
+  void addParam(MVT VT) { Params.push_back(VT); }
+  const std::vector<MVT> &getParams() const { return Params; }
 
-    void addResult(MVT VT) {
-        Results.push_back(VT);
-    }
-    const std::vector<MVT> &getResults() const {
-        return Results;
-    }
+  void addResult(MVT VT) { Results.push_back(VT); }
+  const std::vector<MVT> &getResults() const { return Results; }
 
-    void clearParamsAndResults() {
-        Params.clear();
-        Results.clear();
-    }
+  void clearParamsAndResults() {
+    Params.clear();
+    Results.clear();
+  }
 
-    void setNumLocals(size_t NumLocals) {
-        Locals.resize(NumLocals, MVT::i32);
-    }
-    void setLocal(size_t i, MVT VT) {
-        Locals[i] = VT;
-    }
-    void addLocal(MVT VT) {
-        Locals.push_back(VT);
-    }
-    const std::vector<MVT> &getLocals() const {
-        return Locals;
-    }
+  void setNumLocals(size_t NumLocals) { Locals.resize(NumLocals, MVT::i32); }
+  void setLocal(size_t i, MVT VT) { Locals[i] = VT; }
+  void addLocal(MVT VT) { Locals.push_back(VT); }
+  const std::vector<MVT> &getLocals() const { return Locals; }
 
-    unsigned getVarargBufferVreg() const {
-        assert(VarargVreg != -1U && "Vararg vreg hasn't been set");
-        return VarargVreg;
-    }
-    void setVarargBufferVreg(unsigned Reg) {
-        VarargVreg = Reg;
-    }
+  unsigned getVarargBufferVreg() const {
+    assert(VarargVreg != -1U && "Vararg vreg hasn't been set");
+    return VarargVreg;
+  }
+  void setVarargBufferVreg(unsigned Reg) { VarargVreg = Reg; }
 
-    unsigned getBasePointerVreg() const {
-        assert(BasePtrVreg != -1U && "Base ptr vreg hasn't been set");
-        return BasePtrVreg;
-    }
-    void setFrameBaseVreg(unsigned Reg) {
-        FrameBaseVreg = Reg;
-    }
-    unsigned getFrameBaseVreg() const {
-        assert(FrameBaseVreg != -1U && "Frame base vreg hasn't been set");
-        return FrameBaseVreg;
-    }
-    void clearFrameBaseVreg() {
-        FrameBaseVreg = -1U;
-    }
-    // Return true if the frame base physreg has been replaced by a virtual reg.
-    bool isFrameBaseVirtual() const {
-        return FrameBaseVreg != -1U;
-    }
-    void setFrameBaseLocal(unsigned Local) {
-        FrameBaseLocal = Local;
-    }
-    unsigned getFrameBaseLocal() const {
-        assert(FrameBaseLocal != -1U && "Frame base local hasn't been set");
-        return FrameBaseLocal;
-    }
-    void setBasePointerVreg(unsigned Reg) {
-        BasePtrVreg = Reg;
-    }
+  unsigned getBasePointerVreg() const {
+    assert(BasePtrVreg != -1U && "Base ptr vreg hasn't been set");
+    return BasePtrVreg;
+  }
+  void setFrameBaseVreg(unsigned Reg) { FrameBaseVreg = Reg; }
+  unsigned getFrameBaseVreg() const {
+    assert(FrameBaseVreg != -1U && "Frame base vreg hasn't been set");
+    return FrameBaseVreg;
+  }
+  void clearFrameBaseVreg() { FrameBaseVreg = -1U; }
+  // Return true if the frame base physreg has been replaced by a virtual reg.
+  bool isFrameBaseVirtual() const { return FrameBaseVreg != -1U; }
+  void setFrameBaseLocal(unsigned Local) { FrameBaseLocal = Local; }
+  unsigned getFrameBaseLocal() const {
+    assert(FrameBaseLocal != -1U && "Frame base local hasn't been set");
+    return FrameBaseLocal;
+  }
+  void setBasePointerVreg(unsigned Reg) { BasePtrVreg = Reg; }
 
-    static const unsigned UnusedReg = -1u;
+  static const unsigned UnusedReg = -1u;
 
-    void stackifyVReg(MachineRegisterInfo &MRI, unsigned VReg) {
-        assert(MRI.getUniqueVRegDef(VReg));
-        auto I = Register::virtReg2Index(VReg);
-        if (I >= VRegStackified.size())
-            VRegStackified.resize(I + 1);
-        VRegStackified.set(I);
-    }
-    void unstackifyVReg(unsigned VReg) {
-        auto I = Register::virtReg2Index(VReg);
-        if (I < VRegStackified.size())
-            VRegStackified.reset(I);
-    }
-    bool isVRegStackified(unsigned VReg) const {
-        auto I = Register::virtReg2Index(VReg);
-        if (I >= VRegStackified.size())
-            return false;
-        return VRegStackified.test(I);
-    }
+  void stackifyVReg(MachineRegisterInfo &MRI, unsigned VReg) {
+    assert(MRI.getUniqueVRegDef(VReg));
+    auto I = Register::virtReg2Index(VReg);
+    if (I >= VRegStackified.size())
+      VRegStackified.resize(I + 1);
+    VRegStackified.set(I);
+  }
+  void unstackifyVReg(unsigned VReg) {
+    auto I = Register::virtReg2Index(VReg);
+    if (I < VRegStackified.size())
+      VRegStackified.reset(I);
+  }
+  bool isVRegStackified(unsigned VReg) const {
+    auto I = Register::virtReg2Index(VReg);
+    if (I >= VRegStackified.size())
+      return false;
+    return VRegStackified.test(I);
+  }
 
-    void initWARegs(MachineRegisterInfo &MRI);
-    void setWAReg(unsigned VReg, unsigned WAReg) {
-        assert(WAReg != UnusedReg);
-        auto I = Register::virtReg2Index(VReg);
-        assert(I < WARegs.size());
-        WARegs[I] = WAReg;
-    }
-    unsigned getWAReg(unsigned VReg) const {
-        auto I = Register::virtReg2Index(VReg);
-        assert(I < WARegs.size());
-        return WARegs[I];
-    }
+  void initWARegs(MachineRegisterInfo &MRI);
+  void setWAReg(unsigned VReg, unsigned WAReg) {
+    assert(WAReg != UnusedReg);
+    auto I = Register::virtReg2Index(VReg);
+    assert(I < WARegs.size());
+    WARegs[I] = WAReg;
+  }
+  unsigned getWAReg(unsigned VReg) const {
+    auto I = Register::virtReg2Index(VReg);
+    assert(I < WARegs.size());
+    return WARegs[I];
+  }
 
-    // For a given stackified WAReg, return the id number to print with push/pop.
-    static unsigned getWARegStackId(unsigned Reg) {
-        assert(Reg & INT32_MIN);
-        return Reg & INT32_MAX;
-    }
+  // For a given stackified WAReg, return the id number to print with push/pop.
+  static unsigned getWARegStackId(unsigned Reg) {
+    assert(Reg & INT32_MIN);
+    return Reg & INT32_MAX;
+  }
 
-    bool isCFGStackified() const {
-        return CFGStackified;
-    }
-    void setCFGStackified(bool Value = true) {
-        CFGStackified = Value;
-    }
+  bool isCFGStackified() const { return CFGStackified; }
+  void setCFGStackified(bool Value = true) { CFGStackified = Value; }
 };
 
 void computeLegalValueVTs(const Function &F, const TargetMachine &TM, Type *Ty,
@@ -205,19 +173,19 @@ signatureFromMVTs(const SmallVectorImpl<MVT> &Results,
 namespace yaml {
 
 struct WebAssemblyFunctionInfo final : public yaml::MachineFunctionInfo {
-    bool CFGStackified = false;
+  bool CFGStackified = false;
 
-    WebAssemblyFunctionInfo() = default;
-    WebAssemblyFunctionInfo(const llvm::WebAssemblyFunctionInfo &MFI);
+  WebAssemblyFunctionInfo() = default;
+  WebAssemblyFunctionInfo(const llvm::WebAssemblyFunctionInfo &MFI);
 
-    void mappingImpl(yaml::IO &YamlIO) override;
-    ~WebAssemblyFunctionInfo() = default;
+  void mappingImpl(yaml::IO &YamlIO) override;
+  ~WebAssemblyFunctionInfo() = default;
 };
 
 template <> struct MappingTraits<WebAssemblyFunctionInfo> {
-    static void mapping(IO &YamlIO, WebAssemblyFunctionInfo &MFI) {
-        YamlIO.mapOptional("isCFGStackified", MFI.CFGStackified, false);
-    }
+  static void mapping(IO &YamlIO, WebAssemblyFunctionInfo &MFI) {
+    YamlIO.mapOptional("isCFGStackified", MFI.CFGStackified, false);
+  }
 };
 
 } // end namespace yaml

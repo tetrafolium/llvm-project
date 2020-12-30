@@ -43,107 +43,101 @@ using LoopVectorTy = SmallVector<Loop *, 8>;
 ///   Subscripts -> [{0,+,1}<%for.i>][{1,+,2}<%for.j>][{2,+,3}<%for.k>]
 ///   Sizes -> [m][o][4]
 class IndexedReference {
-    friend raw_ostream &operator<<(raw_ostream &OS, const IndexedReference &R);
+  friend raw_ostream &operator<<(raw_ostream &OS, const IndexedReference &R);
 
 public:
-    /// Construct an indexed reference given a \p StoreOrLoadInst instruction.
-    IndexedReference(Instruction &StoreOrLoadInst, const LoopInfo &LI,
-                     ScalarEvolution &SE);
+  /// Construct an indexed reference given a \p StoreOrLoadInst instruction.
+  IndexedReference(Instruction &StoreOrLoadInst, const LoopInfo &LI,
+                   ScalarEvolution &SE);
 
-    bool isValid() const {
-        return IsValid;
-    }
-    const SCEV *getBasePointer() const {
-        return BasePointer;
-    }
-    size_t getNumSubscripts() const {
-        return Subscripts.size();
-    }
-    const SCEV *getSubscript(unsigned SubNum) const {
-        assert(SubNum < getNumSubscripts() && "Invalid subscript number");
-        return Subscripts[SubNum];
-    }
-    const SCEV *getFirstSubscript() const {
-        assert(!Subscripts.empty() && "Expecting non-empty container");
-        return Subscripts.front();
-    }
-    const SCEV *getLastSubscript() const {
-        assert(!Subscripts.empty() && "Expecting non-empty container");
-        return Subscripts.back();
-    }
+  bool isValid() const { return IsValid; }
+  const SCEV *getBasePointer() const { return BasePointer; }
+  size_t getNumSubscripts() const { return Subscripts.size(); }
+  const SCEV *getSubscript(unsigned SubNum) const {
+    assert(SubNum < getNumSubscripts() && "Invalid subscript number");
+    return Subscripts[SubNum];
+  }
+  const SCEV *getFirstSubscript() const {
+    assert(!Subscripts.empty() && "Expecting non-empty container");
+    return Subscripts.front();
+  }
+  const SCEV *getLastSubscript() const {
+    assert(!Subscripts.empty() && "Expecting non-empty container");
+    return Subscripts.back();
+  }
 
-    /// Return true/false if the current object and the indexed reference \p Other
-    /// are/aren't in the same cache line of size \p CLS. Two references are in
-    /// the same chace line iff the distance between them in the innermost
-    /// dimension is less than the cache line size. Return None if unsure.
-    Optional<bool> hasSpacialReuse(const IndexedReference &Other, unsigned CLS,
-                                   AAResults &AA) const;
+  /// Return true/false if the current object and the indexed reference \p Other
+  /// are/aren't in the same cache line of size \p CLS. Two references are in
+  /// the same chace line iff the distance between them in the innermost
+  /// dimension is less than the cache line size. Return None if unsure.
+  Optional<bool> hasSpacialReuse(const IndexedReference &Other, unsigned CLS,
+                                 AAResults &AA) const;
 
-    /// Return true if the current object and the indexed reference \p Other
-    /// have distance smaller than \p MaxDistance in the dimension associated with
-    /// the given loop \p L. Return false if the distance is not smaller than \p
-    /// MaxDistance and None if unsure.
-    Optional<bool> hasTemporalReuse(const IndexedReference &Other,
-                                    unsigned MaxDistance, const Loop &L,
-                                    DependenceInfo &DI, AAResults &AA) const;
+  /// Return true if the current object and the indexed reference \p Other
+  /// have distance smaller than \p MaxDistance in the dimension associated with
+  /// the given loop \p L. Return false if the distance is not smaller than \p
+  /// MaxDistance and None if unsure.
+  Optional<bool> hasTemporalReuse(const IndexedReference &Other,
+                                  unsigned MaxDistance, const Loop &L,
+                                  DependenceInfo &DI, AAResults &AA) const;
 
-    /// Compute the cost of the reference w.r.t. the given loop \p L when it is
-    /// considered in the innermost position in the loop nest.
-    /// The cost is defined as:
-    ///   - equal to one if the reference is loop invariant, or
-    ///   - equal to '(TripCount * stride) / cache_line_size' if:
-    ///     + the reference stride is less than the cache line size, and
-    ///     + the coefficient of this loop's index variable used in all other
-    ///       subscripts is zero
-    ///   - or otherwise equal to 'TripCount'.
-    CacheCostTy computeRefCost(const Loop &L, unsigned CLS) const;
+  /// Compute the cost of the reference w.r.t. the given loop \p L when it is
+  /// considered in the innermost position in the loop nest.
+  /// The cost is defined as:
+  ///   - equal to one if the reference is loop invariant, or
+  ///   - equal to '(TripCount * stride) / cache_line_size' if:
+  ///     + the reference stride is less than the cache line size, and
+  ///     + the coefficient of this loop's index variable used in all other
+  ///       subscripts is zero
+  ///   - or otherwise equal to 'TripCount'.
+  CacheCostTy computeRefCost(const Loop &L, unsigned CLS) const;
 
 private:
-    /// Attempt to delinearize the indexed reference.
-    bool delinearize(const LoopInfo &LI);
+  /// Attempt to delinearize the indexed reference.
+  bool delinearize(const LoopInfo &LI);
 
-    /// Return true if the index reference is invariant with respect to loop \p L.
-    bool isLoopInvariant(const Loop &L) const;
+  /// Return true if the index reference is invariant with respect to loop \p L.
+  bool isLoopInvariant(const Loop &L) const;
 
-    /// Return true if the indexed reference is 'consecutive' in loop \p L.
-    /// An indexed reference is 'consecutive' if the only coefficient that uses
-    /// the loop induction variable is the rightmost one, and the access stride is
-    /// smaller than the cache line size \p CLS.
-    bool isConsecutive(const Loop &L, unsigned CLS) const;
+  /// Return true if the indexed reference is 'consecutive' in loop \p L.
+  /// An indexed reference is 'consecutive' if the only coefficient that uses
+  /// the loop induction variable is the rightmost one, and the access stride is
+  /// smaller than the cache line size \p CLS.
+  bool isConsecutive(const Loop &L, unsigned CLS) const;
 
-    /// Return the coefficient used in the rightmost dimension.
-    const SCEV *getLastCoefficient() const;
+  /// Return the coefficient used in the rightmost dimension.
+  const SCEV *getLastCoefficient() const;
 
-    /// Return true if the coefficient corresponding to induction variable of
-    /// loop \p L in the given \p Subscript is zero or is loop invariant in \p L.
-    bool isCoeffForLoopZeroOrInvariant(const SCEV &Subscript,
-                                       const Loop &L) const;
+  /// Return true if the coefficient corresponding to induction variable of
+  /// loop \p L in the given \p Subscript is zero or is loop invariant in \p L.
+  bool isCoeffForLoopZeroOrInvariant(const SCEV &Subscript,
+                                     const Loop &L) const;
 
-    /// Verify that the given \p Subscript is 'well formed' (must be a simple add
-    /// recurrence).
-    bool isSimpleAddRecurrence(const SCEV &Subscript, const Loop &L) const;
+  /// Verify that the given \p Subscript is 'well formed' (must be a simple add
+  /// recurrence).
+  bool isSimpleAddRecurrence(const SCEV &Subscript, const Loop &L) const;
 
-    /// Return true if the given reference \p Other is definetely aliased with
-    /// the indexed reference represented by this class.
-    bool isAliased(const IndexedReference &Other, AAResults &AA) const;
+  /// Return true if the given reference \p Other is definetely aliased with
+  /// the indexed reference represented by this class.
+  bool isAliased(const IndexedReference &Other, AAResults &AA) const;
 
 private:
-    /// True if the reference can be delinearized, false otherwise.
-    bool IsValid = false;
+  /// True if the reference can be delinearized, false otherwise.
+  bool IsValid = false;
 
-    /// Represent the memory reference instruction.
-    Instruction &StoreOrLoadInst;
+  /// Represent the memory reference instruction.
+  Instruction &StoreOrLoadInst;
 
-    /// The base pointer of the memory reference.
-    const SCEV *BasePointer = nullptr;
+  /// The base pointer of the memory reference.
+  const SCEV *BasePointer = nullptr;
 
-    /// The subscript (indexes) of the memory reference.
-    SmallVector<const SCEV *, 3> Subscripts;
+  /// The subscript (indexes) of the memory reference.
+  SmallVector<const SCEV *, 3> Subscripts;
 
-    /// The dimensions of the memory reference.
-    SmallVector<const SCEV *, 3> Sizes;
+  /// The dimensions of the memory reference.
+  SmallVector<const SCEV *, 3> Sizes;
 
-    ScalarEvolution &SE;
+  ScalarEvolution &SE;
 };
 
 /// A reference group represents a set of memory references that exhibit
@@ -178,99 +172,95 @@ using ReferenceGroupsTy = SmallVector<ReferenceGroupTy, 8>;
 ///  - equal to the innermost loop trip count if the reference stride is greater
 ///    or equal to the cache line size CLS.
 class CacheCost {
-    friend raw_ostream &operator<<(raw_ostream &OS, const CacheCost &CC);
-    using LoopTripCountTy = std::pair<const Loop *, unsigned>;
-    using LoopCacheCostTy = std::pair<const Loop *, CacheCostTy>;
+  friend raw_ostream &operator<<(raw_ostream &OS, const CacheCost &CC);
+  using LoopTripCountTy = std::pair<const Loop *, unsigned>;
+  using LoopCacheCostTy = std::pair<const Loop *, CacheCostTy>;
 
 public:
-    static CacheCostTy constexpr InvalidCost = -1;
+  static CacheCostTy constexpr InvalidCost = -1;
 
-    /// Construct a CacheCost object for the loop nest described by \p Loops.
-    /// The optional parameter \p TRT can be used to specify the max. distance
-    /// between array elements accessed in a loop so that the elements are
-    /// classified to have temporal reuse.
-    CacheCost(const LoopVectorTy &Loops, const LoopInfo &LI, ScalarEvolution &SE,
-              TargetTransformInfo &TTI, AAResults &AA, DependenceInfo &DI,
-              Optional<unsigned> TRT = None);
+  /// Construct a CacheCost object for the loop nest described by \p Loops.
+  /// The optional parameter \p TRT can be used to specify the max. distance
+  /// between array elements accessed in a loop so that the elements are
+  /// classified to have temporal reuse.
+  CacheCost(const LoopVectorTy &Loops, const LoopInfo &LI, ScalarEvolution &SE,
+            TargetTransformInfo &TTI, AAResults &AA, DependenceInfo &DI,
+            Optional<unsigned> TRT = None);
 
-    /// Create a CacheCost for the loop nest rooted by \p Root.
-    /// The optional parameter \p TRT can be used to specify the max. distance
-    /// between array elements accessed in a loop so that the elements are
-    /// classified to have temporal reuse.
-    static std::unique_ptr<CacheCost>
-    getCacheCost(Loop &Root, LoopStandardAnalysisResults &AR, DependenceInfo &DI,
-                 Optional<unsigned> TRT = None);
+  /// Create a CacheCost for the loop nest rooted by \p Root.
+  /// The optional parameter \p TRT can be used to specify the max. distance
+  /// between array elements accessed in a loop so that the elements are
+  /// classified to have temporal reuse.
+  static std::unique_ptr<CacheCost>
+  getCacheCost(Loop &Root, LoopStandardAnalysisResults &AR, DependenceInfo &DI,
+               Optional<unsigned> TRT = None);
 
-    /// Return the estimated cost of loop \p L if the given loop is part of the
-    /// loop nest associated with this object. Return -1 otherwise.
-    CacheCostTy getLoopCost(const Loop &L) const {
-        auto IT = std::find_if(
-                      LoopCosts.begin(), LoopCosts.end(),
-        [&L](const LoopCacheCostTy &LCC) {
-            return LCC.first == &L;
-        });
-        return (IT != LoopCosts.end()) ? (*IT).second : -1;
-    }
+  /// Return the estimated cost of loop \p L if the given loop is part of the
+  /// loop nest associated with this object. Return -1 otherwise.
+  CacheCostTy getLoopCost(const Loop &L) const {
+    auto IT = std::find_if(
+        LoopCosts.begin(), LoopCosts.end(),
+        [&L](const LoopCacheCostTy &LCC) { return LCC.first == &L; });
+    return (IT != LoopCosts.end()) ? (*IT).second : -1;
+  }
 
-    /// Return the estimated ordered loop costs.
-    const ArrayRef<LoopCacheCostTy> getLoopCosts() const {
-        return LoopCosts;
-    }
+  /// Return the estimated ordered loop costs.
+  const ArrayRef<LoopCacheCostTy> getLoopCosts() const { return LoopCosts; }
 
 private:
-    /// Calculate the cache footprint of each loop in the nest (when it is
-    /// considered to be in the innermost position).
-    void calculateCacheFootprint();
+  /// Calculate the cache footprint of each loop in the nest (when it is
+  /// considered to be in the innermost position).
+  void calculateCacheFootprint();
 
-    /// Partition store/load instructions in the loop nest into reference groups.
-    /// Two or more memory accesses belong in the same reference group if they
-    /// share the same cache line.
-    bool populateReferenceGroups(ReferenceGroupsTy &RefGroups) const;
+  /// Partition store/load instructions in the loop nest into reference groups.
+  /// Two or more memory accesses belong in the same reference group if they
+  /// share the same cache line.
+  bool populateReferenceGroups(ReferenceGroupsTy &RefGroups) const;
 
-    /// Calculate the cost of the given loop \p L assuming it is the innermost
-    /// loop in nest.
-    CacheCostTy computeLoopCacheCost(const Loop &L,
-                                     const ReferenceGroupsTy &RefGroups) const;
+  /// Calculate the cost of the given loop \p L assuming it is the innermost
+  /// loop in nest.
+  CacheCostTy computeLoopCacheCost(const Loop &L,
+                                   const ReferenceGroupsTy &RefGroups) const;
 
-    /// Compute the cost of a representative reference in reference group \p RG
-    /// when the given loop \p L is considered as the innermost loop in the nest.
-    /// The computed cost is an estimate for the number of cache lines used by the
-    /// reference group. The representative reference cost is defined as:
-    ///   - equal to one if the reference is loop invariant, or
-    ///   - equal to '(TripCount * stride) / cache_line_size' if (a) loop \p L's
-    ///     induction variable is used only in the reference subscript associated
-    ///     with loop \p L, and (b) the reference stride is less than the cache
-    ///     line size, or
-    ///   - TripCount otherwise
-    CacheCostTy computeRefGroupCacheCost(const ReferenceGroupTy &RG,
-                                         const Loop &L) const;
+  /// Compute the cost of a representative reference in reference group \p RG
+  /// when the given loop \p L is considered as the innermost loop in the nest.
+  /// The computed cost is an estimate for the number of cache lines used by the
+  /// reference group. The representative reference cost is defined as:
+  ///   - equal to one if the reference is loop invariant, or
+  ///   - equal to '(TripCount * stride) / cache_line_size' if (a) loop \p L's
+  ///     induction variable is used only in the reference subscript associated
+  ///     with loop \p L, and (b) the reference stride is less than the cache
+  ///     line size, or
+  ///   - TripCount otherwise
+  CacheCostTy computeRefGroupCacheCost(const ReferenceGroupTy &RG,
+                                       const Loop &L) const;
 
-    /// Sort the LoopCosts vector by decreasing cache cost.
-    void sortLoopCosts() {
-        sort(LoopCosts, [](const LoopCacheCostTy &A, const LoopCacheCostTy &B) {
-            return A.second > B.second;
-        });
-    }
+  /// Sort the LoopCosts vector by decreasing cache cost.
+  void sortLoopCosts() {
+    sort(LoopCosts, [](const LoopCacheCostTy &A, const LoopCacheCostTy &B) {
+      return A.second > B.second;
+    });
+  }
 
 private:
-    /// Loops in the loop nest associated with this object.
-    LoopVectorTy Loops;
+  /// Loops in the loop nest associated with this object.
+  LoopVectorTy Loops;
 
-    /// Trip counts for the loops in the loop nest associated with this object.
-    SmallVector<LoopTripCountTy, 3> TripCounts;
+  /// Trip counts for the loops in the loop nest associated with this object.
+  SmallVector<LoopTripCountTy, 3> TripCounts;
 
-    /// Cache costs for the loops in the loop nest associated with this object.
-    SmallVector<LoopCacheCostTy, 3> LoopCosts;
+  /// Cache costs for the loops in the loop nest associated with this object.
+  SmallVector<LoopCacheCostTy, 3> LoopCosts;
 
-    /// The max. distance between array elements accessed in a loop so that the
-    /// elements are classified to have temporal reuse.
-    Optional<unsigned> TRT;
+  /// The max. distance between array elements accessed in a loop so that the
+  /// elements are classified to have temporal reuse.
+  Optional<unsigned> TRT;
 
-    const LoopInfo &LI;
-    ScalarEvolution &SE;
-    TargetTransformInfo &TTI;
-    AAResults &AA;
-    DependenceInfo &DI;
+  const LoopInfo &LI;
+  ScalarEvolution &SE;
+  TargetTransformInfo &TTI;
+  AAResults &AA;
+  DependenceInfo &DI;
 };
 
 raw_ostream &operator<<(raw_ostream &OS, const IndexedReference &R);
@@ -278,13 +268,13 @@ raw_ostream &operator<<(raw_ostream &OS, const CacheCost &CC);
 
 /// Printer pass for the \c CacheCost results.
 class LoopCachePrinterPass : public PassInfoMixin<LoopCachePrinterPass> {
-    raw_ostream &OS;
+  raw_ostream &OS;
 
 public:
-    explicit LoopCachePrinterPass(raw_ostream &OS) : OS(OS) {}
+  explicit LoopCachePrinterPass(raw_ostream &OS) : OS(OS) {}
 
-    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
+  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
 } // namespace llvm

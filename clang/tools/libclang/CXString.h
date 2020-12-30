@@ -72,24 +72,24 @@ CXStringSet *createSet(const std::vector<std::string> &Strings);
 /// A string pool used for fast allocation/deallocation of strings.
 class CXStringPool {
 public:
-    ~CXStringPool();
+  ~CXStringPool();
 
-    CXStringBuf *getCXStringBuf(CXTranslationUnit TU);
+  CXStringBuf *getCXStringBuf(CXTranslationUnit TU);
 
 private:
-    std::vector<CXStringBuf *> Pool;
+  std::vector<CXStringBuf *> Pool;
 
-    friend struct CXStringBuf;
+  friend struct CXStringBuf;
 };
 
 struct CXStringBuf {
-    SmallString<128> Data;
-    CXTranslationUnit TU;
+  SmallString<128> Data;
+  CXTranslationUnit TU;
 
-    CXStringBuf(CXTranslationUnit TU) : TU(TU) {}
+  CXStringBuf(CXTranslationUnit TU) : TU(TU) {}
 
-    /// Return this buffer to the pool.
-    void dispose();
+  /// Return this buffer to the pool.
+  void dispose();
 };
 
 CXStringBuf *getCXStringBuf(CXTranslationUnit TU);
@@ -97,12 +97,11 @@ CXStringBuf *getCXStringBuf(CXTranslationUnit TU);
 /// Returns true if the CXString data is managed by a pool.
 bool isManagedByPool(CXString str);
 
-}
+} // namespace cxstring
 
 static inline StringRef getContents(const CXUnsavedFile &UF) {
-    return StringRef(UF.Contents, UF.Length);
+  return StringRef(UF.Contents, UF.Length);
 }
-}
+} // namespace clang
 
 #endif
-

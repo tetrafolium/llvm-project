@@ -51,121 +51,121 @@
 
 template <typename type_lhs, typename type_rhs>
 std::complex<type_lhs> __kmp_lhs_div_rhs(const std::complex<type_lhs> &lhs,
-        const std::complex<type_rhs> &rhs) {
-    type_lhs a = lhs.real();
-    type_lhs b = lhs.imag();
-    type_rhs c = rhs.real();
-    type_rhs d = rhs.imag();
-    type_rhs den = c * c + d * d;
-    type_rhs r = (a * c + b * d);
-    type_rhs i = (b * c - a * d);
-    std::complex<type_lhs> ret(r / den, i / den);
-    return ret;
+                                         const std::complex<type_rhs> &rhs) {
+  type_lhs a = lhs.real();
+  type_lhs b = lhs.imag();
+  type_rhs c = rhs.real();
+  type_rhs d = rhs.imag();
+  type_rhs den = c * c + d * d;
+  type_rhs r = (a * c + b * d);
+  type_rhs i = (b * c - a * d);
+  std::complex<type_lhs> ret(r / den, i / den);
+  return ret;
 }
 
 // complex8
 struct __kmp_cmplx64_t : std::complex<double> {
 
-    __kmp_cmplx64_t() : std::complex<double>() {}
+  __kmp_cmplx64_t() : std::complex<double>() {}
 
-    __kmp_cmplx64_t(const std::complex<double> &cd) : std::complex<double>(cd) {}
+  __kmp_cmplx64_t(const std::complex<double> &cd) : std::complex<double>(cd) {}
 
-    void operator/=(const __kmp_cmplx64_t &rhs) {
-        std::complex<double> lhs = *this;
-        *this = __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  void operator/=(const __kmp_cmplx64_t &rhs) {
+    std::complex<double> lhs = *this;
+    *this = __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    __kmp_cmplx64_t operator/(const __kmp_cmplx64_t &rhs) {
-        std::complex<double> lhs = *this;
-        return __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  __kmp_cmplx64_t operator/(const __kmp_cmplx64_t &rhs) {
+    std::complex<double> lhs = *this;
+    return __kmp_lhs_div_rhs(lhs, rhs);
+  }
 };
 typedef struct __kmp_cmplx64_t kmp_cmplx64;
 
 // complex4
 struct __kmp_cmplx32_t : std::complex<float> {
 
-    __kmp_cmplx32_t() : std::complex<float>() {}
+  __kmp_cmplx32_t() : std::complex<float>() {}
 
-    __kmp_cmplx32_t(const std::complex<float> &cf) : std::complex<float>(cf) {}
+  __kmp_cmplx32_t(const std::complex<float> &cf) : std::complex<float>(cf) {}
 
-    __kmp_cmplx32_t operator+(const __kmp_cmplx32_t &b) {
-        std::complex<float> lhs = *this;
-        std::complex<float> rhs = b;
-        return (lhs + rhs);
-    }
-    __kmp_cmplx32_t operator-(const __kmp_cmplx32_t &b) {
-        std::complex<float> lhs = *this;
-        std::complex<float> rhs = b;
-        return (lhs - rhs);
-    }
-    __kmp_cmplx32_t operator*(const __kmp_cmplx32_t &b) {
-        std::complex<float> lhs = *this;
-        std::complex<float> rhs = b;
-        return (lhs * rhs);
-    }
+  __kmp_cmplx32_t operator+(const __kmp_cmplx32_t &b) {
+    std::complex<float> lhs = *this;
+    std::complex<float> rhs = b;
+    return (lhs + rhs);
+  }
+  __kmp_cmplx32_t operator-(const __kmp_cmplx32_t &b) {
+    std::complex<float> lhs = *this;
+    std::complex<float> rhs = b;
+    return (lhs - rhs);
+  }
+  __kmp_cmplx32_t operator*(const __kmp_cmplx32_t &b) {
+    std::complex<float> lhs = *this;
+    std::complex<float> rhs = b;
+    return (lhs * rhs);
+  }
 
-    __kmp_cmplx32_t operator+(const kmp_cmplx64 &b) {
-        kmp_cmplx64 t = kmp_cmplx64(*this) + b;
-        std::complex<double> d(t);
-        std::complex<float> f(d);
-        __kmp_cmplx32_t r(f);
-        return r;
-    }
-    __kmp_cmplx32_t operator-(const kmp_cmplx64 &b) {
-        kmp_cmplx64 t = kmp_cmplx64(*this) - b;
-        std::complex<double> d(t);
-        std::complex<float> f(d);
-        __kmp_cmplx32_t r(f);
-        return r;
-    }
-    __kmp_cmplx32_t operator*(const kmp_cmplx64 &b) {
-        kmp_cmplx64 t = kmp_cmplx64(*this) * b;
-        std::complex<double> d(t);
-        std::complex<float> f(d);
-        __kmp_cmplx32_t r(f);
-        return r;
-    }
+  __kmp_cmplx32_t operator+(const kmp_cmplx64 &b) {
+    kmp_cmplx64 t = kmp_cmplx64(*this) + b;
+    std::complex<double> d(t);
+    std::complex<float> f(d);
+    __kmp_cmplx32_t r(f);
+    return r;
+  }
+  __kmp_cmplx32_t operator-(const kmp_cmplx64 &b) {
+    kmp_cmplx64 t = kmp_cmplx64(*this) - b;
+    std::complex<double> d(t);
+    std::complex<float> f(d);
+    __kmp_cmplx32_t r(f);
+    return r;
+  }
+  __kmp_cmplx32_t operator*(const kmp_cmplx64 &b) {
+    kmp_cmplx64 t = kmp_cmplx64(*this) * b;
+    std::complex<double> d(t);
+    std::complex<float> f(d);
+    __kmp_cmplx32_t r(f);
+    return r;
+  }
 
-    void operator/=(const __kmp_cmplx32_t &rhs) {
-        std::complex<float> lhs = *this;
-        *this = __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  void operator/=(const __kmp_cmplx32_t &rhs) {
+    std::complex<float> lhs = *this;
+    *this = __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    __kmp_cmplx32_t operator/(const __kmp_cmplx32_t &rhs) {
-        std::complex<float> lhs = *this;
-        return __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  __kmp_cmplx32_t operator/(const __kmp_cmplx32_t &rhs) {
+    std::complex<float> lhs = *this;
+    return __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    void operator/=(const kmp_cmplx64 &rhs) {
-        std::complex<float> lhs = *this;
-        *this = __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  void operator/=(const kmp_cmplx64 &rhs) {
+    std::complex<float> lhs = *this;
+    *this = __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    __kmp_cmplx32_t operator/(const kmp_cmplx64 &rhs) {
-        std::complex<float> lhs = *this;
-        return __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  __kmp_cmplx32_t operator/(const kmp_cmplx64 &rhs) {
+    std::complex<float> lhs = *this;
+    return __kmp_lhs_div_rhs(lhs, rhs);
+  }
 };
 typedef struct __kmp_cmplx32_t kmp_cmplx32;
 
 // complex10
 struct KMP_DO_ALIGN(16) __kmp_cmplx80_t : std::complex<long double> {
 
-    __kmp_cmplx80_t() : std::complex<long double>() {}
+  __kmp_cmplx80_t() : std::complex<long double>() {}
 
-    __kmp_cmplx80_t(const std::complex<long double> &cld)
-        : std::complex<long double>(cld) {}
+  __kmp_cmplx80_t(const std::complex<long double> &cld)
+      : std::complex<long double>(cld) {}
 
-    void operator/=(const __kmp_cmplx80_t &rhs) {
-        std::complex<long double> lhs = *this;
-        *this = __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  void operator/=(const __kmp_cmplx80_t &rhs) {
+    std::complex<long double> lhs = *this;
+    *this = __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    __kmp_cmplx80_t operator/(const __kmp_cmplx80_t &rhs) {
-        std::complex<long double> lhs = *this;
-        return __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  __kmp_cmplx80_t operator/(const __kmp_cmplx80_t &rhs) {
+    std::complex<long double> lhs = *this;
+    return __kmp_lhs_div_rhs(lhs, rhs);
+  }
 };
 typedef KMP_DO_ALIGN(16) struct __kmp_cmplx80_t kmp_cmplx80;
 
@@ -173,19 +173,19 @@ typedef KMP_DO_ALIGN(16) struct __kmp_cmplx80_t kmp_cmplx80;
 #if KMP_HAVE_QUAD
 struct __kmp_cmplx128_t : std::complex<_Quad> {
 
-    __kmp_cmplx128_t() : std::complex<_Quad>() {}
+  __kmp_cmplx128_t() : std::complex<_Quad>() {}
 
-    __kmp_cmplx128_t(const std::complex<_Quad> &cq) : std::complex<_Quad>(cq) {}
+  __kmp_cmplx128_t(const std::complex<_Quad> &cq) : std::complex<_Quad>(cq) {}
 
-    void operator/=(const __kmp_cmplx128_t &rhs) {
-        std::complex<_Quad> lhs = *this;
-        *this = __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  void operator/=(const __kmp_cmplx128_t &rhs) {
+    std::complex<_Quad> lhs = *this;
+    *this = __kmp_lhs_div_rhs(lhs, rhs);
+  }
 
-    __kmp_cmplx128_t operator/(const __kmp_cmplx128_t &rhs) {
-        std::complex<_Quad> lhs = *this;
-        return __kmp_lhs_div_rhs(lhs, rhs);
-    }
+  __kmp_cmplx128_t operator/(const __kmp_cmplx128_t &rhs) {
+    std::complex<_Quad> lhs = *this;
+    return __kmp_lhs_div_rhs(lhs, rhs);
+  }
 };
 typedef struct __kmp_cmplx128_t kmp_cmplx128;
 #endif /* KMP_HAVE_QUAD */
@@ -217,126 +217,126 @@ typedef _Quad _Complex kmp_cmplx128;
 #pragma pack(push, 4)
 
 struct KMP_DO_ALIGN(4) Quad_a4_t {
-    _Quad q;
+  _Quad q;
 
-    Quad_a4_t() : q() {}
-    Quad_a4_t(const _Quad &cq) : q(cq) {}
+  Quad_a4_t() : q() {}
+  Quad_a4_t(const _Quad &cq) : q(cq) {}
 
-    Quad_a4_t operator+(const Quad_a4_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a4_t)(lhs + rhs);
-    }
+  Quad_a4_t operator+(const Quad_a4_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a4_t)(lhs + rhs);
+  }
 
-    Quad_a4_t operator-(const Quad_a4_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a4_t)(lhs - rhs);
-    }
-    Quad_a4_t operator*(const Quad_a4_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a4_t)(lhs * rhs);
-    }
+  Quad_a4_t operator-(const Quad_a4_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a4_t)(lhs - rhs);
+  }
+  Quad_a4_t operator*(const Quad_a4_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a4_t)(lhs * rhs);
+  }
 
-    Quad_a4_t operator/(const Quad_a4_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a4_t)(lhs / rhs);
-    }
+  Quad_a4_t operator/(const Quad_a4_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a4_t)(lhs / rhs);
+  }
 };
 
 struct KMP_DO_ALIGN(4) kmp_cmplx128_a4_t {
-    kmp_cmplx128 q;
+  kmp_cmplx128 q;
 
-    kmp_cmplx128_a4_t() : q() {}
+  kmp_cmplx128_a4_t() : q() {}
 
-    kmp_cmplx128_a4_t(const kmp_cmplx128 &c128) : q(c128) {}
+  kmp_cmplx128_a4_t(const kmp_cmplx128 &c128) : q(c128) {}
 
-    kmp_cmplx128_a4_t operator+(const kmp_cmplx128_a4_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a4_t)(lhs + rhs);
-    }
-    kmp_cmplx128_a4_t operator-(const kmp_cmplx128_a4_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a4_t)(lhs - rhs);
-    }
-    kmp_cmplx128_a4_t operator*(const kmp_cmplx128_a4_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a4_t)(lhs * rhs);
-    }
+  kmp_cmplx128_a4_t operator+(const kmp_cmplx128_a4_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a4_t)(lhs + rhs);
+  }
+  kmp_cmplx128_a4_t operator-(const kmp_cmplx128_a4_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a4_t)(lhs - rhs);
+  }
+  kmp_cmplx128_a4_t operator*(const kmp_cmplx128_a4_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a4_t)(lhs * rhs);
+  }
 
-    kmp_cmplx128_a4_t operator/(const kmp_cmplx128_a4_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a4_t)(lhs / rhs);
-    }
+  kmp_cmplx128_a4_t operator/(const kmp_cmplx128_a4_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a4_t)(lhs / rhs);
+  }
 };
 
 #pragma pack(pop)
 
 // New 16-byte aligned structures for 12.0 compiler.
 struct KMP_DO_ALIGN(16) Quad_a16_t {
-    _Quad q;
+  _Quad q;
 
-    Quad_a16_t() : q() {}
-    Quad_a16_t(const _Quad &cq) : q(cq) {}
+  Quad_a16_t() : q() {}
+  Quad_a16_t(const _Quad &cq) : q(cq) {}
 
-    Quad_a16_t operator+(const Quad_a16_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a16_t)(lhs + rhs);
-    }
+  Quad_a16_t operator+(const Quad_a16_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a16_t)(lhs + rhs);
+  }
 
-    Quad_a16_t operator-(const Quad_a16_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a16_t)(lhs - rhs);
-    }
-    Quad_a16_t operator*(const Quad_a16_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a16_t)(lhs * rhs);
-    }
+  Quad_a16_t operator-(const Quad_a16_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a16_t)(lhs - rhs);
+  }
+  Quad_a16_t operator*(const Quad_a16_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a16_t)(lhs * rhs);
+  }
 
-    Quad_a16_t operator/(const Quad_a16_t &b) {
-        _Quad lhs = (*this).q;
-        _Quad rhs = b.q;
-        return (Quad_a16_t)(lhs / rhs);
-    }
+  Quad_a16_t operator/(const Quad_a16_t &b) {
+    _Quad lhs = (*this).q;
+    _Quad rhs = b.q;
+    return (Quad_a16_t)(lhs / rhs);
+  }
 };
 
 struct KMP_DO_ALIGN(16) kmp_cmplx128_a16_t {
-    kmp_cmplx128 q;
+  kmp_cmplx128 q;
 
-    kmp_cmplx128_a16_t() : q() {}
+  kmp_cmplx128_a16_t() : q() {}
 
-    kmp_cmplx128_a16_t(const kmp_cmplx128 &c128) : q(c128) {}
+  kmp_cmplx128_a16_t(const kmp_cmplx128 &c128) : q(c128) {}
 
-    kmp_cmplx128_a16_t operator+(const kmp_cmplx128_a16_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a16_t)(lhs + rhs);
-    }
-    kmp_cmplx128_a16_t operator-(const kmp_cmplx128_a16_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a16_t)(lhs - rhs);
-    }
-    kmp_cmplx128_a16_t operator*(const kmp_cmplx128_a16_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a16_t)(lhs * rhs);
-    }
+  kmp_cmplx128_a16_t operator+(const kmp_cmplx128_a16_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a16_t)(lhs + rhs);
+  }
+  kmp_cmplx128_a16_t operator-(const kmp_cmplx128_a16_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a16_t)(lhs - rhs);
+  }
+  kmp_cmplx128_a16_t operator*(const kmp_cmplx128_a16_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a16_t)(lhs * rhs);
+  }
 
-    kmp_cmplx128_a16_t operator/(const kmp_cmplx128_a16_t &b) {
-        kmp_cmplx128 lhs = (*this).q;
-        kmp_cmplx128 rhs = b.q;
-        return (kmp_cmplx128_a16_t)(lhs / rhs);
-    }
+  kmp_cmplx128_a16_t operator/(const kmp_cmplx128_a16_t &b) {
+    kmp_cmplx128 lhs = (*this).q;
+    kmp_cmplx128 rhs = b.q;
+    return (kmp_cmplx128_a16_t)(lhs / rhs);
+  }
 };
 
 #endif
@@ -359,47 +359,49 @@ extern int __kmp_atomic_mode;
 typedef kmp_queuing_lock_t kmp_atomic_lock_t;
 
 static inline void __kmp_acquire_atomic_lock(kmp_atomic_lock_t *lck,
-        kmp_int32 gtid) {
+                                             kmp_int32 gtid) {
 #if OMPT_SUPPORT && OMPT_OPTIONAL
-    if (ompt_enabled.ompt_callback_mutex_acquire) {
-        ompt_callbacks.ompt_callback(ompt_callback_mutex_acquire)(
-            ompt_mutex_atomic, 0, kmp_mutex_impl_queuing, (ompt_wait_id_t)(uintptr_t)lck,
-            OMPT_GET_RETURN_ADDRESS(0));
-    }
+  if (ompt_enabled.ompt_callback_mutex_acquire) {
+    ompt_callbacks.ompt_callback(ompt_callback_mutex_acquire)(
+        ompt_mutex_atomic, 0, kmp_mutex_impl_queuing,
+        (ompt_wait_id_t)(uintptr_t)lck, OMPT_GET_RETURN_ADDRESS(0));
+  }
 #endif
 
-    __kmp_acquire_queuing_lock(lck, gtid);
+  __kmp_acquire_queuing_lock(lck, gtid);
 
 #if OMPT_SUPPORT && OMPT_OPTIONAL
-    if (ompt_enabled.ompt_callback_mutex_acquired) {
-        ompt_callbacks.ompt_callback(ompt_callback_mutex_acquired)(
-            ompt_mutex_atomic, (ompt_wait_id_t)(uintptr_t)lck, OMPT_GET_RETURN_ADDRESS(0));
-    }
+  if (ompt_enabled.ompt_callback_mutex_acquired) {
+    ompt_callbacks.ompt_callback(ompt_callback_mutex_acquired)(
+        ompt_mutex_atomic, (ompt_wait_id_t)(uintptr_t)lck,
+        OMPT_GET_RETURN_ADDRESS(0));
+  }
 #endif
 }
 
 static inline int __kmp_test_atomic_lock(kmp_atomic_lock_t *lck,
-        kmp_int32 gtid) {
-    return __kmp_test_queuing_lock(lck, gtid);
+                                         kmp_int32 gtid) {
+  return __kmp_test_queuing_lock(lck, gtid);
 }
 
 static inline void __kmp_release_atomic_lock(kmp_atomic_lock_t *lck,
-        kmp_int32 gtid) {
-    __kmp_release_queuing_lock(lck, gtid);
+                                             kmp_int32 gtid) {
+  __kmp_release_queuing_lock(lck, gtid);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
-    if (ompt_enabled.ompt_callback_mutex_released) {
-        ompt_callbacks.ompt_callback(ompt_callback_mutex_released)(
-            ompt_mutex_atomic, (ompt_wait_id_t)(uintptr_t)lck, OMPT_GET_RETURN_ADDRESS(0));
-    }
+  if (ompt_enabled.ompt_callback_mutex_released) {
+    ompt_callbacks.ompt_callback(ompt_callback_mutex_released)(
+        ompt_mutex_atomic, (ompt_wait_id_t)(uintptr_t)lck,
+        OMPT_GET_RETURN_ADDRESS(0));
+  }
 #endif
 }
 
 static inline void __kmp_init_atomic_lock(kmp_atomic_lock_t *lck) {
-    __kmp_init_queuing_lock(lck);
+  __kmp_init_queuing_lock(lck);
 }
 
 static inline void __kmp_destroy_atomic_lock(kmp_atomic_lock_t *lck) {
-    __kmp_destroy_queuing_lock(lck);
+  __kmp_destroy_queuing_lock(lck);
 }
 
 // Global Locks
@@ -424,11 +426,11 @@ extern kmp_atomic_lock_t __kmp_atomic_lock_8r; /* Control access to all user
                                                   coded atomics for kmp_real64
                                                   data type    */
 extern kmp_atomic_lock_t
-__kmp_atomic_lock_8c; /* Control access to all user coded atomics for
-                             complex byte data type  */
+    __kmp_atomic_lock_8c; /* Control access to all user coded atomics for
+                                 complex byte data type  */
 extern kmp_atomic_lock_t
-__kmp_atomic_lock_10r; /* Control access to all user coded atomics for long
-                              double data type   */
+    __kmp_atomic_lock_10r; /* Control access to all user coded atomics for long
+                                  double data type   */
 extern kmp_atomic_lock_t __kmp_atomic_lock_16r; /* Control access to all user
                                                    coded atomics for _Quad data
                                                    type         */
@@ -436,8 +438,8 @@ extern kmp_atomic_lock_t __kmp_atomic_lock_16c; /* Control access to all user
                                                    coded atomics for double
                                                    complex data type*/
 extern kmp_atomic_lock_t
-__kmp_atomic_lock_20c; /* Control access to all user coded atomics for long
-                              double complex type*/
+    __kmp_atomic_lock_20c; /* Control access to all user coded atomics for long
+                                  double complex type*/
 extern kmp_atomic_lock_t __kmp_atomic_lock_32c; /* Control access to all user
                                                    coded atomics for _Quad
                                                    complex data type */
@@ -1030,7 +1032,7 @@ CPLX128_LEG __kmpc_atomic_cmplx16_rd(ident_t *id_ref, int gtid,
 Quad_a16_t __kmpc_atomic_float16_a16_rd(ident_t *id_ref, int gtid,
                                         Quad_a16_t *loc);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_a16_rd(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *loc);
+                                                kmp_cmplx128_a16_t *loc);
 #endif
 #endif
 
@@ -1080,8 +1082,8 @@ char __kmpc_atomic_fixed1_andb_cpt(ident_t *id_ref, int gtid, char *lhs,
 char __kmpc_atomic_fixed1_div_cpt(ident_t *id_ref, int gtid, char *lhs,
                                   char rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_div_cpt(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        unsigned char rhs, int flag);
+                                            unsigned char *lhs,
+                                            unsigned char rhs, int flag);
 char __kmpc_atomic_fixed1_mul_cpt(ident_t *id_ref, int gtid, char *lhs,
                                   char rhs, int flag);
 char __kmpc_atomic_fixed1_orb_cpt(ident_t *id_ref, int gtid, char *lhs,
@@ -1091,8 +1093,8 @@ char __kmpc_atomic_fixed1_shl_cpt(ident_t *id_ref, int gtid, char *lhs,
 char __kmpc_atomic_fixed1_shr_cpt(ident_t *id_ref, int gtid, char *lhs,
                                   char rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_shr_cpt(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        unsigned char rhs, int flag);
+                                            unsigned char *lhs,
+                                            unsigned char rhs, int flag);
 char __kmpc_atomic_fixed1_sub_cpt(ident_t *id_ref, int gtid, char *lhs,
                                   char rhs, int flag);
 char __kmpc_atomic_fixed1_xor_cpt(ident_t *id_ref, int gtid, char *lhs,
@@ -1105,8 +1107,8 @@ short __kmpc_atomic_fixed2_andb_cpt(ident_t *id_ref, int gtid, short *lhs,
 short __kmpc_atomic_fixed2_div_cpt(ident_t *id_ref, int gtid, short *lhs,
                                    short rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_div_cpt(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        unsigned short rhs, int flag);
+                                             unsigned short *lhs,
+                                             unsigned short rhs, int flag);
 short __kmpc_atomic_fixed2_mul_cpt(ident_t *id_ref, int gtid, short *lhs,
                                    short rhs, int flag);
 short __kmpc_atomic_fixed2_orb_cpt(ident_t *id_ref, int gtid, short *lhs,
@@ -1116,8 +1118,8 @@ short __kmpc_atomic_fixed2_shl_cpt(ident_t *id_ref, int gtid, short *lhs,
 short __kmpc_atomic_fixed2_shr_cpt(ident_t *id_ref, int gtid, short *lhs,
                                    short rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_shr_cpt(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        unsigned short rhs, int flag);
+                                             unsigned short *lhs,
+                                             unsigned short rhs, int flag);
 short __kmpc_atomic_fixed2_sub_cpt(ident_t *id_ref, int gtid, short *lhs,
                                    short rhs, int flag);
 short __kmpc_atomic_fixed2_xor_cpt(ident_t *id_ref, int gtid, short *lhs,
@@ -1153,8 +1155,8 @@ kmp_int32 __kmpc_atomic_fixed4_andb_cpt(ident_t *id_ref, int gtid,
 kmp_int32 __kmpc_atomic_fixed4_div_cpt(ident_t *id_ref, int gtid,
                                        kmp_int32 *lhs, kmp_int32 rhs, int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_div_cpt(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, kmp_uint32 rhs,
-        int flag);
+                                         kmp_uint32 *lhs, kmp_uint32 rhs,
+                                         int flag);
 kmp_int32 __kmpc_atomic_fixed4_mul_cpt(ident_t *id_ref, int gtid,
                                        kmp_int32 *lhs, kmp_int32 rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_orb_cpt(ident_t *id_ref, int gtid,
@@ -1164,8 +1166,8 @@ kmp_int32 __kmpc_atomic_fixed4_shl_cpt(ident_t *id_ref, int gtid,
 kmp_int32 __kmpc_atomic_fixed4_shr_cpt(ident_t *id_ref, int gtid,
                                        kmp_int32 *lhs, kmp_int32 rhs, int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_shr_cpt(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, kmp_uint32 rhs,
-        int flag);
+                                         kmp_uint32 *lhs, kmp_uint32 rhs,
+                                         int flag);
 kmp_int32 __kmpc_atomic_fixed4_xor_cpt(ident_t *id_ref, int gtid,
                                        kmp_int32 *lhs, kmp_int32 rhs, int flag);
 // 8-byte fixed
@@ -1175,8 +1177,8 @@ kmp_int64 __kmpc_atomic_fixed8_andb_cpt(ident_t *id_ref, int gtid,
 kmp_int64 __kmpc_atomic_fixed8_div_cpt(ident_t *id_ref, int gtid,
                                        kmp_int64 *lhs, kmp_int64 rhs, int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_div_cpt(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, kmp_uint64 rhs,
-        int flag);
+                                         kmp_uint64 *lhs, kmp_uint64 rhs,
+                                         int flag);
 kmp_int64 __kmpc_atomic_fixed8_mul_cpt(ident_t *id_ref, int gtid,
                                        kmp_int64 *lhs, kmp_int64 rhs, int flag);
 kmp_int64 __kmpc_atomic_fixed8_orb_cpt(ident_t *id_ref, int gtid,
@@ -1186,8 +1188,8 @@ kmp_int64 __kmpc_atomic_fixed8_shl_cpt(ident_t *id_ref, int gtid,
 kmp_int64 __kmpc_atomic_fixed8_shr_cpt(ident_t *id_ref, int gtid,
                                        kmp_int64 *lhs, kmp_int64 rhs, int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_shr_cpt(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, kmp_uint64 rhs,
-        int flag);
+                                         kmp_uint64 *lhs, kmp_uint64 rhs,
+                                         int flag);
 kmp_int64 __kmpc_atomic_fixed8_xor_cpt(ident_t *id_ref, int gtid,
                                        kmp_int64 *lhs, kmp_int64 rhs, int flag);
 // 4-byte float
@@ -1254,11 +1256,11 @@ kmp_real64 __kmpc_atomic_float8_min_cpt(ident_t *id_ref, int gtid,
                                         int flag);
 #if KMP_HAVE_QUAD
 QUAD_LEGACY __kmpc_atomic_float16_max_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 QUAD_LEGACY __kmpc_atomic_float16_min_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 #endif
 // .NEQV. (same as xor)
 char __kmpc_atomic_fixed1_neqv_cpt(ident_t *id_ref, int gtid, char *lhs,
@@ -1282,31 +1284,31 @@ kmp_int64 __kmpc_atomic_fixed8_eqv_cpt(ident_t *id_ref, int gtid,
                                        kmp_int64 *lhs, kmp_int64 rhs, int flag);
 // long double type
 long double __kmpc_atomic_float10_add_cpt(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                          long double *lhs, long double rhs,
+                                          int flag);
 long double __kmpc_atomic_float10_sub_cpt(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                          long double *lhs, long double rhs,
+                                          int flag);
 long double __kmpc_atomic_float10_mul_cpt(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                          long double *lhs, long double rhs,
+                                          int flag);
 long double __kmpc_atomic_float10_div_cpt(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                          long double *lhs, long double rhs,
+                                          int flag);
 #if KMP_HAVE_QUAD
 // _Quad type
 QUAD_LEGACY __kmpc_atomic_float16_add_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 QUAD_LEGACY __kmpc_atomic_float16_sub_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 QUAD_LEGACY __kmpc_atomic_float16_mul_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 QUAD_LEGACY __kmpc_atomic_float16_div_cpt(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                          QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                          int flag);
 #endif
 // routines for complex types
 // Workaround for cmplx4 routines - return void; captured value is returned via
@@ -1321,78 +1323,78 @@ void __kmpc_atomic_cmplx4_div_cpt(ident_t *id_ref, int gtid, kmp_cmplx32 *lhs,
                                   kmp_cmplx32 rhs, kmp_cmplx32 *out, int flag);
 
 kmp_cmplx64 __kmpc_atomic_cmplx8_add_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                         kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                         int flag);
 kmp_cmplx64 __kmpc_atomic_cmplx8_sub_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                         kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                         int flag);
 kmp_cmplx64 __kmpc_atomic_cmplx8_mul_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                         kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                         int flag);
 kmp_cmplx64 __kmpc_atomic_cmplx8_div_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                         kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                         int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_add_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                          kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                          int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_sub_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                          kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                          int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_mul_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                          kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                          int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_div_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                          kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                          int flag);
 #if KMP_HAVE_QUAD
 CPLX128_LEG __kmpc_atomic_cmplx16_add_cpt(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                          CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                          int flag);
 CPLX128_LEG __kmpc_atomic_cmplx16_sub_cpt(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                          CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                          int flag);
 CPLX128_LEG __kmpc_atomic_cmplx16_mul_cpt(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                          CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                          int flag);
 CPLX128_LEG __kmpc_atomic_cmplx16_div_cpt(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                          CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                          int flag);
 #if (KMP_ARCH_X86)
 // Routines with 16-byte arguments aligned to 16-byte boundary
 Quad_a16_t __kmpc_atomic_float16_add_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 Quad_a16_t __kmpc_atomic_float16_sub_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 Quad_a16_t __kmpc_atomic_float16_mul_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 Quad_a16_t __kmpc_atomic_float16_div_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 Quad_a16_t __kmpc_atomic_float16_max_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 Quad_a16_t __kmpc_atomic_float16_min_a16_cpt(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs,
-        int flag);
+                                             Quad_a16_t *lhs, Quad_a16_t rhs,
+                                             int flag);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_add_a16_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *lhs,
-        kmp_cmplx128_a16_t rhs,
-        int flag);
+                                                     kmp_cmplx128_a16_t *lhs,
+                                                     kmp_cmplx128_a16_t rhs,
+                                                     int flag);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_sub_a16_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *lhs,
-        kmp_cmplx128_a16_t rhs,
-        int flag);
+                                                     kmp_cmplx128_a16_t *lhs,
+                                                     kmp_cmplx128_a16_t rhs,
+                                                     int flag);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_mul_a16_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *lhs,
-        kmp_cmplx128_a16_t rhs,
-        int flag);
+                                                     kmp_cmplx128_a16_t *lhs,
+                                                     kmp_cmplx128_a16_t rhs,
+                                                     int flag);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_div_a16_cpt(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *lhs,
-        kmp_cmplx128_a16_t rhs,
-        int flag);
+                                                     kmp_cmplx128_a16_t *lhs,
+                                                     kmp_cmplx128_a16_t rhs,
+                                                     int flag);
 #endif
 #endif
 
@@ -1407,65 +1409,65 @@ char __kmpc_atomic_fixed1_sub_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
 char __kmpc_atomic_fixed1_div_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
                                       char rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_div_cpt_rev(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        unsigned char rhs, int flag);
+                                                unsigned char *lhs,
+                                                unsigned char rhs, int flag);
 char __kmpc_atomic_fixed1_shl_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
                                       char rhs, int flag);
 char __kmpc_atomic_fixed1_shr_cpt_rev(ident_t *id_ref, int gtid, char *lhs,
                                       char rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_shr_cpt_rev(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        unsigned char rhs, int flag);
+                                                unsigned char *lhs,
+                                                unsigned char rhs, int flag);
 short __kmpc_atomic_fixed2_sub_cpt_rev(ident_t *id_ref, int gtid, short *lhs,
                                        short rhs, int flag);
 short __kmpc_atomic_fixed2_div_cpt_rev(ident_t *id_ref, int gtid, short *lhs,
                                        short rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_div_cpt_rev(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        unsigned short rhs, int flag);
+                                                 unsigned short *lhs,
+                                                 unsigned short rhs, int flag);
 short __kmpc_atomic_fixed2_shl_cpt_rev(ident_t *id_ref, int gtid, short *lhs,
                                        short rhs, int flag);
 short __kmpc_atomic_fixed2_shr_cpt_rev(ident_t *id_ref, int gtid, short *lhs,
                                        short rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_shr_cpt_rev(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        unsigned short rhs, int flag);
+                                                 unsigned short *lhs,
+                                                 unsigned short rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_sub_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, kmp_int32 rhs,
-        int flag);
+                                           kmp_int32 *lhs, kmp_int32 rhs,
+                                           int flag);
 kmp_int32 __kmpc_atomic_fixed4_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, kmp_int32 rhs,
-        int flag);
+                                           kmp_int32 *lhs, kmp_int32 rhs,
+                                           int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, kmp_uint32 rhs,
-        int flag);
+                                             kmp_uint32 *lhs, kmp_uint32 rhs,
+                                             int flag);
 kmp_int32 __kmpc_atomic_fixed4_shl_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, kmp_int32 rhs,
-        int flag);
+                                           kmp_int32 *lhs, kmp_int32 rhs,
+                                           int flag);
 kmp_int32 __kmpc_atomic_fixed4_shr_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, kmp_int32 rhs,
-        int flag);
+                                           kmp_int32 *lhs, kmp_int32 rhs,
+                                           int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_shr_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, kmp_uint32 rhs,
-        int flag);
+                                             kmp_uint32 *lhs, kmp_uint32 rhs,
+                                             int flag);
 kmp_int64 __kmpc_atomic_fixed8_sub_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, kmp_int64 rhs,
-        int flag);
+                                           kmp_int64 *lhs, kmp_int64 rhs,
+                                           int flag);
 kmp_int64 __kmpc_atomic_fixed8_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, kmp_int64 rhs,
-        int flag);
+                                           kmp_int64 *lhs, kmp_int64 rhs,
+                                           int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, kmp_uint64 rhs,
-        int flag);
+                                             kmp_uint64 *lhs, kmp_uint64 rhs,
+                                             int flag);
 kmp_int64 __kmpc_atomic_fixed8_shl_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, kmp_int64 rhs,
-        int flag);
+                                           kmp_int64 *lhs, kmp_int64 rhs,
+                                           int flag);
 kmp_int64 __kmpc_atomic_fixed8_shr_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, kmp_int64 rhs,
-        int flag);
+                                           kmp_int64 *lhs, kmp_int64 rhs,
+                                           int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_shr_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, kmp_uint64 rhs,
-        int flag);
+                                             kmp_uint64 *lhs, kmp_uint64 rhs,
+                                             int flag);
 float __kmpc_atomic_float4_sub_cpt_rev(ident_t *id_ref, int gtid, float *lhs,
                                        float rhs, int flag);
 float __kmpc_atomic_float4_div_cpt_rev(ident_t *id_ref, int gtid, float *lhs,
@@ -1475,18 +1477,18 @@ double __kmpc_atomic_float8_sub_cpt_rev(ident_t *id_ref, int gtid, double *lhs,
 double __kmpc_atomic_float8_div_cpt_rev(ident_t *id_ref, int gtid, double *lhs,
                                         double rhs, int flag);
 long double __kmpc_atomic_float10_sub_cpt_rev(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                              long double *lhs, long double rhs,
+                                              int flag);
 long double __kmpc_atomic_float10_div_cpt_rev(ident_t *id_ref, int gtid,
-        long double *lhs, long double rhs,
-        int flag);
+                                              long double *lhs, long double rhs,
+                                              int flag);
 #if KMP_HAVE_QUAD
 QUAD_LEGACY __kmpc_atomic_float16_sub_cpt_rev(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                              QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                              int flag);
 QUAD_LEGACY __kmpc_atomic_float16_div_cpt_rev(ident_t *id_ref, int gtid,
-        QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
-        int flag);
+                                              QUAD_LEGACY *lhs, QUAD_LEGACY rhs,
+                                              int flag);
 #endif
 // Workaround for cmplx4 routines - return void; captured value is returned via
 // the argument
@@ -1497,31 +1499,31 @@ void __kmpc_atomic_cmplx4_div_cpt_rev(ident_t *id_ref, int gtid,
                                       kmp_cmplx32 *lhs, kmp_cmplx32 rhs,
                                       kmp_cmplx32 *out, int flag);
 kmp_cmplx64 __kmpc_atomic_cmplx8_sub_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                             kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                             int flag);
 kmp_cmplx64 __kmpc_atomic_cmplx8_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
-        int flag);
+                                             kmp_cmplx64 *lhs, kmp_cmplx64 rhs,
+                                             int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_sub_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                              kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                              int flag);
 kmp_cmplx80 __kmpc_atomic_cmplx10_div_cpt_rev(ident_t *id_ref, int gtid,
-        kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
-        int flag);
+                                              kmp_cmplx80 *lhs, kmp_cmplx80 rhs,
+                                              int flag);
 #if KMP_HAVE_QUAD
 CPLX128_LEG __kmpc_atomic_cmplx16_sub_cpt_rev(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                              CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                              int flag);
 CPLX128_LEG __kmpc_atomic_cmplx16_div_cpt_rev(ident_t *id_ref, int gtid,
-        CPLX128_LEG *lhs, CPLX128_LEG rhs,
-        int flag);
+                                              CPLX128_LEG *lhs, CPLX128_LEG rhs,
+                                              int flag);
 #if (KMP_ARCH_X86)
 Quad_a16_t __kmpc_atomic_float16_sub_a16_cpt_rev(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs,
-        Quad_a16_t rhs, int flag);
+                                                 Quad_a16_t *lhs,
+                                                 Quad_a16_t rhs, int flag);
 Quad_a16_t __kmpc_atomic_float16_div_a16_cpt_rev(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs,
-        Quad_a16_t rhs, int flag);
+                                                 Quad_a16_t *lhs,
+                                                 Quad_a16_t rhs, int flag);
 kmp_cmplx128_a16_t
 __kmpc_atomic_cmplx16_sub_a16_cpt_rev(ident_t *id_ref, int gtid,
                                       kmp_cmplx128_a16_t *lhs,
@@ -1566,10 +1568,10 @@ CPLX128_LEG __kmpc_atomic_cmplx16_swp(ident_t *id_ref, int gtid,
                                       CPLX128_LEG *lhs, CPLX128_LEG rhs);
 #if (KMP_ARCH_X86)
 Quad_a16_t __kmpc_atomic_float16_a16_swp(ident_t *id_ref, int gtid,
-        Quad_a16_t *lhs, Quad_a16_t rhs);
+                                         Quad_a16_t *lhs, Quad_a16_t rhs);
 kmp_cmplx128_a16_t __kmpc_atomic_cmplx16_a16_swp(ident_t *id_ref, int gtid,
-        kmp_cmplx128_a16_t *lhs,
-        kmp_cmplx128_a16_t rhs);
+                                                 kmp_cmplx128_a16_t *lhs,
+                                                 kmp_cmplx128_a16_t rhs);
 #endif
 #endif
 
@@ -1585,17 +1587,17 @@ char __kmpc_atomic_fixed1_mul_cpt_fp(ident_t *id_ref, int gtid, char *lhs,
 char __kmpc_atomic_fixed1_div_cpt_fp(ident_t *id_ref, int gtid, char *lhs,
                                      _Quad rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_add_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs, _Quad rhs,
-        int flag);
+                                               unsigned char *lhs, _Quad rhs,
+                                               int flag);
 unsigned char __kmpc_atomic_fixed1u_sub_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs, _Quad rhs,
-        int flag);
+                                               unsigned char *lhs, _Quad rhs,
+                                               int flag);
 unsigned char __kmpc_atomic_fixed1u_mul_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs, _Quad rhs,
-        int flag);
+                                               unsigned char *lhs, _Quad rhs,
+                                               int flag);
 unsigned char __kmpc_atomic_fixed1u_div_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs, _Quad rhs,
-        int flag);
+                                               unsigned char *lhs, _Quad rhs,
+                                               int flag);
 
 short __kmpc_atomic_fixed2_add_cpt_fp(ident_t *id_ref, int gtid, short *lhs,
                                       _Quad rhs, int flag);
@@ -1606,59 +1608,59 @@ short __kmpc_atomic_fixed2_mul_cpt_fp(ident_t *id_ref, int gtid, short *lhs,
 short __kmpc_atomic_fixed2_div_cpt_fp(ident_t *id_ref, int gtid, short *lhs,
                                       _Quad rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_add_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs, _Quad rhs,
-        int flag);
+                                                unsigned short *lhs, _Quad rhs,
+                                                int flag);
 unsigned short __kmpc_atomic_fixed2u_sub_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs, _Quad rhs,
-        int flag);
+                                                unsigned short *lhs, _Quad rhs,
+                                                int flag);
 unsigned short __kmpc_atomic_fixed2u_mul_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs, _Quad rhs,
-        int flag);
+                                                unsigned short *lhs, _Quad rhs,
+                                                int flag);
 unsigned short __kmpc_atomic_fixed2u_div_cpt_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs, _Quad rhs,
-        int flag);
+                                                unsigned short *lhs, _Quad rhs,
+                                                int flag);
 
 kmp_int32 __kmpc_atomic_fixed4_add_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs, int flag);
+                                          kmp_int32 *lhs, _Quad rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_sub_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs, int flag);
+                                          kmp_int32 *lhs, _Quad rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_mul_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs, int flag);
+                                          kmp_int32 *lhs, _Quad rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_div_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs, int flag);
+                                          kmp_int32 *lhs, _Quad rhs, int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_add_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint32 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_sub_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint32 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_mul_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint32 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_div_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint32 *lhs, _Quad rhs,
+                                            int flag);
 
 kmp_int64 __kmpc_atomic_fixed8_add_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs, int flag);
+                                          kmp_int64 *lhs, _Quad rhs, int flag);
 kmp_int64 __kmpc_atomic_fixed8_sub_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs, int flag);
+                                          kmp_int64 *lhs, _Quad rhs, int flag);
 kmp_int64 __kmpc_atomic_fixed8_mul_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs, int flag);
+                                          kmp_int64 *lhs, _Quad rhs, int flag);
 kmp_int64 __kmpc_atomic_fixed8_div_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs, int flag);
+                                          kmp_int64 *lhs, _Quad rhs, int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_add_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint64 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_sub_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint64 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_mul_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint64 *lhs, _Quad rhs,
+                                            int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_div_cpt_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                            kmp_uint64 *lhs, _Quad rhs,
+                                            int flag);
 
 float __kmpc_atomic_float4_add_cpt_fp(ident_t *id_ref, int gtid,
                                       kmp_real32 *lhs, _Quad rhs, int flag);
@@ -1679,76 +1681,76 @@ double __kmpc_atomic_float8_div_cpt_fp(ident_t *id_ref, int gtid,
                                        kmp_real64 *lhs, _Quad rhs, int flag);
 
 long double __kmpc_atomic_float10_add_cpt_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                             long double *lhs, _Quad rhs,
+                                             int flag);
 long double __kmpc_atomic_float10_sub_cpt_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                             long double *lhs, _Quad rhs,
+                                             int flag);
 long double __kmpc_atomic_float10_mul_cpt_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                             long double *lhs, _Quad rhs,
+                                             int flag);
 long double __kmpc_atomic_float10_div_cpt_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                             long double *lhs, _Quad rhs,
+                                             int flag);
 
 char __kmpc_atomic_fixed1_sub_cpt_rev_fp(ident_t *id_ref, int gtid, char *lhs,
-        _Quad rhs, int flag);
+                                         _Quad rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        _Quad rhs, int flag);
+                                                   unsigned char *lhs,
+                                                   _Quad rhs, int flag);
 char __kmpc_atomic_fixed1_div_cpt_rev_fp(ident_t *id_ref, int gtid, char *lhs,
-        _Quad rhs, int flag);
+                                         _Quad rhs, int flag);
 unsigned char __kmpc_atomic_fixed1u_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        unsigned char *lhs,
-        _Quad rhs, int flag);
+                                                   unsigned char *lhs,
+                                                   _Quad rhs, int flag);
 short __kmpc_atomic_fixed2_sub_cpt_rev_fp(ident_t *id_ref, int gtid, short *lhs,
-        _Quad rhs, int flag);
+                                          _Quad rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        _Quad rhs, int flag);
+                                                    unsigned short *lhs,
+                                                    _Quad rhs, int flag);
 short __kmpc_atomic_fixed2_div_cpt_rev_fp(ident_t *id_ref, int gtid, short *lhs,
-        _Quad rhs, int flag);
+                                          _Quad rhs, int flag);
 unsigned short __kmpc_atomic_fixed2u_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        unsigned short *lhs,
-        _Quad rhs, int flag);
+                                                    unsigned short *lhs,
+                                                    _Quad rhs, int flag);
 kmp_int32 __kmpc_atomic_fixed4_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs,
-        int flag);
+                                              kmp_int32 *lhs, _Quad rhs,
+                                              int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                                kmp_uint32 *lhs, _Quad rhs,
+                                                int flag);
 kmp_int32 __kmpc_atomic_fixed4_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_int32 *lhs, _Quad rhs,
-        int flag);
+                                              kmp_int32 *lhs, _Quad rhs,
+                                              int flag);
 kmp_uint32 __kmpc_atomic_fixed4u_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_uint32 *lhs, _Quad rhs,
-        int flag);
+                                                kmp_uint32 *lhs, _Quad rhs,
+                                                int flag);
 kmp_int64 __kmpc_atomic_fixed8_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs,
-        int flag);
+                                              kmp_int64 *lhs, _Quad rhs,
+                                              int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                                kmp_uint64 *lhs, _Quad rhs,
+                                                int flag);
 kmp_int64 __kmpc_atomic_fixed8_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_int64 *lhs, _Quad rhs,
-        int flag);
+                                              kmp_int64 *lhs, _Quad rhs,
+                                              int flag);
 kmp_uint64 __kmpc_atomic_fixed8u_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        kmp_uint64 *lhs, _Quad rhs,
-        int flag);
+                                                kmp_uint64 *lhs, _Quad rhs,
+                                                int flag);
 float __kmpc_atomic_float4_sub_cpt_rev_fp(ident_t *id_ref, int gtid, float *lhs,
-        _Quad rhs, int flag);
+                                          _Quad rhs, int flag);
 float __kmpc_atomic_float4_div_cpt_rev_fp(ident_t *id_ref, int gtid, float *lhs,
-        _Quad rhs, int flag);
+                                          _Quad rhs, int flag);
 double __kmpc_atomic_float8_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        double *lhs, _Quad rhs, int flag);
+                                           double *lhs, _Quad rhs, int flag);
 double __kmpc_atomic_float8_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        double *lhs, _Quad rhs, int flag);
+                                           double *lhs, _Quad rhs, int flag);
 long double __kmpc_atomic_float10_sub_cpt_rev_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                                 long double *lhs, _Quad rhs,
+                                                 int flag);
 long double __kmpc_atomic_float10_div_cpt_rev_fp(ident_t *id_ref, int gtid,
-        long double *lhs, _Quad rhs,
-        int flag);
+                                                 long double *lhs, _Quad rhs,
+                                                 int flag);
 
 #endif // KMP_HAVE_QUAD
 

@@ -11,8 +11,6 @@
 
 namespace __llvm_libc {
 
-float LLVM_LIBC_ENTRYPOINT(ceilf)(float x) {
-    return fputil::ceil(x);
-}
+float LLVM_LIBC_ENTRYPOINT(ceilf)(float x) { return fputil::ceil(x); }
 
 } // namespace __llvm_libc

@@ -70,41 +70,38 @@ static const uint32_t CRCTable[256] = {
     0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
     0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
     0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
-    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-};
+    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
 uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
-    CRC ^= 0xFFFFFFFFU;
-    for (uint8_t Byte : Data) {
-        int TableIdx = (CRC ^ Byte) & 0xff;
-        CRC = CRCTable[TableIdx] ^ (CRC >> 8);
-    }
-    return CRC ^ 0xFFFFFFFFU;
+  CRC ^= 0xFFFFFFFFU;
+  for (uint8_t Byte : Data) {
+    int TableIdx = (CRC ^ Byte) & 0xff;
+    CRC = CRCTable[TableIdx] ^ (CRC >> 8);
+  }
+  return CRC ^ 0xFFFFFFFFU;
 }
 
 #else
 
 #include <zlib.h>
 uint32_t llvm::crc32(uint32_t CRC, ArrayRef<uint8_t> Data) {
-    // Zlib's crc32() only takes a 32-bit length, so we have to iterate for larger
-    // sizes. One could use crc32_z() instead, but that's a recent (2017) addition
-    // and may not be available on all systems.
-    do {
-        ArrayRef<uint8_t> Slice = Data.take_front(UINT32_MAX);
-        CRC = ::crc32(CRC, (const Bytef *)Slice.data(), (uInt)Slice.size());
-        Data = Data.drop_front(Slice.size());
-    } while (Data.size() > 0);
-    return CRC;
+  // Zlib's crc32() only takes a 32-bit length, so we have to iterate for larger
+  // sizes. One could use crc32_z() instead, but that's a recent (2017) addition
+  // and may not be available on all systems.
+  do {
+    ArrayRef<uint8_t> Slice = Data.take_front(UINT32_MAX);
+    CRC = ::crc32(CRC, (const Bytef *)Slice.data(), (uInt)Slice.size());
+    Data = Data.drop_front(Slice.size());
+  } while (Data.size() > 0);
+  return CRC;
 }
 
 #endif
 
-uint32_t llvm::crc32(ArrayRef<uint8_t> Data) {
-    return crc32(0, Data);
-}
+uint32_t llvm::crc32(ArrayRef<uint8_t> Data) { return crc32(0, Data); }
 
 void JamCRC::update(ArrayRef<uint8_t> Data) {
-    CRC ^= 0xFFFFFFFFU; // Undo CRC-32 Init.
-    CRC = crc32(CRC, Data);
-    CRC ^= 0xFFFFFFFFU; // Undo CRC-32 XorOut.
+  CRC ^= 0xFFFFFFFFU; // Undo CRC-32 Init.
+  CRC = crc32(CRC, Data);
+  CRC ^= 0xFFFFFFFFU; // Undo CRC-32 XorOut.
 }

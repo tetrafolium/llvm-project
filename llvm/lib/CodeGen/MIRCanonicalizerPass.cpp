@@ -45,27 +45,27 @@ extern char &MIRCanonicalizerID;
 #define DEBUG_TYPE "mir-canonicalizer"
 
 static cl::opt<unsigned>
-CanonicalizeFunctionNumber("canon-nth-function", cl::Hidden, cl::init(~0u),
-                           cl::value_desc("N"),
-                           cl::desc("Function number to canonicalize."));
+    CanonicalizeFunctionNumber("canon-nth-function", cl::Hidden, cl::init(~0u),
+                               cl::value_desc("N"),
+                               cl::desc("Function number to canonicalize."));
 
 namespace {
 
 class MIRCanonicalizer : public MachineFunctionPass {
 public:
-    static char ID;
-    MIRCanonicalizer() : MachineFunctionPass(ID) {}
+  static char ID;
+  MIRCanonicalizer() : MachineFunctionPass(ID) {}
 
-    StringRef getPassName() const override {
-        return "Rename register operands in a canonical ordering.";
-    }
+  StringRef getPassName() const override {
+    return "Rename register operands in a canonical ordering.";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 };
 
 } // end anonymous namespace
@@ -81,15 +81,15 @@ INITIALIZE_PASS_END(MIRCanonicalizer, "mir-canonicalizer",
                     "Rename Register Operands Canonically", false, false)
 
 static std::vector<MachineBasicBlock *> GetRPOList(MachineFunction &MF) {
-    if (MF.empty())
-        return {};
-    ReversePostOrderTraversal<MachineBasicBlock *> RPOT(&*MF.begin());
-    std::vector<MachineBasicBlock *> RPOList;
-    for (auto MBB : RPOT) {
-        RPOList.push_back(MBB);
-    }
+  if (MF.empty())
+    return {};
+  ReversePostOrderTraversal<MachineBasicBlock *> RPOT(&*MF.begin());
+  std::vector<MachineBasicBlock *> RPOList;
+  for (auto MBB : RPOT) {
+    RPOList.push_back(MBB);
+  }
 
-    return RPOList;
+  return RPOList;
 }
 
 static bool
@@ -97,342 +97,339 @@ rescheduleLexographically(std::vector<MachineInstr *> instructions,
                           MachineBasicBlock *MBB,
                           std::function<MachineBasicBlock::iterator()> getPos) {
 
-    bool Changed = false;
-    using StringInstrPair = std::pair<std::string, MachineInstr *>;
-    std::vector<StringInstrPair> StringInstrMap;
+  bool Changed = false;
+  using StringInstrPair = std::pair<std::string, MachineInstr *>;
+  std::vector<StringInstrPair> StringInstrMap;
 
-    for (auto *II : instructions) {
-        std::string S;
-        raw_string_ostream OS(S);
-        II->print(OS);
-        OS.flush();
+  for (auto *II : instructions) {
+    std::string S;
+    raw_string_ostream OS(S);
+    II->print(OS);
+    OS.flush();
 
-        // Trim the assignment, or start from the beginning in the case of a store.
-        const size_t i = S.find('=');
-        StringInstrMap.push_back({(i == std::string::npos) ? S : S.substr(i), II});
-    }
+    // Trim the assignment, or start from the beginning in the case of a store.
+    const size_t i = S.find('=');
+    StringInstrMap.push_back({(i == std::string::npos) ? S : S.substr(i), II});
+  }
 
-    llvm::sort(StringInstrMap,
-    [](const StringInstrPair &a, const StringInstrPair &b) -> bool {
-        return (a.first < b.first);
+  llvm::sort(StringInstrMap,
+             [](const StringInstrPair &a, const StringInstrPair &b) -> bool {
+               return (a.first < b.first);
+             });
+
+  for (auto &II : StringInstrMap) {
+
+    LLVM_DEBUG({
+      dbgs() << "Splicing ";
+      II.second->dump();
+      dbgs() << " right before: ";
+      getPos()->dump();
     });
 
-    for (auto &II : StringInstrMap) {
+    Changed = true;
+    MBB->splice(getPos(), MBB, II.second);
+  }
 
-        LLVM_DEBUG({
-            dbgs() << "Splicing ";
-            II.second->dump();
-            dbgs() << " right before: ";
-            getPos()->dump();
-        });
-
-        Changed = true;
-        MBB->splice(getPos(), MBB, II.second);
-    }
-
-    return Changed;
+  return Changed;
 }
 
 static bool rescheduleCanonically(unsigned &PseudoIdempotentInstCount,
                                   MachineBasicBlock *MBB) {
 
-    bool Changed = false;
+  bool Changed = false;
 
-    // Calculates the distance of MI from the beginning of its parent BB.
-    auto getInstrIdx = [](const MachineInstr &MI) {
-        unsigned i = 0;
-        for (auto &CurMI : *MI.getParent()) {
-            if (&CurMI == &MI)
-                return i;
-            i++;
-        }
-        return ~0U;
-    };
+  // Calculates the distance of MI from the beginning of its parent BB.
+  auto getInstrIdx = [](const MachineInstr &MI) {
+    unsigned i = 0;
+    for (auto &CurMI : *MI.getParent()) {
+      if (&CurMI == &MI)
+        return i;
+      i++;
+    }
+    return ~0U;
+  };
 
-    // Pre-Populate vector of instructions to reschedule so that we don't
-    // clobber the iterator.
-    std::vector<MachineInstr *> Instructions;
-    for (auto &MI : *MBB) {
-        Instructions.push_back(&MI);
+  // Pre-Populate vector of instructions to reschedule so that we don't
+  // clobber the iterator.
+  std::vector<MachineInstr *> Instructions;
+  for (auto &MI : *MBB) {
+    Instructions.push_back(&MI);
+  }
+
+  std::map<MachineInstr *, std::vector<MachineInstr *>> MultiUsers;
+  std::map<unsigned, MachineInstr *> MultiUserLookup;
+  unsigned UseToBringDefCloserToCount = 0;
+  std::vector<MachineInstr *> PseudoIdempotentInstructions;
+  std::vector<unsigned> PhysRegDefs;
+  for (auto *II : Instructions) {
+    for (unsigned i = 1; i < II->getNumOperands(); i++) {
+      MachineOperand &MO = II->getOperand(i);
+      if (!MO.isReg())
+        continue;
+
+      if (Register::isVirtualRegister(MO.getReg()))
+        continue;
+
+      if (!MO.isDef())
+        continue;
+
+      PhysRegDefs.push_back(MO.getReg());
+    }
+  }
+
+  for (auto *II : Instructions) {
+    if (II->getNumOperands() == 0)
+      continue;
+    if (II->mayLoadOrStore())
+      continue;
+
+    MachineOperand &MO = II->getOperand(0);
+    if (!MO.isReg() || !Register::isVirtualRegister(MO.getReg()))
+      continue;
+    if (!MO.isDef())
+      continue;
+
+    bool IsPseudoIdempotent = true;
+    for (unsigned i = 1; i < II->getNumOperands(); i++) {
+
+      if (II->getOperand(i).isImm()) {
+        continue;
+      }
+
+      if (II->getOperand(i).isReg()) {
+        if (!Register::isVirtualRegister(II->getOperand(i).getReg()))
+          if (!llvm::is_contained(PhysRegDefs, II->getOperand(i).getReg())) {
+            continue;
+          }
+      }
+
+      IsPseudoIdempotent = false;
+      break;
     }
 
-    std::map<MachineInstr *, std::vector<MachineInstr *>> MultiUsers;
-    std::map<unsigned, MachineInstr *> MultiUserLookup;
-    unsigned UseToBringDefCloserToCount = 0;
-    std::vector<MachineInstr *> PseudoIdempotentInstructions;
-    std::vector<unsigned> PhysRegDefs;
-    for (auto *II : Instructions) {
-        for (unsigned i = 1; i < II->getNumOperands(); i++) {
-            MachineOperand &MO = II->getOperand(i);
-            if (!MO.isReg())
-                continue;
-
-            if (Register::isVirtualRegister(MO.getReg()))
-                continue;
-
-            if (!MO.isDef())
-                continue;
-
-            PhysRegDefs.push_back(MO.getReg());
-        }
+    if (IsPseudoIdempotent) {
+      PseudoIdempotentInstructions.push_back(II);
+      continue;
     }
 
-    for (auto *II : Instructions) {
-        if (II->getNumOperands() == 0)
-            continue;
-        if (II->mayLoadOrStore())
-            continue;
+    LLVM_DEBUG(dbgs() << "Operand " << 0 << " of "; II->dump(); MO.dump(););
 
-        MachineOperand &MO = II->getOperand(0);
-        if (!MO.isReg() || !Register::isVirtualRegister(MO.getReg()))
-            continue;
-        if (!MO.isDef())
-            continue;
+    MachineInstr *Def = II;
+    unsigned Distance = ~0U;
+    MachineInstr *UseToBringDefCloserTo = nullptr;
+    MachineRegisterInfo *MRI = &MBB->getParent()->getRegInfo();
+    for (auto &UO : MRI->use_nodbg_operands(MO.getReg())) {
+      MachineInstr *UseInst = UO.getParent();
 
-        bool IsPseudoIdempotent = true;
-        for (unsigned i = 1; i < II->getNumOperands(); i++) {
+      const unsigned DefLoc = getInstrIdx(*Def);
+      const unsigned UseLoc = getInstrIdx(*UseInst);
+      const unsigned Delta = (UseLoc - DefLoc);
 
-            if (II->getOperand(i).isImm()) {
-                continue;
-            }
+      if (UseInst->getParent() != Def->getParent())
+        continue;
+      if (DefLoc >= UseLoc)
+        continue;
 
-            if (II->getOperand(i).isReg()) {
-                if (!Register::isVirtualRegister(II->getOperand(i).getReg()))
-                    if (!llvm::is_contained(PhysRegDefs, II->getOperand(i).getReg())) {
-                        continue;
-                    }
-            }
-
-            IsPseudoIdempotent = false;
-            break;
-        }
-
-        if (IsPseudoIdempotent) {
-            PseudoIdempotentInstructions.push_back(II);
-            continue;
-        }
-
-        LLVM_DEBUG(dbgs() << "Operand " << 0 << " of "; II->dump(); MO.dump(););
-
-        MachineInstr *Def = II;
-        unsigned Distance = ~0U;
-        MachineInstr *UseToBringDefCloserTo = nullptr;
-        MachineRegisterInfo *MRI = &MBB->getParent()->getRegInfo();
-        for (auto &UO : MRI->use_nodbg_operands(MO.getReg())) {
-            MachineInstr *UseInst = UO.getParent();
-
-            const unsigned DefLoc = getInstrIdx(*Def);
-            const unsigned UseLoc = getInstrIdx(*UseInst);
-            const unsigned Delta = (UseLoc - DefLoc);
-
-            if (UseInst->getParent() != Def->getParent())
-                continue;
-            if (DefLoc >= UseLoc)
-                continue;
-
-            if (Delta < Distance) {
-                Distance = Delta;
-                UseToBringDefCloserTo = UseInst;
-                MultiUserLookup[UseToBringDefCloserToCount++] = UseToBringDefCloserTo;
-            }
-        }
-
-        const auto BBE = MBB->instr_end();
-        MachineBasicBlock::iterator DefI = BBE;
-        MachineBasicBlock::iterator UseI = BBE;
-
-        for (auto BBI = MBB->instr_begin(); BBI != BBE; ++BBI) {
-
-            if (DefI != BBE && UseI != BBE)
-                break;
-
-            if (&*BBI == Def) {
-                DefI = BBI;
-                continue;
-            }
-
-            if (&*BBI == UseToBringDefCloserTo) {
-                UseI = BBI;
-                continue;
-            }
-        }
-
-        if (DefI == BBE || UseI == BBE)
-            continue;
-
-        LLVM_DEBUG({
-            dbgs() << "Splicing ";
-            DefI->dump();
-            dbgs() << " right before: ";
-            UseI->dump();
-        });
-
-        MultiUsers[UseToBringDefCloserTo].push_back(Def);
-        Changed = true;
-        MBB->splice(UseI, MBB, DefI);
+      if (Delta < Distance) {
+        Distance = Delta;
+        UseToBringDefCloserTo = UseInst;
+        MultiUserLookup[UseToBringDefCloserToCount++] = UseToBringDefCloserTo;
+      }
     }
 
-    // Sort the defs for users of multiple defs lexographically.
-    for (const auto &E : MultiUserLookup) {
+    const auto BBE = MBB->instr_end();
+    MachineBasicBlock::iterator DefI = BBE;
+    MachineBasicBlock::iterator UseI = BBE;
 
-        auto UseI =
-            std::find_if(MBB->instr_begin(), MBB->instr_end(),
-                         [&](MachineInstr &MI) -> bool { return &MI == E.second; });
+    for (auto BBI = MBB->instr_begin(); BBI != BBE; ++BBI) {
 
-        if (UseI == MBB->instr_end())
-            continue;
+      if (DefI != BBE && UseI != BBE)
+        break;
 
-        LLVM_DEBUG(
-            dbgs() << "Rescheduling Multi-Use Instructions Lexographically.";);
-        Changed |= rescheduleLexographically(
-                       MultiUsers[E.second], MBB,
-                       [&]() -> MachineBasicBlock::iterator { return UseI; });
+      if (&*BBI == Def) {
+        DefI = BBI;
+        continue;
+      }
+
+      if (&*BBI == UseToBringDefCloserTo) {
+        UseI = BBI;
+        continue;
+      }
     }
 
-    PseudoIdempotentInstCount = PseudoIdempotentInstructions.size();
+    if (DefI == BBE || UseI == BBE)
+      continue;
+
+    LLVM_DEBUG({
+      dbgs() << "Splicing ";
+      DefI->dump();
+      dbgs() << " right before: ";
+      UseI->dump();
+    });
+
+    MultiUsers[UseToBringDefCloserTo].push_back(Def);
+    Changed = true;
+    MBB->splice(UseI, MBB, DefI);
+  }
+
+  // Sort the defs for users of multiple defs lexographically.
+  for (const auto &E : MultiUserLookup) {
+
+    auto UseI =
+        std::find_if(MBB->instr_begin(), MBB->instr_end(),
+                     [&](MachineInstr &MI) -> bool { return &MI == E.second; });
+
+    if (UseI == MBB->instr_end())
+      continue;
+
     LLVM_DEBUG(
-        dbgs() << "Rescheduling Idempotent Instructions Lexographically.";);
+        dbgs() << "Rescheduling Multi-Use Instructions Lexographically.";);
     Changed |= rescheduleLexographically(
-                   PseudoIdempotentInstructions, MBB,
-                   [&]() -> MachineBasicBlock::iterator { return MBB->begin(); });
+        MultiUsers[E.second], MBB,
+        [&]() -> MachineBasicBlock::iterator { return UseI; });
+  }
 
-    return Changed;
+  PseudoIdempotentInstCount = PseudoIdempotentInstructions.size();
+  LLVM_DEBUG(
+      dbgs() << "Rescheduling Idempotent Instructions Lexographically.";);
+  Changed |= rescheduleLexographically(
+      PseudoIdempotentInstructions, MBB,
+      [&]() -> MachineBasicBlock::iterator { return MBB->begin(); });
+
+  return Changed;
 }
 
 static bool propagateLocalCopies(MachineBasicBlock *MBB) {
-    bool Changed = false;
-    MachineRegisterInfo &MRI = MBB->getParent()->getRegInfo();
+  bool Changed = false;
+  MachineRegisterInfo &MRI = MBB->getParent()->getRegInfo();
 
-    std::vector<MachineInstr *> Copies;
-    for (MachineInstr &MI : MBB->instrs()) {
-        if (MI.isCopy())
-            Copies.push_back(&MI);
-    }
+  std::vector<MachineInstr *> Copies;
+  for (MachineInstr &MI : MBB->instrs()) {
+    if (MI.isCopy())
+      Copies.push_back(&MI);
+  }
 
-    for (MachineInstr *MI : Copies) {
+  for (MachineInstr *MI : Copies) {
 
-        if (!MI->getOperand(0).isReg())
-            continue;
-        if (!MI->getOperand(1).isReg())
-            continue;
+    if (!MI->getOperand(0).isReg())
+      continue;
+    if (!MI->getOperand(1).isReg())
+      continue;
 
-        const Register Dst = MI->getOperand(0).getReg();
-        const Register Src = MI->getOperand(1).getReg();
+    const Register Dst = MI->getOperand(0).getReg();
+    const Register Src = MI->getOperand(1).getReg();
 
-        if (!Register::isVirtualRegister(Dst))
-            continue;
-        if (!Register::isVirtualRegister(Src))
-            continue;
-        // Not folding COPY instructions if regbankselect has not set the RCs.
-        // Why are we only considering Register Classes? Because the verifier
-        // sometimes gets upset if the register classes don't match even if the
-        // types do. A future patch might add COPY folding for matching types in
-        // pre-registerbankselect code.
-        if (!MRI.getRegClassOrNull(Dst))
-            continue;
-        if (MRI.getRegClass(Dst) != MRI.getRegClass(Src))
-            continue;
+    if (!Register::isVirtualRegister(Dst))
+      continue;
+    if (!Register::isVirtualRegister(Src))
+      continue;
+    // Not folding COPY instructions if regbankselect has not set the RCs.
+    // Why are we only considering Register Classes? Because the verifier
+    // sometimes gets upset if the register classes don't match even if the
+    // types do. A future patch might add COPY folding for matching types in
+    // pre-registerbankselect code.
+    if (!MRI.getRegClassOrNull(Dst))
+      continue;
+    if (MRI.getRegClass(Dst) != MRI.getRegClass(Src))
+      continue;
 
-        std::vector<MachineOperand *> Uses;
-        for (auto UI = MRI.use_begin(Dst); UI != MRI.use_end(); ++UI)
-            Uses.push_back(&*UI);
-        for (auto *MO : Uses)
-            MO->setReg(Src);
+    std::vector<MachineOperand *> Uses;
+    for (auto UI = MRI.use_begin(Dst); UI != MRI.use_end(); ++UI)
+      Uses.push_back(&*UI);
+    for (auto *MO : Uses)
+      MO->setReg(Src);
 
-        Changed = true;
-        MI->eraseFromParent();
-    }
+    Changed = true;
+    MI->eraseFromParent();
+  }
 
-    return Changed;
+  return Changed;
 }
 
 static bool doDefKillClear(MachineBasicBlock *MBB) {
-    bool Changed = false;
+  bool Changed = false;
 
-    for (auto &MI : *MBB) {
-        for (auto &MO : MI.operands()) {
-            if (!MO.isReg())
-                continue;
-            if (!MO.isDef() && MO.isKill()) {
-                Changed = true;
-                MO.setIsKill(false);
-            }
+  for (auto &MI : *MBB) {
+    for (auto &MO : MI.operands()) {
+      if (!MO.isReg())
+        continue;
+      if (!MO.isDef() && MO.isKill()) {
+        Changed = true;
+        MO.setIsKill(false);
+      }
 
-            if (MO.isDef() && MO.isDead()) {
-                Changed = true;
-                MO.setIsDead(false);
-            }
-        }
+      if (MO.isDef() && MO.isDead()) {
+        Changed = true;
+        MO.setIsDead(false);
+      }
     }
+  }
 
-    return Changed;
+  return Changed;
 }
 
-static bool runOnBasicBlock(MachineBasicBlock *MBB,
-                            unsigned BasicBlockNum, VRegRenamer &Renamer) {
-    LLVM_DEBUG({
-        dbgs() << "\n\n  NEW BASIC BLOCK: " << MBB->getName() << "  \n\n";
-        dbgs() << "\n\n================================================\n\n";
-    });
+static bool runOnBasicBlock(MachineBasicBlock *MBB, unsigned BasicBlockNum,
+                            VRegRenamer &Renamer) {
+  LLVM_DEBUG({
+    dbgs() << "\n\n  NEW BASIC BLOCK: " << MBB->getName() << "  \n\n";
+    dbgs() << "\n\n================================================\n\n";
+  });
 
-    bool Changed = false;
+  bool Changed = false;
 
-    LLVM_DEBUG(dbgs() << "\n\n NEW BASIC BLOCK: " << MBB->getName() << "\n\n";);
+  LLVM_DEBUG(dbgs() << "\n\n NEW BASIC BLOCK: " << MBB->getName() << "\n\n";);
 
-    LLVM_DEBUG(dbgs() << "MBB Before Canonical Copy Propagation:\n";
-               MBB->dump(););
-    Changed |= propagateLocalCopies(MBB);
-    LLVM_DEBUG(dbgs() << "MBB After Canonical Copy Propagation:\n"; MBB->dump(););
+  LLVM_DEBUG(dbgs() << "MBB Before Canonical Copy Propagation:\n";
+             MBB->dump(););
+  Changed |= propagateLocalCopies(MBB);
+  LLVM_DEBUG(dbgs() << "MBB After Canonical Copy Propagation:\n"; MBB->dump(););
 
-    LLVM_DEBUG(dbgs() << "MBB Before Scheduling:\n"; MBB->dump(););
-    unsigned IdempotentInstCount = 0;
-    Changed |= rescheduleCanonically(IdempotentInstCount, MBB);
-    LLVM_DEBUG(dbgs() << "MBB After Scheduling:\n"; MBB->dump(););
+  LLVM_DEBUG(dbgs() << "MBB Before Scheduling:\n"; MBB->dump(););
+  unsigned IdempotentInstCount = 0;
+  Changed |= rescheduleCanonically(IdempotentInstCount, MBB);
+  LLVM_DEBUG(dbgs() << "MBB After Scheduling:\n"; MBB->dump(););
 
-    Changed |= Renamer.renameVRegs(MBB, BasicBlockNum);
+  Changed |= Renamer.renameVRegs(MBB, BasicBlockNum);
 
-    // TODO: Consider dropping this. Dropping kill defs is probably not
-    // semantically sound.
-    Changed |= doDefKillClear(MBB);
+  // TODO: Consider dropping this. Dropping kill defs is probably not
+  // semantically sound.
+  Changed |= doDefKillClear(MBB);
 
-    LLVM_DEBUG(dbgs() << "Updated MachineBasicBlock:\n"; MBB->dump();
-               dbgs() << "\n";);
-    LLVM_DEBUG(
-        dbgs() << "\n\n================================================\n\n");
-    return Changed;
+  LLVM_DEBUG(dbgs() << "Updated MachineBasicBlock:\n"; MBB->dump();
+             dbgs() << "\n";);
+  LLVM_DEBUG(
+      dbgs() << "\n\n================================================\n\n");
+  return Changed;
 }
 
 bool MIRCanonicalizer::runOnMachineFunction(MachineFunction &MF) {
 
-    static unsigned functionNum = 0;
-    if (CanonicalizeFunctionNumber != ~0U) {
-        if (CanonicalizeFunctionNumber != functionNum++)
-            return false;
-        LLVM_DEBUG(dbgs() << "\n Canonicalizing Function " << MF.getName()
-                   << "\n";);
-    }
+  static unsigned functionNum = 0;
+  if (CanonicalizeFunctionNumber != ~0U) {
+    if (CanonicalizeFunctionNumber != functionNum++)
+      return false;
+    LLVM_DEBUG(dbgs() << "\n Canonicalizing Function " << MF.getName()
+                      << "\n";);
+  }
 
-    // we need a valid vreg to create a vreg type for skipping all those
-    // stray vreg numbers so reach alignment/canonical vreg values.
-    std::vector<MachineBasicBlock *> RPOList = GetRPOList(MF);
+  // we need a valid vreg to create a vreg type for skipping all those
+  // stray vreg numbers so reach alignment/canonical vreg values.
+  std::vector<MachineBasicBlock *> RPOList = GetRPOList(MF);
 
-    LLVM_DEBUG(
-        dbgs() << "\n\n  NEW MACHINE FUNCTION: " << MF.getName() << "  \n\n";
-        dbgs() << "\n\n================================================\n\n";
-        dbgs() << "Total Basic Blocks: " << RPOList.size() << "\n";
-        for (auto MBB
-    : RPOList) {
-    dbgs() << MBB->getName() << "\n";
-    }
-    dbgs()
-            << "\n\n================================================\n\n";);
+  LLVM_DEBUG(
+      dbgs() << "\n\n  NEW MACHINE FUNCTION: " << MF.getName() << "  \n\n";
+      dbgs() << "\n\n================================================\n\n";
+      dbgs() << "Total Basic Blocks: " << RPOList.size() << "\n";
+      for (auto MBB
+           : RPOList) { dbgs() << MBB->getName() << "\n"; } dbgs()
+      << "\n\n================================================\n\n";);
 
-    unsigned BBNum = 0;
-    bool Changed = false;
-    MachineRegisterInfo &MRI = MF.getRegInfo();
-    VRegRenamer Renamer(MRI);
-    for (auto MBB : RPOList)
-        Changed |= runOnBasicBlock(MBB, BBNum++, Renamer);
+  unsigned BBNum = 0;
+  bool Changed = false;
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  VRegRenamer Renamer(MRI);
+  for (auto MBB : RPOList)
+    Changed |= runOnBasicBlock(MBB, BBNum++, Renamer);
 
-    return Changed;
+  return Changed;
 }

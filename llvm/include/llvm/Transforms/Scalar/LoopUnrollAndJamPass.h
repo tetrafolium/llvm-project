@@ -16,11 +16,11 @@ class Function;
 
 /// A simple loop rotation transformation.
 class LoopUnrollAndJamPass : public PassInfoMixin<LoopUnrollAndJamPass> {
-    const int OptLevel;
+  const int OptLevel;
 
 public:
-    explicit LoopUnrollAndJamPass(int OptLevel = 2) : OptLevel(OptLevel) {}
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  explicit LoopUnrollAndJamPass(int OptLevel = 2) : OptLevel(OptLevel) {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

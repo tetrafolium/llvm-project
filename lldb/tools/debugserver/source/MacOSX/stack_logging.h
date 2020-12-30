@@ -38,8 +38,9 @@
 #define stack_logging_flag_object                                              \
   32 /* NSAllocateObject(Class, extraBytes, zone) */
 #define stack_logging_flag_cleared 64 /* for NewEmptyHandle */
-#define stack_logging_flag_handle 128 /* for Handle (de-)allocation routines   \
-                                         */
+#define stack_logging_flag_handle                                              \
+  128 /* for Handle (de-)allocation routines                                   \
+       */
 #define stack_logging_flag_set_handle_size                                     \
   256 /* (Handle, newSize) treated specially */
 
@@ -48,7 +49,7 @@
   ((address) ^ 0x00005555) /* nicely idempotent */
 
 extern "C" int
-stack_logging_enable_logging; /* when clear, no logging takes place */
+    stack_logging_enable_logging; /* when clear, no logging takes place */
 extern "C" int stack_logging_dontcompact; /* default is to compact; when set
                                              does not compact alloc/free logs;
                                              useful for tracing history */
@@ -70,10 +71,10 @@ __disk_stack_logging_log_stack(uint32_t type_flags, uintptr_t zone_ptr,
 
 /* 64-bit-aware stack log access. */
 typedef struct {
-    uint32_t type_flags;
-    uint64_t stack_identifier;
-    uint64_t argument;
-    mach_vm_address_t address;
+  uint32_t type_flags;
+  uint64_t stack_identifier;
+  uint64_t argument;
+  mach_vm_address_t address;
 } mach_stack_logging_record_t;
 
 extern "C" kern_return_t
@@ -103,24 +104,24 @@ extern "C" kern_return_t __mach_stack_logging_frames_for_uniqued_stack(
  * logging SPI. */
 
 typedef struct {
-    unsigned type;
-    unsigned uniqued_stack;
-    unsigned argument;
-    unsigned address; /* disguised, to avoid confusing leaks */
+  unsigned type;
+  unsigned uniqued_stack;
+  unsigned argument;
+  unsigned address; /* disguised, to avoid confusing leaks */
 } stack_logging_record_t;
 
 typedef struct {
-    unsigned overall_num_bytes;
-    unsigned num_records;
-    unsigned lock; /* 0 means OK to lock; used for inter-process locking */
-    unsigned *uniquing_table; /* allocated using vm_allocate() */
-    /* hashtable organized as (PC, uniqued parent)
-     Only the second half of the table is active
-     To enable us to grow dynamically */
-    unsigned uniquing_table_num_pages; /* number of pages of the table */
-    unsigned extra_retain_count;       /* not used by stack_logging_log_stack */
-    unsigned filler[2]; /* align to cache lines for better performance */
-    stack_logging_record_t records[0]; /* records follow here */
+  unsigned overall_num_bytes;
+  unsigned num_records;
+  unsigned lock; /* 0 means OK to lock; used for inter-process locking */
+  unsigned *uniquing_table; /* allocated using vm_allocate() */
+  /* hashtable organized as (PC, uniqued parent)
+   Only the second half of the table is active
+   To enable us to grow dynamically */
+  unsigned uniquing_table_num_pages; /* number of pages of the table */
+  unsigned extra_retain_count;       /* not used by stack_logging_log_stack */
+  unsigned filler[2]; /* align to cache lines for better performance */
+  stack_logging_record_t records[0]; /* records follow here */
 } stack_logging_record_list_t;
 
 extern "C" stack_logging_record_list_t *stack_logging_the_record_list;

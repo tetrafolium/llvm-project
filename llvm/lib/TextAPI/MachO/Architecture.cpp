@@ -28,70 +28,70 @@ Architecture getArchitectureFromCpuType(uint32_t CPUType, uint32_t CPUSubType) {
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
 
-    return AK_unknown;
+  return AK_unknown;
 }
 
 Architecture getArchitectureFromName(StringRef Name) {
-    return StringSwitch<Architecture>(Name)
+  return StringSwitch<Architecture>(Name)
 #define ARCHINFO(Arch, Type, Subtype, NumBits) .Case(#Arch, AK_##Arch)
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
-           .Default(AK_unknown);
+      .Default(AK_unknown);
 }
 
 StringRef getArchitectureName(Architecture Arch) {
-    switch (Arch) {
+  switch (Arch) {
 #define ARCHINFO(Arch, Type, Subtype, NumBits)                                 \
   case AK_##Arch:                                                              \
     return #Arch;
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
-    case AK_unknown:
-        return "unknown";
-    }
-
-    // Appease some compilers that cannot figure out that this is a fully covered
-    // switch statement.
+  case AK_unknown:
     return "unknown";
+  }
+
+  // Appease some compilers that cannot figure out that this is a fully covered
+  // switch statement.
+  return "unknown";
 }
 
 std::pair<uint32_t, uint32_t> getCPUTypeFromArchitecture(Architecture Arch) {
-    switch (Arch) {
+  switch (Arch) {
 #define ARCHINFO(Arch, Type, Subtype, NumBits)                                 \
   case AK_##Arch:                                                              \
     return std::make_pair(Type, Subtype);
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
-    case AK_unknown:
-        return std::make_pair(0, 0);
-    }
-
-    // Appease some compilers that cannot figure out that this is a fully covered
-    // switch statement.
+  case AK_unknown:
     return std::make_pair(0, 0);
+  }
+
+  // Appease some compilers that cannot figure out that this is a fully covered
+  // switch statement.
+  return std::make_pair(0, 0);
 }
 
 Architecture mapToArchitecture(const Triple &Target) {
-    return getArchitectureFromName(Target.getArchName());
+  return getArchitectureFromName(Target.getArchName());
 }
 
 bool is64Bit(Architecture Arch) {
-    switch (Arch) {
+  switch (Arch) {
 #define ARCHINFO(Arch, Type, Subtype, NumBits)                                 \
   case AK_##Arch:                                                              \
     return NumBits == 64;
 #include "llvm/TextAPI/MachO/Architecture.def"
 #undef ARCHINFO
-    case AK_unknown:
-        return false;
-    }
+  case AK_unknown:
+    return false;
+  }
 
-    llvm_unreachable("Fully handled switch case above.");
+  llvm_unreachable("Fully handled switch case above.");
 }
 
 raw_ostream &operator<<(raw_ostream &OS, Architecture Arch) {
-    OS << getArchitectureName(Arch);
-    return OS;
+  OS << getArchitectureName(Arch);
+  return OS;
 }
 
 } // end namespace MachO.

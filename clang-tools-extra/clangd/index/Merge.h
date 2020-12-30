@@ -28,28 +28,28 @@ Symbol mergeSymbol(const Symbol &L, const Symbol &R);
 // refs in dirty files, so the merged index may return stale symbols
 // and refs from Static index.
 class MergedIndex : public SymbolIndex {
-    const SymbolIndex *Dynamic, *Static;
+  const SymbolIndex *Dynamic, *Static;
 
 public:
-    // The constructor does not access the symbols.
-    // It's safe to inherit from this class and pass pointers to derived members.
-    MergedIndex(const SymbolIndex *Dynamic, const SymbolIndex *Static)
-        : Dynamic(Dynamic), Static(Static) {}
+  // The constructor does not access the symbols.
+  // It's safe to inherit from this class and pass pointers to derived members.
+  MergedIndex(const SymbolIndex *Dynamic, const SymbolIndex *Static)
+      : Dynamic(Dynamic), Static(Static) {}
 
-    bool fuzzyFind(const FuzzyFindRequest &,
-                   llvm::function_ref<void(const Symbol &)>) const override;
-    void lookup(const LookupRequest &,
-                llvm::function_ref<void(const Symbol &)>) const override;
-    bool refs(const RefsRequest &,
-              llvm::function_ref<void(const Ref &)>) const override;
-    void relations(const RelationsRequest &,
-                   llvm::function_ref<void(const SymbolID &, const Symbol &)>)
-    const override;
-    llvm::unique_function<bool(llvm::StringRef) const>
-    indexedFiles() const override;
-    size_t estimateMemoryUsage() const override {
-        return Dynamic->estimateMemoryUsage() + Static->estimateMemoryUsage();
-    }
+  bool fuzzyFind(const FuzzyFindRequest &,
+                 llvm::function_ref<void(const Symbol &)>) const override;
+  void lookup(const LookupRequest &,
+              llvm::function_ref<void(const Symbol &)>) const override;
+  bool refs(const RefsRequest &,
+            llvm::function_ref<void(const Ref &)>) const override;
+  void relations(const RelationsRequest &,
+                 llvm::function_ref<void(const SymbolID &, const Symbol &)>)
+      const override;
+  llvm::unique_function<bool(llvm::StringRef) const>
+  indexedFiles() const override;
+  size_t estimateMemoryUsage() const override {
+    return Dynamic->estimateMemoryUsage() + Static->estimateMemoryUsage();
+  }
 };
 
 } // namespace clangd

@@ -21,29 +21,29 @@ class Terminator;
 // The value of STAT= is zero when no error condition has arisen.
 
 enum Stat {
-    StatOk = 0, // required to be zero by Fortran
+  StatOk = 0, // required to be zero by Fortran
 
-    // Interoperable STAT= codes
-    StatBaseNull = CFI_ERROR_BASE_ADDR_NULL,
-    StatBaseNotNull = CFI_ERROR_BASE_ADDR_NOT_NULL,
-    StatInvalidElemLen = CFI_INVALID_ELEM_LEN,
-    StatInvalidRank = CFI_INVALID_RANK,
-    StatInvalidType = CFI_INVALID_TYPE,
-    StatInvalidAttribute = CFI_INVALID_ATTRIBUTE,
-    StatInvalidExtent = CFI_INVALID_EXTENT,
-    StatInvalidDescriptor = CFI_INVALID_DESCRIPTOR,
-    StatMemAllocation = CFI_ERROR_MEM_ALLOCATION,
-    StatOutOfBounds = CFI_ERROR_OUT_OF_BOUNDS,
+  // Interoperable STAT= codes
+  StatBaseNull = CFI_ERROR_BASE_ADDR_NULL,
+  StatBaseNotNull = CFI_ERROR_BASE_ADDR_NOT_NULL,
+  StatInvalidElemLen = CFI_INVALID_ELEM_LEN,
+  StatInvalidRank = CFI_INVALID_RANK,
+  StatInvalidType = CFI_INVALID_TYPE,
+  StatInvalidAttribute = CFI_INVALID_ATTRIBUTE,
+  StatInvalidExtent = CFI_INVALID_EXTENT,
+  StatInvalidDescriptor = CFI_INVALID_DESCRIPTOR,
+  StatMemAllocation = CFI_ERROR_MEM_ALLOCATION,
+  StatOutOfBounds = CFI_ERROR_OUT_OF_BOUNDS,
 
-    // Standard STAT= values
-    StatFailedImage = FORTRAN_RUNTIME_STAT_FAILED_IMAGE,
-    StatLocked = FORTRAN_RUNTIME_STAT_LOCKED,
-    StatLockedOtherImage = FORTRAN_RUNTIME_STAT_LOCKED_OTHER_IMAGE,
-    StatStoppedImage = FORTRAN_RUNTIME_STAT_STOPPED_IMAGE,
-    StatUnlocked = FORTRAN_RUNTIME_STAT_UNLOCKED,
-    StatUnlockedFailedImage = FORTRAN_RUNTIME_STAT_UNLOCKED_FAILED_IMAGE,
+  // Standard STAT= values
+  StatFailedImage = FORTRAN_RUNTIME_STAT_FAILED_IMAGE,
+  StatLocked = FORTRAN_RUNTIME_STAT_LOCKED,
+  StatLockedOtherImage = FORTRAN_RUNTIME_STAT_LOCKED_OTHER_IMAGE,
+  StatStoppedImage = FORTRAN_RUNTIME_STAT_STOPPED_IMAGE,
+  StatUnlocked = FORTRAN_RUNTIME_STAT_UNLOCKED,
+  StatUnlockedFailedImage = FORTRAN_RUNTIME_STAT_UNLOCKED_FAILED_IMAGE,
 
-    // Additional "processor-defined" STAT= values
+  // Additional "processor-defined" STAT= values
 };
 
 const char *StatErrorString(int);

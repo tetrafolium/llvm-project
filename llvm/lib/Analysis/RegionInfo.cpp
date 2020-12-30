@@ -32,38 +32,32 @@ template class RegionInfoBase<RegionTraits<Function>>;
 
 } // end namespace llvm
 
-STATISTIC(numRegions,       "The # of regions");
+STATISTIC(numRegions, "The # of regions");
 STATISTIC(numSimpleRegions, "The # of simple regions");
 
 // Always verify if expensive checking is enabled.
 
-static cl::opt<bool,true>
-VerifyRegionInfoX(
+static cl::opt<bool, true> VerifyRegionInfoX(
     "verify-region-info",
     cl::location(RegionInfoBase<RegionTraits<Function>>::VerifyRegionInfo),
     cl::desc("Verify region info (time consuming)"));
 
-static cl::opt<Region::PrintStyle, true> printStyleX("print-region-style",
-        cl::location(RegionInfo::printStyle),
-        cl::Hidden,
-        cl::desc("style of printing regions"),
-        cl::values(
-            clEnumValN(Region::PrintNone, "none",  "print no details"),
-            clEnumValN(Region::PrintBB, "bb",
-                       "print regions in detail with block_iterator"),
-            clEnumValN(Region::PrintRN, "rn",
-                       "print regions in detail with element_iterator")));
+static cl::opt<Region::PrintStyle, true> printStyleX(
+    "print-region-style", cl::location(RegionInfo::printStyle), cl::Hidden,
+    cl::desc("style of printing regions"),
+    cl::values(clEnumValN(Region::PrintNone, "none", "print no details"),
+               clEnumValN(Region::PrintBB, "bb",
+                          "print regions in detail with block_iterator"),
+               clEnumValN(Region::PrintRN, "rn",
+                          "print regions in detail with element_iterator")));
 
 //===----------------------------------------------------------------------===//
 // Region implementation
 //
 
-Region::Region(BasicBlock *Entry, BasicBlock *Exit,
-               RegionInfo* RI,
-               DominatorTree *DT, Region *Parent) :
-    RegionBase<RegionTraits<Function>>(Entry, Exit, RI, DT, Parent) {
-
-}
+Region::Region(BasicBlock *Entry, BasicBlock *Exit, RegionInfo *RI,
+               DominatorTree *DT, Region *Parent)
+    : RegionBase<RegionTraits<Function>>(Entry, Exit, RI, DT, Parent) {}
 
 Region::~Region() = default;
 
@@ -77,41 +71,36 @@ RegionInfo::~RegionInfo() = default;
 
 bool RegionInfo::invalidate(Function &F, const PreservedAnalyses &PA,
                             FunctionAnalysisManager::Invalidator &) {
-    // Check whether the analysis, all analyses on functions, or the function's
-    // CFG has been preserved.
-    auto PAC = PA.getChecker<RegionInfoAnalysis>();
-    return !(PAC.preserved() || PAC.preservedSet<AllAnalysesOn<Function>>() ||
-             PAC.preservedSet<CFGAnalyses>());
+  // Check whether the analysis, all analyses on functions, or the function's
+  // CFG has been preserved.
+  auto PAC = PA.getChecker<RegionInfoAnalysis>();
+  return !(PAC.preserved() || PAC.preservedSet<AllAnalysesOn<Function>>() ||
+           PAC.preservedSet<CFGAnalyses>());
 }
 
 void RegionInfo::updateStatistics(Region *R) {
-    ++numRegions;
+  ++numRegions;
 
-    // TODO: Slow. Should only be enabled if -stats is used.
-    if (R->isSimple())
-        ++numSimpleRegions;
+  // TODO: Slow. Should only be enabled if -stats is used.
+  if (R->isSimple())
+    ++numSimpleRegions;
 }
 
 void RegionInfo::recalculate(Function &F, DominatorTree *DT_,
                              PostDominatorTree *PDT_, DominanceFrontier *DF_) {
-    DT = DT_;
-    PDT = PDT_;
-    DF = DF_;
+  DT = DT_;
+  PDT = PDT_;
+  DF = DF_;
 
-    TopLevelRegion = new Region(&F.getEntryBlock(), nullptr,
-                                this, DT, nullptr);
-    updateStatistics(TopLevelRegion);
-    calculate(F);
+  TopLevelRegion = new Region(&F.getEntryBlock(), nullptr, this, DT, nullptr);
+  updateStatistics(TopLevelRegion);
+  calculate(F);
 }
 
 #ifndef NDEBUG
-void RegionInfo::view() {
-    viewRegion(this);
-}
+void RegionInfo::view() { viewRegion(this); }
 
-void RegionInfo::viewOnly() {
-    viewRegionOnly(this);
-}
+void RegionInfo::viewOnly() { viewRegionOnly(this); }
 #endif
 
 //===----------------------------------------------------------------------===//
@@ -119,45 +108,39 @@ void RegionInfo::viewOnly() {
 //
 
 RegionInfoPass::RegionInfoPass() : FunctionPass(ID) {
-    initializeRegionInfoPassPass(*PassRegistry::getPassRegistry());
+  initializeRegionInfoPassPass(*PassRegistry::getPassRegistry());
 }
 
 RegionInfoPass::~RegionInfoPass() = default;
 
 bool RegionInfoPass::runOnFunction(Function &F) {
-    releaseMemory();
+  releaseMemory();
 
-    auto DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
-    auto PDT = &getAnalysis<PostDominatorTreeWrapperPass>().getPostDomTree();
-    auto DF = &getAnalysis<DominanceFrontierWrapperPass>().getDominanceFrontier();
+  auto DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
+  auto PDT = &getAnalysis<PostDominatorTreeWrapperPass>().getPostDomTree();
+  auto DF = &getAnalysis<DominanceFrontierWrapperPass>().getDominanceFrontier();
 
-    RI.recalculate(F, DT, PDT, DF);
-    return false;
+  RI.recalculate(F, DT, PDT, DF);
+  return false;
 }
 
-void RegionInfoPass::releaseMemory() {
-    RI.releaseMemory();
-}
+void RegionInfoPass::releaseMemory() { RI.releaseMemory(); }
 
-void RegionInfoPass::verifyAnalysis() const {
-    RI.verifyAnalysis();
-}
+void RegionInfoPass::verifyAnalysis() const { RI.verifyAnalysis(); }
 
 void RegionInfoPass::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.setPreservesAll();
-    AU.addRequiredTransitive<DominatorTreeWrapperPass>();
-    AU.addRequired<PostDominatorTreeWrapperPass>();
-    AU.addRequired<DominanceFrontierWrapperPass>();
+  AU.setPreservesAll();
+  AU.addRequiredTransitive<DominatorTreeWrapperPass>();
+  AU.addRequired<PostDominatorTreeWrapperPass>();
+  AU.addRequired<DominanceFrontierWrapperPass>();
 }
 
 void RegionInfoPass::print(raw_ostream &OS, const Module *) const {
-    RI.print(OS);
+  RI.print(OS);
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-LLVM_DUMP_METHOD void RegionInfoPass::dump() const {
-    RI.dump();
-}
+LLVM_DUMP_METHOD void RegionInfoPass::dump() const { RI.dump(); }
 #endif
 
 char RegionInfoPass::ID = 0;
@@ -176,9 +159,7 @@ INITIALIZE_PASS_END(RegionInfoPass, "regions",
 
 namespace llvm {
 
-FunctionPass *createRegionInfoPass() {
-    return new RegionInfoPass();
-}
+FunctionPass *createRegionInfoPass() { return new RegionInfoPass(); }
 
 } // end namespace llvm
 
@@ -189,29 +170,28 @@ FunctionPass *createRegionInfoPass() {
 AnalysisKey RegionInfoAnalysis::Key;
 
 RegionInfo RegionInfoAnalysis::run(Function &F, FunctionAnalysisManager &AM) {
-    RegionInfo RI;
-    auto *DT = &AM.getResult<DominatorTreeAnalysis>(F);
-    auto *PDT = &AM.getResult<PostDominatorTreeAnalysis>(F);
-    auto *DF = &AM.getResult<DominanceFrontierAnalysis>(F);
+  RegionInfo RI;
+  auto *DT = &AM.getResult<DominatorTreeAnalysis>(F);
+  auto *PDT = &AM.getResult<PostDominatorTreeAnalysis>(F);
+  auto *DF = &AM.getResult<DominanceFrontierAnalysis>(F);
 
-    RI.recalculate(F, DT, PDT, DF);
-    return RI;
+  RI.recalculate(F, DT, PDT, DF);
+  return RI;
 }
 
-RegionInfoPrinterPass::RegionInfoPrinterPass(raw_ostream &OS)
-    : OS(OS) {}
+RegionInfoPrinterPass::RegionInfoPrinterPass(raw_ostream &OS) : OS(OS) {}
 
 PreservedAnalyses RegionInfoPrinterPass::run(Function &F,
-        FunctionAnalysisManager &AM) {
-    OS << "Region Tree for function: " << F.getName() << "\n";
-    AM.getResult<RegionInfoAnalysis>(F).print(OS);
+                                             FunctionAnalysisManager &AM) {
+  OS << "Region Tree for function: " << F.getName() << "\n";
+  AM.getResult<RegionInfoAnalysis>(F).print(OS);
 
-    return PreservedAnalyses::all();
+  return PreservedAnalyses::all();
 }
 
 PreservedAnalyses RegionInfoVerifierPass::run(Function &F,
-        FunctionAnalysisManager &AM) {
-    AM.getResult<RegionInfoAnalysis>(F).verifyAnalysis();
+                                              FunctionAnalysisManager &AM) {
+  AM.getResult<RegionInfoAnalysis>(F).verifyAnalysis();
 
-    return PreservedAnalyses::all();
+  return PreservedAnalyses::all();
 }

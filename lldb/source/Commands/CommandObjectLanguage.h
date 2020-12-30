@@ -14,12 +14,12 @@
 namespace lldb_private {
 class CommandObjectLanguage : public CommandObjectMultiword {
 public:
-    CommandObjectLanguage(CommandInterpreter &interpreter);
+  CommandObjectLanguage(CommandInterpreter &interpreter);
 
-    ~CommandObjectLanguage() override;
+  ~CommandObjectLanguage() override;
 
 protected:
-    bool DoExecute(Args &command, CommandReturnObject &result);
+  bool DoExecute(Args &command, CommandReturnObject &result);
 };
 } // namespace lldb_private
 

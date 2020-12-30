@@ -44,14 +44,14 @@ template <typename T> struct dispatch_private_info_template;
 
 template <typename T>
 extern void __kmp_dispatch_init_algorithm(ident_t *loc, int gtid,
-        dispatch_private_info_template<T> *pr,
-        enum sched_type schedule, T lb, T ub,
-        typename traits_t<T>::signed_t st,
+                                          dispatch_private_info_template<T> *pr,
+                                          enum sched_type schedule, T lb, T ub,
+                                          typename traits_t<T>::signed_t st,
 #if USE_ITT_BUILD
-        kmp_uint64 *cur_chunk,
+                                          kmp_uint64 *cur_chunk,
 #endif
-        typename traits_t<T>::signed_t chunk,
-        T nproc, T unit_id);
+                                          typename traits_t<T>::signed_t chunk,
+                                          T nproc, T unit_id);
 template <typename T>
 extern int __kmp_dispatch_next_algorithm(
     int gtid, dispatch_private_info_template<T> *pr,
@@ -66,35 +66,35 @@ void __kmp_dispatch_deo_error(int *gtid_ref, int *cid_ref, ident_t *loc_ref);
 // replaces dispatch_private_info{32,64} structures and
 // dispatch_private_info{32,64}_t types
 template <typename T> struct dispatch_private_infoXX_template {
-    typedef typename traits_t<T>::unsigned_t UT;
-    typedef typename traits_t<T>::signed_t ST;
-    UT count; // unsigned
-    T ub;
-    /* Adding KMP_ALIGN_CACHE here doesn't help / can hurt performance */
-    T lb;
-    ST st; // signed
-    UT tc; // unsigned
-    T static_steal_counter; // for static_steal only; maybe better to put after ub
-    kmp_lock_t *th_steal_lock; // lock used for chunk stealing
-    /* parm[1-4] are used in different ways by different scheduling algorithms */
+  typedef typename traits_t<T>::unsigned_t UT;
+  typedef typename traits_t<T>::signed_t ST;
+  UT count; // unsigned
+  T ub;
+  /* Adding KMP_ALIGN_CACHE here doesn't help / can hurt performance */
+  T lb;
+  ST st; // signed
+  UT tc; // unsigned
+  T static_steal_counter; // for static_steal only; maybe better to put after ub
+  kmp_lock_t *th_steal_lock; // lock used for chunk stealing
+  /* parm[1-4] are used in different ways by different scheduling algorithms */
 
-    // KMP_ALIGN( 32 ) ensures ( if the KMP_ALIGN macro is turned on )
-    //    a) parm3 is properly aligned and
-    //    b) all parm1-4 are in the same cache line.
-    // Because of parm1-4 are used together, performance seems to be better
-    // if they are in the same line (not measured though).
+  // KMP_ALIGN( 32 ) ensures ( if the KMP_ALIGN macro is turned on )
+  //    a) parm3 is properly aligned and
+  //    b) all parm1-4 are in the same cache line.
+  // Because of parm1-4 are used together, performance seems to be better
+  // if they are in the same line (not measured though).
 
-    struct KMP_ALIGN(32) { // compiler does not accept sizeof(T)*4
-        T parm1;
-        T parm2;
-        T parm3;
-        T parm4;
-    };
+  struct KMP_ALIGN(32) { // compiler does not accept sizeof(T)*4
+    T parm1;
+    T parm2;
+    T parm3;
+    T parm4;
+  };
 
-    UT ordered_lower; // unsigned
-    UT ordered_upper; // unsigned
+  UT ordered_lower; // unsigned
+  UT ordered_upper; // unsigned
 #if KMP_OS_WINDOWS
-    T last_upper;
+  T last_upper;
 #endif /* KMP_OS_WINDOWS */
 };
 
@@ -103,89 +103,85 @@ template <typename T> struct dispatch_private_infoXX_template {
 // replaces dispatch_private_info{32,64} structures and
 // dispatch_private_info{32,64}_t types
 template <typename T> struct dispatch_private_infoXX_template {
-    typedef typename traits_t<T>::unsigned_t UT;
-    typedef typename traits_t<T>::signed_t ST;
-    T lb;
-    T ub;
-    ST st; // signed
-    UT tc; // unsigned
+  typedef typename traits_t<T>::unsigned_t UT;
+  typedef typename traits_t<T>::signed_t ST;
+  T lb;
+  T ub;
+  ST st; // signed
+  UT tc; // unsigned
 
-    T parm1;
-    T parm2;
-    T parm3;
-    T parm4;
+  T parm1;
+  T parm2;
+  T parm3;
+  T parm4;
 
-    UT count; // unsigned
+  UT count; // unsigned
 
-    UT ordered_lower; // unsigned
-    UT ordered_upper; // unsigned
+  UT ordered_lower; // unsigned
+  UT ordered_upper; // unsigned
 #if KMP_OS_WINDOWS
-    T last_upper;
+  T last_upper;
 #endif /* KMP_OS_WINDOWS */
 };
 #endif /* KMP_STATIC_STEAL_ENABLED */
 
 template <typename T> struct KMP_ALIGN_CACHE dispatch_private_info_template {
-    // duplicate alignment here, otherwise size of structure is not correct in our
-    // compiler
-    union KMP_ALIGN_CACHE private_info_tmpl {
-        dispatch_private_infoXX_template<T> p;
-        dispatch_private_info64_t p64;
-    } u;
-    enum sched_type schedule; /* scheduling algorithm */
-    kmp_sched_flags_t flags; /* flags (e.g., ordered, nomerge, etc.) */
-    kmp_uint32 ordered_bumped;
-    // to retain the structure size after making order
-    kmp_int32 ordered_dummy[KMP_MAX_ORDERED - 3];
-    dispatch_private_info *next; /* stack of buffers for nest of serial regions */
-    kmp_uint32 type_size;
+  // duplicate alignment here, otherwise size of structure is not correct in our
+  // compiler
+  union KMP_ALIGN_CACHE private_info_tmpl {
+    dispatch_private_infoXX_template<T> p;
+    dispatch_private_info64_t p64;
+  } u;
+  enum sched_type schedule; /* scheduling algorithm */
+  kmp_sched_flags_t flags; /* flags (e.g., ordered, nomerge, etc.) */
+  kmp_uint32 ordered_bumped;
+  // to retain the structure size after making order
+  kmp_int32 ordered_dummy[KMP_MAX_ORDERED - 3];
+  dispatch_private_info *next; /* stack of buffers for nest of serial regions */
+  kmp_uint32 type_size;
 #if KMP_USE_HIER_SCHED
-    kmp_int32 hier_id;
-    kmp_hier_top_unit_t<T> *hier_parent;
-    // member functions
-    kmp_int32 get_hier_id() const {
-        return hier_id;
-    }
-    kmp_hier_top_unit_t<T> *get_parent() {
-        return hier_parent;
-    }
+  kmp_int32 hier_id;
+  kmp_hier_top_unit_t<T> *hier_parent;
+  // member functions
+  kmp_int32 get_hier_id() const { return hier_id; }
+  kmp_hier_top_unit_t<T> *get_parent() { return hier_parent; }
 #endif
-    enum cons_type pushed_ws;
+  enum cons_type pushed_ws;
 };
 
 // replaces dispatch_shared_info{32,64} structures and
 // dispatch_shared_info{32,64}_t types
 template <typename T> struct dispatch_shared_infoXX_template {
-    typedef typename traits_t<T>::unsigned_t UT;
-    /* chunk index under dynamic, number of idle threads under static-steal;
-       iteration index otherwise */
-    volatile UT iteration;
-    volatile UT num_done;
-    volatile UT ordered_iteration;
-    // to retain the structure size making ordered_iteration scalar
-    UT ordered_dummy[KMP_MAX_ORDERED - 3];
+  typedef typename traits_t<T>::unsigned_t UT;
+  /* chunk index under dynamic, number of idle threads under static-steal;
+     iteration index otherwise */
+  volatile UT iteration;
+  volatile UT num_done;
+  volatile UT ordered_iteration;
+  // to retain the structure size making ordered_iteration scalar
+  UT ordered_dummy[KMP_MAX_ORDERED - 3];
 };
 
 // replaces dispatch_shared_info structure and dispatch_shared_info_t type
 template <typename T> struct dispatch_shared_info_template {
-    typedef typename traits_t<T>::unsigned_t UT;
-    // we need union here to keep the structure size
-    union shared_info_tmpl {
-        dispatch_shared_infoXX_template<UT> s;
-        dispatch_shared_info64_t s64;
-    } u;
-    volatile kmp_uint32 buffer_index;
-    volatile kmp_int32 doacross_buf_idx; // teamwise index
-    kmp_uint32 *doacross_flags; // array of iteration flags (0/1)
-    kmp_int32 doacross_num_done; // count finished threads
+  typedef typename traits_t<T>::unsigned_t UT;
+  // we need union here to keep the structure size
+  union shared_info_tmpl {
+    dispatch_shared_infoXX_template<UT> s;
+    dispatch_shared_info64_t s64;
+  } u;
+  volatile kmp_uint32 buffer_index;
+  volatile kmp_int32 doacross_buf_idx; // teamwise index
+  kmp_uint32 *doacross_flags; // array of iteration flags (0/1)
+  kmp_int32 doacross_num_done; // count finished threads
 #if KMP_USE_HIER_SCHED
-    kmp_hier_t<T> *hier;
+  kmp_hier_t<T> *hier;
 #endif
 #if KMP_USE_HWLOC
-    // When linking with libhwloc, the ORDERED EPCC test slowsdown on big
-    // machines (> 48 cores). Performance analysis showed that a cache thrash
-    // was occurring and this padding helps alleviate the problem.
-    char padding[64];
+  // When linking with libhwloc, the ORDERED EPCC test slowsdown on big
+  // machines (> 48 cores). Performance analysis showed that a cache thrash
+  // was occurring and this padding helps alleviate the problem.
+  char padding[64];
 #endif
 };
 
@@ -199,18 +195,18 @@ template <typename T> static __forceinline T test_then_add(volatile T *p, T d);
 
 template <>
 __forceinline kmp_int32 test_then_add<kmp_int32>(volatile kmp_int32 *p,
-        kmp_int32 d) {
-    kmp_int32 r;
-    r = KMP_TEST_THEN_ADD32(p, d);
-    return r;
+                                                 kmp_int32 d) {
+  kmp_int32 r;
+  r = KMP_TEST_THEN_ADD32(p, d);
+  return r;
 }
 
 template <>
 __forceinline kmp_int64 test_then_add<kmp_int64>(volatile kmp_int64 *p,
-        kmp_int64 d) {
-    kmp_int64 r;
-    r = KMP_TEST_THEN_ADD64(p, d);
-    return r;
+                                                 kmp_int64 d) {
+  kmp_int64 r;
+  r = KMP_TEST_THEN_ADD64(p, d);
+  return r;
 }
 
 // test_then_inc_acq template (general template should NOT be used)
@@ -218,16 +214,16 @@ template <typename T> static __forceinline T test_then_inc_acq(volatile T *p);
 
 template <>
 __forceinline kmp_int32 test_then_inc_acq<kmp_int32>(volatile kmp_int32 *p) {
-    kmp_int32 r;
-    r = KMP_TEST_THEN_INC_ACQ32(p);
-    return r;
+  kmp_int32 r;
+  r = KMP_TEST_THEN_INC_ACQ32(p);
+  return r;
 }
 
 template <>
 __forceinline kmp_int64 test_then_inc_acq<kmp_int64>(volatile kmp_int64 *p) {
-    kmp_int64 r;
-    r = KMP_TEST_THEN_INC_ACQ64(p);
-    return r;
+  kmp_int64 r;
+  r = KMP_TEST_THEN_INC_ACQ64(p);
+  return r;
 }
 
 // test_then_inc template (general template should NOT be used)
@@ -235,16 +231,16 @@ template <typename T> static __forceinline T test_then_inc(volatile T *p);
 
 template <>
 __forceinline kmp_int32 test_then_inc<kmp_int32>(volatile kmp_int32 *p) {
-    kmp_int32 r;
-    r = KMP_TEST_THEN_INC32(p);
-    return r;
+  kmp_int32 r;
+  r = KMP_TEST_THEN_INC32(p);
+  return r;
 }
 
 template <>
 __forceinline kmp_int64 test_then_inc<kmp_int64>(volatile kmp_int64 *p) {
-    kmp_int64 r;
-    r = KMP_TEST_THEN_INC64(p);
-    return r;
+  kmp_int64 r;
+  r = KMP_TEST_THEN_INC64(p);
+  return r;
 }
 
 // compare_and_swap template (general template should NOT be used)
@@ -253,21 +249,21 @@ static __forceinline kmp_int32 compare_and_swap(volatile T *p, T c, T s);
 
 template <>
 __forceinline kmp_int32 compare_and_swap<kmp_int32>(volatile kmp_int32 *p,
-        kmp_int32 c, kmp_int32 s) {
-    return KMP_COMPARE_AND_STORE_REL32(p, c, s);
+                                                    kmp_int32 c, kmp_int32 s) {
+  return KMP_COMPARE_AND_STORE_REL32(p, c, s);
 }
 
 template <>
 __forceinline kmp_int32 compare_and_swap<kmp_int64>(volatile kmp_int64 *p,
-        kmp_int64 c, kmp_int64 s) {
-    return KMP_COMPARE_AND_STORE_REL64(p, c, s);
+                                                    kmp_int64 c, kmp_int64 s) {
+  return KMP_COMPARE_AND_STORE_REL64(p, c, s);
 }
 
 template <typename T> kmp_uint32 __kmp_ge(T value, T checker) {
-    return value >= checker;
+  return value >= checker;
 }
 template <typename T> kmp_uint32 __kmp_eq(T value, T checker) {
-    return value == checker;
+  return value == checker;
 }
 
 /*
@@ -292,28 +288,28 @@ template <typename T> kmp_uint32 __kmp_eq(T value, T checker) {
 template <typename UT>
 static UT __kmp_wait(volatile UT *spinner, UT checker,
                      kmp_uint32 (*pred)(UT, UT) USE_ITT_BUILD_ARG(void *obj)) {
-    // note: we may not belong to a team at this point
-    volatile UT *spin = spinner;
-    UT check = checker;
-    kmp_uint32 spins;
-    kmp_uint32 (*f)(UT, UT) = pred;
-    UT r;
+  // note: we may not belong to a team at this point
+  volatile UT *spin = spinner;
+  UT check = checker;
+  kmp_uint32 spins;
+  kmp_uint32 (*f)(UT, UT) = pred;
+  UT r;
 
-    KMP_FSYNC_SPIN_INIT(obj, CCAST(UT *, spin));
-    KMP_INIT_YIELD(spins);
-    // main wait spin loop
-    while (!f(r = *spin, check)) {
-        KMP_FSYNC_SPIN_PREPARE(obj);
-        /* GEH - remove this since it was accidentally introduced when kmp_wait was
-           split.
-           It causes problems with infinite recursion because of exit lock */
-        /* if ( TCR_4(__kmp_global.g.g_done) && __kmp_global.g.g_abort)
-            __kmp_abort_thread(); */
-        // If oversubscribed, or have waited a bit then yield.
-        KMP_YIELD_OVERSUB_ELSE_SPIN(spins);
-    }
-    KMP_FSYNC_SPIN_ACQUIRED(obj);
-    return r;
+  KMP_FSYNC_SPIN_INIT(obj, CCAST(UT *, spin));
+  KMP_INIT_YIELD(spins);
+  // main wait spin loop
+  while (!f(r = *spin, check)) {
+    KMP_FSYNC_SPIN_PREPARE(obj);
+    /* GEH - remove this since it was accidentally introduced when kmp_wait was
+       split.
+       It causes problems with infinite recursion because of exit lock */
+    /* if ( TCR_4(__kmp_global.g.g_done) && __kmp_global.g.g_abort)
+        __kmp_abort_thread(); */
+    // If oversubscribed, or have waited a bit then yield.
+    KMP_YIELD_OVERSUB_ELSE_SPIN(spins);
+  }
+  KMP_FSYNC_SPIN_ACQUIRED(obj);
+  return r;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -321,154 +317,154 @@ static UT __kmp_wait(volatile UT *spinner, UT checker,
 
 template <typename UT>
 void __kmp_dispatch_deo(int *gtid_ref, int *cid_ref, ident_t *loc_ref) {
-    dispatch_private_info_template<UT> *pr;
+  dispatch_private_info_template<UT> *pr;
 
-    int gtid = *gtid_ref;
-    //    int  cid = *cid_ref;
-    kmp_info_t *th = __kmp_threads[gtid];
-    KMP_DEBUG_ASSERT(th->th.th_dispatch);
+  int gtid = *gtid_ref;
+  //    int  cid = *cid_ref;
+  kmp_info_t *th = __kmp_threads[gtid];
+  KMP_DEBUG_ASSERT(th->th.th_dispatch);
 
-    KD_TRACE(100, ("__kmp_dispatch_deo: T#%d called\n", gtid));
-    if (__kmp_env_consistency_check) {
-        pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
-                 th->th.th_dispatch->th_dispatch_pr_current);
-        if (pr->pushed_ws != ct_none) {
+  KD_TRACE(100, ("__kmp_dispatch_deo: T#%d called\n", gtid));
+  if (__kmp_env_consistency_check) {
+    pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
+        th->th.th_dispatch->th_dispatch_pr_current);
+    if (pr->pushed_ws != ct_none) {
 #if KMP_USE_DYNAMIC_LOCK
-            __kmp_push_sync(gtid, ct_ordered_in_pdo, loc_ref, NULL, 0);
+      __kmp_push_sync(gtid, ct_ordered_in_pdo, loc_ref, NULL, 0);
 #else
-            __kmp_push_sync(gtid, ct_ordered_in_pdo, loc_ref, NULL);
+      __kmp_push_sync(gtid, ct_ordered_in_pdo, loc_ref, NULL);
 #endif
-        }
     }
+  }
 
-    if (!th->th.th_team->t.t_serialized) {
-        dispatch_shared_info_template<UT> *sh =
-            reinterpret_cast<dispatch_shared_info_template<UT> *>(
-                th->th.th_dispatch->th_dispatch_sh_current);
-        UT lower;
+  if (!th->th.th_team->t.t_serialized) {
+    dispatch_shared_info_template<UT> *sh =
+        reinterpret_cast<dispatch_shared_info_template<UT> *>(
+            th->th.th_dispatch->th_dispatch_sh_current);
+    UT lower;
 
-        if (!__kmp_env_consistency_check) {
-            pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
-                     th->th.th_dispatch->th_dispatch_pr_current);
-        }
-        lower = pr->u.p.ordered_lower;
+    if (!__kmp_env_consistency_check) {
+      pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
+          th->th.th_dispatch->th_dispatch_pr_current);
+    }
+    lower = pr->u.p.ordered_lower;
 
 #if !defined(KMP_GOMP_COMPAT)
-        if (__kmp_env_consistency_check) {
-            if (pr->ordered_bumped) {
-                struct cons_header *p = __kmp_threads[gtid]->th.th_cons;
-                __kmp_error_construct2(kmp_i18n_msg_CnsMultipleNesting,
-                                       ct_ordered_in_pdo, loc_ref,
-                                       &p->stack_data[p->w_top]);
-            }
-        }
+    if (__kmp_env_consistency_check) {
+      if (pr->ordered_bumped) {
+        struct cons_header *p = __kmp_threads[gtid]->th.th_cons;
+        __kmp_error_construct2(kmp_i18n_msg_CnsMultipleNesting,
+                               ct_ordered_in_pdo, loc_ref,
+                               &p->stack_data[p->w_top]);
+      }
+    }
 #endif /* !defined(KMP_GOMP_COMPAT) */
 
-        KMP_MB();
+    KMP_MB();
 #ifdef KMP_DEBUG
-        {
-            char *buff;
-            // create format specifiers before the debug output
-            buff = __kmp_str_format("__kmp_dispatch_deo: T#%%d before wait: "
-                                    "ordered_iter:%%%s lower:%%%s\n",
-                                    traits_t<UT>::spec, traits_t<UT>::spec);
-            KD_TRACE(1000, (buff, gtid, sh->u.s.ordered_iteration, lower));
-            __kmp_str_free(&buff);
-        }
-#endif
-        __kmp_wait<UT>(&sh->u.s.ordered_iteration, lower,
-                       __kmp_ge<UT> USE_ITT_BUILD_ARG(NULL));
-        KMP_MB(); /* is this necessary? */
-#ifdef KMP_DEBUG
-        {
-            char *buff;
-            // create format specifiers before the debug output
-            buff = __kmp_str_format("__kmp_dispatch_deo: T#%%d after wait: "
-                                    "ordered_iter:%%%s lower:%%%s\n",
-                                    traits_t<UT>::spec, traits_t<UT>::spec);
-            KD_TRACE(1000, (buff, gtid, sh->u.s.ordered_iteration, lower));
-            __kmp_str_free(&buff);
-        }
-#endif
+    {
+      char *buff;
+      // create format specifiers before the debug output
+      buff = __kmp_str_format("__kmp_dispatch_deo: T#%%d before wait: "
+                              "ordered_iter:%%%s lower:%%%s\n",
+                              traits_t<UT>::spec, traits_t<UT>::spec);
+      KD_TRACE(1000, (buff, gtid, sh->u.s.ordered_iteration, lower));
+      __kmp_str_free(&buff);
     }
-    KD_TRACE(100, ("__kmp_dispatch_deo: T#%d returned\n", gtid));
+#endif
+    __kmp_wait<UT>(&sh->u.s.ordered_iteration, lower,
+                   __kmp_ge<UT> USE_ITT_BUILD_ARG(NULL));
+    KMP_MB(); /* is this necessary? */
+#ifdef KMP_DEBUG
+    {
+      char *buff;
+      // create format specifiers before the debug output
+      buff = __kmp_str_format("__kmp_dispatch_deo: T#%%d after wait: "
+                              "ordered_iter:%%%s lower:%%%s\n",
+                              traits_t<UT>::spec, traits_t<UT>::spec);
+      KD_TRACE(1000, (buff, gtid, sh->u.s.ordered_iteration, lower));
+      __kmp_str_free(&buff);
+    }
+#endif
+  }
+  KD_TRACE(100, ("__kmp_dispatch_deo: T#%d returned\n", gtid));
 }
 
 template <typename UT>
 void __kmp_dispatch_dxo(int *gtid_ref, int *cid_ref, ident_t *loc_ref) {
-    typedef typename traits_t<UT>::signed_t ST;
-    dispatch_private_info_template<UT> *pr;
+  typedef typename traits_t<UT>::signed_t ST;
+  dispatch_private_info_template<UT> *pr;
 
-    int gtid = *gtid_ref;
-    //    int  cid = *cid_ref;
-    kmp_info_t *th = __kmp_threads[gtid];
-    KMP_DEBUG_ASSERT(th->th.th_dispatch);
+  int gtid = *gtid_ref;
+  //    int  cid = *cid_ref;
+  kmp_info_t *th = __kmp_threads[gtid];
+  KMP_DEBUG_ASSERT(th->th.th_dispatch);
 
-    KD_TRACE(100, ("__kmp_dispatch_dxo: T#%d called\n", gtid));
-    if (__kmp_env_consistency_check) {
-        pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
-                 th->th.th_dispatch->th_dispatch_pr_current);
-        if (pr->pushed_ws != ct_none) {
-            __kmp_pop_sync(gtid, ct_ordered_in_pdo, loc_ref);
-        }
+  KD_TRACE(100, ("__kmp_dispatch_dxo: T#%d called\n", gtid));
+  if (__kmp_env_consistency_check) {
+    pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
+        th->th.th_dispatch->th_dispatch_pr_current);
+    if (pr->pushed_ws != ct_none) {
+      __kmp_pop_sync(gtid, ct_ordered_in_pdo, loc_ref);
+    }
+  }
+
+  if (!th->th.th_team->t.t_serialized) {
+    dispatch_shared_info_template<UT> *sh =
+        reinterpret_cast<dispatch_shared_info_template<UT> *>(
+            th->th.th_dispatch->th_dispatch_sh_current);
+
+    if (!__kmp_env_consistency_check) {
+      pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
+          th->th.th_dispatch->th_dispatch_pr_current);
     }
 
-    if (!th->th.th_team->t.t_serialized) {
-        dispatch_shared_info_template<UT> *sh =
-            reinterpret_cast<dispatch_shared_info_template<UT> *>(
-                th->th.th_dispatch->th_dispatch_sh_current);
-
-        if (!__kmp_env_consistency_check) {
-            pr = reinterpret_cast<dispatch_private_info_template<UT> *>(
-                     th->th.th_dispatch->th_dispatch_pr_current);
-        }
-
-        KMP_FSYNC_RELEASING(CCAST(UT *, &sh->u.s.ordered_iteration));
+    KMP_FSYNC_RELEASING(CCAST(UT *, &sh->u.s.ordered_iteration));
 #if !defined(KMP_GOMP_COMPAT)
-        if (__kmp_env_consistency_check) {
-            if (pr->ordered_bumped != 0) {
-                struct cons_header *p = __kmp_threads[gtid]->th.th_cons;
-                /* How to test it? - OM */
-                __kmp_error_construct2(kmp_i18n_msg_CnsMultipleNesting,
-                                       ct_ordered_in_pdo, loc_ref,
-                                       &p->stack_data[p->w_top]);
-            }
-        }
+    if (__kmp_env_consistency_check) {
+      if (pr->ordered_bumped != 0) {
+        struct cons_header *p = __kmp_threads[gtid]->th.th_cons;
+        /* How to test it? - OM */
+        __kmp_error_construct2(kmp_i18n_msg_CnsMultipleNesting,
+                               ct_ordered_in_pdo, loc_ref,
+                               &p->stack_data[p->w_top]);
+      }
+    }
 #endif /* !defined(KMP_GOMP_COMPAT) */
 
-        KMP_MB(); /* Flush all pending memory write invalidates.  */
+    KMP_MB(); /* Flush all pending memory write invalidates.  */
 
-        pr->ordered_bumped += 1;
+    pr->ordered_bumped += 1;
 
-        KD_TRACE(1000,
-                 ("__kmp_dispatch_dxo: T#%d bumping ordered ordered_bumped=%d\n",
-                  gtid, pr->ordered_bumped));
+    KD_TRACE(1000,
+             ("__kmp_dispatch_dxo: T#%d bumping ordered ordered_bumped=%d\n",
+              gtid, pr->ordered_bumped));
 
-        KMP_MB(); /* Flush all pending memory write invalidates.  */
+    KMP_MB(); /* Flush all pending memory write invalidates.  */
 
-        /* TODO use general release procedure? */
-        test_then_inc<ST>((volatile ST *)&sh->u.s.ordered_iteration);
+    /* TODO use general release procedure? */
+    test_then_inc<ST>((volatile ST *)&sh->u.s.ordered_iteration);
 
-        KMP_MB(); /* Flush all pending memory write invalidates.  */
-    }
-    KD_TRACE(100, ("__kmp_dispatch_dxo: T#%d returned\n", gtid));
+    KMP_MB(); /* Flush all pending memory write invalidates.  */
+  }
+  KD_TRACE(100, ("__kmp_dispatch_dxo: T#%d returned\n", gtid));
 }
 
 /* Computes and returns x to the power of y, where y must a non-negative integer
  */
 template <typename UT>
 static __forceinline long double __kmp_pow(long double x, UT y) {
-    long double s = 1.0L;
+  long double s = 1.0L;
 
-    KMP_DEBUG_ASSERT(x > 0.0 && x < 1.0);
-    // KMP_DEBUG_ASSERT(y >= 0); // y is unsigned
-    while (y) {
-        if (y & 1)
-            s *= x;
-        x *= x;
-        y >>= 1;
-    }
-    return s;
+  KMP_DEBUG_ASSERT(x > 0.0 && x < 1.0);
+  // KMP_DEBUG_ASSERT(y >= 0); // y is unsigned
+  while (y) {
+    if (y & 1)
+      s *= x;
+    x *= x;
+    y >>= 1;
+  }
+  return s;
 }
 
 /* Computes and returns the number of unassigned iterations after idx chunks
@@ -483,20 +479,20 @@ template <typename T>
 static __inline typename traits_t<T>::unsigned_t
 __kmp_dispatch_guided_remaining(T tc, typename traits_t<T>::floating_t base,
                                 typename traits_t<T>::unsigned_t idx) {
-    /* Note: On Windows* OS on IA-32 architecture and Intel(R) 64, at
-       least for ICL 8.1, long double arithmetic may not really have
-       long double precision, even with /Qlong_double.  Currently, we
-       workaround that in the caller code, by manipulating the FPCW for
-       Windows* OS on IA-32 architecture.  The lack of precision is not
-       expected to be a correctness issue, though.
-    */
-    typedef typename traits_t<T>::unsigned_t UT;
+  /* Note: On Windows* OS on IA-32 architecture and Intel(R) 64, at
+     least for ICL 8.1, long double arithmetic may not really have
+     long double precision, even with /Qlong_double.  Currently, we
+     workaround that in the caller code, by manipulating the FPCW for
+     Windows* OS on IA-32 architecture.  The lack of precision is not
+     expected to be a correctness issue, though.
+  */
+  typedef typename traits_t<T>::unsigned_t UT;
 
-    long double x = tc * __kmp_pow<UT>(base, idx);
-    UT r = (UT)x;
-    if (x == r)
-        return r;
-    return r + 1;
+  long double x = tc * __kmp_pow<UT>(base, idx);
+  UT r = (UT)x;
+  if (x == r)
+    return r;
+  return r + 1;
 }
 
 // Parameters of the guided-iterative algorithm:

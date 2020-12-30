@@ -18,7 +18,7 @@
 using namespace llvm;
 
 void WebAssemblyTargetObjectFile::Initialize(MCContext &Ctx,
-        const TargetMachine &TM) {
-    TargetLoweringObjectFileWasm::Initialize(Ctx, TM);
-    InitializeWasm();
+                                             const TargetMachine &TM) {
+  TargetLoweringObjectFileWasm::Initialize(Ctx, TM);
+  InitializeWasm();
 }

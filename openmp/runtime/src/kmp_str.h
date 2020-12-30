@@ -30,10 +30,10 @@ extern "C" {
 #define TOLOWER(c) ((((c) >= 'A') && ((c) <= 'Z')) ? ((c) + 'a' - 'A') : (c))
 
 struct kmp_str_buf {
-    char *str; // Pointer to buffer content, read only.
-    unsigned int size; // Do not change this field!
-    int used; // Number of characters printed to buffer, read only.
-    char bulk[512]; // Do not use this field!
+  char *str; // Pointer to buffer content, read only.
+  unsigned int size; // Do not change this field!
+  int used; // Number of characters printed to buffer, read only.
+  char bulk[512]; // Do not use this field!
 }; // struct kmp_str_buf
 typedef struct kmp_str_buf kmp_str_buf_t;
 
@@ -65,9 +65,9 @@ void __kmp_str_buf_print_size(kmp_str_buf_t *buffer, size_t size);
    __kmp_str_fname_free( & fname );
 */
 struct kmp_str_fname {
-    char *path;
-    char *dir;
-    char *base;
+  char *path;
+  char *dir;
+  char *base;
 }; // struct kmp_str_fname
 typedef struct kmp_str_fname kmp_str_fname_t;
 void __kmp_str_fname_init(kmp_str_fname_t *fname, char const *path);
@@ -90,12 +90,12 @@ int __kmp_str_fname_match(kmp_str_fname_t const *fname, char const *pattern);
    NULL pointers.
 */
 struct kmp_str_loc {
-    char *_bulk; // Do not use thid field.
-    kmp_str_fname_t fname; // Will be initialized if init_fname is true.
-    char *file;
-    char *func;
-    int line;
-    int col;
+  char *_bulk; // Do not use thid field.
+  kmp_str_fname_t fname; // Will be initialized if init_fname is true.
+  char *file;
+  char *func;
+  int line;
+  int col;
 }; // struct kmp_str_loc
 typedef struct kmp_str_loc kmp_str_loc_t;
 kmp_str_loc_t __kmp_str_loc_init(char const *psource, bool init_fname);

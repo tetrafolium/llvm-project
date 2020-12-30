@@ -24,19 +24,19 @@ class MachOLinkingContext;
 /// has a concrete subclass of Writer.
 class Writer {
 public:
-    virtual ~Writer();
+  virtual ~Writer();
 
-    /// Write a file from the supplied File object
-    virtual llvm::Error writeFile(const File &linkedFile, StringRef path) = 0;
+  /// Write a file from the supplied File object
+  virtual llvm::Error writeFile(const File &linkedFile, StringRef path) = 0;
 
-    /// This method is called by Core Linking to give the Writer a chance
-    /// to add file format specific "files" to set of files to be linked. This is
-    /// how file format specific atoms can be added to the link.
-    virtual void createImplicitFiles(std::vector<std::unique_ptr<File>> &) {}
+  /// This method is called by Core Linking to give the Writer a chance
+  /// to add file format specific "files" to set of files to be linked. This is
+  /// how file format specific atoms can be added to the link.
+  virtual void createImplicitFiles(std::vector<std::unique_ptr<File>> &) {}
 
 protected:
-    // only concrete subclasses can be instantiated
-    Writer();
+  // only concrete subclasses can be instantiated
+  Writer();
 };
 
 std::unique_ptr<Writer> createWriterMachO(const MachOLinkingContext &);

@@ -92,427 +92,415 @@ class UnwindPlan;
 
 class EmulateInstruction : public PluginInterface {
 public:
-    static EmulateInstruction *FindPlugin(const ArchSpec &arch,
-                                          InstructionType supported_inst_type,
-                                          const char *plugin_name);
+  static EmulateInstruction *FindPlugin(const ArchSpec &arch,
+                                        InstructionType supported_inst_type,
+                                        const char *plugin_name);
 
-    enum ContextType {
-        eContextInvalid = 0,
-        // Read an instruction opcode from memory
-        eContextReadOpcode,
+  enum ContextType {
+    eContextInvalid = 0,
+    // Read an instruction opcode from memory
+    eContextReadOpcode,
 
-        // Usually used for writing a register value whose source value is an
-        // immediate
-        eContextImmediate,
+    // Usually used for writing a register value whose source value is an
+    // immediate
+    eContextImmediate,
 
-        // Exclusively used when saving a register to the stack as part of the
-        // prologue
-        eContextPushRegisterOnStack,
+    // Exclusively used when saving a register to the stack as part of the
+    // prologue
+    eContextPushRegisterOnStack,
 
-        // Exclusively used when restoring a register off the stack as part of the
-        // epilogue
-        eContextPopRegisterOffStack,
+    // Exclusively used when restoring a register off the stack as part of the
+    // epilogue
+    eContextPopRegisterOffStack,
 
-        // Add or subtract a value from the stack
-        eContextAdjustStackPointer,
+    // Add or subtract a value from the stack
+    eContextAdjustStackPointer,
 
-        // Adjust the frame pointer for the current frame
-        eContextSetFramePointer,
+    // Adjust the frame pointer for the current frame
+    eContextSetFramePointer,
 
-        // Typically in an epilogue sequence.  Copy the frame pointer back into the
-        // stack pointer, use SP for CFA calculations again.
-        eContextRestoreStackPointer,
+    // Typically in an epilogue sequence.  Copy the frame pointer back into the
+    // stack pointer, use SP for CFA calculations again.
+    eContextRestoreStackPointer,
 
-        // Add or subtract a value from a base address register (other than SP)
-        eContextAdjustBaseRegister,
+    // Add or subtract a value from a base address register (other than SP)
+    eContextAdjustBaseRegister,
 
-        // Add or subtract a value from the PC or store a value to the PC.
-        eContextAdjustPC,
+    // Add or subtract a value from the PC or store a value to the PC.
+    eContextAdjustPC,
 
-        // Used in WriteRegister callbacks to indicate where the
-        eContextRegisterPlusOffset,
+    // Used in WriteRegister callbacks to indicate where the
+    eContextRegisterPlusOffset,
 
-        // Used in WriteMemory callback to indicate where the data came from
-        eContextRegisterStore,
+    // Used in WriteMemory callback to indicate where the data came from
+    eContextRegisterStore,
 
-        eContextRegisterLoad,
+    eContextRegisterLoad,
 
-        // Used when performing a PC-relative branch where the
-        eContextRelativeBranchImmediate,
+    // Used when performing a PC-relative branch where the
+    eContextRelativeBranchImmediate,
 
-        // Used when performing an absolute branch where the
-        eContextAbsoluteBranchRegister,
+    // Used when performing an absolute branch where the
+    eContextAbsoluteBranchRegister,
 
-        // Used when performing a supervisor call to an operating system to provide
-        // a service:
-        eContextSupervisorCall,
+    // Used when performing a supervisor call to an operating system to provide
+    // a service:
+    eContextSupervisorCall,
 
-        // Used when performing a MemU operation to read the PC-relative offset
-        // from an address.
-        eContextTableBranchReadMemory,
+    // Used when performing a MemU operation to read the PC-relative offset
+    // from an address.
+    eContextTableBranchReadMemory,
 
-        // Used when random bits are written into a register
-        eContextWriteRegisterRandomBits,
+    // Used when random bits are written into a register
+    eContextWriteRegisterRandomBits,
 
-        // Used when random bits are written to memory
-        eContextWriteMemoryRandomBits,
+    // Used when random bits are written to memory
+    eContextWriteMemoryRandomBits,
 
-        eContextArithmetic,
+    eContextArithmetic,
 
-        eContextAdvancePC,
+    eContextAdvancePC,
 
-        eContextReturnFromException
-    };
+    eContextReturnFromException
+  };
 
-    enum InfoType {
-        eInfoTypeRegisterPlusOffset,
-        eInfoTypeRegisterPlusIndirectOffset,
-        eInfoTypeRegisterToRegisterPlusOffset,
-        eInfoTypeRegisterToRegisterPlusIndirectOffset,
-        eInfoTypeRegisterRegisterOperands,
-        eInfoTypeOffset,
-        eInfoTypeRegister,
-        eInfoTypeImmediate,
-        eInfoTypeImmediateSigned,
-        eInfoTypeAddress,
-        eInfoTypeISAAndImmediate,
-        eInfoTypeISAAndImmediateSigned,
-        eInfoTypeISA,
-        eInfoTypeNoArgs
-    } InfoType;
+  enum InfoType {
+    eInfoTypeRegisterPlusOffset,
+    eInfoTypeRegisterPlusIndirectOffset,
+    eInfoTypeRegisterToRegisterPlusOffset,
+    eInfoTypeRegisterToRegisterPlusIndirectOffset,
+    eInfoTypeRegisterRegisterOperands,
+    eInfoTypeOffset,
+    eInfoTypeRegister,
+    eInfoTypeImmediate,
+    eInfoTypeImmediateSigned,
+    eInfoTypeAddress,
+    eInfoTypeISAAndImmediate,
+    eInfoTypeISAAndImmediateSigned,
+    eInfoTypeISA,
+    eInfoTypeNoArgs
+  } InfoType;
 
-    struct Context {
-        ContextType type;
-        enum InfoType info_type;
-        union {
-            struct RegisterPlusOffset {
-                RegisterInfo reg;      // base register
-                int64_t signed_offset; // signed offset added to base register
-            } RegisterPlusOffset;
+  struct Context {
+    ContextType type;
+    enum InfoType info_type;
+    union {
+      struct RegisterPlusOffset {
+        RegisterInfo reg;      // base register
+        int64_t signed_offset; // signed offset added to base register
+      } RegisterPlusOffset;
 
-            struct RegisterPlusIndirectOffset {
-                RegisterInfo base_reg;   // base register number
-                RegisterInfo offset_reg; // offset register kind
-            } RegisterPlusIndirectOffset;
+      struct RegisterPlusIndirectOffset {
+        RegisterInfo base_reg;   // base register number
+        RegisterInfo offset_reg; // offset register kind
+      } RegisterPlusIndirectOffset;
 
-            struct RegisterToRegisterPlusOffset {
-                RegisterInfo data_reg; // source/target register for data
-                RegisterInfo base_reg; // base register for address calculation
-                int64_t offset;        // offset for address calculation
-            } RegisterToRegisterPlusOffset;
+      struct RegisterToRegisterPlusOffset {
+        RegisterInfo data_reg; // source/target register for data
+        RegisterInfo base_reg; // base register for address calculation
+        int64_t offset;        // offset for address calculation
+      } RegisterToRegisterPlusOffset;
 
-            struct RegisterToRegisterPlusIndirectOffset {
-                RegisterInfo base_reg;   // base register for address calculation
-                RegisterInfo offset_reg; // offset register for address calculation
-                RegisterInfo data_reg;   // source/target register for data
-            } RegisterToRegisterPlusIndirectOffset;
+      struct RegisterToRegisterPlusIndirectOffset {
+        RegisterInfo base_reg;   // base register for address calculation
+        RegisterInfo offset_reg; // offset register for address calculation
+        RegisterInfo data_reg;   // source/target register for data
+      } RegisterToRegisterPlusIndirectOffset;
 
-            struct RegisterRegisterOperands {
-                RegisterInfo
-                operand1; // register containing first operand for binary op
-                RegisterInfo
-                operand2; // register containing second operand for binary op
-            } RegisterRegisterOperands;
+      struct RegisterRegisterOperands {
+        RegisterInfo
+            operand1; // register containing first operand for binary op
+        RegisterInfo
+            operand2; // register containing second operand for binary op
+      } RegisterRegisterOperands;
 
-            int64_t signed_offset; // signed offset by which to adjust self (for
-            // registers only)
+      int64_t signed_offset; // signed offset by which to adjust self (for
+      // registers only)
 
-            RegisterInfo reg; // plain register
+      RegisterInfo reg; // plain register
 
-            uint64_t unsigned_immediate; // unsigned immediate value
-            int64_t signed_immediate;    // signed immediate value
+      uint64_t unsigned_immediate; // unsigned immediate value
+      int64_t signed_immediate;    // signed immediate value
 
-            lldb::addr_t address; // direct address
+      lldb::addr_t address; // direct address
 
-            struct ISAAndImmediate {
-                uint32_t isa;
-                uint32_t unsigned_data32; // immediate data
-            } ISAAndImmediate;
+      struct ISAAndImmediate {
+        uint32_t isa;
+        uint32_t unsigned_data32; // immediate data
+      } ISAAndImmediate;
 
-            struct ISAAndImmediateSigned {
-                uint32_t isa;
-                int32_t signed_data32; // signed immediate data
-            } ISAAndImmediateSigned;
+      struct ISAAndImmediateSigned {
+        uint32_t isa;
+        int32_t signed_data32; // signed immediate data
+      } ISAAndImmediateSigned;
 
-            uint32_t isa;
-        } info;
+      uint32_t isa;
+    } info;
 
-        Context() : type(eContextInvalid), info_type(eInfoTypeNoArgs) {}
+    Context() : type(eContextInvalid), info_type(eInfoTypeNoArgs) {}
 
-        void SetRegisterPlusOffset(RegisterInfo base_reg, int64_t signed_offset) {
-            info_type = eInfoTypeRegisterPlusOffset;
-            info.RegisterPlusOffset.reg = base_reg;
-            info.RegisterPlusOffset.signed_offset = signed_offset;
-        }
-
-        void SetRegisterPlusIndirectOffset(RegisterInfo base_reg,
-                                           RegisterInfo offset_reg) {
-            info_type = eInfoTypeRegisterPlusIndirectOffset;
-            info.RegisterPlusIndirectOffset.base_reg = base_reg;
-            info.RegisterPlusIndirectOffset.offset_reg = offset_reg;
-        }
-
-        void SetRegisterToRegisterPlusOffset(RegisterInfo data_reg,
-                                             RegisterInfo base_reg,
-                                             int64_t offset) {
-            info_type = eInfoTypeRegisterToRegisterPlusOffset;
-            info.RegisterToRegisterPlusOffset.data_reg = data_reg;
-            info.RegisterToRegisterPlusOffset.base_reg = base_reg;
-            info.RegisterToRegisterPlusOffset.offset = offset;
-        }
-
-        void SetRegisterToRegisterPlusIndirectOffset(RegisterInfo base_reg,
-                RegisterInfo offset_reg,
-                RegisterInfo data_reg) {
-            info_type = eInfoTypeRegisterToRegisterPlusIndirectOffset;
-            info.RegisterToRegisterPlusIndirectOffset.base_reg = base_reg;
-            info.RegisterToRegisterPlusIndirectOffset.offset_reg = offset_reg;
-            info.RegisterToRegisterPlusIndirectOffset.data_reg = data_reg;
-        }
-
-        void SetRegisterRegisterOperands(RegisterInfo op1_reg,
-                                         RegisterInfo op2_reg) {
-            info_type = eInfoTypeRegisterRegisterOperands;
-            info.RegisterRegisterOperands.operand1 = op1_reg;
-            info.RegisterRegisterOperands.operand2 = op2_reg;
-        }
-
-        void SetOffset(int64_t signed_offset) {
-            info_type = eInfoTypeOffset;
-            info.signed_offset = signed_offset;
-        }
-
-        void SetRegister(RegisterInfo reg) {
-            info_type = eInfoTypeRegister;
-            info.reg = reg;
-        }
-
-        void SetImmediate(uint64_t immediate) {
-            info_type = eInfoTypeImmediate;
-            info.unsigned_immediate = immediate;
-        }
-
-        void SetImmediateSigned(int64_t signed_immediate) {
-            info_type = eInfoTypeImmediateSigned;
-            info.signed_immediate = signed_immediate;
-        }
-
-        void SetAddress(lldb::addr_t address) {
-            info_type = eInfoTypeAddress;
-            info.address = address;
-        }
-        void SetISAAndImmediate(uint32_t isa, uint32_t data) {
-            info_type = eInfoTypeISAAndImmediate;
-            info.ISAAndImmediate.isa = isa;
-            info.ISAAndImmediate.unsigned_data32 = data;
-        }
-
-        void SetISAAndImmediateSigned(uint32_t isa, int32_t data) {
-            info_type = eInfoTypeISAAndImmediateSigned;
-            info.ISAAndImmediateSigned.isa = isa;
-            info.ISAAndImmediateSigned.signed_data32 = data;
-        }
-
-        void SetISA(uint32_t isa) {
-            info_type = eInfoTypeISA;
-            info.isa = isa;
-        }
-
-        void SetNoArgs() {
-            info_type = eInfoTypeNoArgs;
-        }
-
-        void Dump(Stream &s, EmulateInstruction *instruction) const;
-    };
-
-    typedef size_t (*ReadMemoryCallback)(EmulateInstruction *instruction,
-                                         void *baton, const Context &context,
-                                         lldb::addr_t addr, void *dst,
-                                         size_t length);
-
-    typedef size_t (*WriteMemoryCallback)(EmulateInstruction *instruction,
-                                          void *baton, const Context &context,
-                                          lldb::addr_t addr, const void *dst,
-                                          size_t length);
-
-    typedef bool (*ReadRegisterCallback)(EmulateInstruction *instruction,
-                                         void *baton,
-                                         const RegisterInfo *reg_info,
-                                         RegisterValue &reg_value);
-
-    typedef bool (*WriteRegisterCallback)(EmulateInstruction *instruction,
-                                          void *baton, const Context &context,
-                                          const RegisterInfo *reg_info,
-                                          const RegisterValue &reg_value);
-
-    // Type to represent the condition of an instruction. The UINT32 value is
-    // reserved for the unconditional case and all other value can be used in an
-    // architecture dependent way.
-    typedef uint32_t InstructionCondition;
-    static const InstructionCondition UnconditionalCondition = UINT32_MAX;
-
-    EmulateInstruction(const ArchSpec &arch);
-
-    ~EmulateInstruction() override = default;
-
-    // Mandatory overrides
-    virtual bool
-    SupportsEmulatingInstructionsOfType(InstructionType inst_type) = 0;
-
-    virtual bool SetTargetTriple(const ArchSpec &arch) = 0;
-
-    virtual bool ReadInstruction() = 0;
-
-    virtual bool EvaluateInstruction(uint32_t evaluate_options) = 0;
-
-    virtual InstructionCondition GetInstructionCondition() {
-        return UnconditionalCondition;
+    void SetRegisterPlusOffset(RegisterInfo base_reg, int64_t signed_offset) {
+      info_type = eInfoTypeRegisterPlusOffset;
+      info.RegisterPlusOffset.reg = base_reg;
+      info.RegisterPlusOffset.signed_offset = signed_offset;
     }
 
-    virtual bool TestEmulation(Stream *out_stream, ArchSpec &arch,
-                               OptionValueDictionary *test_data) = 0;
-
-    virtual bool GetRegisterInfo(lldb::RegisterKind reg_kind, uint32_t reg_num,
-                                 RegisterInfo &reg_info) = 0;
-
-    // Optional overrides
-    virtual bool SetInstruction(const Opcode &insn_opcode,
-                                const Address &inst_addr, Target *target);
-
-    virtual bool CreateFunctionEntryUnwind(UnwindPlan &unwind_plan);
-
-    static const char *TranslateRegister(lldb::RegisterKind reg_kind,
-                                         uint32_t reg_num, std::string &reg_name);
-
-    // RegisterInfo variants
-    bool ReadRegister(const RegisterInfo *reg_info, RegisterValue &reg_value);
-
-    uint64_t ReadRegisterUnsigned(const RegisterInfo *reg_info,
-                                  uint64_t fail_value, bool *success_ptr);
-
-    bool WriteRegister(const Context &context, const RegisterInfo *ref_info,
-                       const RegisterValue &reg_value);
-
-    bool WriteRegisterUnsigned(const Context &context,
-                               const RegisterInfo *reg_info, uint64_t reg_value);
-
-    // Register kind and number variants
-    bool ReadRegister(lldb::RegisterKind reg_kind, uint32_t reg_num,
-                      RegisterValue &reg_value);
-
-    bool WriteRegister(const Context &context, lldb::RegisterKind reg_kind,
-                       uint32_t reg_num, const RegisterValue &reg_value);
-
-    uint64_t ReadRegisterUnsigned(lldb::RegisterKind reg_kind, uint32_t reg_num,
-                                  uint64_t fail_value, bool *success_ptr);
-
-    bool WriteRegisterUnsigned(const Context &context,
-                               lldb::RegisterKind reg_kind, uint32_t reg_num,
-                               uint64_t reg_value);
-
-    size_t ReadMemory(const Context &context, lldb::addr_t addr, void *dst,
-                      size_t dst_len);
-
-    uint64_t ReadMemoryUnsigned(const Context &context, lldb::addr_t addr,
-                                size_t byte_size, uint64_t fail_value,
-                                bool *success_ptr);
-
-    bool WriteMemory(const Context &context, lldb::addr_t addr, const void *src,
-                     size_t src_len);
-
-    bool WriteMemoryUnsigned(const Context &context, lldb::addr_t addr,
-                             uint64_t uval, size_t uval_byte_size);
-
-    uint32_t GetAddressByteSize() const {
-        return m_arch.GetAddressByteSize();
+    void SetRegisterPlusIndirectOffset(RegisterInfo base_reg,
+                                       RegisterInfo offset_reg) {
+      info_type = eInfoTypeRegisterPlusIndirectOffset;
+      info.RegisterPlusIndirectOffset.base_reg = base_reg;
+      info.RegisterPlusIndirectOffset.offset_reg = offset_reg;
     }
 
-    lldb::ByteOrder GetByteOrder() const {
-        return m_arch.GetByteOrder();
+    void SetRegisterToRegisterPlusOffset(RegisterInfo data_reg,
+                                         RegisterInfo base_reg,
+                                         int64_t offset) {
+      info_type = eInfoTypeRegisterToRegisterPlusOffset;
+      info.RegisterToRegisterPlusOffset.data_reg = data_reg;
+      info.RegisterToRegisterPlusOffset.base_reg = base_reg;
+      info.RegisterToRegisterPlusOffset.offset = offset;
     }
 
-    const Opcode &GetOpcode() const {
-        return m_opcode;
+    void SetRegisterToRegisterPlusIndirectOffset(RegisterInfo base_reg,
+                                                 RegisterInfo offset_reg,
+                                                 RegisterInfo data_reg) {
+      info_type = eInfoTypeRegisterToRegisterPlusIndirectOffset;
+      info.RegisterToRegisterPlusIndirectOffset.base_reg = base_reg;
+      info.RegisterToRegisterPlusIndirectOffset.offset_reg = offset_reg;
+      info.RegisterToRegisterPlusIndirectOffset.data_reg = data_reg;
     }
 
-    lldb::addr_t GetAddress() const {
-        return m_addr;
+    void SetRegisterRegisterOperands(RegisterInfo op1_reg,
+                                     RegisterInfo op2_reg) {
+      info_type = eInfoTypeRegisterRegisterOperands;
+      info.RegisterRegisterOperands.operand1 = op1_reg;
+      info.RegisterRegisterOperands.operand2 = op2_reg;
     }
 
-    const ArchSpec &GetArchitecture() const {
-        return m_arch;
+    void SetOffset(int64_t signed_offset) {
+      info_type = eInfoTypeOffset;
+      info.signed_offset = signed_offset;
     }
 
-    static size_t ReadMemoryFrame(EmulateInstruction *instruction, void *baton,
+    void SetRegister(RegisterInfo reg) {
+      info_type = eInfoTypeRegister;
+      info.reg = reg;
+    }
+
+    void SetImmediate(uint64_t immediate) {
+      info_type = eInfoTypeImmediate;
+      info.unsigned_immediate = immediate;
+    }
+
+    void SetImmediateSigned(int64_t signed_immediate) {
+      info_type = eInfoTypeImmediateSigned;
+      info.signed_immediate = signed_immediate;
+    }
+
+    void SetAddress(lldb::addr_t address) {
+      info_type = eInfoTypeAddress;
+      info.address = address;
+    }
+    void SetISAAndImmediate(uint32_t isa, uint32_t data) {
+      info_type = eInfoTypeISAAndImmediate;
+      info.ISAAndImmediate.isa = isa;
+      info.ISAAndImmediate.unsigned_data32 = data;
+    }
+
+    void SetISAAndImmediateSigned(uint32_t isa, int32_t data) {
+      info_type = eInfoTypeISAAndImmediateSigned;
+      info.ISAAndImmediateSigned.isa = isa;
+      info.ISAAndImmediateSigned.signed_data32 = data;
+    }
+
+    void SetISA(uint32_t isa) {
+      info_type = eInfoTypeISA;
+      info.isa = isa;
+    }
+
+    void SetNoArgs() { info_type = eInfoTypeNoArgs; }
+
+    void Dump(Stream &s, EmulateInstruction *instruction) const;
+  };
+
+  typedef size_t (*ReadMemoryCallback)(EmulateInstruction *instruction,
+                                       void *baton, const Context &context,
+                                       lldb::addr_t addr, void *dst,
+                                       size_t length);
+
+  typedef size_t (*WriteMemoryCallback)(EmulateInstruction *instruction,
+                                        void *baton, const Context &context,
+                                        lldb::addr_t addr, const void *dst,
+                                        size_t length);
+
+  typedef bool (*ReadRegisterCallback)(EmulateInstruction *instruction,
+                                       void *baton,
+                                       const RegisterInfo *reg_info,
+                                       RegisterValue &reg_value);
+
+  typedef bool (*WriteRegisterCallback)(EmulateInstruction *instruction,
+                                        void *baton, const Context &context,
+                                        const RegisterInfo *reg_info,
+                                        const RegisterValue &reg_value);
+
+  // Type to represent the condition of an instruction. The UINT32 value is
+  // reserved for the unconditional case and all other value can be used in an
+  // architecture dependent way.
+  typedef uint32_t InstructionCondition;
+  static const InstructionCondition UnconditionalCondition = UINT32_MAX;
+
+  EmulateInstruction(const ArchSpec &arch);
+
+  ~EmulateInstruction() override = default;
+
+  // Mandatory overrides
+  virtual bool
+  SupportsEmulatingInstructionsOfType(InstructionType inst_type) = 0;
+
+  virtual bool SetTargetTriple(const ArchSpec &arch) = 0;
+
+  virtual bool ReadInstruction() = 0;
+
+  virtual bool EvaluateInstruction(uint32_t evaluate_options) = 0;
+
+  virtual InstructionCondition GetInstructionCondition() {
+    return UnconditionalCondition;
+  }
+
+  virtual bool TestEmulation(Stream *out_stream, ArchSpec &arch,
+                             OptionValueDictionary *test_data) = 0;
+
+  virtual bool GetRegisterInfo(lldb::RegisterKind reg_kind, uint32_t reg_num,
+                               RegisterInfo &reg_info) = 0;
+
+  // Optional overrides
+  virtual bool SetInstruction(const Opcode &insn_opcode,
+                              const Address &inst_addr, Target *target);
+
+  virtual bool CreateFunctionEntryUnwind(UnwindPlan &unwind_plan);
+
+  static const char *TranslateRegister(lldb::RegisterKind reg_kind,
+                                       uint32_t reg_num, std::string &reg_name);
+
+  // RegisterInfo variants
+  bool ReadRegister(const RegisterInfo *reg_info, RegisterValue &reg_value);
+
+  uint64_t ReadRegisterUnsigned(const RegisterInfo *reg_info,
+                                uint64_t fail_value, bool *success_ptr);
+
+  bool WriteRegister(const Context &context, const RegisterInfo *ref_info,
+                     const RegisterValue &reg_value);
+
+  bool WriteRegisterUnsigned(const Context &context,
+                             const RegisterInfo *reg_info, uint64_t reg_value);
+
+  // Register kind and number variants
+  bool ReadRegister(lldb::RegisterKind reg_kind, uint32_t reg_num,
+                    RegisterValue &reg_value);
+
+  bool WriteRegister(const Context &context, lldb::RegisterKind reg_kind,
+                     uint32_t reg_num, const RegisterValue &reg_value);
+
+  uint64_t ReadRegisterUnsigned(lldb::RegisterKind reg_kind, uint32_t reg_num,
+                                uint64_t fail_value, bool *success_ptr);
+
+  bool WriteRegisterUnsigned(const Context &context,
+                             lldb::RegisterKind reg_kind, uint32_t reg_num,
+                             uint64_t reg_value);
+
+  size_t ReadMemory(const Context &context, lldb::addr_t addr, void *dst,
+                    size_t dst_len);
+
+  uint64_t ReadMemoryUnsigned(const Context &context, lldb::addr_t addr,
+                              size_t byte_size, uint64_t fail_value,
+                              bool *success_ptr);
+
+  bool WriteMemory(const Context &context, lldb::addr_t addr, const void *src,
+                   size_t src_len);
+
+  bool WriteMemoryUnsigned(const Context &context, lldb::addr_t addr,
+                           uint64_t uval, size_t uval_byte_size);
+
+  uint32_t GetAddressByteSize() const { return m_arch.GetAddressByteSize(); }
+
+  lldb::ByteOrder GetByteOrder() const { return m_arch.GetByteOrder(); }
+
+  const Opcode &GetOpcode() const { return m_opcode; }
+
+  lldb::addr_t GetAddress() const { return m_addr; }
+
+  const ArchSpec &GetArchitecture() const { return m_arch; }
+
+  static size_t ReadMemoryFrame(EmulateInstruction *instruction, void *baton,
+                                const Context &context, lldb::addr_t addr,
+                                void *dst, size_t length);
+
+  static size_t WriteMemoryFrame(EmulateInstruction *instruction, void *baton,
+                                 const Context &context, lldb::addr_t addr,
+                                 const void *dst, size_t length);
+
+  static bool ReadRegisterFrame(EmulateInstruction *instruction, void *baton,
+                                const RegisterInfo *reg_info,
+                                RegisterValue &reg_value);
+
+  static bool WriteRegisterFrame(EmulateInstruction *instruction, void *baton,
+                                 const Context &context,
+                                 const RegisterInfo *reg_info,
+                                 const RegisterValue &reg_value);
+
+  static size_t ReadMemoryDefault(EmulateInstruction *instruction, void *baton,
                                   const Context &context, lldb::addr_t addr,
                                   void *dst, size_t length);
 
-    static size_t WriteMemoryFrame(EmulateInstruction *instruction, void *baton,
+  static size_t WriteMemoryDefault(EmulateInstruction *instruction, void *baton,
                                    const Context &context, lldb::addr_t addr,
                                    const void *dst, size_t length);
 
-    static bool ReadRegisterFrame(EmulateInstruction *instruction, void *baton,
+  static bool ReadRegisterDefault(EmulateInstruction *instruction, void *baton,
                                   const RegisterInfo *reg_info,
                                   RegisterValue &reg_value);
 
-    static bool WriteRegisterFrame(EmulateInstruction *instruction, void *baton,
+  static bool WriteRegisterDefault(EmulateInstruction *instruction, void *baton,
                                    const Context &context,
                                    const RegisterInfo *reg_info,
                                    const RegisterValue &reg_value);
 
-    static size_t ReadMemoryDefault(EmulateInstruction *instruction, void *baton,
-                                    const Context &context, lldb::addr_t addr,
-                                    void *dst, size_t length);
+  void SetBaton(void *baton);
 
-    static size_t WriteMemoryDefault(EmulateInstruction *instruction, void *baton,
-                                     const Context &context, lldb::addr_t addr,
-                                     const void *dst, size_t length);
+  void SetCallbacks(ReadMemoryCallback read_mem_callback,
+                    WriteMemoryCallback write_mem_callback,
+                    ReadRegisterCallback read_reg_callback,
+                    WriteRegisterCallback write_reg_callback);
 
-    static bool ReadRegisterDefault(EmulateInstruction *instruction, void *baton,
-                                    const RegisterInfo *reg_info,
-                                    RegisterValue &reg_value);
+  void SetReadMemCallback(ReadMemoryCallback read_mem_callback);
 
-    static bool WriteRegisterDefault(EmulateInstruction *instruction, void *baton,
-                                     const Context &context,
-                                     const RegisterInfo *reg_info,
-                                     const RegisterValue &reg_value);
+  void SetWriteMemCallback(WriteMemoryCallback write_mem_callback);
 
-    void SetBaton(void *baton);
+  void SetReadRegCallback(ReadRegisterCallback read_reg_callback);
 
-    void SetCallbacks(ReadMemoryCallback read_mem_callback,
-                      WriteMemoryCallback write_mem_callback,
-                      ReadRegisterCallback read_reg_callback,
-                      WriteRegisterCallback write_reg_callback);
+  void SetWriteRegCallback(WriteRegisterCallback write_reg_callback);
 
-    void SetReadMemCallback(ReadMemoryCallback read_mem_callback);
+  static bool GetBestRegisterKindAndNumber(const RegisterInfo *reg_info,
+                                           lldb::RegisterKind &reg_kind,
+                                           uint32_t &reg_num);
 
-    void SetWriteMemCallback(WriteMemoryCallback write_mem_callback);
-
-    void SetReadRegCallback(ReadRegisterCallback read_reg_callback);
-
-    void SetWriteRegCallback(WriteRegisterCallback write_reg_callback);
-
-    static bool GetBestRegisterKindAndNumber(const RegisterInfo *reg_info,
-            lldb::RegisterKind &reg_kind,
-            uint32_t &reg_num);
-
-    static uint32_t GetInternalRegisterNumber(RegisterContext *reg_ctx,
-            const RegisterInfo &reg_info);
+  static uint32_t GetInternalRegisterNumber(RegisterContext *reg_ctx,
+                                            const RegisterInfo &reg_info);
 
 protected:
-    ArchSpec m_arch;
-    void *m_baton = nullptr;
-    ReadMemoryCallback m_read_mem_callback = &ReadMemoryDefault;
-    WriteMemoryCallback m_write_mem_callback = &WriteMemoryDefault;
-    ReadRegisterCallback m_read_reg_callback = &ReadRegisterDefault;
-    WriteRegisterCallback m_write_reg_callback = &WriteRegisterDefault;
-    lldb::addr_t m_addr = LLDB_INVALID_ADDRESS;
-    Opcode m_opcode;
+  ArchSpec m_arch;
+  void *m_baton = nullptr;
+  ReadMemoryCallback m_read_mem_callback = &ReadMemoryDefault;
+  WriteMemoryCallback m_write_mem_callback = &WriteMemoryDefault;
+  ReadRegisterCallback m_read_reg_callback = &ReadRegisterDefault;
+  WriteRegisterCallback m_write_reg_callback = &WriteRegisterDefault;
+  lldb::addr_t m_addr = LLDB_INVALID_ADDRESS;
+  Opcode m_opcode;
 
 private:
-    // For EmulateInstruction only
-    EmulateInstruction(const EmulateInstruction &) = delete;
-    const EmulateInstruction &operator=(const EmulateInstruction &) = delete;
+  // For EmulateInstruction only
+  EmulateInstruction(const EmulateInstruction &) = delete;
+  const EmulateInstruction &operator=(const EmulateInstruction &) = delete;
 };
 
 } // namespace lldb_private

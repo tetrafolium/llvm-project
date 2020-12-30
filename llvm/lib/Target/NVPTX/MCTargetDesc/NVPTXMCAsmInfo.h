@@ -19,22 +19,22 @@ namespace llvm {
 class Triple;
 
 class NVPTXMCAsmInfo : public MCAsmInfo {
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    explicit NVPTXMCAsmInfo(const Triple &TheTriple,
-                            const MCTargetOptions &Options);
+  explicit NVPTXMCAsmInfo(const Triple &TheTriple,
+                          const MCTargetOptions &Options);
 
-    /// Return true if the .section directive should be omitted when
-    /// emitting \p SectionName.  For example:
-    ///
-    /// shouldOmitSectionDirective(".text")
-    ///
-    /// returns false => .section .text,#alloc,#execinstr
-    /// returns true  => .text
-    bool shouldOmitSectionDirective(StringRef SectionName) const override {
-        return true;
-    }
+  /// Return true if the .section directive should be omitted when
+  /// emitting \p SectionName.  For example:
+  ///
+  /// shouldOmitSectionDirective(".text")
+  ///
+  /// returns false => .section .text,#alloc,#execinstr
+  /// returns true  => .text
+  bool shouldOmitSectionDirective(StringRef SectionName) const override {
+    return true;
+  }
 };
 } // namespace llvm
 

@@ -25,23 +25,21 @@ SymbolStream::SymbolStream(std::unique_ptr<MappedBlockStream> Stream)
 SymbolStream::~SymbolStream() {}
 
 Error SymbolStream::reload() {
-    BinaryStreamReader Reader(*Stream);
+  BinaryStreamReader Reader(*Stream);
 
-    if (auto EC = Reader.readArray(SymbolRecords, Stream->getLength()))
-        return EC;
+  if (auto EC = Reader.readArray(SymbolRecords, Stream->getLength()))
+    return EC;
 
-    return Error::success();
+  return Error::success();
 }
 
 iterator_range<codeview::CVSymbolArray::Iterator>
 SymbolStream::getSymbols(bool *HadError) const {
-    return llvm::make_range(SymbolRecords.begin(HadError), SymbolRecords.end());
+  return llvm::make_range(SymbolRecords.begin(HadError), SymbolRecords.end());
 }
 
-Error SymbolStream::commit() {
-    return Error::success();
-}
+Error SymbolStream::commit() { return Error::success(); }
 
 codeview::CVSymbol SymbolStream::readRecord(uint32_t Offset) const {
-    return *SymbolRecords.at(Offset);
+  return *SymbolRecords.at(Offset);
 }

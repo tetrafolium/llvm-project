@@ -32,16 +32,16 @@
 #define MAX_NUM_KERNELS (1024 * 16)
 
 typedef struct atmi_implicit_args_s {
-    unsigned long offset_x;
-    unsigned long offset_y;
-    unsigned long offset_z;
-    unsigned long hostcall_ptr;
-    char num_gpu_queues;
-    unsigned long gpu_queue_ptr;
-    char num_cpu_queues;
-    unsigned long cpu_worker_signals;
-    unsigned long cpu_queue_ptr;
-    unsigned long kernarg_template_ptr;
+  unsigned long offset_x;
+  unsigned long offset_y;
+  unsigned long offset_z;
+  unsigned long hostcall_ptr;
+  char num_gpu_queues;
+  unsigned long gpu_queue_ptr;
+  char num_cpu_queues;
+  unsigned long cpu_worker_signals;
+  unsigned long cpu_queue_ptr;
+  unsigned long kernarg_template_ptr;
 } atmi_implicit_args_t;
 
 #ifdef __cplusplus
@@ -67,16 +67,16 @@ extern "C" {
 
 #ifndef HSA_RUNTIME_INC_HSA_H_
 typedef struct hsa_signal_s {
-    uint64_t handle;
+  uint64_t handle;
 } hsa_signal_t;
 #endif
 
 /*  All global values go in this global structure */
 typedef struct atl_context_s {
-    bool struct_initialized;
-    bool g_hsa_initialized;
-    bool g_gpu_initialized;
-    bool g_tasks_initialized;
+  bool struct_initialized;
+  bool g_hsa_initialized;
+  bool g_gpu_initialized;
+  bool g_tasks_initialized;
 } atl_context_t;
 extern atl_context_t atlc;
 extern atl_context_t *atlc_p;
@@ -94,19 +94,19 @@ extern atl_context_t *atlc_p;
 
 // ---------------------- Kernel Start -------------
 typedef struct atl_kernel_info_s {
-    uint64_t kernel_object;
-    uint32_t group_segment_size;
-    uint32_t private_segment_size;
-    uint32_t kernel_segment_size;
-    uint32_t num_args;
-    std::vector<uint64_t> arg_alignments;
-    std::vector<uint64_t> arg_offsets;
-    std::vector<uint64_t> arg_sizes;
+  uint64_t kernel_object;
+  uint32_t group_segment_size;
+  uint32_t private_segment_size;
+  uint32_t kernel_segment_size;
+  uint32_t num_args;
+  std::vector<uint64_t> arg_alignments;
+  std::vector<uint64_t> arg_offsets;
+  std::vector<uint64_t> arg_sizes;
 } atl_kernel_info_t;
 
 typedef struct atl_symbol_info_s {
-    uint64_t addr;
-    uint32_t size;
+  uint64_t addr;
+  uint32_t size;
 } atl_symbol_info_t;
 
 extern std::vector<std::map<std::string, atl_kernel_info_t>> KernelInfoTable;
@@ -124,73 +124,69 @@ class KernelImpl;
 } // namespace core
 
 struct SignalPoolT {
-    SignalPoolT() {
-        // If no signals are created, and none can be created later,
-        // will ultimately fail at pop()
+  SignalPoolT() {
+    // If no signals are created, and none can be created later,
+    // will ultimately fail at pop()
 
-        unsigned N = 1024; // default max pool size from atmi
-        for (unsigned i = 0; i < N; i++) {
-            hsa_signal_t new_signal;
-            hsa_status_t err = hsa_signal_create(0, 0, NULL, &new_signal);
-            if (err != HSA_STATUS_SUCCESS) {
-                break;
-            }
-            state.push(new_signal);
-        }
-        DEBUG_PRINT("Signal Pool Initial Size: %lu\n", state.size());
+    unsigned N = 1024; // default max pool size from atmi
+    for (unsigned i = 0; i < N; i++) {
+      hsa_signal_t new_signal;
+      hsa_status_t err = hsa_signal_create(0, 0, NULL, &new_signal);
+      if (err != HSA_STATUS_SUCCESS) {
+        break;
+      }
+      state.push(new_signal);
     }
-    SignalPoolT(const SignalPoolT &) = delete;
-    SignalPoolT(SignalPoolT &&) = delete;
-    ~SignalPoolT() {
-        size_t N = state.size();
-        for (size_t i = 0; i < N; i++) {
-            hsa_signal_t signal = state.front();
-            state.pop();
-            hsa_status_t rc = hsa_signal_destroy(signal);
-            if (rc != HSA_STATUS_SUCCESS) {
-                DEBUG_PRINT("Signal pool destruction failed\n");
-            }
-        }
+    DEBUG_PRINT("Signal Pool Initial Size: %lu\n", state.size());
+  }
+  SignalPoolT(const SignalPoolT &) = delete;
+  SignalPoolT(SignalPoolT &&) = delete;
+  ~SignalPoolT() {
+    size_t N = state.size();
+    for (size_t i = 0; i < N; i++) {
+      hsa_signal_t signal = state.front();
+      state.pop();
+      hsa_status_t rc = hsa_signal_destroy(signal);
+      if (rc != HSA_STATUS_SUCCESS) {
+        DEBUG_PRINT("Signal pool destruction failed\n");
+      }
     }
-    size_t size() {
-        lock l(&mutex);
-        return state.size();
+  }
+  size_t size() {
+    lock l(&mutex);
+    return state.size();
+  }
+  void push(hsa_signal_t s) {
+    lock l(&mutex);
+    state.push(s);
+  }
+  hsa_signal_t pop(void) {
+    lock l(&mutex);
+    if (!state.empty()) {
+      hsa_signal_t res = state.front();
+      state.pop();
+      return res;
     }
-    void push(hsa_signal_t s) {
-        lock l(&mutex);
-        state.push(s);
-    }
-    hsa_signal_t pop(void) {
-        lock l(&mutex);
-        if (!state.empty()) {
-            hsa_signal_t res = state.front();
-            state.pop();
-            return res;
-        }
 
-        // Pool empty, attempt to create another signal
-        hsa_signal_t new_signal;
-        hsa_status_t err = hsa_signal_create(0, 0, NULL, &new_signal);
-        if (err == HSA_STATUS_SUCCESS) {
-            return new_signal;
-        }
-
-        // Fail
-        return {0};
+    // Pool empty, attempt to create another signal
+    hsa_signal_t new_signal;
+    hsa_status_t err = hsa_signal_create(0, 0, NULL, &new_signal);
+    if (err == HSA_STATUS_SUCCESS) {
+      return new_signal;
     }
+
+    // Fail
+    return {0};
+  }
 
 private:
-    static pthread_mutex_t mutex;
-    std::queue<hsa_signal_t> state;
-    struct lock {
-        lock(pthread_mutex_t *m) : m(m) {
-            pthread_mutex_lock(m);
-        }
-        ~lock() {
-            pthread_mutex_unlock(m);
-        }
-        pthread_mutex_t *m;
-    };
+  static pthread_mutex_t mutex;
+  std::queue<hsa_signal_t> state;
+  struct lock {
+    lock(pthread_mutex_t *m) : m(m) { pthread_mutex_lock(m); }
+    ~lock() { pthread_mutex_unlock(m); }
+    pthread_mutex_t *m;
+  };
 };
 
 extern std::vector<hsa_amd_memory_pool_t> atl_gpu_kernarg_pools;
@@ -204,20 +200,20 @@ hsa_status_t finalize_hsa();
  * Generic utils
  */
 template <typename T> inline T alignDown(T value, size_t alignment) {
-    return (T)(value & ~(alignment - 1));
+  return (T)(value & ~(alignment - 1));
 }
 
 template <typename T> inline T *alignDown(T *value, size_t alignment) {
-    return reinterpret_cast<T *>(alignDown((intptr_t)value, alignment));
+  return reinterpret_cast<T *>(alignDown((intptr_t)value, alignment));
 }
 
 template <typename T> inline T alignUp(T value, size_t alignment) {
-    return alignDown((T)(value + alignment - 1), alignment);
+  return alignDown((T)(value + alignment - 1), alignment);
 }
 
 template <typename T> inline T *alignUp(T *value, size_t alignment) {
-    return reinterpret_cast<T *>(
-               alignDown((intptr_t)(value + alignment - 1), alignment));
+  return reinterpret_cast<T *>(
+      alignDown((intptr_t)(value + alignment - 1), alignment));
 }
 
 extern void register_allocation(void *addr, size_t size,

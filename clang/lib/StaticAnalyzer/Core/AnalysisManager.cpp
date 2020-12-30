@@ -11,7 +11,7 @@
 using namespace clang;
 using namespace ento;
 
-void AnalysisManager::anchor() { }
+void AnalysisManager::anchor() {}
 
 AnalysisManager::AnalysisManager(ASTContext &ASTCtx, Preprocessor &PP,
                                  const PathDiagnosticConsumers &PDC,
@@ -23,44 +23,40 @@ AnalysisManager::AnalysisManager(ASTContext &ASTCtx, Preprocessor &PP,
     : AnaCtxMgr(
           ASTCtx, Options.UnoptimizedCFG,
           Options.ShouldIncludeImplicitDtorsInCFG,
-          /*addInitializers=*/true,
-          Options.ShouldIncludeTemporaryDtorsInCFG,
+          /*addInitializers=*/true, Options.ShouldIncludeTemporaryDtorsInCFG,
           Options.ShouldIncludeLifetimeInCFG,
           // Adding LoopExit elements to the CFG is a requirement for loop
           // unrolling.
-          Options.ShouldIncludeLoopExitInCFG ||
-          Options.ShouldUnrollLoops,
-          Options.ShouldIncludeScopesInCFG,
-          Options.ShouldSynthesizeBodies,
+          Options.ShouldIncludeLoopExitInCFG || Options.ShouldUnrollLoops,
+          Options.ShouldIncludeScopesInCFG, Options.ShouldSynthesizeBodies,
           Options.ShouldConditionalizeStaticInitializers,
           /*addCXXNewAllocator=*/true,
           Options.ShouldIncludeRichConstructorsInCFG,
           Options.ShouldElideConstructors,
-          /*addVirtualBaseBranches=*/true,
-          injector),
-      Ctx(ASTCtx), PP(PP), LangOpts(ASTCtx.getLangOpts()),
-      PathConsumers(PDC), CreateStoreMgr(storemgr),
-      CreateConstraintMgr(constraintmgr), CheckerMgr(checkerMgr),
-      options(Options) {
-    AnaCtxMgr.getCFGBuildOptions().setAllAlwaysAdd();
-    AnaCtxMgr.getCFGBuildOptions().OmitImplicitValueInitializers = true;
-    AnaCtxMgr.getCFGBuildOptions().AddCXXDefaultInitExprInAggregates =
-        Options.ShouldIncludeDefaultInitForAggregates;
+          /*addVirtualBaseBranches=*/true, injector),
+      Ctx(ASTCtx), PP(PP), LangOpts(ASTCtx.getLangOpts()), PathConsumers(PDC),
+      CreateStoreMgr(storemgr), CreateConstraintMgr(constraintmgr),
+      CheckerMgr(checkerMgr), options(Options) {
+  AnaCtxMgr.getCFGBuildOptions().setAllAlwaysAdd();
+  AnaCtxMgr.getCFGBuildOptions().OmitImplicitValueInitializers = true;
+  AnaCtxMgr.getCFGBuildOptions().AddCXXDefaultInitExprInAggregates =
+      Options.ShouldIncludeDefaultInitForAggregates;
 }
 
 AnalysisManager::~AnalysisManager() {
-    FlushDiagnostics();
-    for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
-            E = PathConsumers.end(); I != E; ++I) {
-        delete *I;
-    }
+  FlushDiagnostics();
+  for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
+                                         E = PathConsumers.end();
+       I != E; ++I) {
+    delete *I;
+  }
 }
 
 void AnalysisManager::FlushDiagnostics() {
-    PathDiagnosticConsumer::FilesMade filesMade;
-    for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
-            E = PathConsumers.end();
-            I != E; ++I) {
-        (*I)->FlushDiagnostics(&filesMade);
-    }
+  PathDiagnosticConsumer::FilesMade filesMade;
+  for (PathDiagnosticConsumers::iterator I = PathConsumers.begin(),
+                                         E = PathConsumers.end();
+       I != E; ++I) {
+    (*I)->FlushDiagnostics(&filesMade);
+  }
 }

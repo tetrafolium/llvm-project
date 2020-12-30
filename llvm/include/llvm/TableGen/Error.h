@@ -24,11 +24,11 @@ void PrintNote(ArrayRef<SMLoc> NoteLoc, const Twine &Msg);
 
 LLVM_ATTRIBUTE_NORETURN void PrintFatalNote(const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalNote(ArrayRef<SMLoc> ErrorLoc,
-        const Twine &Msg);
+                                            const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalNote(const Record *Rec,
-        const Twine &Msg);
+                                            const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalNote(const RecordVal *RecVal,
-        const Twine &Msg);
+                                            const Twine &Msg);
 
 void PrintWarning(const Twine &Msg);
 void PrintWarning(ArrayRef<SMLoc> WarningLoc, const Twine &Msg);
@@ -42,15 +42,15 @@ void PrintError(const RecordVal *RecVal, const Twine &Msg);
 
 LLVM_ATTRIBUTE_NORETURN void PrintFatalError(const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalError(ArrayRef<SMLoc> ErrorLoc,
-        const Twine &Msg);
+                                             const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalError(const Record *Rec,
-        const Twine &Msg);
+                                             const Twine &Msg);
 LLVM_ATTRIBUTE_NORETURN void PrintFatalError(const RecordVal *RecVal,
-        const Twine &Msg);
+                                             const Twine &Msg);
 
 extern SourceMgr SrcMgr;
 extern unsigned ErrorsPrinted;
 
-} // end namespace "llvm"
+} // namespace llvm
 
 #endif

@@ -1,19 +1,19 @@
-#include <clc/clc.h>
 #include "../clcmacro.h"
+#include <clc/clc.h>
 
-#define SIGN(TYPE, F) \
-_CLC_DEF _CLC_OVERLOAD TYPE sign(TYPE x) { \
-  if (isnan(x)) { \
-    return 0.0F;   \
-  }               \
-  if (x > 0.0F) { \
-    return 1.0F;  \
-  }               \
-  if (x < 0.0F) { \
-    return -1.0F; \
-  }               \
-  return x; /* -0.0 or +0.0 */  \
-}
+#define SIGN(TYPE, F)                                                          \
+  _CLC_DEF _CLC_OVERLOAD TYPE sign(TYPE x) {                                   \
+    if (isnan(x)) {                                                            \
+      return 0.0F;                                                             \
+    }                                                                          \
+    if (x > 0.0F) {                                                            \
+      return 1.0F;                                                             \
+    }                                                                          \
+    if (x < 0.0F) {                                                            \
+      return -1.0F;                                                            \
+    }                                                                          \
+    return x; /* -0.0 or +0.0 */                                               \
+  }
 
 SIGN(float, f)
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, sign, float)

@@ -26,38 +26,38 @@ extern class LinkerDriver *driver;
 
 class LinkerDriver {
 public:
-    void linkerMain(ArrayRef<const char *> args);
-    void addFile(StringRef path, bool withLOption);
-    void addLibrary(StringRef name);
+  void linkerMain(ArrayRef<const char *> args);
+  void addFile(StringRef path, bool withLOption);
+  void addLibrary(StringRef name);
 
 private:
-    void createFiles(llvm::opt::InputArgList &args);
-    void inferMachineType();
-    template <class ELFT> void link(llvm::opt::InputArgList &args);
-    template <class ELFT> void compileBitcodeFiles();
+  void createFiles(llvm::opt::InputArgList &args);
+  void inferMachineType();
+  template <class ELFT> void link(llvm::opt::InputArgList &args);
+  template <class ELFT> void compileBitcodeFiles();
 
-    // True if we are in --whole-archive and --no-whole-archive.
-    bool inWholeArchive = false;
+  // True if we are in --whole-archive and --no-whole-archive.
+  bool inWholeArchive = false;
 
-    // True if we are in --start-lib and --end-lib.
-    bool inLib = false;
+  // True if we are in --start-lib and --end-lib.
+  bool inLib = false;
 
-    // For LTO.
-    std::unique_ptr<BitcodeCompiler> lto;
+  // For LTO.
+  std::unique_ptr<BitcodeCompiler> lto;
 
-    std::vector<InputFile *> files;
+  std::vector<InputFile *> files;
 };
 
 // Parses command line options.
 class ELFOptTable : public llvm::opt::OptTable {
 public:
-    ELFOptTable();
-    llvm::opt::InputArgList parse(ArrayRef<const char *> argv);
+  ELFOptTable();
+  llvm::opt::InputArgList parse(ArrayRef<const char *> argv);
 };
 
 // Create enum with OPT_xxx values for each option in Options.td
 enum {
-    OPT_INVALID = 0,
+  OPT_INVALID = 0,
 #define OPTION(_1, _2, ID, _4, _5, _6, _7, _8, _9, _10, _11, _12) OPT_##ID,
 #include "Options.inc"
 #undef OPTION

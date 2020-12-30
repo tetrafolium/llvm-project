@@ -16,16 +16,14 @@
 using namespace clang;
 using namespace clang::targets;
 
-ArrayRef<const char *> PNaClTargetInfo::getGCCRegNames() const {
-    return None;
-}
+ArrayRef<const char *> PNaClTargetInfo::getGCCRegNames() const { return None; }
 
 ArrayRef<TargetInfo::GCCRegAlias> PNaClTargetInfo::getGCCRegAliases() const {
-    return None;
+  return None;
 }
 
 void PNaClTargetInfo::getArchDefines(const LangOptions &Opts,
                                      MacroBuilder &Builder) const {
-    Builder.defineMacro("__le32__");
-    Builder.defineMacro("__pnacl__");
+  Builder.defineMacro("__le32__");
+  Builder.defineMacro("__pnacl__");
 }

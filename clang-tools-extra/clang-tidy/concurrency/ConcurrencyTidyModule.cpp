@@ -17,17 +17,18 @@ namespace concurrency {
 
 class ConcurrencyModule : public ClangTidyModule {
 public:
-    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-        CheckFactories.registerCheck<concurrency::MtUnsafeCheck>(
-            "concurrency-mt-unsafe");
-    }
+  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<concurrency::MtUnsafeCheck>(
+        "concurrency-mt-unsafe");
+  }
 };
 
 } // namespace concurrency
 
-// Register the ConcurrencyTidyModule using this statically initialized variable.
+// Register the ConcurrencyTidyModule using this statically initialized
+// variable.
 static ClangTidyModuleRegistry::Add<concurrency::ConcurrencyModule>
-X("concurrency-module", "Adds concurrency checks.");
+    X("concurrency-module", "Adds concurrency checks.");
 
 // This anchor is used to force the linker to link in the generated object file
 // and thus register the ConcurrencyModule.

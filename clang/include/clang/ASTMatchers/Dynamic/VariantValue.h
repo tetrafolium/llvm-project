@@ -33,49 +33,39 @@ namespace dynamic {
 /// It supports all types that VariantValue can contain.
 class ArgKind {
 public:
-    enum Kind {
-        AK_Matcher,
-        AK_Boolean,
-        AK_Double,
-        AK_Unsigned,
-        AK_String
-    };
-    /// Constructor for non-matcher types.
-    ArgKind(Kind K) : K(K) {
-        assert(K != AK_Matcher);
-    }
+  enum Kind { AK_Matcher, AK_Boolean, AK_Double, AK_Unsigned, AK_String };
+  /// Constructor for non-matcher types.
+  ArgKind(Kind K) : K(K) { assert(K != AK_Matcher); }
 
-    /// Constructor for matcher types.
-    ArgKind(ASTNodeKind MatcherKind) : K(AK_Matcher), MatcherKind(MatcherKind) {}
+  /// Constructor for matcher types.
+  ArgKind(ASTNodeKind MatcherKind) : K(AK_Matcher), MatcherKind(MatcherKind) {}
 
-    Kind getArgKind() const {
-        return K;
-    }
-    ASTNodeKind getMatcherKind() const {
-        assert(K == AK_Matcher);
-        return MatcherKind;
-    }
+  Kind getArgKind() const { return K; }
+  ASTNodeKind getMatcherKind() const {
+    assert(K == AK_Matcher);
+    return MatcherKind;
+  }
 
-    /// Determines if this type can be converted to \p To.
-    ///
-    /// \param To the requested destination type.
-    ///
-    /// \param Specificity value corresponding to the "specificity" of the
-    ///   conversion.
-    bool isConvertibleTo(ArgKind To, unsigned *Specificity) const;
+  /// Determines if this type can be converted to \p To.
+  ///
+  /// \param To the requested destination type.
+  ///
+  /// \param Specificity value corresponding to the "specificity" of the
+  ///   conversion.
+  bool isConvertibleTo(ArgKind To, unsigned *Specificity) const;
 
-    bool operator<(const ArgKind &Other) const {
-        if (K == AK_Matcher && Other.K == AK_Matcher)
-            return MatcherKind < Other.MatcherKind;
-        return K < Other.K;
-    }
+  bool operator<(const ArgKind &Other) const {
+    if (K == AK_Matcher && Other.K == AK_Matcher)
+      return MatcherKind < Other.MatcherKind;
+    return K < Other.K;
+  }
 
-    /// String representation of the type.
-    std::string asString() const;
+  /// String representation of the type.
+  std::string asString() const;
 
 private:
-    Kind K;
-    ASTNodeKind MatcherKind;
+  Kind K;
+  ASTNodeKind MatcherKind;
 };
 
 using ast_matchers::internal::DynTypedMatcher;
@@ -94,147 +84,145 @@ using ast_matchers::internal::DynTypedMatcher;
 ///  - hasTypedMatcher<T>()/getTypedMatcher<T>(): These calls will determine if
 ///    the underlying matcher(s) can unambiguously return a Matcher<T>.
 class VariantMatcher {
-    /// Methods that depend on T from hasTypedMatcher/getTypedMatcher.
-    class MatcherOps {
-    public:
-        MatcherOps(ASTNodeKind NodeKind) : NodeKind(NodeKind) {}
+  /// Methods that depend on T from hasTypedMatcher/getTypedMatcher.
+  class MatcherOps {
+  public:
+    MatcherOps(ASTNodeKind NodeKind) : NodeKind(NodeKind) {}
 
-        bool canConstructFrom(const DynTypedMatcher &Matcher,
-                              bool &IsExactMatch) const;
+    bool canConstructFrom(const DynTypedMatcher &Matcher,
+                          bool &IsExactMatch) const;
 
-        /// Convert \p Matcher the destination type and return it as a new
-        /// DynTypedMatcher.
-        virtual DynTypedMatcher
-        convertMatcher(const DynTypedMatcher &Matcher) const = 0;
+    /// Convert \p Matcher the destination type and return it as a new
+    /// DynTypedMatcher.
+    virtual DynTypedMatcher
+    convertMatcher(const DynTypedMatcher &Matcher) const = 0;
 
-        /// Constructs a variadic typed matcher from \p InnerMatchers.
-        /// Will try to convert each inner matcher to the destination type and
-        /// return llvm::None if it fails to do so.
-        llvm::Optional<DynTypedMatcher>
-        constructVariadicOperator(DynTypedMatcher::VariadicOperator Op,
-                                  ArrayRef<VariantMatcher> InnerMatchers) const;
+    /// Constructs a variadic typed matcher from \p InnerMatchers.
+    /// Will try to convert each inner matcher to the destination type and
+    /// return llvm::None if it fails to do so.
+    llvm::Optional<DynTypedMatcher>
+    constructVariadicOperator(DynTypedMatcher::VariadicOperator Op,
+                              ArrayRef<VariantMatcher> InnerMatchers) const;
 
-    protected:
-        ~MatcherOps() = default;
+  protected:
+    ~MatcherOps() = default;
 
-    private:
-        ASTNodeKind NodeKind;
-    };
+  private:
+    ASTNodeKind NodeKind;
+  };
 
-    /// Payload interface to be specialized by each matcher type.
-    ///
-    /// It follows a similar interface as VariantMatcher itself.
-    class Payload {
-    public:
-        virtual ~Payload();
-        virtual llvm::Optional<DynTypedMatcher> getSingleMatcher() const = 0;
-        virtual std::string getTypeAsString() const = 0;
-        virtual llvm::Optional<DynTypedMatcher>
-        getTypedMatcher(const MatcherOps &Ops) const = 0;
-        virtual bool isConvertibleTo(ASTNodeKind Kind,
-                                     unsigned *Specificity) const = 0;
-    };
+  /// Payload interface to be specialized by each matcher type.
+  ///
+  /// It follows a similar interface as VariantMatcher itself.
+  class Payload {
+  public:
+    virtual ~Payload();
+    virtual llvm::Optional<DynTypedMatcher> getSingleMatcher() const = 0;
+    virtual std::string getTypeAsString() const = 0;
+    virtual llvm::Optional<DynTypedMatcher>
+    getTypedMatcher(const MatcherOps &Ops) const = 0;
+    virtual bool isConvertibleTo(ASTNodeKind Kind,
+                                 unsigned *Specificity) const = 0;
+  };
 
 public:
-    /// A null matcher.
-    VariantMatcher();
+  /// A null matcher.
+  VariantMatcher();
 
-    /// Clones the provided matcher.
-    static VariantMatcher SingleMatcher(const DynTypedMatcher &Matcher);
+  /// Clones the provided matcher.
+  static VariantMatcher SingleMatcher(const DynTypedMatcher &Matcher);
 
-    /// Clones the provided matchers.
-    ///
-    /// They should be the result of a polymorphic matcher.
-    static VariantMatcher
-    PolymorphicMatcher(std::vector<DynTypedMatcher> Matchers);
+  /// Clones the provided matchers.
+  ///
+  /// They should be the result of a polymorphic matcher.
+  static VariantMatcher
+  PolymorphicMatcher(std::vector<DynTypedMatcher> Matchers);
 
-    /// Creates a 'variadic' operator matcher.
-    ///
-    /// It will bind to the appropriate type on getTypedMatcher<T>().
-    static VariantMatcher
-    VariadicOperatorMatcher(DynTypedMatcher::VariadicOperator Op,
-                            std::vector<VariantMatcher> Args);
+  /// Creates a 'variadic' operator matcher.
+  ///
+  /// It will bind to the appropriate type on getTypedMatcher<T>().
+  static VariantMatcher
+  VariadicOperatorMatcher(DynTypedMatcher::VariadicOperator Op,
+                          std::vector<VariantMatcher> Args);
 
-    /// Makes the matcher the "null" matcher.
-    void reset();
+  /// Makes the matcher the "null" matcher.
+  void reset();
 
-    /// Whether the matcher is null.
-    bool isNull() const {
-        return !Value;
-    }
+  /// Whether the matcher is null.
+  bool isNull() const { return !Value; }
 
-    /// Return a single matcher, if there is no ambiguity.
-    ///
-    /// \returns the matcher, if there is only one matcher. An empty Optional, if
-    /// the underlying matcher is a polymorphic matcher with more than one
-    /// representation.
-    llvm::Optional<DynTypedMatcher> getSingleMatcher() const;
+  /// Return a single matcher, if there is no ambiguity.
+  ///
+  /// \returns the matcher, if there is only one matcher. An empty Optional, if
+  /// the underlying matcher is a polymorphic matcher with more than one
+  /// representation.
+  llvm::Optional<DynTypedMatcher> getSingleMatcher() const;
 
-    /// Determines if the contained matcher can be converted to
-    ///   \c Matcher<T>.
-    ///
-    /// For the Single case, it returns true if it can be converted to
-    /// \c Matcher<T>.
-    /// For the Polymorphic case, it returns true if one, and only one, of the
-    /// overloads can be converted to \c Matcher<T>. If there are more than one
-    /// that can, the result would be ambiguous and false is returned.
-    template <class T>
-    bool hasTypedMatcher() const {
-        if (!Value) return false;
-        return Value->getTypedMatcher(TypedMatcherOps<T>()).hasValue();
-    }
+  /// Determines if the contained matcher can be converted to
+  ///   \c Matcher<T>.
+  ///
+  /// For the Single case, it returns true if it can be converted to
+  /// \c Matcher<T>.
+  /// For the Polymorphic case, it returns true if one, and only one, of the
+  /// overloads can be converted to \c Matcher<T>. If there are more than one
+  /// that can, the result would be ambiguous and false is returned.
+  template <class T> bool hasTypedMatcher() const {
+    if (!Value)
+      return false;
+    return Value->getTypedMatcher(TypedMatcherOps<T>()).hasValue();
+  }
 
-    /// Determines if the contained matcher can be converted to \p Kind.
-    ///
-    /// \param Kind the requested destination type.
-    ///
-    /// \param Specificity value corresponding to the "specificity" of the
-    ///   conversion.
-    bool isConvertibleTo(ASTNodeKind Kind, unsigned *Specificity) const {
-        if (Value)
-            return Value->isConvertibleTo(Kind, Specificity);
-        return false;
-    }
+  /// Determines if the contained matcher can be converted to \p Kind.
+  ///
+  /// \param Kind the requested destination type.
+  ///
+  /// \param Specificity value corresponding to the "specificity" of the
+  ///   conversion.
+  bool isConvertibleTo(ASTNodeKind Kind, unsigned *Specificity) const {
+    if (Value)
+      return Value->isConvertibleTo(Kind, Specificity);
+    return false;
+  }
 
-    /// Return this matcher as a \c Matcher<T>.
-    ///
-    /// Handles the different types (Single, Polymorphic) accordingly.
-    /// Asserts that \c hasTypedMatcher<T>() is true.
-    template <class T>
-    ast_matchers::internal::Matcher<T> getTypedMatcher() const {
-        assert(hasTypedMatcher<T>() && "hasTypedMatcher<T>() == false");
-        return Value->getTypedMatcher(TypedMatcherOps<T>())
-               ->template convertTo<T>();
-    }
+  /// Return this matcher as a \c Matcher<T>.
+  ///
+  /// Handles the different types (Single, Polymorphic) accordingly.
+  /// Asserts that \c hasTypedMatcher<T>() is true.
+  template <class T>
+  ast_matchers::internal::Matcher<T> getTypedMatcher() const {
+    assert(hasTypedMatcher<T>() && "hasTypedMatcher<T>() == false");
+    return Value->getTypedMatcher(TypedMatcherOps<T>())
+        ->template convertTo<T>();
+  }
 
-    /// String representation of the type of the value.
-    ///
-    /// If the underlying matcher is a polymorphic one, the string will show all
-    /// the types.
-    std::string getTypeAsString() const;
+  /// String representation of the type of the value.
+  ///
+  /// If the underlying matcher is a polymorphic one, the string will show all
+  /// the types.
+  std::string getTypeAsString() const;
 
 private:
-    explicit VariantMatcher(std::shared_ptr<Payload> Value)
-        : Value(std::move(Value)) {}
+  explicit VariantMatcher(std::shared_ptr<Payload> Value)
+      : Value(std::move(Value)) {}
 
-    template <typename T> struct TypedMatcherOps;
+  template <typename T> struct TypedMatcherOps;
 
-    class SinglePayload;
-    class PolymorphicPayload;
-    class VariadicOpPayload;
+  class SinglePayload;
+  class PolymorphicPayload;
+  class VariadicOpPayload;
 
-    std::shared_ptr<const Payload> Value;
+  std::shared_ptr<const Payload> Value;
 };
 
 template <typename T>
 struct VariantMatcher::TypedMatcherOps final : VariantMatcher::MatcherOps {
-    TypedMatcherOps() : MatcherOps(ASTNodeKind::getFromNodeKind<T>()) {}
-    typedef ast_matchers::internal::Matcher<T> MatcherT;
+  TypedMatcherOps() : MatcherOps(ASTNodeKind::getFromNodeKind<T>()) {}
+  typedef ast_matchers::internal::Matcher<T> MatcherT;
 
-    DynTypedMatcher
-    convertMatcher(const DynTypedMatcher &Matcher) const override {
-        return DynTypedMatcher(Matcher.convertTo<T>());
-    }
+  DynTypedMatcher
+  convertMatcher(const DynTypedMatcher &Matcher) const override {
+    return DynTypedMatcher(Matcher.convertTo<T>());
+  }
 };
 
 /// Variant value class.
@@ -253,104 +241,100 @@ struct VariantMatcher::TypedMatcherOps final : VariantMatcher::MatcherOps {
 ///  - \c VariantMatcher (\c DynTypedMatcher / \c Matcher<T>)
 class VariantValue {
 public:
-    VariantValue() : Type(VT_Nothing) {}
+  VariantValue() : Type(VT_Nothing) {}
 
-    VariantValue(const VariantValue &Other);
-    ~VariantValue();
-    VariantValue &operator=(const VariantValue &Other);
+  VariantValue(const VariantValue &Other);
+  ~VariantValue();
+  VariantValue &operator=(const VariantValue &Other);
 
-    /// Specific constructors for each supported type.
-    VariantValue(bool Boolean);
-    VariantValue(double Double);
-    VariantValue(unsigned Unsigned);
-    VariantValue(StringRef String);
-    VariantValue(const VariantMatcher &Matchers);
+  /// Specific constructors for each supported type.
+  VariantValue(bool Boolean);
+  VariantValue(double Double);
+  VariantValue(unsigned Unsigned);
+  VariantValue(StringRef String);
+  VariantValue(const VariantMatcher &Matchers);
 
-    /// Constructs an \c unsigned value (disambiguation from bool).
-    VariantValue(int Signed) : VariantValue(static_cast<unsigned>(Signed)) {}
+  /// Constructs an \c unsigned value (disambiguation from bool).
+  VariantValue(int Signed) : VariantValue(static_cast<unsigned>(Signed)) {}
 
-    /// Returns true iff this is not an empty value.
-    explicit operator bool() const {
-        return hasValue();
-    }
-    bool hasValue() const {
-        return Type != VT_Nothing;
-    }
+  /// Returns true iff this is not an empty value.
+  explicit operator bool() const { return hasValue(); }
+  bool hasValue() const { return Type != VT_Nothing; }
 
-    /// Boolean value functions.
-    bool isBoolean() const;
-    bool getBoolean() const;
-    void setBoolean(bool Boolean);
+  /// Boolean value functions.
+  bool isBoolean() const;
+  bool getBoolean() const;
+  void setBoolean(bool Boolean);
 
-    /// Double value functions.
-    bool isDouble() const;
-    double getDouble() const;
-    void setDouble(double Double);
+  /// Double value functions.
+  bool isDouble() const;
+  double getDouble() const;
+  void setDouble(double Double);
 
-    /// Unsigned value functions.
-    bool isUnsigned() const;
-    unsigned getUnsigned() const;
-    void setUnsigned(unsigned Unsigned);
+  /// Unsigned value functions.
+  bool isUnsigned() const;
+  unsigned getUnsigned() const;
+  void setUnsigned(unsigned Unsigned);
 
-    /// String value functions.
-    bool isString() const;
-    const std::string &getString() const;
-    void setString(StringRef String);
+  /// String value functions.
+  bool isString() const;
+  const std::string &getString() const;
+  void setString(StringRef String);
 
-    /// Matcher value functions.
-    bool isMatcher() const;
-    const VariantMatcher &getMatcher() const;
-    void setMatcher(const VariantMatcher &Matcher);
+  /// Matcher value functions.
+  bool isMatcher() const;
+  const VariantMatcher &getMatcher() const;
+  void setMatcher(const VariantMatcher &Matcher);
 
-    /// Determines if the contained value can be converted to \p Kind.
-    ///
-    /// \param Kind the requested destination type.
-    ///
-    /// \param Specificity value corresponding to the "specificity" of the
-    ///   conversion.
-    bool isConvertibleTo(ArgKind Kind, unsigned* Specificity) const;
+  /// Determines if the contained value can be converted to \p Kind.
+  ///
+  /// \param Kind the requested destination type.
+  ///
+  /// \param Specificity value corresponding to the "specificity" of the
+  ///   conversion.
+  bool isConvertibleTo(ArgKind Kind, unsigned *Specificity) const;
 
-    /// Determines if the contained value can be converted to any kind
-    /// in \p Kinds.
-    ///
-    /// \param Kinds the requested destination types.
-    ///
-    /// \param Specificity value corresponding to the "specificity" of the
-    ///   conversion. It is the maximum specificity of all the possible
-    ///   conversions.
-    bool isConvertibleTo(ArrayRef<ArgKind> Kinds, unsigned *Specificity) const;
+  /// Determines if the contained value can be converted to any kind
+  /// in \p Kinds.
+  ///
+  /// \param Kinds the requested destination types.
+  ///
+  /// \param Specificity value corresponding to the "specificity" of the
+  ///   conversion. It is the maximum specificity of all the possible
+  ///   conversions.
+  bool isConvertibleTo(ArrayRef<ArgKind> Kinds, unsigned *Specificity) const;
 
-    /// String representation of the type of the value.
-    std::string getTypeAsString() const;
+  /// String representation of the type of the value.
+  std::string getTypeAsString() const;
 
 private:
-    void reset();
+  void reset();
 
-    /// All supported value types.
-    enum ValueType {
-        VT_Nothing,
-        VT_Boolean,
-        VT_Double,
-        VT_Unsigned,
-        VT_String,
-        VT_Matcher
-    };
+  /// All supported value types.
+  enum ValueType {
+    VT_Nothing,
+    VT_Boolean,
+    VT_Double,
+    VT_Unsigned,
+    VT_String,
+    VT_Matcher
+  };
 
-    /// All supported value types.
-    union AllValues {
-        unsigned Unsigned;
-        double Double;
-        bool Boolean;
-        std::string *String;
-        VariantMatcher *Matcher;
-    };
+  /// All supported value types.
+  union AllValues {
+    unsigned Unsigned;
+    double Double;
+    bool Boolean;
+    std::string *String;
+    VariantMatcher *Matcher;
+  };
 
-    ValueType Type;
-    AllValues Value;
+  ValueType Type;
+  AllValues Value;
 };
 
 } // end namespace dynamic
 } // end namespace ast_matchers
 } // end namespace clang
 
-#endif  // LLVM_CLANG_AST_MATCHERS_DYNAMIC_VARIANT_VALUE_H
+#endif // LLVM_CLANG_AST_MATCHERS_DYNAMIC_VARIANT_VALUE_H

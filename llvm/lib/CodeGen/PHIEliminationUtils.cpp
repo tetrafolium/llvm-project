@@ -18,47 +18,47 @@ using namespace llvm;
 // SrcReg, but before any subsequent point where control flow might jump out of
 // the basic block.
 MachineBasicBlock::iterator
-llvm::findPHICopyInsertPoint(MachineBasicBlock* MBB, MachineBasicBlock* SuccMBB,
+llvm::findPHICopyInsertPoint(MachineBasicBlock *MBB, MachineBasicBlock *SuccMBB,
                              unsigned SrcReg) {
-    // Handle the trivial case trivially.
-    if (MBB->empty())
-        return MBB->begin();
+  // Handle the trivial case trivially.
+  if (MBB->empty())
+    return MBB->begin();
 
-    // Usually, we just want to insert the copy before the first terminator
-    // instruction. However, for the edge going to a landing pad, we must insert
-    // the copy before the call/invoke instruction. Similarly for an INLINEASM_BR
-    // going to an indirect target. This is similar to SplitKit.cpp's
-    // computeLastInsertPoint, and similarly assumes that there cannot be multiple
-    // instructions that are Calls with EHPad successors or INLINEASM_BR in a
-    // block.
-    bool EHPadSuccessor = SuccMBB->isEHPad();
-    if (!EHPadSuccessor && !SuccMBB->isInlineAsmBrIndirectTarget())
-        return MBB->getFirstTerminator();
+  // Usually, we just want to insert the copy before the first terminator
+  // instruction. However, for the edge going to a landing pad, we must insert
+  // the copy before the call/invoke instruction. Similarly for an INLINEASM_BR
+  // going to an indirect target. This is similar to SplitKit.cpp's
+  // computeLastInsertPoint, and similarly assumes that there cannot be multiple
+  // instructions that are Calls with EHPad successors or INLINEASM_BR in a
+  // block.
+  bool EHPadSuccessor = SuccMBB->isEHPad();
+  if (!EHPadSuccessor && !SuccMBB->isInlineAsmBrIndirectTarget())
+    return MBB->getFirstTerminator();
 
-    // Discover any defs in this basic block.
-    SmallPtrSet<MachineInstr *, 8> DefsInMBB;
-    MachineRegisterInfo& MRI = MBB->getParent()->getRegInfo();
-    for (MachineInstr &RI : MRI.def_instructions(SrcReg))
-        if (RI.getParent() == MBB)
-            DefsInMBB.insert(&RI);
+  // Discover any defs in this basic block.
+  SmallPtrSet<MachineInstr *, 8> DefsInMBB;
+  MachineRegisterInfo &MRI = MBB->getParent()->getRegInfo();
+  for (MachineInstr &RI : MRI.def_instructions(SrcReg))
+    if (RI.getParent() == MBB)
+      DefsInMBB.insert(&RI);
 
-    MachineBasicBlock::iterator InsertPoint = MBB->begin();
-    // Insert the copy at the _latest_ point of:
-    // 1. Immediately AFTER the last def
-    // 2. Immediately BEFORE a call/inlineasm_br.
-    for (auto I = MBB->rbegin(), E = MBB->rend(); I != E; ++I) {
-        if (DefsInMBB.contains(&*I)) {
-            InsertPoint = std::next(I.getReverse());
-            break;
-        }
-        if ((EHPadSuccessor && I->isCall()) ||
-                I->getOpcode() == TargetOpcode::INLINEASM_BR) {
-            InsertPoint = I.getReverse();
-            break;
-        }
+  MachineBasicBlock::iterator InsertPoint = MBB->begin();
+  // Insert the copy at the _latest_ point of:
+  // 1. Immediately AFTER the last def
+  // 2. Immediately BEFORE a call/inlineasm_br.
+  for (auto I = MBB->rbegin(), E = MBB->rend(); I != E; ++I) {
+    if (DefsInMBB.contains(&*I)) {
+      InsertPoint = std::next(I.getReverse());
+      break;
     }
+    if ((EHPadSuccessor && I->isCall()) ||
+        I->getOpcode() == TargetOpcode::INLINEASM_BR) {
+      InsertPoint = I.getReverse();
+      break;
+    }
+  }
 
-    // Make sure the copy goes after any phi nodes but before
-    // any debug nodes.
-    return MBB->SkipPHIsAndLabels(InsertPoint);
+  // Make sure the copy goes after any phi nodes but before
+  // any debug nodes.
+  return MBB->SkipPHIsAndLabels(InsertPoint);
 }

@@ -20,16 +20,16 @@ namespace llvm {
 
 class AsmCond {
 public:
-    enum ConditionalAssemblyType {
-        NoCond,     // no conditional is being processed
-        IfCond,     // inside if conditional
-        ElseIfCond, // inside elseif conditional
-        ElseCond    // inside else conditional
-    };
+  enum ConditionalAssemblyType {
+    NoCond,     // no conditional is being processed
+    IfCond,     // inside if conditional
+    ElseIfCond, // inside elseif conditional
+    ElseCond    // inside else conditional
+  };
 
-    ConditionalAssemblyType TheCond = NoCond;
-    bool CondMet = false;
-    bool Ignore = false;
+  ConditionalAssemblyType TheCond = NoCond;
+  bool CondMet = false;
+  bool Ignore = false;
 };
 
 } // end namespace llvm

@@ -25,65 +25,61 @@ namespace llvm {
 /// Streamer for LLVM remarks which has logic for dealing with DiagnosticInfo
 /// objects.
 class LLVMRemarkStreamer {
-    remarks::RemarkStreamer &RS;
-    /// Convert diagnostics into remark objects.
-    /// The lifetime of the members of the result is bound to the lifetime of
-    /// the LLVM diagnostics.
-    remarks::Remark toRemark(const DiagnosticInfoOptimizationBase &Diag) const;
+  remarks::RemarkStreamer &RS;
+  /// Convert diagnostics into remark objects.
+  /// The lifetime of the members of the result is bound to the lifetime of
+  /// the LLVM diagnostics.
+  remarks::Remark toRemark(const DiagnosticInfoOptimizationBase &Diag) const;
 
 public:
-    LLVMRemarkStreamer(remarks::RemarkStreamer &RS) : RS(RS) {}
-    /// Emit a diagnostic through the streamer.
-    void emit(const DiagnosticInfoOptimizationBase &Diag);
+  LLVMRemarkStreamer(remarks::RemarkStreamer &RS) : RS(RS) {}
+  /// Emit a diagnostic through the streamer.
+  void emit(const DiagnosticInfoOptimizationBase &Diag);
 };
 
 template <typename ThisError>
 struct LLVMRemarkSetupErrorInfo : public ErrorInfo<ThisError> {
-    std::string Msg;
-    std::error_code EC;
+  std::string Msg;
+  std::error_code EC;
 
-    LLVMRemarkSetupErrorInfo(Error E) {
-        handleAllErrors(std::move(E), [&](const ErrorInfoBase &EIB) {
-            Msg = EIB.message();
-            EC = EIB.convertToErrorCode();
-        });
-    }
+  LLVMRemarkSetupErrorInfo(Error E) {
+    handleAllErrors(std::move(E), [&](const ErrorInfoBase &EIB) {
+      Msg = EIB.message();
+      EC = EIB.convertToErrorCode();
+    });
+  }
 
-    void log(raw_ostream &OS) const override {
-        OS << Msg;
-    }
-    std::error_code convertToErrorCode() const override {
-        return EC;
-    }
+  void log(raw_ostream &OS) const override { OS << Msg; }
+  std::error_code convertToErrorCode() const override { return EC; }
 };
 
 struct LLVMRemarkSetupFileError
     : LLVMRemarkSetupErrorInfo<LLVMRemarkSetupFileError> {
-    static char ID;
-    using LLVMRemarkSetupErrorInfo<
-    LLVMRemarkSetupFileError>::LLVMRemarkSetupErrorInfo;
+  static char ID;
+  using LLVMRemarkSetupErrorInfo<
+      LLVMRemarkSetupFileError>::LLVMRemarkSetupErrorInfo;
 };
 
 struct LLVMRemarkSetupPatternError
     : LLVMRemarkSetupErrorInfo<LLVMRemarkSetupPatternError> {
-    static char ID;
-    using LLVMRemarkSetupErrorInfo<
-    LLVMRemarkSetupPatternError>::LLVMRemarkSetupErrorInfo;
+  static char ID;
+  using LLVMRemarkSetupErrorInfo<
+      LLVMRemarkSetupPatternError>::LLVMRemarkSetupErrorInfo;
 };
 
 struct LLVMRemarkSetupFormatError
     : LLVMRemarkSetupErrorInfo<LLVMRemarkSetupFormatError> {
-    static char ID;
-    using LLVMRemarkSetupErrorInfo<
-    LLVMRemarkSetupFormatError>::LLVMRemarkSetupErrorInfo;
+  static char ID;
+  using LLVMRemarkSetupErrorInfo<
+      LLVMRemarkSetupFormatError>::LLVMRemarkSetupErrorInfo;
 };
 
 /// Setup optimization remarks that output to a file.
 Expected<std::unique_ptr<ToolOutputFile>>
-                                       setupLLVMOptimizationRemarks(LLVMContext &Context, StringRef RemarksFilename,
-                                               StringRef RemarksPasses, StringRef RemarksFormat,
-                                               bool RemarksWithHotness,
-                                               Optional<uint64_t> RemarksHotnessThreshold = 0);
+setupLLVMOptimizationRemarks(LLVMContext &Context, StringRef RemarksFilename,
+                             StringRef RemarksPasses, StringRef RemarksFormat,
+                             bool RemarksWithHotness,
+                             Optional<uint64_t> RemarksHotnessThreshold = 0);
 
 /// Setup optimization remarks that output directly to a raw_ostream.
 /// \p OS is managed by the caller and should be open for writing as long as \p

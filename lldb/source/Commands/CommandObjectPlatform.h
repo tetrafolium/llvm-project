@@ -17,14 +17,14 @@ namespace lldb_private {
 
 class CommandObjectPlatform : public CommandObjectMultiword {
 public:
-    CommandObjectPlatform(CommandInterpreter &interpreter);
+  CommandObjectPlatform(CommandInterpreter &interpreter);
 
-    ~CommandObjectPlatform() override;
+  ~CommandObjectPlatform() override;
 
 private:
-    CommandObjectPlatform(const CommandObjectPlatform &) = delete;
-    const CommandObjectPlatform &
-    operator=(const CommandObjectPlatform &) = delete;
+  CommandObjectPlatform(const CommandObjectPlatform &) = delete;
+  const CommandObjectPlatform &
+  operator=(const CommandObjectPlatform &) = delete;
 };
 
 } // namespace lldb_private

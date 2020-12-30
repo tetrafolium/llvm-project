@@ -22,51 +22,44 @@ template <typename T> static inline T findLeadingOne(T mant, int &shift_length);
 
 template <>
 inline uint32_t findLeadingOne<uint32_t>(uint32_t mant, int &shift_length) {
-    shift_length = 0;
-    constexpr int nsteps = 5;
-    constexpr uint32_t bounds[nsteps] = {1 << 16, 1 << 8, 1 << 4, 1 << 2, 1 << 1};
-    constexpr int shifts[nsteps] = {16, 8, 4, 2, 1};
-    for (int i = 0; i < nsteps; ++i) {
-        if (mant >= bounds[i]) {
-            shift_length += shifts[i];
-            mant >>= shifts[i];
-        }
+  shift_length = 0;
+  constexpr int nsteps = 5;
+  constexpr uint32_t bounds[nsteps] = {1 << 16, 1 << 8, 1 << 4, 1 << 2, 1 << 1};
+  constexpr int shifts[nsteps] = {16, 8, 4, 2, 1};
+  for (int i = 0; i < nsteps; ++i) {
+    if (mant >= bounds[i]) {
+      shift_length += shifts[i];
+      mant >>= shifts[i];
     }
-    return 1U << shift_length;
+  }
+  return 1U << shift_length;
 }
 
 template <>
 inline uint64_t findLeadingOne<uint64_t>(uint64_t mant, int &shift_length) {
-    shift_length = 0;
-    constexpr int nsteps = 6;
-    constexpr uint64_t bounds[nsteps] = {1ULL << 32, 1ULL << 16, 1ULL << 8,
-                                         1ULL << 4,  1ULL << 2,  1ULL << 1
-                                        };
-    constexpr int shifts[nsteps] = {32, 16, 8, 4, 2, 1};
-    for (int i = 0; i < nsteps; ++i) {
-        if (mant >= bounds[i]) {
-            shift_length += shifts[i];
-            mant >>= shifts[i];
-        }
+  shift_length = 0;
+  constexpr int nsteps = 6;
+  constexpr uint64_t bounds[nsteps] = {1ULL << 32, 1ULL << 16, 1ULL << 8,
+                                       1ULL << 4,  1ULL << 2,  1ULL << 1};
+  constexpr int shifts[nsteps] = {32, 16, 8, 4, 2, 1};
+  for (int i = 0; i < nsteps; ++i) {
+    if (mant >= bounds[i]) {
+      shift_length += shifts[i];
+      mant >>= shifts[i];
     }
-    return 1ULL << shift_length;
+  }
+  return 1ULL << shift_length;
 }
 
 } // namespace internal
 
 template <typename T> struct DoubleLength;
 
-template <> struct DoubleLength<uint16_t> {
-    using Type = uint32_t;
-};
+template <> struct DoubleLength<uint16_t> { using Type = uint32_t; };
 
-template <> struct DoubleLength<uint32_t> {
-    using Type = uint64_t;
-};
+template <> struct DoubleLength<uint32_t> { using Type = uint64_t; };
 
-template <> struct DoubleLength<uint64_t> {
-    using Type = __uint128_t;
-};
+template <> struct DoubleLength<uint64_t> { using Type = __uint128_t; };
 
 // Correctly rounded IEEE 754 HYPOT(x, y) with round to nearest, ties to even.
 //
@@ -125,147 +118,147 @@ template <> struct DoubleLength<uint64_t> {
 template <typename T,
           cpp::EnableIfType<cpp::IsFloatingPointType<T>::Value, int> = 0>
 static inline T hypot(T x, T y) {
-    using FPBits_t = FPBits<T>;
-    using UIntType = typename FPBits<T>::UIntType;
-    using DUIntType = typename DoubleLength<UIntType>::Type;
+  using FPBits_t = FPBits<T>;
+  using UIntType = typename FPBits<T>::UIntType;
+  using DUIntType = typename DoubleLength<UIntType>::Type;
 
-    FPBits_t x_bits(x), y_bits(y);
+  FPBits_t x_bits(x), y_bits(y);
 
-    if (x_bits.isInf() || y_bits.isInf()) {
+  if (x_bits.isInf() || y_bits.isInf()) {
+    return FPBits_t::inf();
+  }
+  if (x_bits.isNaN()) {
+    return x;
+  }
+  if (y_bits.isNaN()) {
+    return y;
+  }
+
+  uint16_t a_exp, b_exp, out_exp;
+  UIntType a_mant, b_mant;
+  DUIntType a_mant_sq, b_mant_sq;
+  bool sticky_bits;
+
+  if ((x_bits.exponent >= y_bits.exponent + MantissaWidth<T>::value + 2) ||
+      (y == 0)) {
+    return abs(x);
+  } else if ((y_bits.exponent >=
+              x_bits.exponent + MantissaWidth<T>::value + 2) ||
+             (x == 0)) {
+    y_bits.sign = 0;
+    return abs(y);
+  }
+
+  if (x >= y) {
+    a_exp = x_bits.exponent;
+    a_mant = x_bits.mantissa;
+    b_exp = y_bits.exponent;
+    b_mant = y_bits.mantissa;
+  } else {
+    a_exp = y_bits.exponent;
+    a_mant = y_bits.mantissa;
+    b_exp = x_bits.exponent;
+    b_mant = x_bits.mantissa;
+  }
+
+  out_exp = a_exp;
+
+  // Add an extra bit to simplify the final rounding bit computation.
+  constexpr UIntType one = UIntType(1) << (MantissaWidth<T>::value + 1);
+
+  a_mant <<= 1;
+  b_mant <<= 1;
+
+  UIntType leading_one;
+  int y_mant_width;
+  if (a_exp != 0) {
+    leading_one = one;
+    a_mant |= one;
+    y_mant_width = MantissaWidth<T>::value + 1;
+  } else {
+    leading_one = internal::findLeadingOne(a_mant, y_mant_width);
+  }
+
+  if (b_exp != 0) {
+    b_mant |= one;
+  }
+
+  a_mant_sq = static_cast<DUIntType>(a_mant) * a_mant;
+  b_mant_sq = static_cast<DUIntType>(b_mant) * b_mant;
+
+  // At this point, a_exp >= b_exp > a_exp - 25, so in order to line up aSqMant
+  // and bSqMant, we need to shift bSqMant to the right by (a_exp - b_exp) bits.
+  // But before that, remember to store the losing bits to sticky.
+  // The shift length is for a^2 and b^2, so it's double of the exponent
+  // difference between a and b.
+  uint16_t shift_length = 2 * (a_exp - b_exp);
+  sticky_bits =
+      ((b_mant_sq & ((DUIntType(1) << shift_length) - DUIntType(1))) !=
+       DUIntType(0));
+  b_mant_sq >>= shift_length;
+
+  DUIntType sum = a_mant_sq + b_mant_sq;
+  if (sum >= (DUIntType(1) << (2 * y_mant_width + 2))) {
+    // a^2 + b^2 >= 4* leading_one^2, so we will need an extra bit to the left.
+    if (leading_one == one) {
+      // For normal result, we discard the last 2 bits of the sum and increase
+      // the exponent.
+      sticky_bits = sticky_bits || ((sum & 0x3U) != 0);
+      sum >>= 2;
+      ++out_exp;
+      if (out_exp >= FPBits_t::maxExponent) {
         return FPBits_t::inf();
-    }
-    if (x_bits.isNaN()) {
-        return x;
-    }
-    if (y_bits.isNaN()) {
-        return y;
-    }
-
-    uint16_t a_exp, b_exp, out_exp;
-    UIntType a_mant, b_mant;
-    DUIntType a_mant_sq, b_mant_sq;
-    bool sticky_bits;
-
-    if ((x_bits.exponent >= y_bits.exponent + MantissaWidth<T>::value + 2) ||
-            (y == 0)) {
-        return abs(x);
-    } else if ((y_bits.exponent >=
-                x_bits.exponent + MantissaWidth<T>::value + 2) ||
-               (x == 0)) {
-        y_bits.sign = 0;
-        return abs(y);
-    }
-
-    if (x >= y) {
-        a_exp = x_bits.exponent;
-        a_mant = x_bits.mantissa;
-        b_exp = y_bits.exponent;
-        b_mant = y_bits.mantissa;
+      }
     } else {
-        a_exp = y_bits.exponent;
-        a_mant = y_bits.mantissa;
-        b_exp = x_bits.exponent;
-        b_mant = x_bits.mantissa;
+      // For denormal result, we simply move the leading bit of the result to
+      // the left by 1.
+      leading_one <<= 1;
+      ++y_mant_width;
     }
+  }
 
-    out_exp = a_exp;
+  UIntType Y = leading_one;
+  UIntType R = static_cast<UIntType>(sum >> y_mant_width) - leading_one;
+  UIntType tailBits = static_cast<UIntType>(sum) & (leading_one - 1);
 
-    // Add an extra bit to simplify the final rounding bit computation.
-    constexpr UIntType one = UIntType(1) << (MantissaWidth<T>::value + 1);
-
-    a_mant <<= 1;
-    b_mant <<= 1;
-
-    UIntType leading_one;
-    int y_mant_width;
-    if (a_exp != 0) {
-        leading_one = one;
-        a_mant |= one;
-        y_mant_width = MantissaWidth<T>::value + 1;
-    } else {
-        leading_one = internal::findLeadingOne(a_mant, y_mant_width);
+  for (UIntType current_bit = leading_one >> 1; current_bit;
+       current_bit >>= 1) {
+    R = (R << 1) + ((tailBits & current_bit) ? 1 : 0);
+    UIntType tmp = (Y << 1) + current_bit; // 2*y(n - 1) + 2^(-n)
+    if (R >= tmp) {
+      R -= tmp;
+      Y += current_bit;
     }
+  }
 
-    if (b_exp != 0) {
-        b_mant |= one;
+  bool round_bit = Y & UIntType(1);
+  bool lsb = Y & UIntType(2);
+
+  if (Y >= one) {
+    Y -= one;
+
+    if (out_exp == 0) {
+      out_exp = 1;
     }
+  }
 
-    a_mant_sq = static_cast<DUIntType>(a_mant) * a_mant;
-    b_mant_sq = static_cast<DUIntType>(b_mant) * b_mant;
+  Y >>= 1;
 
-    // At this point, a_exp >= b_exp > a_exp - 25, so in order to line up aSqMant
-    // and bSqMant, we need to shift bSqMant to the right by (a_exp - b_exp) bits.
-    // But before that, remember to store the losing bits to sticky.
-    // The shift length is for a^2 and b^2, so it's double of the exponent
-    // difference between a and b.
-    uint16_t shift_length = 2 * (a_exp - b_exp);
-    sticky_bits =
-        ((b_mant_sq & ((DUIntType(1) << shift_length) - DUIntType(1))) !=
-         DUIntType(0));
-    b_mant_sq >>= shift_length;
+  // Round to the nearest, tie to even.
+  if (round_bit && (lsb || sticky_bits || (R != 0))) {
+    ++Y;
+  }
 
-    DUIntType sum = a_mant_sq + b_mant_sq;
-    if (sum >= (DUIntType(1) << (2 * y_mant_width + 2))) {
-        // a^2 + b^2 >= 4* leading_one^2, so we will need an extra bit to the left.
-        if (leading_one == one) {
-            // For normal result, we discard the last 2 bits of the sum and increase
-            // the exponent.
-            sticky_bits = sticky_bits || ((sum & 0x3U) != 0);
-            sum >>= 2;
-            ++out_exp;
-            if (out_exp >= FPBits_t::maxExponent) {
-                return FPBits_t::inf();
-            }
-        } else {
-            // For denormal result, we simply move the leading bit of the result to
-            // the left by 1.
-            leading_one <<= 1;
-            ++y_mant_width;
-        }
+  if (Y >= (one >> 1)) {
+    Y -= one >> 1;
+    ++out_exp;
+    if (out_exp >= FPBits_t::maxExponent) {
+      return FPBits_t::inf();
     }
+  }
 
-    UIntType Y = leading_one;
-    UIntType R = static_cast<UIntType>(sum >> y_mant_width) - leading_one;
-    UIntType tailBits = static_cast<UIntType>(sum) & (leading_one - 1);
-
-    for (UIntType current_bit = leading_one >> 1; current_bit;
-            current_bit >>= 1) {
-        R = (R << 1) + ((tailBits & current_bit) ? 1 : 0);
-        UIntType tmp = (Y << 1) + current_bit; // 2*y(n - 1) + 2^(-n)
-        if (R >= tmp) {
-            R -= tmp;
-            Y += current_bit;
-        }
-    }
-
-    bool round_bit = Y & UIntType(1);
-    bool lsb = Y & UIntType(2);
-
-    if (Y >= one) {
-        Y -= one;
-
-        if (out_exp == 0) {
-            out_exp = 1;
-        }
-    }
-
-    Y >>= 1;
-
-    // Round to the nearest, tie to even.
-    if (round_bit && (lsb || sticky_bits || (R != 0))) {
-        ++Y;
-    }
-
-    if (Y >= (one >> 1)) {
-        Y -= one >> 1;
-        ++out_exp;
-        if (out_exp >= FPBits_t::maxExponent) {
-            return FPBits_t::inf();
-        }
-    }
-
-    Y |= static_cast<UIntType>(out_exp) << MantissaWidth<T>::value;
-    return *reinterpret_cast<T *>(&Y);
+  Y |= static_cast<UIntType>(out_exp) << MantissaWidth<T>::value;
+  return *reinterpret_cast<T *>(&Y);
 }
 
 } // namespace fputil

@@ -32,27 +32,27 @@ namespace exegesis {
 // distribution if the CPU scheduler can distribute the load as evenly as
 // possible.
 std::vector<std::pair<uint16_t, float>>
-                                     computeIdealizedProcResPressure(const MCSchedModel &SM,
-                                             SmallVector<MCWriteProcResEntry, 8> WPRS);
+computeIdealizedProcResPressure(const MCSchedModel &SM,
+                                SmallVector<MCWriteProcResEntry, 8> WPRS);
 
 // An MCSchedClassDesc augmented with some additional data.
 struct ResolvedSchedClass {
-    ResolvedSchedClass(const MCSubtargetInfo &STI, unsigned ResolvedSchedClassId,
-                       bool WasVariant);
+  ResolvedSchedClass(const MCSubtargetInfo &STI, unsigned ResolvedSchedClassId,
+                     bool WasVariant);
 
-    static std::pair<unsigned /*SchedClassId*/, bool /*WasVariant*/>
-    resolveSchedClassId(const MCSubtargetInfo &SubtargetInfo,
-                        const MCInstrInfo &InstrInfo, const MCInst &MCI);
+  static std::pair<unsigned /*SchedClassId*/, bool /*WasVariant*/>
+  resolveSchedClassId(const MCSubtargetInfo &SubtargetInfo,
+                      const MCInstrInfo &InstrInfo, const MCInst &MCI);
 
-    std::vector<BenchmarkMeasure>
-    getAsPoint(InstructionBenchmark::ModeE Mode, const MCSubtargetInfo &STI,
-               ArrayRef<PerInstructionStats> Representative) const;
+  std::vector<BenchmarkMeasure>
+  getAsPoint(InstructionBenchmark::ModeE Mode, const MCSubtargetInfo &STI,
+             ArrayRef<PerInstructionStats> Representative) const;
 
-    const unsigned SchedClassId;
-    const MCSchedClassDesc *const SCDesc;
-    const bool WasVariant; // Whether the original class was variant.
-    const SmallVector<MCWriteProcResEntry, 8> NonRedundantWriteProcRes;
-    const std::vector<std::pair<uint16_t, float>> IdealizedProcResPressure;
+  const unsigned SchedClassId;
+  const MCSchedClassDesc *const SCDesc;
+  const bool WasVariant; // Whether the original class was variant.
+  const SmallVector<MCWriteProcResEntry, 8> NonRedundantWriteProcRes;
+  const std::vector<std::pair<uint16_t, float>> IdealizedProcResPressure;
 };
 
 } // namespace exegesis

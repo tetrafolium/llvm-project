@@ -15,29 +15,29 @@
 
 namespace __cxxabiv1 {
 extern "C" {
-    _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_cast(void) {
+_LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_cast(void) {
 #ifndef _LIBCXXABI_NO_EXCEPTIONS
-        throw std::bad_cast();
+  throw std::bad_cast();
 #else
-        std::terminate();
+  std::terminate();
 #endif
-    }
+}
 
-    _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_typeid(void) {
+_LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void __cxa_bad_typeid(void) {
 #ifndef _LIBCXXABI_NO_EXCEPTIONS
-        throw std::bad_typeid();
+  throw std::bad_typeid();
 #else
-        std::terminate();
+  std::terminate();
 #endif
-    }
+}
 
-    _LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void
-    __cxa_throw_bad_array_new_length(void) {
+_LIBCXXABI_FUNC_VIS _LIBCXXABI_NORETURN void
+__cxa_throw_bad_array_new_length(void) {
 #ifndef _LIBCXXABI_NO_EXCEPTIONS
-        throw std::bad_array_new_length();
+  throw std::bad_array_new_length();
 #else
-        std::terminate();
+  std::terminate();
 #endif
-    }
+}
 } // extern "C"
-} // abi
+} // namespace __cxxabiv1

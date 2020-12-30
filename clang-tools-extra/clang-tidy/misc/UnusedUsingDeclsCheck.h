@@ -23,31 +23,31 @@ namespace misc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/misc-unused-using-decls.html
 class UnusedUsingDeclsCheck : public ClangTidyCheck {
 public:
-    UnusedUsingDeclsCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
-    void onEndOfTranslationUnit() override;
+  UnusedUsingDeclsCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void onEndOfTranslationUnit() override;
 
 private:
-    void removeFromFoundDecls(const Decl *D);
+  void removeFromFoundDecls(const Decl *D);
 
-    struct UsingDeclContext {
-        explicit UsingDeclContext(const UsingDecl *FoundUsingDecl)
-            : FoundUsingDecl(FoundUsingDecl), IsUsed(false) {}
-        // A set saves all UsingShadowDecls introduced by a UsingDecl. A UsingDecl
-        // can introduce multiple UsingShadowDecls in some cases (such as
-        // overloaded functions).
-        llvm::SmallPtrSet<const Decl *, 4> UsingTargetDecls;
-        // The original UsingDecl.
-        const UsingDecl *FoundUsingDecl;
-        // The source range of the UsingDecl.
-        CharSourceRange UsingDeclRange;
-        // Whether the UsingDecl is used.
-        bool IsUsed;
-    };
+  struct UsingDeclContext {
+    explicit UsingDeclContext(const UsingDecl *FoundUsingDecl)
+        : FoundUsingDecl(FoundUsingDecl), IsUsed(false) {}
+    // A set saves all UsingShadowDecls introduced by a UsingDecl. A UsingDecl
+    // can introduce multiple UsingShadowDecls in some cases (such as
+    // overloaded functions).
+    llvm::SmallPtrSet<const Decl *, 4> UsingTargetDecls;
+    // The original UsingDecl.
+    const UsingDecl *FoundUsingDecl;
+    // The source range of the UsingDecl.
+    CharSourceRange UsingDeclRange;
+    // Whether the UsingDecl is used.
+    bool IsUsed;
+  };
 
-    std::vector<UsingDeclContext> Contexts;
+  std::vector<UsingDeclContext> Contexts;
 };
 
 } // namespace misc

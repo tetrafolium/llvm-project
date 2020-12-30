@@ -25,28 +25,28 @@
 namespace llvm {
 class Float2IntPass : public PassInfoMixin<Float2IntPass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-    // Glue for old PM.
-    bool runImpl(Function &F, const DominatorTree &DT);
+  // Glue for old PM.
+  bool runImpl(Function &F, const DominatorTree &DT);
 
 private:
-    void findRoots(Function &F, const DominatorTree &DT);
-    void seen(Instruction *I, ConstantRange R);
-    ConstantRange badRange();
-    ConstantRange unknownRange();
-    ConstantRange validateRange(ConstantRange R);
-    void walkBackwards();
-    void walkForwards();
-    bool validateAndTransform();
-    Value *convert(Instruction *I, Type *ToTy);
-    void cleanup();
+  void findRoots(Function &F, const DominatorTree &DT);
+  void seen(Instruction *I, ConstantRange R);
+  ConstantRange badRange();
+  ConstantRange unknownRange();
+  ConstantRange validateRange(ConstantRange R);
+  void walkBackwards();
+  void walkForwards();
+  bool validateAndTransform();
+  Value *convert(Instruction *I, Type *ToTy);
+  void cleanup();
 
-    MapVector<Instruction *, ConstantRange> SeenInsts;
-    SmallSetVector<Instruction *, 8> Roots;
-    EquivalenceClasses<Instruction *> ECs;
-    MapVector<Instruction *, Value *> ConvertedInsts;
-    LLVMContext *Ctx;
+  MapVector<Instruction *, ConstantRange> SeenInsts;
+  SmallSetVector<Instruction *, 8> Roots;
+  EquivalenceClasses<Instruction *> ECs;
+  MapVector<Instruction *, Value *> ConvertedInsts;
+  LLVMContext *Ctx;
 };
-}
+} // namespace llvm
 #endif // LLVM_TRANSFORMS_SCALAR_FLOAT2INT_H

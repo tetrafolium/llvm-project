@@ -25,75 +25,71 @@ namespace llvm {
 /// used to compute the post-dominator tree for MachineFunctions.
 ///
 class MachinePostDominatorTree : public MachineFunctionPass {
-    using PostDomTreeT = PostDomTreeBase<MachineBasicBlock>;
-    std::unique_ptr<PostDomTreeT> PDT;
+  using PostDomTreeT = PostDomTreeBase<MachineBasicBlock>;
+  std::unique_ptr<PostDomTreeT> PDT;
 
 public:
-    static char ID;
+  static char ID;
 
-    MachinePostDominatorTree();
+  MachinePostDominatorTree();
 
-    PostDomTreeT &getBase() {
-        if (!PDT)
-            PDT.reset(new PostDomTreeT());
-        return *PDT;
-    }
+  PostDomTreeT &getBase() {
+    if (!PDT)
+      PDT.reset(new PostDomTreeT());
+    return *PDT;
+  }
 
-    FunctionPass *createMachinePostDominatorTreePass();
+  FunctionPass *createMachinePostDominatorTreePass();
 
-    MachineDomTreeNode *getRootNode() const {
-        return PDT->getRootNode();
-    }
+  MachineDomTreeNode *getRootNode() const { return PDT->getRootNode(); }
 
-    MachineDomTreeNode *operator[](MachineBasicBlock *BB) const {
-        return PDT->getNode(BB);
-    }
+  MachineDomTreeNode *operator[](MachineBasicBlock *BB) const {
+    return PDT->getNode(BB);
+  }
 
-    MachineDomTreeNode *getNode(MachineBasicBlock *BB) const {
-        return PDT->getNode(BB);
-    }
+  MachineDomTreeNode *getNode(MachineBasicBlock *BB) const {
+    return PDT->getNode(BB);
+  }
 
-    bool dominates(const MachineDomTreeNode *A,
-                   const MachineDomTreeNode *B) const {
-        return PDT->dominates(A, B);
-    }
+  bool dominates(const MachineDomTreeNode *A,
+                 const MachineDomTreeNode *B) const {
+    return PDT->dominates(A, B);
+  }
 
-    bool dominates(const MachineBasicBlock *A, const MachineBasicBlock *B) const {
-        return PDT->dominates(A, B);
-    }
+  bool dominates(const MachineBasicBlock *A, const MachineBasicBlock *B) const {
+    return PDT->dominates(A, B);
+  }
 
-    bool properlyDominates(const MachineDomTreeNode *A,
-                           const MachineDomTreeNode *B) const {
-        return PDT->properlyDominates(A, B);
-    }
+  bool properlyDominates(const MachineDomTreeNode *A,
+                         const MachineDomTreeNode *B) const {
+    return PDT->properlyDominates(A, B);
+  }
 
-    bool properlyDominates(const MachineBasicBlock *A,
-                           const MachineBasicBlock *B) const {
-        return PDT->properlyDominates(A, B);
-    }
+  bool properlyDominates(const MachineBasicBlock *A,
+                         const MachineBasicBlock *B) const {
+    return PDT->properlyDominates(A, B);
+  }
 
-    bool isVirtualRoot(const MachineDomTreeNode *Node) const {
-        return PDT->isVirtualRoot(Node);
-    }
+  bool isVirtualRoot(const MachineDomTreeNode *Node) const {
+    return PDT->isVirtualRoot(Node);
+  }
 
-    MachineBasicBlock *findNearestCommonDominator(MachineBasicBlock *A,
-            MachineBasicBlock *B) const {
-        return PDT->findNearestCommonDominator(A, B);
-    }
+  MachineBasicBlock *findNearestCommonDominator(MachineBasicBlock *A,
+                                                MachineBasicBlock *B) const {
+    return PDT->findNearestCommonDominator(A, B);
+  }
 
-    /// Returns the nearest common dominator of the given blocks.
-    /// If that tree node is a virtual root, a nullptr will be returned.
-    MachineBasicBlock *
-    findNearestCommonDominator(ArrayRef<MachineBasicBlock *> Blocks) const;
+  /// Returns the nearest common dominator of the given blocks.
+  /// If that tree node is a virtual root, a nullptr will be returned.
+  MachineBasicBlock *
+  findNearestCommonDominator(ArrayRef<MachineBasicBlock *> Blocks) const;
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
-    void releaseMemory() override {
-        PDT.reset(nullptr);
-    }
-    void verifyAnalysis() const override;
-    void print(llvm::raw_ostream &OS, const Module *M = nullptr) const override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void releaseMemory() override { PDT.reset(nullptr); }
+  void verifyAnalysis() const override;
+  void print(llvm::raw_ostream &OS, const Module *M = nullptr) const override;
 };
-} //end of namespace llvm
+} // end of namespace llvm
 
 #endif

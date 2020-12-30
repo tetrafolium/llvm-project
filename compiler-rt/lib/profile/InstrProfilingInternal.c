@@ -15,22 +15,20 @@
 
 static unsigned ProfileDumped = 0;
 
-COMPILER_RT_VISIBILITY unsigned lprofProfileDumped() {
-    return ProfileDumped;
-}
+COMPILER_RT_VISIBILITY unsigned lprofProfileDumped() { return ProfileDumped; }
 
 COMPILER_RT_VISIBILITY void lprofSetProfileDumped(unsigned Value) {
-    ProfileDumped = Value;
+  ProfileDumped = Value;
 }
 
 static unsigned RuntimeCounterRelocation = 0;
 
 COMPILER_RT_VISIBILITY unsigned lprofRuntimeCounterRelocation(void) {
-    return RuntimeCounterRelocation;
+  return RuntimeCounterRelocation;
 }
 
 COMPILER_RT_VISIBILITY void lprofSetRuntimeCounterRelocation(unsigned Value) {
-    RuntimeCounterRelocation = Value;
+  RuntimeCounterRelocation = Value;
 }
 
 #endif

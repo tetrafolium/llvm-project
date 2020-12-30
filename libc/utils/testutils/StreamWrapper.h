@@ -16,12 +16,12 @@ namespace testutils {
 // standard headers so we must provide streams through indirection to not
 // expose the system libc headers.
 class StreamWrapper {
-    void *OS;
+  void *OS;
 
 public:
-    StreamWrapper(void *OS) : OS(OS) {}
+  StreamWrapper(void *OS) : OS(OS) {}
 
-    template <typename T> StreamWrapper &operator<<(T t);
+  template <typename T> StreamWrapper &operator<<(T t);
 };
 
 StreamWrapper outs();

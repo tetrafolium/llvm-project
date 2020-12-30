@@ -7,8 +7,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "Function.h"
-#include "Program.h"
 #include "Opcode.h"
+#include "Program.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclCXX.h"
 
@@ -21,34 +21,28 @@ Function::Function(Program &P, const FunctionDecl *F, unsigned ArgSize,
     : P(P), Loc(F->getBeginLoc()), F(F), ArgSize(ArgSize),
       ParamTypes(std::move(ParamTypes)), Params(std::move(Params)) {}
 
-CodePtr Function::getCodeBegin() const {
-    return Code.data();
-}
+CodePtr Function::getCodeBegin() const { return Code.data(); }
 
-CodePtr Function::getCodeEnd() const {
-    return Code.data() + Code.size();
-}
+CodePtr Function::getCodeEnd() const { return Code.data() + Code.size(); }
 
 Function::ParamDescriptor Function::getParamDescriptor(unsigned Offset) const {
-    auto It = Params.find(Offset);
-    assert(It != Params.end() && "Invalid parameter offset");
-    return It->second;
+  auto It = Params.find(Offset);
+  assert(It != Params.end() && "Invalid parameter offset");
+  return It->second;
 }
 
 SourceInfo Function::getSource(CodePtr PC) const {
-    unsigned Offset = PC - getCodeBegin();
-    using Elem = std::pair<unsigned, SourceInfo>;
-    auto It = std::lower_bound(SrcMap.begin(), SrcMap.end(), Elem{Offset, {}},
-    [](Elem A, Elem B) {
-        return A.first < B.first;
-    });
-    if (It == SrcMap.end() || It->first != Offset)
-        llvm::report_fatal_error("missing source location");
-    return It->second;
+  unsigned Offset = PC - getCodeBegin();
+  using Elem = std::pair<unsigned, SourceInfo>;
+  auto It = std::lower_bound(SrcMap.begin(), SrcMap.end(), Elem{Offset, {}},
+                             [](Elem A, Elem B) { return A.first < B.first; });
+  if (It == SrcMap.end() || It->first != Offset)
+    llvm::report_fatal_error("missing source location");
+  return It->second;
 }
 
 bool Function::isVirtual() const {
-    if (auto *M = dyn_cast<CXXMethodDecl>(F))
-        return M->isVirtual();
-    return false;
+  if (auto *M = dyn_cast<CXXMethodDecl>(F))
+    return M->isVirtual();
+  return false;
 }

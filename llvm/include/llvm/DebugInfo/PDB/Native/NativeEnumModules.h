@@ -18,18 +18,18 @@ class NativeSession;
 
 class NativeEnumModules : public IPDBEnumChildren<PDBSymbol> {
 public:
-    NativeEnumModules(NativeSession &Session, uint32_t Index = 0);
+  NativeEnumModules(NativeSession &Session, uint32_t Index = 0);
 
-    uint32_t getChildCount() const override;
-    std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
-    std::unique_ptr<PDBSymbol> getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  std::unique_ptr<PDBSymbol> getChildAtIndex(uint32_t Index) const override;
+  std::unique_ptr<PDBSymbol> getNext() override;
+  void reset() override;
 
 private:
-    NativeSession &Session;
-    uint32_t Index;
+  NativeSession &Session;
+  uint32_t Index;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

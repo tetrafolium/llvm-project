@@ -49,6 +49,6 @@ bool parseWidenableBranch(const User *U, Value *&Condition,
 bool parseWidenableBranch(User *U, Use *&Cond, Use *&WC, BasicBlock *&IfTrueBB,
                           BasicBlock *&IfFalseBB);
 
-} // llvm
+} // namespace llvm
 
 #endif // LLVM_ANALYSIS_GUARDUTILS_H

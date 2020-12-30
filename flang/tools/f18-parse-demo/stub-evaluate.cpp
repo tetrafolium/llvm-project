@@ -13,15 +13,15 @@
 
 namespace Fortran::evaluate {
 struct GenericExprWrapper {
-    static void Deleter(GenericExprWrapper *);
+  static void Deleter(GenericExprWrapper *);
 };
 void GenericExprWrapper::Deleter(GenericExprWrapper *) {}
 struct GenericAssignmentWrapper {
-    static void Deleter(GenericAssignmentWrapper *);
+  static void Deleter(GenericAssignmentWrapper *);
 };
 void GenericAssignmentWrapper::Deleter(GenericAssignmentWrapper *) {}
 struct ProcedureRef {
-    static void Deleter(ProcedureRef *);
+  static void Deleter(ProcedureRef *);
 };
 void ProcedureRef::Deleter(ProcedureRef *) {}
 } // namespace Fortran::evaluate

@@ -20,7 +20,7 @@ namespace AArch64GISelUtils {
 /// \returns true if \p C is a legal immediate operand for an arithmetic
 /// instruction.
 constexpr bool isLegalArithImmed(const uint64_t C) {
-    return (C >> 12 == 0) || ((C & 0xFFFULL) == 0 && C >> 24 == 0);
+  return (C >> 12 == 0) || ((C & 0xFFFULL) == 0 && C >> 24 == 0);
 }
 
 } // namespace AArch64GISelUtils

@@ -21,31 +21,29 @@ Position::~Position() {}
 // AttributePosition
 
 AttributePosition::AttributePosition(const KeyTy &key) : Base(key) {
-    parent = key.first;
+  parent = key.first;
 }
 
 //===----------------------------------------------------------------------===//
 // OperandPosition
 
 OperandPosition::OperandPosition(const KeyTy &key) : Base(key) {
-    parent = key.first;
+  parent = key.first;
 }
 
 //===----------------------------------------------------------------------===//
 // OperationPosition
 
 OperationPosition *OperationPosition::get(StorageUniquer &uniquer,
-        ArrayRef<unsigned> index) {
-    assert(!index.empty() && "expected at least two indices");
+                                          ArrayRef<unsigned> index) {
+  assert(!index.empty() && "expected at least two indices");
 
-    // Set the parent position if this isn't the root.
-    Position *parent = nullptr;
-    if (index.size() > 1) {
-        auto *node = OperationPosition::get(uniquer, index.drop_back());
-        parent = OperandPosition::get(uniquer, std::make_pair(node, index.back()));
-    }
-    return uniquer.get<OperationPosition>(
-    [parent](OperationPosition *node) {
-        node->parent = parent;
-    }, index);
+  // Set the parent position if this isn't the root.
+  Position *parent = nullptr;
+  if (index.size() > 1) {
+    auto *node = OperationPosition::get(uniquer, index.drop_back());
+    parent = OperandPosition::get(uniquer, std::make_pair(node, index.back()));
+  }
+  return uniquer.get<OperationPosition>(
+      [parent](OperationPosition *node) { node->parent = parent; }, index);
 }

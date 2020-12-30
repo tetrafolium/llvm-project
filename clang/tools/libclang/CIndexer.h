@@ -32,85 +32,71 @@ class Token;
 class IdentifierInfo;
 
 class CIndexer {
-    bool OnlyLocalDecls;
-    bool DisplayDiagnostics;
-    unsigned Options; // CXGlobalOptFlags.
+  bool OnlyLocalDecls;
+  bool DisplayDiagnostics;
+  unsigned Options; // CXGlobalOptFlags.
 
-    std::string ResourcesPath;
-    std::shared_ptr<PCHContainerOperations> PCHContainerOps;
+  std::string ResourcesPath;
+  std::shared_ptr<PCHContainerOperations> PCHContainerOps;
 
-    std::string ToolchainPath;
+  std::string ToolchainPath;
 
-    std::string InvocationEmissionPath;
+  std::string InvocationEmissionPath;
 
 public:
-    CIndexer(std::shared_ptr<PCHContainerOperations> PCHContainerOps =
-                 std::make_shared<PCHContainerOperations>())
-        : OnlyLocalDecls(false), DisplayDiagnostics(false),
-          Options(CXGlobalOpt_None), PCHContainerOps(std::move(PCHContainerOps)) {
-    }
+  CIndexer(std::shared_ptr<PCHContainerOperations> PCHContainerOps =
+               std::make_shared<PCHContainerOperations>())
+      : OnlyLocalDecls(false), DisplayDiagnostics(false),
+        Options(CXGlobalOpt_None), PCHContainerOps(std::move(PCHContainerOps)) {
+  }
 
-    /// Whether we only want to see "local" declarations (that did not
-    /// come from a previous precompiled header). If false, we want to see all
-    /// declarations.
-    bool getOnlyLocalDecls() const {
-        return OnlyLocalDecls;
-    }
-    void setOnlyLocalDecls(bool Local = true) {
-        OnlyLocalDecls = Local;
-    }
+  /// Whether we only want to see "local" declarations (that did not
+  /// come from a previous precompiled header). If false, we want to see all
+  /// declarations.
+  bool getOnlyLocalDecls() const { return OnlyLocalDecls; }
+  void setOnlyLocalDecls(bool Local = true) { OnlyLocalDecls = Local; }
 
-    bool getDisplayDiagnostics() const {
-        return DisplayDiagnostics;
-    }
-    void setDisplayDiagnostics(bool Display = true) {
-        DisplayDiagnostics = Display;
-    }
+  bool getDisplayDiagnostics() const { return DisplayDiagnostics; }
+  void setDisplayDiagnostics(bool Display = true) {
+    DisplayDiagnostics = Display;
+  }
 
-    std::shared_ptr<PCHContainerOperations> getPCHContainerOperations() const {
-        return PCHContainerOps;
-    }
+  std::shared_ptr<PCHContainerOperations> getPCHContainerOperations() const {
+    return PCHContainerOps;
+  }
 
-    unsigned getCXGlobalOptFlags() const {
-        return Options;
-    }
-    void setCXGlobalOptFlags(unsigned options) {
-        Options = options;
-    }
+  unsigned getCXGlobalOptFlags() const { return Options; }
+  void setCXGlobalOptFlags(unsigned options) { Options = options; }
 
-    bool isOptEnabled(CXGlobalOptFlags opt) const {
-        return Options & opt;
-    }
+  bool isOptEnabled(CXGlobalOptFlags opt) const { return Options & opt; }
 
-    /// Get the path of the clang resource files.
-    const std::string &getClangResourcesPath();
+  /// Get the path of the clang resource files.
+  const std::string &getClangResourcesPath();
 
-    StringRef getClangToolchainPath();
+  StringRef getClangToolchainPath();
 
-    void setInvocationEmissionPath(StringRef Str) {
-        InvocationEmissionPath = std::string(Str);
-    }
+  void setInvocationEmissionPath(StringRef Str) {
+    InvocationEmissionPath = std::string(Str);
+  }
 
-    StringRef getInvocationEmissionPath() const {
-        return InvocationEmissionPath;
-    }
+  StringRef getInvocationEmissionPath() const { return InvocationEmissionPath; }
 };
 
 /// Logs information about a particular libclang operation like parsing to
 /// a new file in the invocation emission path.
 class LibclangInvocationReporter {
 public:
-    enum class OperationKind { ParseOperation, CompletionOperation };
+  enum class OperationKind { ParseOperation, CompletionOperation };
 
-    LibclangInvocationReporter(CIndexer &Idx, OperationKind Op,
-                               unsigned ParseOptions,
-                               llvm::ArrayRef<const char *> Args,
-                               llvm::ArrayRef<std::string> InvocationArgs,
-                               llvm::ArrayRef<CXUnsavedFile> UnsavedFiles);
-    ~LibclangInvocationReporter();
+  LibclangInvocationReporter(CIndexer &Idx, OperationKind Op,
+                             unsigned ParseOptions,
+                             llvm::ArrayRef<const char *> Args,
+                             llvm::ArrayRef<std::string> InvocationArgs,
+                             llvm::ArrayRef<CXUnsavedFile> UnsavedFiles);
+  ~LibclangInvocationReporter();
 
 private:
-    std::string File;
+  std::string File;
 };
 
 /// Return the current size to request for "safety".
@@ -139,8 +125,8 @@ void printDiagsToStderr(ASTUnit *Unit);
 
 /// If \c MacroDefLoc points at a macro definition with \c II as
 /// its name, this retrieves its MacroInfo.
-MacroInfo *getMacroInfo(const IdentifierInfo &II,
-                        SourceLocation MacroDefLoc, CXTranslationUnit TU);
+MacroInfo *getMacroInfo(const IdentifierInfo &II, SourceLocation MacroDefLoc,
+                        CXTranslationUnit TU);
 
 /// Retrieves the corresponding MacroInfo of a MacroDefinitionRecord.
 const MacroInfo *getMacroInfo(const MacroDefinitionRecord *MacroDef,
@@ -150,16 +136,16 @@ const MacroInfo *getMacroInfo(const MacroDefinitionRecord *MacroDef,
 /// an identifier that has ever been a macro name, this returns the latest
 /// MacroDefinitionRecord for that name, otherwise it returns NULL.
 MacroDefinitionRecord *checkForMacroInMacroDefinition(const MacroInfo *MI,
-        SourceLocation Loc,
-        CXTranslationUnit TU);
+                                                      SourceLocation Loc,
+                                                      CXTranslationUnit TU);
 
 /// If \c Tok resides inside the definition of \c MI and it points at
 /// an identifier that has ever been a macro name, this returns the latest
 /// MacroDefinitionRecord for that name, otherwise it returns NULL.
 MacroDefinitionRecord *checkForMacroInMacroDefinition(const MacroInfo *MI,
-        const Token &Tok,
-        CXTranslationUnit TU);
-}
-}
+                                                      const Token &Tok,
+                                                      CXTranslationUnit TU);
+} // namespace cxindex
+} // namespace clang
 
 #endif

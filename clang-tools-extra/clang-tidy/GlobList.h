@@ -24,24 +24,23 @@ namespace tidy {
 /// them in the order of appearance in the list.
 class GlobList {
 public:
-    /// \p Globs is a comma-separated list of globs (only the '*' metacharacter is
-    /// supported) with an optional '-' prefix to denote exclusion.
-    ///
-    /// An empty \p Globs string is interpreted as one glob that matches an empty
-    /// string.
-    GlobList(StringRef Globs);
+  /// \p Globs is a comma-separated list of globs (only the '*' metacharacter is
+  /// supported) with an optional '-' prefix to denote exclusion.
+  ///
+  /// An empty \p Globs string is interpreted as one glob that matches an empty
+  /// string.
+  GlobList(StringRef Globs);
 
-    /// Returns \c true if the pattern matches \p S. The result is the last
-    /// matching glob's Positive flag.
-    bool contains(StringRef S) const;
+  /// Returns \c true if the pattern matches \p S. The result is the last
+  /// matching glob's Positive flag.
+  bool contains(StringRef S) const;
 
 private:
-
-    struct GlobListItem {
-        bool IsPositive;
-        llvm::Regex Regex;
-    };
-    SmallVector<GlobListItem, 0> Items;
+  struct GlobListItem {
+    bool IsPositive;
+    llvm::Regex Regex;
+  };
+  SmallVector<GlobListItem, 0> Items;
 };
 
 } // end namespace tidy

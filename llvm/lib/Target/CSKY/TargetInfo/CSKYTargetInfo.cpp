@@ -11,10 +11,10 @@
 using namespace llvm;
 
 Target &llvm::getTheCSKYTarget() {
-    static Target TheCSKYTarget;
-    return TheCSKYTarget;
+  static Target TheCSKYTarget;
+  return TheCSKYTarget;
 }
 
 extern "C" void LLVMInitializeCSKYTargetInfo() {
-    RegisterTarget<Triple::csky> X(getTheCSKYTarget(), "csky", "C-SKY", "CSKY");
+  RegisterTarget<Triple::csky> X(getTheCSKYTarget(), "csky", "C-SKY", "CSKY");
 }

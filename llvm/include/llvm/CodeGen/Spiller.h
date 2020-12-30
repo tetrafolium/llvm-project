@@ -21,15 +21,15 @@ class VirtRegMap;
 /// Implementations are utility classes which insert spill or remat code on
 /// demand.
 class Spiller {
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    virtual ~Spiller() = 0;
+  virtual ~Spiller() = 0;
 
-    /// spill - Spill the LRE.getParent() live interval.
-    virtual void spill(LiveRangeEdit &LRE) = 0;
+  /// spill - Spill the LRE.getParent() live interval.
+  virtual void spill(LiveRangeEdit &LRE) = 0;
 
-    virtual void postOptimization() {}
+  virtual void postOptimization() {}
 };
 
 /// Create and return a spiller that will insert spill code directly instead

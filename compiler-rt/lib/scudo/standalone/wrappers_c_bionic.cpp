@@ -24,7 +24,7 @@
 
 extern "C" void SCUDO_PREFIX(malloc_postinit)();
 static scudo::Allocator<scudo::AndroidConfig, SCUDO_PREFIX(malloc_postinit)>
-SCUDO_ALLOCATOR;
+    SCUDO_ALLOCATOR;
 
 #include "wrappers_c.inc"
 
@@ -37,8 +37,8 @@ SCUDO_ALLOCATOR;
 
 extern "C" void SCUDO_PREFIX(malloc_postinit)();
 static scudo::Allocator<scudo::AndroidSvelteConfig,
-       SCUDO_PREFIX(malloc_postinit)>
-       SCUDO_ALLOCATOR;
+                        SCUDO_PREFIX(malloc_postinit)>
+    SCUDO_ALLOCATOR;
 
 #include "wrappers_c.inc"
 
@@ -46,32 +46,30 @@ static scudo::Allocator<scudo::AndroidSvelteConfig,
 #undef SCUDO_PREFIX
 
 // TODO(kostyak): support both allocators.
-INTERFACE void __scudo_print_stats(void) {
-    Allocator.printStats();
-}
+INTERFACE void __scudo_print_stats(void) { Allocator.printStats(); }
 
 INTERFACE void __scudo_get_error_info(
     struct scudo_error_info *error_info, uintptr_t fault_addr,
     const char *stack_depot, const char *region_info, const char *memory,
     const char *memory_tags, uintptr_t memory_addr, size_t memory_size) {
-    Allocator.getErrorInfo(error_info, fault_addr, stack_depot, region_info,
-                           memory, memory_tags, memory_addr, memory_size);
+  Allocator.getErrorInfo(error_info, fault_addr, stack_depot, region_info,
+                         memory, memory_tags, memory_addr, memory_size);
 }
 
 INTERFACE const char *__scudo_get_stack_depot_addr() {
-    return Allocator.getStackDepotAddress();
+  return Allocator.getStackDepotAddress();
 }
 
 INTERFACE size_t __scudo_get_stack_depot_size() {
-    return sizeof(scudo::StackDepot);
+  return sizeof(scudo::StackDepot);
 }
 
 INTERFACE const char *__scudo_get_region_info_addr() {
-    return Allocator.getRegionInfoArrayAddress();
+  return Allocator.getRegionInfoArrayAddress();
 }
 
 INTERFACE size_t __scudo_get_region_info_size() {
-    return Allocator.getRegionInfoArraySize();
+  return Allocator.getRegionInfoArraySize();
 }
 
 #endif // SCUDO_ANDROID && _BIONIC

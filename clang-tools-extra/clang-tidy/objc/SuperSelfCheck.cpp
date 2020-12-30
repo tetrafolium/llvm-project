@@ -32,7 +32,7 @@ namespace {
 ///   @end
 /// \endcode
 AST_MATCHER(ObjCMethodDecl, isInitializer) {
-    return Node.getMethodFamily() == OMF_init;
+  return Node.getMethodFamily() == OMF_init;
 }
 
 /// Matches Objective-C implementations with interfaces that match
@@ -52,8 +52,8 @@ AST_MATCHER(ObjCMethodDecl, isInitializer) {
 /// \endcode
 AST_MATCHER_P(ObjCImplementationDecl, hasInterface,
               ast_matchers::internal::Matcher<ObjCInterfaceDecl>, Base) {
-    const ObjCInterfaceDecl *InterfaceDecl = Node.getClassInterface();
-    return Base.matches(*InterfaceDecl, Finder, Builder);
+  const ObjCInterfaceDecl *InterfaceDecl = Node.getClassInterface();
+  return Base.matches(*InterfaceDecl, Finder, Builder);
 }
 
 /// Matches Objective-C message expressions where the receiver is the
@@ -69,40 +69,40 @@ AST_MATCHER_P(ObjCImplementationDecl, hasInterface,
 ///   }
 /// \endcode
 AST_MATCHER(ObjCMessageExpr, isMessagingSuperInstance) {
-    return Node.getReceiverKind() == ObjCMessageExpr::SuperInstance;
+  return Node.getReceiverKind() == ObjCMessageExpr::SuperInstance;
 }
 
 } // namespace
 
 void SuperSelfCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        objcMessageExpr(hasSelector("self"), isMessagingSuperInstance(),
-                        hasAncestor(objcMethodDecl(
-                                        isInitializer(),
-                                        hasDeclContext(objcImplementationDecl(hasInterface(
-                                                isDerivedFrom(hasName("NSObject"))))))))
-        .bind("message"),
-        this);
+  Finder->addMatcher(
+      objcMessageExpr(hasSelector("self"), isMessagingSuperInstance(),
+                      hasAncestor(objcMethodDecl(
+                          isInitializer(),
+                          hasDeclContext(objcImplementationDecl(hasInterface(
+                              isDerivedFrom(hasName("NSObject"))))))))
+          .bind("message"),
+      this);
 }
 
 void SuperSelfCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *Message = Result.Nodes.getNodeAs<ObjCMessageExpr>("message");
+  const auto *Message = Result.Nodes.getNodeAs<ObjCMessageExpr>("message");
 
-    auto Diag = diag(Message->getExprLoc(), "suspicious invocation of %0 in "
-                     "initializer; did you mean to "
-                     "invoke a superclass initializer?")
-                << Message->getMethodDecl();
+  auto Diag = diag(Message->getExprLoc(), "suspicious invocation of %0 in "
+                                          "initializer; did you mean to "
+                                          "invoke a superclass initializer?")
+              << Message->getMethodDecl();
 
-    SourceLocation ReceiverLoc = Message->getReceiverRange().getBegin();
-    if (ReceiverLoc.isMacroID() || ReceiverLoc.isInvalid())
-        return;
+  SourceLocation ReceiverLoc = Message->getReceiverRange().getBegin();
+  if (ReceiverLoc.isMacroID() || ReceiverLoc.isInvalid())
+    return;
 
-    SourceLocation SelectorLoc = Message->getSelectorStartLoc();
-    if (SelectorLoc.isMacroID() || SelectorLoc.isInvalid())
-        return;
+  SourceLocation SelectorLoc = Message->getSelectorStartLoc();
+  if (SelectorLoc.isMacroID() || SelectorLoc.isInvalid())
+    return;
 
-    Diag << FixItHint::CreateReplacement(Message->getSourceRange(),
-                                         StringRef("[super init]"));
+  Diag << FixItHint::CreateReplacement(Message->getSourceRange(),
+                                       StringRef("[super init]"));
 }
 
 } // namespace objc

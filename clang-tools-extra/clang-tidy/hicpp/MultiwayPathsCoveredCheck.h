@@ -23,22 +23,22 @@ namespace hicpp {
 /// http://clang.llvm.org/extra/clang-tidy/checks/hicpp-multiway-paths-covered.html
 class MultiwayPathsCoveredCheck : public ClangTidyCheck {
 public:
-    MultiwayPathsCoveredCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          WarnOnMissingElse(Options.get("WarnOnMissingElse", false)) {}
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  MultiwayPathsCoveredCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        WarnOnMissingElse(Options.get("WarnOnMissingElse", false)) {}
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void handleSwitchWithDefault(const SwitchStmt *Switch, std::size_t CaseCount);
-    void handleSwitchWithoutDefault(
-        const SwitchStmt *Switch, std::size_t CaseCount,
-        const ast_matchers::MatchFinder::MatchResult &Result);
-    /// This option can be configured to warn on missing 'else' branches in an
-    /// 'if-else if' chain. The default is false because this option might be
-    /// noisy on some code bases.
-    const bool WarnOnMissingElse;
+  void handleSwitchWithDefault(const SwitchStmt *Switch, std::size_t CaseCount);
+  void handleSwitchWithoutDefault(
+      const SwitchStmt *Switch, std::size_t CaseCount,
+      const ast_matchers::MatchFinder::MatchResult &Result);
+  /// This option can be configured to warn on missing 'else' branches in an
+  /// 'if-else if' chain. The default is false because this option might be
+  /// noisy on some code bases.
+  const bool WarnOnMissingElse;
 };
 
 } // namespace hicpp

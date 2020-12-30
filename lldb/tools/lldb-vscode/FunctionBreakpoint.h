@@ -14,13 +14,13 @@
 namespace lldb_vscode {
 
 struct FunctionBreakpoint : public BreakpointBase {
-    std::string functionName;
+  std::string functionName;
 
-    FunctionBreakpoint() = default;
-    FunctionBreakpoint(const llvm::json::Object &obj);
+  FunctionBreakpoint() = default;
+  FunctionBreakpoint(const llvm::json::Object &obj);
 
-    // Set this breakpoint in LLDB as a new breakpoint
-    void SetBreakpoint();
+  // Set this breakpoint in LLDB as a new breakpoint
+  void SetBreakpoint();
 };
 
 } // namespace lldb_vscode

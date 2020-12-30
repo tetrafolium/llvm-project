@@ -34,19 +34,19 @@ namespace {
 
 class SIAddIMGInit : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
 public:
-    SIAddIMGInit() : MachineFunctionPass(ID) {
-        initializeSIAddIMGInitPass(*PassRegistry::getPassRegistry());
-    }
+  SIAddIMGInit() : MachineFunctionPass(ID) {
+    initializeSIAddIMGInitPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 };
 
 } // End anonymous namespace.
@@ -57,121 +57,119 @@ char SIAddIMGInit::ID = 0;
 
 char &llvm::SIAddIMGInitID = SIAddIMGInit::ID;
 
-FunctionPass *llvm::createSIAddIMGInitPass() {
-    return new SIAddIMGInit();
-}
+FunctionPass *llvm::createSIAddIMGInitPass() { return new SIAddIMGInit(); }
 
 bool SIAddIMGInit::runOnMachineFunction(MachineFunction &MF) {
-    MachineRegisterInfo &MRI = MF.getRegInfo();
-    const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
-    const SIInstrInfo *TII = ST.getInstrInfo();
-    const SIRegisterInfo *RI = ST.getRegisterInfo();
-    bool Changed = false;
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const GCNSubtarget &ST = MF.getSubtarget<GCNSubtarget>();
+  const SIInstrInfo *TII = ST.getInstrInfo();
+  const SIRegisterInfo *RI = ST.getRegisterInfo();
+  bool Changed = false;
 
-    for (MachineFunction::iterator BI = MF.begin(), BE = MF.end(); BI != BE;
-            ++BI) {
-        MachineBasicBlock &MBB = *BI;
-        MachineBasicBlock::iterator I, Next;
-        for (I = MBB.begin(); I != MBB.end(); I = Next) {
-            Next = std::next(I);
-            MachineInstr &MI = *I;
+  for (MachineFunction::iterator BI = MF.begin(), BE = MF.end(); BI != BE;
+       ++BI) {
+    MachineBasicBlock &MBB = *BI;
+    MachineBasicBlock::iterator I, Next;
+    for (I = MBB.begin(); I != MBB.end(); I = Next) {
+      Next = std::next(I);
+      MachineInstr &MI = *I;
 
-            auto Opcode = MI.getOpcode();
-            if (TII->isMIMG(Opcode) && !MI.mayStore()) {
-                MachineOperand *TFE = TII->getNamedOperand(MI, AMDGPU::OpName::tfe);
-                MachineOperand *LWE = TII->getNamedOperand(MI, AMDGPU::OpName::lwe);
-                MachineOperand *D16 = TII->getNamedOperand(MI, AMDGPU::OpName::d16);
+      auto Opcode = MI.getOpcode();
+      if (TII->isMIMG(Opcode) && !MI.mayStore()) {
+        MachineOperand *TFE = TII->getNamedOperand(MI, AMDGPU::OpName::tfe);
+        MachineOperand *LWE = TII->getNamedOperand(MI, AMDGPU::OpName::lwe);
+        MachineOperand *D16 = TII->getNamedOperand(MI, AMDGPU::OpName::d16);
 
-                if (!TFE && !LWE) // intersect_ray
-                    continue;
+        if (!TFE && !LWE) // intersect_ray
+          continue;
 
-                unsigned TFEVal = TFE->getImm();
-                unsigned LWEVal = LWE->getImm();
-                unsigned D16Val = D16 ? D16->getImm() : 0;
+        unsigned TFEVal = TFE->getImm();
+        unsigned LWEVal = LWE->getImm();
+        unsigned D16Val = D16 ? D16->getImm() : 0;
 
-                if (TFEVal || LWEVal) {
-                    // At least one of TFE or LWE are non-zero
-                    // We have to insert a suitable initialization of the result value and
-                    // tie this to the dest of the image instruction.
+        if (TFEVal || LWEVal) {
+          // At least one of TFE or LWE are non-zero
+          // We have to insert a suitable initialization of the result value and
+          // tie this to the dest of the image instruction.
 
-                    const DebugLoc &DL = MI.getDebugLoc();
+          const DebugLoc &DL = MI.getDebugLoc();
 
-                    int DstIdx =
-                        AMDGPU::getNamedOperandIdx(MI.getOpcode(), AMDGPU::OpName::vdata);
+          int DstIdx =
+              AMDGPU::getNamedOperandIdx(MI.getOpcode(), AMDGPU::OpName::vdata);
 
-                    // Calculate which dword we have to initialize to 0.
-                    MachineOperand *MO_Dmask =
-                        TII->getNamedOperand(MI, AMDGPU::OpName::dmask);
+          // Calculate which dword we have to initialize to 0.
+          MachineOperand *MO_Dmask =
+              TII->getNamedOperand(MI, AMDGPU::OpName::dmask);
 
-                    // check that dmask operand is found.
-                    assert(MO_Dmask && "Expected dmask operand in instruction");
+          // check that dmask operand is found.
+          assert(MO_Dmask && "Expected dmask operand in instruction");
 
-                    unsigned dmask = MO_Dmask->getImm();
-                    // Determine the number of active lanes taking into account the
-                    // Gather4 special case
-                    unsigned ActiveLanes =
-                        TII->isGather4(Opcode) ? 4 : countPopulation(dmask);
+          unsigned dmask = MO_Dmask->getImm();
+          // Determine the number of active lanes taking into account the
+          // Gather4 special case
+          unsigned ActiveLanes =
+              TII->isGather4(Opcode) ? 4 : countPopulation(dmask);
 
-                    bool Packed = !ST.hasUnpackedD16VMem();
+          bool Packed = !ST.hasUnpackedD16VMem();
 
-                    unsigned InitIdx =
-                        D16Val && Packed ? ((ActiveLanes + 1) >> 1) + 1 : ActiveLanes + 1;
+          unsigned InitIdx =
+              D16Val && Packed ? ((ActiveLanes + 1) >> 1) + 1 : ActiveLanes + 1;
 
-                    // Abandon attempt if the dst size isn't large enough
-                    // - this is in fact an error but this is picked up elsewhere and
-                    // reported correctly.
-                    uint32_t DstSize =
-                        RI->getRegSizeInBits(*TII->getOpRegClass(MI, DstIdx)) / 32;
-                    if (DstSize < InitIdx)
-                        continue;
+          // Abandon attempt if the dst size isn't large enough
+          // - this is in fact an error but this is picked up elsewhere and
+          // reported correctly.
+          uint32_t DstSize =
+              RI->getRegSizeInBits(*TII->getOpRegClass(MI, DstIdx)) / 32;
+          if (DstSize < InitIdx)
+            continue;
 
-                    // Create a register for the intialization value.
-                    Register PrevDst =
-                        MRI.createVirtualRegister(TII->getOpRegClass(MI, DstIdx));
-                    unsigned NewDst = 0; // Final initialized value will be in here
+          // Create a register for the intialization value.
+          Register PrevDst =
+              MRI.createVirtualRegister(TII->getOpRegClass(MI, DstIdx));
+          unsigned NewDst = 0; // Final initialized value will be in here
 
-                    // If PRTStrictNull feature is enabled (the default) then initialize
-                    // all the result registers to 0, otherwise just the error indication
-                    // register (VGPRn+1)
-                    unsigned SizeLeft = ST.usePRTStrictNull() ? InitIdx : 1;
-                    unsigned CurrIdx = ST.usePRTStrictNull() ? 0 : (InitIdx - 1);
+          // If PRTStrictNull feature is enabled (the default) then initialize
+          // all the result registers to 0, otherwise just the error indication
+          // register (VGPRn+1)
+          unsigned SizeLeft = ST.usePRTStrictNull() ? InitIdx : 1;
+          unsigned CurrIdx = ST.usePRTStrictNull() ? 0 : (InitIdx - 1);
 
-                    if (DstSize == 1) {
-                        // In this case we can just initialize the result directly
-                        BuildMI(MBB, MI, DL, TII->get(AMDGPU::V_MOV_B32_e32), PrevDst)
-                        .addImm(0);
-                        NewDst = PrevDst;
-                    } else {
-                        BuildMI(MBB, MI, DL, TII->get(AMDGPU::IMPLICIT_DEF), PrevDst);
-                        for (; SizeLeft; SizeLeft--, CurrIdx++) {
-                            NewDst =
-                                MRI.createVirtualRegister(TII->getOpRegClass(MI, DstIdx));
-                            // Initialize dword
-                            Register SubReg =
-                                MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
-                            BuildMI(MBB, MI, DL, TII->get(AMDGPU::V_MOV_B32_e32), SubReg)
-                            .addImm(0);
-                            // Insert into the super-reg
-                            BuildMI(MBB, I, DL, TII->get(TargetOpcode::INSERT_SUBREG), NewDst)
-                            .addReg(PrevDst)
-                            .addReg(SubReg)
-                            .addImm(SIRegisterInfo::getSubRegFromChannel(CurrIdx));
+          if (DstSize == 1) {
+            // In this case we can just initialize the result directly
+            BuildMI(MBB, MI, DL, TII->get(AMDGPU::V_MOV_B32_e32), PrevDst)
+                .addImm(0);
+            NewDst = PrevDst;
+          } else {
+            BuildMI(MBB, MI, DL, TII->get(AMDGPU::IMPLICIT_DEF), PrevDst);
+            for (; SizeLeft; SizeLeft--, CurrIdx++) {
+              NewDst =
+                  MRI.createVirtualRegister(TII->getOpRegClass(MI, DstIdx));
+              // Initialize dword
+              Register SubReg =
+                  MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
+              BuildMI(MBB, MI, DL, TII->get(AMDGPU::V_MOV_B32_e32), SubReg)
+                  .addImm(0);
+              // Insert into the super-reg
+              BuildMI(MBB, I, DL, TII->get(TargetOpcode::INSERT_SUBREG), NewDst)
+                  .addReg(PrevDst)
+                  .addReg(SubReg)
+                  .addImm(SIRegisterInfo::getSubRegFromChannel(CurrIdx));
 
-                            PrevDst = NewDst;
-                        }
-                    }
-
-                    // Add as an implicit operand
-                    MachineInstrBuilder(MF, MI).addReg(NewDst, RegState::Implicit);
-
-                    // Tie the just added implicit operand to the dst
-                    MI.tieOperands(DstIdx, MI.getNumOperands() - 1);
-
-                    Changed = true;
-                }
+              PrevDst = NewDst;
             }
-        }
-    }
+          }
 
-    return Changed;
+          // Add as an implicit operand
+          MachineInstrBuilder(MF, MI).addReg(NewDst, RegState::Implicit);
+
+          // Tie the just added implicit operand to the dst
+          MI.tieOperands(DstIdx, MI.getNumOperands() - 1);
+
+          Changed = true;
+        }
+      }
+    }
+  }
+
+  return Changed;
 }

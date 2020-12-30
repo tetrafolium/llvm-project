@@ -27,30 +27,26 @@ class ARCTargetLowering;
 class ARCTargetMachine;
 
 class ARCTTIImpl : public BasicTTIImplBase<ARCTTIImpl> {
-    using BaseT = BasicTTIImplBase<ARCTTIImpl>;
-    friend BaseT;
+  using BaseT = BasicTTIImplBase<ARCTTIImpl>;
+  friend BaseT;
 
-    const ARCSubtarget *ST;
-    const ARCTargetLowering *TLI;
+  const ARCSubtarget *ST;
+  const ARCTargetLowering *TLI;
 
-    const ARCSubtarget *getST() const {
-        return ST;
-    }
-    const ARCTargetLowering *getTLI() const {
-        return TLI;
-    }
+  const ARCSubtarget *getST() const { return ST; }
+  const ARCTargetLowering *getTLI() const { return TLI; }
 
 public:
-    explicit ARCTTIImpl(const ARCTargetMachine *TM, const Function &F)
-        : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl()),
-          TLI(ST->getTargetLowering()) {}
+  explicit ARCTTIImpl(const ARCTargetMachine *TM, const Function &F)
+      : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl()),
+        TLI(ST->getTargetLowering()) {}
 
-    // Provide value semantics. MSVC requires that we spell all of these out.
-    ARCTTIImpl(const ARCTTIImpl &Arg)
-        : BaseT(static_cast<const BaseT &>(Arg)), ST(Arg.ST), TLI(Arg.TLI) {}
-    ARCTTIImpl(ARCTTIImpl &&Arg)
-        : BaseT(std::move(static_cast<BaseT &>(Arg))), ST(std::move(Arg.ST)),
-          TLI(std::move(Arg.TLI)) {}
+  // Provide value semantics. MSVC requires that we spell all of these out.
+  ARCTTIImpl(const ARCTTIImpl &Arg)
+      : BaseT(static_cast<const BaseT &>(Arg)), ST(Arg.ST), TLI(Arg.TLI) {}
+  ARCTTIImpl(ARCTTIImpl &&Arg)
+      : BaseT(std::move(static_cast<BaseT &>(Arg))), ST(std::move(Arg.ST)),
+        TLI(std::move(Arg.TLI)) {}
 };
 
 } // end namespace llvm

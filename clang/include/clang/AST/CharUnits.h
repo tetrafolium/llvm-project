@@ -37,221 +37,186 @@ namespace clang {
 /// in character units.
 class CharUnits {
 public:
-    typedef int64_t QuantityType;
+  typedef int64_t QuantityType;
 
 private:
-    QuantityType Quantity = 0;
+  QuantityType Quantity = 0;
 
-    explicit CharUnits(QuantityType C) : Quantity(C) {}
+  explicit CharUnits(QuantityType C) : Quantity(C) {}
 
 public:
+  /// CharUnits - A default constructor.
+  CharUnits() = default;
 
-    /// CharUnits - A default constructor.
-    CharUnits() = default;
+  /// Zero - Construct a CharUnits quantity of zero.
+  static CharUnits Zero() { return CharUnits(0); }
 
-    /// Zero - Construct a CharUnits quantity of zero.
-    static CharUnits Zero() {
-        return CharUnits(0);
-    }
+  /// One - Construct a CharUnits quantity of one.
+  static CharUnits One() { return CharUnits(1); }
 
-    /// One - Construct a CharUnits quantity of one.
-    static CharUnits One() {
-        return CharUnits(1);
-    }
+  /// fromQuantity - Construct a CharUnits quantity from a raw integer type.
+  static CharUnits fromQuantity(QuantityType Quantity) {
+    return CharUnits(Quantity);
+  }
 
-    /// fromQuantity - Construct a CharUnits quantity from a raw integer type.
-    static CharUnits fromQuantity(QuantityType Quantity) {
-        return CharUnits(Quantity);
-    }
+  // Compound assignment.
+  CharUnits &operator+=(const CharUnits &Other) {
+    Quantity += Other.Quantity;
+    return *this;
+  }
+  CharUnits &operator++() {
+    ++Quantity;
+    return *this;
+  }
+  CharUnits operator++(int) { return CharUnits(Quantity++); }
+  CharUnits &operator-=(const CharUnits &Other) {
+    Quantity -= Other.Quantity;
+    return *this;
+  }
+  CharUnits &operator--() {
+    --Quantity;
+    return *this;
+  }
+  CharUnits operator--(int) { return CharUnits(Quantity--); }
 
-    // Compound assignment.
-    CharUnits& operator+= (const CharUnits &Other) {
-        Quantity += Other.Quantity;
-        return *this;
-    }
-    CharUnits& operator++ () {
-        ++Quantity;
-        return *this;
-    }
-    CharUnits operator++ (int) {
-        return CharUnits(Quantity++);
-    }
-    CharUnits& operator-= (const CharUnits &Other) {
-        Quantity -= Other.Quantity;
-        return *this;
-    }
-    CharUnits& operator-- () {
-        --Quantity;
-        return *this;
-    }
-    CharUnits operator-- (int) {
-        return CharUnits(Quantity--);
-    }
+  // Comparison operators.
+  bool operator==(const CharUnits &Other) const {
+    return Quantity == Other.Quantity;
+  }
+  bool operator!=(const CharUnits &Other) const {
+    return Quantity != Other.Quantity;
+  }
 
-    // Comparison operators.
-    bool operator== (const CharUnits &Other) const {
-        return Quantity == Other.Quantity;
-    }
-    bool operator!= (const CharUnits &Other) const {
-        return Quantity != Other.Quantity;
-    }
+  // Relational operators.
+  bool operator<(const CharUnits &Other) const {
+    return Quantity < Other.Quantity;
+  }
+  bool operator<=(const CharUnits &Other) const {
+    return Quantity <= Other.Quantity;
+  }
+  bool operator>(const CharUnits &Other) const {
+    return Quantity > Other.Quantity;
+  }
+  bool operator>=(const CharUnits &Other) const {
+    return Quantity >= Other.Quantity;
+  }
 
-    // Relational operators.
-    bool operator<  (const CharUnits &Other) const {
-        return Quantity <  Other.Quantity;
-    }
-    bool operator<= (const CharUnits &Other) const {
-        return Quantity <= Other.Quantity;
-    }
-    bool operator>  (const CharUnits &Other) const {
-        return Quantity >  Other.Quantity;
-    }
-    bool operator>= (const CharUnits &Other) const {
-        return Quantity >= Other.Quantity;
-    }
+  // Other predicates.
 
-    // Other predicates.
+  /// isZero - Test whether the quantity equals zero.
+  bool isZero() const { return Quantity == 0; }
 
-    /// isZero - Test whether the quantity equals zero.
-    bool isZero() const     {
-        return Quantity == 0;
-    }
+  /// isOne - Test whether the quantity equals one.
+  bool isOne() const { return Quantity == 1; }
 
-    /// isOne - Test whether the quantity equals one.
-    bool isOne() const      {
-        return Quantity == 1;
-    }
+  /// isPositive - Test whether the quantity is greater than zero.
+  bool isPositive() const { return Quantity > 0; }
 
-    /// isPositive - Test whether the quantity is greater than zero.
-    bool isPositive() const {
-        return Quantity  > 0;
-    }
+  /// isNegative - Test whether the quantity is less than zero.
+  bool isNegative() const { return Quantity < 0; }
 
-    /// isNegative - Test whether the quantity is less than zero.
-    bool isNegative() const {
-        return Quantity  < 0;
-    }
+  /// isPowerOfTwo - Test whether the quantity is a power of two.
+  /// Zero is not a power of two.
+  bool isPowerOfTwo() const { return (Quantity & -Quantity) == Quantity; }
 
-    /// isPowerOfTwo - Test whether the quantity is a power of two.
-    /// Zero is not a power of two.
-    bool isPowerOfTwo() const {
-        return (Quantity & -Quantity) == Quantity;
-    }
+  /// Test whether this is a multiple of the other value.
+  ///
+  /// Among other things, this promises that
+  /// self.alignTo(N) will just return self.
+  bool isMultipleOf(CharUnits N) const { return (*this % N) == 0; }
 
-    /// Test whether this is a multiple of the other value.
-    ///
-    /// Among other things, this promises that
-    /// self.alignTo(N) will just return self.
-    bool isMultipleOf(CharUnits N) const {
-        return (*this % N) == 0;
-    }
+  // Arithmetic operators.
+  CharUnits operator*(QuantityType N) const { return CharUnits(Quantity * N); }
+  CharUnits &operator*=(QuantityType N) {
+    Quantity *= N;
+    return *this;
+  }
+  CharUnits operator/(QuantityType N) const { return CharUnits(Quantity / N); }
+  CharUnits &operator/=(QuantityType N) {
+    Quantity /= N;
+    return *this;
+  }
+  QuantityType operator/(const CharUnits &Other) const {
+    return Quantity / Other.Quantity;
+  }
+  CharUnits operator%(QuantityType N) const { return CharUnits(Quantity % N); }
+  QuantityType operator%(const CharUnits &Other) const {
+    return Quantity % Other.Quantity;
+  }
+  CharUnits operator+(const CharUnits &Other) const {
+    return CharUnits(Quantity + Other.Quantity);
+  }
+  CharUnits operator-(const CharUnits &Other) const {
+    return CharUnits(Quantity - Other.Quantity);
+  }
+  CharUnits operator-() const { return CharUnits(-Quantity); }
 
-    // Arithmetic operators.
-    CharUnits operator* (QuantityType N) const {
-        return CharUnits(Quantity * N);
-    }
-    CharUnits &operator*= (QuantityType N) {
-        Quantity *= N;
-        return *this;
-    }
-    CharUnits operator/ (QuantityType N) const {
-        return CharUnits(Quantity / N);
-    }
-    CharUnits &operator/= (QuantityType N) {
-        Quantity /= N;
-        return *this;
-    }
-    QuantityType operator/ (const CharUnits &Other) const {
-        return Quantity / Other.Quantity;
-    }
-    CharUnits operator% (QuantityType N) const {
-        return CharUnits(Quantity % N);
-    }
-    QuantityType operator% (const CharUnits &Other) const {
-        return Quantity % Other.Quantity;
-    }
-    CharUnits operator+ (const CharUnits &Other) const {
-        return CharUnits(Quantity + Other.Quantity);
-    }
-    CharUnits operator- (const CharUnits &Other) const {
-        return CharUnits(Quantity - Other.Quantity);
-    }
-    CharUnits operator- () const {
-        return CharUnits(-Quantity);
-    }
+  // Conversions.
 
+  /// getQuantity - Get the raw integer representation of this quantity.
+  QuantityType getQuantity() const { return Quantity; }
 
-    // Conversions.
+  /// getAsAlign - Returns Quantity as a valid llvm::Align,
+  /// Beware llvm::Align assumes power of two 8-bit bytes.
+  llvm::Align getAsAlign() const { return llvm::Align(Quantity); }
 
-    /// getQuantity - Get the raw integer representation of this quantity.
-    QuantityType getQuantity() const {
-        return Quantity;
-    }
+  /// alignTo - Returns the next integer (mod 2**64) that is
+  /// greater than or equal to this quantity and is a multiple of \p Align.
+  /// Align must be non-zero.
+  CharUnits alignTo(const CharUnits &Align) const {
+    return CharUnits(llvm::alignTo(Quantity, Align.Quantity));
+  }
 
-    /// getAsAlign - Returns Quantity as a valid llvm::Align,
-    /// Beware llvm::Align assumes power of two 8-bit bytes.
-    llvm::Align getAsAlign() const {
-        return llvm::Align(Quantity);
-    }
+  /// Given that this is a non-zero alignment value, what is the
+  /// alignment at the given offset?
+  CharUnits alignmentAtOffset(CharUnits offset) const {
+    assert(Quantity != 0 && "offsetting from unknown alignment?");
+    return CharUnits(llvm::MinAlign(Quantity, offset.Quantity));
+  }
 
-    /// alignTo - Returns the next integer (mod 2**64) that is
-    /// greater than or equal to this quantity and is a multiple of \p Align.
-    /// Align must be non-zero.
-    CharUnits alignTo(const CharUnits &Align) const {
-        return CharUnits(llvm::alignTo(Quantity, Align.Quantity));
-    }
-
-    /// Given that this is a non-zero alignment value, what is the
-    /// alignment at the given offset?
-    CharUnits alignmentAtOffset(CharUnits offset) const {
-        assert(Quantity != 0 && "offsetting from unknown alignment?");
-        return CharUnits(llvm::MinAlign(Quantity, offset.Quantity));
-    }
-
-    /// Given that this is the alignment of the first element of an
-    /// array, return the minimum alignment of any element in the array.
-    CharUnits alignmentOfArrayElement(CharUnits elementSize) const {
-        // Since we don't track offsetted alignments, the alignment of
-        // the second element (or any odd element) will be minimally
-        // aligned.
-        return alignmentAtOffset(elementSize);
-    }
-
+  /// Given that this is the alignment of the first element of an
+  /// array, return the minimum alignment of any element in the array.
+  CharUnits alignmentOfArrayElement(CharUnits elementSize) const {
+    // Since we don't track offsetted alignments, the alignment of
+    // the second element (or any odd element) will be minimally
+    // aligned.
+    return alignmentAtOffset(elementSize);
+  }
 
 }; // class CharUnit
 } // namespace clang
 
-inline clang::CharUnits operator* (clang::CharUnits::QuantityType Scale,
-                                   const clang::CharUnits &CU) {
-    return CU * Scale;
+inline clang::CharUnits operator*(clang::CharUnits::QuantityType Scale,
+                                  const clang::CharUnits &CU) {
+  return CU * Scale;
 }
 
 namespace llvm {
 
-template<> struct DenseMapInfo<clang::CharUnits> {
-    static clang::CharUnits getEmptyKey() {
-        clang::CharUnits::QuantityType Quantity =
-            DenseMapInfo<clang::CharUnits::QuantityType>::getEmptyKey();
+template <> struct DenseMapInfo<clang::CharUnits> {
+  static clang::CharUnits getEmptyKey() {
+    clang::CharUnits::QuantityType Quantity =
+        DenseMapInfo<clang::CharUnits::QuantityType>::getEmptyKey();
 
-        return clang::CharUnits::fromQuantity(Quantity);
-    }
+    return clang::CharUnits::fromQuantity(Quantity);
+  }
 
-    static clang::CharUnits getTombstoneKey() {
-        clang::CharUnits::QuantityType Quantity =
-            DenseMapInfo<clang::CharUnits::QuantityType>::getTombstoneKey();
+  static clang::CharUnits getTombstoneKey() {
+    clang::CharUnits::QuantityType Quantity =
+        DenseMapInfo<clang::CharUnits::QuantityType>::getTombstoneKey();
 
-        return clang::CharUnits::fromQuantity(Quantity);
-    }
+    return clang::CharUnits::fromQuantity(Quantity);
+  }
 
-    static unsigned getHashValue(const clang::CharUnits &CU) {
-        clang::CharUnits::QuantityType Quantity = CU.getQuantity();
-        return DenseMapInfo<clang::CharUnits::QuantityType>::getHashValue(Quantity);
-    }
+  static unsigned getHashValue(const clang::CharUnits &CU) {
+    clang::CharUnits::QuantityType Quantity = CU.getQuantity();
+    return DenseMapInfo<clang::CharUnits::QuantityType>::getHashValue(Quantity);
+  }
 
-    static bool isEqual(const clang::CharUnits &LHS,
-                        const clang::CharUnits &RHS) {
-        return LHS == RHS;
-    }
+  static bool isEqual(const clang::CharUnits &LHS,
+                      const clang::CharUnits &RHS) {
+    return LHS == RHS;
+  }
 };
 
 } // end namespace llvm

@@ -21,7 +21,7 @@ namespace llvm {
 // visible array).
 void BuryPointer(const void *Ptr);
 template <typename T> void BuryPointer(std::unique_ptr<T> Ptr) {
-    BuryPointer(Ptr.release());
+  BuryPointer(Ptr.release());
 }
 
 } // namespace llvm

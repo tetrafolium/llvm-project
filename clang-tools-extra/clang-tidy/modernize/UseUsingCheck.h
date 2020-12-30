@@ -21,20 +21,20 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-use-using.html
 class UseUsingCheck : public ClangTidyCheck {
 
-    const bool IgnoreMacros;
-    SourceLocation LastReplacementEnd;
-    SourceRange LastTagDeclRange;
-    std::string FirstTypedefType;
-    std::string FirstTypedefName;
+  const bool IgnoreMacros;
+  SourceLocation LastReplacementEnd;
+  SourceRange LastTagDeclRange;
+  std::string FirstTypedefType;
+  std::string FirstTypedefName;
 
 public:
-    UseUsingCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  UseUsingCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace modernize

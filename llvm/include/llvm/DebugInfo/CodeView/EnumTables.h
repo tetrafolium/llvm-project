@@ -36,7 +36,7 @@ ArrayRef<EnumEntry<uint32_t>> getModuleSubstreamKindNames();
 ArrayRef<EnumEntry<uint8_t>> getThunkOrdinalNames();
 ArrayRef<EnumEntry<uint16_t>> getTrampolineNames();
 ArrayRef<EnumEntry<COFF::SectionCharacteristics>>
-        getImageSectionCharacteristicNames();
+getImageSectionCharacteristicNames();
 ArrayRef<EnumEntry<uint16_t>> getClassOptionNames();
 ArrayRef<EnumEntry<uint8_t>> getMemberAccessNames();
 ArrayRef<EnumEntry<uint16_t>> getMethodOptionNames();

@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "ubsan_platform.h"
 #include "sanitizer_common/sanitizer_platform.h"
+#include "ubsan_platform.h"
 #if CAN_SANITIZE_UB
 #include "interception/interception.h"
 #include "sanitizer_common/sanitizer_stacktrace.h"
@@ -30,7 +30,7 @@
 
 namespace __ubsan {
 void InitializeDeadlySignals() {}
-}
+} // namespace __ubsan
 
 #else
 
@@ -38,30 +38,30 @@ void InitializeDeadlySignals() {}
 #include "sanitizer_common/sanitizer_signal_interceptors.inc"
 
 // TODO(yln): Temporary workaround. Will be removed.
-void ubsan_GetStackTrace(BufferedStackTrace *stack, uptr max_depth,
-                         uptr pc, uptr bp, void *context, bool fast);
+void ubsan_GetStackTrace(BufferedStackTrace *stack, uptr max_depth, uptr pc,
+                         uptr bp, void *context, bool fast);
 
 namespace __ubsan {
 
 static void OnStackUnwind(const SignalContext &sig, const void *,
                           BufferedStackTrace *stack) {
-    ubsan_GetStackTrace(stack, kStackTraceMax,
-                        StackTrace::GetNextInstructionPc(sig.pc), sig.bp,
-                        sig.context, common_flags()->fast_unwind_on_fatal);
+  ubsan_GetStackTrace(stack, kStackTraceMax,
+                      StackTrace::GetNextInstructionPc(sig.pc), sig.bp,
+                      sig.context, common_flags()->fast_unwind_on_fatal);
 }
 
 static void UBsanOnDeadlySignal(int signo, void *siginfo, void *context) {
-    HandleDeadlySignal(siginfo, context, GetTid(), &OnStackUnwind, nullptr);
+  HandleDeadlySignal(siginfo, context, GetTid(), &OnStackUnwind, nullptr);
 }
 
 static bool is_initialized = false;
 
 void InitializeDeadlySignals() {
-    if (is_initialized)
-        return;
-    is_initialized = true;
-    InitializeSignalInterceptors();
-    InstallDeadlySignalHandlers(&UBsanOnDeadlySignal);
+  if (is_initialized)
+    return;
+  is_initialized = true;
+  InitializeSignalInterceptors();
+  InstallDeadlySignalHandlers(&UBsanOnDeadlySignal);
 }
 
 } // namespace __ubsan

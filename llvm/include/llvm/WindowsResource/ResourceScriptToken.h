@@ -28,29 +28,29 @@ namespace llvm {
 // nor reallocated.
 class RCToken {
 public:
-    enum class Kind {
+  enum class Kind {
 #define TOKEN(Name) Name,
 #define SHORT_TOKEN(Name, Ch) Name,
 #include "ResourceScriptTokenList.h"
 #undef TOKEN
 #undef SHORT_TOKEN
-    };
+  };
 
-    RCToken(RCToken::Kind RCTokenKind, StringRef Value);
+  RCToken(RCToken::Kind RCTokenKind, StringRef Value);
 
-    // Get an integer value of the integer token.
-    uint32_t intValue() const;
-    bool isLongInt() const;
+  // Get an integer value of the integer token.
+  uint32_t intValue() const;
+  bool isLongInt() const;
 
-    StringRef value() const;
-    Kind kind() const;
+  StringRef value() const;
+  Kind kind() const;
 
-    // Check if a token describes a binary operator.
-    bool isBinaryOp() const;
+  // Check if a token describes a binary operator.
+  bool isBinaryOp() const;
 
 private:
-    Kind TokenKind;
-    StringRef TokenValue;
+  Kind TokenKind;
+  StringRef TokenValue;
 };
 
 } // namespace llvm

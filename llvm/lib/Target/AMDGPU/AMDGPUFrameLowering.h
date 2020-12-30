@@ -25,13 +25,13 @@ namespace llvm {
 /// See TargetFrameInfo for more comments.
 class AMDGPUFrameLowering : public TargetFrameLowering {
 public:
-    AMDGPUFrameLowering(StackDirection D, Align StackAl, int LAO,
-                        Align TransAl = Align(1));
-    ~AMDGPUFrameLowering() override;
+  AMDGPUFrameLowering(StackDirection D, Align StackAl, int LAO,
+                      Align TransAl = Align(1));
+  ~AMDGPUFrameLowering() override;
 
-    /// \returns The number of 32-bit sub-registers that are used when storing
-    /// values to the stack.
-    unsigned getStackWidth(const MachineFunction &MF) const;
+  /// \returns The number of 32-bit sub-registers that are used when storing
+  /// values to the stack.
+  unsigned getStackWidth(const MachineFunction &MF) const;
 };
 
 } // end namespace llvm

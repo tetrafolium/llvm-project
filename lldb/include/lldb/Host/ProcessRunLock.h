@@ -24,62 +24,60 @@ namespace lldb_private {
 
 class ProcessRunLock {
 public:
-    ProcessRunLock();
-    ~ProcessRunLock();
+  ProcessRunLock();
+  ~ProcessRunLock();
 
-    bool ReadTryLock();
-    bool ReadUnlock();
-    bool SetRunning();
-    bool TrySetRunning();
-    bool SetStopped();
+  bool ReadTryLock();
+  bool ReadUnlock();
+  bool SetRunning();
+  bool TrySetRunning();
+  bool SetStopped();
 
-    class ProcessRunLocker {
-    public:
-        ProcessRunLocker() : m_lock(nullptr) {}
+  class ProcessRunLocker {
+  public:
+    ProcessRunLocker() : m_lock(nullptr) {}
 
-        ~ProcessRunLocker() {
-            Unlock();
+    ~ProcessRunLocker() { Unlock(); }
+
+    // Try to lock the read lock, but only do so if there are no writers.
+    bool TryLock(ProcessRunLock *lock) {
+      if (m_lock) {
+        if (m_lock == lock)
+          return true; // We already have this lock locked
+        else
+          Unlock();
+      }
+      if (lock) {
+        if (lock->ReadTryLock()) {
+          m_lock = lock;
+          return true;
         }
+      }
+      return false;
+    }
 
-        // Try to lock the read lock, but only do so if there are no writers.
-        bool TryLock(ProcessRunLock *lock) {
-            if (m_lock) {
-                if (m_lock == lock)
-                    return true; // We already have this lock locked
-                else
-                    Unlock();
-            }
-            if (lock) {
-                if (lock->ReadTryLock()) {
-                    m_lock = lock;
-                    return true;
-                }
-            }
-            return false;
-        }
+  protected:
+    void Unlock() {
+      if (m_lock) {
+        m_lock->ReadUnlock();
+        m_lock = nullptr;
+      }
+    }
 
-    protected:
-        void Unlock() {
-            if (m_lock) {
-                m_lock->ReadUnlock();
-                m_lock = nullptr;
-            }
-        }
+    ProcessRunLock *m_lock;
 
-        ProcessRunLock *m_lock;
-
-    private:
-        ProcessRunLocker(const ProcessRunLocker &) = delete;
-        const ProcessRunLocker &operator=(const ProcessRunLocker &) = delete;
-    };
+  private:
+    ProcessRunLocker(const ProcessRunLocker &) = delete;
+    const ProcessRunLocker &operator=(const ProcessRunLocker &) = delete;
+  };
 
 protected:
-    lldb::rwlock_t m_rwlock;
-    bool m_running;
+  lldb::rwlock_t m_rwlock;
+  bool m_running;
 
 private:
-    ProcessRunLock(const ProcessRunLock &) = delete;
-    const ProcessRunLock &operator=(const ProcessRunLock &) = delete;
+  ProcessRunLock(const ProcessRunLock &) = delete;
+  const ProcessRunLock &operator=(const ProcessRunLock &) = delete;
 };
 
 } // namespace lldb_private

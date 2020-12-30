@@ -26,20 +26,20 @@ namespace orc {
 // Provides common code.
 class SpeculateQuery {
 protected:
-    void findCalles(const BasicBlock *, DenseSet<StringRef> &);
-    bool isStraightLine(const Function &F);
+  void findCalles(const BasicBlock *, DenseSet<StringRef> &);
+  bool isStraightLine(const Function &F);
 
 public:
-    using ResultTy = Optional<DenseMap<StringRef, DenseSet<StringRef>>>;
+  using ResultTy = Optional<DenseMap<StringRef, DenseSet<StringRef>>>;
 };
 
 // Direct calls in high frequency basic blocks are extracted.
 class BlockFreqQuery : public SpeculateQuery {
-    size_t numBBToGet(size_t);
+  size_t numBBToGet(size_t);
 
 public:
-    // Find likely next executables based on IR Block Frequency
-    ResultTy operator()(Function &F);
+  // Find likely next executables based on IR Block Frequency
+  ResultTy operator()(Function &F);
 };
 
 // This Query generates a sequence of basic blocks which follows the order of
@@ -47,35 +47,35 @@ public:
 // A handful of BB with higher block frequencies are taken, then path to entry
 // and end BB are discovered by traversing up & down the CFG.
 class SequenceBBQuery : public SpeculateQuery {
-    struct WalkDirection {
-        bool Upward = true, Downward = true;
-        // the block associated contain a call
-        bool CallerBlock = false;
-    };
+  struct WalkDirection {
+    bool Upward = true, Downward = true;
+    // the block associated contain a call
+    bool CallerBlock = false;
+  };
 
 public:
-    using VisitedBlocksInfoTy = DenseMap<const BasicBlock *, WalkDirection>;
-    using BlockListTy = SmallVector<const BasicBlock *, 8>;
-    using BackEdgesInfoTy =
-        SmallVector<std::pair<const BasicBlock *, const BasicBlock *>, 8>;
-    using BlockFreqInfoTy =
-        SmallVector<std::pair<const BasicBlock *, uint64_t>, 8>;
+  using VisitedBlocksInfoTy = DenseMap<const BasicBlock *, WalkDirection>;
+  using BlockListTy = SmallVector<const BasicBlock *, 8>;
+  using BackEdgesInfoTy =
+      SmallVector<std::pair<const BasicBlock *, const BasicBlock *>, 8>;
+  using BlockFreqInfoTy =
+      SmallVector<std::pair<const BasicBlock *, uint64_t>, 8>;
 
 private:
-    std::size_t getHottestBlocks(std::size_t TotalBlocks);
-    BlockListTy rearrangeBB(const Function &, const BlockListTy &);
-    BlockListTy queryCFG(Function &, const BlockListTy &);
-    void traverseToEntryBlock(const BasicBlock *, const BlockListTy &,
-                              const BackEdgesInfoTy &,
-                              const BranchProbabilityInfo *,
-                              VisitedBlocksInfoTy &);
-    void traverseToExitBlock(const BasicBlock *, const BlockListTy &,
-                             const BackEdgesInfoTy &,
-                             const BranchProbabilityInfo *,
-                             VisitedBlocksInfoTy &);
+  std::size_t getHottestBlocks(std::size_t TotalBlocks);
+  BlockListTy rearrangeBB(const Function &, const BlockListTy &);
+  BlockListTy queryCFG(Function &, const BlockListTy &);
+  void traverseToEntryBlock(const BasicBlock *, const BlockListTy &,
+                            const BackEdgesInfoTy &,
+                            const BranchProbabilityInfo *,
+                            VisitedBlocksInfoTy &);
+  void traverseToExitBlock(const BasicBlock *, const BlockListTy &,
+                           const BackEdgesInfoTy &,
+                           const BranchProbabilityInfo *,
+                           VisitedBlocksInfoTy &);
 
 public:
-    ResultTy operator()(Function &F);
+  ResultTy operator()(Function &F);
 };
 
 } // namespace orc

@@ -48,35 +48,19 @@ ValueProfNode COMPILER_RT_SECTION(".lprfnd$A") VNodesStart;
 ValueProfNode COMPILER_RT_SECTION(".lprfnd$Z") VNodesEnd;
 
 const __llvm_profile_data *__llvm_profile_begin_data(void) {
-    return &DataStart + 1;
+  return &DataStart + 1;
 }
-const __llvm_profile_data *__llvm_profile_end_data(void) {
-    return &DataEnd;
-}
+const __llvm_profile_data *__llvm_profile_end_data(void) { return &DataEnd; }
 
-const char *__llvm_profile_begin_names(void) {
-    return &NamesStart + 1;
-}
-const char *__llvm_profile_end_names(void) {
-    return &NamesEnd;
-}
+const char *__llvm_profile_begin_names(void) { return &NamesStart + 1; }
+const char *__llvm_profile_end_names(void) { return &NamesEnd; }
 
-uint64_t *__llvm_profile_begin_counters(void) {
-    return &CountersStart + 1;
-}
-uint64_t *__llvm_profile_end_counters(void) {
-    return &CountersEnd;
-}
-uint32_t *__llvm_profile_begin_orderfile(void) {
-    return &OrderFileStart;
-}
+uint64_t *__llvm_profile_begin_counters(void) { return &CountersStart + 1; }
+uint64_t *__llvm_profile_end_counters(void) { return &CountersEnd; }
+uint32_t *__llvm_profile_begin_orderfile(void) { return &OrderFileStart; }
 
-ValueProfNode *__llvm_profile_begin_vnodes(void) {
-    return &VNodesStart + 1;
-}
-ValueProfNode *__llvm_profile_end_vnodes(void) {
-    return &VNodesEnd;
-}
+ValueProfNode *__llvm_profile_begin_vnodes(void) { return &VNodesStart + 1; }
+ValueProfNode *__llvm_profile_end_vnodes(void) { return &VNodesEnd; }
 
 ValueProfNode *CurrentVNode = &VNodesStart + 1;
 ValueProfNode *EndVNode = &VNodesEnd;

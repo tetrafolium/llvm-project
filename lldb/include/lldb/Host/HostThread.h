@@ -28,24 +28,24 @@ class HostNativeThreadBase;
 ///
 class HostThread {
 public:
-    HostThread();
-    HostThread(lldb::thread_t thread);
+  HostThread();
+  HostThread(lldb::thread_t thread);
 
-    Status Join(lldb::thread_result_t *result);
-    Status Cancel();
-    void Reset();
-    lldb::thread_t Release();
+  Status Join(lldb::thread_result_t *result);
+  Status Cancel();
+  void Reset();
+  lldb::thread_t Release();
 
-    bool IsJoinable() const;
-    HostNativeThread &GetNativeThread();
-    const HostNativeThread &GetNativeThread() const;
-    lldb::thread_result_t GetResult() const;
+  bool IsJoinable() const;
+  HostNativeThread &GetNativeThread();
+  const HostNativeThread &GetNativeThread() const;
+  lldb::thread_result_t GetResult() const;
 
-    bool EqualsThread(lldb::thread_t thread) const;
+  bool EqualsThread(lldb::thread_t thread) const;
 
 private:
-    std::shared_ptr<HostNativeThreadBase> m_native_thread;
+  std::shared_ptr<HostNativeThreadBase> m_native_thread;
 };
-}
+} // namespace lldb_private
 
 #endif

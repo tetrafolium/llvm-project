@@ -31,71 +31,71 @@ using namespace mlir::vector;
 namespace {
 struct LowerVectorToLLVMPass
     : public ConvertVectorToLLVMBase<LowerVectorToLLVMPass> {
-    LowerVectorToLLVMPass(const LowerVectorToLLVMOptions &options) {
-        this->reassociateFPReductions = options.reassociateFPReductions;
-        this->enableIndexOptimizations = options.enableIndexOptimizations;
-        this->enableArmNeon = options.enableArmNeon;
-        this->enableArmSVE = options.enableArmSVE;
-        this->enableAVX512 = options.enableAVX512;
-    }
-    // Override explicitly to allow conditional dialect dependence.
-    void getDependentDialects(DialectRegistry &registry) const override {
-        registry.insert<LLVM::LLVMDialect>();
-        if (enableArmNeon)
-            registry.insert<LLVM::LLVMArmNeonDialect>();
-        if (enableArmSVE)
-            registry.insert<LLVM::LLVMArmSVEDialect>();
-        if (enableAVX512)
-            registry.insert<LLVM::LLVMAVX512Dialect>();
-    }
-    void runOnOperation() override;
+  LowerVectorToLLVMPass(const LowerVectorToLLVMOptions &options) {
+    this->reassociateFPReductions = options.reassociateFPReductions;
+    this->enableIndexOptimizations = options.enableIndexOptimizations;
+    this->enableArmNeon = options.enableArmNeon;
+    this->enableArmSVE = options.enableArmSVE;
+    this->enableAVX512 = options.enableAVX512;
+  }
+  // Override explicitly to allow conditional dialect dependence.
+  void getDependentDialects(DialectRegistry &registry) const override {
+    registry.insert<LLVM::LLVMDialect>();
+    if (enableArmNeon)
+      registry.insert<LLVM::LLVMArmNeonDialect>();
+    if (enableArmSVE)
+      registry.insert<LLVM::LLVMArmSVEDialect>();
+    if (enableAVX512)
+      registry.insert<LLVM::LLVMAVX512Dialect>();
+  }
+  void runOnOperation() override;
 };
 } // namespace
 
 void LowerVectorToLLVMPass::runOnOperation() {
-    // Perform progressive lowering of operations on slices and
-    // all contraction operations. Also applies folding and DCE.
-    {
-        OwningRewritePatternList patterns;
-        populateVectorToVectorCanonicalizationPatterns(patterns, &getContext());
-        populateVectorSlicesLoweringPatterns(patterns, &getContext());
-        populateVectorContractLoweringPatterns(patterns, &getContext());
-        applyPatternsAndFoldGreedily(getOperation(), std::move(patterns));
-    }
-
-    // Convert to the LLVM IR dialect.
-    LLVMTypeConverter converter(&getContext());
+  // Perform progressive lowering of operations on slices and
+  // all contraction operations. Also applies folding and DCE.
+  {
     OwningRewritePatternList patterns;
-    populateVectorToLLVMMatrixConversionPatterns(converter, patterns);
-    populateVectorToLLVMConversionPatterns(
-        converter, patterns, reassociateFPReductions, enableIndexOptimizations);
-    populateVectorToLLVMMatrixConversionPatterns(converter, patterns);
-    populateStdToLLVMConversionPatterns(converter, patterns);
+    populateVectorToVectorCanonicalizationPatterns(patterns, &getContext());
+    populateVectorSlicesLoweringPatterns(patterns, &getContext());
+    populateVectorContractLoweringPatterns(patterns, &getContext());
+    applyPatternsAndFoldGreedily(getOperation(), std::move(patterns));
+  }
 
-    // Architecture specific augmentations.
-    LLVMConversionTarget target(getContext());
-    if (enableArmNeon) {
-        target.addLegalDialect<LLVM::LLVMArmNeonDialect>();
-        target.addIllegalDialect<arm_neon::ArmNeonDialect>();
-        populateArmNeonToLLVMConversionPatterns(converter, patterns);
-    }
-    if (enableArmSVE) {
-        target.addLegalDialect<LLVM::LLVMArmSVEDialect>();
-        target.addIllegalDialect<arm_sve::ArmSVEDialect>();
-        populateArmSVEToLLVMConversionPatterns(converter, patterns);
-    }
-    if (enableAVX512) {
-        target.addLegalDialect<LLVM::LLVMAVX512Dialect>();
-        target.addIllegalDialect<avx512::AVX512Dialect>();
-        populateAVX512ToLLVMConversionPatterns(converter, patterns);
-    }
+  // Convert to the LLVM IR dialect.
+  LLVMTypeConverter converter(&getContext());
+  OwningRewritePatternList patterns;
+  populateVectorToLLVMMatrixConversionPatterns(converter, patterns);
+  populateVectorToLLVMConversionPatterns(
+      converter, patterns, reassociateFPReductions, enableIndexOptimizations);
+  populateVectorToLLVMMatrixConversionPatterns(converter, patterns);
+  populateStdToLLVMConversionPatterns(converter, patterns);
 
-    if (failed(
-                applyPartialConversion(getOperation(), target, std::move(patterns))))
-        signalPassFailure();
+  // Architecture specific augmentations.
+  LLVMConversionTarget target(getContext());
+  if (enableArmNeon) {
+    target.addLegalDialect<LLVM::LLVMArmNeonDialect>();
+    target.addIllegalDialect<arm_neon::ArmNeonDialect>();
+    populateArmNeonToLLVMConversionPatterns(converter, patterns);
+  }
+  if (enableArmSVE) {
+    target.addLegalDialect<LLVM::LLVMArmSVEDialect>();
+    target.addIllegalDialect<arm_sve::ArmSVEDialect>();
+    populateArmSVEToLLVMConversionPatterns(converter, patterns);
+  }
+  if (enableAVX512) {
+    target.addLegalDialect<LLVM::LLVMAVX512Dialect>();
+    target.addIllegalDialect<avx512::AVX512Dialect>();
+    populateAVX512ToLLVMConversionPatterns(converter, patterns);
+  }
+
+  if (failed(
+          applyPartialConversion(getOperation(), target, std::move(patterns))))
+    signalPassFailure();
 }
 
 std::unique_ptr<OperationPass<ModuleOp>>
 mlir::createConvertVectorToLLVMPass(const LowerVectorToLLVMOptions &options) {
-    return std::make_unique<LowerVectorToLLVMPass>(options);
+  return std::make_unique<LowerVectorToLLVMPass>(options);
 }

@@ -16,24 +16,22 @@ namespace clang {
 namespace clangd {
 
 void abortAfterTimeout(std::chrono::seconds Timeout) {
-    // This is more portable than sys::WatchDog, and yields a stack trace.
-    std::thread([Timeout] {
-        std::this_thread::sleep_for(Timeout);
-        std::abort();
-    }).detach();
+  // This is more portable than sys::WatchDog, and yields a stack trace.
+  std::thread([Timeout] {
+    std::this_thread::sleep_for(Timeout);
+    std::abort();
+  }).detach();
 }
 
 static std::atomic<bool> ShutdownRequested = {false};
 
 void requestShutdown() {
-    if (ShutdownRequested.exchange(true))
-        // This is the second shutdown request. Exit hard.
-        std::abort();
+  if (ShutdownRequested.exchange(true))
+    // This is the second shutdown request. Exit hard.
+    std::abort();
 }
 
-bool shutdownRequested() {
-    return ShutdownRequested;
-}
+bool shutdownRequested() { return ShutdownRequested; }
 
 } // namespace clangd
 } // namespace clang

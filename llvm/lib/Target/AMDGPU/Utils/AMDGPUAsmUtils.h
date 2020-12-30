@@ -16,15 +16,15 @@ namespace AMDGPU {
 
 namespace SendMsg { // Symbolic names for the sendmsg(...) syntax.
 
-extern const char* const IdSymbolic[];
-extern const char* const OpSysSymbolic[];
-extern const char* const OpGsSymbolic[];
+extern const char *const IdSymbolic[];
+extern const char *const OpSysSymbolic[];
+extern const char *const OpGsSymbolic[];
 
 } // namespace SendMsg
 
 namespace Hwreg { // Symbolic names for the hwreg(...) syntax.
 
-extern const char* const IdSymbolic[];
+extern const char *const IdSymbolic[];
 
 } // namespace Hwreg
 
@@ -41,13 +41,13 @@ extern unsigned const DfmtNfmt2UFmt[];
 
 namespace Swizzle { // Symbolic names for the swizzle(...) syntax.
 
-extern const char* const IdSymbolic[];
+extern const char *const IdSymbolic[];
 
 } // namespace Swizzle
 
 namespace VGPRIndexMode { // Symbolic names for the gpr_idx(...) syntax.
 
-extern const char* const IdSymbolic[];
+extern const char *const IdSymbolic[];
 
 } // namespace VGPRIndexMode
 

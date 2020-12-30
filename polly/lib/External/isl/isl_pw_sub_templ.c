@@ -10,7 +10,6 @@
 
 #include <isl_pw_macro.h>
 
-__isl_give PW *FN(PW,sub)(__isl_take PW *pw1, __isl_take PW *pw2)
-{
-    return FN(PW,add)(pw1, FN(PW,neg)(pw2));
+__isl_give PW *FN(PW, sub)(__isl_take PW *pw1, __isl_take PW *pw2) {
+  return FN(PW, add)(pw1, FN(PW, neg)(pw2));
 }

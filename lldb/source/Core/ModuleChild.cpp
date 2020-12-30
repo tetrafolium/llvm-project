@@ -16,15 +16,13 @@ ModuleChild::ModuleChild(const lldb::ModuleSP &module_sp)
 ModuleChild::~ModuleChild() {}
 
 const ModuleChild &ModuleChild::operator=(const ModuleChild &rhs) {
-    if (this != &rhs)
-        m_module_wp = rhs.m_module_wp;
-    return *this;
+  if (this != &rhs)
+    m_module_wp = rhs.m_module_wp;
+  return *this;
 }
 
-lldb::ModuleSP ModuleChild::GetModule() const {
-    return m_module_wp.lock();
-}
+lldb::ModuleSP ModuleChild::GetModule() const { return m_module_wp.lock(); }
 
 void ModuleChild::SetModule(const lldb::ModuleSP &module_sp) {
-    m_module_wp = module_sp;
+  m_module_wp = module_sp;
 }

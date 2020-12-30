@@ -42,21 +42,21 @@ class NamedDecl;
 /// base "number" that identifies which base subobject of the
 /// original derived class we are referencing.
 struct CXXBasePathElement {
-    /// The base specifier that states the link from a derived
-    /// class to a base class, which will be followed by this base
-    /// path element.
-    const CXXBaseSpecifier *Base;
+  /// The base specifier that states the link from a derived
+  /// class to a base class, which will be followed by this base
+  /// path element.
+  const CXXBaseSpecifier *Base;
 
-    /// The record decl of the class that the base is a base of.
-    const CXXRecordDecl *Class;
+  /// The record decl of the class that the base is a base of.
+  const CXXRecordDecl *Class;
 
-    /// Identifies which base class subobject (of type
-    /// \c Base->getType()) this base path element refers to.
-    ///
-    /// This value is only valid if \c !Base->isVirtual(), because there
-    /// is no base numbering for the zero or one virtual bases of a
-    /// given type.
-    int SubobjectNumber;
+  /// Identifies which base class subobject (of type
+  /// \c Base->getType()) this base path element refers to.
+  ///
+  /// This value is only valid if \c !Base->isVirtual(), because there
+  /// is no base numbering for the zero or one virtual bases of a
+  /// given type.
+  int SubobjectNumber;
 };
 
 /// Represents a path from a specific derived class
@@ -69,21 +69,21 @@ struct CXXBasePathElement {
 /// subobject is being used.
 class CXXBasePath : public SmallVector<CXXBasePathElement, 4> {
 public:
-    /// The access along this inheritance path.  This is only
-    /// calculated when recording paths.  AS_none is a special value
-    /// used to indicate a path which permits no legal access.
-    AccessSpecifier Access = AS_public;
+  /// The access along this inheritance path.  This is only
+  /// calculated when recording paths.  AS_none is a special value
+  /// used to indicate a path which permits no legal access.
+  AccessSpecifier Access = AS_public;
 
-    CXXBasePath() = default;
+  CXXBasePath() = default;
 
-    /// The set of declarations found inside this base class
-    /// subobject.
-    DeclContext::lookup_result Decls;
+  /// The set of declarations found inside this base class
+  /// subobject.
+  DeclContext::lookup_result Decls;
 
-    void clear() {
-        SmallVectorImpl<CXXBasePathElement>::clear();
-        Access = AS_public;
-    }
+  void clear() {
+    SmallVectorImpl<CXXBasePathElement>::clear();
+    Access = AS_public;
+  }
 };
 
 /// BasePaths - Represents the set of paths from a derived class to
@@ -116,172 +116,146 @@ public:
 /// refer to the same base class subobject of type A (the virtual
 /// one), there is no ambiguity.
 class CXXBasePaths {
-    friend class CXXRecordDecl;
+  friend class CXXRecordDecl;
 
-    /// The type from which this search originated.
-    const CXXRecordDecl *Origin = nullptr;
+  /// The type from which this search originated.
+  const CXXRecordDecl *Origin = nullptr;
 
-    /// Paths - The actual set of paths that can be taken from the
-    /// derived class to the same base class.
-    std::list<CXXBasePath> Paths;
+  /// Paths - The actual set of paths that can be taken from the
+  /// derived class to the same base class.
+  std::list<CXXBasePath> Paths;
 
-    /// ClassSubobjects - Records the class subobjects for each class
-    /// type that we've seen. The first element IsVirtBase says
-    /// whether we found a path to a virtual base for that class type,
-    /// while NumberOfNonVirtBases contains the number of non-virtual base
-    /// class subobjects for that class type. The key of the map is
-    /// the cv-unqualified canonical type of the base class subobject.
-    struct IsVirtBaseAndNumberNonVirtBases {
-        unsigned IsVirtBase : 1;
-        unsigned NumberOfNonVirtBases : 31;
-    };
-    llvm::SmallDenseMap<QualType, IsVirtBaseAndNumberNonVirtBases, 8>
-    ClassSubobjects;
+  /// ClassSubobjects - Records the class subobjects for each class
+  /// type that we've seen. The first element IsVirtBase says
+  /// whether we found a path to a virtual base for that class type,
+  /// while NumberOfNonVirtBases contains the number of non-virtual base
+  /// class subobjects for that class type. The key of the map is
+  /// the cv-unqualified canonical type of the base class subobject.
+  struct IsVirtBaseAndNumberNonVirtBases {
+    unsigned IsVirtBase : 1;
+    unsigned NumberOfNonVirtBases : 31;
+  };
+  llvm::SmallDenseMap<QualType, IsVirtBaseAndNumberNonVirtBases, 8>
+      ClassSubobjects;
 
-    /// VisitedDependentRecords - Records the dependent records that have been
-    /// already visited.
-    llvm::SmallPtrSet<const CXXRecordDecl *, 4> VisitedDependentRecords;
+  /// VisitedDependentRecords - Records the dependent records that have been
+  /// already visited.
+  llvm::SmallPtrSet<const CXXRecordDecl *, 4> VisitedDependentRecords;
 
-    /// DetectedVirtual - The base class that is virtual.
-    const RecordType *DetectedVirtual = nullptr;
+  /// DetectedVirtual - The base class that is virtual.
+  const RecordType *DetectedVirtual = nullptr;
 
-    /// ScratchPath - A BasePath that is used by Sema::lookupInBases
-    /// to help build the set of paths.
-    CXXBasePath ScratchPath;
+  /// ScratchPath - A BasePath that is used by Sema::lookupInBases
+  /// to help build the set of paths.
+  CXXBasePath ScratchPath;
 
-    /// FindAmbiguities - Whether Sema::IsDerivedFrom should try find
-    /// ambiguous paths while it is looking for a path from a derived
-    /// type to a base type.
-    bool FindAmbiguities;
+  /// FindAmbiguities - Whether Sema::IsDerivedFrom should try find
+  /// ambiguous paths while it is looking for a path from a derived
+  /// type to a base type.
+  bool FindAmbiguities;
 
-    /// RecordPaths - Whether Sema::IsDerivedFrom should record paths
-    /// while it is determining whether there are paths from a derived
-    /// type to a base type.
-    bool RecordPaths;
+  /// RecordPaths - Whether Sema::IsDerivedFrom should record paths
+  /// while it is determining whether there are paths from a derived
+  /// type to a base type.
+  bool RecordPaths;
 
-    /// DetectVirtual - Whether Sema::IsDerivedFrom should abort the search
-    /// if it finds a path that goes across a virtual base. The virtual class
-    /// is also recorded.
-    bool DetectVirtual;
+  /// DetectVirtual - Whether Sema::IsDerivedFrom should abort the search
+  /// if it finds a path that goes across a virtual base. The virtual class
+  /// is also recorded.
+  bool DetectVirtual;
 
-    bool lookupInBases(ASTContext &Context, const CXXRecordDecl *Record,
-                       CXXRecordDecl::BaseMatchesCallback BaseMatches,
-                       bool LookupInDependent = false);
+  bool lookupInBases(ASTContext &Context, const CXXRecordDecl *Record,
+                     CXXRecordDecl::BaseMatchesCallback BaseMatches,
+                     bool LookupInDependent = false);
 
 public:
-    using paths_iterator = std::list<CXXBasePath>::iterator;
-    using const_paths_iterator = std::list<CXXBasePath>::const_iterator;
-    using decl_iterator = NamedDecl **;
+  using paths_iterator = std::list<CXXBasePath>::iterator;
+  using const_paths_iterator = std::list<CXXBasePath>::const_iterator;
+  using decl_iterator = NamedDecl **;
 
-    /// BasePaths - Construct a new BasePaths structure to record the
-    /// paths for a derived-to-base search.
-    explicit CXXBasePaths(bool FindAmbiguities = true, bool RecordPaths = true,
-                          bool DetectVirtual = true)
-        : FindAmbiguities(FindAmbiguities), RecordPaths(RecordPaths),
-          DetectVirtual(DetectVirtual) {}
+  /// BasePaths - Construct a new BasePaths structure to record the
+  /// paths for a derived-to-base search.
+  explicit CXXBasePaths(bool FindAmbiguities = true, bool RecordPaths = true,
+                        bool DetectVirtual = true)
+      : FindAmbiguities(FindAmbiguities), RecordPaths(RecordPaths),
+        DetectVirtual(DetectVirtual) {}
 
-    paths_iterator begin() {
-        return Paths.begin();
-    }
-    paths_iterator end()   {
-        return Paths.end();
-    }
-    const_paths_iterator begin() const {
-        return Paths.begin();
-    }
-    const_paths_iterator end()   const {
-        return Paths.end();
-    }
+  paths_iterator begin() { return Paths.begin(); }
+  paths_iterator end() { return Paths.end(); }
+  const_paths_iterator begin() const { return Paths.begin(); }
+  const_paths_iterator end() const { return Paths.end(); }
 
-    CXXBasePath&       front()       {
-        return Paths.front();
-    }
-    const CXXBasePath& front() const {
-        return Paths.front();
-    }
+  CXXBasePath &front() { return Paths.front(); }
+  const CXXBasePath &front() const { return Paths.front(); }
 
-    using decl_range = llvm::iterator_range<decl_iterator>;
+  using decl_range = llvm::iterator_range<decl_iterator>;
 
-    /// Determine whether the path from the most-derived type to the
-    /// given base type is ambiguous (i.e., it refers to multiple subobjects of
-    /// the same base type).
-    bool isAmbiguous(CanQualType BaseType);
+  /// Determine whether the path from the most-derived type to the
+  /// given base type is ambiguous (i.e., it refers to multiple subobjects of
+  /// the same base type).
+  bool isAmbiguous(CanQualType BaseType);
 
-    /// Whether we are finding multiple paths to detect ambiguities.
-    bool isFindingAmbiguities() const {
-        return FindAmbiguities;
-    }
+  /// Whether we are finding multiple paths to detect ambiguities.
+  bool isFindingAmbiguities() const { return FindAmbiguities; }
 
-    /// Whether we are recording paths.
-    bool isRecordingPaths() const {
-        return RecordPaths;
-    }
+  /// Whether we are recording paths.
+  bool isRecordingPaths() const { return RecordPaths; }
 
-    /// Specify whether we should be recording paths or not.
-    void setRecordingPaths(bool RP) {
-        RecordPaths = RP;
-    }
+  /// Specify whether we should be recording paths or not.
+  void setRecordingPaths(bool RP) { RecordPaths = RP; }
 
-    /// Whether we are detecting virtual bases.
-    bool isDetectingVirtual() const {
-        return DetectVirtual;
-    }
+  /// Whether we are detecting virtual bases.
+  bool isDetectingVirtual() const { return DetectVirtual; }
 
-    /// The virtual base discovered on the path (if we are merely
-    /// detecting virtuals).
-    const RecordType* getDetectedVirtual() const {
-        return DetectedVirtual;
-    }
+  /// The virtual base discovered on the path (if we are merely
+  /// detecting virtuals).
+  const RecordType *getDetectedVirtual() const { return DetectedVirtual; }
 
-    /// Retrieve the type from which this base-paths search
-    /// began
-    const CXXRecordDecl *getOrigin() const {
-        return Origin;
-    }
-    void setOrigin(const CXXRecordDecl *Rec) {
-        Origin = Rec;
-    }
+  /// Retrieve the type from which this base-paths search
+  /// began
+  const CXXRecordDecl *getOrigin() const { return Origin; }
+  void setOrigin(const CXXRecordDecl *Rec) { Origin = Rec; }
 
-    /// Clear the base-paths results.
-    void clear();
+  /// Clear the base-paths results.
+  void clear();
 
-    /// Swap this data structure's contents with another CXXBasePaths
-    /// object.
-    void swap(CXXBasePaths &Other);
+  /// Swap this data structure's contents with another CXXBasePaths
+  /// object.
+  void swap(CXXBasePaths &Other);
 };
 
 /// Uniquely identifies a virtual method within a class
 /// hierarchy by the method itself and a class subobject number.
 struct UniqueVirtualMethod {
-    /// The overriding virtual method.
-    CXXMethodDecl *Method = nullptr;
+  /// The overriding virtual method.
+  CXXMethodDecl *Method = nullptr;
 
-    /// The subobject in which the overriding virtual method
-    /// resides.
-    unsigned Subobject = 0;
+  /// The subobject in which the overriding virtual method
+  /// resides.
+  unsigned Subobject = 0;
 
-    /// The virtual base class subobject of which this overridden
-    /// virtual method is a part. Note that this records the closest
-    /// derived virtual base class subobject.
-    const CXXRecordDecl *InVirtualSubobject = nullptr;
+  /// The virtual base class subobject of which this overridden
+  /// virtual method is a part. Note that this records the closest
+  /// derived virtual base class subobject.
+  const CXXRecordDecl *InVirtualSubobject = nullptr;
 
-    UniqueVirtualMethod() = default;
+  UniqueVirtualMethod() = default;
 
-    UniqueVirtualMethod(CXXMethodDecl *Method, unsigned Subobject,
-                        const CXXRecordDecl *InVirtualSubobject)
-        : Method(Method), Subobject(Subobject),
-          InVirtualSubobject(InVirtualSubobject) {}
+  UniqueVirtualMethod(CXXMethodDecl *Method, unsigned Subobject,
+                      const CXXRecordDecl *InVirtualSubobject)
+      : Method(Method), Subobject(Subobject),
+        InVirtualSubobject(InVirtualSubobject) {}
 
-    friend bool operator==(const UniqueVirtualMethod &X,
-                           const UniqueVirtualMethod &Y) {
-        return X.Method == Y.Method && X.Subobject == Y.Subobject &&
-               X.InVirtualSubobject == Y.InVirtualSubobject;
-    }
+  friend bool operator==(const UniqueVirtualMethod &X,
+                         const UniqueVirtualMethod &Y) {
+    return X.Method == Y.Method && X.Subobject == Y.Subobject &&
+           X.InVirtualSubobject == Y.InVirtualSubobject;
+  }
 
-    friend bool operator!=(const UniqueVirtualMethod &X,
-                           const UniqueVirtualMethod &Y) {
-        return !(X == Y);
-    }
+  friend bool operator!=(const UniqueVirtualMethod &X,
+                         const UniqueVirtualMethod &Y) {
+    return !(X == Y);
+  }
 };
 
 /// The set of methods that override a given virtual method in
@@ -292,50 +266,39 @@ struct UniqueVirtualMethod {
 /// pair is the virtual method that overrides it (including the
 /// subobject in which that virtual function occurs).
 class OverridingMethods {
-    using ValuesT = SmallVector<UniqueVirtualMethod, 4>;
-    using MapType = llvm::MapVector<unsigned, ValuesT>;
+  using ValuesT = SmallVector<UniqueVirtualMethod, 4>;
+  using MapType = llvm::MapVector<unsigned, ValuesT>;
 
-    MapType Overrides;
+  MapType Overrides;
 
 public:
-    // Iterate over the set of subobjects that have overriding methods.
-    using iterator = MapType::iterator;
-    using const_iterator = MapType::const_iterator;
+  // Iterate over the set of subobjects that have overriding methods.
+  using iterator = MapType::iterator;
+  using const_iterator = MapType::const_iterator;
 
-    iterator begin() {
-        return Overrides.begin();
-    }
-    const_iterator begin() const {
-        return Overrides.begin();
-    }
-    iterator end() {
-        return Overrides.end();
-    }
-    const_iterator end() const {
-        return Overrides.end();
-    }
-    unsigned size() const {
-        return Overrides.size();
-    }
+  iterator begin() { return Overrides.begin(); }
+  const_iterator begin() const { return Overrides.begin(); }
+  iterator end() { return Overrides.end(); }
+  const_iterator end() const { return Overrides.end(); }
+  unsigned size() const { return Overrides.size(); }
 
-    // Iterate over the set of overriding virtual methods in a given
-    // subobject.
-    using overriding_iterator =
-        SmallVectorImpl<UniqueVirtualMethod>::iterator;
-    using overriding_const_iterator =
-        SmallVectorImpl<UniqueVirtualMethod>::const_iterator;
+  // Iterate over the set of overriding virtual methods in a given
+  // subobject.
+  using overriding_iterator = SmallVectorImpl<UniqueVirtualMethod>::iterator;
+  using overriding_const_iterator =
+      SmallVectorImpl<UniqueVirtualMethod>::const_iterator;
 
-    // Add a new overriding method for a particular subobject.
-    void add(unsigned OverriddenSubobject, UniqueVirtualMethod Overriding);
+  // Add a new overriding method for a particular subobject.
+  void add(unsigned OverriddenSubobject, UniqueVirtualMethod Overriding);
 
-    // Add all of the overriding methods from "other" into overrides for
-    // this method. Used when merging the overrides from multiple base
-    // class subobjects.
-    void add(const OverridingMethods &Other);
+  // Add all of the overriding methods from "other" into overrides for
+  // this method. Used when merging the overrides from multiple base
+  // class subobjects.
+  void add(const OverridingMethods &Other);
 
-    // Replace all overriding virtual methods in all subobjects with the
-    // given virtual method.
-    void replaceAll(UniqueVirtualMethod Overriding);
+  // Replace all overriding virtual methods in all subobjects with the
+  // given virtual method.
+  void replaceAll(UniqueVirtualMethod Overriding);
 };
 
 /// A mapping from each virtual member function to its set of
@@ -394,30 +357,30 @@ class CXXFinalOverriderMap
 
 /// A set of all the primary bases for a class.
 class CXXIndirectPrimaryBaseSet
-    : public llvm::SmallSet<const CXXRecordDecl*, 32> {};
+    : public llvm::SmallSet<const CXXRecordDecl *, 32> {};
 
 inline bool
 inheritanceModelHasVBPtrOffsetField(MSInheritanceModel Inheritance) {
-    return Inheritance == MSInheritanceModel::Unspecified;
+  return Inheritance == MSInheritanceModel::Unspecified;
 }
 
 // Only member pointers to functions need a this adjustment, since it can be
 // combined with the field offset for data pointers.
 inline bool inheritanceModelHasNVOffsetField(bool IsMemberFunction,
-        MSInheritanceModel Inheritance) {
-    return IsMemberFunction && Inheritance >= MSInheritanceModel::Multiple;
+                                             MSInheritanceModel Inheritance) {
+  return IsMemberFunction && Inheritance >= MSInheritanceModel::Multiple;
 }
 
 inline bool
 inheritanceModelHasVBTableOffsetField(MSInheritanceModel Inheritance) {
-    return Inheritance >= MSInheritanceModel::Virtual;
+  return Inheritance >= MSInheritanceModel::Virtual;
 }
 
 inline bool inheritanceModelHasOnlyOneField(bool IsMemberFunction,
-        MSInheritanceModel Inheritance) {
-    if (IsMemberFunction)
-        return Inheritance <= MSInheritanceModel::Single;
-    return Inheritance <= MSInheritanceModel::Multiple;
+                                            MSInheritanceModel Inheritance) {
+  if (IsMemberFunction)
+    return Inheritance <= MSInheritanceModel::Single;
+  return Inheritance <= MSInheritanceModel::Multiple;
 }
 
 } // namespace clang

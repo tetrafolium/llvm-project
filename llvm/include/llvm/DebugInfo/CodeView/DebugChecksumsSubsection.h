@@ -29,79 +29,71 @@ namespace codeview {
 class DebugStringTableSubsection;
 
 struct FileChecksumEntry {
-    uint32_t FileNameOffset;    // Byte offset of filename in global stringtable.
-    FileChecksumKind Kind;      // The type of checksum.
-    ArrayRef<uint8_t> Checksum; // The bytes of the checksum.
+  uint32_t FileNameOffset;    // Byte offset of filename in global stringtable.
+  FileChecksumKind Kind;      // The type of checksum.
+  ArrayRef<uint8_t> Checksum; // The bytes of the checksum.
 };
 
 } // end namespace codeview
 
 template <> struct VarStreamArrayExtractor<codeview::FileChecksumEntry> {
 public:
-    using ContextType = void;
+  using ContextType = void;
 
-    Error operator()(BinaryStreamRef Stream, uint32_t &Len,
-                     codeview::FileChecksumEntry &Item);
+  Error operator()(BinaryStreamRef Stream, uint32_t &Len,
+                   codeview::FileChecksumEntry &Item);
 };
 
 namespace codeview {
 
 class DebugChecksumsSubsectionRef final : public DebugSubsectionRef {
-    using FileChecksumArray = VarStreamArray<codeview::FileChecksumEntry>;
-    using Iterator = FileChecksumArray::Iterator;
+  using FileChecksumArray = VarStreamArray<codeview::FileChecksumEntry>;
+  using Iterator = FileChecksumArray::Iterator;
 
 public:
-    DebugChecksumsSubsectionRef()
-        : DebugSubsectionRef(DebugSubsectionKind::FileChecksums) {}
+  DebugChecksumsSubsectionRef()
+      : DebugSubsectionRef(DebugSubsectionKind::FileChecksums) {}
 
-    static bool classof(const DebugSubsectionRef *S) {
-        return S->kind() == DebugSubsectionKind::FileChecksums;
-    }
+  static bool classof(const DebugSubsectionRef *S) {
+    return S->kind() == DebugSubsectionKind::FileChecksums;
+  }
 
-    bool valid() const {
-        return Checksums.valid();
-    }
+  bool valid() const { return Checksums.valid(); }
 
-    Error initialize(BinaryStreamReader Reader);
-    Error initialize(BinaryStreamRef Stream);
+  Error initialize(BinaryStreamReader Reader);
+  Error initialize(BinaryStreamRef Stream);
 
-    Iterator begin() const {
-        return Checksums.begin();
-    }
-    Iterator end() const {
-        return Checksums.end();
-    }
+  Iterator begin() const { return Checksums.begin(); }
+  Iterator end() const { return Checksums.end(); }
 
-    const FileChecksumArray &getArray() const {
-        return Checksums;
-    }
+  const FileChecksumArray &getArray() const { return Checksums; }
 
 private:
-    FileChecksumArray Checksums;
+  FileChecksumArray Checksums;
 };
 
 class DebugChecksumsSubsection final : public DebugSubsection {
 public:
-    explicit DebugChecksumsSubsection(DebugStringTableSubsection &Strings);
+  explicit DebugChecksumsSubsection(DebugStringTableSubsection &Strings);
 
-    static bool classof(const DebugSubsection *S) {
-        return S->kind() == DebugSubsectionKind::FileChecksums;
-    }
+  static bool classof(const DebugSubsection *S) {
+    return S->kind() == DebugSubsectionKind::FileChecksums;
+  }
 
-    void addChecksum(StringRef FileName, FileChecksumKind Kind,
-                     ArrayRef<uint8_t> Bytes);
+  void addChecksum(StringRef FileName, FileChecksumKind Kind,
+                   ArrayRef<uint8_t> Bytes);
 
-    uint32_t calculateSerializedSize() const override;
-    Error commit(BinaryStreamWriter &Writer) const override;
-    uint32_t mapChecksumOffset(StringRef FileName) const;
+  uint32_t calculateSerializedSize() const override;
+  Error commit(BinaryStreamWriter &Writer) const override;
+  uint32_t mapChecksumOffset(StringRef FileName) const;
 
 private:
-    DebugStringTableSubsection &Strings;
+  DebugStringTableSubsection &Strings;
 
-    DenseMap<uint32_t, uint32_t> OffsetMap;
-    uint32_t SerializedSize = 0;
-    BumpPtrAllocator Storage;
-    std::vector<FileChecksumEntry> Checksums;
+  DenseMap<uint32_t, uint32_t> OffsetMap;
+  uint32_t SerializedSize = 0;
+  BumpPtrAllocator Storage;
+  std::vector<FileChecksumEntry> Checksums;
 };
 
 } // end namespace codeview

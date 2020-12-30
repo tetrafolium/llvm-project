@@ -22,10 +22,10 @@ namespace android {
 /// http://clang.llvm.org/extra/clang-tidy/checks/android-cloexec-dup.html
 class CloexecDupCheck : public CloexecCheck {
 public:
-    CloexecDupCheck(StringRef Name, ClangTidyContext *Context)
-        : CloexecCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  CloexecDupCheck(StringRef Name, ClangTidyContext *Context)
+      : CloexecCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace android

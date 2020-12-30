@@ -45,47 +45,43 @@ namespace llvm {
 ///          4. ...
 class Annotations {
 public:
-    /// Two offsets pointing to a continuous substring. End is not included, i.e.
-    /// represents a half-open range.
-    struct Range {
-        size_t Begin = 0;
-        size_t End = 0;
+  /// Two offsets pointing to a continuous substring. End is not included, i.e.
+  /// represents a half-open range.
+  struct Range {
+    size_t Begin = 0;
+    size_t End = 0;
 
-        friend bool operator==(const Range &L, const Range &R) {
-            return std::tie(L.Begin, L.End) == std::tie(R.Begin, R.End);
-        }
-        friend bool operator!=(const Range &L, const Range &R) {
-            return !(L == R);
-        }
-    };
-
-    /// Parses the annotations from Text. Crashes if it's malformed.
-    Annotations(llvm::StringRef Text);
-
-    /// The input text with all annotations stripped.
-    /// All points and ranges are relative to this stripped text.
-    llvm::StringRef code() const {
-        return Code;
+    friend bool operator==(const Range &L, const Range &R) {
+      return std::tie(L.Begin, L.End) == std::tie(R.Begin, R.End);
     }
+    friend bool operator!=(const Range &L, const Range &R) { return !(L == R); }
+  };
 
-    /// Returns the position of the point marked by ^ (or $name^) in the text.
-    /// Crashes if there isn't exactly one.
-    size_t point(llvm::StringRef Name = "") const;
-    /// Returns the position of all points marked by ^ (or $name^) in the text.
-    /// Order matches the order within the text.
-    std::vector<size_t> points(llvm::StringRef Name = "") const;
+  /// Parses the annotations from Text. Crashes if it's malformed.
+  Annotations(llvm::StringRef Text);
 
-    /// Returns the location of the range marked by [[ ]] (or $name[[ ]]).
-    /// Crashes if there isn't exactly one.
-    Range range(llvm::StringRef Name = "") const;
-    /// Returns the location of all ranges marked by [[ ]] (or $name[[ ]]).
-    /// They are ordered by start position within the text.
-    std::vector<Range> ranges(llvm::StringRef Name = "") const;
+  /// The input text with all annotations stripped.
+  /// All points and ranges are relative to this stripped text.
+  llvm::StringRef code() const { return Code; }
+
+  /// Returns the position of the point marked by ^ (or $name^) in the text.
+  /// Crashes if there isn't exactly one.
+  size_t point(llvm::StringRef Name = "") const;
+  /// Returns the position of all points marked by ^ (or $name^) in the text.
+  /// Order matches the order within the text.
+  std::vector<size_t> points(llvm::StringRef Name = "") const;
+
+  /// Returns the location of the range marked by [[ ]] (or $name[[ ]]).
+  /// Crashes if there isn't exactly one.
+  Range range(llvm::StringRef Name = "") const;
+  /// Returns the location of all ranges marked by [[ ]] (or $name[[ ]]).
+  /// They are ordered by start position within the text.
+  std::vector<Range> ranges(llvm::StringRef Name = "") const;
 
 private:
-    std::string Code;
-    llvm::StringMap<llvm::SmallVector<size_t, 1>> Points;
-    llvm::StringMap<llvm::SmallVector<Range, 1>> Ranges;
+  std::string Code;
+  llvm::StringMap<llvm::SmallVector<size_t, 1>> Points;
+  llvm::StringMap<llvm::SmallVector<Range, 1>> Ranges;
 };
 
 llvm::raw_ostream &operator<<(llvm::raw_ostream &O,

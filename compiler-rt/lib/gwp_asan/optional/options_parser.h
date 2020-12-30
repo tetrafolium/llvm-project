@@ -24,8 +24,8 @@ Options &getOptions();
 } // namespace gwp_asan
 
 extern "C" {
-    SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE const char *
-    __gwp_asan_default_options();
+SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE const char *
+__gwp_asan_default_options();
 }
 
 #endif // GWP_ASAN_OPTIONAL_OPTIONS_PARSER_H_

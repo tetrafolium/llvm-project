@@ -53,211 +53,194 @@ class ASTContext;
 class FriendDecl final
     : public Decl,
       private llvm::TrailingObjects<FriendDecl, TemplateParameterList *> {
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    using FriendUnion = llvm::PointerUnion<NamedDecl *, TypeSourceInfo *>;
+  using FriendUnion = llvm::PointerUnion<NamedDecl *, TypeSourceInfo *>;
 
 private:
-    friend class CXXRecordDecl;
-    friend class CXXRecordDecl::friend_iterator;
+  friend class CXXRecordDecl;
+  friend class CXXRecordDecl::friend_iterator;
 
-    // The declaration that's a friend of this class.
-    FriendUnion Friend;
+  // The declaration that's a friend of this class.
+  FriendUnion Friend;
 
-    // A pointer to the next friend in the sequence.
-    LazyDeclPtr NextFriend;
+  // A pointer to the next friend in the sequence.
+  LazyDeclPtr NextFriend;
 
-    // Location of the 'friend' specifier.
-    SourceLocation FriendLoc;
+  // Location of the 'friend' specifier.
+  SourceLocation FriendLoc;
 
-    /// True if this 'friend' declaration is unsupported.  Eventually we
-    /// will support every possible friend declaration, but for now we
-    /// silently ignore some and set this flag to authorize all access.
-    unsigned UnsupportedFriend : 1;
+  /// True if this 'friend' declaration is unsupported.  Eventually we
+  /// will support every possible friend declaration, but for now we
+  /// silently ignore some and set this flag to authorize all access.
+  unsigned UnsupportedFriend : 1;
 
-    // The number of "outer" template parameter lists in non-templatic
-    // (currently unsupported) friend type declarations, such as
-    //     template <class T> friend class A<T>::B;
-    unsigned NumTPLists : 31;
+  // The number of "outer" template parameter lists in non-templatic
+  // (currently unsupported) friend type declarations, such as
+  //     template <class T> friend class A<T>::B;
+  unsigned NumTPLists : 31;
 
-    FriendDecl(DeclContext *DC, SourceLocation L, FriendUnion Friend,
-               SourceLocation FriendL,
-               ArrayRef<TemplateParameterList *> FriendTypeTPLists)
-        : Decl(Decl::Friend, DC, L), Friend(Friend), FriendLoc(FriendL),
-          UnsupportedFriend(false), NumTPLists(FriendTypeTPLists.size()) {
-        for (unsigned i = 0; i < NumTPLists; ++i)
-            getTrailingObjects<TemplateParameterList *>()[i] = FriendTypeTPLists[i];
-    }
+  FriendDecl(DeclContext *DC, SourceLocation L, FriendUnion Friend,
+             SourceLocation FriendL,
+             ArrayRef<TemplateParameterList *> FriendTypeTPLists)
+      : Decl(Decl::Friend, DC, L), Friend(Friend), FriendLoc(FriendL),
+        UnsupportedFriend(false), NumTPLists(FriendTypeTPLists.size()) {
+    for (unsigned i = 0; i < NumTPLists; ++i)
+      getTrailingObjects<TemplateParameterList *>()[i] = FriendTypeTPLists[i];
+  }
 
-    FriendDecl(EmptyShell Empty, unsigned NumFriendTypeTPLists)
-        : Decl(Decl::Friend, Empty), UnsupportedFriend(false),
-          NumTPLists(NumFriendTypeTPLists) {}
+  FriendDecl(EmptyShell Empty, unsigned NumFriendTypeTPLists)
+      : Decl(Decl::Friend, Empty), UnsupportedFriend(false),
+        NumTPLists(NumFriendTypeTPLists) {}
 
-    FriendDecl *getNextFriend() {
-        if (!NextFriend.isOffset())
-            return cast_or_null<FriendDecl>(NextFriend.get(nullptr));
-        return getNextFriendSlowCase();
-    }
+  FriendDecl *getNextFriend() {
+    if (!NextFriend.isOffset())
+      return cast_or_null<FriendDecl>(NextFriend.get(nullptr));
+    return getNextFriendSlowCase();
+  }
 
-    FriendDecl *getNextFriendSlowCase();
+  FriendDecl *getNextFriendSlowCase();
 
 public:
-    friend class ASTDeclReader;
-    friend class ASTDeclWriter;
-    friend class ASTNodeImporter;
-    friend TrailingObjects;
+  friend class ASTDeclReader;
+  friend class ASTDeclWriter;
+  friend class ASTNodeImporter;
+  friend TrailingObjects;
 
-    static FriendDecl *Create(ASTContext &C, DeclContext *DC,
-                              SourceLocation L, FriendUnion Friend_,
-                              SourceLocation FriendL,
-                              ArrayRef<TemplateParameterList*> FriendTypeTPLists
-                              = None);
-    static FriendDecl *CreateDeserialized(ASTContext &C, unsigned ID,
-                                          unsigned FriendTypeNumTPLists);
+  static FriendDecl *
+  Create(ASTContext &C, DeclContext *DC, SourceLocation L, FriendUnion Friend_,
+         SourceLocation FriendL,
+         ArrayRef<TemplateParameterList *> FriendTypeTPLists = None);
+  static FriendDecl *CreateDeserialized(ASTContext &C, unsigned ID,
+                                        unsigned FriendTypeNumTPLists);
 
-    /// If this friend declaration names an (untemplated but possibly
-    /// dependent) type, return the type; otherwise return null.  This
-    /// is used for elaborated-type-specifiers and, in C++0x, for
-    /// arbitrary friend type declarations.
-    TypeSourceInfo *getFriendType() const {
-        return Friend.dyn_cast<TypeSourceInfo*>();
-    }
+  /// If this friend declaration names an (untemplated but possibly
+  /// dependent) type, return the type; otherwise return null.  This
+  /// is used for elaborated-type-specifiers and, in C++0x, for
+  /// arbitrary friend type declarations.
+  TypeSourceInfo *getFriendType() const {
+    return Friend.dyn_cast<TypeSourceInfo *>();
+  }
 
-    unsigned getFriendTypeNumTemplateParameterLists() const {
-        return NumTPLists;
-    }
+  unsigned getFriendTypeNumTemplateParameterLists() const { return NumTPLists; }
 
-    TemplateParameterList *getFriendTypeTemplateParameterList(unsigned N) const {
-        assert(N < NumTPLists);
-        return getTrailingObjects<TemplateParameterList *>()[N];
-    }
+  TemplateParameterList *getFriendTypeTemplateParameterList(unsigned N) const {
+    assert(N < NumTPLists);
+    return getTrailingObjects<TemplateParameterList *>()[N];
+  }
 
-    /// If this friend declaration doesn't name a type, return the inner
-    /// declaration.
-    NamedDecl *getFriendDecl() const {
-        return Friend.dyn_cast<NamedDecl *>();
-    }
+  /// If this friend declaration doesn't name a type, return the inner
+  /// declaration.
+  NamedDecl *getFriendDecl() const { return Friend.dyn_cast<NamedDecl *>(); }
 
-    /// Retrieves the location of the 'friend' keyword.
-    SourceLocation getFriendLoc() const {
-        return FriendLoc;
-    }
+  /// Retrieves the location of the 'friend' keyword.
+  SourceLocation getFriendLoc() const { return FriendLoc; }
 
-    /// Retrieves the source range for the friend declaration.
-    SourceRange getSourceRange() const override LLVM_READONLY {
-        if (NamedDecl *ND = getFriendDecl()) {
-            if (const auto *FD = dyn_cast<FunctionDecl>(ND))
-                return FD->getSourceRange();
-            if (const auto *FTD = dyn_cast<FunctionTemplateDecl>(ND))
-                return FTD->getSourceRange();
-            if (const auto *CTD = dyn_cast<ClassTemplateDecl>(ND))
-                return CTD->getSourceRange();
-            if (const auto *DD = dyn_cast<DeclaratorDecl>(ND)) {
-                if (DD->getOuterLocStart() != DD->getInnerLocStart())
-                    return DD->getSourceRange();
-            }
-            return SourceRange(getFriendLoc(), ND->getEndLoc());
-        }
-        else if (TypeSourceInfo *TInfo = getFriendType()) {
-            SourceLocation StartL =
-                (NumTPLists == 0) ? getFriendLoc()
-                : getTrailingObjects<TemplateParameterList *>()[0]
-                ->getTemplateLoc();
-            return SourceRange(StartL, TInfo->getTypeLoc().getEndLoc());
-        }
-        else
-            return SourceRange(getFriendLoc(), getLocation());
-    }
+  /// Retrieves the source range for the friend declaration.
+  SourceRange getSourceRange() const override LLVM_READONLY {
+    if (NamedDecl *ND = getFriendDecl()) {
+      if (const auto *FD = dyn_cast<FunctionDecl>(ND))
+        return FD->getSourceRange();
+      if (const auto *FTD = dyn_cast<FunctionTemplateDecl>(ND))
+        return FTD->getSourceRange();
+      if (const auto *CTD = dyn_cast<ClassTemplateDecl>(ND))
+        return CTD->getSourceRange();
+      if (const auto *DD = dyn_cast<DeclaratorDecl>(ND)) {
+        if (DD->getOuterLocStart() != DD->getInnerLocStart())
+          return DD->getSourceRange();
+      }
+      return SourceRange(getFriendLoc(), ND->getEndLoc());
+    } else if (TypeSourceInfo *TInfo = getFriendType()) {
+      SourceLocation StartL =
+          (NumTPLists == 0) ? getFriendLoc()
+                            : getTrailingObjects<TemplateParameterList *>()[0]
+                                  ->getTemplateLoc();
+      return SourceRange(StartL, TInfo->getTypeLoc().getEndLoc());
+    } else
+      return SourceRange(getFriendLoc(), getLocation());
+  }
 
-    /// Determines if this friend kind is unsupported.
-    bool isUnsupportedFriend() const {
-        return UnsupportedFriend;
-    }
-    void setUnsupportedFriend(bool Unsupported) {
-        UnsupportedFriend = Unsupported;
-    }
+  /// Determines if this friend kind is unsupported.
+  bool isUnsupportedFriend() const { return UnsupportedFriend; }
+  void setUnsupportedFriend(bool Unsupported) {
+    UnsupportedFriend = Unsupported;
+  }
 
-    // Implement isa/cast/dyncast/etc.
-    static bool classof(const Decl *D) {
-        return classofKind(D->getKind());
-    }
-    static bool classofKind(Kind K) {
-        return K == Decl::Friend;
-    }
+  // Implement isa/cast/dyncast/etc.
+  static bool classof(const Decl *D) { return classofKind(D->getKind()); }
+  static bool classofKind(Kind K) { return K == Decl::Friend; }
 };
 
 /// An iterator over the friend declarations of a class.
 class CXXRecordDecl::friend_iterator {
-    friend class CXXRecordDecl;
+  friend class CXXRecordDecl;
 
-    FriendDecl *Ptr;
+  FriendDecl *Ptr;
 
-    explicit friend_iterator(FriendDecl *Ptr) : Ptr(Ptr) {}
+  explicit friend_iterator(FriendDecl *Ptr) : Ptr(Ptr) {}
 
 public:
-    friend_iterator() = default;
+  friend_iterator() = default;
 
-    using value_type = FriendDecl *;
-    using reference = FriendDecl *;
-    using pointer = FriendDecl *;
-    using difference_type = int;
-    using iterator_category = std::forward_iterator_tag;
+  using value_type = FriendDecl *;
+  using reference = FriendDecl *;
+  using pointer = FriendDecl *;
+  using difference_type = int;
+  using iterator_category = std::forward_iterator_tag;
 
-    reference operator*() const {
-        return Ptr;
-    }
+  reference operator*() const { return Ptr; }
 
-    friend_iterator &operator++() {
-        assert(Ptr && "attempt to increment past end of friend list");
-        Ptr = Ptr->getNextFriend();
-        return *this;
-    }
+  friend_iterator &operator++() {
+    assert(Ptr && "attempt to increment past end of friend list");
+    Ptr = Ptr->getNextFriend();
+    return *this;
+  }
 
-    friend_iterator operator++(int) {
-        friend_iterator tmp = *this;
-        ++*this;
-        return tmp;
-    }
+  friend_iterator operator++(int) {
+    friend_iterator tmp = *this;
+    ++*this;
+    return tmp;
+  }
 
-    bool operator==(const friend_iterator &Other) const {
-        return Ptr == Other.Ptr;
-    }
+  bool operator==(const friend_iterator &Other) const {
+    return Ptr == Other.Ptr;
+  }
 
-    bool operator!=(const friend_iterator &Other) const {
-        return Ptr != Other.Ptr;
-    }
+  bool operator!=(const friend_iterator &Other) const {
+    return Ptr != Other.Ptr;
+  }
 
-    friend_iterator &operator+=(difference_type N) {
-        assert(N >= 0 && "cannot rewind a CXXRecordDecl::friend_iterator");
-        while (N--)
-            ++*this;
-        return *this;
-    }
+  friend_iterator &operator+=(difference_type N) {
+    assert(N >= 0 && "cannot rewind a CXXRecordDecl::friend_iterator");
+    while (N--)
+      ++*this;
+    return *this;
+  }
 
-    friend_iterator operator+(difference_type N) const {
-        friend_iterator tmp = *this;
-        tmp += N;
-        return tmp;
-    }
+  friend_iterator operator+(difference_type N) const {
+    friend_iterator tmp = *this;
+    tmp += N;
+    return tmp;
+  }
 };
 
 inline CXXRecordDecl::friend_iterator CXXRecordDecl::friend_begin() const {
-    return friend_iterator(getFirstFriend());
+  return friend_iterator(getFirstFriend());
 }
 
 inline CXXRecordDecl::friend_iterator CXXRecordDecl::friend_end() const {
-    return friend_iterator(nullptr);
+  return friend_iterator(nullptr);
 }
 
 inline CXXRecordDecl::friend_range CXXRecordDecl::friends() const {
-    return friend_range(friend_begin(), friend_end());
+  return friend_range(friend_begin(), friend_end());
 }
 
 inline void CXXRecordDecl::pushFriendDecl(FriendDecl *FD) {
-    assert(!FD->NextFriend && "friend already has next friend?");
-    FD->NextFriend = data().FirstFriend;
-    data().FirstFriend = FD;
+  assert(!FD->NextFriend && "friend already has next friend?");
+  FD->NextFriend = data().FirstFriend;
+  data().FirstFriend = FD;
 }
 
 } // namespace clang

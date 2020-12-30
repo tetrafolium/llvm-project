@@ -23,20 +23,20 @@ using namespace llvm;
 
 /// Initialize all passes linked into the Vectorization library.
 void llvm::initializeVectorization(PassRegistry &Registry) {
-    initializeLoopVectorizePass(Registry);
-    initializeSLPVectorizerPass(Registry);
-    initializeLoadStoreVectorizerLegacyPassPass(Registry);
-    initializeVectorCombineLegacyPassPass(Registry);
+  initializeLoopVectorizePass(Registry);
+  initializeSLPVectorizerPass(Registry);
+  initializeLoadStoreVectorizerLegacyPassPass(Registry);
+  initializeVectorCombineLegacyPassPass(Registry);
 }
 
 void LLVMInitializeVectorization(LLVMPassRegistryRef R) {
-    initializeVectorization(*unwrap(R));
+  initializeVectorization(*unwrap(R));
 }
 
 void LLVMAddLoopVectorizePass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createLoopVectorizePass());
+  unwrap(PM)->add(createLoopVectorizePass());
 }
 
 void LLVMAddSLPVectorizePass(LLVMPassManagerRef PM) {
-    unwrap(PM)->add(createSLPVectorizerPass());
+  unwrap(PM)->add(createSLPVectorizerPass());
 }

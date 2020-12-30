@@ -18,14 +18,14 @@ namespace tidy {
 namespace android {
 
 void CloexecPipe2Check::registerMatchers(MatchFinder *Finder) {
-    registerMatchersImpl(Finder,
-                         functionDecl(returns(isInteger()), hasName("pipe2"),
-                                      hasParameter(0, hasType(pointsTo(isInteger()))),
-                                      hasParameter(1, hasType(isInteger()))));
+  registerMatchersImpl(
+      Finder, functionDecl(returns(isInteger()), hasName("pipe2"),
+                           hasParameter(0, hasType(pointsTo(isInteger()))),
+                           hasParameter(1, hasType(isInteger()))));
 }
 
 void CloexecPipe2Check::check(const MatchFinder::MatchResult &Result) {
-    insertMacroFlag(Result, /*MacroFlag=*/"O_CLOEXEC", /*ArgPos=*/1);
+  insertMacroFlag(Result, /*MacroFlag=*/"O_CLOEXEC", /*ArgPos=*/1);
 }
 
 } // namespace android

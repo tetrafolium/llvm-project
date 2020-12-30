@@ -16,36 +16,30 @@ namespace wasm {
 
 class DynamicLoaderWasmDYLD : public DynamicLoader {
 public:
-    DynamicLoaderWasmDYLD(Process *process);
+  DynamicLoaderWasmDYLD(Process *process);
 
-    static void Initialize();
-    static void Terminate() {}
+  static void Initialize();
+  static void Terminate() {}
 
-    static ConstString GetPluginNameStatic();
-    static const char *GetPluginDescriptionStatic();
+  static ConstString GetPluginNameStatic();
+  static const char *GetPluginDescriptionStatic();
 
-    static DynamicLoader *CreateInstance(Process *process, bool force);
+  static DynamicLoader *CreateInstance(Process *process, bool force);
 
-    /// DynamicLoader
-    /// \{
-    void DidAttach() override;
-    void DidLaunch() override {}
-    Status CanLoadImage() override {
-        return Status();
-    }
-    lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
-            bool stop) override;
-    /// \}
+  /// DynamicLoader
+  /// \{
+  void DidAttach() override;
+  void DidLaunch() override {}
+  Status CanLoadImage() override { return Status(); }
+  lldb::ThreadPlanSP GetStepThroughTrampolinePlan(Thread &thread,
+                                                  bool stop) override;
+  /// \}
 
-    /// PluginInterface protocol.
-    /// \{
-    ConstString GetPluginName() override {
-        return GetPluginNameStatic();
-    }
-    uint32_t GetPluginVersion() override {
-        return 1;
-    }
-    /// \}
+  /// PluginInterface protocol.
+  /// \{
+  ConstString GetPluginName() override { return GetPluginNameStatic(); }
+  uint32_t GetPluginVersion() override { return 1; }
+  /// \}
 };
 
 } // namespace wasm

@@ -25,40 +25,36 @@ namespace object {
 
 class TapiFile : public SymbolicFile {
 public:
-    TapiFile(MemoryBufferRef Source, const MachO::InterfaceFile &interface,
-             MachO::Architecture Arch);
-    ~TapiFile() override;
+  TapiFile(MemoryBufferRef Source, const MachO::InterfaceFile &interface,
+           MachO::Architecture Arch);
+  ~TapiFile() override;
 
-    void moveSymbolNext(DataRefImpl &DRI) const override;
+  void moveSymbolNext(DataRefImpl &DRI) const override;
 
-    Error printSymbolName(raw_ostream &OS, DataRefImpl DRI) const override;
+  Error printSymbolName(raw_ostream &OS, DataRefImpl DRI) const override;
 
-    Expected<uint32_t> getSymbolFlags(DataRefImpl DRI) const override;
+  Expected<uint32_t> getSymbolFlags(DataRefImpl DRI) const override;
 
-    basic_symbol_iterator symbol_begin() const override;
+  basic_symbol_iterator symbol_begin() const override;
 
-    basic_symbol_iterator symbol_end() const override;
+  basic_symbol_iterator symbol_end() const override;
 
-    static bool classof(const Binary *v) {
-        return v->isTapiFile();
-    }
+  static bool classof(const Binary *v) { return v->isTapiFile(); }
 
-    bool is64Bit() {
-        return MachO::is64Bit(Arch);
-    }
+  bool is64Bit() { return MachO::is64Bit(Arch); }
 
 private:
-    struct Symbol {
-        StringRef Prefix;
-        StringRef Name;
-        uint32_t Flags;
+  struct Symbol {
+    StringRef Prefix;
+    StringRef Name;
+    uint32_t Flags;
 
-        constexpr Symbol(StringRef Prefix, StringRef Name, uint32_t Flags)
-            : Prefix(Prefix), Name(Name), Flags(Flags) {}
-    };
+    constexpr Symbol(StringRef Prefix, StringRef Name, uint32_t Flags)
+        : Prefix(Prefix), Name(Name), Flags(Flags) {}
+  };
 
-    std::vector<Symbol> Symbols;
-    MachO::Architecture Arch;
+  std::vector<Symbol> Symbols;
+  MachO::Architecture Arch;
 };
 
 } // end namespace object.

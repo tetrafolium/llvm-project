@@ -21,59 +21,55 @@ class GCNSubtarget;
 
 class SIFrameLowering final : public AMDGPUFrameLowering {
 public:
-    SIFrameLowering(StackDirection D, Align StackAl, int LAO,
-                    Align TransAl = Align(1))
-        : AMDGPUFrameLowering(D, StackAl, LAO, TransAl) {}
-    ~SIFrameLowering() override = default;
+  SIFrameLowering(StackDirection D, Align StackAl, int LAO,
+                  Align TransAl = Align(1))
+      : AMDGPUFrameLowering(D, StackAl, LAO, TransAl) {}
+  ~SIFrameLowering() override = default;
 
-    void emitEntryFunctionPrologue(MachineFunction &MF,
-                                   MachineBasicBlock &MBB) const;
-    void emitPrologue(MachineFunction &MF,
-                      MachineBasicBlock &MBB) const override;
-    void emitEpilogue(MachineFunction &MF,
-                      MachineBasicBlock &MBB) const override;
-    StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
-                                       Register &FrameReg) const override;
+  void emitEntryFunctionPrologue(MachineFunction &MF,
+                                 MachineBasicBlock &MBB) const;
+  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  StackOffset getFrameIndexReference(const MachineFunction &MF, int FI,
+                                     Register &FrameReg) const override;
 
-    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                              RegScavenger *RS = nullptr) const override;
-    void determineCalleeSavesSGPR(MachineFunction &MF, BitVector &SavedRegs,
-                                  RegScavenger *RS = nullptr) const;
-    bool
-    assignCalleeSavedSpillSlots(MachineFunction &MF,
-                                const TargetRegisterInfo *TRI,
-                                std::vector<CalleeSavedInfo> &CSI) const override;
+  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                            RegScavenger *RS = nullptr) const override;
+  void determineCalleeSavesSGPR(MachineFunction &MF, BitVector &SavedRegs,
+                                RegScavenger *RS = nullptr) const;
+  bool
+  assignCalleeSavedSpillSlots(MachineFunction &MF,
+                              const TargetRegisterInfo *TRI,
+                              std::vector<CalleeSavedInfo> &CSI) const override;
 
-    bool isSupportedStackID(TargetStackID::Value ID) const override;
+  bool isSupportedStackID(TargetStackID::Value ID) const override;
 
-    void processFunctionBeforeFrameFinalized(
-        MachineFunction &MF,
-        RegScavenger *RS = nullptr) const override;
+  void processFunctionBeforeFrameFinalized(
+      MachineFunction &MF, RegScavenger *RS = nullptr) const override;
 
-    MachineBasicBlock::iterator
-    eliminateCallFramePseudoInstr(MachineFunction &MF,
-                                  MachineBasicBlock &MBB,
-                                  MachineBasicBlock::iterator MI) const override;
+  MachineBasicBlock::iterator
+  eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MI) const override;
 
 private:
-    void emitEntryFunctionFlatScratchInit(MachineFunction &MF,
-                                          MachineBasicBlock &MBB,
-                                          MachineBasicBlock::iterator I,
-                                          const DebugLoc &DL,
-                                          Register ScratchWaveOffsetReg) const;
+  void emitEntryFunctionFlatScratchInit(MachineFunction &MF,
+                                        MachineBasicBlock &MBB,
+                                        MachineBasicBlock::iterator I,
+                                        const DebugLoc &DL,
+                                        Register ScratchWaveOffsetReg) const;
 
-    Register getEntryFunctionReservedScratchRsrcReg(MachineFunction &MF) const;
+  Register getEntryFunctionReservedScratchRsrcReg(MachineFunction &MF) const;
 
-    void emitEntryFunctionScratchRsrcRegSetup(
-        MachineFunction &MF, MachineBasicBlock &MBB,
-        MachineBasicBlock::iterator I, const DebugLoc &DL,
-        Register PreloadedPrivateBufferReg, Register ScratchRsrcReg,
-        Register ScratchWaveOffsetReg) const;
+  void emitEntryFunctionScratchRsrcRegSetup(
+      MachineFunction &MF, MachineBasicBlock &MBB,
+      MachineBasicBlock::iterator I, const DebugLoc &DL,
+      Register PreloadedPrivateBufferReg, Register ScratchRsrcReg,
+      Register ScratchWaveOffsetReg) const;
 
 public:
-    bool hasFP(const MachineFunction &MF) const override;
+  bool hasFP(const MachineFunction &MF) const override;
 
-    bool requiresStackPointerReference(const MachineFunction &MF) const;
+  bool requiresStackPointerReference(const MachineFunction &MF) const;
 };
 
 } // end namespace llvm

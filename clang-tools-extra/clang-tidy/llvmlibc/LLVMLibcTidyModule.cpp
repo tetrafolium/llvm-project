@@ -19,19 +19,19 @@ namespace llvm_libc {
 
 class LLVMLibcModule : public ClangTidyModule {
 public:
-    void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
-        CheckFactories.registerCheck<CalleeNamespaceCheck>(
-            "llvmlibc-callee-namespace");
-        CheckFactories.registerCheck<ImplementationInNamespaceCheck>(
-            "llvmlibc-implementation-in-namespace");
-        CheckFactories.registerCheck<RestrictSystemLibcHeadersCheck>(
-            "llvmlibc-restrict-system-libc-headers");
-    }
+  void addCheckFactories(ClangTidyCheckFactories &CheckFactories) override {
+    CheckFactories.registerCheck<CalleeNamespaceCheck>(
+        "llvmlibc-callee-namespace");
+    CheckFactories.registerCheck<ImplementationInNamespaceCheck>(
+        "llvmlibc-implementation-in-namespace");
+    CheckFactories.registerCheck<RestrictSystemLibcHeadersCheck>(
+        "llvmlibc-restrict-system-libc-headers");
+  }
 };
 
 // Register the LLVMLibcTidyModule using this statically initialized variable.
 static ClangTidyModuleRegistry::Add<LLVMLibcModule>
-X("llvmlibc-module", "Adds LLVM libc standards checks.");
+    X("llvmlibc-module", "Adds LLVM libc standards checks.");
 
 } // namespace llvm_libc
 

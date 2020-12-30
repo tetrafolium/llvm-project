@@ -32,25 +32,25 @@ struct ValueTypeStorage;
 /// The token type to represent asynchronous operation completion.
 class TokenType : public Type::TypeBase<TokenType, Type, TypeStorage> {
 public:
-    using Base::Base;
+  using Base::Base;
 };
 
 /// The value type to represent values returned from asynchronous operations.
 class ValueType
     : public Type::TypeBase<ValueType, Type, detail::ValueTypeStorage> {
 public:
-    using Base::Base;
+  using Base::Base;
 
-    /// Get or create an async ValueType with the provided value type.
-    static ValueType get(Type valueType);
+  /// Get or create an async ValueType with the provided value type.
+  static ValueType get(Type valueType);
 
-    Type getValueType();
+  Type getValueType();
 };
 
 /// The group type to represent async tokens or values grouped together.
 class GroupType : public Type::TypeBase<GroupType, Type, TypeStorage> {
 public:
-    using Base::Base;
+  using Base::Base;
 };
 
 // -------------------------------------------------------------------------- //
@@ -60,7 +60,7 @@ public:
 /// Returns true if the type is reference counted. All async dialect types are
 /// reference counted at runtime.
 inline bool isRefCounted(Type type) {
-    return type.isa<TokenType, ValueType, GroupType>();
+  return type.isa<TokenType, ValueType, GroupType>();
 }
 
 } // namespace async

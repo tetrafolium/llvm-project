@@ -12,13 +12,12 @@
  * to the position of the least significant bit set in i,
  * with the least significant bit is position 0.
  */
-int isl_ffs(int i)
-{
-    unsigned char non_zero;
-    unsigned long index, mask = i;
+int isl_ffs(int i) {
+  unsigned char non_zero;
+  unsigned long index, mask = i;
 
-    non_zero = _BitScanForward(&index, mask);
+  non_zero = _BitScanForward(&index, mask);
 
-    return non_zero ? 1 + index : 0;
+  return non_zero ? 1 + index : 0;
 }
 #endif

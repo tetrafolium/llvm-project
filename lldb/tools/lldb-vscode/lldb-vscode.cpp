@@ -70,7 +70,7 @@ using namespace lldb_vscode;
 
 namespace {
 enum ID {
-    OPT_INVALID = 0, // This is not an option ID.
+  OPT_INVALID = 0, // This is not an option ID.
 #define OPTION(PREFIX, NAME, ID, KIND, GROUP, ALIAS, ALIASARGS, FLAGS, PARAM,  \
                HELPTEXT, METAVAR, VALUES)                                      \
   OPT_##ID,
@@ -94,7 +94,7 @@ static const llvm::opt::OptTable::Info InfoTable[] = {
 };
 class LLDBVSCodeOptTable : public llvm::opt::OptTable {
 public:
-    LLDBVSCodeOptTable() : OptTable(InfoTable, true) {}
+  LLDBVSCodeOptTable() : OptTable(InfoTable, true) {}
 };
 
 typedef void (*RequestCallback)(const llvm::json::Object &command);
@@ -102,158 +102,158 @@ typedef void (*RequestCallback)(const llvm::json::Object &command);
 enum LaunchMethod { Launch, Attach, AttachForSuspendedLaunch };
 
 SOCKET AcceptConnection(int portno) {
-    // Accept a socket connection from any host on "portno".
-    SOCKET newsockfd = -1;
-    struct sockaddr_in serv_addr, cli_addr;
-    SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
-        if (g_vsc.log)
-            *g_vsc.log << "error: opening socket (" << strerror(errno) << ")"
-                       << std::endl;
+  // Accept a socket connection from any host on "portno".
+  SOCKET newsockfd = -1;
+  struct sockaddr_in serv_addr, cli_addr;
+  SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    if (g_vsc.log)
+      *g_vsc.log << "error: opening socket (" << strerror(errno) << ")"
+                 << std::endl;
+  } else {
+    memset((char *)&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    // serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    serv_addr.sin_port = htons(portno);
+    if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+      if (g_vsc.log)
+        *g_vsc.log << "error: binding socket (" << strerror(errno) << ")"
+                   << std::endl;
     } else {
-        memset((char *)&serv_addr, 0, sizeof(serv_addr));
-        serv_addr.sin_family = AF_INET;
-        // serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        serv_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        serv_addr.sin_port = htons(portno);
-        if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-            if (g_vsc.log)
-                *g_vsc.log << "error: binding socket (" << strerror(errno) << ")"
-                           << std::endl;
-        } else {
-            listen(sockfd, 5);
-            socklen_t clilen = sizeof(cli_addr);
-            newsockfd =
-                llvm::sys::RetryAfterSignal(static_cast<SOCKET>(-1), accept, sockfd,
-                                            (struct sockaddr *)&cli_addr, &clilen);
-            if (newsockfd < 0)
-                if (g_vsc.log)
-                    *g_vsc.log << "error: accept (" << strerror(errno) << ")"
-                               << std::endl;
-        }
-#if defined(_WIN32)
-        closesocket(sockfd);
-#else
-        close(sockfd);
-#endif
+      listen(sockfd, 5);
+      socklen_t clilen = sizeof(cli_addr);
+      newsockfd =
+          llvm::sys::RetryAfterSignal(static_cast<SOCKET>(-1), accept, sockfd,
+                                      (struct sockaddr *)&cli_addr, &clilen);
+      if (newsockfd < 0)
+        if (g_vsc.log)
+          *g_vsc.log << "error: accept (" << strerror(errno) << ")"
+                     << std::endl;
     }
-    return newsockfd;
+#if defined(_WIN32)
+    closesocket(sockfd);
+#else
+    close(sockfd);
+#endif
+  }
+  return newsockfd;
 }
 
 std::vector<const char *> MakeArgv(const llvm::ArrayRef<std::string> &strs) {
-    // Create and return an array of "const char *", one for each C string in
-    // "strs" and terminate the list with a NULL. This can be used for argument
-    // vectors (argv) or environment vectors (envp) like those passed to the
-    // "main" function in C programs.
-    std::vector<const char *> argv;
-    for (const auto &s : strs)
-        argv.push_back(s.c_str());
-    argv.push_back(nullptr);
-    return argv;
+  // Create and return an array of "const char *", one for each C string in
+  // "strs" and terminate the list with a NULL. This can be used for argument
+  // vectors (argv) or environment vectors (envp) like those passed to the
+  // "main" function in C programs.
+  std::vector<const char *> argv;
+  for (const auto &s : strs)
+    argv.push_back(s.c_str());
+  argv.push_back(nullptr);
+  return argv;
 }
 
 // Send a "exited" event to indicate the process has exited.
 void SendProcessExitedEvent(lldb::SBProcess &process) {
-    llvm::json::Object event(CreateEventObject("exited"));
-    llvm::json::Object body;
-    body.try_emplace("exitCode", (int64_t)process.GetExitStatus());
-    event.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(event)));
+  llvm::json::Object event(CreateEventObject("exited"));
+  llvm::json::Object body;
+  body.try_emplace("exitCode", (int64_t)process.GetExitStatus());
+  event.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(event)));
 }
 
 void SendThreadExitedEvent(lldb::tid_t tid) {
-    llvm::json::Object event(CreateEventObject("thread"));
-    llvm::json::Object body;
-    body.try_emplace("reason", "exited");
-    body.try_emplace("threadId", (int64_t)tid);
-    event.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(event)));
+  llvm::json::Object event(CreateEventObject("thread"));
+  llvm::json::Object body;
+  body.try_emplace("reason", "exited");
+  body.try_emplace("threadId", (int64_t)tid);
+  event.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(event)));
 }
 
 // Send a "terminated" event to indicate the process is done being
 // debugged.
 void SendTerminatedEvent() {
-    if (!g_vsc.sent_terminated_event) {
-        g_vsc.sent_terminated_event = true;
-        g_vsc.RunTerminateCommands();
-        // Send a "terminated" event
-        llvm::json::Object event(CreateEventObject("terminated"));
-        g_vsc.SendJSON(llvm::json::Value(std::move(event)));
-    }
+  if (!g_vsc.sent_terminated_event) {
+    g_vsc.sent_terminated_event = true;
+    g_vsc.RunTerminateCommands();
+    // Send a "terminated" event
+    llvm::json::Object event(CreateEventObject("terminated"));
+    g_vsc.SendJSON(llvm::json::Value(std::move(event)));
+  }
 }
 
 // Send a thread stopped event for all threads as long as the process
 // is stopped.
 void SendThreadStoppedEvent() {
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    if (process.IsValid()) {
-        auto state = process.GetState();
-        if (state == lldb::eStateStopped) {
-            llvm::DenseSet<lldb::tid_t> old_thread_ids;
-            old_thread_ids.swap(g_vsc.thread_ids);
-            uint32_t stop_id = process.GetStopID();
-            const uint32_t num_threads = process.GetNumThreads();
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  if (process.IsValid()) {
+    auto state = process.GetState();
+    if (state == lldb::eStateStopped) {
+      llvm::DenseSet<lldb::tid_t> old_thread_ids;
+      old_thread_ids.swap(g_vsc.thread_ids);
+      uint32_t stop_id = process.GetStopID();
+      const uint32_t num_threads = process.GetNumThreads();
 
-            // First make a pass through the threads to see if the focused thread
-            // has a stop reason. In case the focus thread doesn't have a stop
-            // reason, remember the first thread that has a stop reason so we can
-            // set it as the focus thread if below if needed.
-            lldb::tid_t first_tid_with_reason = LLDB_INVALID_THREAD_ID;
-            uint32_t num_threads_with_reason = 0;
-            for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
-                lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
-                const lldb::tid_t tid = thread.GetThreadID();
-                const bool has_reason = ThreadHasStopReason(thread);
-                // If the focus thread doesn't have a stop reason, clear the thread ID
-                if (tid == g_vsc.focus_tid && !has_reason)
-                    g_vsc.focus_tid = LLDB_INVALID_THREAD_ID;
-                if (has_reason) {
-                    ++num_threads_with_reason;
-                    if (first_tid_with_reason == LLDB_INVALID_THREAD_ID)
-                        first_tid_with_reason = tid;
-                }
-            }
-
-            // We will have cleared g_vsc.focus_tid if he focus thread doesn't
-            // have a stop reason, so if it was cleared, or wasn't set, then set the
-            // focus thread to the first thread with a stop reason.
-            if (g_vsc.focus_tid == LLDB_INVALID_THREAD_ID)
-                g_vsc.focus_tid = first_tid_with_reason;
-
-            // If no threads stopped with a reason, then report the first one so
-            // we at least let the UI know we stopped.
-            if (num_threads_with_reason == 0) {
-                lldb::SBThread thread = process.GetThreadAtIndex(0);
-                g_vsc.SendJSON(CreateThreadStopped(thread, stop_id));
-            } else {
-                for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
-                    lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
-                    g_vsc.thread_ids.insert(thread.GetThreadID());
-                    if (ThreadHasStopReason(thread)) {
-                        g_vsc.SendJSON(CreateThreadStopped(thread, stop_id));
-                    }
-                }
-            }
-
-            for (auto tid : old_thread_ids) {
-                auto end = g_vsc.thread_ids.end();
-                auto pos = g_vsc.thread_ids.find(tid);
-                if (pos == end)
-                    SendThreadExitedEvent(tid);
-            }
-        } else {
-            if (g_vsc.log)
-                *g_vsc.log << "error: SendThreadStoppedEvent() when process"
-                           " isn't stopped ("
-                           << lldb::SBDebugger::StateAsCString(state) << ')'
-                           << std::endl;
+      // First make a pass through the threads to see if the focused thread
+      // has a stop reason. In case the focus thread doesn't have a stop
+      // reason, remember the first thread that has a stop reason so we can
+      // set it as the focus thread if below if needed.
+      lldb::tid_t first_tid_with_reason = LLDB_INVALID_THREAD_ID;
+      uint32_t num_threads_with_reason = 0;
+      for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
+        lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
+        const lldb::tid_t tid = thread.GetThreadID();
+        const bool has_reason = ThreadHasStopReason(thread);
+        // If the focus thread doesn't have a stop reason, clear the thread ID
+        if (tid == g_vsc.focus_tid && !has_reason)
+          g_vsc.focus_tid = LLDB_INVALID_THREAD_ID;
+        if (has_reason) {
+          ++num_threads_with_reason;
+          if (first_tid_with_reason == LLDB_INVALID_THREAD_ID)
+            first_tid_with_reason = tid;
         }
+      }
+
+      // We will have cleared g_vsc.focus_tid if he focus thread doesn't
+      // have a stop reason, so if it was cleared, or wasn't set, then set the
+      // focus thread to the first thread with a stop reason.
+      if (g_vsc.focus_tid == LLDB_INVALID_THREAD_ID)
+        g_vsc.focus_tid = first_tid_with_reason;
+
+      // If no threads stopped with a reason, then report the first one so
+      // we at least let the UI know we stopped.
+      if (num_threads_with_reason == 0) {
+        lldb::SBThread thread = process.GetThreadAtIndex(0);
+        g_vsc.SendJSON(CreateThreadStopped(thread, stop_id));
+      } else {
+        for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
+          lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
+          g_vsc.thread_ids.insert(thread.GetThreadID());
+          if (ThreadHasStopReason(thread)) {
+            g_vsc.SendJSON(CreateThreadStopped(thread, stop_id));
+          }
+        }
+      }
+
+      for (auto tid : old_thread_ids) {
+        auto end = g_vsc.thread_ids.end();
+        auto pos = g_vsc.thread_ids.find(tid);
+        if (pos == end)
+          SendThreadExitedEvent(tid);
+      }
     } else {
-        if (g_vsc.log)
-            *g_vsc.log << "error: SendThreadStoppedEvent() invalid process"
-                       << std::endl;
+      if (g_vsc.log)
+        *g_vsc.log << "error: SendThreadStoppedEvent() when process"
+                      " isn't stopped ("
+                   << lldb::SBDebugger::StateAsCString(state) << ')'
+                   << std::endl;
     }
-    g_vsc.RunStopCommands();
+  } else {
+    if (g_vsc.log)
+      *g_vsc.log << "error: SendThreadStoppedEvent() invalid process"
+                 << std::endl;
+  }
+  g_vsc.RunStopCommands();
 }
 
 // "ProcessEvent": {
@@ -311,41 +311,41 @@ void SendThreadStoppedEvent() {
 //   ]
 // }
 void SendProcessEvent(LaunchMethod launch_method) {
-    lldb::SBFileSpec exe_fspec = g_vsc.target.GetExecutable();
-    char exe_path[PATH_MAX];
-    exe_fspec.GetPath(exe_path, sizeof(exe_path));
-    llvm::json::Object event(CreateEventObject("process"));
-    llvm::json::Object body;
-    EmplaceSafeString(body, "name", std::string(exe_path));
-    const auto pid = g_vsc.target.GetProcess().GetProcessID();
-    body.try_emplace("systemProcessId", (int64_t)pid);
-    body.try_emplace("isLocalProcess", true);
-    const char *startMethod = nullptr;
-    switch (launch_method) {
-    case Launch:
-        startMethod = "launch";
-        break;
-    case Attach:
-        startMethod = "attach";
-        break;
-    case AttachForSuspendedLaunch:
-        startMethod = "attachForSuspendedLaunch";
-        break;
-    }
-    body.try_emplace("startMethod", startMethod);
-    event.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(event)));
+  lldb::SBFileSpec exe_fspec = g_vsc.target.GetExecutable();
+  char exe_path[PATH_MAX];
+  exe_fspec.GetPath(exe_path, sizeof(exe_path));
+  llvm::json::Object event(CreateEventObject("process"));
+  llvm::json::Object body;
+  EmplaceSafeString(body, "name", std::string(exe_path));
+  const auto pid = g_vsc.target.GetProcess().GetProcessID();
+  body.try_emplace("systemProcessId", (int64_t)pid);
+  body.try_emplace("isLocalProcess", true);
+  const char *startMethod = nullptr;
+  switch (launch_method) {
+  case Launch:
+    startMethod = "launch";
+    break;
+  case Attach:
+    startMethod = "attach";
+    break;
+  case AttachForSuspendedLaunch:
+    startMethod = "attachForSuspendedLaunch";
+    break;
+  }
+  body.try_emplace("startMethod", startMethod);
+  event.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(event)));
 }
 
 // Grab any STDOUT and STDERR from the process and send it up to VS Code
 // via an "output" event to the "stdout" and "stderr" categories.
 void SendStdOutStdErr(lldb::SBProcess &process) {
-    char buffer[1024];
-    size_t count;
-    while ((count = process.GetSTDOUT(buffer, sizeof(buffer))) > 0)
-        g_vsc.SendOutput(OutputType::Stdout, llvm::StringRef(buffer, count));
-    while ((count = process.GetSTDERR(buffer, sizeof(buffer))) > 0)
-        g_vsc.SendOutput(OutputType::Stderr, llvm::StringRef(buffer, count));
+  char buffer[1024];
+  size_t count;
+  while ((count = process.GetSTDOUT(buffer, sizeof(buffer))) > 0)
+    g_vsc.SendOutput(OutputType::Stdout, llvm::StringRef(buffer, count));
+  while ((count = process.GetSTDERR(buffer, sizeof(buffer))) > 0)
+    g_vsc.SendOutput(OutputType::Stderr, llvm::StringRef(buffer, count));
 }
 
 // All events from the debugger, target, process, thread and frames are
@@ -354,167 +354,166 @@ void SendStdOutStdErr(lldb::SBProcess &process) {
 // them prevent multiple threads from writing simultaneously so no locking
 // is required.
 void EventThreadFunction() {
-    lldb::SBEvent event;
-    lldb::SBListener listener = g_vsc.debugger.GetListener();
-    bool done = false;
-    while (!done) {
-        if (listener.WaitForEvent(1, event)) {
-            const auto event_mask = event.GetType();
-            if (lldb::SBProcess::EventIsProcessEvent(event)) {
-                lldb::SBProcess process = lldb::SBProcess::GetProcessFromEvent(event);
-                if (event_mask & lldb::SBProcess::eBroadcastBitStateChanged) {
-                    auto state = lldb::SBProcess::GetStateFromEvent(event);
-                    switch (state) {
-                    case lldb::eStateInvalid:
-                        // Not a state event
-                        break;
-                    case lldb::eStateUnloaded:
-                        break;
-                    case lldb::eStateConnected:
-                        break;
-                    case lldb::eStateAttaching:
-                        break;
-                    case lldb::eStateLaunching:
-                        break;
-                    case lldb::eStateStepping:
-                        break;
-                    case lldb::eStateCrashed:
-                        break;
-                    case lldb::eStateDetached:
-                        break;
-                    case lldb::eStateSuspended:
-                        break;
-                    case lldb::eStateStopped: {
-                        if (g_vsc.waiting_for_run_in_terminal) {
-                            g_vsc.waiting_for_run_in_terminal = false;
-                            g_vsc.request_in_terminal_cv.notify_one();
-                        }
-                    }
-                        // Only report a stopped event if the process was not restarted.
-                    if (!lldb::SBProcess::GetRestartedFromEvent(event)) {
-                        SendStdOutStdErr(process);
-                        SendThreadStoppedEvent();
-                    }
-                    break;
-                    case lldb::eStateRunning:
-                        break;
-                    case lldb::eStateExited: {
-                        // Run any exit LLDB commands the user specified in the
-                        // launch.json
-                        g_vsc.RunExitCommands();
-                        SendProcessExitedEvent(process);
-                        SendTerminatedEvent();
-                        done = true;
-                    }
-                    break;
-                    }
-                } else if ((event_mask & lldb::SBProcess::eBroadcastBitSTDOUT) ||
-                           (event_mask & lldb::SBProcess::eBroadcastBitSTDERR)) {
-                    SendStdOutStdErr(process);
-                }
-            } else if (lldb::SBBreakpoint::EventIsBreakpointEvent(event)) {
-                if (event_mask & lldb::SBTarget::eBroadcastBitBreakpointChanged) {
-                    auto event_type =
-                        lldb::SBBreakpoint::GetBreakpointEventTypeFromEvent(event);
-                    auto bp = lldb::SBBreakpoint::GetBreakpointFromEvent(event);
-                    // If the breakpoint was originated from the IDE, it will have the
-                    // BreakpointBase::GetBreakpointLabel() label attached. Regardless
-                    // of wether the locations were added or removed, the breakpoint
-                    // ins't going away, so we the reason is always "changed".
-                    if ((event_type & lldb::eBreakpointEventTypeLocationsAdded ||
-                            event_type & lldb::eBreakpointEventTypeLocationsRemoved) &&
-                            bp.MatchesName(BreakpointBase::GetBreakpointLabel())) {
-                        auto bp_event = CreateEventObject("breakpoint");
-                        llvm::json::Object body;
-                        // As VSCode already knows the path of this breakpoint, we don't
-                        // need to send it back as part of a "changed" event. This
-                        // prevent us from sending to VSCode paths that should be source
-                        // mapped. Note that CreateBreakpoint doesn't apply source mapping.
-                        // Besides, the current implementation of VSCode ignores the
-                        // "source" element of breakpoint events.
-                        llvm::json::Value source_bp = CreateBreakpoint(bp);
-                        source_bp.getAsObject()->erase("source");
-
-                        body.try_emplace("breakpoint", source_bp);
-                        body.try_emplace("reason", "changed");
-                        bp_event.try_emplace("body", std::move(body));
-                        g_vsc.SendJSON(llvm::json::Value(std::move(bp_event)));
-                    }
-                }
-            } else if (lldb::SBTarget::EventIsTargetEvent(event)) {
-                if (event_mask & lldb::SBTarget::eBroadcastBitModulesLoaded ||
-                        event_mask & lldb::SBTarget::eBroadcastBitModulesUnloaded ||
-                        event_mask & lldb::SBTarget::eBroadcastBitSymbolsLoaded) {
-                    int num_modules = lldb::SBTarget::GetNumModulesFromEvent(event);
-                    for (int i = 0; i < num_modules; i++) {
-                        auto module = lldb::SBTarget::GetModuleAtIndexFromEvent(i, event);
-                        auto module_event = CreateEventObject("module");
-                        llvm::json::Value module_value = CreateModule(module);
-                        llvm::json::Object body;
-                        if (event_mask & lldb::SBTarget::eBroadcastBitModulesLoaded) {
-                            body.try_emplace("reason", "new");
-                        } else if (event_mask &
-                                   lldb::SBTarget::eBroadcastBitModulesUnloaded) {
-                            body.try_emplace("reason", "removed");
-                        } else if (event_mask &
-                                   lldb::SBTarget::eBroadcastBitSymbolsLoaded) {
-                            body.try_emplace("reason", "changed");
-                        }
-                        body.try_emplace("module", module_value);
-                        module_event.try_emplace("body", std::move(body));
-                        g_vsc.SendJSON(llvm::json::Value(std::move(module_event)));
-                    }
-                }
-            } else if (event.BroadcasterMatchesRef(g_vsc.broadcaster)) {
-                if (event_mask & eBroadcastBitStopEventThread) {
-                    done = true;
-                }
+  lldb::SBEvent event;
+  lldb::SBListener listener = g_vsc.debugger.GetListener();
+  bool done = false;
+  while (!done) {
+    if (listener.WaitForEvent(1, event)) {
+      const auto event_mask = event.GetType();
+      if (lldb::SBProcess::EventIsProcessEvent(event)) {
+        lldb::SBProcess process = lldb::SBProcess::GetProcessFromEvent(event);
+        if (event_mask & lldb::SBProcess::eBroadcastBitStateChanged) {
+          auto state = lldb::SBProcess::GetStateFromEvent(event);
+          switch (state) {
+          case lldb::eStateInvalid:
+            // Not a state event
+            break;
+          case lldb::eStateUnloaded:
+            break;
+          case lldb::eStateConnected:
+            break;
+          case lldb::eStateAttaching:
+            break;
+          case lldb::eStateLaunching:
+            break;
+          case lldb::eStateStepping:
+            break;
+          case lldb::eStateCrashed:
+            break;
+          case lldb::eStateDetached:
+            break;
+          case lldb::eStateSuspended:
+            break;
+          case lldb::eStateStopped: {
+            if (g_vsc.waiting_for_run_in_terminal) {
+              g_vsc.waiting_for_run_in_terminal = false;
+              g_vsc.request_in_terminal_cv.notify_one();
             }
+          }
+            // Only report a stopped event if the process was not restarted.
+            if (!lldb::SBProcess::GetRestartedFromEvent(event)) {
+              SendStdOutStdErr(process);
+              SendThreadStoppedEvent();
+            }
+            break;
+          case lldb::eStateRunning:
+            break;
+          case lldb::eStateExited: {
+            // Run any exit LLDB commands the user specified in the
+            // launch.json
+            g_vsc.RunExitCommands();
+            SendProcessExitedEvent(process);
+            SendTerminatedEvent();
+            done = true;
+          } break;
+          }
+        } else if ((event_mask & lldb::SBProcess::eBroadcastBitSTDOUT) ||
+                   (event_mask & lldb::SBProcess::eBroadcastBitSTDERR)) {
+          SendStdOutStdErr(process);
         }
+      } else if (lldb::SBBreakpoint::EventIsBreakpointEvent(event)) {
+        if (event_mask & lldb::SBTarget::eBroadcastBitBreakpointChanged) {
+          auto event_type =
+              lldb::SBBreakpoint::GetBreakpointEventTypeFromEvent(event);
+          auto bp = lldb::SBBreakpoint::GetBreakpointFromEvent(event);
+          // If the breakpoint was originated from the IDE, it will have the
+          // BreakpointBase::GetBreakpointLabel() label attached. Regardless
+          // of wether the locations were added or removed, the breakpoint
+          // ins't going away, so we the reason is always "changed".
+          if ((event_type & lldb::eBreakpointEventTypeLocationsAdded ||
+               event_type & lldb::eBreakpointEventTypeLocationsRemoved) &&
+              bp.MatchesName(BreakpointBase::GetBreakpointLabel())) {
+            auto bp_event = CreateEventObject("breakpoint");
+            llvm::json::Object body;
+            // As VSCode already knows the path of this breakpoint, we don't
+            // need to send it back as part of a "changed" event. This
+            // prevent us from sending to VSCode paths that should be source
+            // mapped. Note that CreateBreakpoint doesn't apply source mapping.
+            // Besides, the current implementation of VSCode ignores the
+            // "source" element of breakpoint events.
+            llvm::json::Value source_bp = CreateBreakpoint(bp);
+            source_bp.getAsObject()->erase("source");
+
+            body.try_emplace("breakpoint", source_bp);
+            body.try_emplace("reason", "changed");
+            bp_event.try_emplace("body", std::move(body));
+            g_vsc.SendJSON(llvm::json::Value(std::move(bp_event)));
+          }
+        }
+      } else if (lldb::SBTarget::EventIsTargetEvent(event)) {
+        if (event_mask & lldb::SBTarget::eBroadcastBitModulesLoaded ||
+            event_mask & lldb::SBTarget::eBroadcastBitModulesUnloaded ||
+            event_mask & lldb::SBTarget::eBroadcastBitSymbolsLoaded) {
+          int num_modules = lldb::SBTarget::GetNumModulesFromEvent(event);
+          for (int i = 0; i < num_modules; i++) {
+            auto module = lldb::SBTarget::GetModuleAtIndexFromEvent(i, event);
+            auto module_event = CreateEventObject("module");
+            llvm::json::Value module_value = CreateModule(module);
+            llvm::json::Object body;
+            if (event_mask & lldb::SBTarget::eBroadcastBitModulesLoaded) {
+              body.try_emplace("reason", "new");
+            } else if (event_mask &
+                       lldb::SBTarget::eBroadcastBitModulesUnloaded) {
+              body.try_emplace("reason", "removed");
+            } else if (event_mask &
+                       lldb::SBTarget::eBroadcastBitSymbolsLoaded) {
+              body.try_emplace("reason", "changed");
+            }
+            body.try_emplace("module", module_value);
+            module_event.try_emplace("body", std::move(body));
+            g_vsc.SendJSON(llvm::json::Value(std::move(module_event)));
+          }
+        }
+      } else if (event.BroadcasterMatchesRef(g_vsc.broadcaster)) {
+        if (event_mask & eBroadcastBitStopEventThread) {
+          done = true;
+        }
+      }
     }
+  }
 }
 
 // Both attach and launch take a either a sourcePath or sourceMap
 // argument (or neither), from which we need to set the target.source-map.
 void SetSourceMapFromArguments(const llvm::json::Object &arguments) {
-    const char *sourceMapHelp =
-        "source must be be an array of two-element arrays, "
-        "each containing a source and replacement path string.\n";
+  const char *sourceMapHelp =
+      "source must be be an array of two-element arrays, "
+      "each containing a source and replacement path string.\n";
 
-    std::string sourceMapCommand;
-    llvm::raw_string_ostream strm(sourceMapCommand);
-    strm << "settings set target.source-map ";
-    auto sourcePath = GetString(arguments, "sourcePath");
+  std::string sourceMapCommand;
+  llvm::raw_string_ostream strm(sourceMapCommand);
+  strm << "settings set target.source-map ";
+  auto sourcePath = GetString(arguments, "sourcePath");
 
-    // sourceMap is the new, more general form of sourcePath and overrides it.
-    auto sourceMap = arguments.getArray("sourceMap");
-    if (sourceMap) {
-        for (const auto &value : *sourceMap) {
-            auto mapping = value.getAsArray();
-            if (mapping == nullptr || mapping->size() != 2 ||
-                    (*mapping)[0].kind() != llvm::json::Value::String ||
-                    (*mapping)[1].kind() != llvm::json::Value::String) {
-                g_vsc.SendOutput(OutputType::Console, llvm::StringRef(sourceMapHelp));
-                return;
-            }
-            auto mapFrom = GetAsString((*mapping)[0]);
-            auto mapTo = GetAsString((*mapping)[1]);
-            strm << "\"" << mapFrom << "\" \"" << mapTo << "\" ";
-        }
-    } else {
-        if (ObjectContainsKey(arguments, "sourceMap")) {
-            g_vsc.SendOutput(OutputType::Console, llvm::StringRef(sourceMapHelp));
-            return;
-        }
-        if (sourcePath.empty())
-            return;
-        // Do any source remapping needed before we create our targets
-        strm << "\".\" \"" << sourcePath << "\"";
+  // sourceMap is the new, more general form of sourcePath and overrides it.
+  auto sourceMap = arguments.getArray("sourceMap");
+  if (sourceMap) {
+    for (const auto &value : *sourceMap) {
+      auto mapping = value.getAsArray();
+      if (mapping == nullptr || mapping->size() != 2 ||
+          (*mapping)[0].kind() != llvm::json::Value::String ||
+          (*mapping)[1].kind() != llvm::json::Value::String) {
+        g_vsc.SendOutput(OutputType::Console, llvm::StringRef(sourceMapHelp));
+        return;
+      }
+      auto mapFrom = GetAsString((*mapping)[0]);
+      auto mapTo = GetAsString((*mapping)[1]);
+      strm << "\"" << mapFrom << "\" \"" << mapTo << "\" ";
     }
-    strm.flush();
-    if (!sourceMapCommand.empty()) {
-        g_vsc.RunLLDBCommands("Setting source map:", {sourceMapCommand});
+  } else {
+    if (ObjectContainsKey(arguments, "sourceMap")) {
+      g_vsc.SendOutput(OutputType::Console, llvm::StringRef(sourceMapHelp));
+      return;
     }
+    if (sourcePath.empty())
+      return;
+    // Do any source remapping needed before we create our targets
+    strm << "\".\" \"" << sourcePath << "\"";
+  }
+  strm.flush();
+  if (!sourceMapCommand.empty()) {
+    g_vsc.RunLLDBCommands("Setting source map:", {sourceMapCommand});
+  }
 }
 
 // "AttachRequest": {
@@ -546,102 +545,102 @@ void SetSourceMapFromArguments(const llvm::json::Object &arguments) {
 //   }]
 // }
 void request_attach(const llvm::json::Object &request) {
-    g_vsc.is_attach = true;
-    llvm::json::Object response;
-    lldb::SBError error;
-    FillResponse(request, response);
-    lldb::SBAttachInfo attach_info;
-    auto arguments = request.getObject("arguments");
-    const lldb::pid_t pid =
-        GetUnsigned(arguments, "pid", LLDB_INVALID_PROCESS_ID);
-    if (pid != LLDB_INVALID_PROCESS_ID)
-        attach_info.SetProcessID(pid);
-    const auto wait_for = GetBoolean(arguments, "waitFor", false);
-    attach_info.SetWaitForLaunch(wait_for, false /*async*/);
-    g_vsc.init_commands = GetStrings(arguments, "initCommands");
-    g_vsc.pre_run_commands = GetStrings(arguments, "preRunCommands");
-    g_vsc.stop_commands = GetStrings(arguments, "stopCommands");
-    g_vsc.exit_commands = GetStrings(arguments, "exitCommands");
-    g_vsc.terminate_commands = GetStrings(arguments, "terminateCommands");
-    auto attachCommands = GetStrings(arguments, "attachCommands");
-    llvm::StringRef core_file = GetString(arguments, "coreFile");
-    g_vsc.stop_at_entry =
-        core_file.empty() ? GetBoolean(arguments, "stopOnEntry", false) : true;
-    const llvm::StringRef debuggerRoot = GetString(arguments, "debuggerRoot");
+  g_vsc.is_attach = true;
+  llvm::json::Object response;
+  lldb::SBError error;
+  FillResponse(request, response);
+  lldb::SBAttachInfo attach_info;
+  auto arguments = request.getObject("arguments");
+  const lldb::pid_t pid =
+      GetUnsigned(arguments, "pid", LLDB_INVALID_PROCESS_ID);
+  if (pid != LLDB_INVALID_PROCESS_ID)
+    attach_info.SetProcessID(pid);
+  const auto wait_for = GetBoolean(arguments, "waitFor", false);
+  attach_info.SetWaitForLaunch(wait_for, false /*async*/);
+  g_vsc.init_commands = GetStrings(arguments, "initCommands");
+  g_vsc.pre_run_commands = GetStrings(arguments, "preRunCommands");
+  g_vsc.stop_commands = GetStrings(arguments, "stopCommands");
+  g_vsc.exit_commands = GetStrings(arguments, "exitCommands");
+  g_vsc.terminate_commands = GetStrings(arguments, "terminateCommands");
+  auto attachCommands = GetStrings(arguments, "attachCommands");
+  llvm::StringRef core_file = GetString(arguments, "coreFile");
+  g_vsc.stop_at_entry =
+      core_file.empty() ? GetBoolean(arguments, "stopOnEntry", false) : true;
+  const llvm::StringRef debuggerRoot = GetString(arguments, "debuggerRoot");
 
-    // This is a hack for loading DWARF in .o files on Mac where the .o files
-    // in the debug map of the main executable have relative paths which require
-    // the lldb-vscode binary to have its working directory set to that relative
-    // root for the .o files in order to be able to load debug info.
-    if (!debuggerRoot.empty())
-        llvm::sys::fs::set_current_path(debuggerRoot);
+  // This is a hack for loading DWARF in .o files on Mac where the .o files
+  // in the debug map of the main executable have relative paths which require
+  // the lldb-vscode binary to have its working directory set to that relative
+  // root for the .o files in order to be able to load debug info.
+  if (!debuggerRoot.empty())
+    llvm::sys::fs::set_current_path(debuggerRoot);
 
-    // Run any initialize LLDB commands the user specified in the launch.json
-    g_vsc.RunInitCommands();
+  // Run any initialize LLDB commands the user specified in the launch.json
+  g_vsc.RunInitCommands();
 
-    lldb::SBError status;
-    g_vsc.SetTarget(g_vsc.CreateTargetFromArguments(*arguments, status));
-    if (status.Fail()) {
-        response["success"] = llvm::json::Value(false);
-        EmplaceSafeString(response, "message", status.GetCString());
-        g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-        return;
-    }
-
-    // Run any pre run LLDB commands the user specified in the launch.json
-    g_vsc.RunPreRunCommands();
-
-    if (pid == LLDB_INVALID_PROCESS_ID && wait_for) {
-        char attach_msg[256];
-        auto attach_msg_len = snprintf(attach_msg, sizeof(attach_msg),
-                                       "Waiting to attach to \"%s\"...",
-                                       g_vsc.target.GetExecutable().GetFilename());
-        g_vsc.SendOutput(OutputType::Console,
-                         llvm::StringRef(attach_msg, attach_msg_len));
-    }
-    if (attachCommands.empty()) {
-        // No "attachCommands", just attach normally.
-        // Disable async events so the attach will be successful when we return from
-        // the launch call and the launch will happen synchronously
-        g_vsc.debugger.SetAsync(false);
-        if (core_file.empty())
-            g_vsc.target.Attach(attach_info, error);
-        else
-            g_vsc.target.LoadCore(core_file.data(), error);
-        // Reenable async events
-        g_vsc.debugger.SetAsync(true);
-    } else {
-        // We have "attachCommands" that are a set of commands that are expected
-        // to execute the commands after which a process should be created. If there
-        // is no valid process after running these commands, we have failed.
-        g_vsc.RunLLDBCommands("Running attachCommands:", attachCommands);
-        // The custom commands might have created a new target so we should use the
-        // selected target after these commands are run.
-        g_vsc.target = g_vsc.debugger.GetSelectedTarget();
-    }
-
-    SetSourceMapFromArguments(*arguments);
-
-    if (error.Success() && core_file.empty()) {
-        auto attached_pid = g_vsc.target.GetProcess().GetProcessID();
-        if (attached_pid == LLDB_INVALID_PROCESS_ID) {
-            if (attachCommands.empty())
-                error.SetErrorString("failed to attach to a process");
-            else
-                error.SetErrorString("attachCommands failed to attach to a process");
-        }
-    }
-
-    if (error.Fail()) {
-        response["success"] = llvm::json::Value(false);
-        EmplaceSafeString(response, "message", std::string(error.GetCString()));
-    }
+  lldb::SBError status;
+  g_vsc.SetTarget(g_vsc.CreateTargetFromArguments(*arguments, status));
+  if (status.Fail()) {
+    response["success"] = llvm::json::Value(false);
+    EmplaceSafeString(response, "message", status.GetCString());
     g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-    if (error.Success()) {
-        SendProcessEvent(Attach);
-        g_vsc.SendJSON(CreateEventObject("initialized"));
-        // SendThreadStoppedEvent();
+    return;
+  }
+
+  // Run any pre run LLDB commands the user specified in the launch.json
+  g_vsc.RunPreRunCommands();
+
+  if (pid == LLDB_INVALID_PROCESS_ID && wait_for) {
+    char attach_msg[256];
+    auto attach_msg_len = snprintf(attach_msg, sizeof(attach_msg),
+                                   "Waiting to attach to \"%s\"...",
+                                   g_vsc.target.GetExecutable().GetFilename());
+    g_vsc.SendOutput(OutputType::Console,
+                     llvm::StringRef(attach_msg, attach_msg_len));
+  }
+  if (attachCommands.empty()) {
+    // No "attachCommands", just attach normally.
+    // Disable async events so the attach will be successful when we return from
+    // the launch call and the launch will happen synchronously
+    g_vsc.debugger.SetAsync(false);
+    if (core_file.empty())
+      g_vsc.target.Attach(attach_info, error);
+    else
+      g_vsc.target.LoadCore(core_file.data(), error);
+    // Reenable async events
+    g_vsc.debugger.SetAsync(true);
+  } else {
+    // We have "attachCommands" that are a set of commands that are expected
+    // to execute the commands after which a process should be created. If there
+    // is no valid process after running these commands, we have failed.
+    g_vsc.RunLLDBCommands("Running attachCommands:", attachCommands);
+    // The custom commands might have created a new target so we should use the
+    // selected target after these commands are run.
+    g_vsc.target = g_vsc.debugger.GetSelectedTarget();
+  }
+
+  SetSourceMapFromArguments(*arguments);
+
+  if (error.Success() && core_file.empty()) {
+    auto attached_pid = g_vsc.target.GetProcess().GetProcessID();
+    if (attached_pid == LLDB_INVALID_PROCESS_ID) {
+      if (attachCommands.empty())
+        error.SetErrorString("failed to attach to a process");
+      else
+        error.SetErrorString("attachCommands failed to attach to a process");
     }
+  }
+
+  if (error.Fail()) {
+    response["success"] = llvm::json::Value(false);
+    EmplaceSafeString(response, "message", std::string(error.GetCString()));
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  if (error.Success()) {
+    SendProcessEvent(Attach);
+    g_vsc.SendJSON(CreateEventObject("initialized"));
+    // SendThreadStoppedEvent();
+  }
 }
 
 // "ContinueRequest": {
@@ -699,18 +698,18 @@ void request_attach(const llvm::json::Object &request) {
 //   }]
 // }
 void request_continue(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    auto arguments = request.getObject("arguments");
-    // Remember the thread ID that caused the resume so we can set the
-    // "threadCausedFocus" boolean value in the "stopped" events.
-    g_vsc.focus_tid = GetUnsigned(arguments, "threadId", LLDB_INVALID_THREAD_ID);
-    lldb::SBError error = process.Continue();
-    llvm::json::Object body;
-    body.try_emplace("allThreadsContinued", true);
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  auto arguments = request.getObject("arguments");
+  // Remember the thread ID that caused the resume so we can set the
+  // "threadCausedFocus" boolean value in the "stopped" events.
+  g_vsc.focus_tid = GetUnsigned(arguments, "threadId", LLDB_INVALID_THREAD_ID);
+  lldb::SBError error = process.Continue();
+  llvm::json::Object body;
+  body.try_emplace("allThreadsContinued", true);
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "ConfigurationDoneRequest": {
@@ -745,13 +744,13 @@ void request_continue(const llvm::json::Object &request) {
 //             }]
 // },
 void request_configurationDone(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-    if (g_vsc.stop_at_entry)
-        SendThreadStoppedEvent();
-    else
-        g_vsc.target.GetProcess().Continue();
+  llvm::json::Object response;
+  FillResponse(request, response);
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  if (g_vsc.stop_at_entry)
+    SendThreadStoppedEvent();
+  else
+    g_vsc.target.GetProcess().Continue();
 }
 
 // "DisconnectRequest": {
@@ -799,81 +798,81 @@ void request_configurationDone(const llvm::json::Object &request) {
 //   }]
 // }
 void request_disconnect(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
+  llvm::json::Object response;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
 
-    bool defaultTerminateDebuggee = g_vsc.is_attach ? false : true;
-    bool terminateDebuggee =
-        GetBoolean(arguments, "terminateDebuggee", defaultTerminateDebuggee);
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    auto state = process.GetState();
-    switch (state) {
-    case lldb::eStateInvalid:
-    case lldb::eStateUnloaded:
-    case lldb::eStateDetached:
-    case lldb::eStateExited:
-        break;
-    case lldb::eStateConnected:
-    case lldb::eStateAttaching:
-    case lldb::eStateLaunching:
-    case lldb::eStateStepping:
-    case lldb::eStateCrashed:
-    case lldb::eStateSuspended:
-    case lldb::eStateStopped:
-    case lldb::eStateRunning:
-        g_vsc.debugger.SetAsync(false);
-        lldb::SBError error = terminateDebuggee ? process.Kill() : process.Detach();
-        if (!error.Success())
-            response.try_emplace("error", error.GetCString());
-        g_vsc.debugger.SetAsync(true);
-        break;
-    }
-    SendTerminatedEvent();
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-    if (g_vsc.event_thread.joinable()) {
-        g_vsc.broadcaster.BroadcastEventByType(eBroadcastBitStopEventThread);
-        g_vsc.event_thread.join();
-    }
+  bool defaultTerminateDebuggee = g_vsc.is_attach ? false : true;
+  bool terminateDebuggee =
+      GetBoolean(arguments, "terminateDebuggee", defaultTerminateDebuggee);
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  auto state = process.GetState();
+  switch (state) {
+  case lldb::eStateInvalid:
+  case lldb::eStateUnloaded:
+  case lldb::eStateDetached:
+  case lldb::eStateExited:
+    break;
+  case lldb::eStateConnected:
+  case lldb::eStateAttaching:
+  case lldb::eStateLaunching:
+  case lldb::eStateStepping:
+  case lldb::eStateCrashed:
+  case lldb::eStateSuspended:
+  case lldb::eStateStopped:
+  case lldb::eStateRunning:
+    g_vsc.debugger.SetAsync(false);
+    lldb::SBError error = terminateDebuggee ? process.Kill() : process.Detach();
+    if (!error.Success())
+      response.try_emplace("error", error.GetCString());
+    g_vsc.debugger.SetAsync(true);
+    break;
+  }
+  SendTerminatedEvent();
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  if (g_vsc.event_thread.joinable()) {
+    g_vsc.broadcaster.BroadcastEventByType(eBroadcastBitStopEventThread);
+    g_vsc.event_thread.join();
+  }
 }
 
 void request_exceptionInfo(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    llvm::json::Object body;
-    lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
-    if (thread.IsValid()) {
-        auto stopReason = thread.GetStopReason();
-        if (stopReason == lldb::eStopReasonSignal)
-            body.try_emplace("exceptionId", "signal");
-        else if (stopReason == lldb::eStopReasonBreakpoint) {
-            ExceptionBreakpoint *exc_bp = g_vsc.GetExceptionBPFromStopReason(thread);
-            if (exc_bp) {
-                EmplaceSafeString(body, "exceptionId", exc_bp->filter);
-                EmplaceSafeString(body, "description", exc_bp->label);
-            } else {
-                body.try_emplace("exceptionId", "exception");
-            }
-        } else {
-            body.try_emplace("exceptionId", "exception");
-        }
-        if (!ObjectContainsKey(body, "description")) {
-            char description[1024];
-            if (thread.GetStopDescription(description, sizeof(description))) {
-                EmplaceSafeString(body, "description", std::string(description));
-            }
-        }
-        body.try_emplace("breakMode", "always");
-        // auto excInfoCount = thread.GetStopReasonDataCount();
-        // for (auto i=0; i<excInfoCount; ++i) {
-        //   uint64_t exc_data = thread.GetStopReasonDataAtIndex(i);
-        // }
+  llvm::json::Object response;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  llvm::json::Object body;
+  lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
+  if (thread.IsValid()) {
+    auto stopReason = thread.GetStopReason();
+    if (stopReason == lldb::eStopReasonSignal)
+      body.try_emplace("exceptionId", "signal");
+    else if (stopReason == lldb::eStopReasonBreakpoint) {
+      ExceptionBreakpoint *exc_bp = g_vsc.GetExceptionBPFromStopReason(thread);
+      if (exc_bp) {
+        EmplaceSafeString(body, "exceptionId", exc_bp->filter);
+        EmplaceSafeString(body, "description", exc_bp->label);
+      } else {
+        body.try_emplace("exceptionId", "exception");
+      }
     } else {
-        response["success"] = llvm::json::Value(false);
+      body.try_emplace("exceptionId", "exception");
     }
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+    if (!ObjectContainsKey(body, "description")) {
+      char description[1024];
+      if (thread.GetStopDescription(description, sizeof(description))) {
+        EmplaceSafeString(body, "description", std::string(description));
+      }
+    }
+    body.try_emplace("breakMode", "always");
+    // auto excInfoCount = thread.GetStopReasonDataCount();
+    // for (auto i=0; i<excInfoCount; ++i) {
+    //   uint64_t exc_data = thread.GetStopReasonDataAtIndex(i);
+    // }
+  } else {
+    response["success"] = llvm::json::Value(false);
+  }
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "CompletionsRequest": {
@@ -992,60 +991,58 @@ void request_exceptionInfo(const llvm::json::Object &request) {
 //   "snippet", "text", "color", "file", "reference", "customcolor" ]
 // }
 void request_completions(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Object body;
-    auto arguments = request.getObject("arguments");
-    std::string text = std::string(GetString(arguments, "text"));
-    auto original_column = GetSigned(arguments, "column", text.size());
-    auto actual_column = original_column - 1;
-    llvm::json::Array targets;
-    // NOTE: the 'line' argument is not needed, as multiline expressions
-    // work well already
-    // TODO: support frameID. Currently
-    // g_vsc.debugger.GetCommandInterpreter().HandleCompletionWithDescriptions
-    // is frame-unaware.
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Object body;
+  auto arguments = request.getObject("arguments");
+  std::string text = std::string(GetString(arguments, "text"));
+  auto original_column = GetSigned(arguments, "column", text.size());
+  auto actual_column = original_column - 1;
+  llvm::json::Array targets;
+  // NOTE: the 'line' argument is not needed, as multiline expressions
+  // work well already
+  // TODO: support frameID. Currently
+  // g_vsc.debugger.GetCommandInterpreter().HandleCompletionWithDescriptions
+  // is frame-unaware.
 
-    if (!text.empty() && text[0] == '`') {
-        text = text.substr(1);
-        actual_column--;
-    } else {
-        text = "p " + text;
-        actual_column += 2;
+  if (!text.empty() && text[0] == '`') {
+    text = text.substr(1);
+    actual_column--;
+  } else {
+    text = "p " + text;
+    actual_column += 2;
+  }
+  lldb::SBStringList matches;
+  lldb::SBStringList descriptions;
+  g_vsc.debugger.GetCommandInterpreter().HandleCompletionWithDescriptions(
+      text.c_str(), actual_column, 0, -1, matches, descriptions);
+  size_t count = std::min((uint32_t)100, matches.GetSize());
+  targets.reserve(count);
+  for (size_t i = 0; i < count; i++) {
+    std::string match = matches.GetStringAtIndex(i);
+    std::string description = descriptions.GetStringAtIndex(i);
+
+    llvm::json::Object item;
+
+    llvm::StringRef match_ref = match;
+    for (llvm::StringRef commit_point : {".", "->"}) {
+      if (match_ref.contains(commit_point)) {
+        match_ref = match_ref.rsplit(commit_point).second;
+      }
     }
-    lldb::SBStringList matches;
-    lldb::SBStringList descriptions;
-    g_vsc.debugger.GetCommandInterpreter().HandleCompletionWithDescriptions(
-        text.c_str(), actual_column, 0, -1, matches, descriptions);
-    size_t count = std::min((uint32_t)100, matches.GetSize());
-    targets.reserve(count);
-    for (size_t i = 0; i < count; i++) {
-        std::string match = matches.GetStringAtIndex(i);
-        std::string description = descriptions.GetStringAtIndex(i);
+    EmplaceSafeString(item, "text", match_ref);
 
-        llvm::json::Object item;
+    if (description.empty())
+      EmplaceSafeString(item, "label", match);
+    else
+      EmplaceSafeString(item, "label", match + " -- " + description);
 
-        llvm::StringRef match_ref = match;
-        for (llvm::StringRef commit_point : {
-                    ".", "->"
-                }) {
-            if (match_ref.contains(commit_point)) {
-                match_ref = match_ref.rsplit(commit_point).second;
-            }
-        }
-        EmplaceSafeString(item, "text", match_ref);
+    targets.emplace_back(std::move(item));
+  }
 
-        if (description.empty())
-            EmplaceSafeString(item, "label", match);
-        else
-            EmplaceSafeString(item, "label", match + " -- " + description);
-
-        targets.emplace_back(std::move(item));
-    }
-
-    body.try_emplace("targets", std::move(targets));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  body.try_emplace("targets", std::move(targets));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 //  "EvaluateRequest": {
@@ -1150,53 +1147,53 @@ void request_completions(const llvm::json::Object &request) {
 //    }]
 //  }
 void request_evaluate(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Object body;
-    auto arguments = request.getObject("arguments");
-    lldb::SBFrame frame = g_vsc.GetLLDBFrame(*arguments);
-    const auto expression = GetString(arguments, "expression");
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Object body;
+  auto arguments = request.getObject("arguments");
+  lldb::SBFrame frame = g_vsc.GetLLDBFrame(*arguments);
+  const auto expression = GetString(arguments, "expression");
 
-    if (!expression.empty() && expression[0] == '`') {
-        auto result =
-            RunLLDBCommands(llvm::StringRef(), {std::string(expression.substr(1))});
-        EmplaceSafeString(body, "result", result);
-        body.try_emplace("variablesReference", (int64_t)0);
+  if (!expression.empty() && expression[0] == '`') {
+    auto result =
+        RunLLDBCommands(llvm::StringRef(), {std::string(expression.substr(1))});
+    EmplaceSafeString(body, "result", result);
+    body.try_emplace("variablesReference", (int64_t)0);
+  } else {
+    // Always try to get the answer from the local variables if possible. If
+    // this fails, then actually evaluate an expression using the expression
+    // parser. "frame variable" is more reliable than the expression parser in
+    // many cases and it is faster.
+    lldb::SBValue value = frame.GetValueForVariablePath(
+        expression.data(), lldb::eDynamicDontRunTarget);
+    if (value.GetError().Fail())
+      value = frame.EvaluateExpression(expression.data());
+    if (value.GetError().Fail()) {
+      response["success"] = llvm::json::Value(false);
+      // This error object must live until we're done with the pointer returned
+      // by GetCString().
+      lldb::SBError error = value.GetError();
+      const char *error_cstr = error.GetCString();
+      if (error_cstr && error_cstr[0])
+        EmplaceSafeString(response, "message", std::string(error_cstr));
+      else
+        EmplaceSafeString(response, "message", "evaluate failed");
     } else {
-        // Always try to get the answer from the local variables if possible. If
-        // this fails, then actually evaluate an expression using the expression
-        // parser. "frame variable" is more reliable than the expression parser in
-        // many cases and it is faster.
-        lldb::SBValue value = frame.GetValueForVariablePath(
-                                  expression.data(), lldb::eDynamicDontRunTarget);
-        if (value.GetError().Fail())
-            value = frame.EvaluateExpression(expression.data());
-        if (value.GetError().Fail()) {
-            response["success"] = llvm::json::Value(false);
-            // This error object must live until we're done with the pointer returned
-            // by GetCString().
-            lldb::SBError error = value.GetError();
-            const char *error_cstr = error.GetCString();
-            if (error_cstr && error_cstr[0])
-                EmplaceSafeString(response, "message", std::string(error_cstr));
-            else
-                EmplaceSafeString(response, "message", "evaluate failed");
-        } else {
-            SetValueForKey(value, body, "result");
-            auto value_typename = value.GetType().GetDisplayTypeName();
-            EmplaceSafeString(body, "type",
-                              value_typename ? value_typename : NO_TYPENAME);
-            if (value.MightHaveChildren()) {
-                auto variablesReference = VARIDX_TO_VARREF(g_vsc.variables.GetSize());
-                g_vsc.variables.Append(value);
-                body.try_emplace("variablesReference", variablesReference);
-            } else {
-                body.try_emplace("variablesReference", (int64_t)0);
-            }
-        }
+      SetValueForKey(value, body, "result");
+      auto value_typename = value.GetType().GetDisplayTypeName();
+      EmplaceSafeString(body, "type",
+                        value_typename ? value_typename : NO_TYPENAME);
+      if (value.MightHaveChildren()) {
+        auto variablesReference = VARIDX_TO_VARREF(g_vsc.variables.GetSize());
+        g_vsc.variables.Append(value);
+        body.try_emplace("variablesReference", variablesReference);
+      } else {
+        body.try_emplace("variablesReference", (int64_t)0);
+      }
     }
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  }
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "getCompileUnitsRequest": {
@@ -1241,28 +1238,28 @@ void request_evaluate(const llvm::json::Object &request) {
 // }
 
 void request_getCompileUnits(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    llvm::json::Object body;
-    llvm::json::Array units;
-    auto arguments = request.getObject("arguments");
-    std::string module_id = std::string(GetString(arguments, "moduleId"));
-    int num_modules = g_vsc.target.GetNumModules();
-    for (int i = 0; i < num_modules; i++) {
-        auto curr_module = g_vsc.target.GetModuleAtIndex(i);
-        if (module_id == curr_module.GetUUIDString()) {
-            int num_units = curr_module.GetNumCompileUnits();
-            for (int j = 0; j < num_units; j++) {
-                auto curr_unit = curr_module.GetCompileUnitAtIndex(j);
-                units.emplace_back(CreateCompileUnit(curr_unit));
-            }
-            body.try_emplace("compileUnits", std::move(units));
-            break;
-        }
+  llvm::json::Object response;
+  FillResponse(request, response);
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  llvm::json::Object body;
+  llvm::json::Array units;
+  auto arguments = request.getObject("arguments");
+  std::string module_id = std::string(GetString(arguments, "moduleId"));
+  int num_modules = g_vsc.target.GetNumModules();
+  for (int i = 0; i < num_modules; i++) {
+    auto curr_module = g_vsc.target.GetModuleAtIndex(i);
+    if (module_id == curr_module.GetUUIDString()) {
+      int num_units = curr_module.GetNumCompileUnits();
+      for (int j = 0; j < num_units; j++) {
+        auto curr_unit = curr_module.GetCompileUnitAtIndex(j);
+        units.emplace_back(CreateCompileUnit(curr_unit));
+      }
+      body.try_emplace("compileUnits", std::move(units));
+      break;
     }
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  }
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "InitializeRequest": {
@@ -1342,149 +1339,149 @@ void request_getCompileUnits(const llvm::json::Object &request) {
 //   }]
 // }
 void request_initialize(const llvm::json::Object &request) {
-    g_vsc.debugger = lldb::SBDebugger::Create(true /*source_init_files*/);
-    // Create an empty target right away since we might get breakpoint requests
-    // before we are given an executable to launch in a "launch" request, or a
-    // executable when attaching to a process by process ID in a "attach"
-    // request.
-    FILE *out = llvm::sys::RetryAfterSignal(nullptr, fopen, dev_null_path, "w");
-    if (out) {
-        // Set the output and error file handles to redirect into nothing otherwise
-        // if any code in LLDB prints to the debugger file handles, the output and
-        // error file handles are initialized to STDOUT and STDERR and any output
-        // will kill our debug session.
-        g_vsc.debugger.SetOutputFileHandle(out, true);
-        g_vsc.debugger.SetErrorFileHandle(out, false);
-    }
+  g_vsc.debugger = lldb::SBDebugger::Create(true /*source_init_files*/);
+  // Create an empty target right away since we might get breakpoint requests
+  // before we are given an executable to launch in a "launch" request, or a
+  // executable when attaching to a process by process ID in a "attach"
+  // request.
+  FILE *out = llvm::sys::RetryAfterSignal(nullptr, fopen, dev_null_path, "w");
+  if (out) {
+    // Set the output and error file handles to redirect into nothing otherwise
+    // if any code in LLDB prints to the debugger file handles, the output and
+    // error file handles are initialized to STDOUT and STDERR and any output
+    // will kill our debug session.
+    g_vsc.debugger.SetOutputFileHandle(out, true);
+    g_vsc.debugger.SetErrorFileHandle(out, false);
+  }
 
-    // Start our event thread so we can receive events from the debugger, target,
-    // process and more.
-    g_vsc.event_thread = std::thread(EventThreadFunction);
+  // Start our event thread so we can receive events from the debugger, target,
+  // process and more.
+  g_vsc.event_thread = std::thread(EventThreadFunction);
 
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Object body;
-    // The debug adapter supports the configurationDoneRequest.
-    body.try_emplace("supportsConfigurationDoneRequest", true);
-    // The debug adapter supports function breakpoints.
-    body.try_emplace("supportsFunctionBreakpoints", true);
-    // The debug adapter supports conditional breakpoints.
-    body.try_emplace("supportsConditionalBreakpoints", true);
-    // The debug adapter supports breakpoints that break execution after a
-    // specified number of hits.
-    body.try_emplace("supportsHitConditionalBreakpoints", true);
-    // The debug adapter supports a (side effect free) evaluate request for
-    // data hovers.
-    body.try_emplace("supportsEvaluateForHovers", true);
-    // Available filters or options for the setExceptionBreakpoints request.
-    llvm::json::Array filters;
-    for (const auto &exc_bp : g_vsc.exception_breakpoints) {
-        filters.emplace_back(CreateExceptionBreakpointFilter(exc_bp));
-    }
-    body.try_emplace("exceptionBreakpointFilters", std::move(filters));
-    // The debug adapter supports launching a debugee in intergrated VSCode
-    // terminal.
-    body.try_emplace("supportsRunInTerminalRequest", true);
-    // The debug adapter supports stepping back via the stepBack and
-    // reverseContinue requests.
-    body.try_emplace("supportsStepBack", false);
-    // The debug adapter supports setting a variable to a value.
-    body.try_emplace("supportsSetVariable", true);
-    // The debug adapter supports restarting a frame.
-    body.try_emplace("supportsRestartFrame", false);
-    // The debug adapter supports the gotoTargetsRequest.
-    body.try_emplace("supportsGotoTargetsRequest", false);
-    // The debug adapter supports the stepInTargetsRequest.
-    body.try_emplace("supportsStepInTargetsRequest", false);
-    // We need to improve the current implementation of completions in order to
-    // enable it again. For some context, this is how VSCode works:
-    // - VSCode sends a completion request whenever chars are added, the user
-    //   triggers completion manually via CTRL-space or similar mechanisms, but
-    //   not when there's a deletion. Besides, VSCode doesn't let us know which
-    //   of these events we are handling. What is more, the use can paste or cut
-    //   sections of the text arbitrarily.
-    //   https://github.com/microsoft/vscode/issues/89531 tracks part of the
-    //   issue just mentioned.
-    // This behavior causes many problems with the current way completion is
-    // implemented in lldb-vscode, as these requests could be really expensive,
-    // blocking the debugger, and there could be many concurrent requests unless
-    // the user types very slowly... We need to address this specific issue, or
-    // at least trigger completion only when the user explicitly wants it, which
-    // is the behavior of LLDB CLI, that expects a TAB.
-    body.try_emplace("supportsCompletionsRequest", false);
-    // The debug adapter supports the modules request.
-    body.try_emplace("supportsModulesRequest", false);
-    // The set of additional module information exposed by the debug adapter.
-    //   body.try_emplace("additionalModuleColumns"] = ColumnDescriptor
-    // Checksum algorithms supported by the debug adapter.
-    //   body.try_emplace("supportedChecksumAlgorithms"] = ChecksumAlgorithm
-    // The debug adapter supports the RestartRequest. In this case a client
-    // should not implement 'restart' by terminating and relaunching the adapter
-    // but by calling the RestartRequest.
-    body.try_emplace("supportsRestartRequest", false);
-    // The debug adapter supports 'exceptionOptions' on the
-    // setExceptionBreakpoints request.
-    body.try_emplace("supportsExceptionOptions", true);
-    // The debug adapter supports a 'format' attribute on the stackTraceRequest,
-    // variablesRequest, and evaluateRequest.
-    body.try_emplace("supportsValueFormattingOptions", true);
-    // The debug adapter supports the exceptionInfo request.
-    body.try_emplace("supportsExceptionInfoRequest", true);
-    // The debug adapter supports the 'terminateDebuggee' attribute on the
-    // 'disconnect' request.
-    body.try_emplace("supportTerminateDebuggee", true);
-    // The debug adapter supports the delayed loading of parts of the stack,
-    // which requires that both the 'startFrame' and 'levels' arguments and the
-    // 'totalFrames' result of the 'StackTrace' request are supported.
-    body.try_emplace("supportsDelayedStackTraceLoading", true);
-    // The debug adapter supports the 'loadedSources' request.
-    body.try_emplace("supportsLoadedSourcesRequest", false);
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Object body;
+  // The debug adapter supports the configurationDoneRequest.
+  body.try_emplace("supportsConfigurationDoneRequest", true);
+  // The debug adapter supports function breakpoints.
+  body.try_emplace("supportsFunctionBreakpoints", true);
+  // The debug adapter supports conditional breakpoints.
+  body.try_emplace("supportsConditionalBreakpoints", true);
+  // The debug adapter supports breakpoints that break execution after a
+  // specified number of hits.
+  body.try_emplace("supportsHitConditionalBreakpoints", true);
+  // The debug adapter supports a (side effect free) evaluate request for
+  // data hovers.
+  body.try_emplace("supportsEvaluateForHovers", true);
+  // Available filters or options for the setExceptionBreakpoints request.
+  llvm::json::Array filters;
+  for (const auto &exc_bp : g_vsc.exception_breakpoints) {
+    filters.emplace_back(CreateExceptionBreakpointFilter(exc_bp));
+  }
+  body.try_emplace("exceptionBreakpointFilters", std::move(filters));
+  // The debug adapter supports launching a debugee in intergrated VSCode
+  // terminal.
+  body.try_emplace("supportsRunInTerminalRequest", true);
+  // The debug adapter supports stepping back via the stepBack and
+  // reverseContinue requests.
+  body.try_emplace("supportsStepBack", false);
+  // The debug adapter supports setting a variable to a value.
+  body.try_emplace("supportsSetVariable", true);
+  // The debug adapter supports restarting a frame.
+  body.try_emplace("supportsRestartFrame", false);
+  // The debug adapter supports the gotoTargetsRequest.
+  body.try_emplace("supportsGotoTargetsRequest", false);
+  // The debug adapter supports the stepInTargetsRequest.
+  body.try_emplace("supportsStepInTargetsRequest", false);
+  // We need to improve the current implementation of completions in order to
+  // enable it again. For some context, this is how VSCode works:
+  // - VSCode sends a completion request whenever chars are added, the user
+  //   triggers completion manually via CTRL-space or similar mechanisms, but
+  //   not when there's a deletion. Besides, VSCode doesn't let us know which
+  //   of these events we are handling. What is more, the use can paste or cut
+  //   sections of the text arbitrarily.
+  //   https://github.com/microsoft/vscode/issues/89531 tracks part of the
+  //   issue just mentioned.
+  // This behavior causes many problems with the current way completion is
+  // implemented in lldb-vscode, as these requests could be really expensive,
+  // blocking the debugger, and there could be many concurrent requests unless
+  // the user types very slowly... We need to address this specific issue, or
+  // at least trigger completion only when the user explicitly wants it, which
+  // is the behavior of LLDB CLI, that expects a TAB.
+  body.try_emplace("supportsCompletionsRequest", false);
+  // The debug adapter supports the modules request.
+  body.try_emplace("supportsModulesRequest", false);
+  // The set of additional module information exposed by the debug adapter.
+  //   body.try_emplace("additionalModuleColumns"] = ColumnDescriptor
+  // Checksum algorithms supported by the debug adapter.
+  //   body.try_emplace("supportedChecksumAlgorithms"] = ChecksumAlgorithm
+  // The debug adapter supports the RestartRequest. In this case a client
+  // should not implement 'restart' by terminating and relaunching the adapter
+  // but by calling the RestartRequest.
+  body.try_emplace("supportsRestartRequest", false);
+  // The debug adapter supports 'exceptionOptions' on the
+  // setExceptionBreakpoints request.
+  body.try_emplace("supportsExceptionOptions", true);
+  // The debug adapter supports a 'format' attribute on the stackTraceRequest,
+  // variablesRequest, and evaluateRequest.
+  body.try_emplace("supportsValueFormattingOptions", true);
+  // The debug adapter supports the exceptionInfo request.
+  body.try_emplace("supportsExceptionInfoRequest", true);
+  // The debug adapter supports the 'terminateDebuggee' attribute on the
+  // 'disconnect' request.
+  body.try_emplace("supportTerminateDebuggee", true);
+  // The debug adapter supports the delayed loading of parts of the stack,
+  // which requires that both the 'startFrame' and 'levels' arguments and the
+  // 'totalFrames' result of the 'StackTrace' request are supported.
+  body.try_emplace("supportsDelayedStackTraceLoading", true);
+  // The debug adapter supports the 'loadedSources' request.
+  body.try_emplace("supportsLoadedSourcesRequest", false);
 
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 void request_runInTerminal(const llvm::json::Object &launch_request,
                            llvm::json::Object &launch_response) {
-    // We have already created a target that has a valid "program" path to the
-    // executable. We will attach to the next process whose name matches that
-    // of the target's.
-    g_vsc.is_attach = true;
-    lldb::SBAttachInfo attach_info;
-    lldb::SBError error;
-    attach_info.SetWaitForLaunch(true, /*async*/ true);
-    g_vsc.target.Attach(attach_info, error);
+  // We have already created a target that has a valid "program" path to the
+  // executable. We will attach to the next process whose name matches that
+  // of the target's.
+  g_vsc.is_attach = true;
+  lldb::SBAttachInfo attach_info;
+  lldb::SBError error;
+  attach_info.SetWaitForLaunch(true, /*async*/ true);
+  g_vsc.target.Attach(attach_info, error);
 
-    llvm::json::Object reverse_request =
-        CreateRunInTerminalReverseRequest(launch_request);
-    llvm::json::Object reverse_response;
-    lldb_vscode::PacketStatus status =
-        g_vsc.SendReverseRequest(reverse_request, reverse_response);
-    if (status != lldb_vscode::PacketStatus::Success)
-        error.SetErrorString("Process cannot be launched by IDE.");
+  llvm::json::Object reverse_request =
+      CreateRunInTerminalReverseRequest(launch_request);
+  llvm::json::Object reverse_response;
+  lldb_vscode::PacketStatus status =
+      g_vsc.SendReverseRequest(reverse_request, reverse_response);
+  if (status != lldb_vscode::PacketStatus::Success)
+    error.SetErrorString("Process cannot be launched by IDE.");
 
-    if (error.Success()) {
-        // Wait for the attach stop event to happen or for a timeout.
-        g_vsc.waiting_for_run_in_terminal = true;
-        static std::mutex mutex;
-        std::unique_lock<std::mutex> locker(mutex);
-        g_vsc.request_in_terminal_cv.wait_for(locker, std::chrono::seconds(10));
+  if (error.Success()) {
+    // Wait for the attach stop event to happen or for a timeout.
+    g_vsc.waiting_for_run_in_terminal = true;
+    static std::mutex mutex;
+    std::unique_lock<std::mutex> locker(mutex);
+    g_vsc.request_in_terminal_cv.wait_for(locker, std::chrono::seconds(10));
 
-        auto attached_pid = g_vsc.target.GetProcess().GetProcessID();
-        if (attached_pid == LLDB_INVALID_PROCESS_ID)
-            error.SetErrorString("Failed to attach to a process");
-        else
-            SendProcessEvent(Attach);
-    }
+    auto attached_pid = g_vsc.target.GetProcess().GetProcessID();
+    if (attached_pid == LLDB_INVALID_PROCESS_ID)
+      error.SetErrorString("Failed to attach to a process");
+    else
+      SendProcessEvent(Attach);
+  }
 
-    if (error.Fail()) {
-        launch_response["success"] = llvm::json::Value(false);
-        EmplaceSafeString(launch_response, "message",
-                          std::string(error.GetCString()));
-    } else {
-        launch_response["success"] = llvm::json::Value(true);
-        g_vsc.SendJSON(CreateEventObject("initialized"));
-    }
+  if (error.Fail()) {
+    launch_response["success"] = llvm::json::Value(false);
+    EmplaceSafeString(launch_response, "message",
+                      std::string(error.GetCString()));
+  } else {
+    launch_response["success"] = llvm::json::Value(true);
+    g_vsc.SendJSON(CreateEventObject("initialized"));
+  }
 }
 
 // "LaunchRequest": {
@@ -1522,107 +1519,107 @@ void request_runInTerminal(const llvm::json::Object &launch_request,
 //   }]
 // }
 void request_launch(const llvm::json::Object &request) {
-    g_vsc.is_attach = false;
-    llvm::json::Object response;
-    lldb::SBError error;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    g_vsc.init_commands = GetStrings(arguments, "initCommands");
-    g_vsc.pre_run_commands = GetStrings(arguments, "preRunCommands");
-    g_vsc.stop_commands = GetStrings(arguments, "stopCommands");
-    g_vsc.exit_commands = GetStrings(arguments, "exitCommands");
-    g_vsc.terminate_commands = GetStrings(arguments, "terminateCommands");
-    auto launchCommands = GetStrings(arguments, "launchCommands");
-    g_vsc.stop_at_entry = GetBoolean(arguments, "stopOnEntry", false);
-    const llvm::StringRef debuggerRoot = GetString(arguments, "debuggerRoot");
+  g_vsc.is_attach = false;
+  llvm::json::Object response;
+  lldb::SBError error;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  g_vsc.init_commands = GetStrings(arguments, "initCommands");
+  g_vsc.pre_run_commands = GetStrings(arguments, "preRunCommands");
+  g_vsc.stop_commands = GetStrings(arguments, "stopCommands");
+  g_vsc.exit_commands = GetStrings(arguments, "exitCommands");
+  g_vsc.terminate_commands = GetStrings(arguments, "terminateCommands");
+  auto launchCommands = GetStrings(arguments, "launchCommands");
+  g_vsc.stop_at_entry = GetBoolean(arguments, "stopOnEntry", false);
+  const llvm::StringRef debuggerRoot = GetString(arguments, "debuggerRoot");
 
-    // This is a hack for loading DWARF in .o files on Mac where the .o files
-    // in the debug map of the main executable have relative paths which require
-    // the lldb-vscode binary to have its working directory set to that relative
-    // root for the .o files in order to be able to load debug info.
-    if (!debuggerRoot.empty())
-        llvm::sys::fs::set_current_path(debuggerRoot);
+  // This is a hack for loading DWARF in .o files on Mac where the .o files
+  // in the debug map of the main executable have relative paths which require
+  // the lldb-vscode binary to have its working directory set to that relative
+  // root for the .o files in order to be able to load debug info.
+  if (!debuggerRoot.empty())
+    llvm::sys::fs::set_current_path(debuggerRoot);
 
-    // Run any initialize LLDB commands the user specified in the launch.json.
-    // This is run before target is created, so commands can't do anything with
-    // the targets - preRunCommands are run with the target.
-    g_vsc.RunInitCommands();
+  // Run any initialize LLDB commands the user specified in the launch.json.
+  // This is run before target is created, so commands can't do anything with
+  // the targets - preRunCommands are run with the target.
+  g_vsc.RunInitCommands();
 
-    SetSourceMapFromArguments(*arguments);
+  SetSourceMapFromArguments(*arguments);
 
-    lldb::SBError status;
-    g_vsc.SetTarget(g_vsc.CreateTargetFromArguments(*arguments, status));
-    if (status.Fail()) {
-        response["success"] = llvm::json::Value(false);
-        EmplaceSafeString(response, "message", status.GetCString());
-        g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-        return;
-    }
-
-    if (GetBoolean(arguments, "runInTerminal", false)) {
-        request_runInTerminal(request, response);
-        g_vsc.SendJSON(llvm::json::Value(std::move(response)));
-        return;
-    }
-
-    // Instantiate a launch info instance for the target.
-    auto launch_info = g_vsc.target.GetLaunchInfo();
-
-    // Grab the current working directory if there is one and set it in the
-    // launch info.
-    const auto cwd = GetString(arguments, "cwd");
-    if (!cwd.empty())
-        launch_info.SetWorkingDirectory(cwd.data());
-
-    // Extract any extra arguments and append them to our program arguments for
-    // when we launch
-    auto args = GetStrings(arguments, "args");
-    if (!args.empty())
-        launch_info.SetArguments(MakeArgv(args).data(), true);
-
-    // Pass any environment variables along that the user specified.
-    auto envs = GetStrings(arguments, "env");
-    if (!envs.empty())
-        launch_info.SetEnvironmentEntries(MakeArgv(envs).data(), true);
-
-    auto flags = launch_info.GetLaunchFlags();
-
-    if (GetBoolean(arguments, "disableASLR", true))
-        flags |= lldb::eLaunchFlagDisableASLR;
-    if (GetBoolean(arguments, "disableSTDIO", false))
-        flags |= lldb::eLaunchFlagDisableSTDIO;
-    if (GetBoolean(arguments, "shellExpandArguments", false))
-        flags |= lldb::eLaunchFlagShellExpandArguments;
-    const bool detatchOnError = GetBoolean(arguments, "detachOnError", false);
-    launch_info.SetDetachOnError(detatchOnError);
-    launch_info.SetLaunchFlags(flags | lldb::eLaunchFlagDebug |
-                               lldb::eLaunchFlagStopAtEntry);
-
-    // Run any pre run LLDB commands the user specified in the launch.json
-    g_vsc.RunPreRunCommands();
-    if (launchCommands.empty()) {
-        // Disable async events so the launch will be successful when we return from
-        // the launch call and the launch will happen synchronously
-        g_vsc.debugger.SetAsync(false);
-        g_vsc.target.Launch(launch_info, error);
-        g_vsc.debugger.SetAsync(true);
-    } else {
-        g_vsc.RunLLDBCommands("Running launchCommands:", launchCommands);
-        // The custom commands might have created a new target so we should use the
-        // selected target after these commands are run.
-        g_vsc.target = g_vsc.debugger.GetSelectedTarget();
-    }
-
-    if (error.Fail()) {
-        response["success"] = llvm::json::Value(false);
-        EmplaceSafeString(response, "message", std::string(error.GetCString()));
-    }
+  lldb::SBError status;
+  g_vsc.SetTarget(g_vsc.CreateTargetFromArguments(*arguments, status));
+  if (status.Fail()) {
+    response["success"] = llvm::json::Value(false);
+    EmplaceSafeString(response, "message", status.GetCString());
     g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+    return;
+  }
 
-    SendProcessEvent(Launch);
-    g_vsc.SendJSON(llvm::json::Value(CreateEventObject("initialized")));
-    // Reenable async events and start the event thread to catch async events.
-    // g_vsc.debugger.SetAsync(true);
+  if (GetBoolean(arguments, "runInTerminal", false)) {
+    request_runInTerminal(request, response);
+    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+    return;
+  }
+
+  // Instantiate a launch info instance for the target.
+  auto launch_info = g_vsc.target.GetLaunchInfo();
+
+  // Grab the current working directory if there is one and set it in the
+  // launch info.
+  const auto cwd = GetString(arguments, "cwd");
+  if (!cwd.empty())
+    launch_info.SetWorkingDirectory(cwd.data());
+
+  // Extract any extra arguments and append them to our program arguments for
+  // when we launch
+  auto args = GetStrings(arguments, "args");
+  if (!args.empty())
+    launch_info.SetArguments(MakeArgv(args).data(), true);
+
+  // Pass any environment variables along that the user specified.
+  auto envs = GetStrings(arguments, "env");
+  if (!envs.empty())
+    launch_info.SetEnvironmentEntries(MakeArgv(envs).data(), true);
+
+  auto flags = launch_info.GetLaunchFlags();
+
+  if (GetBoolean(arguments, "disableASLR", true))
+    flags |= lldb::eLaunchFlagDisableASLR;
+  if (GetBoolean(arguments, "disableSTDIO", false))
+    flags |= lldb::eLaunchFlagDisableSTDIO;
+  if (GetBoolean(arguments, "shellExpandArguments", false))
+    flags |= lldb::eLaunchFlagShellExpandArguments;
+  const bool detatchOnError = GetBoolean(arguments, "detachOnError", false);
+  launch_info.SetDetachOnError(detatchOnError);
+  launch_info.SetLaunchFlags(flags | lldb::eLaunchFlagDebug |
+                             lldb::eLaunchFlagStopAtEntry);
+
+  // Run any pre run LLDB commands the user specified in the launch.json
+  g_vsc.RunPreRunCommands();
+  if (launchCommands.empty()) {
+    // Disable async events so the launch will be successful when we return from
+    // the launch call and the launch will happen synchronously
+    g_vsc.debugger.SetAsync(false);
+    g_vsc.target.Launch(launch_info, error);
+    g_vsc.debugger.SetAsync(true);
+  } else {
+    g_vsc.RunLLDBCommands("Running launchCommands:", launchCommands);
+    // The custom commands might have created a new target so we should use the
+    // selected target after these commands are run.
+    g_vsc.target = g_vsc.debugger.GetSelectedTarget();
+  }
+
+  if (error.Fail()) {
+    response["success"] = llvm::json::Value(false);
+    EmplaceSafeString(response, "message", std::string(error.GetCString()));
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+
+  SendProcessEvent(Launch);
+  g_vsc.SendJSON(llvm::json::Value(CreateEventObject("initialized")));
+  // Reenable async events and start the event thread to catch async events.
+  // g_vsc.debugger.SetAsync(true);
 }
 
 // "NextRequest": {
@@ -1664,19 +1661,19 @@ void request_launch(const llvm::json::Object &request) {
 //   }]
 // }
 void request_next(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
-    if (thread.IsValid()) {
-        // Remember the thread ID that caused the resume so we can set the
-        // "threadCausedFocus" boolean value in the "stopped" events.
-        g_vsc.focus_tid = thread.GetThreadID();
-        thread.StepOver();
-    } else {
-        response["success"] = llvm::json::Value(false);
-    }
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
+  if (thread.IsValid()) {
+    // Remember the thread ID that caused the resume so we can set the
+    // "threadCausedFocus" boolean value in the "stopped" events.
+    g_vsc.focus_tid = thread.GetThreadID();
+    thread.StepOver();
+  } else {
+    response["success"] = llvm::json::Value(false);
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "PauseRequest": {
@@ -1716,11 +1713,11 @@ void request_next(const llvm::json::Object &request) {
 //   }]
 // }
 void request_pause(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    lldb::SBError error = process.Stop();
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  lldb::SBError error = process.Stop();
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "ScopesRequest": {
@@ -1775,46 +1772,46 @@ void request_pause(const llvm::json::Object &request) {
 //   }]
 // }
 void request_scopes(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Object body;
-    auto arguments = request.getObject("arguments");
-    lldb::SBFrame frame = g_vsc.GetLLDBFrame(*arguments);
-    // As the user selects different stack frames in the GUI, a "scopes" request
-    // will be sent to the DAP. This is the only way we know that the user has
-    // selected a frame in a thread. There are no other notifications that are
-    // sent and VS code doesn't allow multiple frames to show variables
-    // concurrently. If we select the thread and frame as the "scopes" requests
-    // are sent, this allows users to type commands in the debugger console
-    // with a backtick character to run lldb commands and these lldb commands
-    // will now have the right context selected as they are run. If the user
-    // types "`bt" into the debugger console and we had another thread selected
-    // in the LLDB library, we would show the wrong thing to the user. If the
-    // users switches threads with a lldb command like "`thread select 14", the
-    // GUI will not update as there are no "event" notification packets that
-    // allow us to change the currently selected thread or frame in the GUI that
-    // I am aware of.
-    if (frame.IsValid()) {
-        frame.GetThread().GetProcess().SetSelectedThread(frame.GetThread());
-        frame.GetThread().SetSelectedFrame(frame.GetFrameID());
-    }
-    g_vsc.variables.Clear();
-    g_vsc.variables.Append(frame.GetVariables(true,   // arguments
-                           true,   // locals
-                           false,  // statics
-                           true)); // in_scope_only
-    g_vsc.num_locals = g_vsc.variables.GetSize();
-    g_vsc.variables.Append(frame.GetVariables(false,  // arguments
-                           false,  // locals
-                           true,   // statics
-                           true)); // in_scope_only
-    g_vsc.num_globals = g_vsc.variables.GetSize() - (g_vsc.num_locals);
-    g_vsc.variables.Append(frame.GetRegisters());
-    g_vsc.num_regs =
-        g_vsc.variables.GetSize() - (g_vsc.num_locals + g_vsc.num_globals);
-    body.try_emplace("scopes", g_vsc.CreateTopLevelScopes());
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Object body;
+  auto arguments = request.getObject("arguments");
+  lldb::SBFrame frame = g_vsc.GetLLDBFrame(*arguments);
+  // As the user selects different stack frames in the GUI, a "scopes" request
+  // will be sent to the DAP. This is the only way we know that the user has
+  // selected a frame in a thread. There are no other notifications that are
+  // sent and VS code doesn't allow multiple frames to show variables
+  // concurrently. If we select the thread and frame as the "scopes" requests
+  // are sent, this allows users to type commands in the debugger console
+  // with a backtick character to run lldb commands and these lldb commands
+  // will now have the right context selected as they are run. If the user
+  // types "`bt" into the debugger console and we had another thread selected
+  // in the LLDB library, we would show the wrong thing to the user. If the
+  // users switches threads with a lldb command like "`thread select 14", the
+  // GUI will not update as there are no "event" notification packets that
+  // allow us to change the currently selected thread or frame in the GUI that
+  // I am aware of.
+  if (frame.IsValid()) {
+    frame.GetThread().GetProcess().SetSelectedThread(frame.GetThread());
+    frame.GetThread().SetSelectedFrame(frame.GetFrameID());
+  }
+  g_vsc.variables.Clear();
+  g_vsc.variables.Append(frame.GetVariables(true,   // arguments
+                                            true,   // locals
+                                            false,  // statics
+                                            true)); // in_scope_only
+  g_vsc.num_locals = g_vsc.variables.GetSize();
+  g_vsc.variables.Append(frame.GetVariables(false,  // arguments
+                                            false,  // locals
+                                            true,   // statics
+                                            true)); // in_scope_only
+  g_vsc.num_globals = g_vsc.variables.GetSize() - (g_vsc.num_locals);
+  g_vsc.variables.Append(frame.GetRegisters());
+  g_vsc.num_regs =
+      g_vsc.variables.GetSize() - (g_vsc.num_locals + g_vsc.num_globals);
+  body.try_emplace("scopes", g_vsc.CreateTopLevelScopes());
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "SetBreakpointsRequest": {
@@ -1928,65 +1925,65 @@ void request_scopes(const llvm::json::Object &request) {
 //   "required": [ "line" ]
 // }
 void request_setBreakpoints(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    lldb::SBError error;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    auto source = arguments->getObject("source");
-    const auto path = GetString(source, "path");
-    auto breakpoints = arguments->getArray("breakpoints");
-    llvm::json::Array response_breakpoints;
+  llvm::json::Object response;
+  lldb::SBError error;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  auto source = arguments->getObject("source");
+  const auto path = GetString(source, "path");
+  auto breakpoints = arguments->getArray("breakpoints");
+  llvm::json::Array response_breakpoints;
 
-    // Decode the source breakpoint infos for this "setBreakpoints" request
-    SourceBreakpointMap request_bps;
-    // "breakpoints" may be unset, in which case we treat it the same as being set
-    // to an empty array.
-    if (breakpoints) {
-        for (const auto &bp : *breakpoints) {
-            auto bp_obj = bp.getAsObject();
-            if (bp_obj) {
-                SourceBreakpoint src_bp(*bp_obj);
-                request_bps[src_bp.line] = src_bp;
+  // Decode the source breakpoint infos for this "setBreakpoints" request
+  SourceBreakpointMap request_bps;
+  // "breakpoints" may be unset, in which case we treat it the same as being set
+  // to an empty array.
+  if (breakpoints) {
+    for (const auto &bp : *breakpoints) {
+      auto bp_obj = bp.getAsObject();
+      if (bp_obj) {
+        SourceBreakpoint src_bp(*bp_obj);
+        request_bps[src_bp.line] = src_bp;
 
-                // We check if this breakpoint already exists to update it
-                auto existing_source_bps = g_vsc.source_breakpoints.find(path);
-                if (existing_source_bps != g_vsc.source_breakpoints.end()) {
-                    const auto &existing_bp =
-                        existing_source_bps->second.find(src_bp.line);
-                    if (existing_bp != existing_source_bps->second.end()) {
-                        existing_bp->second.UpdateBreakpoint(src_bp);
-                        AppendBreakpoint(existing_bp->second.bp, response_breakpoints, path,
-                                         src_bp.line);
-                        continue;
-                    }
-                }
-                // At this point the breakpoint is new
-                src_bp.SetBreakpoint(path.data());
-                AppendBreakpoint(src_bp.bp, response_breakpoints, path, src_bp.line);
-                g_vsc.source_breakpoints[path][src_bp.line] = std::move(src_bp);
-            }
+        // We check if this breakpoint already exists to update it
+        auto existing_source_bps = g_vsc.source_breakpoints.find(path);
+        if (existing_source_bps != g_vsc.source_breakpoints.end()) {
+          const auto &existing_bp =
+              existing_source_bps->second.find(src_bp.line);
+          if (existing_bp != existing_source_bps->second.end()) {
+            existing_bp->second.UpdateBreakpoint(src_bp);
+            AppendBreakpoint(existing_bp->second.bp, response_breakpoints, path,
+                             src_bp.line);
+            continue;
+          }
         }
+        // At this point the breakpoint is new
+        src_bp.SetBreakpoint(path.data());
+        AppendBreakpoint(src_bp.bp, response_breakpoints, path, src_bp.line);
+        g_vsc.source_breakpoints[path][src_bp.line] = std::move(src_bp);
+      }
     }
+  }
 
-    // Delete any breakpoints in this source file that aren't in the
-    // request_bps set. There is no call to remove breakpoints other than
-    // calling this function with a smaller or empty "breakpoints" list.
-    auto old_src_bp_pos = g_vsc.source_breakpoints.find(path);
-    if (old_src_bp_pos != g_vsc.source_breakpoints.end()) {
-        for (auto &old_bp : old_src_bp_pos->second) {
-            auto request_pos = request_bps.find(old_bp.first);
-            if (request_pos == request_bps.end()) {
-                // This breakpoint no longer exists in this source file, delete it
-                g_vsc.target.BreakpointDelete(old_bp.second.bp.GetID());
-                old_src_bp_pos->second.erase(old_bp.first);
-            }
-        }
+  // Delete any breakpoints in this source file that aren't in the
+  // request_bps set. There is no call to remove breakpoints other than
+  // calling this function with a smaller or empty "breakpoints" list.
+  auto old_src_bp_pos = g_vsc.source_breakpoints.find(path);
+  if (old_src_bp_pos != g_vsc.source_breakpoints.end()) {
+    for (auto &old_bp : old_src_bp_pos->second) {
+      auto request_pos = request_bps.find(old_bp.first);
+      if (request_pos == request_bps.end()) {
+        // This breakpoint no longer exists in this source file, delete it
+        g_vsc.target.BreakpointDelete(old_bp.second.bp.GetID());
+        old_src_bp_pos->second.erase(old_bp.first);
+      }
     }
+  }
 
-    llvm::json::Object body;
-    body.try_emplace("breakpoints", std::move(response_breakpoints));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object body;
+  body.try_emplace("breakpoints", std::move(response_breakpoints));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "SetExceptionBreakpointsRequest": {
@@ -2037,31 +2034,31 @@ void request_setBreakpoints(const llvm::json::Object &request) {
 //   }]
 // }
 void request_setExceptionBreakpoints(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    lldb::SBError error;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    auto filters = arguments->getArray("filters");
-    // Keep a list of any exception breakpoint filter names that weren't set
-    // so we can clear any exception breakpoints if needed.
-    std::set<std::string> unset_filters;
-    for (const auto &bp : g_vsc.exception_breakpoints)
-        unset_filters.insert(bp.filter);
+  llvm::json::Object response;
+  lldb::SBError error;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  auto filters = arguments->getArray("filters");
+  // Keep a list of any exception breakpoint filter names that weren't set
+  // so we can clear any exception breakpoints if needed.
+  std::set<std::string> unset_filters;
+  for (const auto &bp : g_vsc.exception_breakpoints)
+    unset_filters.insert(bp.filter);
 
-    for (const auto &value : *filters) {
-        const auto filter = GetAsString(value);
-        auto exc_bp = g_vsc.GetExceptionBreakpoint(std::string(filter));
-        if (exc_bp) {
-            exc_bp->SetBreakpoint();
-            unset_filters.erase(std::string(filter));
-        }
+  for (const auto &value : *filters) {
+    const auto filter = GetAsString(value);
+    auto exc_bp = g_vsc.GetExceptionBreakpoint(std::string(filter));
+    if (exc_bp) {
+      exc_bp->SetBreakpoint();
+      unset_filters.erase(std::string(filter));
     }
-    for (const auto &filter : unset_filters) {
-        auto exc_bp = g_vsc.GetExceptionBreakpoint(filter);
-        if (exc_bp)
-            exc_bp->ClearBreakpoint();
-    }
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  }
+  for (const auto &filter : unset_filters) {
+    auto exc_bp = g_vsc.GetExceptionBreakpoint(filter);
+    if (exc_bp)
+      exc_bp->ClearBreakpoint();
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "SetFunctionBreakpointsRequest": {
@@ -2143,59 +2140,59 @@ void request_setExceptionBreakpoints(const llvm::json::Object &request) {
 //   }]
 // }
 void request_setFunctionBreakpoints(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    lldb::SBError error;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    auto breakpoints = arguments->getArray("breakpoints");
-    FunctionBreakpointMap request_bps;
-    llvm::json::Array response_breakpoints;
-    for (const auto &value : *breakpoints) {
-        auto bp_obj = value.getAsObject();
-        if (bp_obj == nullptr)
-            continue;
-        FunctionBreakpoint func_bp(*bp_obj);
-        request_bps[func_bp.functionName] = std::move(func_bp);
-    }
+  llvm::json::Object response;
+  lldb::SBError error;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  auto breakpoints = arguments->getArray("breakpoints");
+  FunctionBreakpointMap request_bps;
+  llvm::json::Array response_breakpoints;
+  for (const auto &value : *breakpoints) {
+    auto bp_obj = value.getAsObject();
+    if (bp_obj == nullptr)
+      continue;
+    FunctionBreakpoint func_bp(*bp_obj);
+    request_bps[func_bp.functionName] = std::move(func_bp);
+  }
 
-    std::vector<llvm::StringRef> remove_names;
-    // Disable any function breakpoints that aren't in the request_bps.
-    // There is no call to remove function breakpoints other than calling this
-    // function with a smaller or empty "breakpoints" list.
-    for (auto &pair : g_vsc.function_breakpoints) {
-        auto request_pos = request_bps.find(pair.first());
-        if (request_pos == request_bps.end()) {
-            // This function breakpoint no longer exists delete it from LLDB
-            g_vsc.target.BreakpointDelete(pair.second.bp.GetID());
-            remove_names.push_back(pair.first());
-        } else {
-            // Update the existing breakpoint as any setting withing the function
-            // breakpoint might have changed.
-            pair.second.UpdateBreakpoint(request_pos->second);
-            // Remove this breakpoint from the request breakpoints since we have
-            // handled it here and we don't need to set a new breakpoint below.
-            request_bps.erase(request_pos);
-            // Add this breakpoint info to the response
-            AppendBreakpoint(pair.second.bp, response_breakpoints);
-        }
+  std::vector<llvm::StringRef> remove_names;
+  // Disable any function breakpoints that aren't in the request_bps.
+  // There is no call to remove function breakpoints other than calling this
+  // function with a smaller or empty "breakpoints" list.
+  for (auto &pair : g_vsc.function_breakpoints) {
+    auto request_pos = request_bps.find(pair.first());
+    if (request_pos == request_bps.end()) {
+      // This function breakpoint no longer exists delete it from LLDB
+      g_vsc.target.BreakpointDelete(pair.second.bp.GetID());
+      remove_names.push_back(pair.first());
+    } else {
+      // Update the existing breakpoint as any setting withing the function
+      // breakpoint might have changed.
+      pair.second.UpdateBreakpoint(request_pos->second);
+      // Remove this breakpoint from the request breakpoints since we have
+      // handled it here and we don't need to set a new breakpoint below.
+      request_bps.erase(request_pos);
+      // Add this breakpoint info to the response
+      AppendBreakpoint(pair.second.bp, response_breakpoints);
     }
-    // Remove any breakpoints that are no longer in our list
-    for (const auto &name : remove_names)
-        g_vsc.function_breakpoints.erase(name);
+  }
+  // Remove any breakpoints that are no longer in our list
+  for (const auto &name : remove_names)
+    g_vsc.function_breakpoints.erase(name);
 
-    // Any breakpoints that are left in "request_bps" are breakpoints that
-    // need to be set.
-    for (auto &pair : request_bps) {
-        pair.second.SetBreakpoint();
-        // Add this breakpoint info to the response
-        AppendBreakpoint(pair.second.bp, response_breakpoints);
-        g_vsc.function_breakpoints[pair.first()] = std::move(pair.second);
-    }
+  // Any breakpoints that are left in "request_bps" are breakpoints that
+  // need to be set.
+  for (auto &pair : request_bps) {
+    pair.second.SetBreakpoint();
+    // Add this breakpoint info to the response
+    AppendBreakpoint(pair.second.bp, response_breakpoints);
+    g_vsc.function_breakpoints[pair.first()] = std::move(pair.second);
+  }
 
-    llvm::json::Object body;
-    body.try_emplace("breakpoints", std::move(response_breakpoints));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object body;
+  body.try_emplace("breakpoints", std::move(response_breakpoints));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "SourceRequest": {
@@ -2257,22 +2254,22 @@ void request_setFunctionBreakpoints(const llvm::json::Object &request) {
 //   }]
 // }
 void request_source(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Object body;
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Object body;
 
-    auto arguments = request.getObject("arguments");
-    auto source = arguments->getObject("source");
-    auto sourceReference = GetSigned(source, "sourceReference", -1);
-    auto pos = g_vsc.source_map.find((lldb::addr_t)sourceReference);
-    if (pos != g_vsc.source_map.end()) {
-        EmplaceSafeString(body, "content", pos->second.content);
-    } else {
-        response["success"] = llvm::json::Value(false);
-    }
-    EmplaceSafeString(body, "mimeType", "text/x-lldb.disassembly");
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  auto arguments = request.getObject("arguments");
+  auto source = arguments->getObject("source");
+  auto sourceReference = GetSigned(source, "sourceReference", -1);
+  auto pos = g_vsc.source_map.find((lldb::addr_t)sourceReference);
+  if (pos != g_vsc.source_map.end()) {
+    EmplaceSafeString(body, "content", pos->second.content);
+  } else {
+    response["success"] = llvm::json::Value(false);
+  }
+  EmplaceSafeString(body, "mimeType", "text/x-lldb.disassembly");
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "StackTraceRequest": {
@@ -2346,30 +2343,30 @@ void request_source(const llvm::json::Object &request) {
 //   }]
 // }
 void request_stackTrace(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    lldb::SBError error;
-    auto arguments = request.getObject("arguments");
-    lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
-    llvm::json::Array stackFrames;
-    llvm::json::Object body;
+  llvm::json::Object response;
+  FillResponse(request, response);
+  lldb::SBError error;
+  auto arguments = request.getObject("arguments");
+  lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
+  llvm::json::Array stackFrames;
+  llvm::json::Object body;
 
-    if (thread.IsValid()) {
-        const auto startFrame = GetUnsigned(arguments, "startFrame", 0);
-        const auto levels = GetUnsigned(arguments, "levels", 0);
-        const auto endFrame = (levels == 0) ? INT64_MAX : (startFrame + levels);
-        for (uint32_t i = startFrame; i < endFrame; ++i) {
-            auto frame = thread.GetFrameAtIndex(i);
-            if (!frame.IsValid())
-                break;
-            stackFrames.emplace_back(CreateStackFrame(frame));
-        }
-        const auto totalFrames = thread.GetNumFrames();
-        body.try_emplace("totalFrames", totalFrames);
+  if (thread.IsValid()) {
+    const auto startFrame = GetUnsigned(arguments, "startFrame", 0);
+    const auto levels = GetUnsigned(arguments, "levels", 0);
+    const auto endFrame = (levels == 0) ? INT64_MAX : (startFrame + levels);
+    for (uint32_t i = startFrame; i < endFrame; ++i) {
+      auto frame = thread.GetFrameAtIndex(i);
+      if (!frame.IsValid())
+        break;
+      stackFrames.emplace_back(CreateStackFrame(frame));
     }
-    body.try_emplace("stackFrames", std::move(stackFrames));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+    const auto totalFrames = thread.GetNumFrames();
+    body.try_emplace("totalFrames", totalFrames);
+  }
+  body.try_emplace("stackFrames", std::move(stackFrames));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "StepInRequest": {
@@ -2418,19 +2415,19 @@ void request_stackTrace(const llvm::json::Object &request) {
 //   }]
 // }
 void request_stepIn(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
-    if (thread.IsValid()) {
-        // Remember the thread ID that caused the resume so we can set the
-        // "threadCausedFocus" boolean value in the "stopped" events.
-        g_vsc.focus_tid = thread.GetThreadID();
-        thread.StepInto();
-    } else {
-        response["success"] = llvm::json::Value(false);
-    }
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
+  if (thread.IsValid()) {
+    // Remember the thread ID that caused the resume so we can set the
+    // "threadCausedFocus" boolean value in the "stopped" events.
+    g_vsc.focus_tid = thread.GetThreadID();
+    thread.StepInto();
+  } else {
+    response["success"] = llvm::json::Value(false);
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "StepOutRequest": {
@@ -2470,19 +2467,19 @@ void request_stepIn(const llvm::json::Object &request) {
 //   }]
 // }
 void request_stepOut(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    auto arguments = request.getObject("arguments");
-    lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
-    if (thread.IsValid()) {
-        // Remember the thread ID that caused the resume so we can set the
-        // "threadCausedFocus" boolean value in the "stopped" events.
-        g_vsc.focus_tid = thread.GetThreadID();
-        thread.StepOut();
-    } else {
-        response["success"] = llvm::json::Value(false);
-    }
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  auto arguments = request.getObject("arguments");
+  lldb::SBThread thread = g_vsc.GetLLDBThread(*arguments);
+  if (thread.IsValid()) {
+    // Remember the thread ID that caused the resume so we can set the
+    // "threadCausedFocus" boolean value in the "stopped" events.
+    g_vsc.focus_tid = thread.GetThreadID();
+    thread.StepOut();
+  } else {
+    response["success"] = llvm::json::Value(false);
+  }
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "ThreadsRequest": {
@@ -2522,23 +2519,23 @@ void request_stepOut(const llvm::json::Object &request) {
 // }
 void request_threads(const llvm::json::Object &request) {
 
-    lldb::SBProcess process = g_vsc.target.GetProcess();
-    llvm::json::Object response;
-    FillResponse(request, response);
+  lldb::SBProcess process = g_vsc.target.GetProcess();
+  llvm::json::Object response;
+  FillResponse(request, response);
 
-    const uint32_t num_threads = process.GetNumThreads();
-    llvm::json::Array threads;
-    for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
-        lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
-        threads.emplace_back(CreateThread(thread));
-    }
-    if (threads.size() == 0) {
-        response["success"] = llvm::json::Value(false);
-    }
-    llvm::json::Object body;
-    body.try_emplace("threads", std::move(threads));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  const uint32_t num_threads = process.GetNumThreads();
+  llvm::json::Array threads;
+  for (uint32_t thread_idx = 0; thread_idx < num_threads; ++thread_idx) {
+    lldb::SBThread thread = process.GetThreadAtIndex(thread_idx);
+    threads.emplace_back(CreateThread(thread));
+  }
+  if (threads.size() == 0) {
+    response["success"] = llvm::json::Value(false);
+  }
+  llvm::json::Object body;
+  body.try_emplace("threads", std::move(threads));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "SetVariableRequest": {
@@ -2624,112 +2621,112 @@ void request_threads(const llvm::json::Object &request) {
 //   }]
 // }
 void request_setVariable(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Array variables;
-    llvm::json::Object body;
-    auto arguments = request.getObject("arguments");
-    // This is a reference to the containing variable/scope
-    const auto variablesReference =
-        GetUnsigned(arguments, "variablesReference", 0);
-    const auto name = GetString(arguments, "name");
-    const auto value = GetString(arguments, "value");
-    // Set success to false just in case we don't find the variable by name
-    response.try_emplace("success", false);
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Array variables;
+  llvm::json::Object body;
+  auto arguments = request.getObject("arguments");
+  // This is a reference to the containing variable/scope
+  const auto variablesReference =
+      GetUnsigned(arguments, "variablesReference", 0);
+  const auto name = GetString(arguments, "name");
+  const auto value = GetString(arguments, "value");
+  // Set success to false just in case we don't find the variable by name
+  response.try_emplace("success", false);
 
-    lldb::SBValue variable;
-    int64_t newVariablesReference = 0;
+  lldb::SBValue variable;
+  int64_t newVariablesReference = 0;
 
-    // The "id" is the unique integer ID that is unique within the enclosing
-    // variablesReference. It is optionally added to any "interface Variable"
-    // objects to uniquely identify a variable within an enclosing
-    // variablesReference. It helps to disambiguate between two variables that
-    // have the same name within the same scope since the "setVariables" request
-    // only specifies the variable reference of the enclosing scope/variable, and
-    // the name of the variable. We could have two shadowed variables with the
-    // same name in "Locals" or "Globals". In our case the "id" absolute index
-    // of the variable within the g_vsc.variables list.
-    const auto id_value = GetUnsigned(arguments, "id", UINT64_MAX);
-    if (id_value != UINT64_MAX) {
-        variable = g_vsc.variables.GetValueAtIndex(id_value);
-    } else if (VARREF_IS_SCOPE(variablesReference)) {
-        // variablesReference is one of our scopes, not an actual variable it is
-        // asking for a variable in locals or globals or registers
-        int64_t start_idx = 0;
-        int64_t end_idx = 0;
-        switch (variablesReference) {
-        case VARREF_LOCALS:
-            start_idx = 0;
-            end_idx = start_idx + g_vsc.num_locals;
-            break;
-        case VARREF_GLOBALS:
-            start_idx = g_vsc.num_locals;
-            end_idx = start_idx + g_vsc.num_globals;
-            break;
-        case VARREF_REGS:
-            start_idx = g_vsc.num_locals + g_vsc.num_globals;
-            end_idx = start_idx + g_vsc.num_regs;
-            break;
-        default:
-            break;
-        }
-
-        // Find the variable by name in the correct scope and hope we don't have
-        // multiple variables with the same name. We search backwards because
-        // the list of variables has the top most variables first and variables
-        // in deeper scopes are last. This means we will catch the deepest
-        // variable whose name matches which is probably what the user wants.
-        for (int64_t i = end_idx - 1; i >= start_idx; --i) {
-            auto curr_variable = g_vsc.variables.GetValueAtIndex(i);
-            llvm::StringRef variable_name(curr_variable.GetName());
-            if (variable_name == name) {
-                variable = curr_variable;
-                if (curr_variable.MightHaveChildren())
-                    newVariablesReference = i;
-                break;
-            }
-        }
-    } else {
-        // We have a named item within an actual variable so we need to find it
-        // withing the container variable by name.
-        const int64_t var_idx = VARREF_TO_VARIDX(variablesReference);
-        lldb::SBValue container = g_vsc.variables.GetValueAtIndex(var_idx);
-        variable = container.GetChildMemberWithName(name.data());
-        if (!variable.IsValid()) {
-            if (name.startswith("[")) {
-                llvm::StringRef index_str(name.drop_front(1));
-                uint64_t index = 0;
-                if (!index_str.consumeInteger(0, index)) {
-                    if (index_str == "]")
-                        variable = container.GetChildAtIndex(index);
-                }
-            }
-        }
-
-        // We don't know the index of the variable in our g_vsc.variables
-        if (variable.IsValid()) {
-            if (variable.MightHaveChildren()) {
-                newVariablesReference = VARIDX_TO_VARREF(g_vsc.variables.GetSize());
-                g_vsc.variables.Append(variable);
-            }
-        }
+  // The "id" is the unique integer ID that is unique within the enclosing
+  // variablesReference. It is optionally added to any "interface Variable"
+  // objects to uniquely identify a variable within an enclosing
+  // variablesReference. It helps to disambiguate between two variables that
+  // have the same name within the same scope since the "setVariables" request
+  // only specifies the variable reference of the enclosing scope/variable, and
+  // the name of the variable. We could have two shadowed variables with the
+  // same name in "Locals" or "Globals". In our case the "id" absolute index
+  // of the variable within the g_vsc.variables list.
+  const auto id_value = GetUnsigned(arguments, "id", UINT64_MAX);
+  if (id_value != UINT64_MAX) {
+    variable = g_vsc.variables.GetValueAtIndex(id_value);
+  } else if (VARREF_IS_SCOPE(variablesReference)) {
+    // variablesReference is one of our scopes, not an actual variable it is
+    // asking for a variable in locals or globals or registers
+    int64_t start_idx = 0;
+    int64_t end_idx = 0;
+    switch (variablesReference) {
+    case VARREF_LOCALS:
+      start_idx = 0;
+      end_idx = start_idx + g_vsc.num_locals;
+      break;
+    case VARREF_GLOBALS:
+      start_idx = g_vsc.num_locals;
+      end_idx = start_idx + g_vsc.num_globals;
+      break;
+    case VARREF_REGS:
+      start_idx = g_vsc.num_locals + g_vsc.num_globals;
+      end_idx = start_idx + g_vsc.num_regs;
+      break;
+    default:
+      break;
     }
 
+    // Find the variable by name in the correct scope and hope we don't have
+    // multiple variables with the same name. We search backwards because
+    // the list of variables has the top most variables first and variables
+    // in deeper scopes are last. This means we will catch the deepest
+    // variable whose name matches which is probably what the user wants.
+    for (int64_t i = end_idx - 1; i >= start_idx; --i) {
+      auto curr_variable = g_vsc.variables.GetValueAtIndex(i);
+      llvm::StringRef variable_name(curr_variable.GetName());
+      if (variable_name == name) {
+        variable = curr_variable;
+        if (curr_variable.MightHaveChildren())
+          newVariablesReference = i;
+        break;
+      }
+    }
+  } else {
+    // We have a named item within an actual variable so we need to find it
+    // withing the container variable by name.
+    const int64_t var_idx = VARREF_TO_VARIDX(variablesReference);
+    lldb::SBValue container = g_vsc.variables.GetValueAtIndex(var_idx);
+    variable = container.GetChildMemberWithName(name.data());
+    if (!variable.IsValid()) {
+      if (name.startswith("[")) {
+        llvm::StringRef index_str(name.drop_front(1));
+        uint64_t index = 0;
+        if (!index_str.consumeInteger(0, index)) {
+          if (index_str == "]")
+            variable = container.GetChildAtIndex(index);
+        }
+      }
+    }
+
+    // We don't know the index of the variable in our g_vsc.variables
     if (variable.IsValid()) {
-        lldb::SBError error;
-        bool success = variable.SetValueFromCString(value.data(), error);
-        if (success) {
-            SetValueForKey(variable, body, "value");
-            EmplaceSafeString(body, "type", variable.GetType().GetDisplayTypeName());
-            body.try_emplace("variablesReference", newVariablesReference);
-        } else {
-            EmplaceSafeString(body, "message", std::string(error.GetCString()));
-        }
-        response["success"] = llvm::json::Value(success);
+      if (variable.MightHaveChildren()) {
+        newVariablesReference = VARIDX_TO_VARREF(g_vsc.variables.GetSize());
+        g_vsc.variables.Append(variable);
+      }
     }
+  }
 
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  if (variable.IsValid()) {
+    lldb::SBError error;
+    bool success = variable.SetValueFromCString(value.data(), error);
+    if (success) {
+      SetValueForKey(variable, body, "value");
+      EmplaceSafeString(body, "type", variable.GetType().GetDisplayTypeName());
+      body.try_emplace("variablesReference", newVariablesReference);
+    } else {
+      EmplaceSafeString(body, "message", std::string(error.GetCString()));
+    }
+    response["success"] = llvm::json::Value(success);
+  }
+
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // "VariablesRequest": {
@@ -2806,76 +2803,76 @@ void request_setVariable(const llvm::json::Object &request) {
 //   }]
 // }
 void request_variables(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Array variables;
-    auto arguments = request.getObject("arguments");
-    const auto variablesReference =
-        GetUnsigned(arguments, "variablesReference", 0);
-    const int64_t start = GetSigned(arguments, "start", 0);
-    const int64_t count = GetSigned(arguments, "count", 0);
-    bool hex = false;
-    auto format = arguments->getObject("format");
-    if (format)
-        hex = GetBoolean(format, "hex", false);
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Array variables;
+  auto arguments = request.getObject("arguments");
+  const auto variablesReference =
+      GetUnsigned(arguments, "variablesReference", 0);
+  const int64_t start = GetSigned(arguments, "start", 0);
+  const int64_t count = GetSigned(arguments, "count", 0);
+  bool hex = false;
+  auto format = arguments->getObject("format");
+  if (format)
+    hex = GetBoolean(format, "hex", false);
 
-    if (VARREF_IS_SCOPE(variablesReference)) {
-        // variablesReference is one of our scopes, not an actual variable it is
-        // asking for the list of args, locals or globals.
-        int64_t start_idx = 0;
-        int64_t num_children = 0;
-        switch (variablesReference) {
-        case VARREF_LOCALS:
-            start_idx = start;
-            num_children = g_vsc.num_locals;
-            break;
-        case VARREF_GLOBALS:
-            start_idx = start + g_vsc.num_locals + start;
-            num_children = g_vsc.num_globals;
-            break;
-        case VARREF_REGS:
-            start_idx = start + g_vsc.num_locals + g_vsc.num_globals;
-            num_children = g_vsc.num_regs;
-            break;
-        default:
-            break;
-        }
-        const int64_t end_idx = start_idx + ((count == 0) ? num_children : count);
-        for (auto i = start_idx; i < end_idx; ++i) {
-            lldb::SBValue variable = g_vsc.variables.GetValueAtIndex(i);
-            if (!variable.IsValid())
-                break;
-            variables.emplace_back(
-                CreateVariable(variable, VARIDX_TO_VARREF(i), i, hex));
-        }
-    } else {
-        // We are expanding a variable that has children, so we will return its
-        // children.
-        const int64_t var_idx = VARREF_TO_VARIDX(variablesReference);
-        lldb::SBValue variable = g_vsc.variables.GetValueAtIndex(var_idx);
-        if (variable.IsValid()) {
-            const auto num_children = variable.GetNumChildren();
-            const int64_t end_idx = start + ((count == 0) ? num_children : count);
-            for (auto i = start; i < end_idx; ++i) {
-                lldb::SBValue child = variable.GetChildAtIndex(i);
-                if (!child.IsValid())
-                    break;
-                if (child.MightHaveChildren()) {
-                    const int64_t var_idx = g_vsc.variables.GetSize();
-                    auto childVariablesReferences = VARIDX_TO_VARREF(var_idx);
-                    variables.emplace_back(
-                        CreateVariable(child, childVariablesReferences, var_idx, hex));
-                    g_vsc.variables.Append(child);
-                } else {
-                    variables.emplace_back(CreateVariable(child, 0, INT64_MAX, hex));
-                }
-            }
-        }
+  if (VARREF_IS_SCOPE(variablesReference)) {
+    // variablesReference is one of our scopes, not an actual variable it is
+    // asking for the list of args, locals or globals.
+    int64_t start_idx = 0;
+    int64_t num_children = 0;
+    switch (variablesReference) {
+    case VARREF_LOCALS:
+      start_idx = start;
+      num_children = g_vsc.num_locals;
+      break;
+    case VARREF_GLOBALS:
+      start_idx = start + g_vsc.num_locals + start;
+      num_children = g_vsc.num_globals;
+      break;
+    case VARREF_REGS:
+      start_idx = start + g_vsc.num_locals + g_vsc.num_globals;
+      num_children = g_vsc.num_regs;
+      break;
+    default:
+      break;
     }
-    llvm::json::Object body;
-    body.try_emplace("variables", std::move(variables));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+    const int64_t end_idx = start_idx + ((count == 0) ? num_children : count);
+    for (auto i = start_idx; i < end_idx; ++i) {
+      lldb::SBValue variable = g_vsc.variables.GetValueAtIndex(i);
+      if (!variable.IsValid())
+        break;
+      variables.emplace_back(
+          CreateVariable(variable, VARIDX_TO_VARREF(i), i, hex));
+    }
+  } else {
+    // We are expanding a variable that has children, so we will return its
+    // children.
+    const int64_t var_idx = VARREF_TO_VARIDX(variablesReference);
+    lldb::SBValue variable = g_vsc.variables.GetValueAtIndex(var_idx);
+    if (variable.IsValid()) {
+      const auto num_children = variable.GetNumChildren();
+      const int64_t end_idx = start + ((count == 0) ? num_children : count);
+      for (auto i = start; i < end_idx; ++i) {
+        lldb::SBValue child = variable.GetChildAtIndex(i);
+        if (!child.IsValid())
+          break;
+        if (child.MightHaveChildren()) {
+          const int64_t var_idx = g_vsc.variables.GetSize();
+          auto childVariablesReferences = VARIDX_TO_VARREF(var_idx);
+          variables.emplace_back(
+              CreateVariable(child, childVariablesReferences, var_idx, hex));
+          g_vsc.variables.Append(child);
+        } else {
+          variables.emplace_back(CreateVariable(child, 0, INT64_MAX, hex));
+        }
+      }
+    }
+  }
+  llvm::json::Object body;
+  body.try_emplace("variables", std::move(variables));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 // A request used in testing to get the details on all breakpoints that are
@@ -2883,57 +2880,57 @@ void request_variables(const llvm::json::Object &request) {
 // "setFunctionBreakpoints" requests to verify we have the correct set of
 // breakpoints currently set in LLDB.
 void request__testGetTargetBreakpoints(const llvm::json::Object &request) {
-    llvm::json::Object response;
-    FillResponse(request, response);
-    llvm::json::Array response_breakpoints;
-    for (uint32_t i = 0; g_vsc.target.GetBreakpointAtIndex(i).IsValid(); ++i) {
-        auto bp = g_vsc.target.GetBreakpointAtIndex(i);
-        AppendBreakpoint(bp, response_breakpoints);
-    }
-    llvm::json::Object body;
-    body.try_emplace("breakpoints", std::move(response_breakpoints));
-    response.try_emplace("body", std::move(body));
-    g_vsc.SendJSON(llvm::json::Value(std::move(response)));
+  llvm::json::Object response;
+  FillResponse(request, response);
+  llvm::json::Array response_breakpoints;
+  for (uint32_t i = 0; g_vsc.target.GetBreakpointAtIndex(i).IsValid(); ++i) {
+    auto bp = g_vsc.target.GetBreakpointAtIndex(i);
+    AppendBreakpoint(bp, response_breakpoints);
+  }
+  llvm::json::Object body;
+  body.try_emplace("breakpoints", std::move(response_breakpoints));
+  response.try_emplace("body", std::move(body));
+  g_vsc.SendJSON(llvm::json::Value(std::move(response)));
 }
 
 void RegisterRequestCallbacks() {
-    g_vsc.RegisterRequestCallback("attach", request_attach);
-    g_vsc.RegisterRequestCallback("completions", request_completions);
-    g_vsc.RegisterRequestCallback("continue", request_continue);
-    g_vsc.RegisterRequestCallback("configurationDone", request_configurationDone);
-    g_vsc.RegisterRequestCallback("disconnect", request_disconnect);
-    g_vsc.RegisterRequestCallback("evaluate", request_evaluate);
-    g_vsc.RegisterRequestCallback("exceptionInfo", request_exceptionInfo);
-    g_vsc.RegisterRequestCallback("getCompileUnits", request_getCompileUnits);
-    g_vsc.RegisterRequestCallback("initialize", request_initialize);
-    g_vsc.RegisterRequestCallback("launch", request_launch);
-    g_vsc.RegisterRequestCallback("next", request_next);
-    g_vsc.RegisterRequestCallback("pause", request_pause);
-    g_vsc.RegisterRequestCallback("scopes", request_scopes);
-    g_vsc.RegisterRequestCallback("setBreakpoints", request_setBreakpoints);
-    g_vsc.RegisterRequestCallback("setExceptionBreakpoints",
-                                  request_setExceptionBreakpoints);
-    g_vsc.RegisterRequestCallback("setFunctionBreakpoints",
-                                  request_setFunctionBreakpoints);
-    g_vsc.RegisterRequestCallback("setVariable", request_setVariable);
-    g_vsc.RegisterRequestCallback("source", request_source);
-    g_vsc.RegisterRequestCallback("stackTrace", request_stackTrace);
-    g_vsc.RegisterRequestCallback("stepIn", request_stepIn);
-    g_vsc.RegisterRequestCallback("stepOut", request_stepOut);
-    g_vsc.RegisterRequestCallback("threads", request_threads);
-    g_vsc.RegisterRequestCallback("variables", request_variables);
-    // Testing requests
-    g_vsc.RegisterRequestCallback("_testGetTargetBreakpoints",
-                                  request__testGetTargetBreakpoints);
+  g_vsc.RegisterRequestCallback("attach", request_attach);
+  g_vsc.RegisterRequestCallback("completions", request_completions);
+  g_vsc.RegisterRequestCallback("continue", request_continue);
+  g_vsc.RegisterRequestCallback("configurationDone", request_configurationDone);
+  g_vsc.RegisterRequestCallback("disconnect", request_disconnect);
+  g_vsc.RegisterRequestCallback("evaluate", request_evaluate);
+  g_vsc.RegisterRequestCallback("exceptionInfo", request_exceptionInfo);
+  g_vsc.RegisterRequestCallback("getCompileUnits", request_getCompileUnits);
+  g_vsc.RegisterRequestCallback("initialize", request_initialize);
+  g_vsc.RegisterRequestCallback("launch", request_launch);
+  g_vsc.RegisterRequestCallback("next", request_next);
+  g_vsc.RegisterRequestCallback("pause", request_pause);
+  g_vsc.RegisterRequestCallback("scopes", request_scopes);
+  g_vsc.RegisterRequestCallback("setBreakpoints", request_setBreakpoints);
+  g_vsc.RegisterRequestCallback("setExceptionBreakpoints",
+                                request_setExceptionBreakpoints);
+  g_vsc.RegisterRequestCallback("setFunctionBreakpoints",
+                                request_setFunctionBreakpoints);
+  g_vsc.RegisterRequestCallback("setVariable", request_setVariable);
+  g_vsc.RegisterRequestCallback("source", request_source);
+  g_vsc.RegisterRequestCallback("stackTrace", request_stackTrace);
+  g_vsc.RegisterRequestCallback("stepIn", request_stepIn);
+  g_vsc.RegisterRequestCallback("stepOut", request_stepOut);
+  g_vsc.RegisterRequestCallback("threads", request_threads);
+  g_vsc.RegisterRequestCallback("variables", request_variables);
+  // Testing requests
+  g_vsc.RegisterRequestCallback("_testGetTargetBreakpoints",
+                                request__testGetTargetBreakpoints);
 }
 
 } // anonymous namespace
 
 static void printHelp(LLDBVSCodeOptTable &table, llvm::StringRef tool_name) {
-    std::string usage_str = tool_name.str() + " options";
-    table.PrintHelp(llvm::outs(), usage_str.c_str(), "LLDB VSCode", false);
+  std::string usage_str = tool_name.str() + " options";
+  table.PrintHelp(llvm::outs(), usage_str.c_str(), "LLDB VSCode", false);
 
-    std::string examples = R"___(
+  std::string examples = R"___(
 EXAMPLES:
   The debug adapter can be started in two modes.
 
@@ -2948,74 +2945,74 @@ EXAMPLES:
 
     lldb-vscode -g
   )___";
-    llvm::outs() << examples;
+  llvm::outs() << examples;
 }
 
 int main(int argc, char *argv[]) {
 
-    // Initialize LLDB first before we do anything.
-    lldb::SBDebugger::Initialize();
+  // Initialize LLDB first before we do anything.
+  lldb::SBDebugger::Initialize();
 
-    RegisterRequestCallbacks();
+  RegisterRequestCallbacks();
 
-    int portno = -1;
+  int portno = -1;
 
-    LLDBVSCodeOptTable T;
-    unsigned MAI, MAC;
-    llvm::ArrayRef<const char *> ArgsArr = llvm::makeArrayRef(argv + 1, argc);
-    llvm::opt::InputArgList input_args = T.ParseArgs(ArgsArr, MAI, MAC);
+  LLDBVSCodeOptTable T;
+  unsigned MAI, MAC;
+  llvm::ArrayRef<const char *> ArgsArr = llvm::makeArrayRef(argv + 1, argc);
+  llvm::opt::InputArgList input_args = T.ParseArgs(ArgsArr, MAI, MAC);
 
-    if (input_args.hasArg(OPT_help)) {
-        printHelp(T, llvm::sys::path::filename(argv[0]));
-        return 0;
+  if (input_args.hasArg(OPT_help)) {
+    printHelp(T, llvm::sys::path::filename(argv[0]));
+    return 0;
+  }
+
+  if (auto *arg = input_args.getLastArg(OPT_port)) {
+    auto optarg = arg->getValue();
+    char *remainder;
+    portno = strtol(optarg, &remainder, 0);
+    if (remainder == optarg || *remainder != '\0') {
+      fprintf(stderr, "'%s' is not a valid port number.\n", optarg);
+      exit(1);
     }
-
-    if (auto *arg = input_args.getLastArg(OPT_port)) {
-        auto optarg = arg->getValue();
-        char *remainder;
-        portno = strtol(optarg, &remainder, 0);
-        if (remainder == optarg || *remainder != '\0') {
-            fprintf(stderr, "'%s' is not a valid port number.\n", optarg);
-            exit(1);
-        }
-    }
+  }
 
 #if !defined(_WIN32)
-    if (input_args.hasArg(OPT_wait_for_debugger)) {
-        printf("Paused waiting for debugger to attach (pid = %i)...\n", getpid());
-        pause();
-    }
+  if (input_args.hasArg(OPT_wait_for_debugger)) {
+    printf("Paused waiting for debugger to attach (pid = %i)...\n", getpid());
+    pause();
+  }
 #endif
-    if (portno != -1) {
-        printf("Listening on port %i...\n", portno);
-        SOCKET socket_fd = AcceptConnection(portno);
-        if (socket_fd >= 0) {
-            g_vsc.input.descriptor = StreamDescriptor::from_socket(socket_fd, true);
-            g_vsc.output.descriptor = StreamDescriptor::from_socket(socket_fd, false);
-        } else {
-            exit(1);
-        }
+  if (portno != -1) {
+    printf("Listening on port %i...\n", portno);
+    SOCKET socket_fd = AcceptConnection(portno);
+    if (socket_fd >= 0) {
+      g_vsc.input.descriptor = StreamDescriptor::from_socket(socket_fd, true);
+      g_vsc.output.descriptor = StreamDescriptor::from_socket(socket_fd, false);
     } else {
-        g_vsc.input.descriptor = StreamDescriptor::from_file(fileno(stdin), false);
-        g_vsc.output.descriptor =
-            StreamDescriptor::from_file(fileno(stdout), false);
+      exit(1);
     }
-    uint32_t packet_idx = 0;
-    while (!g_vsc.sent_terminated_event) {
-        llvm::json::Object object;
-        lldb_vscode::PacketStatus status = g_vsc.GetNextObject(object);
-        if (status == lldb_vscode::PacketStatus::EndOfFile)
-            break;
-        if (status != lldb_vscode::PacketStatus::Success)
-            return 1; // Fatal error
+  } else {
+    g_vsc.input.descriptor = StreamDescriptor::from_file(fileno(stdin), false);
+    g_vsc.output.descriptor =
+        StreamDescriptor::from_file(fileno(stdout), false);
+  }
+  uint32_t packet_idx = 0;
+  while (!g_vsc.sent_terminated_event) {
+    llvm::json::Object object;
+    lldb_vscode::PacketStatus status = g_vsc.GetNextObject(object);
+    if (status == lldb_vscode::PacketStatus::EndOfFile)
+      break;
+    if (status != lldb_vscode::PacketStatus::Success)
+      return 1; // Fatal error
 
-        if (!g_vsc.HandleObject(object))
-            return 1;
-        ++packet_idx;
-    }
+    if (!g_vsc.HandleObject(object))
+      return 1;
+    ++packet_idx;
+  }
 
-    // We must terminate the debugger in a thread before the C++ destructor
-    // chain messes everything up.
-    lldb::SBDebugger::Terminate();
-    return 0;
+  // We must terminate the debugger in a thread before the C++ destructor
+  // chain messes everything up.
+  lldb::SBDebugger::Terminate();
+  return 0;
 }

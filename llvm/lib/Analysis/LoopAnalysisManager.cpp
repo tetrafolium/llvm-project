@@ -26,128 +26,128 @@ template class AllAnalysesOn<Loop>;
 template class AnalysisManager<Loop, LoopStandardAnalysisResults &>;
 template class InnerAnalysisManagerProxy<LoopAnalysisManager, Function>;
 template class OuterAnalysisManagerProxy<FunctionAnalysisManager, Loop,
-        LoopStandardAnalysisResults &>;
+                                         LoopStandardAnalysisResults &>;
 
 bool LoopAnalysisManagerFunctionProxy::Result::invalidate(
     Function &F, const PreservedAnalyses &PA,
     FunctionAnalysisManager::Invalidator &Inv) {
-    // First compute the sequence of IR units covered by this proxy. We will want
-    // to visit this in postorder, but because this is a tree structure we can do
-    // this by building a preorder sequence and walking it backwards. We also
-    // want siblings in forward program order to match the LoopPassManager so we
-    // get the preorder with siblings reversed.
-    SmallVector<Loop *, 4> PreOrderLoops = LI->getLoopsInReverseSiblingPreorder();
+  // First compute the sequence of IR units covered by this proxy. We will want
+  // to visit this in postorder, but because this is a tree structure we can do
+  // this by building a preorder sequence and walking it backwards. We also
+  // want siblings in forward program order to match the LoopPassManager so we
+  // get the preorder with siblings reversed.
+  SmallVector<Loop *, 4> PreOrderLoops = LI->getLoopsInReverseSiblingPreorder();
 
-    // If this proxy or the loop info is going to be invalidated, we also need
-    // to clear all the keys coming from that analysis. We also completely blow
-    // away the loop analyses if any of the standard analyses provided by the
-    // loop pass manager go away so that loop analyses can freely use these
-    // without worrying about declaring dependencies on them etc.
-    // FIXME: It isn't clear if this is the right tradeoff. We could instead make
-    // loop analyses declare any dependencies on these and use the more general
-    // invalidation logic below to act on that.
-    auto PAC = PA.getChecker<LoopAnalysisManagerFunctionProxy>();
-    bool invalidateMemorySSAAnalysis = false;
-    if (MSSAUsed)
-        invalidateMemorySSAAnalysis = Inv.invalidate<MemorySSAAnalysis>(F, PA);
-    if (!(PAC.preserved() || PAC.preservedSet<AllAnalysesOn<Function>>()) ||
-            Inv.invalidate<AAManager>(F, PA) ||
-            Inv.invalidate<AssumptionAnalysis>(F, PA) ||
-            Inv.invalidate<DominatorTreeAnalysis>(F, PA) ||
-            Inv.invalidate<LoopAnalysis>(F, PA) ||
-            Inv.invalidate<ScalarEvolutionAnalysis>(F, PA) ||
-            invalidateMemorySSAAnalysis) {
-        // Note that the LoopInfo may be stale at this point, however the loop
-        // objects themselves remain the only viable keys that could be in the
-        // analysis manager's cache. So we just walk the keys and forcibly clear
-        // those results. Note that the order doesn't matter here as this will just
-        // directly destroy the results without calling methods on them.
-        for (Loop *L : PreOrderLoops) {
-            // NB! `L` may not be in a good enough state to run Loop::getName.
-            InnerAM->clear(*L, "<possibly invalidated loop>");
-        }
-
-        // We also need to null out the inner AM so that when the object gets
-        // destroyed as invalid we don't try to clear the inner AM again. At that
-        // point we won't be able to reliably walk the loops for this function and
-        // only clear results associated with those loops the way we do here.
-        // FIXME: Making InnerAM null at this point isn't very nice. Most analyses
-        // try to remain valid during invalidation. Maybe we should add an
-        // `IsClean` flag?
-        InnerAM = nullptr;
-
-        // Now return true to indicate this *is* invalid and a fresh proxy result
-        // needs to be built. This is especially important given the null InnerAM.
-        return true;
+  // If this proxy or the loop info is going to be invalidated, we also need
+  // to clear all the keys coming from that analysis. We also completely blow
+  // away the loop analyses if any of the standard analyses provided by the
+  // loop pass manager go away so that loop analyses can freely use these
+  // without worrying about declaring dependencies on them etc.
+  // FIXME: It isn't clear if this is the right tradeoff. We could instead make
+  // loop analyses declare any dependencies on these and use the more general
+  // invalidation logic below to act on that.
+  auto PAC = PA.getChecker<LoopAnalysisManagerFunctionProxy>();
+  bool invalidateMemorySSAAnalysis = false;
+  if (MSSAUsed)
+    invalidateMemorySSAAnalysis = Inv.invalidate<MemorySSAAnalysis>(F, PA);
+  if (!(PAC.preserved() || PAC.preservedSet<AllAnalysesOn<Function>>()) ||
+      Inv.invalidate<AAManager>(F, PA) ||
+      Inv.invalidate<AssumptionAnalysis>(F, PA) ||
+      Inv.invalidate<DominatorTreeAnalysis>(F, PA) ||
+      Inv.invalidate<LoopAnalysis>(F, PA) ||
+      Inv.invalidate<ScalarEvolutionAnalysis>(F, PA) ||
+      invalidateMemorySSAAnalysis) {
+    // Note that the LoopInfo may be stale at this point, however the loop
+    // objects themselves remain the only viable keys that could be in the
+    // analysis manager's cache. So we just walk the keys and forcibly clear
+    // those results. Note that the order doesn't matter here as this will just
+    // directly destroy the results without calling methods on them.
+    for (Loop *L : PreOrderLoops) {
+      // NB! `L` may not be in a good enough state to run Loop::getName.
+      InnerAM->clear(*L, "<possibly invalidated loop>");
     }
 
-    // Directly check if the relevant set is preserved so we can short circuit
-    // invalidating loops.
-    bool AreLoopAnalysesPreserved =
-        PA.allAnalysesInSetPreserved<AllAnalysesOn<Loop>>();
+    // We also need to null out the inner AM so that when the object gets
+    // destroyed as invalid we don't try to clear the inner AM again. At that
+    // point we won't be able to reliably walk the loops for this function and
+    // only clear results associated with those loops the way we do here.
+    // FIXME: Making InnerAM null at this point isn't very nice. Most analyses
+    // try to remain valid during invalidation. Maybe we should add an
+    // `IsClean` flag?
+    InnerAM = nullptr;
 
-    // Since we have a valid LoopInfo we can actually leave the cached results in
-    // the analysis manager associated with the Loop keys, but we need to
-    // propagate any necessary invalidation logic into them. We'd like to
-    // invalidate things in roughly the same order as they were put into the
-    // cache and so we walk the preorder list in reverse to form a valid
-    // postorder.
-    for (Loop *L : reverse(PreOrderLoops)) {
-        Optional<PreservedAnalyses> InnerPA;
+    // Now return true to indicate this *is* invalid and a fresh proxy result
+    // needs to be built. This is especially important given the null InnerAM.
+    return true;
+  }
 
-        // Check to see whether the preserved set needs to be adjusted based on
-        // function-level analysis invalidation triggering deferred invalidation
-        // for this loop.
-        if (auto *OuterProxy =
-                    InnerAM->getCachedResult<FunctionAnalysisManagerLoopProxy>(*L))
-            for (const auto &OuterInvalidationPair :
-                    OuterProxy->getOuterInvalidations()) {
-                AnalysisKey *OuterAnalysisID = OuterInvalidationPair.first;
-                const auto &InnerAnalysisIDs = OuterInvalidationPair.second;
-                if (Inv.invalidate(OuterAnalysisID, F, PA)) {
-                    if (!InnerPA)
-                        InnerPA = PA;
-                    for (AnalysisKey *InnerAnalysisID : InnerAnalysisIDs)
-                        InnerPA->abandon(InnerAnalysisID);
-                }
-            }
+  // Directly check if the relevant set is preserved so we can short circuit
+  // invalidating loops.
+  bool AreLoopAnalysesPreserved =
+      PA.allAnalysesInSetPreserved<AllAnalysesOn<Loop>>();
 
-        // Check if we needed a custom PA set. If so we'll need to run the inner
-        // invalidation.
-        if (InnerPA) {
-            InnerAM->invalidate(*L, *InnerPA);
-            continue;
+  // Since we have a valid LoopInfo we can actually leave the cached results in
+  // the analysis manager associated with the Loop keys, but we need to
+  // propagate any necessary invalidation logic into them. We'd like to
+  // invalidate things in roughly the same order as they were put into the
+  // cache and so we walk the preorder list in reverse to form a valid
+  // postorder.
+  for (Loop *L : reverse(PreOrderLoops)) {
+    Optional<PreservedAnalyses> InnerPA;
+
+    // Check to see whether the preserved set needs to be adjusted based on
+    // function-level analysis invalidation triggering deferred invalidation
+    // for this loop.
+    if (auto *OuterProxy =
+            InnerAM->getCachedResult<FunctionAnalysisManagerLoopProxy>(*L))
+      for (const auto &OuterInvalidationPair :
+           OuterProxy->getOuterInvalidations()) {
+        AnalysisKey *OuterAnalysisID = OuterInvalidationPair.first;
+        const auto &InnerAnalysisIDs = OuterInvalidationPair.second;
+        if (Inv.invalidate(OuterAnalysisID, F, PA)) {
+          if (!InnerPA)
+            InnerPA = PA;
+          for (AnalysisKey *InnerAnalysisID : InnerAnalysisIDs)
+            InnerPA->abandon(InnerAnalysisID);
         }
+      }
 
-        // Otherwise we only need to do invalidation if the original PA set didn't
-        // preserve all Loop analyses.
-        if (!AreLoopAnalysesPreserved)
-            InnerAM->invalidate(*L, PA);
+    // Check if we needed a custom PA set. If so we'll need to run the inner
+    // invalidation.
+    if (InnerPA) {
+      InnerAM->invalidate(*L, *InnerPA);
+      continue;
     }
 
-    // Return false to indicate that this result is still a valid proxy.
-    return false;
+    // Otherwise we only need to do invalidation if the original PA set didn't
+    // preserve all Loop analyses.
+    if (!AreLoopAnalysesPreserved)
+      InnerAM->invalidate(*L, PA);
+  }
+
+  // Return false to indicate that this result is still a valid proxy.
+  return false;
 }
 
 template <>
 LoopAnalysisManagerFunctionProxy::Result
 LoopAnalysisManagerFunctionProxy::run(Function &F,
                                       FunctionAnalysisManager &AM) {
-    return Result(*InnerAM, AM.getResult<LoopAnalysis>(F));
+  return Result(*InnerAM, AM.getResult<LoopAnalysis>(F));
 }
-}
+} // namespace llvm
 
 PreservedAnalyses llvm::getLoopPassPreservedAnalyses() {
-    PreservedAnalyses PA;
-    PA.preserve<DominatorTreeAnalysis>();
-    PA.preserve<LoopAnalysis>();
-    PA.preserve<LoopAnalysisManagerFunctionProxy>();
-    PA.preserve<ScalarEvolutionAnalysis>();
-    // FIXME: What we really want to do here is preserve an AA category, but that
-    // concept doesn't exist yet.
-    PA.preserve<AAManager>();
-    PA.preserve<BasicAA>();
-    PA.preserve<GlobalsAA>();
-    PA.preserve<SCEVAA>();
-    return PA;
+  PreservedAnalyses PA;
+  PA.preserve<DominatorTreeAnalysis>();
+  PA.preserve<LoopAnalysis>();
+  PA.preserve<LoopAnalysisManagerFunctionProxy>();
+  PA.preserve<ScalarEvolutionAnalysis>();
+  // FIXME: What we really want to do here is preserve an AA category, but that
+  // concept doesn't exist yet.
+  PA.preserve<AAManager>();
+  PA.preserve<BasicAA>();
+  PA.preserve<GlobalsAA>();
+  PA.preserve<SCEVAA>();
+  return PA;
 }

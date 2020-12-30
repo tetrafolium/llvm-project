@@ -45,53 +45,49 @@ namespace llvm {
 namespace mca {
 
 class SchedulerStatistics final : public View {
-    const llvm::MCSchedModel &SM;
-    unsigned LQResourceID;
-    unsigned SQResourceID;
+  const llvm::MCSchedModel &SM;
+  unsigned LQResourceID;
+  unsigned SQResourceID;
 
-    unsigned NumIssued;
-    unsigned NumCycles;
+  unsigned NumIssued;
+  unsigned NumCycles;
 
-    unsigned MostRecentLoadDispatched;
-    unsigned MostRecentStoreDispatched;
+  unsigned MostRecentLoadDispatched;
+  unsigned MostRecentStoreDispatched;
 
-    // Tracks the usage of a scheduler's queue.
-    struct BufferUsage {
-        unsigned SlotsInUse;
-        unsigned MaxUsedSlots;
-        uint64_t CumulativeNumUsedSlots;
-    };
+  // Tracks the usage of a scheduler's queue.
+  struct BufferUsage {
+    unsigned SlotsInUse;
+    unsigned MaxUsedSlots;
+    uint64_t CumulativeNumUsedSlots;
+  };
 
-    using Histogram = std::map<unsigned, unsigned>;
-    Histogram IssueWidthPerCycle;
+  using Histogram = std::map<unsigned, unsigned>;
+  Histogram IssueWidthPerCycle;
 
-    std::vector<BufferUsage> Usage;
+  std::vector<BufferUsage> Usage;
 
-    void updateHistograms();
-    void printSchedulerStats(llvm::raw_ostream &OS) const;
-    void printSchedulerUsage(llvm::raw_ostream &OS) const;
+  void updateHistograms();
+  void printSchedulerStats(llvm::raw_ostream &OS) const;
+  void printSchedulerUsage(llvm::raw_ostream &OS) const;
 
 public:
-    SchedulerStatistics(const llvm::MCSubtargetInfo &STI);
-    void onEvent(const HWInstructionEvent &Event) override;
-    void onCycleBegin() override {
-        NumCycles++;
-    }
-    void onCycleEnd() override {
-        updateHistograms();
-    }
+  SchedulerStatistics(const llvm::MCSubtargetInfo &STI);
+  void onEvent(const HWInstructionEvent &Event) override;
+  void onCycleBegin() override { NumCycles++; }
+  void onCycleEnd() override { updateHistograms(); }
 
-    // Increases the number of used scheduler queue slots of every buffered
-    // resource in the Buffers set.
-    void onReservedBuffers(const InstRef &IR,
-                           llvm::ArrayRef<unsigned> Buffers) override;
+  // Increases the number of used scheduler queue slots of every buffered
+  // resource in the Buffers set.
+  void onReservedBuffers(const InstRef &IR,
+                         llvm::ArrayRef<unsigned> Buffers) override;
 
-    // Decreases by one the number of used scheduler queue slots of every
-    // buffered resource in the Buffers set.
-    void onReleasedBuffers(const InstRef &IR,
-                           llvm::ArrayRef<unsigned> Buffers) override;
+  // Decreases by one the number of used scheduler queue slots of every
+  // buffered resource in the Buffers set.
+  void onReleasedBuffers(const InstRef &IR,
+                         llvm::ArrayRef<unsigned> Buffers) override;
 
-    void printView(llvm::raw_ostream &OS) const override;
+  void printView(llvm::raw_ostream &OS) const override;
 };
 } // namespace mca
 } // namespace llvm

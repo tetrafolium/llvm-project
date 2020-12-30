@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 float LLVM_LIBC_ENTRYPOINT(frexpf)(float x, int *exp) {
-    return fputil::frexp(x, *exp);
+  return fputil::frexp(x, *exp);
 }
 
 } // namespace __llvm_libc

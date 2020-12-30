@@ -34,44 +34,42 @@ char LazyBranchProbabilityInfoPass::ID = 0;
 
 LazyBranchProbabilityInfoPass::LazyBranchProbabilityInfoPass()
     : FunctionPass(ID) {
-    initializeLazyBranchProbabilityInfoPassPass(*PassRegistry::getPassRegistry());
+  initializeLazyBranchProbabilityInfoPassPass(*PassRegistry::getPassRegistry());
 }
 
 void LazyBranchProbabilityInfoPass::print(raw_ostream &OS,
-        const Module *) const {
-    LBPI->getCalculated().print(OS);
+                                          const Module *) const {
+  LBPI->getCalculated().print(OS);
 }
 
 void LazyBranchProbabilityInfoPass::getAnalysisUsage(AnalysisUsage &AU) const {
-    // We require DT so it's available when LI is available. The LI updating code
-    // asserts that DT is also present so if we don't make sure that we have DT
-    // here, that assert will trigger.
-    AU.addRequired<DominatorTreeWrapperPass>();
-    AU.addRequired<LoopInfoWrapperPass>();
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-    AU.setPreservesAll();
+  // We require DT so it's available when LI is available. The LI updating code
+  // asserts that DT is also present so if we don't make sure that we have DT
+  // here, that assert will trigger.
+  AU.addRequired<DominatorTreeWrapperPass>();
+  AU.addRequired<LoopInfoWrapperPass>();
+  AU.addRequired<TargetLibraryInfoWrapperPass>();
+  AU.setPreservesAll();
 }
 
-void LazyBranchProbabilityInfoPass::releaseMemory() {
-    LBPI.reset();
-}
+void LazyBranchProbabilityInfoPass::releaseMemory() { LBPI.reset(); }
 
 bool LazyBranchProbabilityInfoPass::runOnFunction(Function &F) {
-    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-    TargetLibraryInfo &TLI =
-        getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-    LBPI = std::make_unique<LazyBranchProbabilityInfo>(&F, &LI, &TLI);
-    return false;
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+  TargetLibraryInfo &TLI =
+      getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+  LBPI = std::make_unique<LazyBranchProbabilityInfo>(&F, &LI, &TLI);
+  return false;
 }
 
 void LazyBranchProbabilityInfoPass::getLazyBPIAnalysisUsage(AnalysisUsage &AU) {
-    AU.addRequired<LazyBranchProbabilityInfoPass>();
-    AU.addRequired<LoopInfoWrapperPass>();
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
+  AU.addRequired<LazyBranchProbabilityInfoPass>();
+  AU.addRequired<LoopInfoWrapperPass>();
+  AU.addRequired<TargetLibraryInfoWrapperPass>();
 }
 
 void llvm::initializeLazyBPIPassPass(PassRegistry &Registry) {
-    INITIALIZE_PASS_DEPENDENCY(LazyBranchProbabilityInfoPass);
-    INITIALIZE_PASS_DEPENDENCY(LoopInfoWrapperPass);
-    INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass);
+  INITIALIZE_PASS_DEPENDENCY(LazyBranchProbabilityInfoPass);
+  INITIALIZE_PASS_DEPENDENCY(LoopInfoWrapperPass);
+  INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass);
 }

@@ -31,12 +31,12 @@ bool PluginInitialize(lldb::SBDebugger debugger);
 bool lldb::PluginInitialize(lldb::SBDebugger debugger) {
 
 #ifdef BUILD_INTEL_PT
-    PTPluginInitialize(debugger);
+  PTPluginInitialize(debugger);
 #endif
 
 #ifdef BUILD_INTEL_MPX
-    MPXPluginInitialize(debugger);
+  MPXPluginInitialize(debugger);
 #endif
 
-    return true;
+  return true;
 }

@@ -33,18 +33,18 @@ using namespace clang;
 
 class DirectoryWatcherWindows : public clang::DirectoryWatcher {
 public:
-    ~DirectoryWatcherWindows() override { }
-    void InitialScan() { }
-    void EventReceivingLoop() { }
-    void StopWork() { }
+  ~DirectoryWatcherWindows() override {}
+  void InitialScan() {}
+  void EventReceivingLoop() {}
+  void StopWork() {}
 };
 } // namespace
 
 llvm::Expected<std::unique_ptr<DirectoryWatcher>>
-        clang::DirectoryWatcher::create(
-            StringRef Path,
-            std::function<void(llvm::ArrayRef<DirectoryWatcher::Event>, bool)> Receiver,
-bool WaitForInitialSync) {
-    return llvm::Expected<std::unique_ptr<DirectoryWatcher>>(
-               llvm::errorCodeToError(std::make_error_code(std::errc::not_supported)));
+clang::DirectoryWatcher::create(
+    StringRef Path,
+    std::function<void(llvm::ArrayRef<DirectoryWatcher::Event>, bool)> Receiver,
+    bool WaitForInitialSync) {
+  return llvm::Expected<std::unique_ptr<DirectoryWatcher>>(
+      llvm::errorCodeToError(std::make_error_code(std::errc::not_supported)));
 }

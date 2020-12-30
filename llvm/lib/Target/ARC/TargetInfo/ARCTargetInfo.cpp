@@ -12,10 +12,10 @@
 using namespace llvm;
 
 Target &llvm::getTheARCTarget() {
-    static Target TheARCTarget;
-    return TheARCTarget;
+  static Target TheARCTarget;
+  return TheARCTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeARCTargetInfo() {
-    RegisterTarget<Triple::arc> X(getTheARCTarget(), "arc", "ARC", "ARC");
+  RegisterTarget<Triple::arc> X(getTheARCTarget(), "arc", "ARC", "ARC");
 }

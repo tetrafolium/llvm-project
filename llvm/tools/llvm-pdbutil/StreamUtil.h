@@ -19,53 +19,45 @@ namespace llvm {
 namespace pdb {
 class PDBFile;
 enum class StreamPurpose {
-    NamedStream,
-    ModuleStream,
-    Symbols,
-    PDB,
-    DBI,
-    TPI,
-    IPI,
-    GlobalHash,
-    PublicHash,
-    TpiHash,
-    IpiHash,
-    Other
+  NamedStream,
+  ModuleStream,
+  Symbols,
+  PDB,
+  DBI,
+  TPI,
+  IPI,
+  GlobalHash,
+  PublicHash,
+  TpiHash,
+  IpiHash,
+  Other
 };
 
 struct StreamInfo {
 public:
-    StreamInfo() {}
+  StreamInfo() {}
 
-    uint32_t getModuleIndex() const {
-        return *ModuleIndex;
-    }
-    StreamPurpose getPurpose() const {
-        return Purpose;
-    }
-    StringRef getShortName() const {
-        return Name;
-    }
-    uint32_t getStreamIndex() const {
-        return StreamIndex;
-    }
-    std::string getLongName() const;
+  uint32_t getModuleIndex() const { return *ModuleIndex; }
+  StreamPurpose getPurpose() const { return Purpose; }
+  StringRef getShortName() const { return Name; }
+  uint32_t getStreamIndex() const { return StreamIndex; }
+  std::string getLongName() const;
 
-    static StreamInfo createStream(StreamPurpose Purpose, StringRef Name,
-                                   uint32_t StreamIndex);
-    static StreamInfo createModuleStream(StringRef Module, uint32_t StreamIndex,
-                                         uint32_t Modi);
+  static StreamInfo createStream(StreamPurpose Purpose, StringRef Name,
+                                 uint32_t StreamIndex);
+  static StreamInfo createModuleStream(StringRef Module, uint32_t StreamIndex,
+                                       uint32_t Modi);
 
 private:
-    StreamPurpose Purpose;
-    uint32_t StreamIndex;
-    std::string Name;
-    Optional<uint32_t> ModuleIndex;
+  StreamPurpose Purpose;
+  uint32_t StreamIndex;
+  std::string Name;
+  Optional<uint32_t> ModuleIndex;
 };
 
 void discoverStreamPurposes(PDBFile &File,
                             SmallVectorImpl<StreamInfo> &Streams);
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

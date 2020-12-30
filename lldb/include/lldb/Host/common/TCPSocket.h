@@ -16,45 +16,45 @@
 namespace lldb_private {
 class TCPSocket : public Socket {
 public:
-    TCPSocket(bool should_close, bool child_processes_inherit);
-    TCPSocket(NativeSocket socket, bool should_close,
-              bool child_processes_inherit);
-    ~TCPSocket() override;
+  TCPSocket(bool should_close, bool child_processes_inherit);
+  TCPSocket(NativeSocket socket, bool should_close,
+            bool child_processes_inherit);
+  ~TCPSocket() override;
 
-    // returns port number or 0 if error
-    uint16_t GetLocalPortNumber() const;
+  // returns port number or 0 if error
+  uint16_t GetLocalPortNumber() const;
 
-    // returns ip address string or empty string if error
-    std::string GetLocalIPAddress() const;
+  // returns ip address string or empty string if error
+  std::string GetLocalIPAddress() const;
 
-    // must be connected
-    // returns port number or 0 if error
-    uint16_t GetRemotePortNumber() const;
+  // must be connected
+  // returns port number or 0 if error
+  uint16_t GetRemotePortNumber() const;
 
-    // must be connected
-    // returns ip address string or empty string if error
-    std::string GetRemoteIPAddress() const;
+  // must be connected
+  // returns ip address string or empty string if error
+  std::string GetRemoteIPAddress() const;
 
-    int SetOptionNoDelay();
-    int SetOptionReuseAddress();
+  int SetOptionNoDelay();
+  int SetOptionReuseAddress();
 
-    Status Connect(llvm::StringRef name) override;
-    Status Listen(llvm::StringRef name, int backlog) override;
-    Status Accept(Socket *&conn_socket) override;
+  Status Connect(llvm::StringRef name) override;
+  Status Listen(llvm::StringRef name, int backlog) override;
+  Status Accept(Socket *&conn_socket) override;
 
-    Status CreateSocket(int domain);
+  Status CreateSocket(int domain);
 
-    bool IsValid() const override;
+  bool IsValid() const override;
 
-    std::string GetRemoteConnectionURI() const override;
+  std::string GetRemoteConnectionURI() const override;
 
 private:
-    TCPSocket(NativeSocket socket, const TCPSocket &listen_socket);
+  TCPSocket(NativeSocket socket, const TCPSocket &listen_socket);
 
-    void CloseListenSockets();
+  void CloseListenSockets();
 
-    std::map<int, SocketAddress> m_listen_sockets;
+  std::map<int, SocketAddress> m_listen_sockets;
 };
-}
+} // namespace lldb_private
 
 #endif // LLDB_HOST_COMMON_TCPSOCKET_H

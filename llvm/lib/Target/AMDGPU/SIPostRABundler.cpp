@@ -29,31 +29,28 @@ namespace {
 
 class SIPostRABundler : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
 public:
-    SIPostRABundler() : MachineFunctionPass(ID) {
-        initializeSIPostRABundlerPass(*PassRegistry::getPassRegistry());
-    }
+  SIPostRABundler() : MachineFunctionPass(ID) {
+    initializeSIPostRABundlerPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    StringRef getPassName() const override {
-        return "SI post-RA bundler";
-    }
+  StringRef getPassName() const override { return "SI post-RA bundler"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
 private:
-    const SIRegisterInfo *TRI;
+  const SIRegisterInfo *TRI;
 
-    SmallSet<Register, 16> Defs;
+  SmallSet<Register, 16> Defs;
 
-    bool isDependentLoad(const MachineInstr &MI) const;
-
+  bool isDependentLoad(const MachineInstr &MI) const;
 };
 
 } // End anonymous namespace.
@@ -65,75 +62,75 @@ char SIPostRABundler::ID = 0;
 char &llvm::SIPostRABundlerID = SIPostRABundler::ID;
 
 FunctionPass *llvm::createSIPostRABundlerPass() {
-    return new SIPostRABundler();
+  return new SIPostRABundler();
 }
 
 bool SIPostRABundler::isDependentLoad(const MachineInstr &MI) const {
-    if (!MI.mayLoad())
-        return false;
-
-    for (const MachineOperand &Op : MI.explicit_operands()) {
-        if (!Op.isReg())
-            continue;
-        Register Reg = Op.getReg();
-        for (Register Def : Defs)
-            if (TRI->regsOverlap(Reg, Def))
-                return true;
-    }
-
+  if (!MI.mayLoad())
     return false;
+
+  for (const MachineOperand &Op : MI.explicit_operands()) {
+    if (!Op.isReg())
+      continue;
+    Register Reg = Op.getReg();
+    for (Register Def : Defs)
+      if (TRI->regsOverlap(Reg, Def))
+        return true;
+  }
+
+  return false;
 }
 
 bool SIPostRABundler::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    TRI = MF.getSubtarget<GCNSubtarget>().getRegisterInfo();
-    bool Changed = false;
-    const uint64_t MemFlags = SIInstrFlags::MTBUF | SIInstrFlags::MUBUF |
-                              SIInstrFlags::SMRD | SIInstrFlags::DS |
-                              SIInstrFlags::FLAT | SIInstrFlags::MIMG;
+  TRI = MF.getSubtarget<GCNSubtarget>().getRegisterInfo();
+  bool Changed = false;
+  const uint64_t MemFlags = SIInstrFlags::MTBUF | SIInstrFlags::MUBUF |
+                            SIInstrFlags::SMRD | SIInstrFlags::DS |
+                            SIInstrFlags::FLAT | SIInstrFlags::MIMG;
 
-    for (MachineBasicBlock &MBB : MF) {
-        MachineBasicBlock::instr_iterator Next;
-        MachineBasicBlock::instr_iterator B = MBB.instr_begin();
-        MachineBasicBlock::instr_iterator E = MBB.instr_end();
-        for (auto I = B; I != E; I = Next) {
-            Next = std::next(I);
+  for (MachineBasicBlock &MBB : MF) {
+    MachineBasicBlock::instr_iterator Next;
+    MachineBasicBlock::instr_iterator B = MBB.instr_begin();
+    MachineBasicBlock::instr_iterator E = MBB.instr_end();
+    for (auto I = B; I != E; I = Next) {
+      Next = std::next(I);
 
-            const uint64_t IMemFlags = I->getDesc().TSFlags & MemFlags;
+      const uint64_t IMemFlags = I->getDesc().TSFlags & MemFlags;
 
-            if (IMemFlags == 0 || I->isBundled() || !I->mayLoadOrStore() ||
-                    B->mayLoad() != I->mayLoad() || B->mayStore() != I->mayStore() ||
-                    ((B->getDesc().TSFlags & MemFlags) != IMemFlags) ||
-                    isDependentLoad(*I)) {
+      if (IMemFlags == 0 || I->isBundled() || !I->mayLoadOrStore() ||
+          B->mayLoad() != I->mayLoad() || B->mayStore() != I->mayStore() ||
+          ((B->getDesc().TSFlags & MemFlags) != IMemFlags) ||
+          isDependentLoad(*I)) {
 
-                if (B != I) {
-                    if (std::next(B) != I) {
-                        finalizeBundle(MBB, B, I);
-                        Changed = true;
-                    }
-                    Next = I;
-                }
-
-                B = Next;
-                Defs.clear();
-                continue;
-            }
-
-            if (I->getNumExplicitDefs() == 0)
-                continue;
-
-            Defs.insert(I->defs().begin()->getReg());
-        }
-
-        if (B != E && std::next(B) != E) {
-            finalizeBundle(MBB, B, E);
+        if (B != I) {
+          if (std::next(B) != I) {
+            finalizeBundle(MBB, B, I);
             Changed = true;
+          }
+          Next = I;
         }
 
+        B = Next;
         Defs.clear();
+        continue;
+      }
+
+      if (I->getNumExplicitDefs() == 0)
+        continue;
+
+      Defs.insert(I->defs().begin()->getReg());
     }
 
-    return Changed;
+    if (B != E && std::next(B) != E) {
+      finalizeBundle(MBB, B, E);
+      Changed = true;
+    }
+
+    Defs.clear();
+  }
+
+  return Changed;
 }

@@ -16,8 +16,8 @@ namespace llvm {
 
 class LoopVersioningLICMPass : public PassInfoMixin<LoopVersioningLICMPass> {
 public:
-    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                          LoopStandardAnalysisResults &LAR, LPMUpdater &U);
+  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                        LoopStandardAnalysisResults &LAR, LPMUpdater &U);
 };
 
 } // namespace llvm

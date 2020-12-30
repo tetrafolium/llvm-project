@@ -23,22 +23,22 @@
 
 namespace llvm {
 template <> struct format_provider<pdb::PdbRaw_ImplVer> {
-    static void format(const pdb::PdbRaw_ImplVer &V, llvm::raw_ostream &Stream,
-                       StringRef Style) {
-        switch (V) {
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC110, "VC110")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC140, "VC140")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC2, "VC2")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC4, "VC4")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC41, "VC41")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC50, "VC50")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC70, "VC70")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC70Dep, "VC70Dep")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC80, "VC80")
-            FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC98, "VC98")
-        }
+  static void format(const pdb::PdbRaw_ImplVer &V, llvm::raw_ostream &Stream,
+                     StringRef Style) {
+    switch (V) {
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC110, "VC110")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC140, "VC140")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC2, "VC2")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC4, "VC4")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC41, "VC41")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC50, "VC50")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC70, "VC70")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC70Dep, "VC70Dep")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC80, "VC80")
+      FORMAT_CASE(pdb::PdbRaw_ImplVer::PdbImplVC98, "VC98")
     }
+  }
 };
-}
+} // namespace llvm
 
 #endif

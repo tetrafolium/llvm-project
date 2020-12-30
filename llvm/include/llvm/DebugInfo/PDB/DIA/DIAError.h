@@ -15,12 +15,12 @@
 namespace llvm {
 namespace pdb {
 enum class dia_error_code {
-    unspecified = 1,
-    could_not_create_impl,
-    invalid_file_format,
-    invalid_parameter,
-    already_loaded,
-    debug_info_mismatch,
+  unspecified = 1,
+  could_not_create_impl,
+  invalid_file_format,
+  invalid_parameter,
+  already_loaded,
+  debug_info_mismatch,
 };
 } // namespace pdb
 } // namespace llvm
@@ -35,15 +35,15 @@ namespace pdb {
 const std::error_category &DIAErrCategory();
 
 inline std::error_code make_error_code(dia_error_code E) {
-    return std::error_code(static_cast<int>(E), DIAErrCategory());
+  return std::error_code(static_cast<int>(E), DIAErrCategory());
 }
 
 /// Base class for errors originating in DIA SDK, e.g. COM calls
 class DIAError : public ErrorInfo<DIAError, StringError> {
 public:
-    using ErrorInfo<DIAError, StringError>::ErrorInfo;
-    DIAError(const Twine &S) : ErrorInfo(S, dia_error_code::unspecified) {}
-    static char ID;
+  using ErrorInfo<DIAError, StringError>::ErrorInfo;
+  DIAError(const Twine &S) : ErrorInfo(S, dia_error_code::unspecified) {}
+  static char ID;
 };
 } // namespace pdb
 } // namespace llvm

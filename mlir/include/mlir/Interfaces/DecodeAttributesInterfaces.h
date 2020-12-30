@@ -18,18 +18,18 @@ namespace mlir {
 class DialectDecodeAttributesInterface
     : public DialectInterface::Base<DialectDecodeAttributesInterface> {
 public:
-    DialectDecodeAttributesInterface(Dialect *dialect) : Base(dialect) {}
+  DialectDecodeAttributesInterface(Dialect *dialect) : Base(dialect) {}
 
-    /// Registered hook to decode opaque constants associated with this
-    /// dialect. The hook function attempts to decode an opaque constant tensor
-    /// into a tensor with non-opaque content. If decoding is successful, this
-    /// method returns success() and sets 'output' attribute. If not, it returns
-    /// failure() and leaves 'output' unspecified. The default hook fails to
-    /// decode.
-    virtual LogicalResult decode(OpaqueElementsAttr input,
-                                 ElementsAttr &output) const {
-        return failure();
-    }
+  /// Registered hook to decode opaque constants associated with this
+  /// dialect. The hook function attempts to decode an opaque constant tensor
+  /// into a tensor with non-opaque content. If decoding is successful, this
+  /// method returns success() and sets 'output' attribute. If not, it returns
+  /// failure() and leaves 'output' unspecified. The default hook fails to
+  /// decode.
+  virtual LogicalResult decode(OpaqueElementsAttr input,
+                               ElementsAttr &output) const {
+    return failure();
+  }
 };
 
 } // end namespace mlir

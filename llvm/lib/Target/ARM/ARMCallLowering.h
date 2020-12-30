@@ -30,27 +30,26 @@ class Value;
 
 class ARMCallLowering : public CallLowering {
 public:
-    ARMCallLowering(const ARMTargetLowering &TLI);
+  ARMCallLowering(const ARMTargetLowering &TLI);
 
-    bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
-                     ArrayRef<Register> VRegs) const override;
+  bool lowerReturn(MachineIRBuilder &MIRBuilder, const Value *Val,
+                   ArrayRef<Register> VRegs) const override;
 
-    bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
-                              ArrayRef<ArrayRef<Register>> VRegs) const override;
+  bool lowerFormalArguments(MachineIRBuilder &MIRBuilder, const Function &F,
+                            ArrayRef<ArrayRef<Register>> VRegs) const override;
 
-    bool lowerCall(MachineIRBuilder &MIRBuilder,
-                   CallLoweringInfo &Info) const override;
+  bool lowerCall(MachineIRBuilder &MIRBuilder,
+                 CallLoweringInfo &Info) const override;
 
 private:
-    bool lowerReturnVal(MachineIRBuilder &MIRBuilder, const Value *Val,
-                        ArrayRef<Register> VRegs,
-                        MachineInstrBuilder &Ret) const;
+  bool lowerReturnVal(MachineIRBuilder &MIRBuilder, const Value *Val,
+                      ArrayRef<Register> VRegs, MachineInstrBuilder &Ret) const;
 
-    /// Split an argument into one or more arguments that the CC lowering can cope
-    /// with.
-    void splitToValueTypes(const ArgInfo &OrigArg,
-                           SmallVectorImpl<ArgInfo> &SplitArgs,
-                           MachineFunction &MF) const;
+  /// Split an argument into one or more arguments that the CC lowering can cope
+  /// with.
+  void splitToValueTypes(const ArgInfo &OrigArg,
+                         SmallVectorImpl<ArgInfo> &SplitArgs,
+                         MachineFunction &MF) const;
 };
 
 } // end namespace llvm

@@ -60,91 +60,91 @@ STATISTIC(StableHashBailingMetadataUnsupported,
           "Metadata of an unsupported kind while computing stable hashes");
 
 stable_hash llvm::stableHashValue(const MachineOperand &MO) {
-    switch (MO.getType()) {
-    case MachineOperand::MO_Register:
-        if (Register::isVirtualRegister(MO.getReg())) {
-            const MachineRegisterInfo &MRI = MO.getParent()->getMF()->getRegInfo();
-            return MRI.getVRegDef(MO.getReg())->getOpcode();
-        }
-
-        // Register operands don't have target flags.
-        return stable_hash_combine(MO.getType(), MO.getReg(), MO.getSubReg(),
-                                   MO.isDef());
-    case MachineOperand::MO_Immediate:
-        return stable_hash_combine(MO.getType(), MO.getTargetFlags(), MO.getImm());
-    case MachineOperand::MO_CImmediate:
-    case MachineOperand::MO_FPImmediate: {
-        auto Val = MO.isCImm() ? MO.getCImm()->getValue()
-                   : MO.getFPImm()->getValueAPF().bitcastToAPInt();
-        auto ValHash =
-            stable_hash_combine_array(Val.getRawData(), Val.getNumWords());
-        return hash_combine(MO.getType(), MO.getTargetFlags(), ValHash);
+  switch (MO.getType()) {
+  case MachineOperand::MO_Register:
+    if (Register::isVirtualRegister(MO.getReg())) {
+      const MachineRegisterInfo &MRI = MO.getParent()->getMF()->getRegInfo();
+      return MRI.getVRegDef(MO.getReg())->getOpcode();
     }
 
-    case MachineOperand::MO_MachineBasicBlock:
-        StableHashBailingMachineBasicBlock++;
-        return 0;
-    case MachineOperand::MO_ConstantPoolIndex:
-        StableHashBailingConstantPoolIndex++;
-        return 0;
-    case MachineOperand::MO_BlockAddress:
-        StableHashBailingBlockAddress++;
-        return 0;
-    case MachineOperand::MO_Metadata:
-        StableHashBailingMetadataUnsupported++;
-        return 0;
-    case MachineOperand::MO_GlobalAddress:
-        StableHashBailingGlobalAddress++;
-        return 0;
-    case MachineOperand::MO_TargetIndex: {
-        if (const char *Name = MO.getTargetIndexName())
-            return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
-                                       stable_hash_combine_string(Name),
-                                       MO.getOffset());
-        StableHashBailingTargetIndexNoName++;
-        return 0;
-    }
+    // Register operands don't have target flags.
+    return stable_hash_combine(MO.getType(), MO.getReg(), MO.getSubReg(),
+                               MO.isDef());
+  case MachineOperand::MO_Immediate:
+    return stable_hash_combine(MO.getType(), MO.getTargetFlags(), MO.getImm());
+  case MachineOperand::MO_CImmediate:
+  case MachineOperand::MO_FPImmediate: {
+    auto Val = MO.isCImm() ? MO.getCImm()->getValue()
+                           : MO.getFPImm()->getValueAPF().bitcastToAPInt();
+    auto ValHash =
+        stable_hash_combine_array(Val.getRawData(), Val.getNumWords());
+    return hash_combine(MO.getType(), MO.getTargetFlags(), ValHash);
+  }
 
-    case MachineOperand::MO_FrameIndex:
-    case MachineOperand::MO_JumpTableIndex:
-        return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
-                                   MO.getIndex());
+  case MachineOperand::MO_MachineBasicBlock:
+    StableHashBailingMachineBasicBlock++;
+    return 0;
+  case MachineOperand::MO_ConstantPoolIndex:
+    StableHashBailingConstantPoolIndex++;
+    return 0;
+  case MachineOperand::MO_BlockAddress:
+    StableHashBailingBlockAddress++;
+    return 0;
+  case MachineOperand::MO_Metadata:
+    StableHashBailingMetadataUnsupported++;
+    return 0;
+  case MachineOperand::MO_GlobalAddress:
+    StableHashBailingGlobalAddress++;
+    return 0;
+  case MachineOperand::MO_TargetIndex: {
+    if (const char *Name = MO.getTargetIndexName())
+      return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
+                                 stable_hash_combine_string(Name),
+                                 MO.getOffset());
+    StableHashBailingTargetIndexNoName++;
+    return 0;
+  }
 
-    case MachineOperand::MO_ExternalSymbol:
-        return hash_combine(MO.getType(), MO.getTargetFlags(), MO.getOffset(),
-                            stable_hash_combine_string(MO.getSymbolName()));
+  case MachineOperand::MO_FrameIndex:
+  case MachineOperand::MO_JumpTableIndex:
+    return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
+                               MO.getIndex());
 
-    case MachineOperand::MO_RegisterMask:
-    case MachineOperand::MO_RegisterLiveOut:
-        return hash_combine(MO.getType(), MO.getTargetFlags(), MO.getRegMask());
+  case MachineOperand::MO_ExternalSymbol:
+    return hash_combine(MO.getType(), MO.getTargetFlags(), MO.getOffset(),
+                        stable_hash_combine_string(MO.getSymbolName()));
 
-    case MachineOperand::MO_ShuffleMask: {
-        std::vector<llvm::stable_hash> ShuffleMaskHashes;
+  case MachineOperand::MO_RegisterMask:
+  case MachineOperand::MO_RegisterLiveOut:
+    return hash_combine(MO.getType(), MO.getTargetFlags(), MO.getRegMask());
 
-        llvm::transform(
-            MO.getShuffleMask(), std::back_inserter(ShuffleMaskHashes),
-            [](int S) -> llvm::stable_hash { return llvm::stable_hash(S); });
+  case MachineOperand::MO_ShuffleMask: {
+    std::vector<llvm::stable_hash> ShuffleMaskHashes;
 
-        return hash_combine(MO.getType(), MO.getTargetFlags(),
-                            stable_hash_combine_array(ShuffleMaskHashes.data(),
-                                    ShuffleMaskHashes.size()));
-    }
-    case MachineOperand::MO_MCSymbol: {
-        auto SymbolName = MO.getMCSymbol()->getName();
-        return hash_combine(MO.getType(), MO.getTargetFlags(),
-                            stable_hash_combine_string(SymbolName));
-    }
-    case MachineOperand::MO_CFIIndex:
-        return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
-                                   MO.getCFIIndex());
-    case MachineOperand::MO_IntrinsicID:
-        return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
-                                   MO.getIntrinsicID());
-    case MachineOperand::MO_Predicate:
-        return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
-                                   MO.getPredicate());
-    }
-    llvm_unreachable("Invalid machine operand type");
+    llvm::transform(
+        MO.getShuffleMask(), std::back_inserter(ShuffleMaskHashes),
+        [](int S) -> llvm::stable_hash { return llvm::stable_hash(S); });
+
+    return hash_combine(MO.getType(), MO.getTargetFlags(),
+                        stable_hash_combine_array(ShuffleMaskHashes.data(),
+                                                  ShuffleMaskHashes.size()));
+  }
+  case MachineOperand::MO_MCSymbol: {
+    auto SymbolName = MO.getMCSymbol()->getName();
+    return hash_combine(MO.getType(), MO.getTargetFlags(),
+                        stable_hash_combine_string(SymbolName));
+  }
+  case MachineOperand::MO_CFIIndex:
+    return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
+                               MO.getCFIIndex());
+  case MachineOperand::MO_IntrinsicID:
+    return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
+                               MO.getIntrinsicID());
+  case MachineOperand::MO_Predicate:
+    return stable_hash_combine(MO.getType(), MO.getTargetFlags(),
+                               MO.getPredicate());
+  }
+  llvm_unreachable("Invalid machine operand type");
 }
 
 /// A stable hash value for machine instructions.
@@ -154,41 +154,41 @@ stable_hash llvm::stableHashValue(const MachineOperand &MO) {
 stable_hash llvm::stableHashValue(const MachineInstr &MI, bool HashVRegs,
                                   bool HashConstantPoolIndices,
                                   bool HashMemOperands) {
-    // Build up a buffer of hash code components.
-    SmallVector<stable_hash, 16> HashComponents;
-    HashComponents.reserve(MI.getNumOperands() + MI.getNumMemOperands() + 2);
-    HashComponents.push_back(MI.getOpcode());
-    HashComponents.push_back(MI.getFlags());
-    for (const MachineOperand &MO : MI.operands()) {
-        if (!HashVRegs && MO.isReg() && MO.isDef() &&
-                Register::isVirtualRegister(MO.getReg()))
-            continue; // Skip virtual register defs.
+  // Build up a buffer of hash code components.
+  SmallVector<stable_hash, 16> HashComponents;
+  HashComponents.reserve(MI.getNumOperands() + MI.getNumMemOperands() + 2);
+  HashComponents.push_back(MI.getOpcode());
+  HashComponents.push_back(MI.getFlags());
+  for (const MachineOperand &MO : MI.operands()) {
+    if (!HashVRegs && MO.isReg() && MO.isDef() &&
+        Register::isVirtualRegister(MO.getReg()))
+      continue; // Skip virtual register defs.
 
-        if (MO.isCPI()) {
-            HashComponents.push_back(stable_hash_combine(
-                                         MO.getType(), MO.getTargetFlags(), MO.getIndex()));
-            continue;
-        }
-
-        stable_hash StableHash = stableHashValue(MO);
-        if (!StableHash)
-            return 0;
-        HashComponents.push_back(StableHash);
+    if (MO.isCPI()) {
+      HashComponents.push_back(stable_hash_combine(
+          MO.getType(), MO.getTargetFlags(), MO.getIndex()));
+      continue;
     }
 
-    for (const auto *Op : MI.memoperands()) {
-        if (!HashMemOperands)
-            break;
-        HashComponents.push_back(static_cast<unsigned>(Op->getSize()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getFlags()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getOffset()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getOrdering()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getAddrSpace()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getSyncScopeID()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getBaseAlign().value()));
-        HashComponents.push_back(static_cast<unsigned>(Op->getFailureOrdering()));
-    }
+    stable_hash StableHash = stableHashValue(MO);
+    if (!StableHash)
+      return 0;
+    HashComponents.push_back(StableHash);
+  }
 
-    return stable_hash_combine_range(HashComponents.begin(),
-                                     HashComponents.end());
+  for (const auto *Op : MI.memoperands()) {
+    if (!HashMemOperands)
+      break;
+    HashComponents.push_back(static_cast<unsigned>(Op->getSize()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getFlags()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getOffset()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getOrdering()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getAddrSpace()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getSyncScopeID()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getBaseAlign().value()));
+    HashComponents.push_back(static_cast<unsigned>(Op->getFailureOrdering()));
+  }
+
+  return stable_hash_combine_range(HashComponents.begin(),
+                                   HashComponents.end());
 }

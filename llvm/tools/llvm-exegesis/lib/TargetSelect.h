@@ -27,10 +27,10 @@ void LLVM_EXEGESIS_INITIALIZE_NATIVE_TARGET();
 // because it's not linked in).
 inline bool InitializeNativeExegesisTarget() {
 #ifdef LLVM_EXEGESIS_INITIALIZE_NATIVE_TARGET
-    LLVM_EXEGESIS_INITIALIZE_NATIVE_TARGET();
-    return true;
+  LLVM_EXEGESIS_INITIALIZE_NATIVE_TARGET();
+  return true;
 #else
-    return false;
+  return false;
 #endif
 }
 

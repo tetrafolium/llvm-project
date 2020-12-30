@@ -30,22 +30,22 @@ using namespace clang;
 using namespace ento;
 
 namespace {
-class MacOSXAPIChecker : public Checker< check::PreStmt<CallExpr> > {
-    mutable std::unique_ptr<BugType> BT_dispatchOnce;
+class MacOSXAPIChecker : public Checker<check::PreStmt<CallExpr>> {
+  mutable std::unique_ptr<BugType> BT_dispatchOnce;
 
-    static const ObjCIvarRegion *getParentIvarRegion(const MemRegion *R);
+  static const ObjCIvarRegion *getParentIvarRegion(const MemRegion *R);
 
 public:
-    void checkPreStmt(const CallExpr *CE, CheckerContext &C) const;
+  void checkPreStmt(const CallExpr *CE, CheckerContext &C) const;
 
-    void CheckDispatchOnce(CheckerContext &C, const CallExpr *CE,
-                           StringRef FName) const;
+  void CheckDispatchOnce(CheckerContext &C, const CallExpr *CE,
+                         StringRef FName) const;
 
-    typedef void (MacOSXAPIChecker::*SubChecker)(CheckerContext &,
-            const CallExpr *,
-            StringRef FName) const;
+  typedef void (MacOSXAPIChecker::*SubChecker)(CheckerContext &,
+                                               const CallExpr *,
+                                               StringRef FName) const;
 };
-} //end anonymous namespace
+} // end anonymous namespace
 
 //===----------------------------------------------------------------------===//
 // dispatch_once and dispatch_once_f
@@ -53,97 +53,97 @@ public:
 
 const ObjCIvarRegion *
 MacOSXAPIChecker::getParentIvarRegion(const MemRegion *R) {
-    const SubRegion *SR = dyn_cast<SubRegion>(R);
-    while (SR) {
-        if (const ObjCIvarRegion *IR = dyn_cast<ObjCIvarRegion>(SR))
-            return IR;
-        SR = dyn_cast<SubRegion>(SR->getSuperRegion());
-    }
-    return nullptr;
+  const SubRegion *SR = dyn_cast<SubRegion>(R);
+  while (SR) {
+    if (const ObjCIvarRegion *IR = dyn_cast<ObjCIvarRegion>(SR))
+      return IR;
+    SR = dyn_cast<SubRegion>(SR->getSuperRegion());
+  }
+  return nullptr;
 }
 
 void MacOSXAPIChecker::CheckDispatchOnce(CheckerContext &C, const CallExpr *CE,
-        StringRef FName) const {
-    if (CE->getNumArgs() < 1)
-        return;
+                                         StringRef FName) const {
+  if (CE->getNumArgs() < 1)
+    return;
 
-    // Check if the first argument is improperly allocated.  If so, issue a
-    // warning because that's likely to be bad news.
-    const MemRegion *R = C.getSVal(CE->getArg(0)).getAsRegion();
-    if (!R)
-        return;
+  // Check if the first argument is improperly allocated.  If so, issue a
+  // warning because that's likely to be bad news.
+  const MemRegion *R = C.getSVal(CE->getArg(0)).getAsRegion();
+  if (!R)
+    return;
 
-    // Global variables are fine.
-    const MemRegion *RB = R->getBaseRegion();
-    const MemSpaceRegion *RS = RB->getMemorySpace();
-    if (isa<GlobalsSpaceRegion>(RS))
-        return;
+  // Global variables are fine.
+  const MemRegion *RB = R->getBaseRegion();
+  const MemSpaceRegion *RS = RB->getMemorySpace();
+  if (isa<GlobalsSpaceRegion>(RS))
+    return;
 
-    // Handle _dispatch_once.  In some versions of the OS X SDK we have the case
-    // that dispatch_once is a macro that wraps a call to _dispatch_once.
-    // _dispatch_once is then a function which then calls the real dispatch_once.
-    // Users do not care; they just want the warning at the top-level call.
-    if (CE->getBeginLoc().isMacroID()) {
-        StringRef TrimmedFName = FName.ltrim('_');
-        if (TrimmedFName != FName)
-            FName = TrimmedFName;
-    }
+  // Handle _dispatch_once.  In some versions of the OS X SDK we have the case
+  // that dispatch_once is a macro that wraps a call to _dispatch_once.
+  // _dispatch_once is then a function which then calls the real dispatch_once.
+  // Users do not care; they just want the warning at the top-level call.
+  if (CE->getBeginLoc().isMacroID()) {
+    StringRef TrimmedFName = FName.ltrim('_');
+    if (TrimmedFName != FName)
+      FName = TrimmedFName;
+  }
 
-    SmallString<256> S;
-    llvm::raw_svector_ostream os(S);
-    bool SuggestStatic = false;
-    os << "Call to '" << FName << "' uses";
-    if (const VarRegion *VR = dyn_cast<VarRegion>(RB)) {
-        const VarDecl *VD = VR->getDecl();
-        // FIXME: These should have correct memory space and thus should be filtered
-        // out earlier. This branch only fires when we're looking from a block,
-        // which we analyze as a top-level declaration, onto a static local
-        // in a function that contains the block.
-        if (VD->isStaticLocal())
-            return;
-        // We filtered out globals earlier, so it must be a local variable
-        // or a block variable which is under UnknownSpaceRegion.
-        if (VR != R)
-            os << " memory within";
-        if (VD->hasAttr<BlocksAttr>())
-            os << " the block variable '";
-        else
-            os << " the local variable '";
-        os << VR->getDecl()->getName() << '\'';
-        SuggestStatic = true;
-    } else if (const ObjCIvarRegion *IVR = getParentIvarRegion(R)) {
-        if (IVR != R)
-            os << " memory within";
-        os << " the instance variable '" << IVR->getDecl()->getName() << '\'';
-    } else if (isa<HeapSpaceRegion>(RS)) {
-        os << " heap-allocated memory";
-    } else if (isa<UnknownSpaceRegion>(RS)) {
-        // Presence of an IVar superregion has priority over this branch, because
-        // ObjC objects are on the heap even if the core doesn't realize this.
-        // Presence of a block variable base region has priority over this branch,
-        // because block variables are known to be either on stack or on heap
-        // (might actually move between the two, hence UnknownSpace).
-        return;
-    } else {
-        os << " stack allocated memory";
-    }
-    os << " for the predicate value.  Using such transient memory for "
-       "the predicate is potentially dangerous.";
-    if (SuggestStatic)
-        os << "  Perhaps you intended to declare the variable as 'static'?";
+  SmallString<256> S;
+  llvm::raw_svector_ostream os(S);
+  bool SuggestStatic = false;
+  os << "Call to '" << FName << "' uses";
+  if (const VarRegion *VR = dyn_cast<VarRegion>(RB)) {
+    const VarDecl *VD = VR->getDecl();
+    // FIXME: These should have correct memory space and thus should be filtered
+    // out earlier. This branch only fires when we're looking from a block,
+    // which we analyze as a top-level declaration, onto a static local
+    // in a function that contains the block.
+    if (VD->isStaticLocal())
+      return;
+    // We filtered out globals earlier, so it must be a local variable
+    // or a block variable which is under UnknownSpaceRegion.
+    if (VR != R)
+      os << " memory within";
+    if (VD->hasAttr<BlocksAttr>())
+      os << " the block variable '";
+    else
+      os << " the local variable '";
+    os << VR->getDecl()->getName() << '\'';
+    SuggestStatic = true;
+  } else if (const ObjCIvarRegion *IVR = getParentIvarRegion(R)) {
+    if (IVR != R)
+      os << " memory within";
+    os << " the instance variable '" << IVR->getDecl()->getName() << '\'';
+  } else if (isa<HeapSpaceRegion>(RS)) {
+    os << " heap-allocated memory";
+  } else if (isa<UnknownSpaceRegion>(RS)) {
+    // Presence of an IVar superregion has priority over this branch, because
+    // ObjC objects are on the heap even if the core doesn't realize this.
+    // Presence of a block variable base region has priority over this branch,
+    // because block variables are known to be either on stack or on heap
+    // (might actually move between the two, hence UnknownSpace).
+    return;
+  } else {
+    os << " stack allocated memory";
+  }
+  os << " for the predicate value.  Using such transient memory for "
+        "the predicate is potentially dangerous.";
+  if (SuggestStatic)
+    os << "  Perhaps you intended to declare the variable as 'static'?";
 
-    ExplodedNode *N = C.generateErrorNode();
-    if (!N)
-        return;
+  ExplodedNode *N = C.generateErrorNode();
+  if (!N)
+    return;
 
-    if (!BT_dispatchOnce)
-        BT_dispatchOnce.reset(new BugType(this, "Improper use of 'dispatch_once'",
-                                          "API Misuse (Apple)"));
+  if (!BT_dispatchOnce)
+    BT_dispatchOnce.reset(new BugType(this, "Improper use of 'dispatch_once'",
+                                      "API Misuse (Apple)"));
 
-    auto report =
-        std::make_unique<PathSensitiveBugReport>(*BT_dispatchOnce, os.str(), N);
-    report->addRange(CE->getArg(0)->getSourceRange());
-    C.emitReport(std::move(report));
+  auto report =
+      std::make_unique<PathSensitiveBugReport>(*BT_dispatchOnce, os.str(), N);
+  report->addRange(CE->getArg(0)->getSourceRange());
+  C.emitReport(std::move(report));
 }
 
 //===----------------------------------------------------------------------===//
@@ -152,20 +152,18 @@ void MacOSXAPIChecker::CheckDispatchOnce(CheckerContext &C, const CallExpr *CE,
 
 void MacOSXAPIChecker::checkPreStmt(const CallExpr *CE,
                                     CheckerContext &C) const {
-    StringRef Name = C.getCalleeName(CE);
-    if (Name.empty())
-        return;
+  StringRef Name = C.getCalleeName(CE);
+  if (Name.empty())
+    return;
 
-    SubChecker SC =
-        llvm::StringSwitch<SubChecker>(Name)
-        .Cases("dispatch_once",
-               "_dispatch_once",
-               "dispatch_once_f",
-               &MacOSXAPIChecker::CheckDispatchOnce)
-        .Default(nullptr);
+  SubChecker SC =
+      llvm::StringSwitch<SubChecker>(Name)
+          .Cases("dispatch_once", "_dispatch_once", "dispatch_once_f",
+                 &MacOSXAPIChecker::CheckDispatchOnce)
+          .Default(nullptr);
 
-    if (SC)
-        (this->*SC)(C, CE, Name);
+  if (SC)
+    (this->*SC)(C, CE, Name);
 }
 
 //===----------------------------------------------------------------------===//
@@ -173,9 +171,9 @@ void MacOSXAPIChecker::checkPreStmt(const CallExpr *CE,
 //===----------------------------------------------------------------------===//
 
 void ento::registerMacOSXAPIChecker(CheckerManager &mgr) {
-    mgr.registerChecker<MacOSXAPIChecker>();
+  mgr.registerChecker<MacOSXAPIChecker>();
 }
 
 bool ento::shouldRegisterMacOSXAPIChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

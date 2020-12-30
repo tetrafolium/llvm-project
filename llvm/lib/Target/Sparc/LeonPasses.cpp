@@ -37,28 +37,26 @@ char InsertNOPLoad::ID = 0;
 InsertNOPLoad::InsertNOPLoad() : LEONMachineFunctionPass(ID) {}
 
 bool InsertNOPLoad::runOnMachineFunction(MachineFunction &MF) {
-    Subtarget = &MF.getSubtarget<SparcSubtarget>();
-    const TargetInstrInfo &TII = *Subtarget->getInstrInfo();
-    DebugLoc DL = DebugLoc();
+  Subtarget = &MF.getSubtarget<SparcSubtarget>();
+  const TargetInstrInfo &TII = *Subtarget->getInstrInfo();
+  DebugLoc DL = DebugLoc();
 
-    bool Modified = false;
-    for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
-        MachineBasicBlock &MBB = *MFI;
-        for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
-            MachineInstr &MI = *MBBI;
-            unsigned Opcode = MI.getOpcode();
-            if (Opcode >= SP::LDDArr && Opcode <= SP::LDrr) {
-                MachineBasicBlock::iterator NMBBI = std::next(MBBI);
-                BuildMI(MBB, NMBBI, DL, TII.get(SP::NOP));
-                Modified = true;
-            }
-        }
+  bool Modified = false;
+  for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
+    MachineBasicBlock &MBB = *MFI;
+    for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
+      MachineInstr &MI = *MBBI;
+      unsigned Opcode = MI.getOpcode();
+      if (Opcode >= SP::LDDArr && Opcode <= SP::LDrr) {
+        MachineBasicBlock::iterator NMBBI = std::next(MBBI);
+        BuildMI(MBB, NMBBI, DL, TII.get(SP::NOP));
+        Modified = true;
+      }
     }
+  }
 
-    return Modified;
+  return Modified;
 }
-
-
 
 //*****************************************************************************
 //**** DetectRoundChange pass
@@ -74,32 +72,32 @@ char DetectRoundChange::ID = 0;
 DetectRoundChange::DetectRoundChange() : LEONMachineFunctionPass(ID) {}
 
 bool DetectRoundChange::runOnMachineFunction(MachineFunction &MF) {
-    Subtarget = &MF.getSubtarget<SparcSubtarget>();
+  Subtarget = &MF.getSubtarget<SparcSubtarget>();
 
-    bool Modified = false;
-    for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
-        MachineBasicBlock &MBB = *MFI;
-        for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
-            MachineInstr &MI = *MBBI;
-            unsigned Opcode = MI.getOpcode();
-            if (Opcode == SP::CALL && MI.getNumOperands() > 0) {
-                MachineOperand &MO = MI.getOperand(0);
+  bool Modified = false;
+  for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
+    MachineBasicBlock &MBB = *MFI;
+    for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
+      MachineInstr &MI = *MBBI;
+      unsigned Opcode = MI.getOpcode();
+      if (Opcode == SP::CALL && MI.getNumOperands() > 0) {
+        MachineOperand &MO = MI.getOperand(0);
 
-                if (MO.isGlobal()) {
-                    StringRef FuncName = MO.getGlobal()->getName();
-                    if (FuncName.compare_lower("fesetround") == 0) {
-                        errs() << "Error: You are using the detectroundchange "
-                               "option to detect rounding changes that will "
-                               "cause LEON errata. The only way to fix this "
-                               "is to remove the call to fesetround from "
-                               "the source code.\n";
-                    }
-                }
-            }
+        if (MO.isGlobal()) {
+          StringRef FuncName = MO.getGlobal()->getName();
+          if (FuncName.compare_lower("fesetround") == 0) {
+            errs() << "Error: You are using the detectroundchange "
+                      "option to detect rounding changes that will "
+                      "cause LEON errata. The only way to fix this "
+                      "is to remove the call to fesetround from "
+                      "the source code.\n";
+          }
         }
+      }
     }
+  }
 
-    return Modified;
+  return Modified;
 }
 
 //*****************************************************************************
@@ -124,33 +122,33 @@ char FixAllFDIVSQRT::ID = 0;
 FixAllFDIVSQRT::FixAllFDIVSQRT() : LEONMachineFunctionPass(ID) {}
 
 bool FixAllFDIVSQRT::runOnMachineFunction(MachineFunction &MF) {
-    Subtarget = &MF.getSubtarget<SparcSubtarget>();
-    const TargetInstrInfo &TII = *Subtarget->getInstrInfo();
-    DebugLoc DL = DebugLoc();
+  Subtarget = &MF.getSubtarget<SparcSubtarget>();
+  const TargetInstrInfo &TII = *Subtarget->getInstrInfo();
+  DebugLoc DL = DebugLoc();
 
-    bool Modified = false;
-    for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
-        MachineBasicBlock &MBB = *MFI;
-        for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
-            MachineInstr &MI = *MBBI;
-            unsigned Opcode = MI.getOpcode();
+  bool Modified = false;
+  for (auto MFI = MF.begin(), E = MF.end(); MFI != E; ++MFI) {
+    MachineBasicBlock &MBB = *MFI;
+    for (auto MBBI = MBB.begin(), E = MBB.end(); MBBI != E; ++MBBI) {
+      MachineInstr &MI = *MBBI;
+      unsigned Opcode = MI.getOpcode();
 
-            // Note: FDIVS and FSQRTS cannot be generated when this erratum fix is
-            // switched on so we don't need to check for them here. They will
-            // already have been converted to FSQRTD or FDIVD earlier in the
-            // pipeline.
-            if (Opcode == SP::FSQRTD || Opcode == SP::FDIVD) {
-                for (int InsertedCount = 0; InsertedCount < 5; InsertedCount++)
-                    BuildMI(MBB, MBBI, DL, TII.get(SP::NOP));
+      // Note: FDIVS and FSQRTS cannot be generated when this erratum fix is
+      // switched on so we don't need to check for them here. They will
+      // already have been converted to FSQRTD or FDIVD earlier in the
+      // pipeline.
+      if (Opcode == SP::FSQRTD || Opcode == SP::FDIVD) {
+        for (int InsertedCount = 0; InsertedCount < 5; InsertedCount++)
+          BuildMI(MBB, MBBI, DL, TII.get(SP::NOP));
 
-                MachineBasicBlock::iterator NMBBI = std::next(MBBI);
-                for (int InsertedCount = 0; InsertedCount < 28; InsertedCount++)
-                    BuildMI(MBB, NMBBI, DL, TII.get(SP::NOP));
+        MachineBasicBlock::iterator NMBBI = std::next(MBBI);
+        for (int InsertedCount = 0; InsertedCount < 28; InsertedCount++)
+          BuildMI(MBB, NMBBI, DL, TII.get(SP::NOP));
 
-                Modified = true;
-            }
-        }
+        Modified = true;
+      }
     }
+  }
 
-    return Modified;
+  return Modified;
 }

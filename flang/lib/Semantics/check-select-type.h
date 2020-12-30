@@ -20,12 +20,12 @@ namespace Fortran::semantics {
 
 class SelectTypeChecker : public virtual BaseChecker {
 public:
-    explicit SelectTypeChecker(SemanticsContext &context) : context_{context} {};
-    void Enter(const parser::SelectTypeConstruct &);
+  explicit SelectTypeChecker(SemanticsContext &context) : context_{context} {};
+  void Enter(const parser::SelectTypeConstruct &);
 
 private:
-    const SomeExpr *GetExprFromSelector(const parser::Selector &);
-    SemanticsContext &context_;
+  const SomeExpr *GetExprFromSelector(const parser::Selector &);
+  SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_SELECT_TYPE_H_

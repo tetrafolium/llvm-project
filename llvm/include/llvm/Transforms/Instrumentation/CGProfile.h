@@ -18,7 +18,7 @@
 namespace llvm {
 class CGProfilePass : public PassInfoMixin<CGProfilePass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 } // end namespace llvm
 

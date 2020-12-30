@@ -31,26 +31,26 @@ namespace Fortran::semantics {
 
 class DataChecker : public virtual BaseChecker {
 public:
-    explicit DataChecker(SemanticsContext &context) : exprAnalyzer_{context} {}
-    void Leave(const parser::DataStmtObject &);
-    void Leave(const parser::DataIDoObject &);
-    void Enter(const parser::DataImpliedDo &);
-    void Leave(const parser::DataImpliedDo &);
-    void Leave(const parser::DataStmtSet &);
+  explicit DataChecker(SemanticsContext &context) : exprAnalyzer_{context} {}
+  void Leave(const parser::DataStmtObject &);
+  void Leave(const parser::DataIDoObject &);
+  void Enter(const parser::DataImpliedDo &);
+  void Leave(const parser::DataImpliedDo &);
+  void Leave(const parser::DataStmtSet &);
 
-    // After all DATA statements have been processed, converts their
-    // initializations into per-symbol static initializers.
-    void CompileDataInitializationsIntoInitializers();
+  // After all DATA statements have been processed, converts their
+  // initializations into per-symbol static initializers.
+  void CompileDataInitializationsIntoInitializers();
 
 private:
-    ConstantSubscript GetRepetitionCount(const parser::DataStmtRepeat &);
-    template <typename T> void CheckIfConstantSubscript(const T &);
-    void CheckSubscript(const parser::SectionSubscript &);
-    bool CheckAllSubscriptsInDataRef(const parser::DataRef &, parser::CharBlock);
+  ConstantSubscript GetRepetitionCount(const parser::DataStmtRepeat &);
+  template <typename T> void CheckIfConstantSubscript(const T &);
+  void CheckSubscript(const parser::SectionSubscript &);
+  bool CheckAllSubscriptsInDataRef(const parser::DataRef &, parser::CharBlock);
 
-    DataInitializations inits_;
-    evaluate::ExpressionAnalyzer exprAnalyzer_;
-    bool currentSetHasFatalErrors_{false};
+  DataInitializations inits_;
+  evaluate::ExpressionAnalyzer exprAnalyzer_;
+  bool currentSetHasFatalErrors_{false};
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_DATA_H_

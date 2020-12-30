@@ -13,24 +13,20 @@ namespace __llvm_libc {
 namespace cpp {
 
 template <bool B, typename T> struct EnableIf;
-template <typename T> struct EnableIf<true, T> {
-    typedef T Type;
-};
+template <typename T> struct EnableIf<true, T> { typedef T Type; };
 
 template <bool B, typename T>
 using EnableIfType = typename EnableIf<B, T>::Type;
 
 struct TrueValue {
-    static constexpr bool Value = true;
+  static constexpr bool Value = true;
 };
 
 struct FalseValue {
-    static constexpr bool Value = false;
+  static constexpr bool Value = false;
 };
 
-template <typename T> struct TypeIdentity {
-    typedef T Type;
-};
+template <typename T> struct TypeIdentity { typedef T Type; };
 
 template <typename T1, typename T2> struct IsSame : public FalseValue {};
 template <typename T> struct IsSame<T, T> : public TrueValue {};
@@ -46,33 +42,33 @@ struct RemoveCV<const volatile T> : public TypeIdentity<T> {};
 template <typename T> using RemoveCVType = typename RemoveCV<T>::Type;
 
 template <typename Type> struct IsIntegral {
-    using TypeNoCV = RemoveCVType<Type>;
-    static constexpr bool Value =
-        IsSameV<char, TypeNoCV> || IsSameV<signed char, TypeNoCV> ||
-        IsSameV<unsigned char, TypeNoCV> || IsSameV<short, TypeNoCV> ||
-        IsSameV<unsigned short, TypeNoCV> || IsSameV<int, TypeNoCV> ||
-        IsSameV<unsigned int, TypeNoCV> || IsSameV<long, TypeNoCV> ||
-        IsSameV<unsigned long, TypeNoCV> || IsSameV<long long, TypeNoCV> ||
-        IsSameV<unsigned long long, TypeNoCV> || IsSameV<bool, TypeNoCV> ||
-        IsSameV<__uint128_t, TypeNoCV>;
+  using TypeNoCV = RemoveCVType<Type>;
+  static constexpr bool Value =
+      IsSameV<char, TypeNoCV> || IsSameV<signed char, TypeNoCV> ||
+      IsSameV<unsigned char, TypeNoCV> || IsSameV<short, TypeNoCV> ||
+      IsSameV<unsigned short, TypeNoCV> || IsSameV<int, TypeNoCV> ||
+      IsSameV<unsigned int, TypeNoCV> || IsSameV<long, TypeNoCV> ||
+      IsSameV<unsigned long, TypeNoCV> || IsSameV<long long, TypeNoCV> ||
+      IsSameV<unsigned long long, TypeNoCV> || IsSameV<bool, TypeNoCV> ||
+      IsSameV<__uint128_t, TypeNoCV>;
 };
 
 template <typename T> struct IsPointerTypeNoCV : public FalseValue {};
 template <typename T> struct IsPointerTypeNoCV<T *> : public TrueValue {};
 template <typename T> struct IsPointerType {
-    static constexpr bool Value = IsPointerTypeNoCV<RemoveCVType<T>>::Value;
+  static constexpr bool Value = IsPointerTypeNoCV<RemoveCVType<T>>::Value;
 };
 
 template <typename Type> struct IsFloatingPointType {
-    using TypeNoCV = RemoveCVType<Type>;
-    static constexpr bool Value = IsSame<float, TypeNoCV>::Value ||
-                                  IsSame<double, TypeNoCV>::Value ||
-                                  IsSame<long double, TypeNoCV>::Value;
+  using TypeNoCV = RemoveCVType<Type>;
+  static constexpr bool Value = IsSame<float, TypeNoCV>::Value ||
+                                IsSame<double, TypeNoCV>::Value ||
+                                IsSame<long double, TypeNoCV>::Value;
 };
 
 template <typename Type> struct IsArithmetic {
-    static constexpr bool Value =
-        IsIntegral<Type>::Value || IsFloatingPointType<Type>::Value;
+  static constexpr bool Value =
+      IsIntegral<Type>::Value || IsFloatingPointType<Type>::Value;
 };
 
 } // namespace cpp

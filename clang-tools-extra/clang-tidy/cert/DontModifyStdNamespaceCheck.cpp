@@ -17,27 +17,27 @@ namespace tidy {
 namespace cert {
 
 void DontModifyStdNamespaceCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        namespaceDecl(unless(isExpansionInSystemHeader()),
-                      hasAnyName("std", "posix"),
-                      has(decl(unless(anyOf(
-                                          functionDecl(isExplicitTemplateSpecialization()),
-                                          cxxRecordDecl(isExplicitTemplateSpecialization()))))))
-        .bind("nmspc"),
-        this);
+  Finder->addMatcher(
+      namespaceDecl(unless(isExpansionInSystemHeader()),
+                    hasAnyName("std", "posix"),
+                    has(decl(unless(anyOf(
+                        functionDecl(isExplicitTemplateSpecialization()),
+                        cxxRecordDecl(isExplicitTemplateSpecialization()))))))
+          .bind("nmspc"),
+      this);
 }
 
 void DontModifyStdNamespaceCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *N = Result.Nodes.getNodeAs<NamespaceDecl>("nmspc");
+  const auto *N = Result.Nodes.getNodeAs<NamespaceDecl>("nmspc");
 
-    // Only consider top level namespaces.
-    if (N->getParent() != Result.Context->getTranslationUnitDecl())
-        return;
+  // Only consider top level namespaces.
+  if (N->getParent() != Result.Context->getTranslationUnitDecl())
+    return;
 
-    diag(N->getLocation(),
-         "modification of %0 namespace can result in undefined behavior")
-            << N;
+  diag(N->getLocation(),
+       "modification of %0 namespace can result in undefined behavior")
+      << N;
 }
 
 } // namespace cert

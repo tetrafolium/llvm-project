@@ -19,10 +19,10 @@ namespace misc {
 /// are not meant to be passed by value, such as C FILE objects.
 class NonCopyableObjectsCheck : public ClangTidyCheck {
 public:
-    NonCopyableObjectsCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  NonCopyableObjectsCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace misc

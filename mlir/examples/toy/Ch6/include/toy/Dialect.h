@@ -29,13 +29,11 @@ namespace toy {
 /// methods.
 class ToyDialect : public mlir::Dialect {
 public:
-    explicit ToyDialect(mlir::MLIRContext *ctx);
+  explicit ToyDialect(mlir::MLIRContext *ctx);
 
-    /// Provide a utility accessor to the dialect namespace. This is used by
-    /// several utilities for casting between dialects.
-    static llvm::StringRef getDialectNamespace() {
-        return "toy";
-    }
+  /// Provide a utility accessor to the dialect namespace. This is used by
+  /// several utilities for casting between dialects.
+  static llvm::StringRef getDialectNamespace() { return "toy"; }
 };
 
 } // end namespace toy

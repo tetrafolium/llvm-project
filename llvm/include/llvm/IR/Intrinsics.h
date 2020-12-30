@@ -39,9 +39,9 @@ namespace Intrinsic {
 typedef unsigned ID;
 
 enum IndependentIntrinsics : unsigned {
-    not_intrinsic = 0, // Must be zero
+  not_intrinsic = 0, // Must be zero
 
-    // Get the intrinsic enums generated from Intrinsics.td
+// Get the intrinsic enums generated from Intrinsics.td
 #define GET_INTRINSIC_ENUM_VALUES
 #include "llvm/IR/IntrinsicEnums.inc"
 #undef GET_INTRINSIC_ENUM_VALUES
@@ -57,11 +57,10 @@ StringRef getName(ID id);
 /// than the StringRef version of this function.  If no overloads are
 /// requried, it is safe to use this version, but better to use the StringRef
 /// version.
-std::string getName(ID id, ArrayRef<Type*> Tys);
+std::string getName(ID id, ArrayRef<Type *> Tys);
 
 /// Return the function type for an intrinsic.
-FunctionType *getType(LLVMContext &Context, ID id,
-                      ArrayRef<Type*> Tys = None);
+FunctionType *getType(LLVMContext &Context, ID id, ArrayRef<Type *> Tys = None);
 
 /// Returns true if the intrinsic can be overloaded.
 bool isOverloaded(ID id);
@@ -81,14 +80,13 @@ AttributeList getAttributes(LLVMContext &C, ID id);
 /// using iAny, fAny, vAny, or iPTRAny).  For a declaration of an overloaded
 /// intrinsic, Tys must provide exactly one type for each overloaded type in
 /// the intrinsic.
-Function *getDeclaration(Module *M, ID id, ArrayRef<Type*> Tys = None);
+Function *getDeclaration(Module *M, ID id, ArrayRef<Type *> Tys = None);
 
 /// Looks up Name in NameTable via binary search. NameTable must be sorted
 /// and all entries must start with "llvm.".  If NameTable contains an exact
 /// match for Name or a prefix of Name followed by a dot, its index in
 /// NameTable is returned. Otherwise, -1 is returned.
-int lookupLLVMIntrinsicByName(ArrayRef<const char *> NameTable,
-                              StringRef Name);
+int lookupLLVMIntrinsicByName(ArrayRef<const char *> NameTable, StringRef Name);
 
 /// Map a GCC builtin name to an intrinsic ID.
 ID getIntrinsicForGCCBuiltin(const char *Prefix, StringRef BuiltinName);
@@ -99,99 +97,99 @@ ID getIntrinsicForMSBuiltin(const char *Prefix, StringRef BuiltinName);
 /// This is a type descriptor which explains the type requirements of an
 /// intrinsic. This is returned by getIntrinsicInfoTableEntries.
 struct IITDescriptor {
-    enum IITDescriptorKind {
-        Void,
-        VarArg,
-        MMX,
-        Token,
-        Metadata,
-        Half,
-        BFloat,
-        Float,
-        Double,
-        Quad,
-        Integer,
-        Vector,
-        Pointer,
-        Struct,
-        Argument,
-        ExtendArgument,
-        TruncArgument,
-        HalfVecArgument,
-        SameVecWidthArgument,
-        PtrToArgument,
-        PtrToElt,
-        VecOfAnyPtrsToElt,
-        VecElementArgument,
-        Subdivide2Argument,
-        Subdivide4Argument,
-        VecOfBitcastsToInt
-    } Kind;
+  enum IITDescriptorKind {
+    Void,
+    VarArg,
+    MMX,
+    Token,
+    Metadata,
+    Half,
+    BFloat,
+    Float,
+    Double,
+    Quad,
+    Integer,
+    Vector,
+    Pointer,
+    Struct,
+    Argument,
+    ExtendArgument,
+    TruncArgument,
+    HalfVecArgument,
+    SameVecWidthArgument,
+    PtrToArgument,
+    PtrToElt,
+    VecOfAnyPtrsToElt,
+    VecElementArgument,
+    Subdivide2Argument,
+    Subdivide4Argument,
+    VecOfBitcastsToInt
+  } Kind;
 
-    union {
-        unsigned Integer_Width;
-        unsigned Float_Width;
-        unsigned Pointer_AddressSpace;
-        unsigned Struct_NumElements;
-        unsigned Argument_Info;
-        ElementCount Vector_Width;
-    };
+  union {
+    unsigned Integer_Width;
+    unsigned Float_Width;
+    unsigned Pointer_AddressSpace;
+    unsigned Struct_NumElements;
+    unsigned Argument_Info;
+    ElementCount Vector_Width;
+  };
 
-    enum ArgKind {
-        AK_Any,
-        AK_AnyInteger,
-        AK_AnyFloat,
-        AK_AnyVector,
-        AK_AnyPointer,
-        AK_MatchType = 7
-    };
+  enum ArgKind {
+    AK_Any,
+    AK_AnyInteger,
+    AK_AnyFloat,
+    AK_AnyVector,
+    AK_AnyPointer,
+    AK_MatchType = 7
+  };
 
-    unsigned getArgumentNumber() const {
-        assert(Kind == Argument || Kind == ExtendArgument ||
-               Kind == TruncArgument || Kind == HalfVecArgument ||
-               Kind == SameVecWidthArgument || Kind == PtrToArgument ||
-               Kind == PtrToElt || Kind == VecElementArgument ||
-               Kind == Subdivide2Argument || Kind == Subdivide4Argument ||
-               Kind == VecOfBitcastsToInt);
-        return Argument_Info >> 3;
-    }
-    ArgKind getArgumentKind() const {
-        assert(Kind == Argument || Kind == ExtendArgument ||
-               Kind == TruncArgument || Kind == HalfVecArgument ||
-               Kind == SameVecWidthArgument || Kind == PtrToArgument ||
-               Kind == VecElementArgument || Kind == Subdivide2Argument ||
-               Kind == Subdivide4Argument || Kind == VecOfBitcastsToInt);
-        return (ArgKind)(Argument_Info & 7);
-    }
+  unsigned getArgumentNumber() const {
+    assert(Kind == Argument || Kind == ExtendArgument ||
+           Kind == TruncArgument || Kind == HalfVecArgument ||
+           Kind == SameVecWidthArgument || Kind == PtrToArgument ||
+           Kind == PtrToElt || Kind == VecElementArgument ||
+           Kind == Subdivide2Argument || Kind == Subdivide4Argument ||
+           Kind == VecOfBitcastsToInt);
+    return Argument_Info >> 3;
+  }
+  ArgKind getArgumentKind() const {
+    assert(Kind == Argument || Kind == ExtendArgument ||
+           Kind == TruncArgument || Kind == HalfVecArgument ||
+           Kind == SameVecWidthArgument || Kind == PtrToArgument ||
+           Kind == VecElementArgument || Kind == Subdivide2Argument ||
+           Kind == Subdivide4Argument || Kind == VecOfBitcastsToInt);
+    return (ArgKind)(Argument_Info & 7);
+  }
 
-    // VecOfAnyPtrsToElt uses both an overloaded argument (for address space)
-    // and a reference argument (for matching vector width and element types)
-    unsigned getOverloadArgNumber() const {
-        assert(Kind == VecOfAnyPtrsToElt);
-        return Argument_Info >> 16;
-    }
-    unsigned getRefArgNumber() const {
-        assert(Kind == VecOfAnyPtrsToElt);
-        return Argument_Info & 0xFFFF;
-    }
+  // VecOfAnyPtrsToElt uses both an overloaded argument (for address space)
+  // and a reference argument (for matching vector width and element types)
+  unsigned getOverloadArgNumber() const {
+    assert(Kind == VecOfAnyPtrsToElt);
+    return Argument_Info >> 16;
+  }
+  unsigned getRefArgNumber() const {
+    assert(Kind == VecOfAnyPtrsToElt);
+    return Argument_Info & 0xFFFF;
+  }
 
-    static IITDescriptor get(IITDescriptorKind K, unsigned Field) {
-        IITDescriptor Result = { K, { Field } };
-        return Result;
-    }
+  static IITDescriptor get(IITDescriptorKind K, unsigned Field) {
+    IITDescriptor Result = {K, {Field}};
+    return Result;
+  }
 
-    static IITDescriptor get(IITDescriptorKind K, unsigned short Hi,
-                             unsigned short Lo) {
-        unsigned Field = Hi << 16 | Lo;
-        IITDescriptor Result = {K, {Field}};
-        return Result;
-    }
+  static IITDescriptor get(IITDescriptorKind K, unsigned short Hi,
+                           unsigned short Lo) {
+    unsigned Field = Hi << 16 | Lo;
+    IITDescriptor Result = {K, {Field}};
+    return Result;
+  }
 
-    static IITDescriptor getVector(unsigned Width, bool IsScalable) {
-        IITDescriptor Result = {Vector, {0}};
-        Result.Vector_Width = ElementCount::get(Width, IsScalable);
-        return Result;
-    }
+  static IITDescriptor getVector(unsigned Width, bool IsScalable) {
+    IITDescriptor Result = {Vector, {0}};
+    Result.Vector_Width = ElementCount::get(Width, IsScalable);
+    return Result;
+  }
 };
 
 /// Return the IIT table descriptor for the specified intrinsic into an array
@@ -199,9 +197,9 @@ struct IITDescriptor {
 void getIntrinsicInfoTableEntries(ID id, SmallVectorImpl<IITDescriptor> &T);
 
 enum MatchIntrinsicTypesResult {
-    MatchIntrinsicTypes_Match = 0,
-    MatchIntrinsicTypes_NoMatchRet = 1,
-    MatchIntrinsicTypes_NoMatchArg = 2,
+  MatchIntrinsicTypes_Match = 0,
+  MatchIntrinsicTypes_NoMatchRet = 1,
+  MatchIntrinsicTypes_NoMatchArg = 2,
 };
 
 /// Match the specified function type with the type constraints specified by
@@ -229,10 +227,10 @@ bool getIntrinsicSignature(Function *F, SmallVectorImpl<Type *> &ArgTys);
 
 // Checks if the intrinsic name matches with its signature and if not
 // returns the declaration with the same signature and remangled name.
-llvm::Optional<Function*> remangleIntrinsicFunction(Function *F);
+llvm::Optional<Function *> remangleIntrinsicFunction(Function *F);
 
-} // End Intrinsic namespace
+} // namespace Intrinsic
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

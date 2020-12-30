@@ -125,8 +125,8 @@ using __allow_parallel =
 template <typename _ExecutionPolicy, typename... _IteratorTypes>
 auto
 __is_vectorization_preferred(_ExecutionPolicy&& __exec)
--> decltype(__internal::__lazy_and(__exec.__allow_vector(),
-                                   typename __internal::__is_random_access_iterator<_IteratorTypes...>::type()))
+    -> decltype(__internal::__lazy_and(__exec.__allow_vector(),
+                                       typename __internal::__is_random_access_iterator<_IteratorTypes...>::type()))
 {
     return __internal::__lazy_and(__exec.__allow_vector(),
                                   typename __internal::__is_random_access_iterator<_IteratorTypes...>::type());
@@ -135,8 +135,8 @@ __is_vectorization_preferred(_ExecutionPolicy&& __exec)
 template <typename _ExecutionPolicy, typename... _IteratorTypes>
 auto
 __is_parallelization_preferred(_ExecutionPolicy&& __exec)
--> decltype(__internal::__lazy_and(__exec.__allow_parallel(),
-                                   typename __internal::__is_random_access_iterator<_IteratorTypes...>::type()))
+    -> decltype(__internal::__lazy_and(__exec.__allow_parallel(),
+                                       typename __internal::__is_random_access_iterator<_IteratorTypes...>::type()))
 {
     return __internal::__lazy_and(__exec.__allow_parallel(),
                                   typename __internal::__is_random_access_iterator<_IteratorTypes...>::type());

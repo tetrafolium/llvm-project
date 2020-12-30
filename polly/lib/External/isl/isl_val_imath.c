@@ -4,19 +4,18 @@
  * integer value stored in the "n" chunks of size "size" at "chunks".
  * The least significant chunk is assumed to be stored first.
  */
-__isl_give isl_val *isl_val_int_from_chunks(isl_ctx *ctx, size_t n,
-        size_t size, const void *chunks)
-{
-    isl_val *v;
+__isl_give isl_val *isl_val_int_from_chunks(isl_ctx *ctx, size_t n, size_t size,
+                                            const void *chunks) {
+  isl_val *v;
 
-    v = isl_val_alloc(ctx);
-    if (!v)
-        return NULL;
+  v = isl_val_alloc(ctx);
+  if (!v)
+    return NULL;
 
-    impz_import(v->n, n, -1, size, 0, 0, chunks);
-    isl_int_set_si(v->d, 1);
+  impz_import(v->n, n, -1, size, 0, 0, chunks);
+  isl_int_set_si(v->d, 1);
 
-    return v;
+  return v;
 }
 
 /* Store a representation of the absolute value of the numerator of "v"
@@ -31,34 +30,32 @@ __isl_give isl_val *isl_val_int_from_chunks(isl_ctx *ctx, size_t n,
  * do it ourselves.
  */
 isl_stat isl_val_get_abs_num_chunks(__isl_keep isl_val *v, size_t size,
-                                    void *chunks)
-{
-    if (!v || !chunks)
-        return isl_stat_error;
+                                    void *chunks) {
+  if (!v || !chunks)
+    return isl_stat_error;
 
-    if (!isl_val_is_rat(v))
-        isl_die(isl_val_get_ctx(v), isl_error_invalid,
-                "expecting rational value", return isl_stat_error);
+  if (!isl_val_is_rat(v))
+    isl_die(isl_val_get_ctx(v), isl_error_invalid, "expecting rational value",
+            return isl_stat_error);
 
-    impz_export(chunks, NULL, -1, size, 0, 0, v->n);
-    if (isl_val_is_zero(v))
-        memset(chunks, 0, size);
+  impz_export(chunks, NULL, -1, size, 0, 0, v->n);
+  if (isl_val_is_zero(v))
+    memset(chunks, 0, size);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Return the number of chunks of size "size" required to
  * store the absolute value of the numerator of "v".
  */
-isl_size isl_val_n_abs_num_chunks(__isl_keep isl_val *v, size_t size)
-{
-    if (!v)
-        return isl_size_error;
+isl_size isl_val_n_abs_num_chunks(__isl_keep isl_val *v, size_t size) {
+  if (!v)
+    return isl_size_error;
 
-    if (!isl_val_is_rat(v))
-        isl_die(isl_val_get_ctx(v), isl_error_invalid,
-                "expecting rational value", return isl_size_error);
+  if (!isl_val_is_rat(v))
+    isl_die(isl_val_get_ctx(v), isl_error_invalid, "expecting rational value",
+            return isl_size_error);
 
-    size *= 8;
-    return (impz_sizeinbase(v->n, 2) + size - 1) / size;
+  size *= 8;
+  return (impz_sizeinbase(v->n, 2) + size - 1) / size;
 }

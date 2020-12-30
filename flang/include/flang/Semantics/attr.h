@@ -22,31 +22,27 @@ namespace Fortran::semantics {
 
 // All available attributes.
 ENUM_CLASS(Attr, ABSTRACT, ALLOCATABLE, ASYNCHRONOUS, BIND_C, CONTIGUOUS,
-           DEFERRED, ELEMENTAL, EXTENDS, EXTERNAL, IMPURE, INTENT_IN, INTENT_INOUT,
-           INTENT_OUT, INTRINSIC, MODULE, NON_OVERRIDABLE, NON_RECURSIVE, NOPASS,
-           OPTIONAL, PARAMETER, PASS, POINTER, PRIVATE, PROTECTED, PUBLIC, PURE,
-           RECURSIVE, SAVE, TARGET, VALUE, VOLATILE)
+    DEFERRED, ELEMENTAL, EXTENDS, EXTERNAL, IMPURE, INTENT_IN, INTENT_INOUT,
+    INTENT_OUT, INTRINSIC, MODULE, NON_OVERRIDABLE, NON_RECURSIVE, NOPASS,
+    OPTIONAL, PARAMETER, PASS, POINTER, PRIVATE, PROTECTED, PUBLIC, PURE,
+    RECURSIVE, SAVE, TARGET, VALUE, VOLATILE)
 
 // Set of attributes
 class Attrs : public common::EnumSet<Attr, Attr_enumSize> {
 private:
-    using enumSetType = common::EnumSet<Attr, Attr_enumSize>;
+  using enumSetType = common::EnumSet<Attr, Attr_enumSize>;
 
 public:
-    using enumSetType::enumSetType;
-    Attrs(const enumSetType &attrs) : enumSetType(attrs) {}
-    Attrs(enumSetType &&attrs) : enumSetType(std::move(attrs)) {}
-    constexpr bool HasAny(const Attrs &x) const {
-        return !(*this & x).none();
-    }
-    constexpr bool HasAll(const Attrs &x) const {
-        return (~*this & x).none();
-    }
-    // Internal error if any of these attributes are not in allowed.
-    void CheckValid(const Attrs &allowed) const;
+  using enumSetType::enumSetType;
+  Attrs(const enumSetType &attrs) : enumSetType(attrs) {}
+  Attrs(enumSetType &&attrs) : enumSetType(std::move(attrs)) {}
+  constexpr bool HasAny(const Attrs &x) const { return !(*this & x).none(); }
+  constexpr bool HasAll(const Attrs &x) const { return (~*this & x).none(); }
+  // Internal error if any of these attributes are not in allowed.
+  void CheckValid(const Attrs &allowed) const;
 
 private:
-    friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, const Attrs &);
+  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &, const Attrs &);
 };
 
 // Return string representation of attr that matches Fortran source.

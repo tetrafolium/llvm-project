@@ -22,65 +22,65 @@ namespace lldb_private {
 
 class UnwindTable {
 public:
-    /// Create an Unwind table using the data in the given module.
-    explicit UnwindTable(Module &module);
+  /// Create an Unwind table using the data in the given module.
+  explicit UnwindTable(Module &module);
 
-    ~UnwindTable();
+  ~UnwindTable();
 
-    lldb_private::CallFrameInfo *GetObjectFileUnwindInfo();
+  lldb_private::CallFrameInfo *GetObjectFileUnwindInfo();
 
-    lldb_private::DWARFCallFrameInfo *GetEHFrameInfo();
-    lldb_private::DWARFCallFrameInfo *GetDebugFrameInfo();
+  lldb_private::DWARFCallFrameInfo *GetEHFrameInfo();
+  lldb_private::DWARFCallFrameInfo *GetDebugFrameInfo();
 
-    lldb_private::CompactUnwindInfo *GetCompactUnwindInfo();
+  lldb_private::CompactUnwindInfo *GetCompactUnwindInfo();
 
-    ArmUnwindInfo *GetArmUnwindInfo();
-    SymbolFile *GetSymbolFile();
+  ArmUnwindInfo *GetArmUnwindInfo();
+  SymbolFile *GetSymbolFile();
 
-    lldb::FuncUnwindersSP GetFuncUnwindersContainingAddress(const Address &addr,
-            SymbolContext &sc);
+  lldb::FuncUnwindersSP GetFuncUnwindersContainingAddress(const Address &addr,
+                                                          SymbolContext &sc);
 
-    bool GetAllowAssemblyEmulationUnwindPlans();
+  bool GetAllowAssemblyEmulationUnwindPlans();
 
-    // Normally when we create a new FuncUnwinders object we track it in this
-    // UnwindTable so it can be reused later.  But for the target modules show-
-    // unwind we want to create brand new UnwindPlans for the function of
-    // interest - so ignore any existing FuncUnwinders for that function and
-    // don't add this new one to our UnwindTable. This FuncUnwinders object does
-    // have a reference to the UnwindTable but the lifetime of this uncached
-    // FuncUnwinders is expected to be short so in practice this will not be a
-    // problem.
-    lldb::FuncUnwindersSP
-    GetUncachedFuncUnwindersContainingAddress(const Address &addr,
-            SymbolContext &sc);
+  // Normally when we create a new FuncUnwinders object we track it in this
+  // UnwindTable so it can be reused later.  But for the target modules show-
+  // unwind we want to create brand new UnwindPlans for the function of
+  // interest - so ignore any existing FuncUnwinders for that function and
+  // don't add this new one to our UnwindTable. This FuncUnwinders object does
+  // have a reference to the UnwindTable but the lifetime of this uncached
+  // FuncUnwinders is expected to be short so in practice this will not be a
+  // problem.
+  lldb::FuncUnwindersSP
+  GetUncachedFuncUnwindersContainingAddress(const Address &addr,
+                                            SymbolContext &sc);
 
-    ArchSpec GetArchitecture();
+  ArchSpec GetArchitecture();
 
 private:
-    void Dump(Stream &s);
+  void Dump(Stream &s);
 
-    void Initialize();
-    llvm::Optional<AddressRange> GetAddressRange(const Address &addr,
-            SymbolContext &sc);
+  void Initialize();
+  llvm::Optional<AddressRange> GetAddressRange(const Address &addr,
+                                               SymbolContext &sc);
 
-    typedef std::map<lldb::addr_t, lldb::FuncUnwindersSP> collection;
-    typedef collection::iterator iterator;
-    typedef collection::const_iterator const_iterator;
+  typedef std::map<lldb::addr_t, lldb::FuncUnwindersSP> collection;
+  typedef collection::iterator iterator;
+  typedef collection::const_iterator const_iterator;
 
-    Module &m_module;
-    collection m_unwinds;
+  Module &m_module;
+  collection m_unwinds;
 
-    bool m_initialized; // delay some initialization until ObjectFile is set up
-    std::mutex m_mutex;
+  bool m_initialized; // delay some initialization until ObjectFile is set up
+  std::mutex m_mutex;
 
-    std::unique_ptr<CallFrameInfo> m_object_file_unwind_up;
-    std::unique_ptr<DWARFCallFrameInfo> m_eh_frame_up;
-    std::unique_ptr<DWARFCallFrameInfo> m_debug_frame_up;
-    std::unique_ptr<CompactUnwindInfo> m_compact_unwind_up;
-    std::unique_ptr<ArmUnwindInfo> m_arm_unwind_up;
+  std::unique_ptr<CallFrameInfo> m_object_file_unwind_up;
+  std::unique_ptr<DWARFCallFrameInfo> m_eh_frame_up;
+  std::unique_ptr<DWARFCallFrameInfo> m_debug_frame_up;
+  std::unique_ptr<CompactUnwindInfo> m_compact_unwind_up;
+  std::unique_ptr<ArmUnwindInfo> m_arm_unwind_up;
 
-    UnwindTable(const UnwindTable &) = delete;
-    const UnwindTable &operator=(const UnwindTable &) = delete;
+  UnwindTable(const UnwindTable &) = delete;
+  const UnwindTable &operator=(const UnwindTable &) = delete;
 };
 
 } // namespace lldb_private

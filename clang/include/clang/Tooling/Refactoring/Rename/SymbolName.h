@@ -28,20 +28,18 @@ namespace tooling {
 /// \endcode
 class SymbolName {
 public:
-    explicit SymbolName(StringRef Name) {
-        // While empty symbol names are valid (Objective-C selectors can have empty
-        // name pieces), occurrences Objective-C selectors are created using an
-        // array of strings instead of just one string.
-        assert(!Name.empty() && "Invalid symbol name!");
-        this->Name.push_back(Name.str());
-    }
+  explicit SymbolName(StringRef Name) {
+    // While empty symbol names are valid (Objective-C selectors can have empty
+    // name pieces), occurrences Objective-C selectors are created using an
+    // array of strings instead of just one string.
+    assert(!Name.empty() && "Invalid symbol name!");
+    this->Name.push_back(Name.str());
+  }
 
-    ArrayRef<std::string> getNamePieces() const {
-        return Name;
-    }
+  ArrayRef<std::string> getNamePieces() const { return Name; }
 
 private:
-    llvm::SmallVector<std::string, 1> Name;
+  llvm::SmallVector<std::string, 1> Name;
 };
 
 } // end namespace tooling

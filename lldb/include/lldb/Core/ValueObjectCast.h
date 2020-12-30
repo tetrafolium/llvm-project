@@ -24,41 +24,40 @@ class ConstString;
 // A ValueObject that represents a given value represented as a different type.
 class ValueObjectCast : public ValueObject {
 public:
-    ~ValueObjectCast() override;
+  ~ValueObjectCast() override;
 
-    static lldb::ValueObjectSP Create(ValueObject &parent,
-                                      ConstString name,
-                                      const CompilerType &cast_type);
+  static lldb::ValueObjectSP Create(ValueObject &parent, ConstString name,
+                                    const CompilerType &cast_type);
 
-    llvm::Optional<uint64_t> GetByteSize() override;
+  llvm::Optional<uint64_t> GetByteSize() override;
 
-    size_t CalculateNumChildren(uint32_t max) override;
+  size_t CalculateNumChildren(uint32_t max) override;
 
-    lldb::ValueType GetValueType() const override;
+  lldb::ValueType GetValueType() const override;
 
-    bool IsInScope() override;
+  bool IsInScope() override;
 
-    ValueObject *GetParent() override {
-        return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
-    }
+  ValueObject *GetParent() override {
+    return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
+  }
 
-    const ValueObject *GetParent() const override {
-        return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
-    }
+  const ValueObject *GetParent() const override {
+    return ((m_parent != nullptr) ? m_parent->GetParent() : nullptr);
+  }
 
 protected:
-    ValueObjectCast(ValueObject &parent, ConstString name,
-                    const CompilerType &cast_type);
+  ValueObjectCast(ValueObject &parent, ConstString name,
+                  const CompilerType &cast_type);
 
-    bool UpdateValue() override;
+  bool UpdateValue() override;
 
-    CompilerType GetCompilerTypeImpl() override;
+  CompilerType GetCompilerTypeImpl() override;
 
-    CompilerType m_cast_type;
+  CompilerType m_cast_type;
 
 private:
-    ValueObjectCast(const ValueObjectCast &) = delete;
-    const ValueObjectCast &operator=(const ValueObjectCast &) = delete;
+  ValueObjectCast(const ValueObjectCast &) = delete;
+  const ValueObjectCast &operator=(const ValueObjectCast &) = delete;
 };
 
 } // namespace lldb_private

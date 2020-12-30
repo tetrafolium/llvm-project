@@ -33,20 +33,20 @@ using namespace llvm;
 
 namespace {
 class WebAssemblyAddMissingPrototypes final : public ModulePass {
-    StringRef getPassName() const override {
-        return "Add prototypes to prototypes-less functions";
-    }
+  StringRef getPassName() const override {
+    return "Add prototypes to prototypes-less functions";
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        ModulePass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    ModulePass::getAnalysisUsage(AU);
+  }
 
-    bool runOnModule(Module &M) override;
+  bool runOnModule(Module &M) override;
 
 public:
-    static char ID;
-    WebAssemblyAddMissingPrototypes() : ModulePass(ID) {}
+  static char ID;
+  WebAssemblyAddMissingPrototypes() : ModulePass(ID) {}
 };
 } // End anonymous namespace
 
@@ -55,90 +55,90 @@ INITIALIZE_PASS(WebAssemblyAddMissingPrototypes, DEBUG_TYPE,
                 "Add prototypes to prototypes-less functions", false, false)
 
 ModulePass *llvm::createWebAssemblyAddMissingPrototypes() {
-    return new WebAssemblyAddMissingPrototypes();
+  return new WebAssemblyAddMissingPrototypes();
 }
 
 bool WebAssemblyAddMissingPrototypes::runOnModule(Module &M) {
-    LLVM_DEBUG(dbgs() << "********** Add Missing Prototypes **********\n");
+  LLVM_DEBUG(dbgs() << "********** Add Missing Prototypes **********\n");
 
-    std::vector<std::pair<Function *, Function *>> Replacements;
+  std::vector<std::pair<Function *, Function *>> Replacements;
 
-    // Find all the prototype-less function declarations
-    for (Function &F : M) {
-        if (!F.isDeclaration() || !F.hasFnAttribute("no-prototype"))
-            continue;
+  // Find all the prototype-less function declarations
+  for (Function &F : M) {
+    if (!F.isDeclaration() || !F.hasFnAttribute("no-prototype"))
+      continue;
 
-        LLVM_DEBUG(dbgs() << "Found no-prototype function: " << F.getName()
-                   << "\n");
+    LLVM_DEBUG(dbgs() << "Found no-prototype function: " << F.getName()
+                      << "\n");
 
-        // When clang emits prototype-less C functions it uses (...), i.e. varargs
-        // function that take no arguments (have no sentinel).  When we see a
-        // no-prototype attribute we expect the function have these properties.
-        if (!F.isVarArg())
-            report_fatal_error(
-                "Functions with 'no-prototype' attribute must take varargs: " +
-                F.getName());
-        unsigned NumParams = F.getFunctionType()->getNumParams();
-        if (NumParams != 0) {
-            if (!(NumParams == 1 && F.arg_begin()->hasStructRetAttr()))
-                report_fatal_error("Functions with 'no-prototype' attribute should "
-                                   "not have params: " +
-                                   F.getName());
-        }
-
-        // Create a function prototype based on the first call site (first bitcast)
-        // that we find.
-        FunctionType *NewType = nullptr;
-        for (Use &U : F.uses()) {
-            LLVM_DEBUG(dbgs() << "prototype-less use: " << F.getName() << "\n");
-            LLVM_DEBUG(dbgs() << *U.getUser() << "\n");
-            if (auto *BC = dyn_cast<BitCastOperator>(U.getUser())) {
-                if (auto *DestType = dyn_cast<FunctionType>(
-                                         BC->getDestTy()->getPointerElementType())) {
-                    if (!NewType) {
-                        // Create a new function with the correct type
-                        NewType = DestType;
-                        LLVM_DEBUG(dbgs() << "found function type: " << *NewType << "\n");
-                    } else if (NewType != DestType) {
-                        errs() << "warning: prototype-less function used with "
-                               "conflicting signatures: "
-                               << F.getName() << "\n";
-                        LLVM_DEBUG(dbgs() << "  " << *DestType << "\n");
-                        LLVM_DEBUG(dbgs() << "  "<<  *NewType << "\n");
-                    }
-                }
-            }
-        }
-
-        if (!NewType) {
-            LLVM_DEBUG(
-                dbgs() << "could not derive a function prototype from usage: " +
-                F.getName() + "\n");
-            // We could not derive a type for this function.  In this case strip
-            // the isVarArg and make it a simple zero-arg function.  This has more
-            // chance of being correct.  The current signature of (...) is illegal in
-            // C since it doesn't have any arguments before the "...", we this at
-            // least makes it possible for this symbol to be resolved by the linker.
-            NewType = FunctionType::get(F.getFunctionType()->getReturnType(), false);
-        }
-
-        Function *NewF =
-            Function::Create(NewType, F.getLinkage(), F.getName() + ".fixed_sig");
-        NewF->setAttributes(F.getAttributes());
-        NewF->removeFnAttr("no-prototype");
-        Replacements.emplace_back(&F, NewF);
+    // When clang emits prototype-less C functions it uses (...), i.e. varargs
+    // function that take no arguments (have no sentinel).  When we see a
+    // no-prototype attribute we expect the function have these properties.
+    if (!F.isVarArg())
+      report_fatal_error(
+          "Functions with 'no-prototype' attribute must take varargs: " +
+          F.getName());
+    unsigned NumParams = F.getFunctionType()->getNumParams();
+    if (NumParams != 0) {
+      if (!(NumParams == 1 && F.arg_begin()->hasStructRetAttr()))
+        report_fatal_error("Functions with 'no-prototype' attribute should "
+                           "not have params: " +
+                           F.getName());
     }
 
-    for (auto &Pair : Replacements) {
-        Function *OldF = Pair.first;
-        Function *NewF = Pair.second;
-        std::string Name = std::string(OldF->getName());
-        M.getFunctionList().push_back(NewF);
-        OldF->replaceAllUsesWith(
-            ConstantExpr::getPointerBitCastOrAddrSpaceCast(NewF, OldF->getType()));
-        OldF->eraseFromParent();
-        NewF->setName(Name);
+    // Create a function prototype based on the first call site (first bitcast)
+    // that we find.
+    FunctionType *NewType = nullptr;
+    for (Use &U : F.uses()) {
+      LLVM_DEBUG(dbgs() << "prototype-less use: " << F.getName() << "\n");
+      LLVM_DEBUG(dbgs() << *U.getUser() << "\n");
+      if (auto *BC = dyn_cast<BitCastOperator>(U.getUser())) {
+        if (auto *DestType = dyn_cast<FunctionType>(
+                BC->getDestTy()->getPointerElementType())) {
+          if (!NewType) {
+            // Create a new function with the correct type
+            NewType = DestType;
+            LLVM_DEBUG(dbgs() << "found function type: " << *NewType << "\n");
+          } else if (NewType != DestType) {
+            errs() << "warning: prototype-less function used with "
+                      "conflicting signatures: "
+                   << F.getName() << "\n";
+            LLVM_DEBUG(dbgs() << "  " << *DestType << "\n");
+            LLVM_DEBUG(dbgs() << "  " << *NewType << "\n");
+          }
+        }
+      }
     }
 
-    return !Replacements.empty();
+    if (!NewType) {
+      LLVM_DEBUG(
+          dbgs() << "could not derive a function prototype from usage: " +
+                        F.getName() + "\n");
+      // We could not derive a type for this function.  In this case strip
+      // the isVarArg and make it a simple zero-arg function.  This has more
+      // chance of being correct.  The current signature of (...) is illegal in
+      // C since it doesn't have any arguments before the "...", we this at
+      // least makes it possible for this symbol to be resolved by the linker.
+      NewType = FunctionType::get(F.getFunctionType()->getReturnType(), false);
+    }
+
+    Function *NewF =
+        Function::Create(NewType, F.getLinkage(), F.getName() + ".fixed_sig");
+    NewF->setAttributes(F.getAttributes());
+    NewF->removeFnAttr("no-prototype");
+    Replacements.emplace_back(&F, NewF);
+  }
+
+  for (auto &Pair : Replacements) {
+    Function *OldF = Pair.first;
+    Function *NewF = Pair.second;
+    std::string Name = std::string(OldF->getName());
+    M.getFunctionList().push_back(NewF);
+    OldF->replaceAllUsesWith(
+        ConstantExpr::getPointerBitCastOrAddrSpaceCast(NewF, OldF->getType()));
+    OldF->eraseFromParent();
+    NewF->setName(Name);
+  }
+
+  return !Replacements.empty();
 }

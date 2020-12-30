@@ -22,17 +22,17 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-static-accessed-through-instance.html
 class StaticAccessedThroughInstanceCheck : public ClangTidyCheck {
 public:
-    StaticAccessedThroughInstanceCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          NameSpecifierNestingThreshold(
-              Options.get("NameSpecifierNestingThreshold", 3U)) {}
+  StaticAccessedThroughInstanceCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        NameSpecifierNestingThreshold(
+            Options.get("NameSpecifierNestingThreshold", 3U)) {}
 
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const unsigned NameSpecifierNestingThreshold;
+  const unsigned NameSpecifierNestingThreshold;
 };
 
 } // namespace readability

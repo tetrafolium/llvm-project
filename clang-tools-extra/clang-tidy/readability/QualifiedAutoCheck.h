@@ -23,18 +23,18 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-qualified-auto.html
 class QualifiedAutoCheck : public ClangTidyCheck {
 public:
-    QualifiedAutoCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          AddConstToQualified(Options.get("AddConstToQualified", true)) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus11;
-    }
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  QualifiedAutoCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        AddConstToQualified(Options.get("AddConstToQualified", true)) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus11;
+  }
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    const bool AddConstToQualified;
+  const bool AddConstToQualified;
 };
 
 } // namespace readability

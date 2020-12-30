@@ -13,16 +13,16 @@
 namespace lldb_private {
 
 enum class NameMatch {
-    Ignore,
-    Equals,
-    Contains,
-    StartsWith,
-    EndsWith,
-    RegularExpression
+  Ignore,
+  Equals,
+  Contains,
+  StartsWith,
+  EndsWith,
+  RegularExpression
 };
 
 bool NameMatches(llvm::StringRef name, NameMatch match_type,
                  llvm::StringRef match);
-}
+} // namespace lldb_private
 
 #endif

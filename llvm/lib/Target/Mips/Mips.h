@@ -40,13 +40,13 @@ FunctionPass *createMipsExpandPseudoPass();
 FunctionPass *createMipsPreLegalizeCombiner();
 
 InstructionSelector *createMipsInstructionSelector(const MipsTargetMachine &,
-        MipsSubtarget &,
-        MipsRegisterBankInfo &);
+                                                   MipsSubtarget &,
+                                                   MipsRegisterBankInfo &);
 
 void initializeMipsDelaySlotFillerPass(PassRegistry &);
 void initializeMipsBranchExpansionPass(PassRegistry &);
 void initializeMicroMipsSizeReducePass(PassRegistry &);
-void initializeMipsPreLegalizerCombinerPass(PassRegistry&);
-} // end namespace llvm;
+void initializeMipsPreLegalizerCombinerPass(PassRegistry &);
+} // namespace llvm
 
 #endif

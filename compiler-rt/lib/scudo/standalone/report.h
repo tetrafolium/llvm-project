@@ -31,13 +31,13 @@ void NORETURN reportSanityCheckError(const char *Field);
 // Combined allocator errors.
 void NORETURN reportAlignmentTooBig(uptr Alignment, uptr MaxAlignment);
 void NORETURN reportAllocationSizeTooBig(uptr UserSize, uptr TotalSize,
-        uptr MaxSize);
+                                         uptr MaxSize);
 void NORETURN reportOutOfMemory(uptr RequestedSize);
 enum class AllocatorAction : u8 {
-    Recycling,
-    Deallocating,
-    Reallocating,
-    Sizing,
+  Recycling,
+  Deallocating,
+  Reallocating,
+  Sizing,
 };
 void NORETURN reportInvalidChunkState(AllocatorAction Action, void *Ptr);
 void NORETURN reportMisalignedPointer(AllocatorAction Action, void *Ptr);

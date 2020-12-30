@@ -15,9 +15,9 @@
 namespace Fortran::runtime {
 
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-constexpr bool isHostLittleEndian {false};
+constexpr bool isHostLittleEndian{false};
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-constexpr bool isHostLittleEndian {true};
+constexpr bool isHostLittleEndian{true};
 #else
 #error host endianness is not known
 #endif
@@ -28,14 +28,14 @@ enum class Convert { Unknown, Native, LittleEndian, BigEndian, Swap };
 std::optional<Convert> GetConvertFromString(const char *, std::size_t);
 
 struct ExecutionEnvironment {
-    void Configure(int argc, const char *argv[], const char *envp[]);
+  void Configure(int argc, const char *argv[], const char *envp[]);
 
-    int argc;
-    const char **argv;
-    const char **envp;
-    int listDirectedOutputLineLengthLimit;
-    enum decimal::FortranRounding defaultOutputRoundingMode;
-    Convert conversion;
+  int argc;
+  const char **argv;
+  const char **envp;
+  int listDirectedOutputLineLengthLimit;
+  enum decimal::FortranRounding defaultOutputRoundingMode;
+  Convert conversion;
 };
 extern ExecutionEnvironment executionEnvironment;
 } // namespace Fortran::runtime

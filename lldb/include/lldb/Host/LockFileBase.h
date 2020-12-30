@@ -17,40 +17,40 @@ namespace lldb_private {
 
 class LockFileBase {
 public:
-    virtual ~LockFileBase() = default;
+  virtual ~LockFileBase() = default;
 
-    bool IsLocked() const;
+  bool IsLocked() const;
 
-    Status WriteLock(const uint64_t start, const uint64_t len);
-    Status TryWriteLock(const uint64_t start, const uint64_t len);
+  Status WriteLock(const uint64_t start, const uint64_t len);
+  Status TryWriteLock(const uint64_t start, const uint64_t len);
 
-    Status ReadLock(const uint64_t start, const uint64_t len);
-    Status TryReadLock(const uint64_t start, const uint64_t len);
+  Status ReadLock(const uint64_t start, const uint64_t len);
+  Status TryReadLock(const uint64_t start, const uint64_t len);
 
-    Status Unlock();
+  Status Unlock();
 
 protected:
-    using Locker = std::function<Status(const uint64_t, const uint64_t)>;
+  using Locker = std::function<Status(const uint64_t, const uint64_t)>;
 
-    LockFileBase(int fd);
+  LockFileBase(int fd);
 
-    virtual bool IsValidFile() const;
+  virtual bool IsValidFile() const;
 
-    virtual Status DoWriteLock(const uint64_t start, const uint64_t len) = 0;
-    virtual Status DoTryWriteLock(const uint64_t start, const uint64_t len) = 0;
+  virtual Status DoWriteLock(const uint64_t start, const uint64_t len) = 0;
+  virtual Status DoTryWriteLock(const uint64_t start, const uint64_t len) = 0;
 
-    virtual Status DoReadLock(const uint64_t start, const uint64_t len) = 0;
-    virtual Status DoTryReadLock(const uint64_t start, const uint64_t len) = 0;
+  virtual Status DoReadLock(const uint64_t start, const uint64_t len) = 0;
+  virtual Status DoTryReadLock(const uint64_t start, const uint64_t len) = 0;
 
-    virtual Status DoUnlock() = 0;
+  virtual Status DoUnlock() = 0;
 
-    Status DoLock(const Locker &locker, const uint64_t start, const uint64_t len);
+  Status DoLock(const Locker &locker, const uint64_t start, const uint64_t len);
 
-    int m_fd; // not owned.
-    bool m_locked;
-    uint64_t m_start;
-    uint64_t m_len;
+  int m_fd; // not owned.
+  bool m_locked;
+  uint64_t m_start;
+  uint64_t m_len;
 };
-}
+} // namespace lldb_private
 
 #endif

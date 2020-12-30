@@ -24,10 +24,10 @@ class RefactoringOption;
 /// declaration in this interface.
 class RefactoringOptionVisitor {
 public:
-    virtual ~RefactoringOptionVisitor() {}
+  virtual ~RefactoringOptionVisitor() {}
 
-    virtual void visit(const RefactoringOption &Opt,
-                       Optional<std::string> &Value) = 0;
+  virtual void visit(const RefactoringOption &Opt,
+                     Optional<std::string> &Value) = 0;
 };
 
 namespace traits {
@@ -35,16 +35,16 @@ namespace internal {
 
 template <typename T> struct HasHandle {
 private:
-    template <typename ClassT>
-    static auto check(ClassT *) -> typename std::is_same<
-    decltype(std::declval<RefactoringOptionVisitor>().visit(
-                 std::declval<RefactoringOption>(), *std::declval<Optional<T> *>())),
-                     void>::type;
+  template <typename ClassT>
+  static auto check(ClassT *) -> typename std::is_same<
+      decltype(std::declval<RefactoringOptionVisitor>().visit(
+          std::declval<RefactoringOption>(), *std::declval<Optional<T> *>())),
+      void>::type;
 
-    template <typename> static std::false_type check(...);
+  template <typename> static std::false_type check(...);
 
 public:
-    using Type = decltype(check<RefactoringOptionVisitor>(nullptr));
+  using Type = decltype(check<RefactoringOptionVisitor>(nullptr));
 };
 
 } // end namespace internal

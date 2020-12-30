@@ -24,73 +24,73 @@ using namespace llvm;
 
 namespace {
 struct PatchableFunction : public MachineFunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    PatchableFunction() : MachineFunctionPass(ID) {
-        initializePatchableFunctionPass(*PassRegistry::getPassRegistry());
-    }
+  static char ID; // Pass identification, replacement for typeid
+  PatchableFunction() : MachineFunctionPass(ID) {
+    initializePatchableFunctionPass(*PassRegistry::getPassRegistry());
+  }
 
-    bool runOnMachineFunction(MachineFunction &F) override;
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::NoVRegs);
-    }
+  bool runOnMachineFunction(MachineFunction &F) override;
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoVRegs);
+  }
 };
-}
+} // namespace
 
 /// Returns true if instruction \p MI will not result in actual machine code
 /// instructions.
 static bool doesNotGeneratecode(const MachineInstr &MI) {
-    // TODO: Introduce an MCInstrDesc flag for this
-    switch (MI.getOpcode()) {
-    default:
-        return false;
-    case TargetOpcode::IMPLICIT_DEF:
-    case TargetOpcode::KILL:
-    case TargetOpcode::CFI_INSTRUCTION:
-    case TargetOpcode::EH_LABEL:
-    case TargetOpcode::GC_LABEL:
-    case TargetOpcode::DBG_VALUE:
-    case TargetOpcode::DBG_LABEL:
-        return true;
-    }
+  // TODO: Introduce an MCInstrDesc flag for this
+  switch (MI.getOpcode()) {
+  default:
+    return false;
+  case TargetOpcode::IMPLICIT_DEF:
+  case TargetOpcode::KILL:
+  case TargetOpcode::CFI_INSTRUCTION:
+  case TargetOpcode::EH_LABEL:
+  case TargetOpcode::GC_LABEL:
+  case TargetOpcode::DBG_VALUE:
+  case TargetOpcode::DBG_LABEL:
+    return true;
+  }
 }
 
 bool PatchableFunction::runOnMachineFunction(MachineFunction &MF) {
-    if (MF.getFunction().hasFnAttribute("patchable-function-entry")) {
-        MachineBasicBlock &FirstMBB = *MF.begin();
-        const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
-        // The initial .loc covers PATCHABLE_FUNCTION_ENTER.
-        BuildMI(FirstMBB, FirstMBB.begin(), DebugLoc(),
-                TII->get(TargetOpcode::PATCHABLE_FUNCTION_ENTER));
-        return true;
-    }
+  if (MF.getFunction().hasFnAttribute("patchable-function-entry")) {
+    MachineBasicBlock &FirstMBB = *MF.begin();
+    const TargetInstrInfo *TII = MF.getSubtarget().getInstrInfo();
+    // The initial .loc covers PATCHABLE_FUNCTION_ENTER.
+    BuildMI(FirstMBB, FirstMBB.begin(), DebugLoc(),
+            TII->get(TargetOpcode::PATCHABLE_FUNCTION_ENTER));
+    return true;
+  }
 
-    if (!MF.getFunction().hasFnAttribute("patchable-function"))
-        return false;
+  if (!MF.getFunction().hasFnAttribute("patchable-function"))
+    return false;
 
 #ifndef NDEBUG
-    Attribute PatchAttr = MF.getFunction().getFnAttribute("patchable-function");
-    StringRef PatchType = PatchAttr.getValueAsString();
-    assert(PatchType == "prologue-short-redirect" && "Only possibility today!");
+  Attribute PatchAttr = MF.getFunction().getFnAttribute("patchable-function");
+  StringRef PatchType = PatchAttr.getValueAsString();
+  assert(PatchType == "prologue-short-redirect" && "Only possibility today!");
 #endif
 
-    auto &FirstMBB = *MF.begin();
-    MachineBasicBlock::iterator FirstActualI = FirstMBB.begin();
-    for (; doesNotGeneratecode(*FirstActualI); ++FirstActualI)
-        assert(FirstActualI != FirstMBB.end());
+  auto &FirstMBB = *MF.begin();
+  MachineBasicBlock::iterator FirstActualI = FirstMBB.begin();
+  for (; doesNotGeneratecode(*FirstActualI); ++FirstActualI)
+    assert(FirstActualI != FirstMBB.end());
 
-    auto *TII = MF.getSubtarget().getInstrInfo();
-    auto MIB = BuildMI(FirstMBB, FirstActualI, FirstActualI->getDebugLoc(),
-                       TII->get(TargetOpcode::PATCHABLE_OP))
-               .addImm(2)
-               .addImm(FirstActualI->getOpcode());
+  auto *TII = MF.getSubtarget().getInstrInfo();
+  auto MIB = BuildMI(FirstMBB, FirstActualI, FirstActualI->getDebugLoc(),
+                     TII->get(TargetOpcode::PATCHABLE_OP))
+                 .addImm(2)
+                 .addImm(FirstActualI->getOpcode());
 
-    for (auto &MO : FirstActualI->operands())
-        MIB.add(MO);
+  for (auto &MO : FirstActualI->operands())
+    MIB.add(MO);
 
-    FirstActualI->eraseFromParent();
-    MF.ensureAlignment(Align(16));
-    return true;
+  FirstActualI->eraseFromParent();
+  MF.ensureAlignment(Align(16));
+  return true;
 }
 
 char PatchableFunction::ID = 0;

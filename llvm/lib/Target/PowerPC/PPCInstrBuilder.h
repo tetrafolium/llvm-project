@@ -28,15 +28,15 @@ namespace llvm {
 /// reference has base register as the FrameIndex offset until it is resolved.
 /// This allows a constant offset to be specified as well...
 ///
-static inline const MachineInstrBuilder&
+static inline const MachineInstrBuilder &
 addFrameReference(const MachineInstrBuilder &MIB, int FI, int Offset = 0,
                   bool mem = true) {
-    if (mem)
-        return MIB.addImm(Offset).addFrameIndex(FI);
-    else
-        return MIB.addFrameIndex(FI).addImm(Offset);
+  if (mem)
+    return MIB.addImm(Offset).addFrameIndex(FI);
+  else
+    return MIB.addFrameIndex(FI).addImm(Offset);
 }
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

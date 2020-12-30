@@ -31,47 +31,47 @@ namespace llvm {
 namespace yaml {
 
 template <> struct ScalarTraits<FlowStringRef> {
-    static void output(const FlowStringRef &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, FlowStringRef &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const FlowStringRef &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, FlowStringRef &);
+  static QuotingType mustQuote(StringRef);
 };
 
 template <> struct ScalarEnumerationTraits<MachO::ObjCConstraintType> {
-    static void enumeration(IO &, MachO::ObjCConstraintType &);
+  static void enumeration(IO &, MachO::ObjCConstraintType &);
 };
 
 template <> struct ScalarTraits<MachO::PlatformSet> {
-    static void output(const MachO::PlatformSet &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, MachO::PlatformSet &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const MachO::PlatformSet &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, MachO::PlatformSet &);
+  static QuotingType mustQuote(StringRef);
 };
 
 template <> struct ScalarBitSetTraits<MachO::ArchitectureSet> {
-    static void bitset(IO &, MachO::ArchitectureSet &);
+  static void bitset(IO &, MachO::ArchitectureSet &);
 };
 
 template <> struct ScalarTraits<MachO::Architecture> {
-    static void output(const MachO::Architecture &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, MachO::Architecture &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const MachO::Architecture &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, MachO::Architecture &);
+  static QuotingType mustQuote(StringRef);
 };
 
 template <> struct ScalarTraits<MachO::PackedVersion> {
-    static void output(const MachO::PackedVersion &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, MachO::PackedVersion &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const MachO::PackedVersion &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, MachO::PackedVersion &);
+  static QuotingType mustQuote(StringRef);
 };
 
 template <> struct ScalarTraits<SwiftVersion> {
-    static void output(const SwiftVersion &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, SwiftVersion &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const SwiftVersion &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, SwiftVersion &);
+  static QuotingType mustQuote(StringRef);
 };
 
 template <> struct ScalarTraits<UUID> {
-    static void output(const UUID &, void *, raw_ostream &);
-    static StringRef input(StringRef, void *, UUID &);
-    static QuotingType mustQuote(StringRef);
+  static void output(const UUID &, void *, raw_ostream &);
+  static StringRef input(StringRef, void *, UUID &);
+  static QuotingType mustQuote(StringRef);
 };
 
 } // end namespace yaml.

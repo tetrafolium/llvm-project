@@ -25,18 +25,18 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-properly-seeded-random-generator.html
 class ProperlySeededRandomGeneratorCheck : public ClangTidyCheck {
 public:
-    ProperlySeededRandomGeneratorCheck(StringRef Name, ClangTidyContext *Context);
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  ProperlySeededRandomGeneratorCheck(StringRef Name, ClangTidyContext *Context);
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    template <class T>
-    void checkSeed(const ast_matchers::MatchFinder::MatchResult &Result,
-                   const T *Func);
+  template <class T>
+  void checkSeed(const ast_matchers::MatchFinder::MatchResult &Result,
+                 const T *Func);
 
-    std::string RawDisallowedSeedTypes;
-    SmallVector<StringRef, 5> DisallowedSeedTypes;
+  std::string RawDisallowedSeedTypes;
+  SmallVector<StringRef, 5> DisallowedSeedTypes;
 };
 
 } // namespace cert

@@ -99,29 +99,29 @@ raw_ostream &operator<<(raw_ostream &OS, const LookupKind &K);
 /// to dump object files to disk at a specified path.
 class DumpObjects {
 public:
-    /// Construct a DumpObjects transform that will dump objects to disk.
-    ///
-    /// @param DumpDir specifies the path to write dumped objects to. DumpDir may
-    /// be empty, in which case files will be dumped to the working directory. If
-    /// DumpDir is non-empty then any trailing separators will be discarded.
-    ///
-    /// @param IdentifierOverride specifies a file name stem to use when dumping
-    /// objects. If empty, each MemoryBuffer's identifier will be used (with a .o
-    /// suffix added if not already present). If an identifier override is
-    /// supplied it will be used instead (since all buffers will use the same
-    /// identifier, the resulting files will be named <ident>.o, <ident>.2.o,
-    /// <ident>.3.o, and so on). IdentifierOverride should not contain an
-    /// extension, as a .o suffix will be added by DumpObjects.
-    DumpObjects(std::string DumpDir = "", std::string IdentifierOverride = "");
+  /// Construct a DumpObjects transform that will dump objects to disk.
+  ///
+  /// @param DumpDir specifies the path to write dumped objects to. DumpDir may
+  /// be empty, in which case files will be dumped to the working directory. If
+  /// DumpDir is non-empty then any trailing separators will be discarded.
+  ///
+  /// @param IdentifierOverride specifies a file name stem to use when dumping
+  /// objects. If empty, each MemoryBuffer's identifier will be used (with a .o
+  /// suffix added if not already present). If an identifier override is
+  /// supplied it will be used instead (since all buffers will use the same
+  /// identifier, the resulting files will be named <ident>.o, <ident>.2.o,
+  /// <ident>.3.o, and so on). IdentifierOverride should not contain an
+  /// extension, as a .o suffix will be added by DumpObjects.
+  DumpObjects(std::string DumpDir = "", std::string IdentifierOverride = "");
 
-    /// Dumps the given buffer to disk.
-    Expected<std::unique_ptr<MemoryBuffer>>
-                                         operator()(std::unique_ptr<MemoryBuffer> Obj);
+  /// Dumps the given buffer to disk.
+  Expected<std::unique_ptr<MemoryBuffer>>
+  operator()(std::unique_ptr<MemoryBuffer> Obj);
 
 private:
-    StringRef getBufferIdentifier(MemoryBuffer &B);
-    std::string DumpDir;
-    std::string IdentifierOverride;
+  StringRef getBufferIdentifier(MemoryBuffer &B);
+  std::string DumpDir;
+  std::string IdentifierOverride;
 };
 
 } // End namespace orc

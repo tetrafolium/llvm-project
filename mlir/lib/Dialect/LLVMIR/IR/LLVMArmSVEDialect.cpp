@@ -21,10 +21,10 @@
 using namespace mlir;
 
 void LLVM::LLVMArmSVEDialect::initialize() {
-    addOperations<
+  addOperations<
 #define GET_OP_LIST
 #include "mlir/Dialect/LLVMIR/LLVMArmSVE.cpp.inc"
-    >();
+      >();
 }
 
 #define GET_OP_CLASSES

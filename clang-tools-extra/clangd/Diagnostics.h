@@ -31,51 +31,51 @@ class ClangTidyContext;
 namespace clangd {
 
 struct ClangdDiagnosticOptions {
-    /// If true, Clangd uses an LSP extension to embed the fixes with the
-    /// diagnostics that are sent to the client.
-    bool EmbedFixesInDiagnostics = false;
+  /// If true, Clangd uses an LSP extension to embed the fixes with the
+  /// diagnostics that are sent to the client.
+  bool EmbedFixesInDiagnostics = false;
 
-    /// If true, Clangd uses the relatedInformation field to include other
-    /// locations (in particular attached notes).
-    /// Otherwise, these are flattened into the diagnostic message.
-    bool EmitRelatedLocations = false;
+  /// If true, Clangd uses the relatedInformation field to include other
+  /// locations (in particular attached notes).
+  /// Otherwise, these are flattened into the diagnostic message.
+  bool EmitRelatedLocations = false;
 
-    /// If true, Clangd uses an LSP extension to send the diagnostic's
-    /// category to the client. The category typically describes the compilation
-    /// stage during which the issue was produced, e.g. "Semantic Issue" or "Parse
-    /// Issue".
-    bool SendDiagnosticCategory = false;
+  /// If true, Clangd uses an LSP extension to send the diagnostic's
+  /// category to the client. The category typically describes the compilation
+  /// stage during which the issue was produced, e.g. "Semantic Issue" or "Parse
+  /// Issue".
+  bool SendDiagnosticCategory = false;
 
-    /// If true, Clangd will add a number of available fixes to the diagnostic's
-    /// message.
-    bool DisplayFixesCount = true;
+  /// If true, Clangd will add a number of available fixes to the diagnostic's
+  /// message.
+  bool DisplayFixesCount = true;
 };
 
 /// Contains basic information about a diagnostic.
 struct DiagBase {
-    std::string Message;
-    // Intended to be used only in error messages.
-    // May be relative, absolute or even artificially constructed.
-    std::string File;
-    // Absolute path to containing file, if available.
-    llvm::Optional<std::string> AbsFile;
+  std::string Message;
+  // Intended to be used only in error messages.
+  // May be relative, absolute or even artificially constructed.
+  std::string File;
+  // Absolute path to containing file, if available.
+  llvm::Optional<std::string> AbsFile;
 
-    clangd::Range Range;
-    DiagnosticsEngine::Level Severity = DiagnosticsEngine::Note;
-    std::string Category;
-    // Since File is only descriptive, we store a separate flag to distinguish
-    // diags from the main file.
-    bool InsideMainFile = false;
-    unsigned ID; // e.g. member of clang::diag, or clang-tidy assigned ID.
+  clangd::Range Range;
+  DiagnosticsEngine::Level Severity = DiagnosticsEngine::Note;
+  std::string Category;
+  // Since File is only descriptive, we store a separate flag to distinguish
+  // diags from the main file.
+  bool InsideMainFile = false;
+  unsigned ID; // e.g. member of clang::diag, or clang-tidy assigned ID.
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const DiagBase &D);
 
 /// Represents a single fix-it that editor can apply to fix the error.
 struct Fix {
-    /// Message for the fix-it.
-    std::string Message;
-    /// TextEdits from clang's fix-its. Must be non-empty.
-    llvm::SmallVector<TextEdit, 1> Edits;
+  /// Message for the fix-it.
+  std::string Message;
+  /// TextEdits from clang's fix-its. Must be non-empty.
+  llvm::SmallVector<TextEdit, 1> Edits;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Fix &F);
 
@@ -85,18 +85,18 @@ struct Note : DiagBase {};
 
 /// A top-level diagnostic that may have Notes and Fixes.
 struct Diag : DiagBase {
-    std::string Name; // if ID was recognized.
-    // The source of this diagnostic.
-    enum DiagSource {
-        Unknown,
-        Clang,
-        ClangTidy,
-        ClangdConfig,
-    } Source = Unknown;
-    /// Elaborate on the problem, usually pointing to a related piece of code.
-    std::vector<Note> Notes;
-    /// *Alternative* fixes for this diagnostic, one should be chosen.
-    std::vector<Fix> Fixes;
+  std::string Name; // if ID was recognized.
+  // The source of this diagnostic.
+  enum DiagSource {
+    Unknown,
+    Clang,
+    ClangTidy,
+    ClangdConfig,
+  } Source = Unknown;
+  /// Elaborate on the problem, usually pointing to a related piece of code.
+  std::vector<Note> Notes;
+  /// *Alternative* fixes for this diagnostic, one should be chosen.
+  std::vector<Fix> Fixes;
 };
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const Diag &D);
 
@@ -123,44 +123,40 @@ int getSeverity(DiagnosticsEngine::Level L);
 /// the diag itself nor its notes are in the main file).
 class StoreDiags : public DiagnosticConsumer {
 public:
-    // The ClangTidyContext populates Source and Name for clang-tidy diagnostics.
-    std::vector<Diag> take(const clang::tidy::ClangTidyContext *Tidy = nullptr);
+  // The ClangTidyContext populates Source and Name for clang-tidy diagnostics.
+  std::vector<Diag> take(const clang::tidy::ClangTidyContext *Tidy = nullptr);
 
-    void BeginSourceFile(const LangOptions &Opts,
-                         const Preprocessor *PP) override;
-    void EndSourceFile() override;
-    void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
-                          const clang::Diagnostic &Info) override;
+  void BeginSourceFile(const LangOptions &Opts,
+                       const Preprocessor *PP) override;
+  void EndSourceFile() override;
+  void HandleDiagnostic(DiagnosticsEngine::Level DiagLevel,
+                        const clang::Diagnostic &Info) override;
 
-    using DiagFixer = std::function<std::vector<Fix>(DiagnosticsEngine::Level,
-                      const clang::Diagnostic &)>;
-    using LevelAdjuster = std::function<DiagnosticsEngine::Level(
-                              DiagnosticsEngine::Level, const clang::Diagnostic &)>;
-    /// If set, possibly adds fixes for diagnostics using \p Fixer.
-    void contributeFixes(DiagFixer Fixer) {
-        this->Fixer = Fixer;
-    }
-    /// If set, this allows the client of this class to adjust the level of
-    /// diagnostics, such as promoting warnings to errors, or ignoring
-    /// diagnostics.
-    void setLevelAdjuster(LevelAdjuster Adjuster) {
-        this->Adjuster = Adjuster;
-    }
+  using DiagFixer = std::function<std::vector<Fix>(DiagnosticsEngine::Level,
+                                                   const clang::Diagnostic &)>;
+  using LevelAdjuster = std::function<DiagnosticsEngine::Level(
+      DiagnosticsEngine::Level, const clang::Diagnostic &)>;
+  /// If set, possibly adds fixes for diagnostics using \p Fixer.
+  void contributeFixes(DiagFixer Fixer) { this->Fixer = Fixer; }
+  /// If set, this allows the client of this class to adjust the level of
+  /// diagnostics, such as promoting warnings to errors, or ignoring
+  /// diagnostics.
+  void setLevelAdjuster(LevelAdjuster Adjuster) { this->Adjuster = Adjuster; }
 
 private:
-    void flushLastDiag();
+  void flushLastDiag();
 
-    DiagFixer Fixer = nullptr;
-    LevelAdjuster Adjuster = nullptr;
-    std::vector<Diag> Output;
-    llvm::Optional<LangOptions> LangOpts;
-    llvm::Optional<Diag> LastDiag;
-    llvm::Optional<FullSourceLoc> LastDiagLoc; // Valid only when LastDiag is set.
-    bool LastDiagOriginallyError = false;      // Valid only when LastDiag is set.
-    SourceManager *OrigSrcMgr = nullptr;
+  DiagFixer Fixer = nullptr;
+  LevelAdjuster Adjuster = nullptr;
+  std::vector<Diag> Output;
+  llvm::Optional<LangOptions> LangOpts;
+  llvm::Optional<Diag> LastDiag;
+  llvm::Optional<FullSourceLoc> LastDiagLoc; // Valid only when LastDiag is set.
+  bool LastDiagOriginallyError = false;      // Valid only when LastDiag is set.
+  SourceManager *OrigSrcMgr = nullptr;
 
-    llvm::DenseSet<std::pair<unsigned, unsigned>> IncludedErrorLocations;
-    bool LastPrimaryDiagnosticWasSuppressed = false;
+  llvm::DenseSet<std::pair<unsigned, unsigned>> IncludedErrorLocations;
+  bool LastPrimaryDiagnosticWasSuppressed = false;
 };
 
 } // namespace clangd

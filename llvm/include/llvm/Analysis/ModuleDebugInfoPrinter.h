@@ -17,12 +17,12 @@ namespace llvm {
 
 class ModuleDebugInfoPrinterPass
     : public PassInfoMixin<ModuleDebugInfoPrinterPass> {
-    DebugInfoFinder Finder;
-    raw_ostream &OS;
+  DebugInfoFinder Finder;
+  raw_ostream &OS;
 
 public:
-    explicit ModuleDebugInfoPrinterPass(raw_ostream &OS);
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  explicit ModuleDebugInfoPrinterPass(raw_ostream &OS);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 } // end namespace llvm
 

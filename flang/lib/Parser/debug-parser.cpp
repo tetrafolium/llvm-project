@@ -13,14 +13,14 @@
 namespace Fortran::parser {
 
 std::optional<Success> DebugParser::Parse(ParseState &state) const {
-    if (auto ustate{state.userState()}) {
-        if (auto out{ustate->debugOutput()}) {
-            std::string note{str_, length_};
-            Message message{state.GetLocation(), "parser debug: %s"_en_US, note};
-            message.SetContext(state.context().get());
-            message.Emit(*out, ustate->allCooked(), true);
-        }
+  if (auto ustate{state.userState()}) {
+    if (auto out{ustate->debugOutput()}) {
+      std::string note{str_, length_};
+      Message message{state.GetLocation(), "parser debug: %s"_en_US, note};
+      message.SetContext(state.context().get());
+      message.Emit(*out, ustate->allCooked(), true);
     }
-    return Success{};
+  }
+  return Success{};
 }
 } // namespace Fortran::parser

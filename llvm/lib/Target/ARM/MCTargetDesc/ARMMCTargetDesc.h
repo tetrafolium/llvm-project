@@ -13,8 +13,8 @@
 #ifndef LLVM_LIB_TARGET_ARM_MCTARGETDESC_ARMMCTARGETDESC_H
 #define LLVM_LIB_TARGET_ARM_MCTARGETDESC_ARMMCTARGETDESC_H
 
-#include "llvm/Support/DataTypes.h"
 #include "llvm/MC/MCInstrDesc.h"
+#include "llvm/Support/DataTypes.h"
 #include <memory>
 #include <string>
 
@@ -46,30 +46,29 @@ void initLLVMToCVRegMapping(MCRegisterInfo *MRI);
 bool isPredicated(const MCInst &MI, const MCInstrInfo *MCII);
 bool isCPSRDefined(const MCInst &MI, const MCInstrInfo *MCII);
 
-template<class Inst>
-bool isLDMBaseRegInList(const Inst &MI) {
-    auto BaseReg = MI.getOperand(0).getReg();
-    for (unsigned I = 1, E = MI.getNumOperands(); I < E; ++I) {
-        const auto &Op = MI.getOperand(I);
-        if (Op.isReg() && Op.getReg() == BaseReg)
-            return true;
-    }
-    return false;
+template <class Inst> bool isLDMBaseRegInList(const Inst &MI) {
+  auto BaseReg = MI.getOperand(0).getReg();
+  for (unsigned I = 1, E = MI.getNumOperands(); I < E; ++I) {
+    const auto &Op = MI.getOperand(I);
+    if (Op.isReg() && Op.getReg() == BaseReg)
+      return true;
+  }
+  return false;
 }
 
 /// Create a ARM MCSubtargetInfo instance. This is exposed so Asm parser, etc.
 /// do not need to go through TargetRegistry.
 MCSubtargetInfo *createARMMCSubtargetInfo(const Triple &TT, StringRef CPU,
-        StringRef FS);
-}
+                                          StringRef FS);
+} // namespace ARM_MC
 
 MCTargetStreamer *createARMNullTargetStreamer(MCStreamer &S);
 MCTargetStreamer *createARMTargetAsmStreamer(MCStreamer &S,
-        formatted_raw_ostream &OS,
-        MCInstPrinter *InstPrint,
-        bool isVerboseAsm);
+                                             formatted_raw_ostream &OS,
+                                             MCInstPrinter *InstPrint,
+                                             bool isVerboseAsm);
 MCTargetStreamer *createARMObjectTargetStreamer(MCStreamer &S,
-        const MCSubtargetInfo &STI);
+                                                const MCSubtargetInfo &STI);
 
 MCCodeEmitter *createARMLEMCCodeEmitter(const MCInstrInfo &MCII,
                                         const MCRegisterInfo &MRI,
@@ -101,8 +100,7 @@ std::unique_ptr<MCObjectTargetWriter> createARMELFObjectWriter(uint8_t OSABI);
 
 /// Construct an ARM Mach-O object writer.
 std::unique_ptr<MCObjectTargetWriter>
-createARMMachObjectWriter(bool Is64Bit, uint32_t CPUType,
-                          uint32_t CPUSubtype);
+createARMMachObjectWriter(bool Is64Bit, uint32_t CPUType, uint32_t CPUSubtype);
 
 /// Construct an ARM PE/COFF object writer.
 std::unique_ptr<MCObjectTargetWriter>
@@ -113,21 +111,21 @@ MCRelocationInfo *createARMMachORelocationInfo(MCContext &Ctx);
 
 namespace ARM {
 enum OperandType {
-    OPERAND_VPRED_R = MCOI::OPERAND_FIRST_TARGET,
-    OPERAND_VPRED_N,
+  OPERAND_VPRED_R = MCOI::OPERAND_FIRST_TARGET,
+  OPERAND_VPRED_N,
 };
 inline bool isVpred(OperandType op) {
-    return op == OPERAND_VPRED_R || op == OPERAND_VPRED_N;
+  return op == OPERAND_VPRED_R || op == OPERAND_VPRED_N;
 }
 inline bool isVpred(uint8_t op) {
-    return isVpred(static_cast<OperandType>(op));
+  return isVpred(static_cast<OperandType>(op));
 }
 
 bool isCDECoproc(size_t Coproc, const MCSubtargetInfo &STI);
 
 } // end namespace ARM
 
-} // End llvm namespace
+} // namespace llvm
 
 // Defines symbolic names for ARM registers.  This defines a mapping from
 // register name to register number.

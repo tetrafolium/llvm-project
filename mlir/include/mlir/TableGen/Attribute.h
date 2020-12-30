@@ -32,15 +32,13 @@ class Type;
 // in TableGen.
 class AttrConstraint : public Constraint {
 public:
-    explicit AttrConstraint(const llvm::Record *record);
+  explicit AttrConstraint(const llvm::Record *record);
 
-    static bool classof(const Constraint *c) {
-        return c->getKind() == CK_Attr;
-    }
+  static bool classof(const Constraint *c) { return c->getKind() == CK_Attr; }
 
-    // Returns true if this constraint is a subclass of the given `className`
-    // class defined in TableGen.
-    bool isSubClassOf(StringRef className) const;
+  // Returns true if this constraint is a subclass of the given `className`
+  // class defined in TableGen.
+  bool isSubClassOf(StringRef className) const;
 };
 
 // Wrapper class providing helper methods for accessing MLIR Attribute defined
@@ -48,73 +46,73 @@ public:
 // `Attr` in TableGen.
 class Attribute : public AttrConstraint {
 public:
-    explicit Attribute(const llvm::Record *record);
-    explicit Attribute(const llvm::DefInit *init);
+  explicit Attribute(const llvm::Record *record);
+  explicit Attribute(const llvm::DefInit *init);
 
-    // Returns the storage type if set. Returns the default storage type
-    // ("Attribute") otherwise.
-    StringRef getStorageType() const;
+  // Returns the storage type if set. Returns the default storage type
+  // ("Attribute") otherwise.
+  StringRef getStorageType() const;
 
-    // Returns the return type for this attribute.
-    StringRef getReturnType() const;
+  // Returns the return type for this attribute.
+  StringRef getReturnType() const;
 
-    // Return the type constraint corresponding to the type of this attribute, or
-    // None if this is not a TypedAttr.
-    llvm::Optional<Type> getValueType() const;
+  // Return the type constraint corresponding to the type of this attribute, or
+  // None if this is not a TypedAttr.
+  llvm::Optional<Type> getValueType() const;
 
-    // Returns the template getter method call which reads this attribute's
-    // storage and returns the value as of the desired return type.
-    // The call will contain a `{0}` which will be expanded to this attribute.
-    StringRef getConvertFromStorageCall() const;
+  // Returns the template getter method call which reads this attribute's
+  // storage and returns the value as of the desired return type.
+  // The call will contain a `{0}` which will be expanded to this attribute.
+  StringRef getConvertFromStorageCall() const;
 
-    // Returns true if this attribute can be built from a constant value.
-    bool isConstBuildable() const;
+  // Returns true if this attribute can be built from a constant value.
+  bool isConstBuildable() const;
 
-    // Returns the template that can be used to produce an instance of the
-    // attribute.
-    // Syntax: `$builder` should be replaced with a builder, `$0` should be
-    // replaced with the constant value.
-    StringRef getConstBuilderTemplate() const;
+  // Returns the template that can be used to produce an instance of the
+  // attribute.
+  // Syntax: `$builder` should be replaced with a builder, `$0` should be
+  // replaced with the constant value.
+  StringRef getConstBuilderTemplate() const;
 
-    // Returns the base-level attribute that this attribute constraint is
-    // built upon.
-    Attribute getBaseAttr() const;
+  // Returns the base-level attribute that this attribute constraint is
+  // built upon.
+  Attribute getBaseAttr() const;
 
-    // Returns whether this attribute has a default value.
-    bool hasDefaultValue() const;
-    // Returns the default value for this attribute.
-    StringRef getDefaultValue() const;
+  // Returns whether this attribute has a default value.
+  bool hasDefaultValue() const;
+  // Returns the default value for this attribute.
+  StringRef getDefaultValue() const;
 
-    // Returns whether this attribute is optional.
-    bool isOptional() const;
+  // Returns whether this attribute is optional.
+  bool isOptional() const;
 
-    // Returns true if this attribute is a derived attribute (i.e., a subclass
-    // of `DerivedAttr`).
-    bool isDerivedAttr() const;
+  // Returns true if this attribute is a derived attribute (i.e., a subclass
+  // of `DerivedAttr`).
+  bool isDerivedAttr() const;
 
-    // Returns true if this attribute is a type attribute (i.e., a subclass
-    // of `TypeAttrBase`).
-    bool isTypeAttr() const;
+  // Returns true if this attribute is a type attribute (i.e., a subclass
+  // of `TypeAttrBase`).
+  bool isTypeAttr() const;
 
-    // Returns true if this attribute is a symbol reference attribute (i.e., a
-    // subclass of `SymbolRefAttr` or `FlatSymbolRefAttr`).
-    bool isSymbolRefAttr() const;
+  // Returns true if this attribute is a symbol reference attribute (i.e., a
+  // subclass of `SymbolRefAttr` or `FlatSymbolRefAttr`).
+  bool isSymbolRefAttr() const;
 
-    // Returns true if this attribute is an enum attribute (i.e., a subclass of
-    // `EnumAttrInfo`)
-    bool isEnumAttr() const;
+  // Returns true if this attribute is an enum attribute (i.e., a subclass of
+  // `EnumAttrInfo`)
+  bool isEnumAttr() const;
 
-    // Returns this attribute's TableGen def name. If this is an `OptionalAttr`
-    // or `DefaultValuedAttr` without explicit name, returns the base attribute's
-    // name.
-    StringRef getAttrDefName() const;
+  // Returns this attribute's TableGen def name. If this is an `OptionalAttr`
+  // or `DefaultValuedAttr` without explicit name, returns the base attribute's
+  // name.
+  StringRef getAttrDefName() const;
 
-    // Returns the code body for derived attribute. Aborts if this is not a
-    // derived attribute.
-    StringRef getDerivedCodeBody() const;
+  // Returns the code body for derived attribute. Aborts if this is not a
+  // derived attribute.
+  StringRef getDerivedCodeBody() const;
 
-    // Returns the dialect for the attribute if defined.
-    Dialect getDialect() const;
+  // Returns the dialect for the attribute if defined.
+  Dialect getDialect() const;
 };
 
 // Wrapper class providing helper methods for accessing MLIR constant attribute
@@ -122,17 +120,17 @@ public:
 // class `ConstantAttr` in TableGen.
 class ConstantAttr {
 public:
-    explicit ConstantAttr(const llvm::DefInit *init);
+  explicit ConstantAttr(const llvm::DefInit *init);
 
-    // Returns the attribute kind.
-    Attribute getAttribute() const;
+  // Returns the attribute kind.
+  Attribute getAttribute() const;
 
-    // Returns the constant value.
-    StringRef getConstantValue() const;
+  // Returns the constant value.
+  StringRef getConstantValue() const;
 
 private:
-    // The TableGen definition of this constant attribute.
-    const llvm::Record *def;
+  // The TableGen definition of this constant attribute.
+  const llvm::Record *def;
 };
 
 // Wrapper class providing helper methods for accessing enum attribute cases
@@ -140,23 +138,23 @@ private:
 // StringAttr and IntegerAttr.
 class EnumAttrCase : public Attribute {
 public:
-    explicit EnumAttrCase(const llvm::Record *record);
-    explicit EnumAttrCase(const llvm::DefInit *init);
+  explicit EnumAttrCase(const llvm::Record *record);
+  explicit EnumAttrCase(const llvm::DefInit *init);
 
-    // Returns true if this EnumAttrCase is backed by a StringAttr.
-    bool isStrCase() const;
+  // Returns true if this EnumAttrCase is backed by a StringAttr.
+  bool isStrCase() const;
 
-    // Returns the symbol of this enum attribute case.
-    StringRef getSymbol() const;
+  // Returns the symbol of this enum attribute case.
+  StringRef getSymbol() const;
 
-    // Returns the textual representation of this enum attribute case.
-    StringRef getStr() const;
+  // Returns the textual representation of this enum attribute case.
+  StringRef getStr() const;
 
-    // Returns the value of this enum attribute case.
-    int64_t getValue() const;
+  // Returns the value of this enum attribute case.
+  int64_t getValue() const;
 
-    // Returns the TableGen definition this EnumAttrCase was constructed from.
-    const llvm::Record &getDef() const;
+  // Returns the TableGen definition this EnumAttrCase was constructed from.
+  const llvm::Record &getDef() const;
 };
 
 // Wrapper class providing helper methods for accessing enum attributes defined
@@ -164,76 +162,76 @@ public:
 // and IntegerAttr.
 class EnumAttr : public Attribute {
 public:
-    explicit EnumAttr(const llvm::Record *record);
-    explicit EnumAttr(const llvm::Record &record);
-    explicit EnumAttr(const llvm::DefInit *init);
+  explicit EnumAttr(const llvm::Record *record);
+  explicit EnumAttr(const llvm::Record &record);
+  explicit EnumAttr(const llvm::DefInit *init);
 
-    static bool classof(const Attribute *attr);
+  static bool classof(const Attribute *attr);
 
-    // Returns true if this is a bit enum attribute.
-    bool isBitEnum() const;
+  // Returns true if this is a bit enum attribute.
+  bool isBitEnum() const;
 
-    // Returns the enum class name.
-    StringRef getEnumClassName() const;
+  // Returns the enum class name.
+  StringRef getEnumClassName() const;
 
-    // Returns the C++ namespaces this enum class should be placed in.
-    StringRef getCppNamespace() const;
+  // Returns the C++ namespaces this enum class should be placed in.
+  StringRef getCppNamespace() const;
 
-    // Returns the underlying type.
-    StringRef getUnderlyingType() const;
+  // Returns the underlying type.
+  StringRef getUnderlyingType() const;
 
-    // Returns the name of the utility function that converts a value of the
-    // underlying type to the corresponding symbol.
-    StringRef getUnderlyingToSymbolFnName() const;
+  // Returns the name of the utility function that converts a value of the
+  // underlying type to the corresponding symbol.
+  StringRef getUnderlyingToSymbolFnName() const;
 
-    // Returns the name of the utility function that converts a string to the
-    // corresponding symbol.
-    StringRef getStringToSymbolFnName() const;
+  // Returns the name of the utility function that converts a string to the
+  // corresponding symbol.
+  StringRef getStringToSymbolFnName() const;
 
-    // Returns the name of the utility function that converts a symbol to the
-    // corresponding string.
-    StringRef getSymbolToStringFnName() const;
+  // Returns the name of the utility function that converts a symbol to the
+  // corresponding string.
+  StringRef getSymbolToStringFnName() const;
 
-    // Returns the return type of the utility function that converts a symbol to
-    // the corresponding string.
-    StringRef getSymbolToStringFnRetType() const;
+  // Returns the return type of the utility function that converts a symbol to
+  // the corresponding string.
+  StringRef getSymbolToStringFnRetType() const;
 
-    // Returns the name of the utilit function that returns the max enum value
-    // used within the enum class.
-    StringRef getMaxEnumValFnName() const;
+  // Returns the name of the utilit function that returns the max enum value
+  // used within the enum class.
+  StringRef getMaxEnumValFnName() const;
 
-    // Returns all allowed cases for this enum attribute.
-    std::vector<EnumAttrCase> getAllCases() const;
+  // Returns all allowed cases for this enum attribute.
+  std::vector<EnumAttrCase> getAllCases() const;
 };
 
 class StructFieldAttr {
 public:
-    explicit StructFieldAttr(const llvm::Record *record);
-    explicit StructFieldAttr(const llvm::Record &record);
-    explicit StructFieldAttr(const llvm::DefInit *init);
+  explicit StructFieldAttr(const llvm::Record *record);
+  explicit StructFieldAttr(const llvm::Record &record);
+  explicit StructFieldAttr(const llvm::DefInit *init);
 
-    StringRef getName() const;
-    Attribute getType() const;
+  StringRef getName() const;
+  Attribute getType() const;
 
 private:
-    const llvm::Record *def;
+  const llvm::Record *def;
 };
 
 // Wrapper class providing helper methods for accessing struct attributes
 // defined in TableGen.
 class StructAttr : public Attribute {
 public:
-    explicit StructAttr(const llvm::Record *record);
-    explicit StructAttr(const llvm::Record &record) : StructAttr(&record) {};
-    explicit StructAttr(const llvm::DefInit *init);
+  explicit StructAttr(const llvm::Record *record);
+  explicit StructAttr(const llvm::Record &record) : StructAttr(&record){};
+  explicit StructAttr(const llvm::DefInit *init);
 
-    // Returns the struct class name.
-    StringRef getStructClassName() const;
+  // Returns the struct class name.
+  StringRef getStructClassName() const;
 
-    // Returns the C++ namespaces this struct class should be placed in.
-    StringRef getCppNamespace() const;
+  // Returns the C++ namespaces this struct class should be placed in.
+  StringRef getCppNamespace() const;
 
-    std::vector<StructFieldAttr> getAllFields() const;
+  std::vector<StructFieldAttr> getAllFields() const;
 };
 
 // Name of infer type op interface.

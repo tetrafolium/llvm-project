@@ -18,13 +18,13 @@ using namespace mlir;
 inline void iterateIndicesExcept(unsigned totalIndices,
                                  ArrayRef<unsigned> indices,
                                  function_ref<void(unsigned)> callback) {
-    llvm::BitVector skipIndices(totalIndices);
-    for (unsigned i : indices)
-        skipIndices.set(i);
+  llvm::BitVector skipIndices(totalIndices);
+  for (unsigned i : indices)
+    skipIndices.set(i);
 
-    for (unsigned i = 0; i < totalIndices; ++i)
-        if (!skipIndices.test(i))
-            callback(i);
+  for (unsigned i = 0; i < totalIndices; ++i)
+    if (!skipIndices.test(i))
+      callback(i);
 }
 
 //===----------------------------------------------------------------------===//
@@ -35,67 +35,67 @@ void mlir::impl::eraseFunctionArguments(Operation *op,
                                         ArrayRef<unsigned> argIndices,
                                         unsigned originalNumArgs,
                                         Type newType) {
-    // There are 3 things that need to be updated:
-    // - Function type.
-    // - Arg attrs.
-    // - Block arguments of entry block.
-    Block &entry = op->getRegion(0).front();
-    SmallString<8> nameBuf;
+  // There are 3 things that need to be updated:
+  // - Function type.
+  // - Arg attrs.
+  // - Block arguments of entry block.
+  Block &entry = op->getRegion(0).front();
+  SmallString<8> nameBuf;
 
-    // Collect arg attrs to set.
-    SmallVector<DictionaryAttr, 4> newArgAttrs;
-    iterateIndicesExcept(originalNumArgs, argIndices, [&](unsigned i) {
-        newArgAttrs.emplace_back(getArgAttrDict(op, i));
-    });
+  // Collect arg attrs to set.
+  SmallVector<DictionaryAttr, 4> newArgAttrs;
+  iterateIndicesExcept(originalNumArgs, argIndices, [&](unsigned i) {
+    newArgAttrs.emplace_back(getArgAttrDict(op, i));
+  });
 
-    // Remove any arg attrs that are no longer needed.
-    for (unsigned i = newArgAttrs.size(), e = originalNumArgs; i < e; ++i)
-        op->removeAttr(getArgAttrName(i, nameBuf));
+  // Remove any arg attrs that are no longer needed.
+  for (unsigned i = newArgAttrs.size(), e = originalNumArgs; i < e; ++i)
+    op->removeAttr(getArgAttrName(i, nameBuf));
 
-    // Set the function type.
-    op->setAttr(getTypeAttrName(), TypeAttr::get(newType));
+  // Set the function type.
+  op->setAttr(getTypeAttrName(), TypeAttr::get(newType));
 
-    // Set the new arg attrs, or remove them if empty.
-    for (unsigned i = 0, e = newArgAttrs.size(); i != e; ++i) {
-        auto nameAttr = getArgAttrName(i, nameBuf);
-        if (newArgAttrs[i] && !newArgAttrs[i].empty())
-            op->setAttr(nameAttr, newArgAttrs[i]);
-        else
-            op->removeAttr(nameAttr);
-    }
+  // Set the new arg attrs, or remove them if empty.
+  for (unsigned i = 0, e = newArgAttrs.size(); i != e; ++i) {
+    auto nameAttr = getArgAttrName(i, nameBuf);
+    if (newArgAttrs[i] && !newArgAttrs[i].empty())
+      op->setAttr(nameAttr, newArgAttrs[i]);
+    else
+      op->removeAttr(nameAttr);
+  }
 
-    // Update the entry block's arguments.
-    entry.eraseArguments(argIndices);
+  // Update the entry block's arguments.
+  entry.eraseArguments(argIndices);
 }
 
 void mlir::impl::eraseFunctionResults(Operation *op,
                                       ArrayRef<unsigned> resultIndices,
                                       unsigned originalNumResults,
                                       Type newType) {
-    // There are 2 things that need to be updated:
-    // - Function type.
-    // - Result attrs.
-    SmallString<8> nameBuf;
+  // There are 2 things that need to be updated:
+  // - Function type.
+  // - Result attrs.
+  SmallString<8> nameBuf;
 
-    // Collect result attrs to set.
-    SmallVector<DictionaryAttr, 4> newResultAttrs;
-    iterateIndicesExcept(originalNumResults, resultIndices, [&](unsigned i) {
-        newResultAttrs.emplace_back(getResultAttrDict(op, i));
-    });
+  // Collect result attrs to set.
+  SmallVector<DictionaryAttr, 4> newResultAttrs;
+  iterateIndicesExcept(originalNumResults, resultIndices, [&](unsigned i) {
+    newResultAttrs.emplace_back(getResultAttrDict(op, i));
+  });
 
-    // Remove any result attrs that are no longer needed.
-    for (unsigned i = newResultAttrs.size(), e = originalNumResults; i < e; ++i)
-        op->removeAttr(getResultAttrName(i, nameBuf));
+  // Remove any result attrs that are no longer needed.
+  for (unsigned i = newResultAttrs.size(), e = originalNumResults; i < e; ++i)
+    op->removeAttr(getResultAttrName(i, nameBuf));
 
-    // Set the function type.
-    op->setAttr(getTypeAttrName(), TypeAttr::get(newType));
+  // Set the function type.
+  op->setAttr(getTypeAttrName(), TypeAttr::get(newType));
 
-    // Set the new result attrs, or remove them if empty.
-    for (unsigned i = 0, e = newResultAttrs.size(); i != e; ++i) {
-        auto nameAttr = getResultAttrName(i, nameBuf);
-        if (newResultAttrs[i] && !newResultAttrs[i].empty())
-            op->setAttr(nameAttr, newResultAttrs[i]);
-        else
-            op->removeAttr(nameAttr);
-    }
+  // Set the new result attrs, or remove them if empty.
+  for (unsigned i = 0, e = newResultAttrs.size(); i != e; ++i) {
+    auto nameAttr = getResultAttrName(i, nameBuf);
+    if (newResultAttrs[i] && !newResultAttrs[i].empty())
+      op->setAttr(nameAttr, newResultAttrs[i]);
+    else
+      op->removeAttr(nameAttr);
+  }
 }

@@ -34,12 +34,12 @@ class ObjCMethodDecl;
 /// functions.
 class CodeInjector {
 public:
-    CodeInjector();
-    virtual ~CodeInjector();
+  CodeInjector();
+  virtual ~CodeInjector();
 
-    virtual Stmt *getBody(const FunctionDecl *D) = 0;
-    virtual Stmt *getBody(const ObjCMethodDecl *D) = 0;
+  virtual Stmt *getBody(const FunctionDecl *D) = 0;
+  virtual Stmt *getBody(const ObjCMethodDecl *D) = 0;
 };
-}
+} // namespace clang
 
 #endif

@@ -17,25 +17,25 @@
 using namespace llvm;
 
 bool llvm::canTrackArgumentsInterprocedurally(Function *F) {
-    return F->hasLocalLinkage() && !F->hasAddressTaken();
+  return F->hasLocalLinkage() && !F->hasAddressTaken();
 }
 
 bool llvm::canTrackReturnsInterprocedurally(Function *F) {
-    return F->hasExactDefinition() && !F->hasFnAttribute(Attribute::Naked);
+  return F->hasExactDefinition() && !F->hasFnAttribute(Attribute::Naked);
 }
 
 bool llvm::canTrackGlobalVariableInterprocedurally(GlobalVariable *GV) {
-    if (GV->isConstant() || !GV->hasLocalLinkage() ||
-            !GV->hasDefinitiveInitializer())
-        return false;
-    return all_of(GV->users(), [&](User *U) {
-        // Currently all users of a global variable have to be none-volatile loads
-        // or stores and the global cannot be stored itself.
-        if (auto *Store = dyn_cast<StoreInst>(U))
-            return Store->getValueOperand() != GV && !Store->isVolatile();
-        if (auto *Load = dyn_cast<LoadInst>(U))
-            return !Load->isVolatile();
+  if (GV->isConstant() || !GV->hasLocalLinkage() ||
+      !GV->hasDefinitiveInitializer())
+    return false;
+  return all_of(GV->users(), [&](User *U) {
+    // Currently all users of a global variable have to be none-volatile loads
+    // or stores and the global cannot be stored itself.
+    if (auto *Store = dyn_cast<StoreInst>(U))
+      return Store->getValueOperand() != GV && !Store->isVolatile();
+    if (auto *Load = dyn_cast<LoadInst>(U))
+      return !Load->isVolatile();
 
-        return false;
-    });
+    return false;
+  });
 }

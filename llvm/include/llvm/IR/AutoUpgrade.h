@@ -45,7 +45,7 @@ void UpgradeInlineAsmString(std::string *AsmStr);
 /// which need to have both the function updated as well as all calls updated
 /// to the new function. This should only be run in a post-processing fashion
 /// so that it can update all calls to the old function.
-void UpgradeCallsToIntrinsic(Function* F);
+void UpgradeCallsToIntrinsic(Function *F);
 
 /// This checks for global variables which should be upgraded. It it requires
 /// upgrading, returns a pointer to the upgraded variable.
@@ -85,7 +85,7 @@ bool UpgradeDebugInfo(Module &M);
 
 /// Check whether a string looks like an old loop attachment tag.
 inline bool mayBeOldLoopAttachmentTag(StringRef Name) {
-    return Name.startswith("llvm.vectorizer.");
+  return Name.startswith("llvm.vectorizer.");
 }
 
 /// Upgrade the loop attachment metadata node.
@@ -98,6 +98,6 @@ std::string UpgradeDataLayoutString(StringRef DL, StringRef Triple);
 /// Upgrade attributes that changed format or kind.
 void UpgradeAttributes(AttrBuilder &B);
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

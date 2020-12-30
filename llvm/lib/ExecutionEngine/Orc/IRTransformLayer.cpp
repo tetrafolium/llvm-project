@@ -19,14 +19,14 @@ IRTransformLayer::IRTransformLayer(ExecutionSession &ES, IRLayer &BaseLayer,
 
 void IRTransformLayer::emit(std::unique_ptr<MaterializationResponsibility> R,
                             ThreadSafeModule TSM) {
-    assert(TSM && "Module must not be null");
+  assert(TSM && "Module must not be null");
 
-    if (auto TransformedTSM = Transform(std::move(TSM), *R))
-        BaseLayer.emit(std::move(R), std::move(*TransformedTSM));
-    else {
-        R->failMaterialization();
-        getExecutionSession().reportError(TransformedTSM.takeError());
-    }
+  if (auto TransformedTSM = Transform(std::move(TSM), *R))
+    BaseLayer.emit(std::move(R), std::move(*TransformedTSM));
+  else {
+    R->failMaterialization();
+    getExecutionSession().reportError(TransformedTSM.takeError());
+  }
 }
 
 } // End namespace orc.

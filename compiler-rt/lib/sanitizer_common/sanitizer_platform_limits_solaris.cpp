@@ -112,12 +112,12 @@ int af_inet = (int)AF_INET;
 int af_inet6 = (int)AF_INET6;
 
 uptr __sanitizer_in_addr_sz(int af) {
-    if (af == AF_INET)
-        return sizeof(struct in_addr);
-    else if (af == AF_INET6)
-        return sizeof(struct in6_addr);
-    else
-        return 0;
+  if (af == AF_INET)
+    return sizeof(struct in_addr);
+  else if (af == AF_INET6)
+    return sizeof(struct in6_addr);
+  else
+    return 0;
 }
 
 unsigned struct_ElfW_Phdr_sz = sizeof(ElfW(Phdr));
@@ -185,7 +185,7 @@ unsigned IOCTL_MTIOCTOP = MTIOCTOP;
 
 const int si_SEGV_MAPERR = SEGV_MAPERR;
 const int si_SEGV_ACCERR = SEGV_ACCERR;
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
 using namespace __sanitizer;
 

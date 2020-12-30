@@ -28,12 +28,12 @@ extern "C" {
 // A descriptor must be initialized before being used for any purpose,
 // but needs reinitialization in a deallocated state only when there is
 // a change of type, rank, or corank.
-    void RTNAME(AllocatableInitIntrinsic)(
-        Descriptor &, TypeCategory, int kind, int rank = 0, int corank = 0);
-    void RTNAME(AllocatableInitCharacter)(Descriptor &, SubscriptValue length = 0,
-                                          int kind = 1, int rank = 0, int corank = 0);
-    void RTNAME(AllocatableInitDerived)(
-        Descriptor &, const typeInfo::DerivedType &, int rank = 0, int corank = 0);
+void RTNAME(AllocatableInitIntrinsic)(
+    Descriptor &, TypeCategory, int kind, int rank = 0, int corank = 0);
+void RTNAME(AllocatableInitCharacter)(Descriptor &, SubscriptValue length = 0,
+    int kind = 1, int rank = 0, int corank = 0);
+void RTNAME(AllocatableInitDerived)(
+    Descriptor &, const typeInfo::DerivedType &, int rank = 0, int corank = 0);
 
 // Checks that an allocatable is not already allocated in statements
 // with STAT=.  Use this on a value descriptor before setting bounds or
@@ -41,39 +41,39 @@ extern "C" {
 // (If there's no STAT=, the error will be caught later anyway, but
 // this API allows the error to be caught before descriptor is modified.)
 // Return 0 on success (deallocated state), else the STAT= value.
-    int RTNAME(AllocatableCheckAllocated)(Descriptor &,
-                                          Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
-                                          int sourceLine = 0);
+int RTNAME(AllocatableCheckAllocated)(Descriptor &,
+    Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
+    int sourceLine = 0);
 
 // For MOLD= allocation; sets bounds, cobounds, and length type
 // parameters from another descriptor.  The destination descriptor must
 // be initialized and deallocated.
-    void RTNAME(AllocatableApplyMold)(Descriptor &, const Descriptor &mold);
+void RTNAME(AllocatableApplyMold)(Descriptor &, const Descriptor &mold);
 
 // Explicitly sets the bounds and length type parameters of an initialized
 // deallocated allocatable.
-    void RTNAME(AllocatableSetBounds)(
-        Descriptor &, int zeroBasedDim, SubscriptValue lower, SubscriptValue upper);
+void RTNAME(AllocatableSetBounds)(
+    Descriptor &, int zeroBasedDim, SubscriptValue lower, SubscriptValue upper);
 
 // The upper bound is ignored for the last codimension.
-    void RTNAME(AllocatableSetCoBounds)(Descriptor &, int zeroBasedCoDim,
-                                        SubscriptValue lower, SubscriptValue upper = 0);
+void RTNAME(AllocatableSetCoBounds)(Descriptor &, int zeroBasedCoDim,
+    SubscriptValue lower, SubscriptValue upper = 0);
 
 // Length type parameters are indexed in declaration order; i.e., 0 is the
 // first length type parameter in the deepest base type.  (Not for use
 // with CHARACTER; see above.)
-    void RTNAME(AllocatableSetDerivedLength)(
-        Descriptor &, int which, SubscriptValue);
+void RTNAME(AllocatableSetDerivedLength)(
+    Descriptor &, int which, SubscriptValue);
 
 // When an explicit type-spec appears in an ALLOCATE statement for an
 // allocatable with an explicit (non-deferred) length type paramater for
 // a derived type or CHARACTER value, the explicit value has to match
 // the length type parameter's value.  This API checks that requirement.
 // Returns 0 for success, or the STAT= value on failure with hasStat==true.
-    int RTNAME(AllocatableCheckLengthParameter)(Descriptor &,
-            int which /* 0 for CHARACTER length */, SubscriptValue other,
-            bool hasStat = false, Descriptor *errMsg = nullptr,
-            const char *sourceFile = nullptr, int sourceLine = 0);
+int RTNAME(AllocatableCheckLengthParameter)(Descriptor &,
+    int which /* 0 for CHARACTER length */, SubscriptValue other,
+    bool hasStat = false, Descriptor *errMsg = nullptr,
+    const char *sourceFile = nullptr, int sourceLine = 0);
 
 // Allocates an allocatable.  The allocatable descriptor must have been
 // initialized and its bounds and length type parameters set and must be
@@ -84,12 +84,12 @@ extern "C" {
 // Successfully allocated memory is initialized if the allocatable has a
 // derived type, and is always initialized by AllocatableAllocateSource().
 // Performs all necessary coarray synchronization and validation actions.
-    int RTNAME(AllocatableAllocate)(Descriptor &, bool hasStat = false,
-                                    Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
-                                    int sourceLine = 0);
-    int RTNAME(AllocatableAllocateSource)(Descriptor &, const Descriptor &source,
-                                          bool hasStat = false, Descriptor *errMsg = nullptr,
-                                          const char *sourceFile = nullptr, int sourceLine = 0);
+int RTNAME(AllocatableAllocate)(Descriptor &, bool hasStat = false,
+    Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
+    int sourceLine = 0);
+int RTNAME(AllocatableAllocateSource)(Descriptor &, const Descriptor &source,
+    bool hasStat = false, Descriptor *errMsg = nullptr,
+    const char *sourceFile = nullptr, int sourceLine = 0);
 
 // Assigns to a whole allocatable, with automatic (re)allocation when the
 // destination is unallocated or nonconforming (Fortran 2003 semantics).
@@ -98,22 +98,22 @@ extern "C" {
 // TODO: Consider renaming to a more general name that will work for
 // assignments to pointers, dummy arguments, and anything else with a
 // descriptor.
-    void RTNAME(AllocatableAssign)(Descriptor &to, const Descriptor &from);
+void RTNAME(AllocatableAssign)(Descriptor &to, const Descriptor &from);
 
 // Implements the intrinsic subroutine MOVE_ALLOC (16.9.137 in F'2018,
 // but note the order of first two arguments is reversed for consistency
 // with the other APIs for allocatables.)  The destination descriptor
 // must be initialized.
-    int RTNAME(MoveAlloc)(Descriptor &to, const Descriptor &from,
-                          bool hasStat = false, Descriptor *errMsg = nullptr,
-                          const char *sourceFile = nullptr, int sourceLine = 0);
+int RTNAME(MoveAlloc)(Descriptor &to, const Descriptor &from,
+    bool hasStat = false, Descriptor *errMsg = nullptr,
+    const char *sourceFile = nullptr, int sourceLine = 0);
 
 // Deallocates an allocatable.  Finalizes elements &/or components as needed.
 // The allocatable is left in an initialized state suitable for reallocation
 // with the same bounds, cobounds, and length type parameters.
-    int RTNAME(AllocatableDeallocate)(Descriptor &, bool hasStat = false,
-                                      Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
-                                      int sourceLine = 0);
+int RTNAME(AllocatableDeallocate)(Descriptor &, bool hasStat = false,
+    Descriptor *errMsg = nullptr, const char *sourceFile = nullptr,
+    int sourceLine = 0);
 }
 } // namespace Fortran::runtime
 #endif // FORTRAN_RUNTIME_ALLOCATABLE_H_

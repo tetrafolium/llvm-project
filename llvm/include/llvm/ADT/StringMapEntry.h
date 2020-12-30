@@ -21,14 +21,12 @@ namespace llvm {
 
 /// StringMapEntryBase - Shared base class of StringMapEntry instances.
 class StringMapEntryBase {
-    size_t keyLength;
+  size_t keyLength;
 
 public:
-    explicit StringMapEntryBase(size_t keyLength) : keyLength(keyLength) {}
+  explicit StringMapEntryBase(size_t keyLength) : keyLength(keyLength) {}
 
-    size_t getKeyLength() const {
-        return keyLength;
-    }
+  size_t getKeyLength() const { return keyLength; }
 };
 
 /// StringMapEntryStorage - Holds the value in a StringMapEntry.
@@ -39,37 +37,29 @@ public:
 template <typename ValueTy>
 class StringMapEntryStorage : public StringMapEntryBase {
 public:
-    ValueTy second;
+  ValueTy second;
 
-    explicit StringMapEntryStorage(size_t keyLength)
-        : StringMapEntryBase(keyLength), second() {}
-    template <typename... InitTy>
-    StringMapEntryStorage(size_t keyLength, InitTy &&... initVals)
-        : StringMapEntryBase(keyLength),
-          second(std::forward<InitTy>(initVals)...) {}
-    StringMapEntryStorage(StringMapEntryStorage &e) = delete;
+  explicit StringMapEntryStorage(size_t keyLength)
+      : StringMapEntryBase(keyLength), second() {}
+  template <typename... InitTy>
+  StringMapEntryStorage(size_t keyLength, InitTy &&... initVals)
+      : StringMapEntryBase(keyLength),
+        second(std::forward<InitTy>(initVals)...) {}
+  StringMapEntryStorage(StringMapEntryStorage &e) = delete;
 
-    const ValueTy &getValue() const {
-        return second;
-    }
-    ValueTy &getValue() {
-        return second;
-    }
+  const ValueTy &getValue() const { return second; }
+  ValueTy &getValue() { return second; }
 
-    void setValue(const ValueTy &V) {
-        second = V;
-    }
+  void setValue(const ValueTy &V) { second = V; }
 };
 
 template <> class StringMapEntryStorage<NoneType> : public StringMapEntryBase {
 public:
-    explicit StringMapEntryStorage(size_t keyLength, NoneType none = None)
-        : StringMapEntryBase(keyLength) {}
-    StringMapEntryStorage(StringMapEntryStorage &entry) = delete;
+  explicit StringMapEntryStorage(size_t keyLength, NoneType none = None)
+      : StringMapEntryBase(keyLength) {}
+  StringMapEntryStorage(StringMapEntryStorage &entry) = delete;
 
-    NoneType getValue() const {
-        return None;
-    }
+  NoneType getValue() const { return None; }
 };
 
 /// StringMapEntry - This is used to represent one value that is inserted into
@@ -78,66 +68,66 @@ public:
 template <typename ValueTy>
 class StringMapEntry final : public StringMapEntryStorage<ValueTy> {
 public:
-    using StringMapEntryStorage<ValueTy>::StringMapEntryStorage;
+  using StringMapEntryStorage<ValueTy>::StringMapEntryStorage;
 
-    StringRef getKey() const {
-        return StringRef(getKeyData(), this->getKeyLength());
-    }
+  StringRef getKey() const {
+    return StringRef(getKeyData(), this->getKeyLength());
+  }
 
-    /// getKeyData - Return the start of the string data that is the key for this
-    /// value.  The string data is always stored immediately after the
-    /// StringMapEntry object.
-    const char *getKeyData() const {
-        return reinterpret_cast<const char *>(this + 1);
-    }
+  /// getKeyData - Return the start of the string data that is the key for this
+  /// value.  The string data is always stored immediately after the
+  /// StringMapEntry object.
+  const char *getKeyData() const {
+    return reinterpret_cast<const char *>(this + 1);
+  }
 
-    StringRef first() const {
-        return StringRef(getKeyData(), this->getKeyLength());
-    }
+  StringRef first() const {
+    return StringRef(getKeyData(), this->getKeyLength());
+  }
 
-    /// Create a StringMapEntry for the specified key construct the value using
-    /// \p InitiVals.
-    template <typename AllocatorTy, typename... InitTy>
-    static StringMapEntry *Create(StringRef key, AllocatorTy &allocator,
-                                  InitTy &&... initVals) {
-        size_t keyLength = key.size();
+  /// Create a StringMapEntry for the specified key construct the value using
+  /// \p InitiVals.
+  template <typename AllocatorTy, typename... InitTy>
+  static StringMapEntry *Create(StringRef key, AllocatorTy &allocator,
+                                InitTy &&... initVals) {
+    size_t keyLength = key.size();
 
-        // Allocate a new item with space for the string at the end and a null
-        // terminator.
-        size_t allocSize = sizeof(StringMapEntry) + keyLength + 1;
-        size_t alignment = alignof(StringMapEntry);
+    // Allocate a new item with space for the string at the end and a null
+    // terminator.
+    size_t allocSize = sizeof(StringMapEntry) + keyLength + 1;
+    size_t alignment = alignof(StringMapEntry);
 
-        StringMapEntry *newItem =
-            static_cast<StringMapEntry *>(allocator.Allocate(allocSize, alignment));
-        assert(newItem && "Unhandled out-of-memory");
+    StringMapEntry *newItem =
+        static_cast<StringMapEntry *>(allocator.Allocate(allocSize, alignment));
+    assert(newItem && "Unhandled out-of-memory");
 
-        // Construct the value.
-        new (newItem) StringMapEntry(keyLength, std::forward<InitTy>(initVals)...);
+    // Construct the value.
+    new (newItem) StringMapEntry(keyLength, std::forward<InitTy>(initVals)...);
 
-        // Copy the string information.
-        char *strBuffer = const_cast<char *>(newItem->getKeyData());
-        if (keyLength > 0)
-            memcpy(strBuffer, key.data(), keyLength);
-        strBuffer[keyLength] = 0; // Null terminate for convenience of clients.
-        return newItem;
-    }
+    // Copy the string information.
+    char *strBuffer = const_cast<char *>(newItem->getKeyData());
+    if (keyLength > 0)
+      memcpy(strBuffer, key.data(), keyLength);
+    strBuffer[keyLength] = 0; // Null terminate for convenience of clients.
+    return newItem;
+  }
 
-    /// GetStringMapEntryFromKeyData - Given key data that is known to be embedded
-    /// into a StringMapEntry, return the StringMapEntry itself.
-    static StringMapEntry &GetStringMapEntryFromKeyData(const char *keyData) {
-        char *ptr = const_cast<char *>(keyData) - sizeof(StringMapEntry<ValueTy>);
-        return *reinterpret_cast<StringMapEntry *>(ptr);
-    }
+  /// GetStringMapEntryFromKeyData - Given key data that is known to be embedded
+  /// into a StringMapEntry, return the StringMapEntry itself.
+  static StringMapEntry &GetStringMapEntryFromKeyData(const char *keyData) {
+    char *ptr = const_cast<char *>(keyData) - sizeof(StringMapEntry<ValueTy>);
+    return *reinterpret_cast<StringMapEntry *>(ptr);
+  }
 
-    /// Destroy - Destroy this StringMapEntry, releasing memory back to the
-    /// specified allocator.
-    template <typename AllocatorTy> void Destroy(AllocatorTy &allocator) {
-        // Free memory referenced by the item.
-        size_t AllocSize = sizeof(StringMapEntry) + this->getKeyLength() + 1;
-        this->~StringMapEntry();
-        allocator.Deallocate(static_cast<void *>(this), AllocSize,
-                             alignof(StringMapEntry));
-    }
+  /// Destroy - Destroy this StringMapEntry, releasing memory back to the
+  /// specified allocator.
+  template <typename AllocatorTy> void Destroy(AllocatorTy &allocator) {
+    // Free memory referenced by the item.
+    size_t AllocSize = sizeof(StringMapEntry) + this->getKeyLength() + 1;
+    this->~StringMapEntry();
+    allocator.Deallocate(static_cast<void *>(this), AllocSize,
+                         alignof(StringMapEntry));
+  }
 };
 
 } // end namespace llvm

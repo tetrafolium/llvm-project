@@ -41,103 +41,100 @@ class MLIRContext;
 /// allocated by the bump pointer allocator.
 class IntegerSet {
 public:
-    using ImplType = detail::IntegerSetStorage;
+  using ImplType = detail::IntegerSetStorage;
 
-    constexpr IntegerSet() : set(nullptr) {}
-    explicit IntegerSet(ImplType *set) : set(set) {}
+  constexpr IntegerSet() : set(nullptr) {}
+  explicit IntegerSet(ImplType *set) : set(set) {}
 
-    static IntegerSet get(unsigned dimCount, unsigned symbolCount,
-                          ArrayRef<AffineExpr> constraints,
-                          ArrayRef<bool> eqFlags);
+  static IntegerSet get(unsigned dimCount, unsigned symbolCount,
+                        ArrayRef<AffineExpr> constraints,
+                        ArrayRef<bool> eqFlags);
 
-    // Returns the canonical empty IntegerSet (i.e. a set with no integer points).
-    static IntegerSet getEmptySet(unsigned numDims, unsigned numSymbols,
-                                  MLIRContext *context) {
-        auto one = getAffineConstantExpr(1, context);
-        /* 1 == 0 */
-        return get(numDims, numSymbols, one, true);
-    }
+  // Returns the canonical empty IntegerSet (i.e. a set with no integer points).
+  static IntegerSet getEmptySet(unsigned numDims, unsigned numSymbols,
+                                MLIRContext *context) {
+    auto one = getAffineConstantExpr(1, context);
+    /* 1 == 0 */
+    return get(numDims, numSymbols, one, true);
+  }
 
-    /// Returns true if this is the canonical integer set.
-    bool isEmptyIntegerSet() const;
+  /// Returns true if this is the canonical integer set.
+  bool isEmptyIntegerSet() const;
 
-    /// This method substitutes any uses of dimensions and symbols (e.g.
-    /// dim#0 with dimReplacements[0]) in subexpressions and returns the modified
-    /// integer set.  Because this can be used to eliminate dims and
-    /// symbols, the client needs to specify the number of dims and symbols in
-    /// the result.  The returned map always has the same number of results.
-    IntegerSet replaceDimsAndSymbols(ArrayRef<AffineExpr> dimReplacements,
-                                     ArrayRef<AffineExpr> symReplacements,
-                                     unsigned numResultDims,
-                                     unsigned numResultSyms);
+  /// This method substitutes any uses of dimensions and symbols (e.g.
+  /// dim#0 with dimReplacements[0]) in subexpressions and returns the modified
+  /// integer set.  Because this can be used to eliminate dims and
+  /// symbols, the client needs to specify the number of dims and symbols in
+  /// the result.  The returned map always has the same number of results.
+  IntegerSet replaceDimsAndSymbols(ArrayRef<AffineExpr> dimReplacements,
+                                   ArrayRef<AffineExpr> symReplacements,
+                                   unsigned numResultDims,
+                                   unsigned numResultSyms);
 
-    explicit operator bool() {
-        return set;
-    }
-    bool operator==(IntegerSet other) const {
-        return set == other.set;
-    }
+  explicit operator bool() { return set; }
+  bool operator==(IntegerSet other) const { return set == other.set; }
 
-    unsigned getNumDims() const;
-    unsigned getNumSymbols() const;
-    unsigned getNumInputs() const;
-    unsigned getNumConstraints() const;
-    unsigned getNumEqualities() const;
-    unsigned getNumInequalities() const;
+  unsigned getNumDims() const;
+  unsigned getNumSymbols() const;
+  unsigned getNumInputs() const;
+  unsigned getNumConstraints() const;
+  unsigned getNumEqualities() const;
+  unsigned getNumInequalities() const;
 
-    ArrayRef<AffineExpr> getConstraints() const;
+  ArrayRef<AffineExpr> getConstraints() const;
 
-    AffineExpr getConstraint(unsigned idx) const;
+  AffineExpr getConstraint(unsigned idx) const;
 
-    /// Returns the equality bits, which specify whether each of the constraints
-    /// is an equality or inequality.
-    ArrayRef<bool> getEqFlags() const;
+  /// Returns the equality bits, which specify whether each of the constraints
+  /// is an equality or inequality.
+  ArrayRef<bool> getEqFlags() const;
 
-    /// Returns true if the idx^th constraint is an equality, false if it is an
-    /// inequality.
-    bool isEq(unsigned idx) const;
+  /// Returns true if the idx^th constraint is an equality, false if it is an
+  /// inequality.
+  bool isEq(unsigned idx) const;
 
-    MLIRContext *getContext() const;
+  MLIRContext *getContext() const;
 
-    /// Walk all of the AffineExpr's in this set's constraints. Each node in an
-    /// expression tree is visited in postorder.
-    void walkExprs(function_ref<void(AffineExpr)> callback) const;
+  /// Walk all of the AffineExpr's in this set's constraints. Each node in an
+  /// expression tree is visited in postorder.
+  void walkExprs(function_ref<void(AffineExpr)> callback) const;
 
-    void print(raw_ostream &os) const;
-    void dump() const;
+  void print(raw_ostream &os) const;
+  void dump() const;
 
-    friend ::llvm::hash_code hash_value(IntegerSet arg);
+  friend ::llvm::hash_code hash_value(IntegerSet arg);
 
 private:
-    ImplType *set;
-    /// Sets with constraints fewer than kUniquingThreshold are uniqued.
-    constexpr static unsigned kUniquingThreshold = 4;
+  ImplType *set;
+  /// Sets with constraints fewer than kUniquingThreshold are uniqued.
+  constexpr static unsigned kUniquingThreshold = 4;
 };
 
 // Make AffineExpr hashable.
 inline ::llvm::hash_code hash_value(IntegerSet arg) {
-    return ::llvm::hash_value(arg.set);
+  return ::llvm::hash_value(arg.set);
 }
 
 } // end namespace mlir
 namespace llvm {
 
 // IntegerSet hash just like pointers
-template <> struct DenseMapInfo<mlir::IntegerSet> {
-    static mlir::IntegerSet getEmptyKey() {
-        auto pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
-        return mlir::IntegerSet(static_cast<mlir::IntegerSet::ImplType *>(pointer));
-    }
-    static mlir::IntegerSet getTombstoneKey() {
-        auto pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
-        return mlir::IntegerSet(static_cast<mlir::IntegerSet::ImplType *>(pointer));
-    }
-    static unsigned getHashValue(mlir::IntegerSet val) {
-        return mlir::hash_value(val);
-    }
-    static bool isEqual(mlir::IntegerSet LHS, mlir::IntegerSet RHS) {
-        return LHS == RHS;
-    }
+template <>
+struct DenseMapInfo<mlir::IntegerSet> {
+  static mlir::IntegerSet getEmptyKey() {
+    auto pointer = llvm::DenseMapInfo<void *>::getEmptyKey();
+    return mlir::IntegerSet(static_cast<mlir::IntegerSet::ImplType *>(pointer));
+  }
+  static mlir::IntegerSet getTombstoneKey() {
+    auto pointer = llvm::DenseMapInfo<void *>::getTombstoneKey();
+    return mlir::IntegerSet(static_cast<mlir::IntegerSet::ImplType *>(pointer));
+  }
+  static unsigned getHashValue(mlir::IntegerSet val) {
+    return mlir::hash_value(val);
+  }
+  static bool isEqual(mlir::IntegerSet LHS, mlir::IntegerSet RHS) {
+    return LHS == RHS;
+  }
 };
 
 } // namespace llvm

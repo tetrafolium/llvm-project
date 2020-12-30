@@ -16,11 +16,11 @@
 namespace lldb_private {
 
 struct HardwareBreakpoint {
-    lldb::addr_t m_addr;
-    size_t m_size;
+  lldb::addr_t m_addr;
+  size_t m_size;
 };
 
 using HardwareBreakpointMap = std::map<lldb::addr_t, HardwareBreakpoint>;
-}
+} // namespace lldb_private
 
 #endif // LLDB_HOST_COMMON_NATIVEBREAKPOINTLIST_H

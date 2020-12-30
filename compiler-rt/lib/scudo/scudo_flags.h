@@ -20,13 +20,13 @@ struct Flags {
 #include "scudo_flags.inc"
 #undef SCUDO_FLAG
 
-    void setDefaults();
+  void setDefaults();
 };
 
 Flags *getFlags();
 
 void initFlags();
 
-}  // namespace __scudo
+} // namespace __scudo
 
-#endif  // SCUDO_FLAGS_H_
+#endif // SCUDO_FLAGS_H_

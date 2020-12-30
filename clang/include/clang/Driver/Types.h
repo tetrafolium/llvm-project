@@ -21,11 +21,11 @@ namespace driver {
 class Driver;
 namespace types {
 enum ID {
-    TY_INVALID,
+  TY_INVALID,
 #define TYPE(NAME, ID, PP_TYPE, TEMP_SUFFIX, ...) TY_##ID,
 #include "clang/Driver/Types.def"
 #undef TYPE
-    TY_LAST
+  TY_LAST
 };
 
 /// getTypeName - Return the name of the type for \p Id.

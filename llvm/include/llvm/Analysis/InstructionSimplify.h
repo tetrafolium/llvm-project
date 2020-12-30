@@ -61,80 +61,80 @@ class Value;
 /// instructions like metadata or keywords like nsw, which provides conservative
 /// results if the users specified it is safe to use.
 struct InstrInfoQuery {
-    InstrInfoQuery(bool UMD) : UseInstrInfo(UMD) {}
-    InstrInfoQuery() : UseInstrInfo(true) {}
-    bool UseInstrInfo = true;
+  InstrInfoQuery(bool UMD) : UseInstrInfo(UMD) {}
+  InstrInfoQuery() : UseInstrInfo(true) {}
+  bool UseInstrInfo = true;
 
-    MDNode *getMetadata(const Instruction *I, unsigned KindID) const {
-        if (UseInstrInfo)
-            return I->getMetadata(KindID);
-        return nullptr;
-    }
+  MDNode *getMetadata(const Instruction *I, unsigned KindID) const {
+    if (UseInstrInfo)
+      return I->getMetadata(KindID);
+    return nullptr;
+  }
 
-    template <class InstT> bool hasNoUnsignedWrap(const InstT *Op) const {
-        if (UseInstrInfo)
-            return Op->hasNoUnsignedWrap();
-        return false;
-    }
+  template <class InstT> bool hasNoUnsignedWrap(const InstT *Op) const {
+    if (UseInstrInfo)
+      return Op->hasNoUnsignedWrap();
+    return false;
+  }
 
-    template <class InstT> bool hasNoSignedWrap(const InstT *Op) const {
-        if (UseInstrInfo)
-            return Op->hasNoSignedWrap();
-        return false;
-    }
+  template <class InstT> bool hasNoSignedWrap(const InstT *Op) const {
+    if (UseInstrInfo)
+      return Op->hasNoSignedWrap();
+    return false;
+  }
 
-    bool isExact(const BinaryOperator *Op) const {
-        if (UseInstrInfo && isa<PossiblyExactOperator>(Op))
-            return cast<PossiblyExactOperator>(Op)->isExact();
-        return false;
-    }
+  bool isExact(const BinaryOperator *Op) const {
+    if (UseInstrInfo && isa<PossiblyExactOperator>(Op))
+      return cast<PossiblyExactOperator>(Op)->isExact();
+    return false;
+  }
 };
 
 struct SimplifyQuery {
-    const DataLayout &DL;
-    const TargetLibraryInfo *TLI = nullptr;
-    const DominatorTree *DT = nullptr;
-    AssumptionCache *AC = nullptr;
-    const Instruction *CxtI = nullptr;
+  const DataLayout &DL;
+  const TargetLibraryInfo *TLI = nullptr;
+  const DominatorTree *DT = nullptr;
+  AssumptionCache *AC = nullptr;
+  const Instruction *CxtI = nullptr;
 
-    // Wrapper to query additional information for instructions like metadata or
-    // keywords like nsw, which provides conservative results if those cannot
-    // be safely used.
-    const InstrInfoQuery IIQ;
+  // Wrapper to query additional information for instructions like metadata or
+  // keywords like nsw, which provides conservative results if those cannot
+  // be safely used.
+  const InstrInfoQuery IIQ;
 
-    /// Controls whether simplifications are allowed to constrain the range of
-    /// possible values for uses of undef. If it is false, simplifications are not
-    /// allowed to assume a particular value for a use of undef for example.
-    bool CanUseUndef = true;
+  /// Controls whether simplifications are allowed to constrain the range of
+  /// possible values for uses of undef. If it is false, simplifications are not
+  /// allowed to assume a particular value for a use of undef for example.
+  bool CanUseUndef = true;
 
-    SimplifyQuery(const DataLayout &DL, const Instruction *CXTI = nullptr)
-        : DL(DL), CxtI(CXTI) {}
+  SimplifyQuery(const DataLayout &DL, const Instruction *CXTI = nullptr)
+      : DL(DL), CxtI(CXTI) {}
 
-    SimplifyQuery(const DataLayout &DL, const TargetLibraryInfo *TLI,
-                  const DominatorTree *DT = nullptr,
-                  AssumptionCache *AC = nullptr,
-                  const Instruction *CXTI = nullptr, bool UseInstrInfo = true,
-                  bool CanUseUndef = true)
-        : DL(DL), TLI(TLI), DT(DT), AC(AC), CxtI(CXTI), IIQ(UseInstrInfo),
-          CanUseUndef(CanUseUndef) {}
-    SimplifyQuery getWithInstruction(Instruction *I) const {
-        SimplifyQuery Copy(*this);
-        Copy.CxtI = I;
-        return Copy;
-    }
-    SimplifyQuery getWithoutUndef() const {
-        SimplifyQuery Copy(*this);
-        Copy.CanUseUndef = false;
-        return Copy;
-    }
+  SimplifyQuery(const DataLayout &DL, const TargetLibraryInfo *TLI,
+                const DominatorTree *DT = nullptr,
+                AssumptionCache *AC = nullptr,
+                const Instruction *CXTI = nullptr, bool UseInstrInfo = true,
+                bool CanUseUndef = true)
+      : DL(DL), TLI(TLI), DT(DT), AC(AC), CxtI(CXTI), IIQ(UseInstrInfo),
+        CanUseUndef(CanUseUndef) {}
+  SimplifyQuery getWithInstruction(Instruction *I) const {
+    SimplifyQuery Copy(*this);
+    Copy.CxtI = I;
+    return Copy;
+  }
+  SimplifyQuery getWithoutUndef() const {
+    SimplifyQuery Copy(*this);
+    Copy.CanUseUndef = false;
+    return Copy;
+  }
 
-    /// If CanUseUndef is true, returns whether \p V is undef.
-    /// Otherwise always return false.
-    bool isUndefValue(Value *V) const {
-        if (!CanUseUndef)
-            return false;
-        return isa<UndefValue>(V);
-    }
+  /// If CanUseUndef is true, returns whether \p V is undef.
+  /// Otherwise always return false.
+  bool isUndefValue(Value *V) const {
+    if (!CanUseUndef)
+      return false;
+    return isa<UndefValue>(V);
+  }
 };
 
 // NOTE: the explicit multiple argument versions of these functions are
@@ -142,8 +142,7 @@ struct SimplifyQuery {
 // Please use the SimplifyQuery versions in new code.
 
 /// Given operand for an FNeg, fold the result or return null.
-Value *SimplifyFNegInst(Value *Op, FastMathFlags FMF,
-                        const SimplifyQuery &Q);
+Value *SimplifyFNegInst(Value *Op, FastMathFlags FMF, const SimplifyQuery &Q);
 
 /// Given operands for an Add, fold the result or return null.
 Value *SimplifyAddInst(Value *LHS, Value *RHS, bool isNSW, bool isNUW,
@@ -277,8 +276,8 @@ Value *SimplifyBinOp(unsigned Opcode, Value *LHS, Value *RHS,
 
 /// Given operands for a BinaryOperator, fold the result or return null.
 /// Try to use FastMathFlags when folding the result.
-Value *SimplifyBinOp(unsigned Opcode, Value *LHS, Value *RHS,
-                     FastMathFlags FMF, const SimplifyQuery &Q);
+Value *SimplifyBinOp(unsigned Opcode, Value *LHS, Value *RHS, FastMathFlags FMF,
+                     const SimplifyQuery &Q);
 
 /// Given a callsite, fold the result or return null.
 Value *SimplifyCall(CallBase *Call, const SimplifyQuery &Q);
@@ -330,10 +329,9 @@ bool recursivelySimplifyInstruction(Instruction *I,
 const SimplifyQuery getBestSimplifyQuery(Pass &, Function &);
 template <class T, class... TArgs>
 const SimplifyQuery getBestSimplifyQuery(AnalysisManager<T, TArgs...> &,
-        Function &);
+                                         Function &);
 const SimplifyQuery getBestSimplifyQuery(LoopStandardAnalysisResults &,
-        const DataLayout &);
+                                         const DataLayout &);
 } // end namespace llvm
 
 #endif
-

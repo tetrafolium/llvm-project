@@ -38,28 +38,26 @@ static StringRef MASSVFuncs[] = {
 
 class PPCLowerMASSVEntries : public ModulePass {
 public:
-    static char ID;
+  static char ID;
 
-    PPCLowerMASSVEntries() : ModulePass(ID) {}
+  PPCLowerMASSVEntries() : ModulePass(ID) {}
 
-    bool runOnModule(Module &M) override;
+  bool runOnModule(Module &M) override;
 
-    StringRef getPassName() const override {
-        return "PPC Lower MASS Entries";
-    }
+  StringRef getPassName() const override { return "PPC Lower MASS Entries"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<TargetTransformInfoWrapperPass>();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<TargetTransformInfoWrapperPass>();
+  }
 
 private:
-    static bool isMASSVFunc(StringRef Name);
-    static StringRef getCPUSuffix(const PPCSubtarget *Subtarget);
-    static std::string createMASSVFuncName(Function &Func,
-                                           const PPCSubtarget *Subtarget);
-    bool handlePowSpecialCases(CallInst *CI, Function &Func, Module &M);
-    bool lowerMASSVCall(CallInst *CI, Function &Func, Module &M,
-                        const PPCSubtarget *Subtarget);
+  static bool isMASSVFunc(StringRef Name);
+  static StringRef getCPUSuffix(const PPCSubtarget *Subtarget);
+  static std::string createMASSVFuncName(Function &Func,
+                                         const PPCSubtarget *Subtarget);
+  bool handlePowSpecialCases(CallInst *CI, Function &Func, Module &M);
+  bool lowerMASSVCall(CallInst *CI, Function &Func, Module &M,
+                      const PPCSubtarget *Subtarget);
 };
 
 } // namespace
@@ -67,7 +65,7 @@ private:
 /// Checks if the specified function name represents an entry in the MASSV
 /// library.
 bool PPCLowerMASSVEntries::isMASSVFunc(StringRef Name) {
-    return llvm::is_contained(MASSVFuncs, Name);
+  return llvm::is_contained(MASSVFuncs, Name);
 }
 
 // FIXME:
@@ -76,114 +74,114 @@ bool PPCLowerMASSVEntries::isMASSVFunc(StringRef Name) {
 /// generating subtarget-specific MASSV library functions. Current support
 /// includes  Power8 and Power9 subtargets.
 StringRef PPCLowerMASSVEntries::getCPUSuffix(const PPCSubtarget *Subtarget) {
-    // Assume Power8 when Subtarget is unavailable.
-    if (!Subtarget)
-        return "P8";
-    if (Subtarget->hasP9Vector())
-        return "P9";
-    if (Subtarget->hasP8Vector())
-        return "P8";
+  // Assume Power8 when Subtarget is unavailable.
+  if (!Subtarget)
+    return "P8";
+  if (Subtarget->hasP9Vector())
+    return "P9";
+  if (Subtarget->hasP8Vector())
+    return "P8";
 
-    report_fatal_error("Unsupported Subtarget: MASSV is supported only on "
-                       "Power8 and Power9 subtargets.");
+  report_fatal_error("Unsupported Subtarget: MASSV is supported only on "
+                     "Power8 and Power9 subtargets.");
 }
 
 /// Creates PowerPC subtarget-specific name corresponding to the specified
 /// generic MASSV function, and the PowerPC subtarget.
 std::string
 PPCLowerMASSVEntries::createMASSVFuncName(Function &Func,
-        const PPCSubtarget *Subtarget) {
-    StringRef Suffix = getCPUSuffix(Subtarget);
-    auto GenericName = Func.getName().drop_back(MASSVSuffixLength).str();
-    std::string MASSVEntryName = GenericName + Suffix.str();
-    return MASSVEntryName;
+                                          const PPCSubtarget *Subtarget) {
+  StringRef Suffix = getCPUSuffix(Subtarget);
+  auto GenericName = Func.getName().drop_back(MASSVSuffixLength).str();
+  std::string MASSVEntryName = GenericName + Suffix.str();
+  return MASSVEntryName;
 }
 
 /// If there are proper fast-math flags, this function creates llvm.pow
 /// intrinsics when the exponent is 0.25 or 0.75.
 bool PPCLowerMASSVEntries::handlePowSpecialCases(CallInst *CI, Function &Func,
-        Module &M) {
-    if (Func.getName() != "__powf4_massv" && Func.getName() != "__powd2_massv")
+                                                 Module &M) {
+  if (Func.getName() != "__powf4_massv" && Func.getName() != "__powd2_massv")
+    return false;
+
+  if (Constant *Exp = dyn_cast<Constant>(CI->getArgOperand(1)))
+    if (ConstantFP *CFP = dyn_cast_or_null<ConstantFP>(Exp->getSplatValue())) {
+      // If the argument is 0.75 or 0.25 it is cheaper to turn it into pow
+      // intrinsic so that it could be optimzed as sequence of sqrt's.
+      if (!CI->hasNoInfs() || !CI->hasApproxFunc())
         return false;
 
-    if (Constant *Exp = dyn_cast<Constant>(CI->getArgOperand(1)))
-        if (ConstantFP *CFP = dyn_cast_or_null<ConstantFP>(Exp->getSplatValue())) {
-            // If the argument is 0.75 or 0.25 it is cheaper to turn it into pow
-            // intrinsic so that it could be optimzed as sequence of sqrt's.
-            if (!CI->hasNoInfs() || !CI->hasApproxFunc())
-                return false;
+      if (!CFP->isExactlyValue(0.75) && !CFP->isExactlyValue(0.25))
+        return false;
 
-            if (!CFP->isExactlyValue(0.75) && !CFP->isExactlyValue(0.25))
-                return false;
+      if (CFP->isExactlyValue(0.25) && !CI->hasNoSignedZeros())
+        return false;
 
-            if (CFP->isExactlyValue(0.25) && !CI->hasNoSignedZeros())
-                return false;
+      CI->setCalledFunction(
+          Intrinsic::getDeclaration(&M, Intrinsic::pow, CI->getType()));
+      return true;
+    }
 
-            CI->setCalledFunction(
-                Intrinsic::getDeclaration(&M, Intrinsic::pow, CI->getType()));
-            return true;
-        }
-
-    return false;
+  return false;
 }
 
 /// Lowers generic MASSV entries to PowerPC subtarget-specific MASSV entries.
 /// e.g.: __sind2_massv --> __sind2_P9 for a Power9 subtarget.
 /// Both function prototypes and their callsites are updated during lowering.
 bool PPCLowerMASSVEntries::lowerMASSVCall(CallInst *CI, Function &Func,
-        Module &M,
-        const PPCSubtarget *Subtarget) {
-    if (CI->use_empty())
-        return false;
+                                          Module &M,
+                                          const PPCSubtarget *Subtarget) {
+  if (CI->use_empty())
+    return false;
 
-    // Handling pow(x, 0.25), pow(x, 0.75), powf(x, 0.25), powf(x, 0.75)
-    if (handlePowSpecialCases(CI, Func, M))
-        return true;
-
-    std::string MASSVEntryName = createMASSVFuncName(Func, Subtarget);
-    FunctionCallee FCache = M.getOrInsertFunction(
-                                MASSVEntryName, Func.getFunctionType(), Func.getAttributes());
-
-    CI->setCalledFunction(FCache);
-
+  // Handling pow(x, 0.25), pow(x, 0.75), powf(x, 0.25), powf(x, 0.75)
+  if (handlePowSpecialCases(CI, Func, M))
     return true;
+
+  std::string MASSVEntryName = createMASSVFuncName(Func, Subtarget);
+  FunctionCallee FCache = M.getOrInsertFunction(
+      MASSVEntryName, Func.getFunctionType(), Func.getAttributes());
+
+  CI->setCalledFunction(FCache);
+
+  return true;
 }
 
 bool PPCLowerMASSVEntries::runOnModule(Module &M) {
-    bool Changed = false;
+  bool Changed = false;
 
-    auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
-    if (!TPC)
-        return Changed;
-
-    auto &TM = TPC->getTM<PPCTargetMachine>();
-    const PPCSubtarget *Subtarget;
-
-    for (Function &Func : M) {
-        if (!Func.isDeclaration())
-            continue;
-
-        if (!isMASSVFunc(Func.getName()))
-            continue;
-
-        // Call to lowerMASSVCall() invalidates the iterator over users upon
-        // replacing the users. Precomputing the current list of users allows us to
-        // replace all the call sites.
-        SmallVector<User *, 4> MASSVUsers;
-        for (auto *User: Func.users())
-            MASSVUsers.push_back(User);
-
-        for (auto *User : MASSVUsers) {
-            auto *CI = dyn_cast<CallInst>(User);
-            if (!CI)
-                continue;
-
-            Subtarget = &TM.getSubtarget<PPCSubtarget>(*CI->getParent()->getParent());
-            Changed |= lowerMASSVCall(CI, Func, M, Subtarget);
-        }
-    }
-
+  auto *TPC = getAnalysisIfAvailable<TargetPassConfig>();
+  if (!TPC)
     return Changed;
+
+  auto &TM = TPC->getTM<PPCTargetMachine>();
+  const PPCSubtarget *Subtarget;
+
+  for (Function &Func : M) {
+    if (!Func.isDeclaration())
+      continue;
+
+    if (!isMASSVFunc(Func.getName()))
+      continue;
+
+    // Call to lowerMASSVCall() invalidates the iterator over users upon
+    // replacing the users. Precomputing the current list of users allows us to
+    // replace all the call sites.
+    SmallVector<User *, 4> MASSVUsers;
+    for (auto *User : Func.users())
+      MASSVUsers.push_back(User);
+
+    for (auto *User : MASSVUsers) {
+      auto *CI = dyn_cast<CallInst>(User);
+      if (!CI)
+        continue;
+
+      Subtarget = &TM.getSubtarget<PPCSubtarget>(*CI->getParent()->getParent());
+      Changed |= lowerMASSVCall(CI, Func, M, Subtarget);
+    }
+  }
+
+  return Changed;
 }
 
 char PPCLowerMASSVEntries::ID = 0;
@@ -194,5 +192,5 @@ INITIALIZE_PASS(PPCLowerMASSVEntries, DEBUG_TYPE, "Lower MASSV entries", false,
                 false)
 
 ModulePass *llvm::createPPCLowerMASSVEntriesPass() {
-    return new PPCLowerMASSVEntries();
+  return new PPCLowerMASSVEntries();
 }

@@ -35,8 +35,8 @@ MCAsmBackend *createSparcAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                     const MCRegisterInfo &MRI,
                                     const MCTargetOptions &Options);
 std::unique_ptr<MCObjectTargetWriter> createSparcELFObjectWriter(bool Is64Bit,
-        uint8_t OSABI);
-} // End llvm namespace
+                                                                 uint8_t OSABI);
+} // namespace llvm
 
 // Defines symbolic names for Sparc registers.  This defines a mapping from
 // register name to register number.

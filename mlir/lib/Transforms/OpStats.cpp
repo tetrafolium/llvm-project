@@ -19,69 +19,68 @@ using namespace mlir;
 
 namespace {
 struct PrintOpStatsPass : public PrintOpStatsBase<PrintOpStatsPass> {
-    explicit PrintOpStatsPass(raw_ostream &os = llvm::errs()) : os(os) {}
+  explicit PrintOpStatsPass(raw_ostream &os = llvm::errs()) : os(os) {}
 
-    // Prints the resultant operation statistics post iterating over the module.
-    void runOnOperation() override;
+  // Prints the resultant operation statistics post iterating over the module.
+  void runOnOperation() override;
 
-    // Print summary of op stats.
-    void printSummary();
+  // Print summary of op stats.
+  void printSummary();
 
 private:
-    llvm::StringMap<int64_t> opCount;
-    raw_ostream &os;
+  llvm::StringMap<int64_t> opCount;
+  raw_ostream &os;
 };
 } // namespace
 
 void PrintOpStatsPass::runOnOperation() {
-    opCount.clear();
+  opCount.clear();
 
-    // Compute the operation statistics for the currently visited operation.
-    getOperation()->walk([&](Operation *op) {
-        ++opCount[op->getName().getStringRef()];
-    });
-    printSummary();
+  // Compute the operation statistics for the currently visited operation.
+  getOperation()->walk(
+      [&](Operation *op) { ++opCount[op->getName().getStringRef()]; });
+  printSummary();
 }
 
 void PrintOpStatsPass::printSummary() {
-    os << "Operations encountered:\n";
-    os << "-----------------------\n";
-    SmallVector<StringRef, 64> sorted(opCount.keys());
-    llvm::sort(sorted);
+  os << "Operations encountered:\n";
+  os << "-----------------------\n";
+  SmallVector<StringRef, 64> sorted(opCount.keys());
+  llvm::sort(sorted);
 
-    // Split an operation name from its dialect prefix.
-    auto splitOperationName = [](StringRef opName) {
-        auto splitName = opName.split('.');
-        return splitName.second.empty() ? std::make_pair("", splitName.first)
-               : splitName;
-    };
+  // Split an operation name from its dialect prefix.
+  auto splitOperationName = [](StringRef opName) {
+    auto splitName = opName.split('.');
+    return splitName.second.empty() ? std::make_pair("", splitName.first)
+                                    : splitName;
+  };
 
-    // Compute the largest dialect and operation name.
-    StringRef dialectName, opName;
-    size_t maxLenOpName = 0, maxLenDialect = 0;
-    for (const auto &key : sorted) {
-        std::tie(dialectName, opName) = splitOperationName(key);
-        maxLenDialect = std::max(maxLenDialect, dialectName.size());
-        maxLenOpName = std::max(maxLenOpName, opName.size());
-    }
+  // Compute the largest dialect and operation name.
+  StringRef dialectName, opName;
+  size_t maxLenOpName = 0, maxLenDialect = 0;
+  for (const auto &key : sorted) {
+    std::tie(dialectName, opName) = splitOperationName(key);
+    maxLenDialect = std::max(maxLenDialect, dialectName.size());
+    maxLenOpName = std::max(maxLenOpName, opName.size());
+  }
 
-    for (const auto &key : sorted) {
-        std::tie(dialectName, opName) = splitOperationName(key);
+  for (const auto &key : sorted) {
+    std::tie(dialectName, opName) = splitOperationName(key);
 
-        // Left-align the names (aligning on the dialect) and right-align the count
-        // below. The alignment is for readability and does not affect CSV/FileCheck
-        // parsing.
-        if (dialectName.empty())
-            os.indent(maxLenDialect + 3);
-        else
-            os << llvm::right_justify(dialectName, maxLenDialect + 2) << '.';
+    // Left-align the names (aligning on the dialect) and right-align the count
+    // below. The alignment is for readability and does not affect CSV/FileCheck
+    // parsing.
+    if (dialectName.empty())
+      os.indent(maxLenDialect + 3);
+    else
+      os << llvm::right_justify(dialectName, maxLenDialect + 2) << '.';
 
-        // Left justify the operation name.
-        os << llvm::left_justify(opName, maxLenOpName) << " , " << opCount[key]
-           << '\n';
-    }
+    // Left justify the operation name.
+    os << llvm::left_justify(opName, maxLenOpName) << " , " << opCount[key]
+       << '\n';
+  }
 }
 
 std::unique_ptr<Pass> mlir::createPrintOpStatsPass() {
-    return std::make_unique<PrintOpStatsPass>();
+  return std::make_unique<PrintOpStatsPass>();
 }

@@ -24,52 +24,52 @@ namespace cppcoreguidelines {
 
 namespace {
 Matcher<FunctionDecl> hasAnyListedName(const std::string &FunctionNames) {
-    const std::vector<std::string> NameList =
-        utils::options::parseStringList(FunctionNames);
-    return hasAnyName(std::vector<StringRef>(NameList.begin(), NameList.end()));
+  const std::vector<std::string> NameList =
+      utils::options::parseStringList(FunctionNames);
+  return hasAnyName(std::vector<StringRef>(NameList.begin(), NameList.end()));
 }
 } // namespace
 
 void NoMallocCheck::storeOptions(ClangTidyOptions::OptionMap &Opts) {
-    Options.store(Opts, "Allocations", AllocList);
-    Options.store(Opts, "Reallocations", ReallocList);
-    Options.store(Opts, "Deallocations", DeallocList);
+  Options.store(Opts, "Allocations", AllocList);
+  Options.store(Opts, "Reallocations", ReallocList);
+  Options.store(Opts, "Deallocations", DeallocList);
 }
 
 void NoMallocCheck::registerMatchers(MatchFinder *Finder) {
-    // Registering malloc, will suggest RAII.
-    Finder->addMatcher(callExpr(callee(functionDecl(hasAnyListedName(AllocList))))
-                       .bind("allocation"),
-                       this);
+  // Registering malloc, will suggest RAII.
+  Finder->addMatcher(callExpr(callee(functionDecl(hasAnyListedName(AllocList))))
+                         .bind("allocation"),
+                     this);
 
-    // Registering realloc calls, suggest std::vector or std::string.
-    Finder->addMatcher(
-        callExpr(callee(functionDecl(hasAnyListedName(ReallocList))))
-        .bind("realloc"),
-        this);
+  // Registering realloc calls, suggest std::vector or std::string.
+  Finder->addMatcher(
+      callExpr(callee(functionDecl(hasAnyListedName(ReallocList))))
+          .bind("realloc"),
+      this);
 
-    // Registering free calls, will suggest RAII instead.
-    Finder->addMatcher(
-        callExpr(callee(functionDecl(hasAnyListedName(DeallocList))))
-        .bind("free"),
-        this);
+  // Registering free calls, will suggest RAII instead.
+  Finder->addMatcher(
+      callExpr(callee(functionDecl(hasAnyListedName(DeallocList))))
+          .bind("free"),
+      this);
 }
 
 void NoMallocCheck::check(const MatchFinder::MatchResult &Result) {
-    const CallExpr *Call = nullptr;
-    StringRef Recommendation;
+  const CallExpr *Call = nullptr;
+  StringRef Recommendation;
 
-    if ((Call = Result.Nodes.getNodeAs<CallExpr>("allocation")))
-        Recommendation = "consider a container or a smart pointer";
-    else if ((Call = Result.Nodes.getNodeAs<CallExpr>("realloc")))
-        Recommendation = "consider std::vector or std::string";
-    else if ((Call = Result.Nodes.getNodeAs<CallExpr>("free")))
-        Recommendation = "use RAII";
+  if ((Call = Result.Nodes.getNodeAs<CallExpr>("allocation")))
+    Recommendation = "consider a container or a smart pointer";
+  else if ((Call = Result.Nodes.getNodeAs<CallExpr>("realloc")))
+    Recommendation = "consider std::vector or std::string";
+  else if ((Call = Result.Nodes.getNodeAs<CallExpr>("free")))
+    Recommendation = "use RAII";
 
-    assert(Call && "Unhandled binding in the Matcher");
+  assert(Call && "Unhandled binding in the Matcher");
 
-    diag(Call->getBeginLoc(), "do not manage memory manually; %0")
-            << Recommendation << SourceRange(Call->getBeginLoc(), Call->getEndLoc());
+  diag(Call->getBeginLoc(), "do not manage memory manually; %0")
+      << Recommendation << SourceRange(Call->getBeginLoc(), Call->getEndLoc());
 }
 
 } // namespace cppcoreguidelines

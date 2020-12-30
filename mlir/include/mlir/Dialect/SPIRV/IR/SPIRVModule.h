@@ -21,7 +21,7 @@ namespace spirv {
 // TODO: Remove this class in favor of using OwningOpRef directly.
 class OwningSPIRVModuleRef : public OwningOpRef<spirv::ModuleOp> {
 public:
-    using OwningOpRef<spirv::ModuleOp>::OwningOpRef;
+  using OwningOpRef<spirv::ModuleOp>::OwningOpRef;
 };
 
 } // end namespace spirv

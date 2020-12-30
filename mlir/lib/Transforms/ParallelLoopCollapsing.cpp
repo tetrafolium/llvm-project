@@ -21,25 +21,25 @@ using namespace mlir;
 namespace {
 struct ParallelLoopCollapsing
     : public ParallelLoopCollapsingBase<ParallelLoopCollapsing> {
-    void runOnOperation() override {
-        Operation *module = getOperation();
+  void runOnOperation() override {
+    Operation *module = getOperation();
 
-        module->walk([&](scf::ParallelOp op) {
-            // The common case for GPU dialect will be simplifying the ParallelOp to 3
-            // arguments, so we do that here to simplify things.
-            llvm::SmallVector<std::vector<unsigned>, 3> combinedLoops;
-            if (clCollapsedIndices0.size())
-                combinedLoops.push_back(clCollapsedIndices0);
-            if (clCollapsedIndices1.size())
-                combinedLoops.push_back(clCollapsedIndices1);
-            if (clCollapsedIndices2.size())
-                combinedLoops.push_back(clCollapsedIndices2);
-            collapseParallelLoops(op, combinedLoops);
-        });
-    }
+    module->walk([&](scf::ParallelOp op) {
+      // The common case for GPU dialect will be simplifying the ParallelOp to 3
+      // arguments, so we do that here to simplify things.
+      llvm::SmallVector<std::vector<unsigned>, 3> combinedLoops;
+      if (clCollapsedIndices0.size())
+        combinedLoops.push_back(clCollapsedIndices0);
+      if (clCollapsedIndices1.size())
+        combinedLoops.push_back(clCollapsedIndices1);
+      if (clCollapsedIndices2.size())
+        combinedLoops.push_back(clCollapsedIndices2);
+      collapseParallelLoops(op, combinedLoops);
+    });
+  }
 };
 } // namespace
 
 std::unique_ptr<Pass> mlir::createParallelLoopCollapsingPass() {
-    return std::make_unique<ParallelLoopCollapsing>();
+  return std::make_unique<ParallelLoopCollapsing>();
 }

@@ -30,33 +30,33 @@ using namespace llvm;
 
 namespace {
 
-class AMDGPUAnnotateUniformValues : public FunctionPass,
-    public InstVisitor<AMDGPUAnnotateUniformValues> {
-    LegacyDivergenceAnalysis *DA;
-    MemoryDependenceResults *MDR;
-    LoopInfo *LI;
-    DenseMap<Value*, GetElementPtrInst*> noClobberClones;
-    bool isEntryFunc;
+class AMDGPUAnnotateUniformValues
+    : public FunctionPass,
+      public InstVisitor<AMDGPUAnnotateUniformValues> {
+  LegacyDivergenceAnalysis *DA;
+  MemoryDependenceResults *MDR;
+  LoopInfo *LI;
+  DenseMap<Value *, GetElementPtrInst *> noClobberClones;
+  bool isEntryFunc;
 
 public:
-    static char ID;
-    AMDGPUAnnotateUniformValues() :
-        FunctionPass(ID) { }
-    bool doInitialization(Module &M) override;
-    bool runOnFunction(Function &F) override;
-    StringRef getPassName() const override {
-        return "AMDGPU Annotate Uniform Values";
-    }
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.addRequired<LegacyDivergenceAnalysis>();
-        AU.addRequired<MemoryDependenceWrapperPass>();
-        AU.addRequired<LoopInfoWrapperPass>();
-        AU.setPreservesAll();
-    }
+  static char ID;
+  AMDGPUAnnotateUniformValues() : FunctionPass(ID) {}
+  bool doInitialization(Module &M) override;
+  bool runOnFunction(Function &F) override;
+  StringRef getPassName() const override {
+    return "AMDGPU Annotate Uniform Values";
+  }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.addRequired<LegacyDivergenceAnalysis>();
+    AU.addRequired<MemoryDependenceWrapperPass>();
+    AU.addRequired<LoopInfoWrapperPass>();
+    AU.setPreservesAll();
+  }
 
-    void visitBranchInst(BranchInst &I);
-    void visitLoadInst(LoadInst &I);
-    bool isClobberedInFunction(LoadInst * Load);
+  void visitBranchInst(BranchInst &I);
+  void visitLoadInst(LoadInst &I);
+  bool isClobberedInFunction(LoadInst *Load);
 };
 
 } // End anonymous namespace
@@ -72,124 +72,123 @@ INITIALIZE_PASS_END(AMDGPUAnnotateUniformValues, DEBUG_TYPE,
 char AMDGPUAnnotateUniformValues::ID = 0;
 
 static void setUniformMetadata(Instruction *I) {
-    I->setMetadata("amdgpu.uniform", MDNode::get(I->getContext(), {}));
+  I->setMetadata("amdgpu.uniform", MDNode::get(I->getContext(), {}));
 }
 static void setNoClobberMetadata(Instruction *I) {
-    I->setMetadata("amdgpu.noclobber", MDNode::get(I->getContext(), {}));
+  I->setMetadata("amdgpu.noclobber", MDNode::get(I->getContext(), {}));
 }
 
-static void DFS(BasicBlock *Root, SetVector<BasicBlock*> & Set) {
-    for (auto I : predecessors(Root))
-        if (Set.insert(I))
-            DFS(I, Set);
+static void DFS(BasicBlock *Root, SetVector<BasicBlock *> &Set) {
+  for (auto I : predecessors(Root))
+    if (Set.insert(I))
+      DFS(I, Set);
 }
 
-bool AMDGPUAnnotateUniformValues::isClobberedInFunction(LoadInst * Load) {
-    // 1. get Loop for the Load->getparent();
-    // 2. if it exists, collect all the BBs from the most outer
-    // loop and check for the writes. If NOT - start DFS over all preds.
-    // 3. Start DFS over all preds from the most outer loop header.
-    SetVector<BasicBlock *> Checklist;
-    BasicBlock *Start = Load->getParent();
-    Checklist.insert(Start);
-    const Value *Ptr = Load->getPointerOperand();
-    const Loop *L = LI->getLoopFor(Start);
-    if (L) {
-        const Loop *P = L;
-        do {
-            L = P;
-            P = P->getParentLoop();
-        } while (P);
-        Checklist.insert(L->block_begin(), L->block_end());
-        Start = L->getHeader();
-    }
+bool AMDGPUAnnotateUniformValues::isClobberedInFunction(LoadInst *Load) {
+  // 1. get Loop for the Load->getparent();
+  // 2. if it exists, collect all the BBs from the most outer
+  // loop and check for the writes. If NOT - start DFS over all preds.
+  // 3. Start DFS over all preds from the most outer loop header.
+  SetVector<BasicBlock *> Checklist;
+  BasicBlock *Start = Load->getParent();
+  Checklist.insert(Start);
+  const Value *Ptr = Load->getPointerOperand();
+  const Loop *L = LI->getLoopFor(Start);
+  if (L) {
+    const Loop *P = L;
+    do {
+      L = P;
+      P = P->getParentLoop();
+    } while (P);
+    Checklist.insert(L->block_begin(), L->block_end());
+    Start = L->getHeader();
+  }
 
-    DFS(Start, Checklist);
-    for (auto &BB : Checklist) {
-        BasicBlock::iterator StartIt = (!L && (BB == Load->getParent())) ?
-                                       BasicBlock::iterator(Load) : BB->end();
-        auto Q = MDR->getPointerDependencyFrom(
-                     MemoryLocation::getBeforeOrAfter(Ptr), true, StartIt, BB, Load);
-        if (Q.isClobber() || Q.isUnknown() ||
-                // Store defines the load and thus clobbers it.
-                (Q.isDef() && Q.getInst()->mayWriteToMemory()))
-            return true;
-    }
-    return false;
+  DFS(Start, Checklist);
+  for (auto &BB : Checklist) {
+    BasicBlock::iterator StartIt = (!L && (BB == Load->getParent()))
+                                       ? BasicBlock::iterator(Load)
+                                       : BB->end();
+    auto Q = MDR->getPointerDependencyFrom(
+        MemoryLocation::getBeforeOrAfter(Ptr), true, StartIt, BB, Load);
+    if (Q.isClobber() || Q.isUnknown() ||
+        // Store defines the load and thus clobbers it.
+        (Q.isDef() && Q.getInst()->mayWriteToMemory()))
+      return true;
+  }
+  return false;
 }
 
 void AMDGPUAnnotateUniformValues::visitBranchInst(BranchInst &I) {
-    if (DA->isUniform(&I))
-        setUniformMetadata(I.getParent()->getTerminator());
+  if (DA->isUniform(&I))
+    setUniformMetadata(I.getParent()->getTerminator());
 }
 
 void AMDGPUAnnotateUniformValues::visitLoadInst(LoadInst &I) {
-    Value *Ptr = I.getPointerOperand();
-    if (!DA->isUniform(Ptr))
-        return;
-    auto isGlobalLoad = [&](LoadInst &Load)->bool {
-        return Load.getPointerAddressSpace() == AMDGPUAS::GLOBAL_ADDRESS;
-    };
-    // We're tracking up to the Function boundaries, and cannot go beyond because
-    // of FunctionPass restrictions. We can ensure that is memory not clobbered
-    // for memory operations that are live in to entry points only.
-    Instruction *PtrI = dyn_cast<Instruction>(Ptr);
+  Value *Ptr = I.getPointerOperand();
+  if (!DA->isUniform(Ptr))
+    return;
+  auto isGlobalLoad = [&](LoadInst &Load) -> bool {
+    return Load.getPointerAddressSpace() == AMDGPUAS::GLOBAL_ADDRESS;
+  };
+  // We're tracking up to the Function boundaries, and cannot go beyond because
+  // of FunctionPass restrictions. We can ensure that is memory not clobbered
+  // for memory operations that are live in to entry points only.
+  Instruction *PtrI = dyn_cast<Instruction>(Ptr);
 
-    if (!isEntryFunc) {
-        if (PtrI)
-            setUniformMetadata(PtrI);
-        return;
-    }
-
-    bool NotClobbered = false;
+  if (!isEntryFunc) {
     if (PtrI)
-        NotClobbered = !isClobberedInFunction(&I);
-    else if (isa<Argument>(Ptr) || isa<GlobalValue>(Ptr)) {
-        if (isGlobalLoad(I) && !isClobberedInFunction(&I)) {
-            NotClobbered = true;
-            // Lookup for the existing GEP
-            if (noClobberClones.count(Ptr)) {
-                PtrI = noClobberClones[Ptr];
-            } else {
-                // Create GEP of the Value
-                Function *F = I.getParent()->getParent();
-                Value *Idx = Constant::getIntegerValue(
-                                 Type::getInt32Ty(Ptr->getContext()), APInt(64, 0));
-                // Insert GEP at the entry to make it dominate all uses
-                PtrI = GetElementPtrInst::Create(
-                           Ptr->getType()->getPointerElementType(), Ptr,
-                           ArrayRef<Value*>(Idx), Twine(""), F->getEntryBlock().getFirstNonPHI());
-            }
-            I.replaceUsesOfWith(Ptr, PtrI);
-        }
-    }
+      setUniformMetadata(PtrI);
+    return;
+  }
 
-    if (PtrI) {
-        setUniformMetadata(PtrI);
-        if (NotClobbered)
-            setNoClobberMetadata(PtrI);
+  bool NotClobbered = false;
+  if (PtrI)
+    NotClobbered = !isClobberedInFunction(&I);
+  else if (isa<Argument>(Ptr) || isa<GlobalValue>(Ptr)) {
+    if (isGlobalLoad(I) && !isClobberedInFunction(&I)) {
+      NotClobbered = true;
+      // Lookup for the existing GEP
+      if (noClobberClones.count(Ptr)) {
+        PtrI = noClobberClones[Ptr];
+      } else {
+        // Create GEP of the Value
+        Function *F = I.getParent()->getParent();
+        Value *Idx = Constant::getIntegerValue(
+            Type::getInt32Ty(Ptr->getContext()), APInt(64, 0));
+        // Insert GEP at the entry to make it dominate all uses
+        PtrI =
+            GetElementPtrInst::Create(Ptr->getType()->getPointerElementType(),
+                                      Ptr, ArrayRef<Value *>(Idx), Twine(""),
+                                      F->getEntryBlock().getFirstNonPHI());
+      }
+      I.replaceUsesOfWith(Ptr, PtrI);
     }
+  }
+
+  if (PtrI) {
+    setUniformMetadata(PtrI);
+    if (NotClobbered)
+      setNoClobberMetadata(PtrI);
+  }
 }
 
-bool AMDGPUAnnotateUniformValues::doInitialization(Module &M) {
-    return false;
-}
+bool AMDGPUAnnotateUniformValues::doInitialization(Module &M) { return false; }
 
 bool AMDGPUAnnotateUniformValues::runOnFunction(Function &F) {
-    if (skipFunction(F))
-        return false;
+  if (skipFunction(F))
+    return false;
 
-    DA  = &getAnalysis<LegacyDivergenceAnalysis>();
-    MDR = &getAnalysis<MemoryDependenceWrapperPass>().getMemDep();
-    LI  = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-    isEntryFunc = AMDGPU::isEntryFunctionCC(F.getCallingConv());
+  DA = &getAnalysis<LegacyDivergenceAnalysis>();
+  MDR = &getAnalysis<MemoryDependenceWrapperPass>().getMemDep();
+  LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+  isEntryFunc = AMDGPU::isEntryFunctionCC(F.getCallingConv());
 
-    visit(F);
-    noClobberClones.clear();
-    return true;
+  visit(F);
+  noClobberClones.clear();
+  return true;
 }
 
-FunctionPass *
-llvm::createAMDGPUAnnotateUniformValues() {
-    return new AMDGPUAnnotateUniformValues();
+FunctionPass *llvm::createAMDGPUAnnotateUniformValues() {
+  return new AMDGPUAnnotateUniformValues();
 }

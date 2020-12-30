@@ -23,17 +23,16 @@ namespace edit {
 class Commit;
 
 bool rewriteObjCRedundantCallWithLiteral(const ObjCMessageExpr *Msg,
-        const NSAPI &NS, Commit &commit);
+                                         const NSAPI &NS, Commit &commit);
 
-bool rewriteToObjCLiteralSyntax(const ObjCMessageExpr *Msg,
-                                const NSAPI &NS, Commit &commit,
-                                const ParentMap *PMap);
+bool rewriteToObjCLiteralSyntax(const ObjCMessageExpr *Msg, const NSAPI &NS,
+                                Commit &commit, const ParentMap *PMap);
 
-bool rewriteToObjCSubscriptSyntax(const ObjCMessageExpr *Msg,
-                                  const NSAPI &NS, Commit &commit);
+bool rewriteToObjCSubscriptSyntax(const ObjCMessageExpr *Msg, const NSAPI &NS,
+                                  Commit &commit);
 
-}
+} // namespace edit
 
-}  // end namespace clang
+} // end namespace clang
 
 #endif

@@ -21,7 +21,7 @@ namespace mca {
 Stage::~Stage() = default;
 
 void Stage::addListener(HWEventListener *Listener) {
-    Listeners.insert(Listener);
+  Listeners.insert(Listener);
 }
 
 } // namespace mca

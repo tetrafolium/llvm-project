@@ -10,7 +10,6 @@
 #ifndef liblldb_ProcessPOSIXLog_h_
 #define liblldb_ProcessPOSIXLog_h_
 
-
 #include "lldb/Utility/Log.h"
 
 #define POSIX_LOG_PROCESS (1u << 1)
@@ -25,15 +24,15 @@
 
 namespace lldb_private {
 class ProcessPOSIXLog {
-    static Log::Channel g_channel;
+  static Log::Channel g_channel;
 
 public:
-    static void Initialize();
+  static void Initialize();
 
-    static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
-        return g_channel.GetLogIfAll(mask);
-    }
+  static Log *GetLogIfAllCategoriesSet(uint32_t mask) {
+    return g_channel.GetLogIfAll(mask);
+  }
 };
-}
+} // namespace lldb_private
 
 #endif // liblldb_ProcessPOSIXLog_h_

@@ -82,202 +82,178 @@ bool isTopLevelValue(Value value);
 // TODO: Consider replacing src/dst memref indices with view memrefs.
 class AffineDmaStartOp
     : public Op<AffineDmaStartOp, OpTrait::MemRefsNormalizable,
-      OpTrait::VariadicOperands, OpTrait::ZeroResult> {
+                OpTrait::VariadicOperands, OpTrait::ZeroResult> {
 public:
-    using Op::Op;
+  using Op::Op;
 
-    static void build(OpBuilder &builder, OperationState &result, Value srcMemRef,
-                      AffineMap srcMap, ValueRange srcIndices, Value destMemRef,
-                      AffineMap dstMap, ValueRange destIndices, Value tagMemRef,
-                      AffineMap tagMap, ValueRange tagIndices, Value numElements,
-                      Value stride = nullptr, Value elementsPerStride = nullptr);
+  static void build(OpBuilder &builder, OperationState &result, Value srcMemRef,
+                    AffineMap srcMap, ValueRange srcIndices, Value destMemRef,
+                    AffineMap dstMap, ValueRange destIndices, Value tagMemRef,
+                    AffineMap tagMap, ValueRange tagIndices, Value numElements,
+                    Value stride = nullptr, Value elementsPerStride = nullptr);
 
-    /// Returns the operand index of the src memref.
-    unsigned getSrcMemRefOperandIndex() {
-        return 0;
-    }
+  /// Returns the operand index of the src memref.
+  unsigned getSrcMemRefOperandIndex() { return 0; }
 
-    /// Returns the source MemRefType for this DMA operation.
-    Value getSrcMemRef() {
-        return getOperand(getSrcMemRefOperandIndex());
-    }
-    MemRefType getSrcMemRefType() {
-        return getSrcMemRef().getType().cast<MemRefType>();
-    }
+  /// Returns the source MemRefType for this DMA operation.
+  Value getSrcMemRef() { return getOperand(getSrcMemRefOperandIndex()); }
+  MemRefType getSrcMemRefType() {
+    return getSrcMemRef().getType().cast<MemRefType>();
+  }
 
-    /// Returns the rank (number of indices) of the source MemRefType.
-    unsigned getSrcMemRefRank() {
-        return getSrcMemRefType().getRank();
-    }
+  /// Returns the rank (number of indices) of the source MemRefType.
+  unsigned getSrcMemRefRank() { return getSrcMemRefType().getRank(); }
 
-    /// Returns the affine map used to access the src memref.
-    AffineMap getSrcMap() {
-        return getSrcMapAttr().getValue();
-    }
-    AffineMapAttr getSrcMapAttr() {
-        return (*this)->getAttr(getSrcMapAttrName()).cast<AffineMapAttr>();
-    }
+  /// Returns the affine map used to access the src memref.
+  AffineMap getSrcMap() { return getSrcMapAttr().getValue(); }
+  AffineMapAttr getSrcMapAttr() {
+    return (*this)->getAttr(getSrcMapAttrName()).cast<AffineMapAttr>();
+  }
 
-    /// Returns the source memref affine map indices for this DMA operation.
-    operand_range getSrcIndices() {
-        return {operand_begin() + getSrcMemRefOperandIndex() + 1,
-                operand_begin() + getSrcMemRefOperandIndex() + 1 +
+  /// Returns the source memref affine map indices for this DMA operation.
+  operand_range getSrcIndices() {
+    return {operand_begin() + getSrcMemRefOperandIndex() + 1,
+            operand_begin() + getSrcMemRefOperandIndex() + 1 +
                 getSrcMap().getNumInputs()};
-    }
+  }
 
-    /// Returns the memory space of the src memref.
-    unsigned getSrcMemorySpace() {
-        return getSrcMemRef().getType().cast<MemRefType>().getMemorySpace();
-    }
+  /// Returns the memory space of the src memref.
+  unsigned getSrcMemorySpace() {
+    return getSrcMemRef().getType().cast<MemRefType>().getMemorySpace();
+  }
 
-    /// Returns the operand index of the dst memref.
-    unsigned getDstMemRefOperandIndex() {
-        return getSrcMemRefOperandIndex() + 1 + getSrcMap().getNumInputs();
-    }
+  /// Returns the operand index of the dst memref.
+  unsigned getDstMemRefOperandIndex() {
+    return getSrcMemRefOperandIndex() + 1 + getSrcMap().getNumInputs();
+  }
 
-    /// Returns the destination MemRefType for this DMA operations.
-    Value getDstMemRef() {
-        return getOperand(getDstMemRefOperandIndex());
-    }
-    MemRefType getDstMemRefType() {
-        return getDstMemRef().getType().cast<MemRefType>();
-    }
+  /// Returns the destination MemRefType for this DMA operations.
+  Value getDstMemRef() { return getOperand(getDstMemRefOperandIndex()); }
+  MemRefType getDstMemRefType() {
+    return getDstMemRef().getType().cast<MemRefType>();
+  }
 
-    /// Returns the rank (number of indices) of the destination MemRefType.
-    unsigned getDstMemRefRank() {
-        return getDstMemRef().getType().cast<MemRefType>().getRank();
-    }
+  /// Returns the rank (number of indices) of the destination MemRefType.
+  unsigned getDstMemRefRank() {
+    return getDstMemRef().getType().cast<MemRefType>().getRank();
+  }
 
-    /// Returns the memory space of the src memref.
-    unsigned getDstMemorySpace() {
-        return getDstMemRef().getType().cast<MemRefType>().getMemorySpace();
-    }
+  /// Returns the memory space of the src memref.
+  unsigned getDstMemorySpace() {
+    return getDstMemRef().getType().cast<MemRefType>().getMemorySpace();
+  }
 
-    /// Returns the affine map used to access the dst memref.
-    AffineMap getDstMap() {
-        return getDstMapAttr().getValue();
-    }
-    AffineMapAttr getDstMapAttr() {
-        return (*this)->getAttr(getDstMapAttrName()).cast<AffineMapAttr>();
-    }
+  /// Returns the affine map used to access the dst memref.
+  AffineMap getDstMap() { return getDstMapAttr().getValue(); }
+  AffineMapAttr getDstMapAttr() {
+    return (*this)->getAttr(getDstMapAttrName()).cast<AffineMapAttr>();
+  }
 
-    /// Returns the destination memref indices for this DMA operation.
-    operand_range getDstIndices() {
-        return {operand_begin() + getDstMemRefOperandIndex() + 1,
-                operand_begin() + getDstMemRefOperandIndex() + 1 +
+  /// Returns the destination memref indices for this DMA operation.
+  operand_range getDstIndices() {
+    return {operand_begin() + getDstMemRefOperandIndex() + 1,
+            operand_begin() + getDstMemRefOperandIndex() + 1 +
                 getDstMap().getNumInputs()};
-    }
+  }
 
-    /// Returns the operand index of the tag memref.
-    unsigned getTagMemRefOperandIndex() {
-        return getDstMemRefOperandIndex() + 1 + getDstMap().getNumInputs();
-    }
+  /// Returns the operand index of the tag memref.
+  unsigned getTagMemRefOperandIndex() {
+    return getDstMemRefOperandIndex() + 1 + getDstMap().getNumInputs();
+  }
 
-    /// Returns the Tag MemRef for this DMA operation.
-    Value getTagMemRef() {
-        return getOperand(getTagMemRefOperandIndex());
-    }
-    MemRefType getTagMemRefType() {
-        return getTagMemRef().getType().cast<MemRefType>();
-    }
+  /// Returns the Tag MemRef for this DMA operation.
+  Value getTagMemRef() { return getOperand(getTagMemRefOperandIndex()); }
+  MemRefType getTagMemRefType() {
+    return getTagMemRef().getType().cast<MemRefType>();
+  }
 
-    /// Returns the rank (number of indices) of the tag MemRefType.
-    unsigned getTagMemRefRank() {
-        return getTagMemRef().getType().cast<MemRefType>().getRank();
-    }
+  /// Returns the rank (number of indices) of the tag MemRefType.
+  unsigned getTagMemRefRank() {
+    return getTagMemRef().getType().cast<MemRefType>().getRank();
+  }
 
-    /// Returns the affine map used to access the tag memref.
-    AffineMap getTagMap() {
-        return getTagMapAttr().getValue();
-    }
-    AffineMapAttr getTagMapAttr() {
-        return (*this)->getAttr(getTagMapAttrName()).cast<AffineMapAttr>();
-    }
+  /// Returns the affine map used to access the tag memref.
+  AffineMap getTagMap() { return getTagMapAttr().getValue(); }
+  AffineMapAttr getTagMapAttr() {
+    return (*this)->getAttr(getTagMapAttrName()).cast<AffineMapAttr>();
+  }
 
-    /// Returns the tag memref indices for this DMA operation.
-    operand_range getTagIndices() {
-        return {operand_begin() + getTagMemRefOperandIndex() + 1,
-                operand_begin() + getTagMemRefOperandIndex() + 1 +
+  /// Returns the tag memref indices for this DMA operation.
+  operand_range getTagIndices() {
+    return {operand_begin() + getTagMemRefOperandIndex() + 1,
+            operand_begin() + getTagMemRefOperandIndex() + 1 +
                 getTagMap().getNumInputs()};
-    }
+  }
 
-    /// Returns the number of elements being transferred by this DMA operation.
-    Value getNumElements() {
-        return getOperand(getTagMemRefOperandIndex() + 1 +
-                          getTagMap().getNumInputs());
-    }
+  /// Returns the number of elements being transferred by this DMA operation.
+  Value getNumElements() {
+    return getOperand(getTagMemRefOperandIndex() + 1 +
+                      getTagMap().getNumInputs());
+  }
 
-    /// Returns the AffineMapAttr associated with 'memref'.
-    NamedAttribute getAffineMapAttrForMemRef(Value memref) {
-        if (memref == getSrcMemRef())
-            return {Identifier::get(getSrcMapAttrName(), getContext()),
-                    getSrcMapAttr()};
-        else if (memref == getDstMemRef())
-            return {Identifier::get(getDstMapAttrName(), getContext()),
-                    getDstMapAttr()};
-        assert(memref == getTagMemRef() &&
-               "DmaStartOp expected source, destination or tag memref");
-        return {Identifier::get(getTagMapAttrName(), getContext()),
-                getTagMapAttr()};
-    }
+  /// Returns the AffineMapAttr associated with 'memref'.
+  NamedAttribute getAffineMapAttrForMemRef(Value memref) {
+    if (memref == getSrcMemRef())
+      return {Identifier::get(getSrcMapAttrName(), getContext()),
+              getSrcMapAttr()};
+    else if (memref == getDstMemRef())
+      return {Identifier::get(getDstMapAttrName(), getContext()),
+              getDstMapAttr()};
+    assert(memref == getTagMemRef() &&
+           "DmaStartOp expected source, destination or tag memref");
+    return {Identifier::get(getTagMapAttrName(), getContext()),
+            getTagMapAttr()};
+  }
 
-    /// Returns true if this is a DMA from a faster memory space to a slower one.
-    bool isDestMemorySpaceFaster() {
-        return (getSrcMemorySpace() < getDstMemorySpace());
-    }
+  /// Returns true if this is a DMA from a faster memory space to a slower one.
+  bool isDestMemorySpaceFaster() {
+    return (getSrcMemorySpace() < getDstMemorySpace());
+  }
 
-    /// Returns true if this is a DMA from a slower memory space to a faster one.
-    bool isSrcMemorySpaceFaster() {
-        // Assumes that a lower number is for a slower memory space.
-        return (getDstMemorySpace() < getSrcMemorySpace());
-    }
+  /// Returns true if this is a DMA from a slower memory space to a faster one.
+  bool isSrcMemorySpaceFaster() {
+    // Assumes that a lower number is for a slower memory space.
+    return (getDstMemorySpace() < getSrcMemorySpace());
+  }
 
-    /// Given a DMA start operation, returns the operand position of either the
-    /// source or destination memref depending on the one that is at the higher
-    /// level of the memory hierarchy. Asserts failure if neither is true.
-    unsigned getFasterMemPos() {
-        assert(isSrcMemorySpaceFaster() || isDestMemorySpaceFaster());
-        return isSrcMemorySpaceFaster() ? 0 : getDstMemRefOperandIndex();
-    }
+  /// Given a DMA start operation, returns the operand position of either the
+  /// source or destination memref depending on the one that is at the higher
+  /// level of the memory hierarchy. Asserts failure if neither is true.
+  unsigned getFasterMemPos() {
+    assert(isSrcMemorySpaceFaster() || isDestMemorySpaceFaster());
+    return isSrcMemorySpaceFaster() ? 0 : getDstMemRefOperandIndex();
+  }
 
-    static StringRef getSrcMapAttrName() {
-        return "src_map";
-    }
-    static StringRef getDstMapAttrName() {
-        return "dst_map";
-    }
-    static StringRef getTagMapAttrName() {
-        return "tag_map";
-    }
+  static StringRef getSrcMapAttrName() { return "src_map"; }
+  static StringRef getDstMapAttrName() { return "dst_map"; }
+  static StringRef getTagMapAttrName() { return "tag_map"; }
 
-    static StringRef getOperationName() {
-        return "affine.dma_start";
-    }
-    static ParseResult parse(OpAsmParser &parser, OperationState &result);
-    void print(OpAsmPrinter &p);
-    LogicalResult verify();
-    LogicalResult fold(ArrayRef<Attribute> cstOperands,
-                       SmallVectorImpl<OpFoldResult> &results);
+  static StringRef getOperationName() { return "affine.dma_start"; }
+  static ParseResult parse(OpAsmParser &parser, OperationState &result);
+  void print(OpAsmPrinter &p);
+  LogicalResult verify();
+  LogicalResult fold(ArrayRef<Attribute> cstOperands,
+                     SmallVectorImpl<OpFoldResult> &results);
 
-    /// Returns true if this DMA operation is strided, returns false otherwise.
-    bool isStrided() {
-        return getNumOperands() !=
-               getTagMemRefOperandIndex() + 1 + getTagMap().getNumInputs() + 1;
-    }
+  /// Returns true if this DMA operation is strided, returns false otherwise.
+  bool isStrided() {
+    return getNumOperands() !=
+           getTagMemRefOperandIndex() + 1 + getTagMap().getNumInputs() + 1;
+  }
 
-    /// Returns the stride value for this DMA operation.
-    Value getStride() {
-        if (!isStrided())
-            return nullptr;
-        return getOperand(getNumOperands() - 1 - 1);
-    }
+  /// Returns the stride value for this DMA operation.
+  Value getStride() {
+    if (!isStrided())
+      return nullptr;
+    return getOperand(getNumOperands() - 1 - 1);
+  }
 
-    /// Returns the number of elements to transfer per stride for this DMA op.
-    Value getNumElementsPerStride() {
-        if (!isStrided())
-            return nullptr;
-        return getOperand(getNumOperands() - 1);
-    }
+  /// Returns the number of elements to transfer per stride for this DMA op.
+  Value getNumElementsPerStride() {
+    if (!isStrided())
+      return nullptr;
+    return getOperand(getNumOperands() - 1);
+  }
 };
 
 /// AffineDmaWaitOp blocks until the completion of a DMA operation associated
@@ -295,64 +271,54 @@ public:
 //
 class AffineDmaWaitOp
     : public Op<AffineDmaWaitOp, OpTrait::MemRefsNormalizable,
-      OpTrait::VariadicOperands, OpTrait::ZeroResult> {
+                OpTrait::VariadicOperands, OpTrait::ZeroResult> {
 public:
-    using Op::Op;
+  using Op::Op;
 
-    static void build(OpBuilder &builder, OperationState &result, Value tagMemRef,
-                      AffineMap tagMap, ValueRange tagIndices, Value numElements);
+  static void build(OpBuilder &builder, OperationState &result, Value tagMemRef,
+                    AffineMap tagMap, ValueRange tagIndices, Value numElements);
 
-    static StringRef getOperationName() {
-        return "affine.dma_wait";
-    }
+  static StringRef getOperationName() { return "affine.dma_wait"; }
 
-    // Returns the Tag MemRef associated with the DMA operation being waited on.
-    Value getTagMemRef() {
-        return getOperand(0);
-    }
-    MemRefType getTagMemRefType() {
-        return getTagMemRef().getType().cast<MemRefType>();
-    }
+  // Returns the Tag MemRef associated with the DMA operation being waited on.
+  Value getTagMemRef() { return getOperand(0); }
+  MemRefType getTagMemRefType() {
+    return getTagMemRef().getType().cast<MemRefType>();
+  }
 
-    /// Returns the affine map used to access the tag memref.
-    AffineMap getTagMap() {
-        return getTagMapAttr().getValue();
-    }
-    AffineMapAttr getTagMapAttr() {
-        return (*this)->getAttr(getTagMapAttrName()).cast<AffineMapAttr>();
-    }
+  /// Returns the affine map used to access the tag memref.
+  AffineMap getTagMap() { return getTagMapAttr().getValue(); }
+  AffineMapAttr getTagMapAttr() {
+    return (*this)->getAttr(getTagMapAttrName()).cast<AffineMapAttr>();
+  }
 
-    // Returns the tag memref index for this DMA operation.
-    operand_range getTagIndices() {
-        return {operand_begin() + 1,
-                operand_begin() + 1 + getTagMap().getNumInputs()};
-    }
+  // Returns the tag memref index for this DMA operation.
+  operand_range getTagIndices() {
+    return {operand_begin() + 1,
+            operand_begin() + 1 + getTagMap().getNumInputs()};
+  }
 
-    // Returns the rank (number of indices) of the tag memref.
-    unsigned getTagMemRefRank() {
-        return getTagMemRef().getType().cast<MemRefType>().getRank();
-    }
+  // Returns the rank (number of indices) of the tag memref.
+  unsigned getTagMemRefRank() {
+    return getTagMemRef().getType().cast<MemRefType>().getRank();
+  }
 
-    /// Returns the AffineMapAttr associated with 'memref'.
-    NamedAttribute getAffineMapAttrForMemRef(Value memref) {
-        assert(memref == getTagMemRef());
-        return {Identifier::get(getTagMapAttrName(), getContext()),
-                getTagMapAttr()};
-    }
+  /// Returns the AffineMapAttr associated with 'memref'.
+  NamedAttribute getAffineMapAttrForMemRef(Value memref) {
+    assert(memref == getTagMemRef());
+    return {Identifier::get(getTagMapAttrName(), getContext()),
+            getTagMapAttr()};
+  }
 
-    /// Returns the number of elements transferred in the associated DMA op.
-    Value getNumElements() {
-        return getOperand(1 + getTagMap().getNumInputs());
-    }
+  /// Returns the number of elements transferred in the associated DMA op.
+  Value getNumElements() { return getOperand(1 + getTagMap().getNumInputs()); }
 
-    static StringRef getTagMapAttrName() {
-        return "tag_map";
-    }
-    static ParseResult parse(OpAsmParser &parser, OperationState &result);
-    void print(OpAsmPrinter &p);
-    LogicalResult verify();
-    LogicalResult fold(ArrayRef<Attribute> cstOperands,
-                       SmallVectorImpl<OpFoldResult> &results);
+  static StringRef getTagMapAttrName() { return "tag_map"; }
+  static ParseResult parse(OpAsmParser &parser, OperationState &result);
+  void print(OpAsmPrinter &p);
+  LogicalResult verify();
+  LogicalResult fold(ArrayRef<Attribute> cstOperands,
+                     SmallVectorImpl<OpFoldResult> &results);
 };
 
 /// Returns true if the given Value can be used as a dimension id in the region
@@ -433,11 +399,11 @@ void buildAffineLoopNest(OpBuilder &builder, Location loc,
                          ArrayRef<int64_t> lbs, ArrayRef<int64_t> ubs,
                          ArrayRef<int64_t> steps,
                          function_ref<void(OpBuilder &, Location, ValueRange)>
-                         bodyBuilderFn = nullptr);
+                             bodyBuilderFn = nullptr);
 void buildAffineLoopNest(OpBuilder &builder, Location loc, ValueRange lbs,
                          ValueRange ubs, ArrayRef<int64_t> steps,
                          function_ref<void(OpBuilder &, Location, ValueRange)>
-                         bodyBuilderFn = nullptr);
+                             bodyBuilderFn = nullptr);
 
 /// AffineBound represents a lower or upper bound in the for operation.
 /// This class does not own the underlying operands. Instead, it refers
@@ -445,46 +411,32 @@ void buildAffineLoopNest(OpBuilder &builder, Location loc, ValueRange lbs,
 /// that of the for operation it refers to.
 class AffineBound {
 public:
-    AffineForOp getAffineForOp() {
-        return op;
-    }
-    AffineMap getMap() {
-        return map;
-    }
+  AffineForOp getAffineForOp() { return op; }
+  AffineMap getMap() { return map; }
 
-    unsigned getNumOperands() {
-        return opEnd - opStart;
-    }
-    Value getOperand(unsigned idx) {
-        return op.getOperand(opStart + idx);
-    }
+  unsigned getNumOperands() { return opEnd - opStart; }
+  Value getOperand(unsigned idx) { return op.getOperand(opStart + idx); }
 
-    using operand_iterator = AffineForOp::operand_iterator;
-    using operand_range = AffineForOp::operand_range;
+  using operand_iterator = AffineForOp::operand_iterator;
+  using operand_range = AffineForOp::operand_range;
 
-    operand_iterator operand_begin() {
-        return op.operand_begin() + opStart;
-    }
-    operand_iterator operand_end() {
-        return op.operand_begin() + opEnd;
-    }
-    operand_range getOperands() {
-        return {operand_begin(), operand_end()};
-    }
+  operand_iterator operand_begin() { return op.operand_begin() + opStart; }
+  operand_iterator operand_end() { return op.operand_begin() + opEnd; }
+  operand_range getOperands() { return {operand_begin(), operand_end()}; }
 
 private:
-    // 'affine.for' operation that contains this bound.
-    AffineForOp op;
-    // Start and end positions of this affine bound operands in the list of
-    // the containing 'affine.for' operation operands.
-    unsigned opStart, opEnd;
-    // Affine map for this bound.
-    AffineMap map;
+  // 'affine.for' operation that contains this bound.
+  AffineForOp op;
+  // Start and end positions of this affine bound operands in the list of
+  // the containing 'affine.for' operation operands.
+  unsigned opStart, opEnd;
+  // Affine map for this bound.
+  AffineMap map;
 
-    AffineBound(AffineForOp op, unsigned opStart, unsigned opEnd, AffineMap map)
-        : op(op), opStart(opStart), opEnd(opEnd), map(map) {}
+  AffineBound(AffineForOp op, unsigned opStart, unsigned opEnd, AffineMap map)
+      : op(op), opStart(opStart), opEnd(opEnd), map(map) {}
 
-    friend class AffineForOp;
+  friend class AffineForOp;
 };
 
 /// An `AffineApplyNormalizer` is a helper class that supports renumbering
@@ -501,75 +453,65 @@ private:
 ///    %1 = affine.apply () -> (0)
 /// ```
 struct AffineApplyNormalizer {
-    AffineApplyNormalizer(AffineMap map, ArrayRef<Value> operands);
+  AffineApplyNormalizer(AffineMap map, ArrayRef<Value> operands);
 
-    /// Returns the AffineMap resulting from normalization.
-    AffineMap getAffineMap() {
-        return affineMap;
-    }
+  /// Returns the AffineMap resulting from normalization.
+  AffineMap getAffineMap() { return affineMap; }
 
-    SmallVector<Value, 8> getOperands() {
-        SmallVector<Value, 8> res(reorderedDims);
-        res.append(concatenatedSymbols.begin(), concatenatedSymbols.end());
-        return res;
-    }
+  SmallVector<Value, 8> getOperands() {
+    SmallVector<Value, 8> res(reorderedDims);
+    res.append(concatenatedSymbols.begin(), concatenatedSymbols.end());
+    return res;
+  }
 
-    unsigned getNumSymbols() {
-        return concatenatedSymbols.size();
-    }
-    unsigned getNumDims() {
-        return reorderedDims.size();
-    }
+  unsigned getNumSymbols() { return concatenatedSymbols.size(); }
+  unsigned getNumDims() { return reorderedDims.size(); }
 
-    /// Normalizes 'otherMap' and its operands 'otherOperands' to map to this
-    /// normalizer's coordinate space.
-    void normalize(AffineMap *otherMap, SmallVectorImpl<Value> *otherOperands);
+  /// Normalizes 'otherMap' and its operands 'otherOperands' to map to this
+  /// normalizer's coordinate space.
+  void normalize(AffineMap *otherMap, SmallVectorImpl<Value> *otherOperands);
 
 private:
-    /// Helper function to insert `v` into the coordinate system of the current
-    /// AffineApplyNormalizer. Returns the AffineDimExpr with the corresponding
-    /// renumbered position.
-    AffineDimExpr renumberOneDim(Value v);
+  /// Helper function to insert `v` into the coordinate system of the current
+  /// AffineApplyNormalizer. Returns the AffineDimExpr with the corresponding
+  /// renumbered position.
+  AffineDimExpr renumberOneDim(Value v);
 
-    /// Given an `other` normalizer, this rewrites `other.affineMap` in the
-    /// coordinate system of the current AffineApplyNormalizer.
-    /// Returns the rewritten AffineMap and updates the dims and symbols of
-    /// `this`.
-    AffineMap renumber(const AffineApplyNormalizer &other);
+  /// Given an `other` normalizer, this rewrites `other.affineMap` in the
+  /// coordinate system of the current AffineApplyNormalizer.
+  /// Returns the rewritten AffineMap and updates the dims and symbols of
+  /// `this`.
+  AffineMap renumber(const AffineApplyNormalizer &other);
 
-    /// Maps of Value to position in `affineMap`.
-    DenseMap<Value, unsigned> dimValueToPosition;
+  /// Maps of Value to position in `affineMap`.
+  DenseMap<Value, unsigned> dimValueToPosition;
 
-    /// Ordered dims and symbols matching positional dims and symbols in
-    /// `affineMap`.
-    SmallVector<Value, 8> reorderedDims;
-    SmallVector<Value, 8> concatenatedSymbols;
+  /// Ordered dims and symbols matching positional dims and symbols in
+  /// `affineMap`.
+  SmallVector<Value, 8> reorderedDims;
+  SmallVector<Value, 8> concatenatedSymbols;
 
-    /// The number of symbols in concatenated symbols that belong to the original
-    /// map as opposed to those concatendated during map composition.
-    unsigned numProperSymbols;
+  /// The number of symbols in concatenated symbols that belong to the original
+  /// map as opposed to those concatendated during map composition.
+  unsigned numProperSymbols;
 
-    AffineMap affineMap;
+  AffineMap affineMap;
 
-    /// Used with RAII to control the depth at which AffineApply are composed
-    /// recursively. Only accepts depth 1 for now to allow a behavior where a
-    /// newly composed AffineApplyOp does not increase the length of the chain of
-    /// AffineApplyOps. Full composition is implemented iteratively on top of
-    /// this behavior.
-    static unsigned &affineApplyDepth() {
-        static thread_local unsigned depth = 0;
-        return depth;
-    }
-    static constexpr unsigned kMaxAffineApplyDepth = 1;
+  /// Used with RAII to control the depth at which AffineApply are composed
+  /// recursively. Only accepts depth 1 for now to allow a behavior where a
+  /// newly composed AffineApplyOp does not increase the length of the chain of
+  /// AffineApplyOps. Full composition is implemented iteratively on top of
+  /// this behavior.
+  static unsigned &affineApplyDepth() {
+    static thread_local unsigned depth = 0;
+    return depth;
+  }
+  static constexpr unsigned kMaxAffineApplyDepth = 1;
 
-    AffineApplyNormalizer() : numProperSymbols(0) {
-        affineApplyDepth()++;
-    }
+  AffineApplyNormalizer() : numProperSymbols(0) { affineApplyDepth()++; }
 
 public:
-    ~AffineApplyNormalizer() {
-        affineApplyDepth()--;
-    }
+  ~AffineApplyNormalizer() { affineApplyDepth()--; }
 };
 
 } // end namespace mlir

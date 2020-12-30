@@ -26,15 +26,15 @@ namespace modernize {
 /// \endcode
 class MakeUniqueCheck : public MakeSmartPtrCheck {
 public:
-    MakeUniqueCheck(StringRef Name, ClangTidyContext *Context);
+  MakeUniqueCheck(StringRef Name, ClangTidyContext *Context);
 
 protected:
-    SmartPtrTypeMatcher getSmartPointerTypeMatcher() const override;
+  SmartPtrTypeMatcher getSmartPointerTypeMatcher() const override;
 
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override;
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override;
 
 private:
-    const bool RequireCPlusPlus14;
+  const bool RequireCPlusPlus14;
 };
 
 } // namespace modernize

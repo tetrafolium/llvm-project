@@ -32,8 +32,8 @@ reduce(_ExecutionPolicy&& __exec, _ForwardIterator __first, _ForwardIterator __l
 
 template <class _ExecutionPolicy, class _ForwardIterator>
 __pstl::__internal::__enable_if_execution_policy<_ExecutionPolicy,
-       typename iterator_traits<_ForwardIterator>::value_type>
-       reduce(_ExecutionPolicy&& __exec, _ForwardIterator __first, _ForwardIterator __last);
+                                                 typename iterator_traits<_ForwardIterator>::value_type>
+reduce(_ExecutionPolicy&& __exec, _ForwardIterator __first, _ForwardIterator __last);
 
 template <class _ExecutionPolicy, class _ForwardIterator1, class _ForwardIterator2, class _Tp>
 __pstl::__internal::__enable_if_execution_policy<_ExecutionPolicy, _Tp>

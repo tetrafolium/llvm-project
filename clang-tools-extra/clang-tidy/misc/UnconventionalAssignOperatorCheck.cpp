@@ -18,79 +18,77 @@ namespace misc {
 
 void UnconventionalAssignOperatorCheck::registerMatchers(
     ast_matchers::MatchFinder *Finder) {
-    const auto HasGoodReturnType = cxxMethodDecl(returns(lValueReferenceType(
-                                       pointee(unless(isConstQualified()),
-                                               anyOf(autoType(), hasDeclaration(equalsBoundNode("class")))))));
+  const auto HasGoodReturnType = cxxMethodDecl(returns(lValueReferenceType(
+      pointee(unless(isConstQualified()),
+              anyOf(autoType(), hasDeclaration(equalsBoundNode("class")))))));
 
-    const auto IsSelf = qualType(
-                            anyOf(hasDeclaration(equalsBoundNode("class")),
-                                  referenceType(pointee(hasDeclaration(equalsBoundNode("class"))))));
-    const auto IsAssign =
-        cxxMethodDecl(unless(anyOf(isDeleted(), isPrivate(), isImplicit())),
-                      hasName("operator="), ofClass(recordDecl().bind("class")))
-        .bind("method");
-    const auto IsSelfAssign =
-        cxxMethodDecl(IsAssign, hasParameter(0, parmVarDecl(hasType(IsSelf))))
-        .bind("method");
+  const auto IsSelf = qualType(
+      anyOf(hasDeclaration(equalsBoundNode("class")),
+            referenceType(pointee(hasDeclaration(equalsBoundNode("class"))))));
+  const auto IsAssign =
+      cxxMethodDecl(unless(anyOf(isDeleted(), isPrivate(), isImplicit())),
+                    hasName("operator="), ofClass(recordDecl().bind("class")))
+          .bind("method");
+  const auto IsSelfAssign =
+      cxxMethodDecl(IsAssign, hasParameter(0, parmVarDecl(hasType(IsSelf))))
+          .bind("method");
 
-    Finder->addMatcher(
-        cxxMethodDecl(IsAssign, unless(HasGoodReturnType)).bind("ReturnType"),
-        this);
+  Finder->addMatcher(
+      cxxMethodDecl(IsAssign, unless(HasGoodReturnType)).bind("ReturnType"),
+      this);
 
-    const auto BadSelf = referenceType(
-                             anyOf(lValueReferenceType(pointee(unless(isConstQualified()))),
-                                   rValueReferenceType(pointee(isConstQualified()))));
+  const auto BadSelf = referenceType(
+      anyOf(lValueReferenceType(pointee(unless(isConstQualified()))),
+            rValueReferenceType(pointee(isConstQualified()))));
 
-    Finder->addMatcher(
-        cxxMethodDecl(IsSelfAssign,
-                      hasParameter(0, parmVarDecl(hasType(BadSelf))))
-        .bind("ArgumentType"),
-        this);
+  Finder->addMatcher(
+      cxxMethodDecl(IsSelfAssign,
+                    hasParameter(0, parmVarDecl(hasType(BadSelf))))
+          .bind("ArgumentType"),
+      this);
 
-    Finder->addMatcher(
-        cxxMethodDecl(IsSelfAssign, anyOf(isConst(), isVirtual())).bind("cv"),
-        this);
+  Finder->addMatcher(
+      cxxMethodDecl(IsSelfAssign, anyOf(isConst(), isVirtual())).bind("cv"),
+      this);
 
-    const auto IsBadReturnStatement = returnStmt(unless(has(ignoringParenImpCasts(
-                                          anyOf(unaryOperator(hasOperatorName("*"), hasUnaryOperand(cxxThisExpr())),
-                                                  cxxOperatorCallExpr(argumentCountIs(1),
-                                                          callee(unresolvedLookupExpr()),
-                                                          hasArgument(0, cxxThisExpr())),
-                                                  cxxOperatorCallExpr(
-                                                          hasOverloadedOperatorName("="),
-                                                          hasArgument(
-                                                                  0, unaryOperator(hasOperatorName("*"),
-                                                                          hasUnaryOperand(cxxThisExpr())))))))));
-    const auto IsGoodAssign = cxxMethodDecl(IsAssign, HasGoodReturnType);
+  const auto IsBadReturnStatement = returnStmt(unless(has(ignoringParenImpCasts(
+      anyOf(unaryOperator(hasOperatorName("*"), hasUnaryOperand(cxxThisExpr())),
+            cxxOperatorCallExpr(argumentCountIs(1),
+                                callee(unresolvedLookupExpr()),
+                                hasArgument(0, cxxThisExpr())),
+            cxxOperatorCallExpr(
+                hasOverloadedOperatorName("="),
+                hasArgument(
+                    0, unaryOperator(hasOperatorName("*"),
+                                     hasUnaryOperand(cxxThisExpr())))))))));
+  const auto IsGoodAssign = cxxMethodDecl(IsAssign, HasGoodReturnType);
 
-    Finder->addMatcher(returnStmt(IsBadReturnStatement, forFunction(IsGoodAssign))
-                       .bind("returnStmt"),
-                       this);
+  Finder->addMatcher(returnStmt(IsBadReturnStatement, forFunction(IsGoodAssign))
+                         .bind("returnStmt"),
+                     this);
 }
 
 void UnconventionalAssignOperatorCheck::check(
     const MatchFinder::MatchResult &Result) {
-    if (const auto *RetStmt = Result.Nodes.getNodeAs<ReturnStmt>("returnStmt")) {
-        diag(RetStmt->getBeginLoc(), "operator=() should always return '*this'");
-    } else {
-        static const char *const Messages[][2] = {
-            {"ReturnType", "operator=() should return '%0&'"},
-            {   "ArgumentType",
-                getLangOpts().CPlusPlus11
-                ? "operator=() should take '%0 const&', '%0&&' or '%0'"
-                : "operator=() should take '%0 const&' or '%0'"
-            },
-            {"cv", "operator=() should not be marked '%1'"}
-        };
+  if (const auto *RetStmt = Result.Nodes.getNodeAs<ReturnStmt>("returnStmt")) {
+    diag(RetStmt->getBeginLoc(), "operator=() should always return '*this'");
+  } else {
+    static const char *const Messages[][2] = {
+        {"ReturnType", "operator=() should return '%0&'"},
+        {"ArgumentType",
+         getLangOpts().CPlusPlus11
+             ? "operator=() should take '%0 const&', '%0&&' or '%0'"
+             : "operator=() should take '%0 const&' or '%0'"},
+        {"cv", "operator=() should not be marked '%1'"}};
 
-        const auto *Method = Result.Nodes.getNodeAs<CXXMethodDecl>("method");
-        for (const auto &Message : Messages) {
-            if (Result.Nodes.getNodeAs<Decl>(Message[0]))
-                diag(Method->getBeginLoc(), Message[1])
-                        << Method->getParent()->getName()
-                        << (Method->isConst() ? "const" : "virtual");
-        }
+    const auto *Method = Result.Nodes.getNodeAs<CXXMethodDecl>("method");
+    for (const auto &Message : Messages) {
+      if (Result.Nodes.getNodeAs<Decl>(Message[0]))
+        diag(Method->getBeginLoc(), Message[1])
+            << Method->getParent()->getName()
+            << (Method->isConst() ? "const" : "virtual");
     }
+  }
 }
 
 } // namespace misc

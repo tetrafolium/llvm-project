@@ -22,11 +22,10 @@ class Function;
 
 class NewGVNPass : public PassInfoMixin<NewGVNPass> {
 public:
-    /// Run the pass over the function.
-    PreservedAnalyses run(Function &F, AnalysisManager<Function> &AM);
+  /// Run the pass over the function.
+  PreservedAnalyses run(Function &F, AnalysisManager<Function> &AM);
 };
 
 } // end namespace llvm
 
 #endif // LLVM_TRANSFORMS_SCALAR_NEWGVN_H
-

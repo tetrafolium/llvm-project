@@ -75,7 +75,7 @@ void EmitClangCommentHTMLTags(llvm::RecordKeeper &Records,
 void EmitClangCommentHTMLTagsProperties(llvm::RecordKeeper &Records,
                                         llvm::raw_ostream &OS);
 void EmitClangCommentHTMLNamedCharacterReferences(llvm::RecordKeeper &Records,
-        llvm::raw_ostream &OS);
+                                                  llvm::raw_ostream &OS);
 
 void EmitClangCommentCommandInfo(llvm::RecordKeeper &Records,
                                  llvm::raw_ostream &OS);
@@ -123,7 +123,7 @@ void EmitClangDataCollectors(llvm::RecordKeeper &Records,
                              llvm::raw_ostream &OS);
 
 void EmitTestPragmaAttributeSupportedAttributes(llvm::RecordKeeper &Records,
-        llvm::raw_ostream &OS);
+                                                llvm::raw_ostream &OS);
 
 } // end namespace clang
 

@@ -52,25 +52,25 @@ cl::opt<int> DCEPreciseSteps(
 
 class DeadCodeElim : public ScopPass {
 public:
-    static char ID;
-    explicit DeadCodeElim() : ScopPass(ID) {}
+  static char ID;
+  explicit DeadCodeElim() : ScopPass(ID) {}
 
-    /// Remove dead iterations from the schedule of @p S.
-    bool runOnScop(Scop &S) override;
+  /// Remove dead iterations from the schedule of @p S.
+  bool runOnScop(Scop &S) override;
 
-    /// Register all analyses and transformation required.
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  /// Register all analyses and transformation required.
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
 private:
-    /// Return the set of live iterations.
-    ///
-    /// The set of live iterations are all iterations that write to memory and for
-    /// which we can not prove that there will be a later write that _must_
-    /// overwrite the same memory location and is consequently the only one that
-    /// is visible after the execution of the SCoP.
-    ///
-    isl::union_set getLiveOut(Scop &S);
-    bool eliminateDeadCode(Scop &S, int PreciseSteps);
+  /// Return the set of live iterations.
+  ///
+  /// The set of live iterations are all iterations that write to memory and for
+  /// which we can not prove that there will be a later write that _must_
+  /// overwrite the same memory location and is consequently the only one that
+  /// is visible after the execution of the SCoP.
+  ///
+  isl::union_set getLiveOut(Scop &S);
+  bool eliminateDeadCode(Scop &S, int PreciseSteps);
 };
 } // namespace
 
@@ -87,19 +87,19 @@ char DeadCodeElim::ID = 0;
 // this means may-writes are in the current situation always live, there is
 // no point in trying to remove them from the live-out set.
 isl::union_set DeadCodeElim::getLiveOut(Scop &S) {
-    isl::union_map Schedule = S.getSchedule();
-    isl::union_map MustWrites = S.getMustWrites();
-    isl::union_map WriteIterations = MustWrites.reverse();
-    isl::union_map WriteTimes = WriteIterations.apply_range(Schedule);
+  isl::union_map Schedule = S.getSchedule();
+  isl::union_map MustWrites = S.getMustWrites();
+  isl::union_map WriteIterations = MustWrites.reverse();
+  isl::union_map WriteTimes = WriteIterations.apply_range(Schedule);
 
-    isl::union_map LastWriteTimes = WriteTimes.lexmax();
-    isl::union_map LastWriteIterations =
-        LastWriteTimes.apply_range(Schedule.reverse());
+  isl::union_map LastWriteTimes = WriteTimes.lexmax();
+  isl::union_map LastWriteIterations =
+      LastWriteTimes.apply_range(Schedule.reverse());
 
-    isl::union_set Live = LastWriteIterations.range();
-    isl::union_map MayWrites = S.getMayWrites();
-    Live = Live.unite(MayWrites.domain());
-    return Live.coalesce();
+  isl::union_set Live = LastWriteIterations.range();
+  isl::union_map MayWrites = S.getMayWrites();
+  Live = Live.unite(MayWrites.domain());
+  return Live.coalesce();
 }
 
 /// Performs polyhedral dead iteration elimination by:
@@ -111,63 +111,61 @@ isl::union_set DeadCodeElim::getLiveOut(Scop &S) {
 /// combine a certain number of precise steps with one approximating step that
 /// simplifies the life set with an affine hull.
 bool DeadCodeElim::eliminateDeadCode(Scop &S, int PreciseSteps) {
-    DependenceInfo &DI = getAnalysis<DependenceInfo>();
-    const Dependences &D = DI.getDependences(Dependences::AL_Statement);
+  DependenceInfo &DI = getAnalysis<DependenceInfo>();
+  const Dependences &D = DI.getDependences(Dependences::AL_Statement);
 
-    if (!D.hasValidDependences())
-        return false;
+  if (!D.hasValidDependences())
+    return false;
 
-    isl::union_set Live = getLiveOut(S);
-    isl::union_map Dep =
-        D.getDependences(Dependences::TYPE_RAW | Dependences::TYPE_RED);
-    Dep = Dep.reverse();
+  isl::union_set Live = getLiveOut(S);
+  isl::union_map Dep =
+      D.getDependences(Dependences::TYPE_RAW | Dependences::TYPE_RED);
+  Dep = Dep.reverse();
 
-    if (PreciseSteps == -1)
-        Live = Live.affine_hull();
+  if (PreciseSteps == -1)
+    Live = Live.affine_hull();
 
-    isl::union_set OriginalDomain = S.getDomains();
-    int Steps = 0;
-    while (true) {
-        Steps++;
+  isl::union_set OriginalDomain = S.getDomains();
+  int Steps = 0;
+  while (true) {
+    Steps++;
 
-        isl::union_set Extra = Live.apply(Dep);
+    isl::union_set Extra = Live.apply(Dep);
 
-        if (Extra.is_subset(Live))
-            break;
+    if (Extra.is_subset(Live))
+      break;
 
-        Live = Live.unite(Extra);
+    Live = Live.unite(Extra);
 
-        if (Steps > PreciseSteps) {
-            Steps = 0;
-            Live = Live.affine_hull();
-        }
-
-        Live = Live.intersect(OriginalDomain);
+    if (Steps > PreciseSteps) {
+      Steps = 0;
+      Live = Live.affine_hull();
     }
 
-    Live = Live.coalesce();
+    Live = Live.intersect(OriginalDomain);
+  }
 
-    bool Changed = S.restrictDomains(Live);
+  Live = Live.coalesce();
 
-    // FIXME: We can probably avoid the recomputation of all dependences by
-    // updating them explicitly.
-    if (Changed)
-        DI.recomputeDependences(Dependences::AL_Statement);
-    return Changed;
+  bool Changed = S.restrictDomains(Live);
+
+  // FIXME: We can probably avoid the recomputation of all dependences by
+  // updating them explicitly.
+  if (Changed)
+    DI.recomputeDependences(Dependences::AL_Statement);
+  return Changed;
 }
 
 bool DeadCodeElim::runOnScop(Scop &S) {
-    return eliminateDeadCode(S, DCEPreciseSteps);
+  return eliminateDeadCode(S, DCEPreciseSteps);
 }
 
 void DeadCodeElim::getAnalysisUsage(AnalysisUsage &AU) const {
-    ScopPass::getAnalysisUsage(AU);
-    AU.addRequired<DependenceInfo>();
+  ScopPass::getAnalysisUsage(AU);
+  AU.addRequired<DependenceInfo>();
 }
 
-Pass *polly::createDeadCodeElimPass() {
-    return new DeadCodeElim();
-}
+Pass *polly::createDeadCodeElimPass() { return new DeadCodeElim(); }
 
 INITIALIZE_PASS_BEGIN(DeadCodeElim, "polly-dce",
                       "Polly - Remove dead iterations", false, false)

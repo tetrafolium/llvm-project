@@ -24,10 +24,10 @@ namespace cert {
 /// http://clang.llvm.org/extra/clang-tidy/checks/cert-env33-c.html
 class CommandProcessorCheck : public ClangTidyCheck {
 public:
-    CommandProcessorCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  CommandProcessorCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cert

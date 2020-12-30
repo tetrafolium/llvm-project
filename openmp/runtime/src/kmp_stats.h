@@ -47,12 +47,12 @@
  *
  */
 enum stats_flags_e {
-    noTotal = 1 << 0, //!< do not show a TOTAL_aggregation for this statistic
-    onlyInMaster = 1 << 1, //!< statistic is valid only for master
-    noUnits = 1 << 2, //!< statistic doesn't need units printed next to it
-    notInMaster = 1 << 3, //!< statistic is valid only for non-master threads
-    logEvent = 1 << 4 //!< statistic can be logged on the event timeline when
-               //! KMP_STATS_EVENTS is on (valid only for timers)
+  noTotal = 1 << 0, //!< do not show a TOTAL_aggregation for this statistic
+  onlyInMaster = 1 << 1, //!< statistic is valid only for master
+  noUnits = 1 << 2, //!< statistic doesn't need units printed next to it
+  notInMaster = 1 << 3, //!< statistic is valid only for non-master threads
+  logEvent = 1 << 4 //!< statistic can be logged on the event timeline when
+                    //! KMP_STATS_EVENTS is on (valid only for timers)
 };
 
 /*!
@@ -61,16 +61,16 @@ enum stats_flags_e {
  *
  */
 enum stats_state_e {
-    IDLE,
-    SERIAL_REGION,
-    FORK_JOIN_BARRIER,
-    PLAIN_BARRIER,
-    TASKWAIT,
-    TASKYIELD,
-    TASKGROUP,
-    IMPLICIT_TASK,
-    EXPLICIT_TASK,
-    TEAMS_REGION
+  IDLE,
+  SERIAL_REGION,
+  FORK_JOIN_BARRIER,
+  PLAIN_BARRIER,
+  TASKWAIT,
+  TASKYIELD,
+  TASKGROUP,
+  IMPLICIT_TASK,
+  EXPLICIT_TASK,
+  TEAMS_REGION
 };
 
 /*!
@@ -289,14 +289,14 @@ enum stats_state_e {
  * same as that of a timer above.
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_FOREACH_EXPLICIT_TIMER(macro, arg) KMP_FOREACH_TIMER(macro, arg)
 
 #define ENUMERATE(name, ignore, prefix) prefix##name,
 enum timer_e { KMP_FOREACH_TIMER(ENUMERATE, TIMER_) TIMER_LAST };
 
 enum explicit_timer_e {
-    KMP_FOREACH_EXPLICIT_TIMER(ENUMERATE, EXPLICIT_TIMER_) EXPLICIT_TIMER_LAST
+  KMP_FOREACH_EXPLICIT_TIMER(ENUMERATE, EXPLICIT_TIMER_) EXPLICIT_TIMER_LAST
 };
 
 enum counter_e { KMP_FOREACH_COUNTER(ENUMERATE, COUNTER_) COUNTER_LAST };
@@ -309,235 +309,199 @@ enum counter_e { KMP_FOREACH_COUNTER(ENUMERATE, COUNTER_) COUNTER_LAST };
  * about them.
  */
 class logHistogram {
-    enum {
-        numBins = 31, /* Number of powers of 10. If this changes you need to change
+  enum {
+    numBins = 31, /* Number of powers of 10. If this changes you need to change
                    * the initializer for binMax */
 
-        /*
-         * If you want to use this to analyse values that may be less than 1, (for
-         * instance times in s), then the logOffset gives you negative powers.
-         * In our case here, we're just looking at times in ticks, or counts, so we
-         * can never see values with magnitude < 1 (other than zero), so we can set
-         * it to 0.  As above change the initializer if you change this.
-         */
-        logOffset = 0
-    };
-    uint32_t KMP_ALIGN_CACHE zeroCount;
-    struct {
-        uint32_t count;
-        double total;
-    } bins[numBins];
+    /*
+     * If you want to use this to analyse values that may be less than 1, (for
+     * instance times in s), then the logOffset gives you negative powers.
+     * In our case here, we're just looking at times in ticks, or counts, so we
+     * can never see values with magnitude < 1 (other than zero), so we can set
+     * it to 0.  As above change the initializer if you change this.
+     */
+    logOffset = 0
+  };
+  uint32_t KMP_ALIGN_CACHE zeroCount;
+  struct {
+    uint32_t count;
+    double total;
+  } bins[numBins];
 
-    static double binMax[numBins];
+  static double binMax[numBins];
 
 #ifdef KMP_DEBUG
-    uint64_t _total;
+  uint64_t _total;
 
-    void check() const {
-        uint64_t t = zeroCount;
-        for (int i = 0; i < numBins; i++)
-            t += bins[i].count;
-        KMP_DEBUG_ASSERT(t == _total);
-    }
+  void check() const {
+    uint64_t t = zeroCount;
+    for (int i = 0; i < numBins; i++)
+      t += bins[i].count;
+    KMP_DEBUG_ASSERT(t == _total);
+  }
 #else
-    void check() const {}
+  void check() const {}
 #endif
 
 public:
-    logHistogram() {
-        reset();
-    }
+  logHistogram() { reset(); }
 
-    logHistogram(logHistogram const &o) {
-        for (int i = 0; i < numBins; i++)
-            bins[i] = o.bins[i];
+  logHistogram(logHistogram const &o) {
+    for (int i = 0; i < numBins; i++)
+      bins[i] = o.bins[i];
 #ifdef KMP_DEBUG
-        _total = o._total;
+    _total = o._total;
 #endif
-    }
+  }
 
-    void reset() {
-        zeroCount = 0;
-        for (int i = 0; i < numBins; i++) {
-            bins[i].count = 0;
-            bins[i].total = 0;
-        }
+  void reset() {
+    zeroCount = 0;
+    for (int i = 0; i < numBins; i++) {
+      bins[i].count = 0;
+      bins[i].total = 0;
+    }
 
 #ifdef KMP_DEBUG
-        _total = 0;
+    _total = 0;
 #endif
-    }
-    uint32_t count(int b) const {
-        return bins[b + logOffset].count;
-    }
-    double total(int b) const {
-        return bins[b + logOffset].total;
-    }
-    static uint32_t findBin(double sample);
+  }
+  uint32_t count(int b) const { return bins[b + logOffset].count; }
+  double total(int b) const { return bins[b + logOffset].total; }
+  static uint32_t findBin(double sample);
 
-    logHistogram &operator+=(logHistogram const &o) {
-        zeroCount += o.zeroCount;
-        for (int i = 0; i < numBins; i++) {
-            bins[i].count += o.bins[i].count;
-            bins[i].total += o.bins[i].total;
-        }
+  logHistogram &operator+=(logHistogram const &o) {
+    zeroCount += o.zeroCount;
+    for (int i = 0; i < numBins; i++) {
+      bins[i].count += o.bins[i].count;
+      bins[i].total += o.bins[i].total;
+    }
 #ifdef KMP_DEBUG
-        _total += o._total;
-        check();
+    _total += o._total;
+    check();
 #endif
 
-        return *this;
-    }
+    return *this;
+  }
 
-    void addSample(double sample);
-    int minBin() const;
-    int maxBin() const;
+  void addSample(double sample);
+  int minBin() const;
+  int maxBin() const;
 
-    std::string format(char) const;
+  std::string format(char) const;
 };
 
 class statistic {
-    double KMP_ALIGN_CACHE minVal;
-    double maxVal;
-    double meanVal;
-    double m2;
-    uint64_t sampleCount;
-    double offset;
-    bool collectingHist;
-    logHistogram hist;
+  double KMP_ALIGN_CACHE minVal;
+  double maxVal;
+  double meanVal;
+  double m2;
+  uint64_t sampleCount;
+  double offset;
+  bool collectingHist;
+  logHistogram hist;
 
 public:
-    statistic(bool doHist = bool(KMP_STATS_HIST)) {
-        reset();
-        collectingHist = doHist;
-    }
-    statistic(statistic const &o)
-        : minVal(o.minVal), maxVal(o.maxVal), meanVal(o.meanVal), m2(o.m2),
-          sampleCount(o.sampleCount), offset(o.offset),
-          collectingHist(o.collectingHist), hist(o.hist) {}
-    statistic(double minv, double maxv, double meanv, uint64_t sc, double sd)
-        : minVal(minv), maxVal(maxv), meanVal(meanv), m2(sd * sd * sc),
-          sampleCount(sc), offset(0.0), collectingHist(false) {}
-    bool haveHist() const {
-        return collectingHist;
-    }
-    double getMin() const {
-        return minVal;
-    }
-    double getMean() const {
-        return meanVal;
-    }
-    double getMax() const {
-        return maxVal;
-    }
-    uint64_t getCount() const {
-        return sampleCount;
-    }
-    double getSD() const {
-        return sqrt(m2 / sampleCount);
-    }
-    double getTotal() const {
-        return sampleCount * meanVal;
-    }
-    logHistogram const *getHist() const {
-        return &hist;
-    }
-    void setOffset(double d) {
-        offset = d;
-    }
+  statistic(bool doHist = bool(KMP_STATS_HIST)) {
+    reset();
+    collectingHist = doHist;
+  }
+  statistic(statistic const &o)
+      : minVal(o.minVal), maxVal(o.maxVal), meanVal(o.meanVal), m2(o.m2),
+        sampleCount(o.sampleCount), offset(o.offset),
+        collectingHist(o.collectingHist), hist(o.hist) {}
+  statistic(double minv, double maxv, double meanv, uint64_t sc, double sd)
+      : minVal(minv), maxVal(maxv), meanVal(meanv), m2(sd * sd * sc),
+        sampleCount(sc), offset(0.0), collectingHist(false) {}
+  bool haveHist() const { return collectingHist; }
+  double getMin() const { return minVal; }
+  double getMean() const { return meanVal; }
+  double getMax() const { return maxVal; }
+  uint64_t getCount() const { return sampleCount; }
+  double getSD() const { return sqrt(m2 / sampleCount); }
+  double getTotal() const { return sampleCount * meanVal; }
+  logHistogram const *getHist() const { return &hist; }
+  void setOffset(double d) { offset = d; }
 
-    void reset() {
-        minVal = (std::numeric_limits<double>::max)();
-        maxVal = -minVal;
-        meanVal = 0.0;
-        m2 = 0.0;
-        sampleCount = 0;
-        offset = 0.0;
-        hist.reset();
-    }
-    void addSample(double sample);
-    void scale(double factor);
-    void scaleDown(double f) {
-        scale(1. / f);
-    }
-    void forceCount(uint64_t count) {
-        sampleCount = count;
-    }
-    statistic &operator+=(statistic const &other);
+  void reset() {
+    minVal = (std::numeric_limits<double>::max)();
+    maxVal = -minVal;
+    meanVal = 0.0;
+    m2 = 0.0;
+    sampleCount = 0;
+    offset = 0.0;
+    hist.reset();
+  }
+  void addSample(double sample);
+  void scale(double factor);
+  void scaleDown(double f) { scale(1. / f); }
+  void forceCount(uint64_t count) { sampleCount = count; }
+  statistic &operator+=(statistic const &other);
 
-    std::string format(char unit, bool total = false) const;
-    std::string formatHist(char unit) const {
-        return hist.format(unit);
-    }
+  std::string format(char unit, bool total = false) const;
+  std::string formatHist(char unit) const { return hist.format(unit); }
 };
 
 struct statInfo {
-    const char *name;
-    uint32_t flags;
+  const char *name;
+  uint32_t flags;
 };
 
 class timeStat : public statistic {
-    static statInfo timerInfo[];
+  static statInfo timerInfo[];
 
 public:
-    timeStat() : statistic() {}
-    static const char *name(timer_e e) {
-        return timerInfo[e].name;
+  timeStat() : statistic() {}
+  static const char *name(timer_e e) { return timerInfo[e].name; }
+  static bool noTotal(timer_e e) {
+    return timerInfo[e].flags & stats_flags_e::noTotal;
+  }
+  static bool masterOnly(timer_e e) {
+    return timerInfo[e].flags & stats_flags_e::onlyInMaster;
+  }
+  static bool workerOnly(timer_e e) {
+    return timerInfo[e].flags & stats_flags_e::notInMaster;
+  }
+  static bool noUnits(timer_e e) {
+    return timerInfo[e].flags & stats_flags_e::noUnits;
+  }
+  static bool logEvent(timer_e e) {
+    return timerInfo[e].flags & stats_flags_e::logEvent;
+  }
+  static void clearEventFlags() {
+    for (int i = 0; i < TIMER_LAST; i++) {
+      timerInfo[i].flags &= (~(stats_flags_e::logEvent));
     }
-    static bool noTotal(timer_e e) {
-        return timerInfo[e].flags & stats_flags_e::noTotal;
-    }
-    static bool masterOnly(timer_e e) {
-        return timerInfo[e].flags & stats_flags_e::onlyInMaster;
-    }
-    static bool workerOnly(timer_e e) {
-        return timerInfo[e].flags & stats_flags_e::notInMaster;
-    }
-    static bool noUnits(timer_e e) {
-        return timerInfo[e].flags & stats_flags_e::noUnits;
-    }
-    static bool logEvent(timer_e e) {
-        return timerInfo[e].flags & stats_flags_e::logEvent;
-    }
-    static void clearEventFlags() {
-        for (int i = 0; i < TIMER_LAST; i++) {
-            timerInfo[i].flags &= (~(stats_flags_e::logEvent));
-        }
-    }
+  }
 };
 
 // Where we need explicitly to start and end the timer, this version can be used
 // Since these timers normally aren't nicely scoped, so don't have a good place
 // to live on the stack of the thread, they're more work to use.
 class explicitTimer {
-    timeStat *stat;
-    timer_e timerEnumValue;
-    tsc_tick_count startTime;
-    tsc_tick_count pauseStartTime;
-    tsc_tick_count::tsc_interval_t totalPauseTime;
+  timeStat *stat;
+  timer_e timerEnumValue;
+  tsc_tick_count startTime;
+  tsc_tick_count pauseStartTime;
+  tsc_tick_count::tsc_interval_t totalPauseTime;
 
 public:
-    explicitTimer(timeStat *s, timer_e te)
-        : stat(s), timerEnumValue(te), startTime(), pauseStartTime(0),
-          totalPauseTime() {}
+  explicitTimer(timeStat *s, timer_e te)
+      : stat(s), timerEnumValue(te), startTime(), pauseStartTime(0),
+        totalPauseTime() {}
 
-    // void setStat(timeStat *s) { stat = s; }
-    void start(tsc_tick_count tick);
-    void pause(tsc_tick_count tick) {
-        pauseStartTime = tick;
-    }
-    void resume(tsc_tick_count tick) {
-        totalPauseTime += (tick - pauseStartTime);
-    }
-    void stop(tsc_tick_count tick, kmp_stats_list *stats_ptr = nullptr);
-    void reset() {
-        startTime = 0;
-        pauseStartTime = 0;
-        totalPauseTime = 0;
-    }
-    timer_e get_type() const {
-        return timerEnumValue;
-    }
+  // void setStat(timeStat *s) { stat = s; }
+  void start(tsc_tick_count tick);
+  void pause(tsc_tick_count tick) { pauseStartTime = tick; }
+  void resume(tsc_tick_count tick) {
+    totalPauseTime += (tick - pauseStartTime);
+  }
+  void stop(tsc_tick_count tick, kmp_stats_list *stats_ptr = nullptr);
+  void reset() {
+    startTime = 0;
+    pauseStartTime = 0;
+    totalPauseTime = 0;
+  }
+  timer_e get_type() const { return timerEnumValue; }
 };
 
 // Where you need to partition a threads clock ticks into separate states
@@ -548,73 +512,61 @@ public:
 // versa
 class partitionedTimers {
 private:
-    std::vector<explicitTimer> timer_stack;
+  std::vector<explicitTimer> timer_stack;
 
 public:
-    partitionedTimers();
-    void init(explicitTimer timer);
-    void exchange(explicitTimer timer);
-    void push(explicitTimer timer);
-    void pop();
-    void windup();
+  partitionedTimers();
+  void init(explicitTimer timer);
+  void exchange(explicitTimer timer);
+  void push(explicitTimer timer);
+  void pop();
+  void windup();
 };
 
 // Special wrapper around the partitioned timers to aid timing code blocks
 // It avoids the need to have an explicit end, leaving the scope suffices.
 class blockPartitionedTimer {
-    partitionedTimers *part_timers;
+  partitionedTimers *part_timers;
 
 public:
-    blockPartitionedTimer(partitionedTimers *pt, explicitTimer timer)
-        : part_timers(pt) {
-        part_timers->push(timer);
-    }
-    ~blockPartitionedTimer() {
-        part_timers->pop();
-    }
+  blockPartitionedTimer(partitionedTimers *pt, explicitTimer timer)
+      : part_timers(pt) {
+    part_timers->push(timer);
+  }
+  ~blockPartitionedTimer() { part_timers->pop(); }
 };
 
 // Special wrapper around the thread state to aid in keeping state in code
 // blocks It avoids the need to have an explicit end, leaving the scope
 // suffices.
 class blockThreadState {
-    stats_state_e *state_pointer;
-    stats_state_e old_state;
+  stats_state_e *state_pointer;
+  stats_state_e old_state;
 
 public:
-    blockThreadState(stats_state_e *thread_state_pointer, stats_state_e new_state)
-        : state_pointer(thread_state_pointer), old_state(*thread_state_pointer) {
-        *state_pointer = new_state;
-    }
-    ~blockThreadState() {
-        *state_pointer = old_state;
-    }
+  blockThreadState(stats_state_e *thread_state_pointer, stats_state_e new_state)
+      : state_pointer(thread_state_pointer), old_state(*thread_state_pointer) {
+    *state_pointer = new_state;
+  }
+  ~blockThreadState() { *state_pointer = old_state; }
 };
 
 // If all you want is a count, then you can use this...
 // The individual per-thread counts will be aggregated into a statistic at
 // program exit.
 class counter {
-    uint64_t value;
-    static const statInfo counterInfo[];
+  uint64_t value;
+  static const statInfo counterInfo[];
 
 public:
-    counter() : value(0) {}
-    void increment() {
-        value++;
-    }
-    uint64_t getValue() const {
-        return value;
-    }
-    void reset() {
-        value = 0;
-    }
-    static const char *name(counter_e e) {
-        return counterInfo[e].name;
-    }
-    static bool masterOnly(counter_e e) {
-        return counterInfo[e].flags & stats_flags_e::onlyInMaster;
-    }
+  counter() : value(0) {}
+  void increment() { value++; }
+  uint64_t getValue() const { return value; }
+  void reset() { value = 0; }
+  static const char *name(counter_e e) { return counterInfo[e].name; }
+  static bool masterOnly(counter_e e) {
+    return counterInfo[e].flags & stats_flags_e::onlyInMaster;
+  }
 };
 
 /* ****************************************************************
@@ -651,28 +603,20 @@ Begin -------------------------------------------------------------> Time
 
 **************************************************************** */
 class kmp_stats_event {
-    uint64_t start;
-    uint64_t stop;
-    int nest_level;
-    timer_e timer_name;
+  uint64_t start;
+  uint64_t stop;
+  int nest_level;
+  timer_e timer_name;
 
 public:
-    kmp_stats_event()
-        : start(0), stop(0), nest_level(0), timer_name(TIMER_LAST) {}
-    kmp_stats_event(uint64_t strt, uint64_t stp, int nst, timer_e nme)
-        : start(strt), stop(stp), nest_level(nst), timer_name(nme) {}
-    inline uint64_t getStart() const {
-        return start;
-    }
-    inline uint64_t getStop() const {
-        return stop;
-    }
-    inline int getNestLevel() const {
-        return nest_level;
-    }
-    inline timer_e getTimerName() const {
-        return timer_name;
-    }
+  kmp_stats_event()
+      : start(0), stop(0), nest_level(0), timer_name(TIMER_LAST) {}
+  kmp_stats_event(uint64_t strt, uint64_t stp, int nst, timer_e nme)
+      : start(strt), stop(stp), nest_level(nst), timer_name(nme) {}
+  inline uint64_t getStart() const { return start; }
+  inline uint64_t getStop() const { return stop; }
+  inline int getNestLevel() const { return nest_level; }
+  inline timer_e getTimerName() const { return timer_name; }
 };
 
 /* ****************************************************************
@@ -702,56 +646,44 @@ public:
     6) operator[index] or at(index) -- returns event reference at that index
 **************************************************************** */
 class kmp_stats_event_vector {
-    kmp_stats_event *events;
-    int internal_size;
-    int allocated_size;
-    static const int INIT_SIZE = 1024;
+  kmp_stats_event *events;
+  int internal_size;
+  int allocated_size;
+  static const int INIT_SIZE = 1024;
 
 public:
-    kmp_stats_event_vector() {
-        events =
-            (kmp_stats_event *)__kmp_allocate(sizeof(kmp_stats_event) * INIT_SIZE);
-        internal_size = 0;
-        allocated_size = INIT_SIZE;
+  kmp_stats_event_vector() {
+    events =
+        (kmp_stats_event *)__kmp_allocate(sizeof(kmp_stats_event) * INIT_SIZE);
+    internal_size = 0;
+    allocated_size = INIT_SIZE;
+  }
+  ~kmp_stats_event_vector() {}
+  inline void reset() { internal_size = 0; }
+  inline int size() const { return internal_size; }
+  void push_back(uint64_t start_time, uint64_t stop_time, int nest_level,
+                 timer_e name) {
+    int i;
+    if (internal_size == allocated_size) {
+      kmp_stats_event *tmp = (kmp_stats_event *)__kmp_allocate(
+          sizeof(kmp_stats_event) * allocated_size * 2);
+      for (i = 0; i < internal_size; i++)
+        tmp[i] = events[i];
+      __kmp_free(events);
+      events = tmp;
+      allocated_size *= 2;
     }
-    ~kmp_stats_event_vector() {}
-    inline void reset() {
-        internal_size = 0;
-    }
-    inline int size() const {
-        return internal_size;
-    }
-    void push_back(uint64_t start_time, uint64_t stop_time, int nest_level,
-                   timer_e name) {
-        int i;
-        if (internal_size == allocated_size) {
-            kmp_stats_event *tmp = (kmp_stats_event *)__kmp_allocate(
-                                       sizeof(kmp_stats_event) * allocated_size * 2);
-            for (i = 0; i < internal_size; i++)
-                tmp[i] = events[i];
-            __kmp_free(events);
-            events = tmp;
-            allocated_size *= 2;
-        }
-        events[internal_size] =
-            kmp_stats_event(start_time, stop_time, nest_level, name);
-        internal_size++;
-        return;
-    }
-    void deallocate();
-    void sort();
-    const kmp_stats_event &operator[](int index) const {
-        return events[index];
-    }
-    kmp_stats_event &operator[](int index) {
-        return events[index];
-    }
-    const kmp_stats_event &at(int index) const {
-        return events[index];
-    }
-    kmp_stats_event &at(int index) {
-        return events[index];
-    }
+    events[internal_size] =
+        kmp_stats_event(start_time, stop_time, nest_level, name);
+    internal_size++;
+    return;
+  }
+  void deallocate();
+  void sort();
+  const kmp_stats_event &operator[](int index) const { return events[index]; }
+  kmp_stats_event &operator[](int index) { return events[index]; }
+  const kmp_stats_event &at(int index) const { return events[index]; }
+  kmp_stats_event &at(int index) { return events[index]; }
 };
 
 /* ****************************************************************
@@ -782,111 +714,73 @@ public:
     store "dummy" statistics before __kmp_create_worker() is called.
 **************************************************************** */
 class kmp_stats_list {
-    int gtid;
-    timeStat _timers[TIMER_LAST + 1];
-    counter _counters[COUNTER_LAST + 1];
-    explicitTimer thread_life_timer;
-    partitionedTimers _partitionedTimers;
-    int _nestLevel; // one per thread
-    kmp_stats_event_vector _event_vector;
-    kmp_stats_list *next;
-    kmp_stats_list *prev;
-    stats_state_e state;
-    int thread_is_idle_flag;
+  int gtid;
+  timeStat _timers[TIMER_LAST + 1];
+  counter _counters[COUNTER_LAST + 1];
+  explicitTimer thread_life_timer;
+  partitionedTimers _partitionedTimers;
+  int _nestLevel; // one per thread
+  kmp_stats_event_vector _event_vector;
+  kmp_stats_list *next;
+  kmp_stats_list *prev;
+  stats_state_e state;
+  int thread_is_idle_flag;
 
 public:
-    kmp_stats_list()
-        : thread_life_timer(&_timers[TIMER_OMP_worker_thread_life],
-                            TIMER_OMP_worker_thread_life),
-          _nestLevel(0), _event_vector(), next(this), prev(this), state(IDLE),
-          thread_is_idle_flag(0) {}
-    ~kmp_stats_list() {}
-    inline timeStat *getTimer(timer_e idx) {
-        return &_timers[idx];
-    }
-    inline counter *getCounter(counter_e idx) {
-        return &_counters[idx];
-    }
-    inline partitionedTimers *getPartitionedTimers() {
-        return &_partitionedTimers;
-    }
-    inline timeStat *getTimers() {
-        return _timers;
-    }
-    inline counter *getCounters() {
-        return _counters;
-    }
-    inline kmp_stats_event_vector &getEventVector() {
-        return _event_vector;
-    }
-    inline void startLife() {
-        thread_life_timer.start(tsc_tick_count::now());
-    }
-    inline void endLife() {
-        thread_life_timer.stop(tsc_tick_count::now(), this);
-    }
-    inline void resetEventVector() {
-        _event_vector.reset();
-    }
-    inline void incrementNestValue() {
-        _nestLevel++;
-    }
-    inline int getNestValue() {
-        return _nestLevel;
-    }
-    inline void decrementNestValue() {
-        _nestLevel--;
-    }
-    inline int getGtid() const {
-        return gtid;
-    }
-    inline void setGtid(int newgtid) {
-        gtid = newgtid;
-    }
-    inline void setState(stats_state_e newstate) {
-        state = newstate;
-    }
-    inline stats_state_e getState() const {
-        return state;
-    }
-    inline stats_state_e *getStatePointer() {
-        return &state;
-    }
-    inline bool isIdle() {
-        return thread_is_idle_flag == 1;
-    }
-    inline void setIdleFlag() {
-        thread_is_idle_flag = 1;
-    }
-    inline void resetIdleFlag() {
-        thread_is_idle_flag = 0;
-    }
-    kmp_stats_list *push_back(int gtid); // returns newly created list node
-    inline void push_event(uint64_t start_time, uint64_t stop_time,
-                           int nest_level, timer_e name) {
-        _event_vector.push_back(start_time, stop_time, nest_level, name);
-    }
-    void deallocate();
-    class iterator;
-    kmp_stats_list::iterator begin();
-    kmp_stats_list::iterator end();
-    int size();
-    class iterator {
-        kmp_stats_list *ptr;
-        friend kmp_stats_list::iterator kmp_stats_list::begin();
-        friend kmp_stats_list::iterator kmp_stats_list::end();
+  kmp_stats_list()
+      : thread_life_timer(&_timers[TIMER_OMP_worker_thread_life],
+                          TIMER_OMP_worker_thread_life),
+        _nestLevel(0), _event_vector(), next(this), prev(this), state(IDLE),
+        thread_is_idle_flag(0) {}
+  ~kmp_stats_list() {}
+  inline timeStat *getTimer(timer_e idx) { return &_timers[idx]; }
+  inline counter *getCounter(counter_e idx) { return &_counters[idx]; }
+  inline partitionedTimers *getPartitionedTimers() {
+    return &_partitionedTimers;
+  }
+  inline timeStat *getTimers() { return _timers; }
+  inline counter *getCounters() { return _counters; }
+  inline kmp_stats_event_vector &getEventVector() { return _event_vector; }
+  inline void startLife() { thread_life_timer.start(tsc_tick_count::now()); }
+  inline void endLife() { thread_life_timer.stop(tsc_tick_count::now(), this); }
+  inline void resetEventVector() { _event_vector.reset(); }
+  inline void incrementNestValue() { _nestLevel++; }
+  inline int getNestValue() { return _nestLevel; }
+  inline void decrementNestValue() { _nestLevel--; }
+  inline int getGtid() const { return gtid; }
+  inline void setGtid(int newgtid) { gtid = newgtid; }
+  inline void setState(stats_state_e newstate) { state = newstate; }
+  inline stats_state_e getState() const { return state; }
+  inline stats_state_e *getStatePointer() { return &state; }
+  inline bool isIdle() { return thread_is_idle_flag == 1; }
+  inline void setIdleFlag() { thread_is_idle_flag = 1; }
+  inline void resetIdleFlag() { thread_is_idle_flag = 0; }
+  kmp_stats_list *push_back(int gtid); // returns newly created list node
+  inline void push_event(uint64_t start_time, uint64_t stop_time,
+                         int nest_level, timer_e name) {
+    _event_vector.push_back(start_time, stop_time, nest_level, name);
+  }
+  void deallocate();
+  class iterator;
+  kmp_stats_list::iterator begin();
+  kmp_stats_list::iterator end();
+  int size();
+  class iterator {
+    kmp_stats_list *ptr;
+    friend kmp_stats_list::iterator kmp_stats_list::begin();
+    friend kmp_stats_list::iterator kmp_stats_list::end();
 
-    public:
-        iterator();
-        ~iterator();
-        iterator operator++();
-        iterator operator++(int dummy);
-        iterator operator--();
-        iterator operator--(int dummy);
-        bool operator!=(const iterator &rhs);
-        bool operator==(const iterator &rhs);
-        kmp_stats_list *operator*() const; // dereference operator
-    };
+  public:
+    iterator();
+    ~iterator();
+    iterator operator++();
+    iterator operator++(int dummy);
+    iterator operator--();
+    iterator operator--(int dummy);
+    bool operator!=(const iterator &rhs);
+    bool operator==(const iterator &rhs);
+    kmp_stats_list *operator*() const; // dereference operator
+  };
 };
 
 /* ****************************************************************
@@ -921,44 +815,38 @@ public:
 class kmp_stats_output_module {
 
 public:
-    struct rgb_color {
-        float r;
-        float g;
-        float b;
-    };
+  struct rgb_color {
+    float r;
+    float g;
+    float b;
+  };
 
 private:
-    std::string outputFileName;
-    static const char *eventsFileName;
-    static const char *plotFileName;
-    static int printPerThreadFlag;
-    static int printPerThreadEventsFlag;
-    static const rgb_color globalColorArray[];
-    static rgb_color timerColorInfo[];
+  std::string outputFileName;
+  static const char *eventsFileName;
+  static const char *plotFileName;
+  static int printPerThreadFlag;
+  static int printPerThreadEventsFlag;
+  static const rgb_color globalColorArray[];
+  static rgb_color timerColorInfo[];
 
-    void init();
-    static void setupEventColors();
-    static void printPloticusFile();
-    static void printHeaderInfo(FILE *statsOut);
-    static void printTimerStats(FILE *statsOut, statistic const *theStats,
-                                statistic const *totalStats);
-    static void printCounterStats(FILE *statsOut, statistic const *theStats);
-    static void printCounters(FILE *statsOut, counter const *theCounters);
-    static void printEvents(FILE *eventsOut, kmp_stats_event_vector *theEvents,
-                            int gtid);
-    static rgb_color getEventColor(timer_e e) {
-        return timerColorInfo[e];
-    }
-    static void windupExplicitTimers();
-    bool eventPrintingEnabled() const {
-        return printPerThreadEventsFlag;
-    }
+  void init();
+  static void setupEventColors();
+  static void printPloticusFile();
+  static void printHeaderInfo(FILE *statsOut);
+  static void printTimerStats(FILE *statsOut, statistic const *theStats,
+                              statistic const *totalStats);
+  static void printCounterStats(FILE *statsOut, statistic const *theStats);
+  static void printCounters(FILE *statsOut, counter const *theCounters);
+  static void printEvents(FILE *eventsOut, kmp_stats_event_vector *theEvents,
+                          int gtid);
+  static rgb_color getEventColor(timer_e e) { return timerColorInfo[e]; }
+  static void windupExplicitTimers();
+  bool eventPrintingEnabled() const { return printPerThreadEventsFlag; }
 
 public:
-    kmp_stats_output_module() {
-        init();
-    }
-    void outputStats(const char *heading);
+  kmp_stats_output_module() { init(); }
+  void outputStats(const char *heading);
 };
 
 #ifdef __cplusplus
@@ -996,7 +884,7 @@ extern kmp_stats_output_module __kmp_stats_output;
  * a timer statistics.
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_COUNT_VALUE(name, value)                                           \
   __kmp_stats_thread_ptr->getTimer(TIMER_##name)->addSample(value)
 
@@ -1009,7 +897,7 @@ extern kmp_stats_output_module __kmp_stats_output;
  * counter for the executing thread.
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_COUNT_BLOCK(name)                                                  \
   __kmp_stats_thread_ptr->getCounter(COUNTER_##name)->increment()
 
@@ -1029,7 +917,7 @@ extern kmp_stats_output_module __kmp_stats_output;
  * macro is called.
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_OUTPUT_STATS(heading_string) __kmp_output_stats(heading_string)
 
 /*!
@@ -1038,7 +926,7 @@ extern kmp_stats_output_module __kmp_stats_output;
  * @param name timer which you want this thread to begin with
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_INIT_PARTITIONED_TIMERS(name)                                      \
   __kmp_stats_thread_ptr->getPartitionedTimers()->init(explicitTimer(          \
       __kmp_stats_thread_ptr->getTimer(TIMER_##name), TIMER_##name))
@@ -1075,7 +963,7 @@ extern kmp_stats_output_module __kmp_stats_output;
  * \details Reset all stats for all threads.
  *
  * @ingroup STATS_GATHERING
-*/
+ */
 #define KMP_RESET_STATS() __kmp_reset_stats()
 
 #if (KMP_DEVELOPER_STATS)

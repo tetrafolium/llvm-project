@@ -489,13 +489,13 @@ __pattern_copy_if(_ExecutionPolicy&&, _RandomAccessIterator, _RandomAccessIterat
 
 template <class _ForwardIterator, class _Predicate>
 typename std::iterator_traits<_ForwardIterator>::difference_type
-__brick_count(_ForwardIterator, _ForwardIterator, _Predicate,
-              /* is_vector = */ std::true_type) noexcept;
+    __brick_count(_ForwardIterator, _ForwardIterator, _Predicate,
+                  /* is_vector = */ std::true_type) noexcept;
 
 template <class _ForwardIterator, class _Predicate>
 typename std::iterator_traits<_ForwardIterator>::difference_type
-__brick_count(_ForwardIterator, _ForwardIterator, _Predicate,
-              /* is_vector = */ std::false_type) noexcept;
+    __brick_count(_ForwardIterator, _ForwardIterator, _Predicate,
+                  /* is_vector = */ std::false_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator, class _Predicate, class _IsVector>
 typename std::iterator_traits<_ForwardIterator>::difference_type
@@ -711,11 +711,11 @@ __pattern_partition(_ExecutionPolicy&&, _ForwardIterator, _ForwardIterator, _Una
 
 template <class _BidirectionalIterator, class _UnaryPredicate>
 _BidirectionalIterator __brick_stable_partition(_BidirectionalIterator, _BidirectionalIterator, _UnaryPredicate,
-        /*__is_vector=*/std::false_type) noexcept;
+                                                /*__is_vector=*/std::false_type) noexcept;
 
 template <class _BidirectionalIterator, class _UnaryPredicate>
 _BidirectionalIterator __brick_stable_partition(_BidirectionalIterator, _BidirectionalIterator, _UnaryPredicate,
-        /*__is_vector=*/std::true_type) noexcept;
+                                                /*__is_vector=*/std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _BidirectionalIterator, class _UnaryPredicate, class _IsVector>
 _BidirectionalIterator
@@ -735,13 +735,13 @@ __pattern_stable_partition(_ExecutionPolicy&&, _BidirectionalIterator, _Bidirect
 
 template <class _ForwardIterator, class _OutputIterator1, class _OutputIterator2, class _UnaryPredicate>
 std::pair<_OutputIterator1, _OutputIterator2>
-__brick_partition_copy(_ForwardIterator, _ForwardIterator, _OutputIterator1, _OutputIterator2, _UnaryPredicate,
-                       /*is_vector=*/std::false_type) noexcept;
+    __brick_partition_copy(_ForwardIterator, _ForwardIterator, _OutputIterator1, _OutputIterator2, _UnaryPredicate,
+                           /*is_vector=*/std::false_type) noexcept;
 
 template <class _ForwardIterator, class _OutputIterator1, class _OutputIterator2, class _UnaryPredicate>
 std::pair<_OutputIterator1, _OutputIterator2>
-__brick_partition_copy(_ForwardIterator, _ForwardIterator, _OutputIterator1, _OutputIterator2, _UnaryPredicate,
-                       /*is_vector=*/std::true_type) noexcept;
+    __brick_partition_copy(_ForwardIterator, _ForwardIterator, _OutputIterator1, _OutputIterator2, _UnaryPredicate,
+                           /*is_vector=*/std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator, class _OutputIterator1, class _OutputIterator2,
           class _UnaryPredicate, class _IsVector>
@@ -1063,13 +1063,13 @@ __pattern_set_union(_ExecutionPolicy&&, _ForwardIterator1, _ForwardIterator1, _F
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator, class _Compare>
 _OutputIterator __brick_set_intersection(_ForwardIterator1, _ForwardIterator1, _ForwardIterator2, _ForwardIterator2,
-        _OutputIterator, _Compare,
-        /*__is_vector=*/std::false_type) noexcept;
+                                         _OutputIterator, _Compare,
+                                         /*__is_vector=*/std::false_type) noexcept;
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator, class _Compare>
 _OutputIterator __brick_set_intersection(_ForwardIterator1, _ForwardIterator1, _ForwardIterator2, _ForwardIterator2,
-        _OutputIterator, _Compare,
-        /*__is_vector=*/std::true_type) noexcept;
+                                         _OutputIterator, _Compare,
+                                         /*__is_vector=*/std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator,
           class _Compare, class _IsVector>
@@ -1116,13 +1116,13 @@ __pattern_set_difference(_ExecutionPolicy&&, _ForwardIterator1, _ForwardIterator
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator, class _Compare>
 _OutputIterator __brick_set_symmetric_difference(_ForwardIterator1, _ForwardIterator1, _ForwardIterator2,
-        _ForwardIterator2, _OutputIterator, _Compare,
-        /*__is_vector=*/std::false_type) noexcept;
+                                                 _ForwardIterator2, _OutputIterator, _Compare,
+                                                 /*__is_vector=*/std::false_type) noexcept;
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator, class _Compare>
 _OutputIterator __brick_set_symmetric_difference(_ForwardIterator1, _ForwardIterator1, _ForwardIterator2,
-        _ForwardIterator2, _OutputIterator, _Compare,
-        /*__is_vector=*/std::true_type) noexcept;
+                                                 _ForwardIterator2, _OutputIterator, _Compare,
+                                                 /*__is_vector=*/std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator1, class _ForwardIterator2, class _OutputIterator,
           class _Compare, class _IsVector>
@@ -1144,11 +1144,11 @@ __pattern_set_symmetric_difference(_ExecutionPolicy&&, _ForwardIterator1, _Forwa
 
 template <class _RandomAccessIterator, class _Compare>
 _RandomAccessIterator __brick_is_heap_until(_RandomAccessIterator, _RandomAccessIterator, _Compare,
-        /* __is_vector = */ std::false_type) noexcept;
+                                            /* __is_vector = */ std::false_type) noexcept;
 
 template <class _RandomAccessIterator, class _Compare>
 _RandomAccessIterator __brick_is_heap_until(_RandomAccessIterator, _RandomAccessIterator, _Compare,
-        /* __is_vector = */ std::true_type) noexcept;
+                                            /* __is_vector = */ std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _RandomAccessIterator, class _Compare, class _IsVector>
 _RandomAccessIterator
@@ -1188,11 +1188,11 @@ __pattern_min_element(_ExecutionPolicy&&, _RandomAccessIterator, _RandomAccessIt
 
 template <typename _ForwardIterator, typename _Compare>
 std::pair<_ForwardIterator, _ForwardIterator> __brick_minmax_element(_ForwardIterator, _ForwardIterator, _Compare,
-        /* __is_vector = */ std::false_type) noexcept;
+                                                                     /* __is_vector = */ std::false_type) noexcept;
 
 template <typename _ForwardIterator, typename _Compare>
 std::pair<_ForwardIterator, _ForwardIterator> __brick_minmax_element(_ForwardIterator, _ForwardIterator, _Compare,
-        /* __is_vector = */ std::true_type) noexcept;
+                                                                     /* __is_vector = */ std::true_type) noexcept;
 
 template <typename _ExecutionPolicy, typename _ForwardIterator, typename _Compare, typename _IsVector>
 std::pair<_ForwardIterator, _ForwardIterator>
@@ -1210,13 +1210,13 @@ __pattern_minmax_element(_ExecutionPolicy&&, _ForwardIterator, _ForwardIterator,
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _Predicate>
 std::pair<_ForwardIterator1, _ForwardIterator2> __brick_mismatch(_ForwardIterator1, _ForwardIterator1,
-        _ForwardIterator2, _ForwardIterator2, _Predicate,
-        /* __is_vector = */ std::false_type) noexcept;
+                                                                 _ForwardIterator2, _ForwardIterator2, _Predicate,
+                                                                 /* __is_vector = */ std::false_type) noexcept;
 
 template <class _ForwardIterator1, class _ForwardIterator2, class _Predicate>
 std::pair<_ForwardIterator1, _ForwardIterator2> __brick_mismatch(_ForwardIterator1, _ForwardIterator1,
-        _ForwardIterator2, _ForwardIterator2, _Predicate,
-        /* __is_vector = */ std::true_type) noexcept;
+                                                                 _ForwardIterator2, _ForwardIterator2, _Predicate,
+                                                                 /* __is_vector = */ std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator1, class _ForwardIterator2, class _Predicate, class _IsVector>
 std::pair<_ForwardIterator1, _ForwardIterator2>

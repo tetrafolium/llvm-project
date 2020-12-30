@@ -38,25 +38,25 @@
 #define _OMPTARGET_DEBUG_H
 
 static inline int getInfoLevel() {
-    static int InfoLevel = -1;
-    if (InfoLevel >= 0)
-        return InfoLevel;
-
-    if (char *EnvStr = getenv("LIBOMPTARGET_INFO"))
-        InfoLevel = std::stoi(EnvStr);
-
+  static int InfoLevel = -1;
+  if (InfoLevel >= 0)
     return InfoLevel;
+
+  if (char *EnvStr = getenv("LIBOMPTARGET_INFO"))
+    InfoLevel = std::stoi(EnvStr);
+
+  return InfoLevel;
 }
 
 static inline int getDebugLevel() {
-    static int DebugLevel = -1;
-    if (DebugLevel >= 0)
-        return DebugLevel;
-
-    if (char *EnvStr = getenv("LIBOMPTARGET_DEBUG"))
-        DebugLevel = std::stoi(EnvStr);
-
+  static int DebugLevel = -1;
+  if (DebugLevel >= 0)
     return DebugLevel;
+
+  if (char *EnvStr = getenv("LIBOMPTARGET_DEBUG"))
+    DebugLevel = std::stoi(EnvStr);
+
+  return DebugLevel;
 }
 
 #ifndef __STDC_FORMAT_MACROS

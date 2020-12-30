@@ -22,10 +22,10 @@ namespace darwin {
 /// http://clang.llvm.org/extra/clang-tidy/checks/darwin-dispatch-once-nonstatic.html
 class DispatchOnceNonstaticCheck : public ClangTidyCheck {
 public:
-    DispatchOnceNonstaticCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  DispatchOnceNonstaticCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace darwin

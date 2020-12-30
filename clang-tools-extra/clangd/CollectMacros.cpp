@@ -15,20 +15,20 @@ namespace clangd {
 
 void CollectMainFileMacros::add(const Token &MacroNameTok,
                                 const MacroInfo *MI) {
-    if (!InMainFile)
-        return;
-    auto Loc = MacroNameTok.getLocation();
-    if (Loc.isInvalid() || Loc.isMacroID())
-        return;
+  if (!InMainFile)
+    return;
+  auto Loc = MacroNameTok.getLocation();
+  if (Loc.isInvalid() || Loc.isMacroID())
+    return;
 
-    auto Name = MacroNameTok.getIdentifierInfo()->getName();
-    Out.Names.insert(Name);
-    auto Range = halfOpenToRange(
-                     SM, CharSourceRange::getCharRange(Loc, MacroNameTok.getEndLoc()));
-    if (auto SID = getSymbolID(Name, MI, SM))
-        Out.MacroRefs[SID].push_back(Range);
-    else
-        Out.UnknownMacros.push_back(Range);
+  auto Name = MacroNameTok.getIdentifierInfo()->getName();
+  Out.Names.insert(Name);
+  auto Range = halfOpenToRange(
+      SM, CharSourceRange::getCharRange(Loc, MacroNameTok.getEndLoc()));
+  if (auto SID = getSymbolID(Name, MI, SM))
+    Out.MacroRefs[SID].push_back(Range);
+  else
+    Out.UnknownMacros.push_back(Range);
 }
 } // namespace clangd
 } // namespace clang

@@ -20,23 +20,23 @@ namespace pdb {
 
 class NativeTypeVTShape : public NativeRawSymbol {
 public:
-    // Create a pointer record for a non-simple type.
-    NativeTypeVTShape(NativeSession &Session, SymIndexId Id,
-                      codeview::TypeIndex TI, codeview::VFTableShapeRecord SR);
+  // Create a pointer record for a non-simple type.
+  NativeTypeVTShape(NativeSession &Session, SymIndexId Id,
+                    codeview::TypeIndex TI, codeview::VFTableShapeRecord SR);
 
-    ~NativeTypeVTShape() override;
+  ~NativeTypeVTShape() override;
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    bool isConstType() const override;
-    bool isVolatileType() const override;
-    bool isUnalignedType() const override;
-    uint32_t getCount() const override;
+  bool isConstType() const override;
+  bool isVolatileType() const override;
+  bool isUnalignedType() const override;
+  uint32_t getCount() const override;
 
 protected:
-    codeview::TypeIndex TI;
-    codeview::VFTableShapeRecord Record;
+  codeview::TypeIndex TI;
+  codeview::VFTableShapeRecord Record;
 };
 
 } // namespace pdb

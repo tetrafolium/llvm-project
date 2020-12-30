@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "TableGenBackends.h" // Declares all backends.
 #include "ASTTableGen.h"
+#include "TableGenBackends.h" // Declares all backends.
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/PrettyStackTrace.h"
 #include "llvm/Support/Signals.h"
@@ -23,71 +23,71 @@ using namespace llvm;
 using namespace clang;
 
 enum ActionType {
-    PrintRecords,
-    DumpJSON,
-    GenClangAttrClasses,
-    GenClangAttrParserStringSwitches,
-    GenClangAttrSubjectMatchRulesParserStringSwitches,
-    GenClangAttrImpl,
-    GenClangAttrList,
-    GenClangAttrSubjectMatchRuleList,
-    GenClangAttrPCHRead,
-    GenClangAttrPCHWrite,
-    GenClangAttrHasAttributeImpl,
-    GenClangAttrSpellingListIndex,
-    GenClangAttrASTVisitor,
-    GenClangAttrTemplateInstantiate,
-    GenClangAttrParsedAttrList,
-    GenClangAttrParsedAttrImpl,
-    GenClangAttrParsedAttrKinds,
-    GenClangAttrTextNodeDump,
-    GenClangAttrNodeTraverse,
-    GenClangBasicReader,
-    GenClangBasicWriter,
-    GenClangDiagsDefs,
-    GenClangDiagGroups,
-    GenClangDiagsIndexName,
-    GenClangCommentNodes,
-    GenClangDeclNodes,
-    GenClangStmtNodes,
-    GenClangTypeNodes,
-    GenClangTypeReader,
-    GenClangTypeWriter,
-    GenClangOpcodes,
-    GenClangSACheckers,
-    GenClangSyntaxNodeList,
-    GenClangSyntaxNodeClasses,
-    GenClangCommentHTMLTags,
-    GenClangCommentHTMLTagsProperties,
-    GenClangCommentHTMLNamedCharacterReferences,
-    GenClangCommentCommandInfo,
-    GenClangCommentCommandList,
-    GenClangOpenCLBuiltins,
-    GenArmNeon,
-    GenArmFP16,
-    GenArmBF16,
-    GenArmNeonSema,
-    GenArmNeonTest,
-    GenArmMveHeader,
-    GenArmMveBuiltinDef,
-    GenArmMveBuiltinSema,
-    GenArmMveBuiltinCG,
-    GenArmMveBuiltinAliases,
-    GenArmSveHeader,
-    GenArmSveBuiltins,
-    GenArmSveBuiltinCG,
-    GenArmSveTypeFlags,
-    GenArmSveRangeChecks,
-    GenArmCdeHeader,
-    GenArmCdeBuiltinDef,
-    GenArmCdeBuiltinSema,
-    GenArmCdeBuiltinCG,
-    GenArmCdeBuiltinAliases,
-    GenAttrDocs,
-    GenDiagDocs,
-    GenOptDocs,
-    GenDataCollectors,
-    GenTestPragmaAttributeSupportedAttributes
+  PrintRecords,
+  DumpJSON,
+  GenClangAttrClasses,
+  GenClangAttrParserStringSwitches,
+  GenClangAttrSubjectMatchRulesParserStringSwitches,
+  GenClangAttrImpl,
+  GenClangAttrList,
+  GenClangAttrSubjectMatchRuleList,
+  GenClangAttrPCHRead,
+  GenClangAttrPCHWrite,
+  GenClangAttrHasAttributeImpl,
+  GenClangAttrSpellingListIndex,
+  GenClangAttrASTVisitor,
+  GenClangAttrTemplateInstantiate,
+  GenClangAttrParsedAttrList,
+  GenClangAttrParsedAttrImpl,
+  GenClangAttrParsedAttrKinds,
+  GenClangAttrTextNodeDump,
+  GenClangAttrNodeTraverse,
+  GenClangBasicReader,
+  GenClangBasicWriter,
+  GenClangDiagsDefs,
+  GenClangDiagGroups,
+  GenClangDiagsIndexName,
+  GenClangCommentNodes,
+  GenClangDeclNodes,
+  GenClangStmtNodes,
+  GenClangTypeNodes,
+  GenClangTypeReader,
+  GenClangTypeWriter,
+  GenClangOpcodes,
+  GenClangSACheckers,
+  GenClangSyntaxNodeList,
+  GenClangSyntaxNodeClasses,
+  GenClangCommentHTMLTags,
+  GenClangCommentHTMLTagsProperties,
+  GenClangCommentHTMLNamedCharacterReferences,
+  GenClangCommentCommandInfo,
+  GenClangCommentCommandList,
+  GenClangOpenCLBuiltins,
+  GenArmNeon,
+  GenArmFP16,
+  GenArmBF16,
+  GenArmNeonSema,
+  GenArmNeonTest,
+  GenArmMveHeader,
+  GenArmMveBuiltinDef,
+  GenArmMveBuiltinSema,
+  GenArmMveBuiltinCG,
+  GenArmMveBuiltinAliases,
+  GenArmSveHeader,
+  GenArmSveBuiltins,
+  GenArmSveBuiltinCG,
+  GenArmSveTypeFlags,
+  GenArmSveRangeChecks,
+  GenArmCdeHeader,
+  GenArmCdeBuiltinDef,
+  GenArmCdeBuiltinSema,
+  GenArmCdeBuiltinCG,
+  GenArmCdeBuiltinAliases,
+  GenAttrDocs,
+  GenDiagDocs,
+  GenOptDocs,
+  GenDataCollectors,
+  GenTestPragmaAttributeSupportedAttributes
 };
 
 namespace {
@@ -241,222 +241,222 @@ cl::opt<ActionType> Action(
                    "attribute for testing purposes")));
 
 cl::opt<std::string>
-ClangComponent("clang-component",
-               cl::desc("Only use warnings from specified component"),
-               cl::value_desc("component"), cl::Hidden);
+    ClangComponent("clang-component",
+                   cl::desc("Only use warnings from specified component"),
+                   cl::value_desc("component"), cl::Hidden);
 
 bool ClangTableGenMain(raw_ostream &OS, RecordKeeper &Records) {
-    switch (Action) {
-    case PrintRecords:
-        OS << Records;           // No argument, dump all contents
-        break;
-    case DumpJSON:
-        EmitJSON(Records, OS);
-        break;
-    case GenClangAttrClasses:
-        EmitClangAttrClass(Records, OS);
-        break;
-    case GenClangAttrParserStringSwitches:
-        EmitClangAttrParserStringSwitches(Records, OS);
-        break;
-    case GenClangAttrSubjectMatchRulesParserStringSwitches:
-        EmitClangAttrSubjectMatchRulesParserStringSwitches(Records, OS);
-        break;
-    case GenClangAttrImpl:
-        EmitClangAttrImpl(Records, OS);
-        break;
-    case GenClangAttrList:
-        EmitClangAttrList(Records, OS);
-        break;
-    case GenClangAttrSubjectMatchRuleList:
-        EmitClangAttrSubjectMatchRuleList(Records, OS);
-        break;
-    case GenClangAttrPCHRead:
-        EmitClangAttrPCHRead(Records, OS);
-        break;
-    case GenClangAttrPCHWrite:
-        EmitClangAttrPCHWrite(Records, OS);
-        break;
-    case GenClangAttrHasAttributeImpl:
-        EmitClangAttrHasAttrImpl(Records, OS);
-        break;
-    case GenClangAttrSpellingListIndex:
-        EmitClangAttrSpellingListIndex(Records, OS);
-        break;
-    case GenClangAttrASTVisitor:
-        EmitClangAttrASTVisitor(Records, OS);
-        break;
-    case GenClangAttrTemplateInstantiate:
-        EmitClangAttrTemplateInstantiate(Records, OS);
-        break;
-    case GenClangAttrParsedAttrList:
-        EmitClangAttrParsedAttrList(Records, OS);
-        break;
-    case GenClangAttrParsedAttrImpl:
-        EmitClangAttrParsedAttrImpl(Records, OS);
-        break;
-    case GenClangAttrParsedAttrKinds:
-        EmitClangAttrParsedAttrKinds(Records, OS);
-        break;
-    case GenClangAttrTextNodeDump:
-        EmitClangAttrTextNodeDump(Records, OS);
-        break;
-    case GenClangAttrNodeTraverse:
-        EmitClangAttrNodeTraverse(Records, OS);
-        break;
-    case GenClangDiagsDefs:
-        EmitClangDiagsDefs(Records, OS, ClangComponent);
-        break;
-    case GenClangDiagGroups:
-        EmitClangDiagGroups(Records, OS);
-        break;
-    case GenClangDiagsIndexName:
-        EmitClangDiagsIndexName(Records, OS);
-        break;
-    case GenClangCommentNodes:
-        EmitClangASTNodes(Records, OS, CommentNodeClassName, "");
-        break;
-    case GenClangDeclNodes:
-        EmitClangASTNodes(Records, OS, DeclNodeClassName, "Decl");
-        EmitClangDeclContext(Records, OS);
-        break;
-    case GenClangStmtNodes:
-        EmitClangASTNodes(Records, OS, StmtNodeClassName, "");
-        break;
-    case GenClangTypeNodes:
-        EmitClangTypeNodes(Records, OS);
-        break;
-    case GenClangTypeReader:
-        EmitClangTypeReader(Records, OS);
-        break;
-    case GenClangTypeWriter:
-        EmitClangTypeWriter(Records, OS);
-        break;
-    case GenClangBasicReader:
-        EmitClangBasicReader(Records, OS);
-        break;
-    case GenClangBasicWriter:
-        EmitClangBasicWriter(Records, OS);
-        break;
-    case GenClangOpcodes:
-        EmitClangOpcodes(Records, OS);
-        break;
-    case GenClangSACheckers:
-        EmitClangSACheckers(Records, OS);
-        break;
-    case GenClangCommentHTMLTags:
-        EmitClangCommentHTMLTags(Records, OS);
-        break;
-    case GenClangCommentHTMLTagsProperties:
-        EmitClangCommentHTMLTagsProperties(Records, OS);
-        break;
-    case GenClangCommentHTMLNamedCharacterReferences:
-        EmitClangCommentHTMLNamedCharacterReferences(Records, OS);
-        break;
-    case GenClangCommentCommandInfo:
-        EmitClangCommentCommandInfo(Records, OS);
-        break;
-    case GenClangCommentCommandList:
-        EmitClangCommentCommandList(Records, OS);
-        break;
-    case GenClangOpenCLBuiltins:
-        EmitClangOpenCLBuiltins(Records, OS);
-        break;
-    case GenClangSyntaxNodeList:
-        EmitClangSyntaxNodeList(Records, OS);
-        break;
-    case GenClangSyntaxNodeClasses:
-        EmitClangSyntaxNodeClasses(Records, OS);
-        break;
-    case GenArmNeon:
-        EmitNeon(Records, OS);
-        break;
-    case GenArmFP16:
-        EmitFP16(Records, OS);
-        break;
-    case GenArmBF16:
-        EmitBF16(Records, OS);
-        break;
-    case GenArmNeonSema:
-        EmitNeonSema(Records, OS);
-        break;
-    case GenArmNeonTest:
-        EmitNeonTest(Records, OS);
-        break;
-    case GenArmMveHeader:
-        EmitMveHeader(Records, OS);
-        break;
-    case GenArmMveBuiltinDef:
-        EmitMveBuiltinDef(Records, OS);
-        break;
-    case GenArmMveBuiltinSema:
-        EmitMveBuiltinSema(Records, OS);
-        break;
-    case GenArmMveBuiltinCG:
-        EmitMveBuiltinCG(Records, OS);
-        break;
-    case GenArmMveBuiltinAliases:
-        EmitMveBuiltinAliases(Records, OS);
-        break;
-    case GenArmSveHeader:
-        EmitSveHeader(Records, OS);
-        break;
-    case GenArmSveBuiltins:
-        EmitSveBuiltins(Records, OS);
-        break;
-    case GenArmSveBuiltinCG:
-        EmitSveBuiltinCG(Records, OS);
-        break;
-    case GenArmSveTypeFlags:
-        EmitSveTypeFlags(Records, OS);
-        break;
-    case GenArmSveRangeChecks:
-        EmitSveRangeChecks(Records, OS);
-        break;
-    case GenArmCdeHeader:
-        EmitCdeHeader(Records, OS);
-        break;
-    case GenArmCdeBuiltinDef:
-        EmitCdeBuiltinDef(Records, OS);
-        break;
-    case GenArmCdeBuiltinSema:
-        EmitCdeBuiltinSema(Records, OS);
-        break;
-    case GenArmCdeBuiltinCG:
-        EmitCdeBuiltinCG(Records, OS);
-        break;
-    case GenArmCdeBuiltinAliases:
-        EmitCdeBuiltinAliases(Records, OS);
-        break;
-    case GenAttrDocs:
-        EmitClangAttrDocs(Records, OS);
-        break;
-    case GenDiagDocs:
-        EmitClangDiagDocs(Records, OS);
-        break;
-    case GenOptDocs:
-        EmitClangOptDocs(Records, OS);
-        break;
-    case GenDataCollectors:
-        EmitClangDataCollectors(Records, OS);
-        break;
-    case GenTestPragmaAttributeSupportedAttributes:
-        EmitTestPragmaAttributeSupportedAttributes(Records, OS);
-        break;
-    }
+  switch (Action) {
+  case PrintRecords:
+    OS << Records; // No argument, dump all contents
+    break;
+  case DumpJSON:
+    EmitJSON(Records, OS);
+    break;
+  case GenClangAttrClasses:
+    EmitClangAttrClass(Records, OS);
+    break;
+  case GenClangAttrParserStringSwitches:
+    EmitClangAttrParserStringSwitches(Records, OS);
+    break;
+  case GenClangAttrSubjectMatchRulesParserStringSwitches:
+    EmitClangAttrSubjectMatchRulesParserStringSwitches(Records, OS);
+    break;
+  case GenClangAttrImpl:
+    EmitClangAttrImpl(Records, OS);
+    break;
+  case GenClangAttrList:
+    EmitClangAttrList(Records, OS);
+    break;
+  case GenClangAttrSubjectMatchRuleList:
+    EmitClangAttrSubjectMatchRuleList(Records, OS);
+    break;
+  case GenClangAttrPCHRead:
+    EmitClangAttrPCHRead(Records, OS);
+    break;
+  case GenClangAttrPCHWrite:
+    EmitClangAttrPCHWrite(Records, OS);
+    break;
+  case GenClangAttrHasAttributeImpl:
+    EmitClangAttrHasAttrImpl(Records, OS);
+    break;
+  case GenClangAttrSpellingListIndex:
+    EmitClangAttrSpellingListIndex(Records, OS);
+    break;
+  case GenClangAttrASTVisitor:
+    EmitClangAttrASTVisitor(Records, OS);
+    break;
+  case GenClangAttrTemplateInstantiate:
+    EmitClangAttrTemplateInstantiate(Records, OS);
+    break;
+  case GenClangAttrParsedAttrList:
+    EmitClangAttrParsedAttrList(Records, OS);
+    break;
+  case GenClangAttrParsedAttrImpl:
+    EmitClangAttrParsedAttrImpl(Records, OS);
+    break;
+  case GenClangAttrParsedAttrKinds:
+    EmitClangAttrParsedAttrKinds(Records, OS);
+    break;
+  case GenClangAttrTextNodeDump:
+    EmitClangAttrTextNodeDump(Records, OS);
+    break;
+  case GenClangAttrNodeTraverse:
+    EmitClangAttrNodeTraverse(Records, OS);
+    break;
+  case GenClangDiagsDefs:
+    EmitClangDiagsDefs(Records, OS, ClangComponent);
+    break;
+  case GenClangDiagGroups:
+    EmitClangDiagGroups(Records, OS);
+    break;
+  case GenClangDiagsIndexName:
+    EmitClangDiagsIndexName(Records, OS);
+    break;
+  case GenClangCommentNodes:
+    EmitClangASTNodes(Records, OS, CommentNodeClassName, "");
+    break;
+  case GenClangDeclNodes:
+    EmitClangASTNodes(Records, OS, DeclNodeClassName, "Decl");
+    EmitClangDeclContext(Records, OS);
+    break;
+  case GenClangStmtNodes:
+    EmitClangASTNodes(Records, OS, StmtNodeClassName, "");
+    break;
+  case GenClangTypeNodes:
+    EmitClangTypeNodes(Records, OS);
+    break;
+  case GenClangTypeReader:
+    EmitClangTypeReader(Records, OS);
+    break;
+  case GenClangTypeWriter:
+    EmitClangTypeWriter(Records, OS);
+    break;
+  case GenClangBasicReader:
+    EmitClangBasicReader(Records, OS);
+    break;
+  case GenClangBasicWriter:
+    EmitClangBasicWriter(Records, OS);
+    break;
+  case GenClangOpcodes:
+    EmitClangOpcodes(Records, OS);
+    break;
+  case GenClangSACheckers:
+    EmitClangSACheckers(Records, OS);
+    break;
+  case GenClangCommentHTMLTags:
+    EmitClangCommentHTMLTags(Records, OS);
+    break;
+  case GenClangCommentHTMLTagsProperties:
+    EmitClangCommentHTMLTagsProperties(Records, OS);
+    break;
+  case GenClangCommentHTMLNamedCharacterReferences:
+    EmitClangCommentHTMLNamedCharacterReferences(Records, OS);
+    break;
+  case GenClangCommentCommandInfo:
+    EmitClangCommentCommandInfo(Records, OS);
+    break;
+  case GenClangCommentCommandList:
+    EmitClangCommentCommandList(Records, OS);
+    break;
+  case GenClangOpenCLBuiltins:
+    EmitClangOpenCLBuiltins(Records, OS);
+    break;
+  case GenClangSyntaxNodeList:
+    EmitClangSyntaxNodeList(Records, OS);
+    break;
+  case GenClangSyntaxNodeClasses:
+    EmitClangSyntaxNodeClasses(Records, OS);
+    break;
+  case GenArmNeon:
+    EmitNeon(Records, OS);
+    break;
+  case GenArmFP16:
+    EmitFP16(Records, OS);
+    break;
+  case GenArmBF16:
+    EmitBF16(Records, OS);
+    break;
+  case GenArmNeonSema:
+    EmitNeonSema(Records, OS);
+    break;
+  case GenArmNeonTest:
+    EmitNeonTest(Records, OS);
+    break;
+  case GenArmMveHeader:
+    EmitMveHeader(Records, OS);
+    break;
+  case GenArmMveBuiltinDef:
+    EmitMveBuiltinDef(Records, OS);
+    break;
+  case GenArmMveBuiltinSema:
+    EmitMveBuiltinSema(Records, OS);
+    break;
+  case GenArmMveBuiltinCG:
+    EmitMveBuiltinCG(Records, OS);
+    break;
+  case GenArmMveBuiltinAliases:
+    EmitMveBuiltinAliases(Records, OS);
+    break;
+  case GenArmSveHeader:
+    EmitSveHeader(Records, OS);
+    break;
+  case GenArmSveBuiltins:
+    EmitSveBuiltins(Records, OS);
+    break;
+  case GenArmSveBuiltinCG:
+    EmitSveBuiltinCG(Records, OS);
+    break;
+  case GenArmSveTypeFlags:
+    EmitSveTypeFlags(Records, OS);
+    break;
+  case GenArmSveRangeChecks:
+    EmitSveRangeChecks(Records, OS);
+    break;
+  case GenArmCdeHeader:
+    EmitCdeHeader(Records, OS);
+    break;
+  case GenArmCdeBuiltinDef:
+    EmitCdeBuiltinDef(Records, OS);
+    break;
+  case GenArmCdeBuiltinSema:
+    EmitCdeBuiltinSema(Records, OS);
+    break;
+  case GenArmCdeBuiltinCG:
+    EmitCdeBuiltinCG(Records, OS);
+    break;
+  case GenArmCdeBuiltinAliases:
+    EmitCdeBuiltinAliases(Records, OS);
+    break;
+  case GenAttrDocs:
+    EmitClangAttrDocs(Records, OS);
+    break;
+  case GenDiagDocs:
+    EmitClangDiagDocs(Records, OS);
+    break;
+  case GenOptDocs:
+    EmitClangOptDocs(Records, OS);
+    break;
+  case GenDataCollectors:
+    EmitClangDataCollectors(Records, OS);
+    break;
+  case GenTestPragmaAttributeSupportedAttributes:
+    EmitTestPragmaAttributeSupportedAttributes(Records, OS);
+    break;
+  }
 
-    return false;
+  return false;
 }
-}
+} // namespace
 
 int main(int argc, char **argv) {
-    sys::PrintStackTraceOnErrorSignal(argv[0]);
-    PrettyStackTraceProgram X(argc, argv);
-    cl::ParseCommandLineOptions(argc, argv);
+  sys::PrintStackTraceOnErrorSignal(argv[0]);
+  PrettyStackTraceProgram X(argc, argv);
+  cl::ParseCommandLineOptions(argc, argv);
 
-    llvm_shutdown_obj Y;
+  llvm_shutdown_obj Y;
 
-    return TableGenMain(argv[0], &ClangTableGenMain);
+  return TableGenMain(argv[0], &ClangTableGenMain);
 }
 
 #ifdef __has_feature
@@ -464,8 +464,6 @@ int main(int argc, char **argv) {
 #include <sanitizer/lsan_interface.h>
 // Disable LeakSanitizer for this binary as it has too many leaks that are not
 // very interesting to fix. See compiler-rt/include/sanitizer/lsan_interface.h .
-int __lsan_is_turned_off() {
-    return 1;
-}
-#endif  // __has_feature(address_sanitizer)
-#endif  // defined(__has_feature)
+int __lsan_is_turned_off() { return 1; }
+#endif // __has_feature(address_sanitizer)
+#endif // defined(__has_feature)

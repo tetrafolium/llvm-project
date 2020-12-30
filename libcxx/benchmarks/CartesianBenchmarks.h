@@ -6,7 +6,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -19,70 +18,66 @@ namespace internal {
 
 template <class D, class E, size_t I>
 struct EnumValue : std::integral_constant<E, static_cast<E>(I)> {
-    static std::string name() {
-        return std::string("_") + D::Names[I];
-    }
+  static std::string name() { return std::string("_") + D::Names[I]; }
 };
 
-template <class D, class E, size_t ...Idxs>
+template <class D, class E, size_t... Idxs>
 constexpr auto makeEnumValueTuple(std::index_sequence<Idxs...>) {
-    return std::make_tuple(EnumValue<D, E, Idxs> {}...);
+  return std::make_tuple(EnumValue<D, E, Idxs>{}...);
 }
 
 template <class B>
 static auto skip(const B& Bench, int) -> decltype(Bench.skip()) {
-    return Bench.skip();
+  return Bench.skip();
 }
 template <class B>
 static auto skip(const B& Bench, char) {
-    return false;
+  return false;
 }
 
 template <class B, class Args, size_t... Is>
 void makeBenchmarkFromValuesImpl(const Args& A, std::index_sequence<Is...>) {
-    for (auto& V : A) {
-        B Bench{std::get<Is>(V)...};
-        if (!internal::skip(Bench, 0)) {
-            benchmark::RegisterBenchmark(Bench.name().c_str(),
-            [=](benchmark::State& S) {
-                Bench.run(S);
-            });
-        }
+  for (auto& V : A) {
+    B Bench{std::get<Is>(V)...};
+    if (!internal::skip(Bench, 0)) {
+      benchmark::RegisterBenchmark(Bench.name().c_str(),
+                                   [=](benchmark::State& S) { Bench.run(S); });
     }
+  }
 }
 
 template <class B, class... Args>
 void makeBenchmarkFromValues(const std::vector<std::tuple<Args...> >& A) {
-    makeBenchmarkFromValuesImpl<B>(A, std::index_sequence_for<Args...>());
+  makeBenchmarkFromValuesImpl<B>(A, std::index_sequence_for<Args...>());
 }
 
 template <template <class...> class B, class Args, class... U>
 void makeBenchmarkImpl(const Args& A, std::tuple<U...> t) {
-    makeBenchmarkFromValues<B<U...> >(A);
+  makeBenchmarkFromValues<B<U...> >(A);
 }
 
-template <template <class...> class B, class Args, class... U,
-          class... T, class... Tuples>
+template <template <class...> class B, class Args, class... U, class... T,
+          class... Tuples>
 void makeBenchmarkImpl(const Args& A, std::tuple<U...>, std::tuple<T...>,
                        Tuples... rest) {
-    (internal::makeBenchmarkImpl<B>(A, std::tuple<U..., T>(), rest...), ...);
+  (internal::makeBenchmarkImpl<B>(A, std::tuple<U..., T>(), rest...), ...);
 }
 
 template <class R, class T>
 void allValueCombinations(R& Result, const T& Final) {
-    return Result.push_back(Final);
+  return Result.push_back(Final);
 }
 
 template <class R, class T, class V, class... Vs>
 void allValueCombinations(R& Result, const T& Prev, const V& Value,
                           const Vs&... Values) {
-    for (const auto& E : Value) {
-        allValueCombinations(Result, std::tuple_cat(Prev, std::make_tuple(E)),
-                             Values...);
-    }
+  for (const auto& E : Value) {
+    allValueCombinations(Result, std::tuple_cat(Prev, std::make_tuple(E)),
+                         Values...);
+  }
 }
 
-}  // namespace internal
+} // namespace internal
 
 // CRTP class that enables using enum types as a dimension for
 // makeCartesianProductBenchmark below.
@@ -98,7 +93,7 @@ void allValueCombinations(R& Result, const T& Prev, const V& Value,
 template <class Derived, class EnumType, size_t NumLabels>
 using EnumValuesAsTuple =
     decltype(internal::makeEnumValueTuple<Derived, EnumType>(
-                 std::make_index_sequence<NumLabels> {}));
+        std::make_index_sequence<NumLabels>{}));
 
 // Instantiates B<T0, T1, ..., TN> where <Ti...> are the combinations in the
 // cartesian product of `Tuples...`, and pass (arg0, ..., argN) as constructor
@@ -113,18 +108,18 @@ using EnumValuesAsTuple =
 // Returns int to facilitate registration. The return value is unspecified.
 template <template <class...> class B, class... Tuples, class... Args>
 int makeCartesianProductBenchmark(const Args&... A) {
-    std::vector<std::tuple<typename Args::value_type...> > V;
-    internal::allValueCombinations(V, std::tuple<>(), A...);
-    internal::makeBenchmarkImpl<B>(V, std::tuple<>(), Tuples()...);
-    return 0;
+  std::vector<std::tuple<typename Args::value_type...> > V;
+  internal::allValueCombinations(V, std::tuple<>(), A...);
+  internal::makeBenchmarkImpl<B>(V, std::tuple<>(), Tuples()...);
+  return 0;
 }
 
 template <class B, class... Args>
 int makeCartesianProductBenchmark(const Args&... A) {
-    std::vector<std::tuple<typename Args::value_type...> > V;
-    internal::allValueCombinations(V, std::tuple<>(), A...);
-    internal::makeBenchmarkFromValues<B>(V);
-    return 0;
+  std::vector<std::tuple<typename Args::value_type...> > V;
+  internal::allValueCombinations(V, std::tuple<>(), A...);
+  internal::makeBenchmarkFromValues<B>(V);
+  return 0;
 }
 
 // When `opaque` is true, this function hides the runtime state of `value` from
@@ -132,6 +127,7 @@ int makeCartesianProductBenchmark(const Args&... A) {
 // It returns `value`.
 template <class T>
 TEST_ALWAYS_INLINE inline T maybeOpaque(T value, bool opaque) {
-    if (opaque) benchmark::DoNotOptimize(value);
-    return value;
+  if (opaque)
+    benchmark::DoNotOptimize(value);
+  return value;
 }

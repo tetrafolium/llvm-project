@@ -22,38 +22,30 @@ namespace llvm {
 // LanaiMachineFunctionInfo - This class is derived from MachineFunction and
 // contains private Lanai target-specific information for each MachineFunction.
 class LanaiMachineFunctionInfo : public MachineFunctionInfo {
-    virtual void anchor();
+  virtual void anchor();
 
-    // SRetReturnReg - Lanai ABI require that sret lowering includes
-    // returning the value of the returned struct in a register. This field
-    // holds the virtual register into which the sret argument is passed.
-    Register SRetReturnReg;
+  // SRetReturnReg - Lanai ABI require that sret lowering includes
+  // returning the value of the returned struct in a register. This field
+  // holds the virtual register into which the sret argument is passed.
+  Register SRetReturnReg;
 
-    // GlobalBaseReg - keeps track of the virtual register initialized for
-    // use as the global base register. This is used for PIC in some PIC
-    // relocation models.
-    Register GlobalBaseReg;
+  // GlobalBaseReg - keeps track of the virtual register initialized for
+  // use as the global base register. This is used for PIC in some PIC
+  // relocation models.
+  Register GlobalBaseReg;
 
-    // VarArgsFrameIndex - FrameIndex for start of varargs area.
-    int VarArgsFrameIndex;
+  // VarArgsFrameIndex - FrameIndex for start of varargs area.
+  int VarArgsFrameIndex;
 
 public:
-    explicit LanaiMachineFunctionInfo(MachineFunction &MF)
-        : VarArgsFrameIndex(0) {}
+  explicit LanaiMachineFunctionInfo(MachineFunction &MF)
+      : VarArgsFrameIndex(0) {}
 
-    Register getSRetReturnReg() const {
-        return SRetReturnReg;
-    }
-    void setSRetReturnReg(Register Reg) {
-        SRetReturnReg = Reg;
-    }
+  Register getSRetReturnReg() const { return SRetReturnReg; }
+  void setSRetReturnReg(Register Reg) { SRetReturnReg = Reg; }
 
-    int getVarArgsFrameIndex() const {
-        return VarArgsFrameIndex;
-    }
-    void setVarArgsFrameIndex(int Index) {
-        VarArgsFrameIndex = Index;
-    }
+  int getVarArgsFrameIndex() const { return VarArgsFrameIndex; }
+  void setVarArgsFrameIndex(int Index) { VarArgsFrameIndex = Index; }
 };
 
 } // namespace llvm

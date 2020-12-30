@@ -22,61 +22,61 @@ namespace {
 /// Converts `shape.num_elements` to `shape.reduce`.
 struct NumElementsOpConverter : public OpRewritePattern<NumElementsOp> {
 public:
-    using OpRewritePattern::OpRewritePattern;
+  using OpRewritePattern::OpRewritePattern;
 
-    LogicalResult matchAndRewrite(NumElementsOp op,
-                                  PatternRewriter &rewriter) const final;
+  LogicalResult matchAndRewrite(NumElementsOp op,
+                                PatternRewriter &rewriter) const final;
 };
 } // namespace
 
 LogicalResult
 NumElementsOpConverter::matchAndRewrite(NumElementsOp op,
                                         PatternRewriter &rewriter) const {
-    auto loc = op.getLoc();
-    Type valueType = op.getResult().getType();
-    Value init = op->getDialect()
-                 ->materializeConstant(rewriter, rewriter.getIndexAttr(1),
-                                       valueType, loc)
-                 ->getResult(0);
-    ReduceOp reduce = rewriter.create<ReduceOp>(loc, op.shape(), init);
+  auto loc = op.getLoc();
+  Type valueType = op.getResult().getType();
+  Value init = op->getDialect()
+                   ->materializeConstant(rewriter, rewriter.getIndexAttr(1),
+                                         valueType, loc)
+                   ->getResult(0);
+  ReduceOp reduce = rewriter.create<ReduceOp>(loc, op.shape(), init);
 
-    // Generate reduce operator.
-    Block *body = reduce.getBody();
-    OpBuilder b = OpBuilder::atBlockEnd(body);
-    Value product = b.create<MulOp>(loc, valueType, body->getArgument(1),
-                                    body->getArgument(2));
-    b.create<shape::YieldOp>(loc, product);
+  // Generate reduce operator.
+  Block *body = reduce.getBody();
+  OpBuilder b = OpBuilder::atBlockEnd(body);
+  Value product = b.create<MulOp>(loc, valueType, body->getArgument(1),
+                                  body->getArgument(2));
+  b.create<shape::YieldOp>(loc, product);
 
-    rewriter.replaceOp(op, reduce.result());
-    return success();
+  rewriter.replaceOp(op, reduce.result());
+  return success();
 }
 
 namespace {
 struct ShapeToShapeLowering
     : public ShapeToShapeLoweringBase<ShapeToShapeLowering> {
-    void runOnFunction() override;
+  void runOnFunction() override;
 };
 } // namespace
 
 void ShapeToShapeLowering::runOnFunction() {
-    MLIRContext &ctx = getContext();
+  MLIRContext &ctx = getContext();
 
-    OwningRewritePatternList patterns;
-    populateShapeRewritePatterns(&ctx, patterns);
+  OwningRewritePatternList patterns;
+  populateShapeRewritePatterns(&ctx, patterns);
 
-    ConversionTarget target(getContext());
-    target.addLegalDialect<ShapeDialect, StandardOpsDialect>();
-    target.addIllegalOp<NumElementsOp>();
-    if (failed(mlir::applyPartialConversion(getFunction(), target,
-                                            std::move(patterns))))
-        signalPassFailure();
+  ConversionTarget target(getContext());
+  target.addLegalDialect<ShapeDialect, StandardOpsDialect>();
+  target.addIllegalOp<NumElementsOp>();
+  if (failed(mlir::applyPartialConversion(getFunction(), target,
+                                          std::move(patterns))))
+    signalPassFailure();
 }
 
 void mlir::populateShapeRewritePatterns(MLIRContext *context,
                                         OwningRewritePatternList &patterns) {
-    patterns.insert<NumElementsOpConverter>(context);
+  patterns.insert<NumElementsOpConverter>(context);
 }
 
 std::unique_ptr<Pass> mlir::createShapeToShapeLowering() {
-    return std::make_unique<ShapeToShapeLowering>();
+  return std::make_unique<ShapeToShapeLowering>();
 }

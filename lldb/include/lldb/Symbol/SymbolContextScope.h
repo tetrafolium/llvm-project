@@ -63,47 +63,39 @@ namespace lldb_private {
 /// overhead.
 class SymbolContextScope {
 public:
-    virtual ~SymbolContextScope() = default;
+  virtual ~SymbolContextScope() = default;
 
-    /// Reconstruct the object's symbol context into \a sc.
-    ///
-    /// The object should fill in as much of the SymbolContext as it can so
-    /// function calls that require a symbol context can be made for the given
-    /// object.
-    ///
-    /// \param[out] sc
-    ///     A symbol context object pointer that gets filled in.
-    virtual void CalculateSymbolContext(SymbolContext *sc) = 0;
+  /// Reconstruct the object's symbol context into \a sc.
+  ///
+  /// The object should fill in as much of the SymbolContext as it can so
+  /// function calls that require a symbol context can be made for the given
+  /// object.
+  ///
+  /// \param[out] sc
+  ///     A symbol context object pointer that gets filled in.
+  virtual void CalculateSymbolContext(SymbolContext *sc) = 0;
 
-    virtual lldb::ModuleSP CalculateSymbolContextModule() {
-        return lldb::ModuleSP();
-    }
+  virtual lldb::ModuleSP CalculateSymbolContextModule() {
+    return lldb::ModuleSP();
+  }
 
-    virtual CompileUnit *CalculateSymbolContextCompileUnit() {
-        return nullptr;
-    }
+  virtual CompileUnit *CalculateSymbolContextCompileUnit() { return nullptr; }
 
-    virtual Function *CalculateSymbolContextFunction() {
-        return nullptr;
-    }
+  virtual Function *CalculateSymbolContextFunction() { return nullptr; }
 
-    virtual Block *CalculateSymbolContextBlock() {
-        return nullptr;
-    }
+  virtual Block *CalculateSymbolContextBlock() { return nullptr; }
 
-    virtual Symbol *CalculateSymbolContextSymbol() {
-        return nullptr;
-    }
+  virtual Symbol *CalculateSymbolContextSymbol() { return nullptr; }
 
-    /// Dump the object's symbol context to the stream \a s.
-    ///
-    /// The object should dump its symbol context to the stream \a s. This
-    /// function is widely used in the DumpDebug and verbose output for lldb
-    /// objects.
-    ///
-    /// \param[in] s
-    ///     The stream to which to dump the object's symbol context.
-    virtual void DumpSymbolContext(Stream *s) = 0;
+  /// Dump the object's symbol context to the stream \a s.
+  ///
+  /// The object should dump its symbol context to the stream \a s. This
+  /// function is widely used in the DumpDebug and verbose output for lldb
+  /// objects.
+  ///
+  /// \param[in] s
+  ///     The stream to which to dump the object's symbol context.
+  virtual void DumpSymbolContext(Stream *s) = 0;
 };
 
 } // namespace lldb_private

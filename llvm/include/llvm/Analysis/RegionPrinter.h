@@ -65,6 +65,6 @@ void viewRegionOnly(llvm::RegionInfo *RI);
 /// @param F Function to analyze.
 void viewRegionOnly(const llvm::Function *F);
 #endif
-} // End llvm namespace
+} // namespace llvm
 
 #endif

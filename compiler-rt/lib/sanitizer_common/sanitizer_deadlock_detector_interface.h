@@ -16,11 +16,11 @@
 #define SANITIZER_DEADLOCK_DETECTOR_INTERFACE_H
 
 #ifndef SANITIZER_DEADLOCK_DETECTOR_VERSION
-# define SANITIZER_DEADLOCK_DETECTOR_VERSION 1
+#define SANITIZER_DEADLOCK_DETECTOR_VERSION 1
 #endif
 
-#include "sanitizer_internal_defs.h"
 #include "sanitizer_atomic.h"
+#include "sanitizer_internal_defs.h"
 
 namespace __sanitizer {
 
@@ -33,76 +33,66 @@ struct DDLogicalThread;
 
 struct DDMutex {
 #if SANITIZER_DEADLOCK_DETECTOR_VERSION == 1
-    uptr id;
-    u32  stk;  // creation stack
+  uptr id;
+  u32 stk;  // creation stack
 #elif SANITIZER_DEADLOCK_DETECTOR_VERSION == 2
-    u32              id;
-    u32              recursion;
-    atomic_uintptr_t owner;
+  u32 id;
+  u32 recursion;
+  atomic_uintptr_t owner;
 #else
-# error "BAD SANITIZER_DEADLOCK_DETECTOR_VERSION"
+#error "BAD SANITIZER_DEADLOCK_DETECTOR_VERSION"
 #endif
-    u64  ctx;
+  u64 ctx;
 };
 
 struct DDFlags {
-    bool second_deadlock_stack;
+  bool second_deadlock_stack;
 };
 
 struct DDReport {
-    enum { kMaxLoopSize = 20 };
-    int n;  // number of entries in loop
-    struct {
-        u64 thr_ctx;   // user thread context
-        u64 mtx_ctx0;  // user mutex context, start of the edge
-        u64 mtx_ctx1;  // user mutex context, end of the edge
-        u32 stk[2];  // stack ids for the edge
-    } loop[kMaxLoopSize];
+  enum { kMaxLoopSize = 20 };
+  int n;  // number of entries in loop
+  struct {
+    u64 thr_ctx;   // user thread context
+    u64 mtx_ctx0;  // user mutex context, start of the edge
+    u64 mtx_ctx1;  // user mutex context, end of the edge
+    u32 stk[2];    // stack ids for the edge
+  } loop[kMaxLoopSize];
 };
 
 struct DDCallback {
-    DDPhysicalThread *pt;
-    DDLogicalThread  *lt;
+  DDPhysicalThread *pt;
+  DDLogicalThread *lt;
 
-    virtual u32 Unwind() {
-        return 0;
-    }
-    virtual int UniqueTid() {
-        return 0;
-    }
+  virtual u32 Unwind() { return 0; }
+  virtual int UniqueTid() { return 0; }
 
-protected:
-    ~DDCallback() {}
+ protected:
+  ~DDCallback() {}
 };
 
 struct DDetector {
-    static DDetector *Create(const DDFlags *flags);
+  static DDetector *Create(const DDFlags *flags);
 
-    virtual DDPhysicalThread* CreatePhysicalThread() {
-        return nullptr;
-    }
-    virtual void DestroyPhysicalThread(DDPhysicalThread *pt) {}
+  virtual DDPhysicalThread *CreatePhysicalThread() { return nullptr; }
+  virtual void DestroyPhysicalThread(DDPhysicalThread *pt) {}
 
-    virtual DDLogicalThread* CreateLogicalThread(u64 ctx) {
-        return nullptr;
-    }
-    virtual void DestroyLogicalThread(DDLogicalThread *lt) {}
+  virtual DDLogicalThread *CreateLogicalThread(u64 ctx) { return nullptr; }
+  virtual void DestroyLogicalThread(DDLogicalThread *lt) {}
 
-    virtual void MutexInit(DDCallback *cb, DDMutex *m) {}
-    virtual void MutexBeforeLock(DDCallback *cb, DDMutex *m, bool wlock) {}
-    virtual void MutexAfterLock(DDCallback *cb, DDMutex *m, bool wlock,
-                                bool trylock) {}
-    virtual void MutexBeforeUnlock(DDCallback *cb, DDMutex *m, bool wlock) {}
-    virtual void MutexDestroy(DDCallback *cb, DDMutex *m) {}
+  virtual void MutexInit(DDCallback *cb, DDMutex *m) {}
+  virtual void MutexBeforeLock(DDCallback *cb, DDMutex *m, bool wlock) {}
+  virtual void MutexAfterLock(DDCallback *cb, DDMutex *m, bool wlock,
+                              bool trylock) {}
+  virtual void MutexBeforeUnlock(DDCallback *cb, DDMutex *m, bool wlock) {}
+  virtual void MutexDestroy(DDCallback *cb, DDMutex *m) {}
 
-    virtual DDReport *GetReport(DDCallback *cb) {
-        return nullptr;
-    }
+  virtual DDReport *GetReport(DDCallback *cb) { return nullptr; }
 
-protected:
-    ~DDetector() {}
+ protected:
+  ~DDetector() {}
 };
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
-#endif // SANITIZER_DEADLOCK_DETECTOR_INTERFACE_H
+#endif  // SANITIZER_DEADLOCK_DETECTOR_INTERFACE_H

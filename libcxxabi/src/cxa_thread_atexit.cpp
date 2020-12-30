@@ -19,15 +19,16 @@
 
 namespace __cxxabiv1 {
 
-using Dtor = void(*)(void*);
+using Dtor = void (*)(void*);
 
 extern "C"
 #ifndef HAVE___CXA_THREAD_ATEXIT_IMPL
-// A weak symbol is used to detect this function's presence in the C library
-// at runtime, even if libc++ is built against an older libc
-_LIBCXXABI_WEAK
+    // A weak symbol is used to detect this function's presence in the C library
+    // at runtime, even if libc++ is built against an older libc
+    _LIBCXXABI_WEAK
 #endif
-int __cxa_thread_atexit_impl(Dtor, void*, void*);
+    int
+    __cxa_thread_atexit_impl(Dtor, void*, void*);
 
 #ifndef HAVE___CXA_THREAD_ATEXIT_IMPL
 
@@ -61,9 +62,9 @@ namespace {
 // So construction still has to work.)
 
 struct DtorList {
-    Dtor dtor;
-    void* obj;
-    DtorList* next;
+  Dtor dtor;
+  void* obj;
+  DtorList* next;
 };
 
 // The linked list of thread-local destructors to run
@@ -74,33 +75,34 @@ __thread bool dtors_alive = false;
 std::__libcpp_tls_key dtors_key;
 
 void run_dtors(void*) {
-    while (auto head = dtors) {
-        dtors = head->next;
-        head->dtor(head->obj);
-        ::free(head);
-    }
+  while (auto head = dtors) {
+    dtors = head->next;
+    head->dtor(head->obj);
+    ::free(head);
+  }
 
-    dtors_alive = false;
+  dtors_alive = false;
 }
 
 struct DtorsManager {
-    DtorsManager() {
-        // There is intentionally no matching std::__libcpp_tls_delete call, as
-        // __cxa_thread_atexit() may be called arbitrarily late (for example, from
-        // global destructors or atexit() handlers).
-        if (std::__libcpp_tls_create(&dtors_key, run_dtors) != 0) {
-            abort_message("std::__libcpp_tls_create() failed in __cxa_thread_atexit()");
-        }
+  DtorsManager() {
+    // There is intentionally no matching std::__libcpp_tls_delete call, as
+    // __cxa_thread_atexit() may be called arbitrarily late (for example, from
+    // global destructors or atexit() handlers).
+    if (std::__libcpp_tls_create(&dtors_key, run_dtors) != 0) {
+      abort_message(
+          "std::__libcpp_tls_create() failed in __cxa_thread_atexit()");
     }
+  }
 
-    ~DtorsManager() {
-        // std::__libcpp_tls_key destructors do not run on threads that call exit()
-        // (including when the main thread returns from main()), so we explicitly
-        // call the destructor here.  This runs at exit time (potentially earlier
-        // if libc++abi is dlclose()'d).  Any thread_locals initialized after this
-        // point will not be destroyed.
-        run_dtors(nullptr);
-    }
+  ~DtorsManager() {
+    // std::__libcpp_tls_key destructors do not run on threads that call exit()
+    // (including when the main thread returns from main()), so we explicitly
+    // call the destructor here.  This runs at exit time (potentially earlier
+    // if libc++abi is dlclose()'d).  Any thread_locals initialized after this
+    // point will not be destroyed.
+    run_dtors(nullptr);
+  }
 };
 } // namespace
 
@@ -108,38 +110,39 @@ struct DtorsManager {
 
 extern "C" {
 
-    _LIBCXXABI_FUNC_VIS int __cxa_thread_atexit(Dtor dtor, void* obj, void* dso_symbol) throw() {
+_LIBCXXABI_FUNC_VIS int __cxa_thread_atexit(Dtor dtor, void* obj,
+                                            void* dso_symbol) throw() {
 #ifdef HAVE___CXA_THREAD_ATEXIT_IMPL
-        return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
+  return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
 #else
-        if (__cxa_thread_atexit_impl) {
-            return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
-        } else {
-            // Initialize the dtors std::__libcpp_tls_key (uses __cxa_guard_*() for
-            // one-time initialization and __cxa_atexit() for destruction)
-            static DtorsManager manager;
+  if (__cxa_thread_atexit_impl) {
+    return __cxa_thread_atexit_impl(dtor, obj, dso_symbol);
+  } else {
+    // Initialize the dtors std::__libcpp_tls_key (uses __cxa_guard_*() for
+    // one-time initialization and __cxa_atexit() for destruction)
+    static DtorsManager manager;
 
-            if (!dtors_alive) {
-                if (std::__libcpp_tls_set(dtors_key, &dtors_key) != 0) {
-                    return -1;
-                }
-                dtors_alive = true;
-            }
-
-            auto head = static_cast<DtorList*>(::malloc(sizeof(DtorList)));
-            if (!head) {
-                return -1;
-            }
-
-            head->dtor = dtor;
-            head->obj = obj;
-            head->next = dtors;
-            dtors = head;
-
-            return 0;
-        }
-#endif // HAVE___CXA_THREAD_ATEXIT_IMPL
+    if (!dtors_alive) {
+      if (std::__libcpp_tls_set(dtors_key, &dtors_key) != 0) {
+        return -1;
+      }
+      dtors_alive = true;
     }
+
+    auto head = static_cast<DtorList*>(::malloc(sizeof(DtorList)));
+    if (!head) {
+      return -1;
+    }
+
+    head->dtor = dtor;
+    head->obj = obj;
+    head->next = dtors;
+    dtors = head;
+
+    return 0;
+  }
+#endif // HAVE___CXA_THREAD_ATEXIT_IMPL
+}
 
 } // extern "C"
 } // namespace __cxxabiv1

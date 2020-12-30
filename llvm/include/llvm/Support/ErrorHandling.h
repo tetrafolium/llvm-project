@@ -23,7 +23,7 @@ class Twine;
 
 /// An error handler callback.
 typedef void (*fatal_error_handler_t)(void *user_data,
-                                      const std::string& reason,
+                                      const std::string &reason,
                                       bool gen_crash_diag);
 
 /// install_fatal_error_handler - Installs a new error handler to be used
@@ -52,14 +52,12 @@ void remove_fatal_error_handler();
 /// calls install_fatal_error_handler in its constructor and
 /// remove_fatal_error_handler in its destructor.
 struct ScopedFatalErrorHandler {
-    explicit ScopedFatalErrorHandler(fatal_error_handler_t handler,
-                                     void *user_data = nullptr) {
-        install_fatal_error_handler(handler, user_data);
-    }
+  explicit ScopedFatalErrorHandler(fatal_error_handler_t handler,
+                                   void *user_data = nullptr) {
+    install_fatal_error_handler(handler, user_data);
+  }
 
-    ~ScopedFatalErrorHandler() {
-        remove_fatal_error_handler();
-    }
+  ~ScopedFatalErrorHandler() { remove_fatal_error_handler(); }
 };
 
 /// Reports a serious error, calling any installed error handler. These
@@ -71,13 +69,13 @@ struct ScopedFatalErrorHandler {
 /// After the error handler is called this function will call abort(), it
 /// does not return.
 LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const char *reason,
-        bool gen_crash_diag = true);
+                                                bool gen_crash_diag = true);
 LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const std::string &reason,
-        bool gen_crash_diag = true);
+                                                bool gen_crash_diag = true);
 LLVM_ATTRIBUTE_NORETURN void report_fatal_error(StringRef reason,
-        bool gen_crash_diag = true);
+                                                bool gen_crash_diag = true);
 LLVM_ATTRIBUTE_NORETURN void report_fatal_error(const Twine &reason,
-        bool gen_crash_diag = true);
+                                                bool gen_crash_diag = true);
 
 /// Installs a new bad alloc error handler that should be used whenever a
 /// bad alloc error, e.g. failing malloc/calloc, is encountered by LLVM.
@@ -116,7 +114,7 @@ void install_out_of_memory_new_handler();
 /// if LLVM is compiled with exception support. Otherwise prints the error
 /// to standard error and calls abort().
 LLVM_ATTRIBUTE_NORETURN void report_bad_alloc_error(const char *Reason,
-        bool GenCrashDiag = true);
+                                                    bool GenCrashDiag = true);
 
 /// This function calls abort(), and prints the optional message to stderr.
 /// Use the llvm_unreachable macro (that adds location info), instead of
@@ -124,7 +122,7 @@ LLVM_ATTRIBUTE_NORETURN void report_bad_alloc_error(const char *Reason,
 LLVM_ATTRIBUTE_NORETURN void
 llvm_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
                           unsigned line = 0);
-}
+} // namespace llvm
 
 /// Marks that the current location is not supposed to be reachable.
 /// In !NDEBUG builds, prints the message and location info to stderr.
@@ -135,7 +133,7 @@ llvm_unreachable_internal(const char *msg = nullptr, const char *file = nullptr,
 /// Use this instead of assert(0).  It conveys intent more clearly and
 /// allows compilers to omit some unnecessary code.
 #ifndef NDEBUG
-#define llvm_unreachable(msg) \
+#define llvm_unreachable(msg)                                                  \
   ::llvm::llvm_unreachable_internal(msg, __FILE__, __LINE__)
 #elif defined(LLVM_BUILTIN_UNREACHABLE)
 #define llvm_unreachable(msg) LLVM_BUILTIN_UNREACHABLE

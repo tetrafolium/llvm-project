@@ -26,19 +26,19 @@ class MachineFunction;
 
 class Combiner {
 public:
-    Combiner(CombinerInfo &CombinerInfo, const TargetPassConfig *TPC);
+  Combiner(CombinerInfo &CombinerInfo, const TargetPassConfig *TPC);
 
-    /// If CSEInfo is not null, then the Combiner will setup observer for
-    /// CSEInfo and instantiate a CSEMIRBuilder. Pass nullptr if CSE is not
-    /// needed.
-    bool combineMachineInstrs(MachineFunction &MF, GISelCSEInfo *CSEInfo);
+  /// If CSEInfo is not null, then the Combiner will setup observer for
+  /// CSEInfo and instantiate a CSEMIRBuilder. Pass nullptr if CSE is not
+  /// needed.
+  bool combineMachineInstrs(MachineFunction &MF, GISelCSEInfo *CSEInfo);
 
 protected:
-    CombinerInfo &CInfo;
+  CombinerInfo &CInfo;
 
-    MachineRegisterInfo *MRI = nullptr;
-    const TargetPassConfig *TPC;
-    std::unique_ptr<MachineIRBuilder> Builder;
+  MachineRegisterInfo *MRI = nullptr;
+  const TargetPassConfig *TPC;
+  std::unique_ptr<MachineIRBuilder> Builder;
 };
 
 } // End namespace llvm.

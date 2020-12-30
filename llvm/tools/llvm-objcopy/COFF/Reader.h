@@ -23,16 +23,16 @@ struct Object;
 using object::COFFObjectFile;
 
 class COFFReader {
-    const COFFObjectFile &COFFObj;
+  const COFFObjectFile &COFFObj;
 
-    Error readExecutableHeaders(Object &Obj) const;
-    Error readSections(Object &Obj) const;
-    Error readSymbols(Object &Obj, bool IsBigObj) const;
-    Error setSymbolTargets(Object &Obj) const;
+  Error readExecutableHeaders(Object &Obj) const;
+  Error readSections(Object &Obj) const;
+  Error readSymbols(Object &Obj, bool IsBigObj) const;
+  Error setSymbolTargets(Object &Obj) const;
 
 public:
-    explicit COFFReader(const COFFObjectFile &O) : COFFObj(O) {}
-    Expected<std::unique_ptr<Object>> create() const;
+  explicit COFFReader(const COFFObjectFile &O) : COFFObj(O) {}
+  Expected<std::unique_ptr<Object>> create() const;
 };
 
 } // end namespace coff

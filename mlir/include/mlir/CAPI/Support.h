@@ -21,22 +21,22 @@
 
 /// Converts a StringRef into its MLIR C API equivalent.
 inline MlirStringRef wrap(llvm::StringRef ref) {
-    return mlirStringRefCreate(ref.data(), ref.size());
+  return mlirStringRefCreate(ref.data(), ref.size());
 }
 
 /// Creates a StringRef out of its MLIR C API equivalent.
 inline llvm::StringRef unwrap(MlirStringRef ref) {
-    return llvm::StringRef(ref.data, ref.length);
+  return llvm::StringRef(ref.data, ref.length);
 }
 
 inline MlirLogicalResult wrap(mlir::LogicalResult res) {
-    if (mlir::succeeded(res))
-        return mlirLogicalResultSuccess();
-    return mlirLogicalResultFailure();
+  if (mlir::succeeded(res))
+    return mlirLogicalResultSuccess();
+  return mlirLogicalResultFailure();
 }
 
 inline mlir::LogicalResult unwrap(MlirLogicalResult res) {
-    return mlir::success(mlirLogicalResultIsSuccess(res));
+  return mlir::success(mlirLogicalResultIsSuccess(res));
 }
 
 #endif // MLIR_CAPI_SUPPORT_H

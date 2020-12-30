@@ -39,15 +39,15 @@ struct MemberRecordBase;
 } // end namespace detail
 
 struct MemberRecord {
-    std::shared_ptr<detail::MemberRecordBase> Member;
+  std::shared_ptr<detail::MemberRecordBase> Member;
 };
 
 struct LeafRecord {
-    std::shared_ptr<detail::LeafRecordBase> Leaf;
+  std::shared_ptr<detail::LeafRecordBase> Leaf;
 
-    codeview::CVType
-    toCodeViewRecord(codeview::AppendingTypeTableBuilder &Serializer) const;
-    static Expected<LeafRecord> fromCodeViewRecord(codeview::CVType Type);
+  codeview::CVType
+  toCodeViewRecord(codeview::AppendingTypeTableBuilder &Serializer) const;
+  static Expected<LeafRecord> fromCodeViewRecord(codeview::CVType Type);
 };
 
 std::vector<LeafRecord> fromDebugT(ArrayRef<uint8_t> DebugTorP,

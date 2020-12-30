@@ -19,32 +19,32 @@
 namespace llvm {
 class NVPTXMachineFunctionInfo : public MachineFunctionInfo {
 private:
-    /// Stores a mapping from index to symbol name for removing image handles
-    /// on Fermi.
-    SmallVector<std::string, 8> ImageHandleList;
+  /// Stores a mapping from index to symbol name for removing image handles
+  /// on Fermi.
+  SmallVector<std::string, 8> ImageHandleList;
 
 public:
-    NVPTXMachineFunctionInfo(MachineFunction &MF) {}
+  NVPTXMachineFunctionInfo(MachineFunction &MF) {}
 
-    /// Returns the index for the symbol \p Symbol. If the symbol was previously,
-    /// added, the same index is returned. Otherwise, the symbol is added and the
-    /// new index is returned.
-    unsigned getImageHandleSymbolIndex(const char *Symbol) {
-        // Is the symbol already present?
-        for (unsigned i = 0, e = ImageHandleList.size(); i != e; ++i)
-            if (ImageHandleList[i] == std::string(Symbol))
-                return i;
-        // Nope, insert it
-        ImageHandleList.push_back(Symbol);
-        return ImageHandleList.size()-1;
-    }
+  /// Returns the index for the symbol \p Symbol. If the symbol was previously,
+  /// added, the same index is returned. Otherwise, the symbol is added and the
+  /// new index is returned.
+  unsigned getImageHandleSymbolIndex(const char *Symbol) {
+    // Is the symbol already present?
+    for (unsigned i = 0, e = ImageHandleList.size(); i != e; ++i)
+      if (ImageHandleList[i] == std::string(Symbol))
+        return i;
+    // Nope, insert it
+    ImageHandleList.push_back(Symbol);
+    return ImageHandleList.size() - 1;
+  }
 
-    /// Returns the symbol name at the given index.
-    const char *getImageHandleSymbol(unsigned Idx) const {
-        assert(ImageHandleList.size() > Idx && "Bad index");
-        return ImageHandleList[Idx].c_str();
-    }
+  /// Returns the symbol name at the given index.
+  const char *getImageHandleSymbol(unsigned Idx) const {
+    assert(ImageHandleList.size() > Idx && "Bad index");
+    return ImageHandleList[Idx].c_str();
+  }
 };
-}
+} // namespace llvm
 
 #endif

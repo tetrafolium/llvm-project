@@ -21,36 +21,30 @@ class ObjFile;
 // InputSection structures.
 class DwarfObject final : public llvm::DWARFObject {
 public:
-    bool isLittleEndian() const override {
-        return true;
-    }
+  bool isLittleEndian() const override { return true; }
 
-    llvm::Optional<llvm::RelocAddrEntry> find(const llvm::DWARFSection &sec,
-            uint64_t pos) const override {
-        // TODO: implement this
-        return llvm::None;
-    }
+  llvm::Optional<llvm::RelocAddrEntry> find(const llvm::DWARFSection &sec,
+                                            uint64_t pos) const override {
+    // TODO: implement this
+    return llvm::None;
+  }
 
-    void forEachInfoSections(
-        llvm::function_ref<void(const llvm::DWARFSection &)> f) const override {
-        f(infoSection);
-    }
+  void forEachInfoSections(
+      llvm::function_ref<void(const llvm::DWARFSection &)> f) const override {
+    f(infoSection);
+  }
 
-    llvm::StringRef getAbbrevSection() const override {
-        return abbrevSection;
-    }
-    llvm::StringRef getStrSection() const override {
-        return strSection;
-    }
+  llvm::StringRef getAbbrevSection() const override { return abbrevSection; }
+  llvm::StringRef getStrSection() const override { return strSection; }
 
-    // Returns an instance of DwarfObject if the given object file has the
-    // relevant DWARF debug sections.
-    static std::unique_ptr<DwarfObject> create(ObjFile *);
+  // Returns an instance of DwarfObject if the given object file has the
+  // relevant DWARF debug sections.
+  static std::unique_ptr<DwarfObject> create(ObjFile *);
 
 private:
-    llvm::DWARFSection infoSection;
-    llvm::StringRef abbrevSection;
-    llvm::StringRef strSection;
+  llvm::DWARFSection infoSection;
+  llvm::StringRef abbrevSection;
+  llvm::StringRef strSection;
 };
 
 } // namespace macho

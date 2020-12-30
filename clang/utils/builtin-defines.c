@@ -17,7 +17,8 @@ RUN:           else \
 RUN:             cc_prog=gcc; \
 RUN:             output=%t1; \
 RUN:           fi; \
-RUN:           $cc_prog $arch $lang $opts -march=core2 -dM -E -x $input %s | sort > $output; \
+RUN:           $cc_prog $arch $lang $opts -march=core2 -dM -E -x $input %s |
+sort > $output; \
 RUN:          done; \
 RUN:          if (! diff %t0 %t1); then exit 1; fi; \
 RUN:       done; \

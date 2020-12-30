@@ -28,29 +28,29 @@ OptReductionPass::OptReductionPass(const OptReductionPass &srcPass)
 
 /// Runs the pass instance in the pass pipeline.
 void OptReductionPass::runOnOperation() {
-    LLVM_DEBUG(llvm::dbgs() << "\nOptimization Reduction pass: ");
-    LLVM_DEBUG(llvm::dbgs() << optPass.get()->getName() << "\nTesting:\n");
+  LLVM_DEBUG(llvm::dbgs() << "\nOptimization Reduction pass: ");
+  LLVM_DEBUG(llvm::dbgs() << optPass.get()->getName() << "\nTesting:\n");
 
-    ModuleOp module = this->getOperation();
-    ModuleOp moduleVariant = module.clone();
-    PassManager pmTransform(context);
-    pmTransform.addPass(std::move(optPass));
+  ModuleOp module = this->getOperation();
+  ModuleOp moduleVariant = module.clone();
+  PassManager pmTransform(context);
+  pmTransform.addPass(std::move(optPass));
 
-    if (failed(pmTransform.run(moduleVariant)))
-        return;
+  if (failed(pmTransform.run(moduleVariant)))
+    return;
 
-    ReductionNode original(module, nullptr);
-    original.measureAndTest(test);
+  ReductionNode original(module, nullptr);
+  original.measureAndTest(test);
 
-    ReductionNode reduced(moduleVariant, nullptr);
-    reduced.measureAndTest(test);
+  ReductionNode reduced(moduleVariant, nullptr);
+  reduced.measureAndTest(test);
 
-    if (reduced.isInteresting() && reduced.getSize() < original.getSize()) {
-        ReductionTreeUtils::updateGoldenModule(module, reduced.getModule().clone());
-        LLVM_DEBUG(llvm::dbgs() << "\nSuccessful Transformed version\n\n");
-    } else {
-        LLVM_DEBUG(llvm::dbgs() << "\nUnsuccessful Transformed version\n\n");
-    }
+  if (reduced.isInteresting() && reduced.getSize() < original.getSize()) {
+    ReductionTreeUtils::updateGoldenModule(module, reduced.getModule().clone());
+    LLVM_DEBUG(llvm::dbgs() << "\nSuccessful Transformed version\n\n");
+  } else {
+    LLVM_DEBUG(llvm::dbgs() << "\nUnsuccessful Transformed version\n\n");
+  }
 
-    LLVM_DEBUG(llvm::dbgs() << "Pass Complete\n\n");
+  LLVM_DEBUG(llvm::dbgs() << "Pass Complete\n\n");
 }

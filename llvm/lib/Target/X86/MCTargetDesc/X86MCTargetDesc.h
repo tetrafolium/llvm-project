@@ -39,17 +39,13 @@ class StringRef;
 /// Flavour of dwarf regnumbers
 ///
 namespace DWARFFlavour {
-enum {
-    X86_64 = 0, X86_32_DarwinEH = 1, X86_32_Generic = 2
-};
+enum { X86_64 = 0, X86_32_DarwinEH = 1, X86_32_Generic = 2 };
 }
 
 ///  Native X86 register numbers
 ///
 namespace N86 {
-enum {
-    EAX = 0, ECX = 1, EDX = 2, EBX = 3, ESP = 4, EBP = 5, ESI = 6, EDI = 7
-};
+enum { EAX = 0, ECX = 1, EDX = 2, EBX = 3, ESP = 4, EBP = 5, ESI = 6, EDI = 7 };
 }
 
 namespace X86_MC {
@@ -59,15 +55,14 @@ unsigned getDwarfRegFlavour(const Triple &TT, bool isEH);
 
 void initLLVMToSEHAndCVRegMapping(MCRegisterInfo *MRI);
 
-
 /// Returns true if this instruction has a LOCK prefix.
 bool hasLockPrefix(const MCInst &MI);
 
 /// Create a X86 MCSubtargetInfo instance. This is exposed so Asm parser, etc.
 /// do not need to go through TargetRegistry.
 MCSubtargetInfo *createX86MCSubtargetInfo(const Triple &TT, StringRef CPU,
-        StringRef FS);
-}
+                                          StringRef FS);
+} // namespace X86_MC
 
 MCCodeEmitter *createX86MCCodeEmitter(const MCInstrInfo &MCII,
                                       const MCRegisterInfo &MRI,
@@ -84,13 +79,13 @@ MCAsmBackend *createX86_64AsmBackend(const Target &T,
 
 /// Implements X86-only directives for assembly emission.
 MCTargetStreamer *createX86AsmTargetStreamer(MCStreamer &S,
-        formatted_raw_ostream &OS,
-        MCInstPrinter *InstPrinter,
-        bool IsVerboseAsm);
+                                             formatted_raw_ostream &OS,
+                                             MCInstPrinter *InstPrinter,
+                                             bool IsVerboseAsm);
 
 /// Implements X86-only directives for object files.
 MCTargetStreamer *createX86ObjectTargetStreamer(MCStreamer &S,
-        const MCSubtargetInfo &STI);
+                                                const MCSubtargetInfo &STI);
 
 /// Construct an X86 Windows COFF machine code streamer which will generate
 /// PE/COFF format object files.
@@ -117,15 +112,14 @@ createX86WinCOFFObjectWriter(bool Is64Bit);
 /// Returns the sub or super register of a specific X86 register.
 /// e.g. getX86SubSuperRegister(X86::EAX, 16) returns X86::AX.
 /// Aborts on error.
-MCRegister getX86SubSuperRegister(MCRegister, unsigned, bool High=false);
+MCRegister getX86SubSuperRegister(MCRegister, unsigned, bool High = false);
 
 /// Returns the sub or super register of a specific X86 register.
 /// Like getX86SubSuperRegister() but returns 0 on error.
 MCRegister getX86SubSuperRegisterOrZero(MCRegister, unsigned,
                                         bool High = false);
 
-} // End llvm namespace
-
+} // namespace llvm
 
 // Defines symbolic names for X86 registers.  This defines a mapping from
 // register name to register number.

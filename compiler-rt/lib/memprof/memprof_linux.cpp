@@ -40,15 +40,15 @@
 #include <unwind.h>
 
 typedef enum {
-    MEMPROF_RT_VERSION_UNDEFINED = 0,
-    MEMPROF_RT_VERSION_DYNAMIC,
-    MEMPROF_RT_VERSION_STATIC,
+  MEMPROF_RT_VERSION_UNDEFINED = 0,
+  MEMPROF_RT_VERSION_DYNAMIC,
+  MEMPROF_RT_VERSION_STATIC,
 } memprof_rt_version_t;
 
 // FIXME: perhaps also store abi version here?
 extern "C" {
-    SANITIZER_INTERFACE_ATTRIBUTE
-    memprof_rt_version_t __memprof_rt_version;
+SANITIZER_INTERFACE_ATTRIBUTE
+memprof_rt_version_t __memprof_rt_version;
 }
 
 namespace __memprof {
@@ -57,24 +57,22 @@ void InitializePlatformInterceptors() {}
 void InitializePlatformExceptionHandlers() {}
 
 void *MemprofDoesNotSupportStaticLinkage() {
-    // This will fail to link with -static.
-    return &_DYNAMIC; // defined in link.h
+  // This will fail to link with -static.
+  return &_DYNAMIC; // defined in link.h
 }
 
 uptr FindDynamicShadowStart() {
-    uptr shadow_size_bytes = MemToShadowSize(kHighMemEnd);
-    return MapDynamicShadow(shadow_size_bytes, SHADOW_SCALE,
-                            /*min_shadow_base_alignment*/ 0, kHighMemEnd);
+  uptr shadow_size_bytes = MemToShadowSize(kHighMemEnd);
+  return MapDynamicShadow(shadow_size_bytes, SHADOW_SCALE,
+                          /*min_shadow_base_alignment*/ 0, kHighMemEnd);
 }
 
 void ReadContextStack(void *context, uptr *stack, uptr *ssize) {
-    ucontext_t *ucp = (ucontext_t *)context;
-    *stack = (uptr)ucp->uc_stack.ss_sp;
-    *ssize = ucp->uc_stack.ss_size;
+  ucontext_t *ucp = (ucontext_t *)context;
+  *stack = (uptr)ucp->uc_stack.ss_sp;
+  *ssize = ucp->uc_stack.ss_size;
 }
 
-void *MemprofDlSymNext(const char *sym) {
-    return dlsym(RTLD_NEXT, sym);
-}
+void *MemprofDlSymNext(const char *sym) { return dlsym(RTLD_NEXT, sym); }
 
 } // namespace __memprof

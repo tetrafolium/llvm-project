@@ -15,123 +15,123 @@
 namespace lldb {
 class LLDB_API SBTypeSummaryOptions {
 public:
-    SBTypeSummaryOptions();
+  SBTypeSummaryOptions();
 
-    SBTypeSummaryOptions(const lldb::SBTypeSummaryOptions &rhs);
+  SBTypeSummaryOptions(const lldb::SBTypeSummaryOptions &rhs);
 
-    SBTypeSummaryOptions(const lldb_private::TypeSummaryOptions *lldb_object_ptr);
+  SBTypeSummaryOptions(const lldb_private::TypeSummaryOptions *lldb_object_ptr);
 
-    ~SBTypeSummaryOptions();
+  ~SBTypeSummaryOptions();
 
-    explicit operator bool() const;
+  explicit operator bool() const;
 
-    bool IsValid();
+  bool IsValid();
 
-    lldb::LanguageType GetLanguage();
+  lldb::LanguageType GetLanguage();
 
-    lldb::TypeSummaryCapping GetCapping();
+  lldb::TypeSummaryCapping GetCapping();
 
-    void SetLanguage(lldb::LanguageType);
+  void SetLanguage(lldb::LanguageType);
 
-    void SetCapping(lldb::TypeSummaryCapping);
+  void SetCapping(lldb::TypeSummaryCapping);
 
 protected:
-    friend class SBValue;
+  friend class SBValue;
 
-    lldb_private::TypeSummaryOptions *operator->();
+  lldb_private::TypeSummaryOptions *operator->();
 
-    const lldb_private::TypeSummaryOptions *operator->() const;
+  const lldb_private::TypeSummaryOptions *operator->() const;
 
-    lldb_private::TypeSummaryOptions *get();
+  lldb_private::TypeSummaryOptions *get();
 
-    lldb_private::TypeSummaryOptions &ref();
+  lldb_private::TypeSummaryOptions &ref();
 
-    const lldb_private::TypeSummaryOptions &ref() const;
+  const lldb_private::TypeSummaryOptions &ref() const;
 
-    void SetOptions(const lldb_private::TypeSummaryOptions *lldb_object_ptr);
+  void SetOptions(const lldb_private::TypeSummaryOptions *lldb_object_ptr);
 
 private:
-    std::unique_ptr<lldb_private::TypeSummaryOptions> m_opaque_up;
+  std::unique_ptr<lldb_private::TypeSummaryOptions> m_opaque_up;
 };
 
 class SBTypeSummary {
 public:
-    SBTypeSummary();
+  SBTypeSummary();
 
-    // Native function summary formatter callback
-    typedef bool (*FormatCallback)(SBValue, SBTypeSummaryOptions, SBStream &);
+  // Native function summary formatter callback
+  typedef bool (*FormatCallback)(SBValue, SBTypeSummaryOptions, SBStream &);
 
-    static SBTypeSummary
-    CreateWithSummaryString(const char *data,
-                            uint32_t options = 0); // see lldb::eTypeOption values
+  static SBTypeSummary
+  CreateWithSummaryString(const char *data,
+                          uint32_t options = 0); // see lldb::eTypeOption values
 
-    static SBTypeSummary
-    CreateWithFunctionName(const char *data,
-                           uint32_t options = 0); // see lldb::eTypeOption values
-
-    static SBTypeSummary
-    CreateWithScriptCode(const char *data,
+  static SBTypeSummary
+  CreateWithFunctionName(const char *data,
                          uint32_t options = 0); // see lldb::eTypeOption values
 
-    static SBTypeSummary CreateWithCallback(FormatCallback cb,
-                                            uint32_t options = 0,
-                                            const char *description = nullptr);
+  static SBTypeSummary
+  CreateWithScriptCode(const char *data,
+                       uint32_t options = 0); // see lldb::eTypeOption values
 
-    SBTypeSummary(const lldb::SBTypeSummary &rhs);
+  static SBTypeSummary CreateWithCallback(FormatCallback cb,
+                                          uint32_t options = 0,
+                                          const char *description = nullptr);
 
-    ~SBTypeSummary();
+  SBTypeSummary(const lldb::SBTypeSummary &rhs);
 
-    explicit operator bool() const;
+  ~SBTypeSummary();
 
-    bool IsValid() const;
+  explicit operator bool() const;
 
-    bool IsFunctionCode();
+  bool IsValid() const;
 
-    bool IsFunctionName();
+  bool IsFunctionCode();
 
-    bool IsSummaryString();
+  bool IsFunctionName();
 
-    const char *GetData();
+  bool IsSummaryString();
 
-    void SetSummaryString(const char *data);
+  const char *GetData();
 
-    void SetFunctionName(const char *data);
+  void SetSummaryString(const char *data);
 
-    void SetFunctionCode(const char *data);
+  void SetFunctionName(const char *data);
 
-    uint32_t GetOptions();
+  void SetFunctionCode(const char *data);
 
-    void SetOptions(uint32_t);
+  uint32_t GetOptions();
 
-    bool GetDescription(lldb::SBStream &description,
-                        lldb::DescriptionLevel description_level);
+  void SetOptions(uint32_t);
 
-    lldb::SBTypeSummary &operator=(const lldb::SBTypeSummary &rhs);
+  bool GetDescription(lldb::SBStream &description,
+                      lldb::DescriptionLevel description_level);
 
-    bool DoesPrintValue(lldb::SBValue value);
+  lldb::SBTypeSummary &operator=(const lldb::SBTypeSummary &rhs);
 
-    bool IsEqualTo(lldb::SBTypeSummary &rhs);
+  bool DoesPrintValue(lldb::SBValue value);
 
-    bool operator==(lldb::SBTypeSummary &rhs);
+  bool IsEqualTo(lldb::SBTypeSummary &rhs);
 
-    bool operator!=(lldb::SBTypeSummary &rhs);
+  bool operator==(lldb::SBTypeSummary &rhs);
+
+  bool operator!=(lldb::SBTypeSummary &rhs);
 
 protected:
-    friend class SBDebugger;
-    friend class SBTypeCategory;
-    friend class SBValue;
+  friend class SBDebugger;
+  friend class SBTypeCategory;
+  friend class SBValue;
 
-    lldb::TypeSummaryImplSP GetSP();
+  lldb::TypeSummaryImplSP GetSP();
 
-    void SetSP(const lldb::TypeSummaryImplSP &typefilter_impl_sp);
+  void SetSP(const lldb::TypeSummaryImplSP &typefilter_impl_sp);
 
-    lldb::TypeSummaryImplSP m_opaque_sp;
+  lldb::TypeSummaryImplSP m_opaque_sp;
 
-    SBTypeSummary(const lldb::TypeSummaryImplSP &);
+  SBTypeSummary(const lldb::TypeSummaryImplSP &);
 
-    bool CopyOnWrite_Impl();
+  bool CopyOnWrite_Impl();
 
-    bool ChangeSummaryType(bool want_script);
+  bool ChangeSummaryType(bool want_script);
 };
 
 } // namespace lldb

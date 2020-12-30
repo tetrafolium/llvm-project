@@ -19,7 +19,7 @@
 
 namespace llvm {
 struct AnnotationRemarksPass : public PassInfoMixin<AnnotationRemarksPass> {
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 } // namespace llvm
 

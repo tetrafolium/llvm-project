@@ -33,27 +33,27 @@
 using namespace llvm;
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
-    RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
-    RegisterTargetMachine<RISCVTargetMachine> Y(getTheRISCV64Target());
-    auto *PR = PassRegistry::getPassRegistry();
-    initializeGlobalISel(*PR);
-    initializeRISCVMergeBaseOffsetOptPass(*PR);
-    initializeRISCVExpandPseudoPass(*PR);
-    initializeRISCVCleanupVSETVLIPass(*PR);
+  RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
+  RegisterTargetMachine<RISCVTargetMachine> Y(getTheRISCV64Target());
+  auto *PR = PassRegistry::getPassRegistry();
+  initializeGlobalISel(*PR);
+  initializeRISCVMergeBaseOffsetOptPass(*PR);
+  initializeRISCVExpandPseudoPass(*PR);
+  initializeRISCVCleanupVSETVLIPass(*PR);
 }
 
 static StringRef computeDataLayout(const Triple &TT) {
-    if (TT.isArch64Bit())
-        return "e-m:e-p:64:64-i64:64-i128:128-n64-S128";
-    assert(TT.isArch32Bit() && "only RV32 and RV64 are currently supported");
-    return "e-m:e-p:32:32-i64:64-n32-S128";
+  if (TT.isArch64Bit())
+    return "e-m:e-p:64:64-i64:64-i128:128-n64-S128";
+  assert(TT.isArch32Bit() && "only RV32 and RV64 are currently supported");
+  return "e-m:e-p:32:32-i64:64-n32-S128";
 }
 
 static Reloc::Model getEffectiveRelocModel(const Triple &TT,
-        Optional<Reloc::Model> RM) {
-    if (!RM.hasValue())
-        return Reloc::Static;
-    return *RM;
+                                           Optional<Reloc::Model> RM) {
+  if (!RM.hasValue())
+    return Reloc::Static;
+  return *RM;
 }
 
 RISCVTargetMachine::RISCVTargetMachine(const Target &T, const Triple &TT,
@@ -66,49 +66,50 @@ RISCVTargetMachine::RISCVTargetMachine(const Target &T, const Triple &TT,
                         getEffectiveRelocModel(TT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<RISCVELFTargetObjectFile>()) {
-    initAsmInfo();
+  initAsmInfo();
 
-    // RISC-V supports the MachineOutliner.
-    setMachineOutliner(true);
+  // RISC-V supports the MachineOutliner.
+  setMachineOutliner(true);
 }
 
 const RISCVSubtarget *
 RISCVTargetMachine::getSubtargetImpl(const Function &F) const {
-    Attribute CPUAttr = F.getFnAttribute("target-cpu");
-    Attribute TuneAttr = F.getFnAttribute("tune-cpu");
-    Attribute FSAttr = F.getFnAttribute("target-features");
+  Attribute CPUAttr = F.getFnAttribute("target-cpu");
+  Attribute TuneAttr = F.getFnAttribute("tune-cpu");
+  Attribute FSAttr = F.getFnAttribute("target-features");
 
-    std::string CPU =
-        CPUAttr.isValid() ? CPUAttr.getValueAsString().str() : TargetCPU;
-    std::string TuneCPU =
-        TuneAttr.isValid() ? TuneAttr.getValueAsString().str() : CPU;
-    std::string FS =
-        FSAttr.isValid() ? FSAttr.getValueAsString().str() : TargetFS;
-    std::string Key = CPU + TuneCPU + FS;
-    auto &I = SubtargetMap[Key];
-    if (!I) {
-        // This needs to be done before we create a new subtarget since any
-        // creation will depend on the TM and the code generation flags on the
-        // function that reside in TargetOptions.
-        resetTargetOptions(F);
-        auto ABIName = Options.MCOptions.getABIName();
-        if (const MDString *ModuleTargetABI = dyn_cast_or_null<MDString>(
-                F.getParent()->getModuleFlag("target-abi"))) {
-            auto TargetABI = RISCVABI::getTargetABI(ABIName);
-            if (TargetABI != RISCVABI::ABI_Unknown &&
-                    ModuleTargetABI->getString() != ABIName) {
-                report_fatal_error("-target-abi option != target-abi module flag");
-            }
-            ABIName = ModuleTargetABI->getString();
-        }
-        I = std::make_unique<RISCVSubtarget>(TargetTriple, CPU, TuneCPU, FS, ABIName, *this);
+  std::string CPU =
+      CPUAttr.isValid() ? CPUAttr.getValueAsString().str() : TargetCPU;
+  std::string TuneCPU =
+      TuneAttr.isValid() ? TuneAttr.getValueAsString().str() : CPU;
+  std::string FS =
+      FSAttr.isValid() ? FSAttr.getValueAsString().str() : TargetFS;
+  std::string Key = CPU + TuneCPU + FS;
+  auto &I = SubtargetMap[Key];
+  if (!I) {
+    // This needs to be done before we create a new subtarget since any
+    // creation will depend on the TM and the code generation flags on the
+    // function that reside in TargetOptions.
+    resetTargetOptions(F);
+    auto ABIName = Options.MCOptions.getABIName();
+    if (const MDString *ModuleTargetABI = dyn_cast_or_null<MDString>(
+            F.getParent()->getModuleFlag("target-abi"))) {
+      auto TargetABI = RISCVABI::getTargetABI(ABIName);
+      if (TargetABI != RISCVABI::ABI_Unknown &&
+          ModuleTargetABI->getString() != ABIName) {
+        report_fatal_error("-target-abi option != target-abi module flag");
+      }
+      ABIName = ModuleTargetABI->getString();
     }
-    return I.get();
+    I = std::make_unique<RISCVSubtarget>(TargetTriple, CPU, TuneCPU, FS,
+                                         ABIName, *this);
+  }
+  return I.get();
 }
 
 TargetTransformInfo
 RISCVTargetMachine::getTargetTransformInfo(const Function &F) {
-    return TargetTransformInfo(RISCVTTIImpl(this, F));
+  return TargetTransformInfo(RISCVTTIImpl(this, F));
 }
 
 // A RISC-V hart has a single byte-addressable address space of 2^XLEN bytes
@@ -116,85 +117,83 @@ RISCVTargetMachine::getTargetTransformInfo(const Function &F) {
 // implementation has no-op address space casts. If an implementation makes a
 // change to this, they can override it here.
 bool RISCVTargetMachine::isNoopAddrSpaceCast(unsigned SrcAS,
-        unsigned DstAS) const {
-    return true;
+                                             unsigned DstAS) const {
+  return true;
 }
 
 namespace {
 class RISCVPassConfig : public TargetPassConfig {
 public:
-    RISCVPassConfig(RISCVTargetMachine &TM, PassManagerBase &PM)
-        : TargetPassConfig(TM, PM) {}
+  RISCVPassConfig(RISCVTargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
 
-    RISCVTargetMachine &getRISCVTargetMachine() const {
-        return getTM<RISCVTargetMachine>();
-    }
+  RISCVTargetMachine &getRISCVTargetMachine() const {
+    return getTM<RISCVTargetMachine>();
+  }
 
-    void addIRPasses() override;
-    bool addInstSelector() override;
-    bool addIRTranslator() override;
-    bool addLegalizeMachineIR() override;
-    bool addRegBankSelect() override;
-    bool addGlobalInstructionSelect() override;
-    void addPreEmitPass() override;
-    void addPreEmitPass2() override;
-    void addPreSched2() override;
-    void addPreRegAlloc() override;
+  void addIRPasses() override;
+  bool addInstSelector() override;
+  bool addIRTranslator() override;
+  bool addLegalizeMachineIR() override;
+  bool addRegBankSelect() override;
+  bool addGlobalInstructionSelect() override;
+  void addPreEmitPass() override;
+  void addPreEmitPass2() override;
+  void addPreSched2() override;
+  void addPreRegAlloc() override;
 };
 } // namespace
 
 TargetPassConfig *RISCVTargetMachine::createPassConfig(PassManagerBase &PM) {
-    return new RISCVPassConfig(*this, PM);
+  return new RISCVPassConfig(*this, PM);
 }
 
 void RISCVPassConfig::addIRPasses() {
-    addPass(createAtomicExpandPass());
-    TargetPassConfig::addIRPasses();
+  addPass(createAtomicExpandPass());
+  TargetPassConfig::addIRPasses();
 }
 
 bool RISCVPassConfig::addInstSelector() {
-    addPass(createRISCVISelDag(getRISCVTargetMachine()));
+  addPass(createRISCVISelDag(getRISCVTargetMachine()));
 
-    return false;
+  return false;
 }
 
 bool RISCVPassConfig::addIRTranslator() {
-    addPass(new IRTranslator(getOptLevel()));
-    return false;
+  addPass(new IRTranslator(getOptLevel()));
+  return false;
 }
 
 bool RISCVPassConfig::addLegalizeMachineIR() {
-    addPass(new Legalizer());
-    return false;
+  addPass(new Legalizer());
+  return false;
 }
 
 bool RISCVPassConfig::addRegBankSelect() {
-    addPass(new RegBankSelect());
-    return false;
+  addPass(new RegBankSelect());
+  return false;
 }
 
 bool RISCVPassConfig::addGlobalInstructionSelect() {
-    addPass(new InstructionSelect());
-    return false;
+  addPass(new InstructionSelect());
+  return false;
 }
 
 void RISCVPassConfig::addPreSched2() {}
 
-void RISCVPassConfig::addPreEmitPass() {
-    addPass(&BranchRelaxationPassID);
-}
+void RISCVPassConfig::addPreEmitPass() { addPass(&BranchRelaxationPassID); }
 
 void RISCVPassConfig::addPreEmitPass2() {
-    addPass(createRISCVExpandPseudoPass());
-    // Schedule the expansion of AMOs at the last possible moment, avoiding the
-    // possibility for other passes to break the requirements for forward
-    // progress in the LR/SC block.
-    addPass(createRISCVExpandAtomicPseudoPass());
+  addPass(createRISCVExpandPseudoPass());
+  // Schedule the expansion of AMOs at the last possible moment, avoiding the
+  // possibility for other passes to break the requirements for forward
+  // progress in the LR/SC block.
+  addPass(createRISCVExpandAtomicPseudoPass());
 }
 
 void RISCVPassConfig::addPreRegAlloc() {
-    if (TM->getOptLevel() != CodeGenOpt::None) {
-        addPass(createRISCVMergeBaseOffsetOptPass());
-        addPass(createRISCVCleanupVSETVLIPass());
-    }
+  if (TM->getOptLevel() != CodeGenOpt::None) {
+    addPass(createRISCVMergeBaseOffsetOptPass());
+    addPass(createRISCVCleanupVSETVLIPass());
+  }
 }

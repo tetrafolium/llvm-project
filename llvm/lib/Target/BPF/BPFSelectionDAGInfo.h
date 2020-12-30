@@ -19,19 +19,16 @@ namespace llvm {
 
 class BPFSelectionDAGInfo : public SelectionDAGTargetInfo {
 public:
-    SDValue EmitTargetCodeForMemcpy(SelectionDAG &DAG, const SDLoc &dl,
-                                    SDValue Chain, SDValue Dst, SDValue Src,
-                                    SDValue Size, Align Alignment,
-                                    bool isVolatile, bool AlwaysInline,
-                                    MachinePointerInfo DstPtrInfo,
-                                    MachinePointerInfo SrcPtrInfo) const override;
+  SDValue EmitTargetCodeForMemcpy(SelectionDAG &DAG, const SDLoc &dl,
+                                  SDValue Chain, SDValue Dst, SDValue Src,
+                                  SDValue Size, Align Alignment,
+                                  bool isVolatile, bool AlwaysInline,
+                                  MachinePointerInfo DstPtrInfo,
+                                  MachinePointerInfo SrcPtrInfo) const override;
 
-    unsigned getCommonMaxStoresPerMemFunc() const {
-        return 128;
-    }
-
+  unsigned getCommonMaxStoresPerMemFunc() const { return 128; }
 };
 
-}
+} // namespace llvm
 
 #endif

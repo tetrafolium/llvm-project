@@ -27,7 +27,7 @@ namespace remote {
 /// \returns nullptr if the address is not resolved during the function call or
 /// if the project was compiled without Remote Index support.
 std::unique_ptr<clangd::SymbolIndex> getClient(llvm::StringRef Address,
-        llvm::StringRef IndexRoot);
+                                               llvm::StringRef IndexRoot);
 
 } // namespace remote
 } // namespace clangd

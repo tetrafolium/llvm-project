@@ -16,7 +16,6 @@
 #include "clang/StaticAnalyzer/Core/PathSensitive/CallEvent.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h"
 
-
 #include "Iterator.h"
 
 using namespace clang;
@@ -27,118 +26,119 @@ namespace {
 
 class InvalidatedIteratorChecker
     : public Checker<check::PreCall, check::PreStmt<UnaryOperator>,
-      check::PreStmt<BinaryOperator>,
-      check::PreStmt<ArraySubscriptExpr>,
-      check::PreStmt<MemberExpr>> {
+                     check::PreStmt<BinaryOperator>,
+                     check::PreStmt<ArraySubscriptExpr>,
+                     check::PreStmt<MemberExpr>> {
 
-    std::unique_ptr<BugType> InvalidatedBugType;
+  std::unique_ptr<BugType> InvalidatedBugType;
 
-    void verifyAccess(CheckerContext &C, const SVal &Val) const;
-    void reportBug(const StringRef &Message, const SVal &Val,
-                   CheckerContext &C, ExplodedNode *ErrNode) const;
+  void verifyAccess(CheckerContext &C, const SVal &Val) const;
+  void reportBug(const StringRef &Message, const SVal &Val, CheckerContext &C,
+                 ExplodedNode *ErrNode) const;
+
 public:
-    InvalidatedIteratorChecker();
+  InvalidatedIteratorChecker();
 
-    void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
-    void checkPreStmt(const UnaryOperator *UO, CheckerContext &C) const;
-    void checkPreStmt(const BinaryOperator *BO, CheckerContext &C) const;
-    void checkPreStmt(const ArraySubscriptExpr *ASE, CheckerContext &C) const;
-    void checkPreStmt(const MemberExpr *ME, CheckerContext &C) const;
-
+  void checkPreCall(const CallEvent &Call, CheckerContext &C) const;
+  void checkPreStmt(const UnaryOperator *UO, CheckerContext &C) const;
+  void checkPreStmt(const BinaryOperator *BO, CheckerContext &C) const;
+  void checkPreStmt(const ArraySubscriptExpr *ASE, CheckerContext &C) const;
+  void checkPreStmt(const MemberExpr *ME, CheckerContext &C) const;
 };
 
-} //namespace
+} // namespace
 
 InvalidatedIteratorChecker::InvalidatedIteratorChecker() {
-    InvalidatedBugType.reset(
-        new BugType(this, "Iterator invalidated", "Misuse of STL APIs"));
+  InvalidatedBugType.reset(
+      new BugType(this, "Iterator invalidated", "Misuse of STL APIs"));
 }
 
 void InvalidatedIteratorChecker::checkPreCall(const CallEvent &Call,
-        CheckerContext &C) const {
-    // Check for access of invalidated position
-    const auto *Func = dyn_cast_or_null<FunctionDecl>(Call.getDecl());
-    if (!Func)
-        return;
+                                              CheckerContext &C) const {
+  // Check for access of invalidated position
+  const auto *Func = dyn_cast_or_null<FunctionDecl>(Call.getDecl());
+  if (!Func)
+    return;
 
-    if (Func->isOverloadedOperator() &&
-            isAccessOperator(Func->getOverloadedOperator())) {
-        // Check for any kind of access of invalidated iterator positions
-        if (const auto *InstCall = dyn_cast<CXXInstanceCall>(&Call)) {
-            verifyAccess(C, InstCall->getCXXThisVal());
-        } else {
-            verifyAccess(C, Call.getArgSVal(0));
-        }
+  if (Func->isOverloadedOperator() &&
+      isAccessOperator(Func->getOverloadedOperator())) {
+    // Check for any kind of access of invalidated iterator positions
+    if (const auto *InstCall = dyn_cast<CXXInstanceCall>(&Call)) {
+      verifyAccess(C, InstCall->getCXXThisVal());
+    } else {
+      verifyAccess(C, Call.getArgSVal(0));
     }
+  }
 }
 
 void InvalidatedIteratorChecker::checkPreStmt(const UnaryOperator *UO,
-        CheckerContext &C) const {
-    if (isa<CXXThisExpr>(UO->getSubExpr()))
-        return;
+                                              CheckerContext &C) const {
+  if (isa<CXXThisExpr>(UO->getSubExpr()))
+    return;
 
-    ProgramStateRef State = C.getState();
-    UnaryOperatorKind OK = UO->getOpcode();
-    SVal SubVal = State->getSVal(UO->getSubExpr(), C.getLocationContext());
+  ProgramStateRef State = C.getState();
+  UnaryOperatorKind OK = UO->getOpcode();
+  SVal SubVal = State->getSVal(UO->getSubExpr(), C.getLocationContext());
 
-    if (isAccessOperator(OK)) {
-        verifyAccess(C, SubVal);
-    }
+  if (isAccessOperator(OK)) {
+    verifyAccess(C, SubVal);
+  }
 }
 
 void InvalidatedIteratorChecker::checkPreStmt(const BinaryOperator *BO,
-        CheckerContext &C) const {
-    ProgramStateRef State = C.getState();
-    BinaryOperatorKind OK = BO->getOpcode();
-    SVal LVal = State->getSVal(BO->getLHS(), C.getLocationContext());
+                                              CheckerContext &C) const {
+  ProgramStateRef State = C.getState();
+  BinaryOperatorKind OK = BO->getOpcode();
+  SVal LVal = State->getSVal(BO->getLHS(), C.getLocationContext());
 
-    if (isAccessOperator(OK)) {
-        verifyAccess(C, LVal);
-    }
+  if (isAccessOperator(OK)) {
+    verifyAccess(C, LVal);
+  }
 }
 
 void InvalidatedIteratorChecker::checkPreStmt(const ArraySubscriptExpr *ASE,
-        CheckerContext &C) const {
-    ProgramStateRef State = C.getState();
-    SVal LVal = State->getSVal(ASE->getLHS(), C.getLocationContext());
-    verifyAccess(C, LVal);
+                                              CheckerContext &C) const {
+  ProgramStateRef State = C.getState();
+  SVal LVal = State->getSVal(ASE->getLHS(), C.getLocationContext());
+  verifyAccess(C, LVal);
 }
 
 void InvalidatedIteratorChecker::checkPreStmt(const MemberExpr *ME,
-        CheckerContext &C) const {
-    if (!ME->isArrow() || ME->isImplicitAccess())
-        return;
+                                              CheckerContext &C) const {
+  if (!ME->isArrow() || ME->isImplicitAccess())
+    return;
 
-    ProgramStateRef State = C.getState();
-    SVal BaseVal = State->getSVal(ME->getBase(), C.getLocationContext());
-    verifyAccess(C, BaseVal);
+  ProgramStateRef State = C.getState();
+  SVal BaseVal = State->getSVal(ME->getBase(), C.getLocationContext());
+  verifyAccess(C, BaseVal);
 }
 
-void InvalidatedIteratorChecker::verifyAccess(CheckerContext &C, const SVal &Val) const {
-    auto State = C.getState();
-    const auto *Pos = getIteratorPosition(State, Val);
-    if (Pos && !Pos->isValid()) {
-        auto *N = C.generateErrorNode(State);
-        if (!N) {
-            return;
-        }
-        reportBug("Invalidated iterator accessed.", Val, C, N);
+void InvalidatedIteratorChecker::verifyAccess(CheckerContext &C,
+                                              const SVal &Val) const {
+  auto State = C.getState();
+  const auto *Pos = getIteratorPosition(State, Val);
+  if (Pos && !Pos->isValid()) {
+    auto *N = C.generateErrorNode(State);
+    if (!N) {
+      return;
     }
+    reportBug("Invalidated iterator accessed.", Val, C, N);
+  }
 }
 
 void InvalidatedIteratorChecker::reportBug(const StringRef &Message,
-        const SVal &Val, CheckerContext &C,
-        ExplodedNode *ErrNode) const {
-    auto R = std::make_unique<PathSensitiveBugReport>(*InvalidatedBugType,
-             Message, ErrNode);
-    R->markInteresting(Val);
-    C.emitReport(std::move(R));
+                                           const SVal &Val, CheckerContext &C,
+                                           ExplodedNode *ErrNode) const {
+  auto R = std::make_unique<PathSensitiveBugReport>(*InvalidatedBugType,
+                                                    Message, ErrNode);
+  R->markInteresting(Val);
+  C.emitReport(std::move(R));
 }
 
 void ento::registerInvalidatedIteratorChecker(CheckerManager &mgr) {
-    mgr.registerChecker<InvalidatedIteratorChecker>();
+  mgr.registerChecker<InvalidatedIteratorChecker>();
 }
 
 bool ento::shouldRegisterInvalidatedIteratorChecker(const CheckerManager &mgr) {
-    return true;
+  return true;
 }

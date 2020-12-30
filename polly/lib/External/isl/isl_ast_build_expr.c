@@ -10,14 +10,14 @@
  * B.P. 105 - 78153 Le Chesnay, France
  */
 
-#include <isl/id.h>
-#include <isl/space.h>
 #include <isl/constraint.h>
+#include <isl/id.h>
 #include <isl/ilp.h>
+#include <isl/space.h>
 #include <isl/val.h>
 #include <isl_ast_build_expr.h>
-#include <isl_ast_private.h>
 #include <isl_ast_build_private.h>
+#include <isl_ast_private.h>
 #include <isl_sort.h>
 
 /* Compute the "opposite" of the (numerator of the) argument of a div
@@ -28,13 +28,12 @@
  *	-aff + (d - 1)
  */
 static __isl_give isl_aff *oppose_div_arg(__isl_take isl_aff *aff,
-        __isl_take isl_val *d)
-{
-    aff = isl_aff_neg(aff);
-    aff = isl_aff_add_constant_val(aff, d);
-    aff = isl_aff_add_constant_si(aff, -1);
+                                          __isl_take isl_val *d) {
+  aff = isl_aff_neg(aff);
+  aff = isl_aff_add_constant_val(aff, d);
+  aff = isl_aff_add_constant_si(aff, -1);
 
-    return aff;
+  return aff;
 }
 
 /* Internal data structure used inside isl_ast_expr_add_term.
@@ -47,9 +46,9 @@ static __isl_give isl_aff *oppose_div_arg(__isl_take isl_aff *aff,
  * is set internally by isl_ast_expr_add_term.
  */
 struct isl_ast_add_term_data {
-    isl_ast_build *build;
-    isl_val *cst;
-    isl_val *v;
+  isl_ast_build *build;
+  isl_val *cst;
+  isl_val *v;
 };
 
 /* Given the numerator "aff" of the argument of an integer division
@@ -73,30 +72,30 @@ struct isl_ast_add_term_data {
  * checking again.
  */
 static int is_non_neg_after_stealing(__isl_keep isl_aff *aff,
-                                     __isl_keep isl_val *d, struct isl_ast_add_term_data *data)
-{
-    isl_aff *shifted;
-    isl_val *shift;
-    int is_zero;
-    int non_neg;
+                                     __isl_keep isl_val *d,
+                                     struct isl_ast_add_term_data *data) {
+  isl_aff *shifted;
+  isl_val *shift;
+  int is_zero;
+  int non_neg;
 
-    if (isl_val_sgn(data->cst) != isl_val_sgn(data->v))
-        return 0;
+  if (isl_val_sgn(data->cst) != isl_val_sgn(data->v))
+    return 0;
 
-    shift = isl_val_div(isl_val_copy(data->cst), isl_val_copy(data->v));
-    shift = isl_val_floor(shift);
-    is_zero = isl_val_is_zero(shift);
-    if (is_zero < 0 || is_zero) {
-        isl_val_free(shift);
-        return is_zero < 0 ? -1 : 0;
-    }
-    shift = isl_val_mul(shift, isl_val_copy(d));
-    shifted = isl_aff_copy(aff);
-    shifted = isl_aff_add_constant_val(shifted, shift);
-    non_neg = isl_ast_build_aff_is_nonneg(data->build, shifted);
-    isl_aff_free(shifted);
+  shift = isl_val_div(isl_val_copy(data->cst), isl_val_copy(data->v));
+  shift = isl_val_floor(shift);
+  is_zero = isl_val_is_zero(shift);
+  if (is_zero < 0 || is_zero) {
+    isl_val_free(shift);
+    return is_zero < 0 ? -1 : 0;
+  }
+  shift = isl_val_mul(shift, isl_val_copy(d));
+  shifted = isl_aff_copy(aff);
+  shifted = isl_aff_add_constant_val(shifted, shift);
+  non_neg = isl_ast_build_aff_is_nonneg(data->build, shifted);
+  isl_aff_free(shifted);
 
-    return non_neg;
+  return non_neg;
 }
 
 /* Given the numerator "aff' of the argument of an integer division
@@ -126,25 +125,25 @@ static int is_non_neg_after_stealing(__isl_keep isl_aff *aff,
  *	v * floor((aff + s*d)/d) + (cst - v*s)
  */
 static __isl_give isl_aff *steal_from_cst(__isl_take isl_aff *aff,
-        __isl_keep isl_val *d, struct isl_ast_add_term_data *data)
-{
-    isl_set *domain;
-    isl_val *shift, *t;
+                                          __isl_keep isl_val *d,
+                                          struct isl_ast_add_term_data *data) {
+  isl_set *domain;
+  isl_val *shift, *t;
 
-    domain = isl_ast_build_get_domain(data->build);
-    shift = isl_set_min_val(domain, aff);
-    isl_set_free(domain);
+  domain = isl_ast_build_get_domain(data->build);
+  shift = isl_set_min_val(domain, aff);
+  isl_set_free(domain);
 
-    shift = isl_val_neg(shift);
-    shift = isl_val_div(shift, isl_val_copy(d));
-    shift = isl_val_ceil(shift);
+  shift = isl_val_neg(shift);
+  shift = isl_val_div(shift, isl_val_copy(d));
+  shift = isl_val_ceil(shift);
 
-    t = isl_val_copy(shift);
-    t = isl_val_mul(t, isl_val_copy(data->v));
-    data->cst = isl_val_sub(data->cst, t);
+  t = isl_val_copy(shift);
+  t = isl_val_mul(t, isl_val_copy(data->v));
+  data->cst = isl_val_sub(data->cst, t);
 
-    shift = isl_val_mul(shift, isl_val_copy(d));
-    return isl_aff_add_constant_val(aff, shift);
+  shift = isl_val_mul(shift, isl_val_copy(d));
+  return isl_aff_add_constant_val(aff, shift);
 }
 
 /* Create an isl_ast_expr evaluating the div at position "pos" in "ls".
@@ -182,47 +181,46 @@ static __isl_give isl_aff *steal_from_cst(__isl_take isl_aff *aff,
  * with s the minimal shift that makes the argument non-negative.
  */
 static __isl_give isl_ast_expr *var_div(struct isl_ast_add_term_data *data,
-                                        __isl_keep isl_local_space *ls, int pos)
-{
-    isl_ctx *ctx = isl_local_space_get_ctx(ls);
-    isl_aff *aff;
-    isl_ast_expr *num, *den;
-    isl_val *d;
-    enum isl_ast_expr_op_type type;
+                                        __isl_keep isl_local_space *ls,
+                                        int pos) {
+  isl_ctx *ctx = isl_local_space_get_ctx(ls);
+  isl_aff *aff;
+  isl_ast_expr *num, *den;
+  isl_val *d;
+  enum isl_ast_expr_op_type type;
 
-    aff = isl_local_space_get_div(ls, pos);
-    d = isl_aff_get_denominator_val(aff);
-    aff = isl_aff_scale_val(aff, isl_val_copy(d));
-    den = isl_ast_expr_from_val(isl_val_copy(d));
+  aff = isl_local_space_get_div(ls, pos);
+  d = isl_aff_get_denominator_val(aff);
+  aff = isl_aff_scale_val(aff, isl_val_copy(d));
+  den = isl_ast_expr_from_val(isl_val_copy(d));
 
-    type = isl_ast_expr_op_fdiv_q;
-    if (isl_options_get_ast_build_prefer_pdiv(ctx)) {
-        int non_neg = isl_ast_build_aff_is_nonneg(data->build, aff);
-        if (non_neg >= 0 && !non_neg) {
-            isl_aff *opp = oppose_div_arg(isl_aff_copy(aff),
-                                          isl_val_copy(d));
-            non_neg = isl_ast_build_aff_is_nonneg(data->build, opp);
-            if (non_neg >= 0 && non_neg) {
-                data->v = isl_val_neg(data->v);
-                isl_aff_free(aff);
-                aff = opp;
-            } else
-                isl_aff_free(opp);
-        }
-        if (non_neg >= 0 && !non_neg) {
-            non_neg = is_non_neg_after_stealing(aff, d, data);
-            if (non_neg >= 0 && non_neg)
-                aff = steal_from_cst(aff, d, data);
-        }
-        if (non_neg < 0)
-            aff = isl_aff_free(aff);
-        else if (non_neg)
-            type = isl_ast_expr_op_pdiv_q;
+  type = isl_ast_expr_op_fdiv_q;
+  if (isl_options_get_ast_build_prefer_pdiv(ctx)) {
+    int non_neg = isl_ast_build_aff_is_nonneg(data->build, aff);
+    if (non_neg >= 0 && !non_neg) {
+      isl_aff *opp = oppose_div_arg(isl_aff_copy(aff), isl_val_copy(d));
+      non_neg = isl_ast_build_aff_is_nonneg(data->build, opp);
+      if (non_neg >= 0 && non_neg) {
+        data->v = isl_val_neg(data->v);
+        isl_aff_free(aff);
+        aff = opp;
+      } else
+        isl_aff_free(opp);
     }
+    if (non_neg >= 0 && !non_neg) {
+      non_neg = is_non_neg_after_stealing(aff, d, data);
+      if (non_neg >= 0 && non_neg)
+        aff = steal_from_cst(aff, d, data);
+    }
+    if (non_neg < 0)
+      aff = isl_aff_free(aff);
+    else if (non_neg)
+      type = isl_ast_expr_op_pdiv_q;
+  }
 
-    isl_val_free(d);
-    num = isl_ast_expr_from_aff(aff, data->build);
-    return isl_ast_expr_alloc_binary(type, num, den);
+  isl_val_free(d);
+  num = isl_ast_expr_from_aff(aff, data->build);
+  return isl_ast_expr_alloc_binary(type, num, den);
 }
 
 /* Create an isl_ast_expr evaluating the specified dimension of "ls".
@@ -235,61 +233,58 @@ static __isl_give isl_ast_expr *var_div(struct isl_ast_add_term_data *data,
  * - parameters are constructed from the isl_ids in "ls"
  */
 static __isl_give isl_ast_expr *var(struct isl_ast_add_term_data *data,
-                                    __isl_keep isl_local_space *ls, enum isl_dim_type type, int pos)
-{
-    isl_ctx *ctx = isl_local_space_get_ctx(ls);
-    isl_id *id;
+                                    __isl_keep isl_local_space *ls,
+                                    enum isl_dim_type type, int pos) {
+  isl_ctx *ctx = isl_local_space_get_ctx(ls);
+  isl_id *id;
 
-    if (type == isl_dim_div)
-        return var_div(data, ls, pos);
+  if (type == isl_dim_div)
+    return var_div(data, ls, pos);
 
-    if (type == isl_dim_set) {
-        id = isl_ast_build_get_iterator_id(data->build, pos);
-        return isl_ast_expr_from_id(id);
-    }
-
-    if (!isl_local_space_has_dim_id(ls, type, pos))
-        isl_die(ctx, isl_error_internal, "unnamed dimension",
-                return NULL);
-    id = isl_local_space_get_dim_id(ls, type, pos);
+  if (type == isl_dim_set) {
+    id = isl_ast_build_get_iterator_id(data->build, pos);
     return isl_ast_expr_from_id(id);
+  }
+
+  if (!isl_local_space_has_dim_id(ls, type, pos))
+    isl_die(ctx, isl_error_internal, "unnamed dimension", return NULL);
+  id = isl_local_space_get_dim_id(ls, type, pos);
+  return isl_ast_expr_from_id(id);
 }
 
 /* Does "expr" represent the zero integer?
  */
-static int ast_expr_is_zero(__isl_keep isl_ast_expr *expr)
-{
-    if (!expr)
-        return -1;
-    if (expr->type != isl_ast_expr_int)
-        return 0;
-    return isl_val_is_zero(expr->u.v);
+static int ast_expr_is_zero(__isl_keep isl_ast_expr *expr) {
+  if (!expr)
+    return -1;
+  if (expr->type != isl_ast_expr_int)
+    return 0;
+  return isl_val_is_zero(expr->u.v);
 }
 
 /* Create an expression representing the sum of "expr1" and "expr2",
  * provided neither of the two expressions is identically zero.
  */
 static __isl_give isl_ast_expr *ast_expr_add(__isl_take isl_ast_expr *expr1,
-        __isl_take isl_ast_expr *expr2)
-{
-    if (!expr1 || !expr2)
-        goto error;
+                                             __isl_take isl_ast_expr *expr2) {
+  if (!expr1 || !expr2)
+    goto error;
 
-    if (ast_expr_is_zero(expr1)) {
-        isl_ast_expr_free(expr1);
-        return expr2;
-    }
-
-    if (ast_expr_is_zero(expr2)) {
-        isl_ast_expr_free(expr2);
-        return expr1;
-    }
-
-    return isl_ast_expr_add(expr1, expr2);
-error:
+  if (ast_expr_is_zero(expr1)) {
     isl_ast_expr_free(expr1);
+    return expr2;
+  }
+
+  if (ast_expr_is_zero(expr2)) {
     isl_ast_expr_free(expr2);
-    return NULL;
+    return expr1;
+  }
+
+  return isl_ast_expr_add(expr1, expr2);
+error:
+  isl_ast_expr_free(expr1);
+  isl_ast_expr_free(expr2);
+  return NULL;
 }
 
 /* Subtract expr2 from expr1.
@@ -304,26 +299,25 @@ error:
  *	(isl_ast_expr_op_sub, expr1, expr2)
  */
 static __isl_give isl_ast_expr *ast_expr_sub(__isl_take isl_ast_expr *expr1,
-        __isl_take isl_ast_expr *expr2)
-{
-    if (!expr1 || !expr2)
-        goto error;
+                                             __isl_take isl_ast_expr *expr2) {
+  if (!expr1 || !expr2)
+    goto error;
 
-    if (ast_expr_is_zero(expr2)) {
-        isl_ast_expr_free(expr2);
-        return expr1;
-    }
-
-    if (ast_expr_is_zero(expr1)) {
-        isl_ast_expr_free(expr1);
-        return isl_ast_expr_neg(expr2);
-    }
-
-    return isl_ast_expr_sub(expr1, expr2);
-error:
-    isl_ast_expr_free(expr1);
+  if (ast_expr_is_zero(expr2)) {
     isl_ast_expr_free(expr2);
-    return NULL;
+    return expr1;
+  }
+
+  if (ast_expr_is_zero(expr1)) {
+    isl_ast_expr_free(expr1);
+    return isl_ast_expr_neg(expr2);
+  }
+
+  return isl_ast_expr_sub(expr1, expr2);
+error:
+  isl_ast_expr_free(expr1);
+  isl_ast_expr_free(expr2);
+  return NULL;
 }
 
 /* Return an isl_ast_expr that represents
@@ -333,27 +327,26 @@ error:
  * v is assumed to be non-negative.
  * The result is simplified in terms of build->domain.
  */
-static __isl_give isl_ast_expr *isl_ast_expr_mod(__isl_keep isl_val *v,
-        __isl_keep isl_aff *aff, __isl_keep isl_val *d,
-        __isl_keep isl_ast_build *build)
-{
-    isl_ast_expr *expr;
-    isl_ast_expr *c;
+static __isl_give isl_ast_expr *
+isl_ast_expr_mod(__isl_keep isl_val *v, __isl_keep isl_aff *aff,
+                 __isl_keep isl_val *d, __isl_keep isl_ast_build *build) {
+  isl_ast_expr *expr;
+  isl_ast_expr *c;
 
-    if (!aff)
-        return NULL;
+  if (!aff)
+    return NULL;
 
-    expr = isl_ast_expr_from_aff(isl_aff_copy(aff), build);
+  expr = isl_ast_expr_from_aff(isl_aff_copy(aff), build);
 
-    c = isl_ast_expr_from_val(isl_val_copy(d));
-    expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_pdiv_r, expr, c);
+  c = isl_ast_expr_from_val(isl_val_copy(d));
+  expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_pdiv_r, expr, c);
 
-    if (!isl_val_is_one(v)) {
-        c = isl_ast_expr_from_val(isl_val_copy(v));
-        expr = isl_ast_expr_mul(c, expr);
-    }
+  if (!isl_val_is_one(v)) {
+    c = isl_ast_expr_from_val(isl_val_copy(v));
+    expr = isl_ast_expr_mul(c, expr);
+  }
 
-    return expr;
+  return expr;
 }
 
 /* Create an isl_ast_expr that scales "expr" by "v".
@@ -368,30 +361,29 @@ static __isl_give isl_ast_expr *isl_ast_expr_mod(__isl_keep isl_val *v,
  *	(isl_ast_expr_op_mul, expr(v), expr)
  */
 static __isl_give isl_ast_expr *scale(__isl_take isl_ast_expr *expr,
-                                      __isl_take isl_val *v)
-{
-    isl_ast_expr *c;
+                                      __isl_take isl_val *v) {
+  isl_ast_expr *c;
 
-    if (!expr || !v)
-        goto error;
-    if (isl_val_is_one(v)) {
-        isl_val_free(v);
-        return expr;
-    }
-
-    if (isl_val_is_negone(v)) {
-        isl_val_free(v);
-        expr = isl_ast_expr_neg(expr);
-    } else {
-        c = isl_ast_expr_from_val(v);
-        expr = isl_ast_expr_mul(c, expr);
-    }
-
-    return expr;
-error:
+  if (!expr || !v)
+    goto error;
+  if (isl_val_is_one(v)) {
     isl_val_free(v);
-    isl_ast_expr_free(expr);
-    return NULL;
+    return expr;
+  }
+
+  if (isl_val_is_negone(v)) {
+    isl_val_free(v);
+    expr = isl_ast_expr_neg(expr);
+  } else {
+    c = isl_ast_expr_from_val(v);
+    expr = isl_ast_expr_mul(c, expr);
+  }
+
+  return expr;
+error:
+  isl_val_free(v);
+  isl_ast_expr_free(expr);
+  return NULL;
 }
 
 /* Add an expression for "*v" times the specified dimension of "ls"
@@ -417,57 +409,56 @@ error:
  *	(isl_ast_expr_op_add, expr, e)
  *
  */
-static __isl_give isl_ast_expr *isl_ast_expr_add_term(
-    __isl_take isl_ast_expr *expr,
-    __isl_keep isl_local_space *ls, enum isl_dim_type type, int pos,
-    __isl_take isl_val *v, struct isl_ast_add_term_data *data)
-{
-    isl_ast_expr *term;
+static __isl_give isl_ast_expr *
+isl_ast_expr_add_term(__isl_take isl_ast_expr *expr,
+                      __isl_keep isl_local_space *ls, enum isl_dim_type type,
+                      int pos, __isl_take isl_val *v,
+                      struct isl_ast_add_term_data *data) {
+  isl_ast_expr *term;
 
-    if (!expr)
-        return NULL;
+  if (!expr)
+    return NULL;
 
-    data->v = v;
-    term = var(data, ls, type, pos);
-    v = data->v;
+  data->v = v;
+  term = var(data, ls, type, pos);
+  v = data->v;
 
-    if (isl_val_is_neg(v) && !ast_expr_is_zero(expr)) {
-        v = isl_val_neg(v);
-        term = scale(term, v);
-        return ast_expr_sub(expr, term);
-    } else {
-        term = scale(term, v);
-        return ast_expr_add(expr, term);
-    }
+  if (isl_val_is_neg(v) && !ast_expr_is_zero(expr)) {
+    v = isl_val_neg(v);
+    term = scale(term, v);
+    return ast_expr_sub(expr, term);
+  } else {
+    term = scale(term, v);
+    return ast_expr_add(expr, term);
+  }
 }
 
 /* Add an expression for "v" to expr.
  */
-static __isl_give isl_ast_expr *isl_ast_expr_add_int(
-    __isl_take isl_ast_expr *expr, __isl_take isl_val *v)
-{
-    isl_ast_expr *expr_int;
+static __isl_give isl_ast_expr *
+isl_ast_expr_add_int(__isl_take isl_ast_expr *expr, __isl_take isl_val *v) {
+  isl_ast_expr *expr_int;
 
-    if (!expr || !v)
-        goto error;
+  if (!expr || !v)
+    goto error;
 
-    if (isl_val_is_zero(v)) {
-        isl_val_free(v);
-        return expr;
-    }
-
-    if (isl_val_is_neg(v) && !ast_expr_is_zero(expr)) {
-        v = isl_val_neg(v);
-        expr_int = isl_ast_expr_from_val(v);
-        return ast_expr_sub(expr, expr_int);
-    } else {
-        expr_int = isl_ast_expr_from_val(v);
-        return ast_expr_add(expr, expr_int);
-    }
-error:
-    isl_ast_expr_free(expr);
+  if (isl_val_is_zero(v)) {
     isl_val_free(v);
-    return NULL;
+    return expr;
+  }
+
+  if (isl_val_is_neg(v) && !ast_expr_is_zero(expr)) {
+    v = isl_val_neg(v);
+    expr_int = isl_ast_expr_from_val(v);
+    return ast_expr_sub(expr, expr_int);
+  } else {
+    expr_int = isl_ast_expr_from_val(v);
+    return ast_expr_add(expr, expr_int);
+  }
+error:
+  isl_ast_expr_free(expr);
+  isl_val_free(v);
+  return NULL;
 }
 
 /* Internal data structure used inside extract_modulos.
@@ -493,21 +484,21 @@ error:
  * If "sign" is 0, then no such affine expression has been found (yet).
  */
 struct isl_extract_mod_data {
-    isl_ast_build *build;
-    isl_aff *aff;
+  isl_ast_build *build;
+  isl_aff *aff;
 
-    isl_ast_expr *pos;
-    isl_ast_expr *neg;
+  isl_ast_expr *pos;
+  isl_ast_expr *neg;
 
-    isl_aff *add;
+  isl_aff *add;
 
-    int i;
-    isl_val *v;
-    isl_val *d;
-    isl_aff *div;
+  int i;
+  isl_val *v;
+  isl_val *d;
+  isl_aff *div;
 
-    isl_aff *nonneg;
-    int sign;
+  isl_aff *nonneg;
+  int sign;
 };
 
 /* Does
@@ -524,20 +515,19 @@ struct isl_extract_mod_data {
  * ?
  */
 static isl_bool is_even_test(struct isl_extract_mod_data *data,
-                             __isl_keep isl_aff *arg)
-{
-    isl_bool res;
-    isl_val *cst;
+                             __isl_keep isl_aff *arg) {
+  isl_bool res;
+  isl_val *cst;
 
-    res = isl_val_eq_si(data->d, 2);
-    if (res < 0 || !res)
-        return res;
-
-    cst = isl_aff_get_constant_val(arg);
-    res = isl_val_eq_si(cst, -1);
-    isl_val_free(cst);
-
+  res = isl_val_eq_si(data->d, 2);
+  if (res < 0 || !res)
     return res;
+
+  cst = isl_aff_get_constant_val(arg);
+  res = isl_val_eq_si(cst, -1);
+  isl_val_free(cst);
+
+  return res;
 }
 
 /* Given that data->v * div_i in data->aff is equal to
@@ -570,44 +560,43 @@ static isl_bool is_even_test(struct isl_extract_mod_data *data,
  * Also, if "lin - 1" is non-negative, then "lin" is non-negative too.
  */
 static int extract_term_and_mod(struct isl_extract_mod_data *data,
-                                __isl_take isl_aff *term, __isl_take isl_aff *arg)
-{
-    isl_bool even;
-    isl_ast_expr *expr;
-    int s;
+                                __isl_take isl_aff *term,
+                                __isl_take isl_aff *arg) {
+  isl_bool even;
+  isl_ast_expr *expr;
+  int s;
 
-    even = is_even_test(data, arg);
-    if (even < 0) {
-        arg = isl_aff_free(arg);
-    } else if (even) {
-        term = oppose_div_arg(term, isl_val_copy(data->d));
-        data->v = isl_val_neg(data->v);
-        arg = isl_aff_set_constant_si(arg, 0);
-    }
+  even = is_even_test(data, arg);
+  if (even < 0) {
+    arg = isl_aff_free(arg);
+  } else if (even) {
+    term = oppose_div_arg(term, isl_val_copy(data->d));
+    data->v = isl_val_neg(data->v);
+    arg = isl_aff_set_constant_si(arg, 0);
+  }
 
-    data->v = isl_val_div(data->v, isl_val_copy(data->d));
-    s = isl_val_sgn(data->v);
-    data->v = isl_val_abs(data->v);
-    expr = isl_ast_expr_mod(data->v, arg, data->d, data->build);
-    isl_aff_free(arg);
-    if (s > 0)
-        data->neg = ast_expr_add(data->neg, expr);
-    else
-        data->pos = ast_expr_add(data->pos, expr);
-    data->aff = isl_aff_set_coefficient_si(data->aff,
-                                           isl_dim_div, data->i, 0);
-    if (s < 0)
-        data->v = isl_val_neg(data->v);
-    term = isl_aff_scale_val(term, isl_val_copy(data->v));
+  data->v = isl_val_div(data->v, isl_val_copy(data->d));
+  s = isl_val_sgn(data->v);
+  data->v = isl_val_abs(data->v);
+  expr = isl_ast_expr_mod(data->v, arg, data->d, data->build);
+  isl_aff_free(arg);
+  if (s > 0)
+    data->neg = ast_expr_add(data->neg, expr);
+  else
+    data->pos = ast_expr_add(data->pos, expr);
+  data->aff = isl_aff_set_coefficient_si(data->aff, isl_dim_div, data->i, 0);
+  if (s < 0)
+    data->v = isl_val_neg(data->v);
+  term = isl_aff_scale_val(term, isl_val_copy(data->v));
 
-    if (!data->add)
-        data->add = term;
-    else
-        data->add = isl_aff_add(data->add, term);
-    if (!data->add)
-        return -1;
+  if (!data->add)
+    data->add = term;
+  else
+    data->add = isl_aff_add(data->add, term);
+  if (!data->add)
+    return -1;
 
-    return 0;
+  return 0;
 }
 
 /* Given that data->v * div_i in data->aff is of the form
@@ -628,10 +617,9 @@ static int extract_term_and_mod(struct isl_extract_mod_data *data,
  *
  * to data->neg or data->pos depending on the sign of -f.
  */
-static int extract_mod(struct isl_extract_mod_data *data)
-{
-    return extract_term_and_mod(data, isl_aff_copy(data->div),
-                                isl_aff_copy(data->div));
+static int extract_mod(struct isl_extract_mod_data *data) {
+  return extract_term_and_mod(data, isl_aff_copy(data->div),
+                              isl_aff_copy(data->div));
 }
 
 /* Given that data->v * div_i in data->aff is of the form
@@ -652,29 +640,28 @@ static int extract_mod(struct isl_extract_mod_data *data)
  *
  * This function may modify data->div.
  */
-static int extract_nonneg_mod(struct isl_extract_mod_data *data)
-{
-    int mod;
+static int extract_nonneg_mod(struct isl_extract_mod_data *data) {
+  int mod;
 
-    mod = isl_ast_build_aff_is_nonneg(data->build, data->div);
-    if (mod < 0)
-        goto error;
-    if (mod)
-        return extract_mod(data);
+  mod = isl_ast_build_aff_is_nonneg(data->build, data->div);
+  if (mod < 0)
+    goto error;
+  if (mod)
+    return extract_mod(data);
 
-    data->div = oppose_div_arg(data->div, isl_val_copy(data->d));
-    mod = isl_ast_build_aff_is_nonneg(data->build, data->div);
-    if (mod < 0)
-        goto error;
-    if (mod) {
-        data->v = isl_val_neg(data->v);
-        return extract_mod(data);
-    }
+  data->div = oppose_div_arg(data->div, isl_val_copy(data->d));
+  mod = isl_ast_build_aff_is_nonneg(data->build, data->div);
+  if (mod < 0)
+    goto error;
+  if (mod) {
+    data->v = isl_val_neg(data->v);
+    return extract_mod(data);
+  }
 
-    return 0;
+  return 0;
 error:
-    data->aff = isl_aff_free(data->aff);
-    return -1;
+  data->aff = isl_aff_free(data->aff);
+  return -1;
 }
 
 /* Is the affine expression of constraint "c" "simpler" than data->nonneg
@@ -689,21 +676,20 @@ error:
  * More detailed heuristics could be used if it turns out that there is a need.
  */
 static int mod_constraint_is_simpler(struct isl_extract_mod_data *data,
-                                     __isl_keep isl_constraint *c)
-{
-    isl_val *v1, *v2;
-    int simpler;
+                                     __isl_keep isl_constraint *c) {
+  isl_val *v1, *v2;
+  int simpler;
 
-    if (!data->nonneg)
-        return 1;
+  if (!data->nonneg)
+    return 1;
 
-    v1 = isl_val_abs(isl_constraint_get_constant_val(c));
-    v2 = isl_val_abs(isl_aff_get_constant_val(data->nonneg));
-    simpler = isl_val_lt(v1, v2);
-    isl_val_free(v1);
-    isl_val_free(v2);
+  v1 = isl_val_abs(isl_constraint_get_constant_val(c));
+  v2 = isl_val_abs(isl_aff_get_constant_val(data->nonneg));
+  simpler = isl_val_lt(v1, v2);
+  isl_val_free(v1);
+  isl_val_free(v2);
 
-    return simpler;
+  return simpler;
 }
 
 /* Check if the coefficients of "c" are either equal or opposite to those
@@ -728,74 +714,71 @@ static int mod_constraint_is_simpler(struct isl_extract_mod_data *data,
  * variable in the representation of some integer type.
  */
 static isl_stat check_parallel_or_opposite(__isl_take isl_constraint *c,
-        void *user)
-{
-    struct isl_extract_mod_data *data = user;
-    enum isl_dim_type c_type[2] = { isl_dim_param, isl_dim_set };
-    enum isl_dim_type a_type[2] = { isl_dim_param, isl_dim_in };
-    int i, t;
-    isl_size n[2];
-    int parallel = 1, opposite = 1;
+                                           void *user) {
+  struct isl_extract_mod_data *data = user;
+  enum isl_dim_type c_type[2] = {isl_dim_param, isl_dim_set};
+  enum isl_dim_type a_type[2] = {isl_dim_param, isl_dim_in};
+  int i, t;
+  isl_size n[2];
+  int parallel = 1, opposite = 1;
 
-    for (t = 0; t < 2; ++t) {
-        n[t] = isl_constraint_dim(c, c_type[t]);
-        if (n[t] < 0)
-            return isl_stat_error;
-        for (i = 0; i < n[t]; ++i) {
-            int a, b;
+  for (t = 0; t < 2; ++t) {
+    n[t] = isl_constraint_dim(c, c_type[t]);
+    if (n[t] < 0)
+      return isl_stat_error;
+    for (i = 0; i < n[t]; ++i) {
+      int a, b;
 
-            a = isl_constraint_involves_dims(c, c_type[t], i, 1);
-            b = isl_aff_involves_dims(data->div, a_type[t], i, 1);
-            if (a != b)
-                parallel = opposite = 0;
-        }
+      a = isl_constraint_involves_dims(c, c_type[t], i, 1);
+      b = isl_aff_involves_dims(data->div, a_type[t], i, 1);
+      if (a != b)
+        parallel = opposite = 0;
     }
+  }
 
-    if (parallel || opposite) {
-        isl_val *v;
+  if (parallel || opposite) {
+    isl_val *v;
 
-        v = isl_val_abs(isl_constraint_get_constant_val(c));
-        if (isl_val_cmp_si(v, 1 << 15) > 0)
-            parallel = opposite = 0;
-        isl_val_free(v);
+    v = isl_val_abs(isl_constraint_get_constant_val(c));
+    if (isl_val_cmp_si(v, 1 << 15) > 0)
+      parallel = opposite = 0;
+    isl_val_free(v);
+  }
+
+  for (t = 0; t < 2; ++t) {
+    for (i = 0; i < n[t]; ++i) {
+      isl_val *v1, *v2;
+
+      if (!parallel && !opposite)
+        break;
+      v1 = isl_constraint_get_coefficient_val(c, c_type[t], i);
+      v2 = isl_aff_get_coefficient_val(data->div, a_type[t], i);
+      if (parallel) {
+        v1 = isl_val_sub(v1, isl_val_copy(v2));
+        parallel = isl_val_is_divisible_by(v1, data->d);
+        v1 = isl_val_add(v1, isl_val_copy(v2));
+      }
+      if (opposite) {
+        v1 = isl_val_add(v1, isl_val_copy(v2));
+        opposite = isl_val_is_divisible_by(v1, data->d);
+      }
+      isl_val_free(v1);
+      isl_val_free(v2);
     }
+  }
 
-    for (t = 0; t < 2; ++t) {
-        for (i = 0; i < n[t]; ++i) {
-            isl_val *v1, *v2;
+  if ((parallel || opposite) && mod_constraint_is_simpler(data, c)) {
+    isl_aff_free(data->nonneg);
+    data->nonneg = isl_constraint_get_aff(c);
+    data->sign = parallel ? 1 : -1;
+  }
 
-            if (!parallel && !opposite)
-                break;
-            v1 = isl_constraint_get_coefficient_val(c,
-                                                    c_type[t], i);
-            v2 = isl_aff_get_coefficient_val(data->div,
-                                             a_type[t], i);
-            if (parallel) {
-                v1 = isl_val_sub(v1, isl_val_copy(v2));
-                parallel = isl_val_is_divisible_by(v1, data->d);
-                v1 = isl_val_add(v1, isl_val_copy(v2));
-            }
-            if (opposite) {
-                v1 = isl_val_add(v1, isl_val_copy(v2));
-                opposite = isl_val_is_divisible_by(v1, data->d);
-            }
-            isl_val_free(v1);
-            isl_val_free(v2);
-        }
-    }
+  isl_constraint_free(c);
 
-    if ((parallel || opposite) && mod_constraint_is_simpler(data, c)) {
-        isl_aff_free(data->nonneg);
-        data->nonneg = isl_constraint_get_aff(c);
-        data->sign = parallel ? 1 : -1;
-    }
+  if (data->sign != 0 && data->nonneg == NULL)
+    return isl_stat_error;
 
-    isl_constraint_free(c);
-
-    if (data->sign != 0 && data->nonneg == NULL)
-        return isl_stat_error;
-
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Given that data->v * div_i in data->aff is of the form
@@ -877,67 +860,64 @@ static isl_stat check_parallel_or_opposite(__isl_take isl_constraint *c,
  * Alternatively, we could first compute the dual of the domain
  * and plug in the constraints on the coefficients.
  */
-static int try_extract_mod(struct isl_extract_mod_data *data)
-{
-    isl_basic_set *hull;
-    isl_val *v1, *v2;
-    isl_stat r;
-    isl_size n;
+static int try_extract_mod(struct isl_extract_mod_data *data) {
+  isl_basic_set *hull;
+  isl_val *v1, *v2;
+  isl_stat r;
+  isl_size n;
 
-    if (!data->build)
-        goto error;
+  if (!data->build)
+    goto error;
 
-    n = isl_aff_dim(data->div, isl_dim_div);
-    if (n < 0)
-        goto error;
+  n = isl_aff_dim(data->div, isl_dim_div);
+  if (n < 0)
+    goto error;
 
-    if (isl_aff_involves_dims(data->div, isl_dim_div, 0, n))
-        return extract_nonneg_mod(data);
+  if (isl_aff_involves_dims(data->div, isl_dim_div, 0, n))
+    return extract_nonneg_mod(data);
 
-    hull = isl_set_simple_hull(isl_set_copy(data->build->domain));
-    hull = isl_basic_set_remove_divs(hull);
-    data->sign = 0;
-    data->nonneg = NULL;
-    r = isl_basic_set_foreach_constraint(hull, &check_parallel_or_opposite,
-                                         data);
-    isl_basic_set_free(hull);
+  hull = isl_set_simple_hull(isl_set_copy(data->build->domain));
+  hull = isl_basic_set_remove_divs(hull);
+  data->sign = 0;
+  data->nonneg = NULL;
+  r = isl_basic_set_foreach_constraint(hull, &check_parallel_or_opposite, data);
+  isl_basic_set_free(hull);
 
-    if (!data->sign || r < 0) {
-        isl_aff_free(data->nonneg);
-        if (r < 0)
-            goto error;
-        return extract_nonneg_mod(data);
-    }
+  if (!data->sign || r < 0) {
+    isl_aff_free(data->nonneg);
+    if (r < 0)
+      goto error;
+    return extract_nonneg_mod(data);
+  }
 
-    v1 = isl_aff_get_constant_val(data->div);
-    v2 = isl_aff_get_constant_val(data->nonneg);
-    if (data->sign < 0) {
-        v1 = isl_val_neg(v1);
-        v1 = isl_val_add(v1, isl_val_copy(data->d));
-        v1 = isl_val_sub_ui(v1, 1);
-    }
+  v1 = isl_aff_get_constant_val(data->div);
+  v2 = isl_aff_get_constant_val(data->nonneg);
+  if (data->sign < 0) {
+    v1 = isl_val_neg(v1);
+    v1 = isl_val_add(v1, isl_val_copy(data->d));
+    v1 = isl_val_sub_ui(v1, 1);
+  }
+  v1 = isl_val_sub(v1, isl_val_copy(v2));
+  v1 = isl_val_mod(v1, isl_val_copy(data->d));
+  v1 = isl_val_add(v1, v2);
+  v2 = isl_val_div(isl_val_copy(v1), isl_val_copy(data->d));
+  v2 = isl_val_ceil(v2);
+  if (isl_val_is_neg(v2)) {
+    v2 = isl_val_mul(v2, isl_val_copy(data->d));
     v1 = isl_val_sub(v1, isl_val_copy(v2));
-    v1 = isl_val_mod(v1, isl_val_copy(data->d));
-    v1 = isl_val_add(v1, v2);
-    v2 = isl_val_div(isl_val_copy(v1), isl_val_copy(data->d));
-    v2 = isl_val_ceil(v2);
-    if (isl_val_is_neg(v2)) {
-        v2 = isl_val_mul(v2, isl_val_copy(data->d));
-        v1 = isl_val_sub(v1, isl_val_copy(v2));
-    }
-    data->nonneg = isl_aff_set_constant_val(data->nonneg, v1);
-    isl_val_free(v2);
+  }
+  data->nonneg = isl_aff_set_constant_val(data->nonneg, v1);
+  isl_val_free(v2);
 
-    if (data->sign < 0) {
-        data->div = oppose_div_arg(data->div, isl_val_copy(data->d));
-        data->v = isl_val_neg(data->v);
-    }
+  if (data->sign < 0) {
+    data->div = oppose_div_arg(data->div, isl_val_copy(data->d));
+    data->v = isl_val_neg(data->v);
+  }
 
-    return extract_term_and_mod(data,
-                                isl_aff_copy(data->div), data->nonneg);
+  return extract_term_and_mod(data, isl_aff_copy(data->div), data->nonneg);
 error:
-    data->aff = isl_aff_free(data->aff);
-    return -1;
+  data->aff = isl_aff_free(data->aff);
+  return -1;
 }
 
 /* Check if "data->aff" involves any (implicit) modulo computations based
@@ -971,18 +951,17 @@ error:
  *
  * and still extract a modulo.
  */
-static int extract_modulo(struct isl_extract_mod_data *data)
-{
-    data->div = isl_aff_get_div(data->aff, data->i);
-    data->d = isl_aff_get_denominator_val(data->div);
-    if (isl_val_is_divisible_by(data->v, data->d)) {
-        data->div = isl_aff_scale_val(data->div, isl_val_copy(data->d));
-        if (try_extract_mod(data) < 0)
-            data->aff = isl_aff_free(data->aff);
-    }
-    isl_aff_free(data->div);
-    isl_val_free(data->d);
-    return 0;
+static int extract_modulo(struct isl_extract_mod_data *data) {
+  data->div = isl_aff_get_div(data->aff, data->i);
+  data->d = isl_aff_get_denominator_val(data->div);
+  if (isl_val_is_divisible_by(data->v, data->d)) {
+    data->div = isl_aff_scale_val(data->div, isl_val_copy(data->d));
+    if (try_extract_mod(data) < 0)
+      data->aff = isl_aff_free(data->aff);
+  }
+  isl_aff_free(data->div);
+  isl_val_free(data->d);
+  return 0;
 }
 
 /* Check if "aff" involves any (implicit) modulo computations.
@@ -1009,46 +988,45 @@ static int extract_modulo(struct isl_extract_mod_data *data)
  * If f < 0, we add ((-f) * (a mod m)) to *pos.
  */
 static __isl_give isl_aff *extract_modulos(__isl_take isl_aff *aff,
-        __isl_keep isl_ast_expr **pos, __isl_keep isl_ast_expr **neg,
-        __isl_keep isl_ast_build *build)
-{
-    struct isl_extract_mod_data data = { build, aff, *pos, *neg };
-    isl_ctx *ctx;
-    isl_size n;
+                                           __isl_keep isl_ast_expr **pos,
+                                           __isl_keep isl_ast_expr **neg,
+                                           __isl_keep isl_ast_build *build) {
+  struct isl_extract_mod_data data = {build, aff, *pos, *neg};
+  isl_ctx *ctx;
+  isl_size n;
 
-    if (!aff)
-        return NULL;
+  if (!aff)
+    return NULL;
 
-    ctx = isl_aff_get_ctx(aff);
-    if (!isl_options_get_ast_build_prefer_pdiv(ctx))
-        return aff;
+  ctx = isl_aff_get_ctx(aff);
+  if (!isl_options_get_ast_build_prefer_pdiv(ctx))
+    return aff;
 
-    n = isl_aff_dim(data.aff, isl_dim_div);
-    if (n < 0)
-        return isl_aff_free(aff);
-    for (data.i = 0; data.i < n; ++data.i) {
-        data.v = isl_aff_get_coefficient_val(data.aff,
-                                             isl_dim_div, data.i);
-        if (!data.v)
-            return isl_aff_free(aff);
-        if (isl_val_is_zero(data.v) ||
-                isl_val_is_one(data.v) || isl_val_is_negone(data.v)) {
-            isl_val_free(data.v);
-            continue;
-        }
-        if (extract_modulo(&data) < 0)
-            data.aff = isl_aff_free(data.aff);
-        isl_val_free(data.v);
-        if (!data.aff)
-            break;
+  n = isl_aff_dim(data.aff, isl_dim_div);
+  if (n < 0)
+    return isl_aff_free(aff);
+  for (data.i = 0; data.i < n; ++data.i) {
+    data.v = isl_aff_get_coefficient_val(data.aff, isl_dim_div, data.i);
+    if (!data.v)
+      return isl_aff_free(aff);
+    if (isl_val_is_zero(data.v) || isl_val_is_one(data.v) ||
+        isl_val_is_negone(data.v)) {
+      isl_val_free(data.v);
+      continue;
     }
+    if (extract_modulo(&data) < 0)
+      data.aff = isl_aff_free(data.aff);
+    isl_val_free(data.v);
+    if (!data.aff)
+      break;
+  }
 
-    if (data.add)
-        data.aff = isl_aff_add(data.aff, data.add);
+  if (data.add)
+    data.aff = isl_aff_add(data.aff, data.add);
 
-    *pos = data.pos;
-    *neg = data.neg;
-    return data.aff;
+  *pos = data.pos;
+  *neg = data.neg;
+  return data.aff;
 }
 
 /* Check if aff involves any non-integer coefficients.
@@ -1060,79 +1038,78 @@ static __isl_give isl_aff *extract_modulos(__isl_take isl_aff *aff,
  * Return aff1 and add (aff2 / d) to *expr.
  */
 static __isl_give isl_aff *extract_rational(__isl_take isl_aff *aff,
-        __isl_keep isl_ast_expr **expr, __isl_keep isl_ast_build *build)
-{
-    int i, j;
-    isl_size n;
-    isl_aff *rat = NULL;
-    isl_local_space *ls = NULL;
-    isl_ast_expr *rat_expr;
-    isl_val *v, *d;
-    enum isl_dim_type t[] = { isl_dim_param, isl_dim_in, isl_dim_div };
-    enum isl_dim_type l[] = { isl_dim_param, isl_dim_set, isl_dim_div };
+                                            __isl_keep isl_ast_expr **expr,
+                                            __isl_keep isl_ast_build *build) {
+  int i, j;
+  isl_size n;
+  isl_aff *rat = NULL;
+  isl_local_space *ls = NULL;
+  isl_ast_expr *rat_expr;
+  isl_val *v, *d;
+  enum isl_dim_type t[] = {isl_dim_param, isl_dim_in, isl_dim_div};
+  enum isl_dim_type l[] = {isl_dim_param, isl_dim_set, isl_dim_div};
 
-    if (!aff)
-        return NULL;
-    d = isl_aff_get_denominator_val(aff);
-    if (!d)
-        goto error;
-    if (isl_val_is_one(d)) {
-        isl_val_free(d);
-        return aff;
-    }
-
-    aff = isl_aff_scale_val(aff, isl_val_copy(d));
-
-    ls = isl_aff_get_domain_local_space(aff);
-    rat = isl_aff_zero_on_domain(isl_local_space_copy(ls));
-
-    for (i = 0; i < 3; ++i) {
-        n = isl_aff_dim(aff, t[i]);
-        if (n < 0)
-            goto error;
-        for (j = 0; j < n; ++j) {
-            isl_aff *rat_j;
-
-            v = isl_aff_get_coefficient_val(aff, t[i], j);
-            if (!v)
-                goto error;
-            if (isl_val_is_divisible_by(v, d)) {
-                isl_val_free(v);
-                continue;
-            }
-            rat_j = isl_aff_var_on_domain(isl_local_space_copy(ls),
-                                          l[i], j);
-            rat_j = isl_aff_scale_val(rat_j, v);
-            rat = isl_aff_add(rat, rat_j);
-        }
-    }
-
-    v = isl_aff_get_constant_val(aff);
-    if (isl_val_is_divisible_by(v, d)) {
-        isl_val_free(v);
-    } else {
-        isl_aff *rat_0;
-
-        rat_0 = isl_aff_val_on_domain(isl_local_space_copy(ls), v);
-        rat = isl_aff_add(rat, rat_0);
-    }
-
-    isl_local_space_free(ls);
-
-    aff = isl_aff_sub(aff, isl_aff_copy(rat));
-    aff = isl_aff_scale_down_val(aff, isl_val_copy(d));
-
-    rat_expr = isl_ast_expr_from_aff(rat, build);
-    rat_expr = isl_ast_expr_div(rat_expr, isl_ast_expr_from_val(d));
-    *expr = ast_expr_add(*expr, rat_expr);
-
-    return aff;
-error:
-    isl_aff_free(rat);
-    isl_local_space_free(ls);
-    isl_aff_free(aff);
-    isl_val_free(d);
+  if (!aff)
     return NULL;
+  d = isl_aff_get_denominator_val(aff);
+  if (!d)
+    goto error;
+  if (isl_val_is_one(d)) {
+    isl_val_free(d);
+    return aff;
+  }
+
+  aff = isl_aff_scale_val(aff, isl_val_copy(d));
+
+  ls = isl_aff_get_domain_local_space(aff);
+  rat = isl_aff_zero_on_domain(isl_local_space_copy(ls));
+
+  for (i = 0; i < 3; ++i) {
+    n = isl_aff_dim(aff, t[i]);
+    if (n < 0)
+      goto error;
+    for (j = 0; j < n; ++j) {
+      isl_aff *rat_j;
+
+      v = isl_aff_get_coefficient_val(aff, t[i], j);
+      if (!v)
+        goto error;
+      if (isl_val_is_divisible_by(v, d)) {
+        isl_val_free(v);
+        continue;
+      }
+      rat_j = isl_aff_var_on_domain(isl_local_space_copy(ls), l[i], j);
+      rat_j = isl_aff_scale_val(rat_j, v);
+      rat = isl_aff_add(rat, rat_j);
+    }
+  }
+
+  v = isl_aff_get_constant_val(aff);
+  if (isl_val_is_divisible_by(v, d)) {
+    isl_val_free(v);
+  } else {
+    isl_aff *rat_0;
+
+    rat_0 = isl_aff_val_on_domain(isl_local_space_copy(ls), v);
+    rat = isl_aff_add(rat, rat_0);
+  }
+
+  isl_local_space_free(ls);
+
+  aff = isl_aff_sub(aff, isl_aff_copy(rat));
+  aff = isl_aff_scale_down_val(aff, isl_val_copy(d));
+
+  rat_expr = isl_ast_expr_from_aff(rat, build);
+  rat_expr = isl_ast_expr_div(rat_expr, isl_ast_expr_from_val(d));
+  *expr = ast_expr_add(*expr, rat_expr);
+
+  return aff;
+error:
+  isl_aff_free(rat);
+  isl_local_space_free(ls);
+  isl_aff_free(aff);
+  isl_val_free(d);
+  return NULL;
 }
 
 /* Construct an isl_ast_expr that evaluates the affine expression "aff",
@@ -1143,92 +1120,90 @@ error:
  * Finally, if the affine expression has a non-trivial denominator,
  * we divide the resulting isl_ast_expr by this denominator.
  */
-__isl_give isl_ast_expr *isl_ast_expr_from_aff(__isl_take isl_aff *aff,
-        __isl_keep isl_ast_build *build)
-{
-    int i, j;
-    isl_size n;
-    isl_val *v;
-    isl_ctx *ctx = isl_aff_get_ctx(aff);
-    isl_ast_expr *expr, *expr_neg;
-    enum isl_dim_type t[] = { isl_dim_param, isl_dim_in, isl_dim_div };
-    enum isl_dim_type l[] = { isl_dim_param, isl_dim_set, isl_dim_div };
-    isl_local_space *ls;
-    struct isl_ast_add_term_data data;
+__isl_give isl_ast_expr *
+isl_ast_expr_from_aff(__isl_take isl_aff *aff,
+                      __isl_keep isl_ast_build *build) {
+  int i, j;
+  isl_size n;
+  isl_val *v;
+  isl_ctx *ctx = isl_aff_get_ctx(aff);
+  isl_ast_expr *expr, *expr_neg;
+  enum isl_dim_type t[] = {isl_dim_param, isl_dim_in, isl_dim_div};
+  enum isl_dim_type l[] = {isl_dim_param, isl_dim_set, isl_dim_div};
+  isl_local_space *ls;
+  struct isl_ast_add_term_data data;
 
-    if (!aff)
-        return NULL;
+  if (!aff)
+    return NULL;
 
-    expr = isl_ast_expr_alloc_int_si(ctx, 0);
-    expr_neg = isl_ast_expr_alloc_int_si(ctx, 0);
+  expr = isl_ast_expr_alloc_int_si(ctx, 0);
+  expr_neg = isl_ast_expr_alloc_int_si(ctx, 0);
 
-    aff = extract_rational(aff, &expr, build);
+  aff = extract_rational(aff, &expr, build);
 
-    aff = extract_modulos(aff, &expr, &expr_neg, build);
-    expr = ast_expr_sub(expr, expr_neg);
+  aff = extract_modulos(aff, &expr, &expr_neg, build);
+  expr = ast_expr_sub(expr, expr_neg);
 
-    ls = isl_aff_get_domain_local_space(aff);
+  ls = isl_aff_get_domain_local_space(aff);
 
-    data.build = build;
-    data.cst = isl_aff_get_constant_val(aff);
-    for (i = 0; i < 3; ++i) {
-        n = isl_aff_dim(aff, t[i]);
-        if (n < 0)
-            expr = isl_ast_expr_free(expr);
-        for (j = 0; j < n; ++j) {
-            v = isl_aff_get_coefficient_val(aff, t[i], j);
-            if (!v)
-                expr = isl_ast_expr_free(expr);
-            if (isl_val_is_zero(v)) {
-                isl_val_free(v);
-                continue;
-            }
-            expr = isl_ast_expr_add_term(expr,
-                                         ls, l[i], j, v, &data);
-        }
+  data.build = build;
+  data.cst = isl_aff_get_constant_val(aff);
+  for (i = 0; i < 3; ++i) {
+    n = isl_aff_dim(aff, t[i]);
+    if (n < 0)
+      expr = isl_ast_expr_free(expr);
+    for (j = 0; j < n; ++j) {
+      v = isl_aff_get_coefficient_val(aff, t[i], j);
+      if (!v)
+        expr = isl_ast_expr_free(expr);
+      if (isl_val_is_zero(v)) {
+        isl_val_free(v);
+        continue;
+      }
+      expr = isl_ast_expr_add_term(expr, ls, l[i], j, v, &data);
     }
+  }
 
-    expr = isl_ast_expr_add_int(expr, data.cst);
+  expr = isl_ast_expr_add_int(expr, data.cst);
 
-    isl_local_space_free(ls);
-    isl_aff_free(aff);
-    return expr;
+  isl_local_space_free(ls);
+  isl_aff_free(aff);
+  return expr;
 }
 
 /* Add terms to "expr" for each variable in "aff" with a coefficient
  * with sign equal to "sign".
  * The result is simplified in terms of data->build->domain.
  */
-static __isl_give isl_ast_expr *add_signed_terms(__isl_take isl_ast_expr *expr,
-        __isl_keep isl_aff *aff, int sign, struct isl_ast_add_term_data *data)
-{
-    int i, j;
-    isl_val *v;
-    enum isl_dim_type t[] = { isl_dim_param, isl_dim_in, isl_dim_div };
-    enum isl_dim_type l[] = { isl_dim_param, isl_dim_set, isl_dim_div };
-    isl_local_space *ls;
+static __isl_give isl_ast_expr *
+add_signed_terms(__isl_take isl_ast_expr *expr, __isl_keep isl_aff *aff,
+                 int sign, struct isl_ast_add_term_data *data) {
+  int i, j;
+  isl_val *v;
+  enum isl_dim_type t[] = {isl_dim_param, isl_dim_in, isl_dim_div};
+  enum isl_dim_type l[] = {isl_dim_param, isl_dim_set, isl_dim_div};
+  isl_local_space *ls;
 
-    ls = isl_aff_get_domain_local_space(aff);
+  ls = isl_aff_get_domain_local_space(aff);
 
-    for (i = 0; i < 3; ++i) {
-        isl_size n = isl_aff_dim(aff, t[i]);
-        if (n < 0)
-            expr = isl_ast_expr_free(expr);
-        for (j = 0; j < n; ++j) {
-            v = isl_aff_get_coefficient_val(aff, t[i], j);
-            if (sign * isl_val_sgn(v) <= 0) {
-                isl_val_free(v);
-                continue;
-            }
-            v = isl_val_abs(v);
-            expr = isl_ast_expr_add_term(expr,
-                                         ls, l[i], j, v, data);
-        }
+  for (i = 0; i < 3; ++i) {
+    isl_size n = isl_aff_dim(aff, t[i]);
+    if (n < 0)
+      expr = isl_ast_expr_free(expr);
+    for (j = 0; j < n; ++j) {
+      v = isl_aff_get_coefficient_val(aff, t[i], j);
+      if (sign * isl_val_sgn(v) <= 0) {
+        isl_val_free(v);
+        continue;
+      }
+      v = isl_val_abs(v);
+      expr = isl_ast_expr_add_term(expr, ls, l[i], j, v, data);
     }
+  }
 
-    isl_local_space_free(ls);
+  isl_local_space_free(ls);
 
-    return expr;
+  return expr;
 }
 
 /* Should the constant term "v" be considered positive?
@@ -1241,13 +1216,13 @@ static __isl_give isl_ast_expr *add_signed_terms(__isl_take isl_ast_expr *expr,
  * of overflows.
  */
 static int constant_is_considered_positive(__isl_keep isl_val *v,
-        __isl_keep isl_ast_expr *pos, __isl_keep isl_ast_expr *neg)
-{
-    if (ast_expr_is_zero(pos))
-        return 1;
-    if (ast_expr_is_zero(neg))
-        return 0;
-    return isl_val_is_pos(v);
+                                           __isl_keep isl_ast_expr *pos,
+                                           __isl_keep isl_ast_expr *neg) {
+  if (ast_expr_is_zero(pos))
+    return 1;
+  if (ast_expr_is_zero(neg))
+    return 0;
+  return isl_val_is_pos(v);
 }
 
 /* Check if the equality
@@ -1276,54 +1251,52 @@ static int constant_is_considered_positive(__isl_keep isl_val *v,
  *
  * where e and e' differ by a constant.
  */
-static int is_stride_constraint(__isl_keep isl_aff *aff, int pos)
-{
-    isl_aff *div;
-    isl_val *c, *d;
-    int eq;
+static int is_stride_constraint(__isl_keep isl_aff *aff, int pos) {
+  isl_aff *div;
+  isl_val *c, *d;
+  int eq;
 
-    div = isl_aff_get_div(aff, pos);
-    c = isl_aff_get_coefficient_val(aff, isl_dim_div, pos);
-    d = isl_aff_get_denominator_val(div);
-    eq = isl_val_abs_eq(c, d);
-    if (eq >= 0 && eq) {
-        aff = isl_aff_copy(aff);
-        aff = isl_aff_set_coefficient_si(aff, isl_dim_div, pos, 0);
-        div = isl_aff_scale_val(div, d);
-        if (isl_val_is_pos(c))
-            div = isl_aff_neg(div);
-        eq = isl_aff_plain_is_equal(div, aff);
-        isl_aff_free(aff);
-    } else
-        isl_val_free(d);
-    isl_val_free(c);
-    isl_aff_free(div);
+  div = isl_aff_get_div(aff, pos);
+  c = isl_aff_get_coefficient_val(aff, isl_dim_div, pos);
+  d = isl_aff_get_denominator_val(div);
+  eq = isl_val_abs_eq(c, d);
+  if (eq >= 0 && eq) {
+    aff = isl_aff_copy(aff);
+    aff = isl_aff_set_coefficient_si(aff, isl_dim_div, pos, 0);
+    div = isl_aff_scale_val(div, d);
+    if (isl_val_is_pos(c))
+      div = isl_aff_neg(div);
+    eq = isl_aff_plain_is_equal(div, aff);
+    isl_aff_free(aff);
+  } else
+    isl_val_free(d);
+  isl_val_free(c);
+  isl_aff_free(div);
 
-    return eq;
+  return eq;
 }
 
 /* Are all coefficients of "aff" (zero or) negative?
  */
-static isl_bool all_negative_coefficients(__isl_keep isl_aff *aff)
-{
-    int i;
-    isl_size n;
+static isl_bool all_negative_coefficients(__isl_keep isl_aff *aff) {
+  int i;
+  isl_size n;
 
-    n = isl_aff_dim(aff, isl_dim_param);
-    if (n < 0)
-        return isl_bool_error;
-    for (i = 0; i < n; ++i)
-        if (isl_aff_coefficient_sgn(aff, isl_dim_param, i) > 0)
-            return isl_bool_false;
+  n = isl_aff_dim(aff, isl_dim_param);
+  if (n < 0)
+    return isl_bool_error;
+  for (i = 0; i < n; ++i)
+    if (isl_aff_coefficient_sgn(aff, isl_dim_param, i) > 0)
+      return isl_bool_false;
 
-    n = isl_aff_dim(aff, isl_dim_in);
-    if (n < 0)
-        return isl_bool_error;
-    for (i = 0; i < n; ++i)
-        if (isl_aff_coefficient_sgn(aff, isl_dim_in, i) > 0)
-            return isl_bool_false;
+  n = isl_aff_dim(aff, isl_dim_in);
+  if (n < 0)
+    return isl_bool_error;
+  for (i = 0; i < n; ++i)
+    if (isl_aff_coefficient_sgn(aff, isl_dim_in, i) > 0)
+      return isl_bool_false;
 
-    return isl_bool_true;
+  return isl_bool_true;
 }
 
 /* Give an equality of the form
@@ -1347,36 +1320,36 @@ static isl_bool all_negative_coefficients(__isl_keep isl_aff *aff)
  *
  * instead.
  */
-static __isl_give isl_ast_expr *extract_stride_constraint(
-    __isl_take isl_aff *aff, int pos, __isl_keep isl_ast_build *build)
-{
-    isl_bool all_neg;
-    isl_ctx *ctx;
-    isl_val *c;
-    isl_ast_expr *expr, *cst;
+static __isl_give isl_ast_expr *
+extract_stride_constraint(__isl_take isl_aff *aff, int pos,
+                          __isl_keep isl_ast_build *build) {
+  isl_bool all_neg;
+  isl_ctx *ctx;
+  isl_val *c;
+  isl_ast_expr *expr, *cst;
 
-    if (!aff)
-        return NULL;
+  if (!aff)
+    return NULL;
 
-    ctx = isl_aff_get_ctx(aff);
+  ctx = isl_aff_get_ctx(aff);
 
-    c = isl_aff_get_coefficient_val(aff, isl_dim_div, pos);
-    aff = isl_aff_set_coefficient_si(aff, isl_dim_div, pos, 0);
+  c = isl_aff_get_coefficient_val(aff, isl_dim_div, pos);
+  aff = isl_aff_set_coefficient_si(aff, isl_dim_div, pos, 0);
 
-    all_neg = all_negative_coefficients(aff);
-    if (all_neg < 0)
-        aff = isl_aff_free(aff);
-    else if (all_neg)
-        aff = isl_aff_neg(aff);
+  all_neg = all_negative_coefficients(aff);
+  if (all_neg < 0)
+    aff = isl_aff_free(aff);
+  else if (all_neg)
+    aff = isl_aff_neg(aff);
 
-    cst = isl_ast_expr_from_val(isl_val_abs(c));
-    expr = isl_ast_expr_from_aff(aff, build);
+  cst = isl_ast_expr_from_val(isl_val_abs(c));
+  expr = isl_ast_expr_from_aff(aff, build);
 
-    expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_zdiv_r, expr, cst);
-    cst = isl_ast_expr_alloc_int_si(ctx, 0);
-    expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_eq, expr, cst);
+  expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_zdiv_r, expr, cst);
+  cst = isl_ast_expr_alloc_int_si(ctx, 0);
+  expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_eq, expr, cst);
 
-    return expr;
+  return expr;
 }
 
 /* Construct an isl_ast_expr that evaluates the condition "constraint",
@@ -1416,74 +1389,74 @@ static __isl_give isl_ast_expr *extract_stride_constraint(
  * with negative coefficients), then the constant term is added to "pos"
  * (or "neg"), ignoring the sign of the constant term.
  */
-static __isl_give isl_ast_expr *isl_ast_expr_from_constraint(
-    __isl_take isl_constraint *constraint, __isl_keep isl_ast_build *build)
-{
-    int i;
-    isl_size n;
-    isl_ctx *ctx;
-    isl_ast_expr *expr_pos;
-    isl_ast_expr *expr_neg;
-    isl_ast_expr *expr;
-    isl_aff *aff;
-    int eq;
-    enum isl_ast_expr_op_type type;
-    struct isl_ast_add_term_data data;
+static __isl_give isl_ast_expr *
+isl_ast_expr_from_constraint(__isl_take isl_constraint *constraint,
+                             __isl_keep isl_ast_build *build) {
+  int i;
+  isl_size n;
+  isl_ctx *ctx;
+  isl_ast_expr *expr_pos;
+  isl_ast_expr *expr_neg;
+  isl_ast_expr *expr;
+  isl_aff *aff;
+  int eq;
+  enum isl_ast_expr_op_type type;
+  struct isl_ast_add_term_data data;
 
-    if (!constraint)
-        return NULL;
-
-    aff = isl_constraint_get_aff(constraint);
-    eq = isl_constraint_is_equality(constraint);
-    isl_constraint_free(constraint);
-
-    n = isl_aff_dim(aff, isl_dim_div);
-    if (n < 0)
-        aff = isl_aff_free(aff);
-    if (eq && n > 0)
-        for (i = 0; i < n; ++i) {
-            int is_stride;
-            is_stride = is_stride_constraint(aff, i);
-            if (is_stride < 0)
-                goto error;
-            if (is_stride)
-                return extract_stride_constraint(aff, i, build);
-        }
-
-    ctx = isl_aff_get_ctx(aff);
-    expr_pos = isl_ast_expr_alloc_int_si(ctx, 0);
-    expr_neg = isl_ast_expr_alloc_int_si(ctx, 0);
-
-    aff = extract_modulos(aff, &expr_pos, &expr_neg, build);
-
-    data.build = build;
-    data.cst = isl_aff_get_constant_val(aff);
-    expr_pos = add_signed_terms(expr_pos, aff, 1, &data);
-    data.cst = isl_val_neg(data.cst);
-    expr_neg = add_signed_terms(expr_neg, aff, -1, &data);
-    data.cst = isl_val_neg(data.cst);
-
-    if (constant_is_considered_positive(data.cst, expr_pos, expr_neg)) {
-        expr_pos = isl_ast_expr_add_int(expr_pos, data.cst);
-    } else {
-        data.cst = isl_val_neg(data.cst);
-        expr_neg = isl_ast_expr_add_int(expr_neg, data.cst);
-    }
-
-    if (isl_ast_expr_get_type(expr_pos) == isl_ast_expr_int &&
-            isl_ast_expr_get_type(expr_neg) != isl_ast_expr_int) {
-        type = eq ? isl_ast_expr_op_eq : isl_ast_expr_op_le;
-        expr = isl_ast_expr_alloc_binary(type, expr_neg, expr_pos);
-    } else {
-        type = eq ? isl_ast_expr_op_eq : isl_ast_expr_op_ge;
-        expr = isl_ast_expr_alloc_binary(type, expr_pos, expr_neg);
-    }
-
-    isl_aff_free(aff);
-    return expr;
-error:
-    isl_aff_free(aff);
+  if (!constraint)
     return NULL;
+
+  aff = isl_constraint_get_aff(constraint);
+  eq = isl_constraint_is_equality(constraint);
+  isl_constraint_free(constraint);
+
+  n = isl_aff_dim(aff, isl_dim_div);
+  if (n < 0)
+    aff = isl_aff_free(aff);
+  if (eq && n > 0)
+    for (i = 0; i < n; ++i) {
+      int is_stride;
+      is_stride = is_stride_constraint(aff, i);
+      if (is_stride < 0)
+        goto error;
+      if (is_stride)
+        return extract_stride_constraint(aff, i, build);
+    }
+
+  ctx = isl_aff_get_ctx(aff);
+  expr_pos = isl_ast_expr_alloc_int_si(ctx, 0);
+  expr_neg = isl_ast_expr_alloc_int_si(ctx, 0);
+
+  aff = extract_modulos(aff, &expr_pos, &expr_neg, build);
+
+  data.build = build;
+  data.cst = isl_aff_get_constant_val(aff);
+  expr_pos = add_signed_terms(expr_pos, aff, 1, &data);
+  data.cst = isl_val_neg(data.cst);
+  expr_neg = add_signed_terms(expr_neg, aff, -1, &data);
+  data.cst = isl_val_neg(data.cst);
+
+  if (constant_is_considered_positive(data.cst, expr_pos, expr_neg)) {
+    expr_pos = isl_ast_expr_add_int(expr_pos, data.cst);
+  } else {
+    data.cst = isl_val_neg(data.cst);
+    expr_neg = isl_ast_expr_add_int(expr_neg, data.cst);
+  }
+
+  if (isl_ast_expr_get_type(expr_pos) == isl_ast_expr_int &&
+      isl_ast_expr_get_type(expr_neg) != isl_ast_expr_int) {
+    type = eq ? isl_ast_expr_op_eq : isl_ast_expr_op_le;
+    expr = isl_ast_expr_alloc_binary(type, expr_neg, expr_pos);
+  } else {
+    type = eq ? isl_ast_expr_op_eq : isl_ast_expr_op_ge;
+    expr = isl_ast_expr_alloc_binary(type, expr_pos, expr_neg);
+  }
+
+  isl_aff_free(aff);
+  return expr;
+error:
+  isl_aff_free(aff);
+  return NULL;
 }
 
 /* Wrapper around isl_constraint_cmp_last_non_zero for use
@@ -1492,14 +1465,13 @@ error:
  * apart, then use isl_constraint_plain_cmp instead.
  */
 static int cmp_constraint(__isl_keep isl_constraint *a,
-                          __isl_keep isl_constraint *b, void *user)
-{
-    int cmp;
+                          __isl_keep isl_constraint *b, void *user) {
+  int cmp;
 
-    cmp = isl_constraint_cmp_last_non_zero(a, b);
-    if (cmp != 0)
-        return cmp;
-    return isl_constraint_plain_cmp(a, b);
+  cmp = isl_constraint_cmp_last_non_zero(a, b);
+  if (cmp != 0)
+    return cmp;
+  return isl_constraint_plain_cmp(a, b);
 }
 
 /* Construct an isl_ast_expr that evaluates the conditions defining "bset".
@@ -1522,50 +1494,50 @@ static int cmp_constraint(__isl_keep isl_constraint *a,
  * involve integer divisions may serve to simplify some constraints
  * that do involve integer divisions.
  */
-__isl_give isl_ast_expr *isl_ast_build_expr_from_basic_set(
-    __isl_keep isl_ast_build *build, __isl_take isl_basic_set *bset)
-{
-    int i;
-    isl_size n;
-    isl_constraint *c;
-    isl_constraint_list *list;
-    isl_ast_expr *res;
-    isl_set *set;
+__isl_give isl_ast_expr *
+isl_ast_build_expr_from_basic_set(__isl_keep isl_ast_build *build,
+                                  __isl_take isl_basic_set *bset) {
+  int i;
+  isl_size n;
+  isl_constraint *c;
+  isl_constraint_list *list;
+  isl_ast_expr *res;
+  isl_set *set;
 
-    list = isl_basic_set_get_constraint_list(bset);
-    isl_basic_set_free(bset);
-    list = isl_constraint_list_sort(list, &cmp_constraint, NULL);
-    n = isl_constraint_list_n_constraint(list);
-    if (n < 0)
-        build = NULL;
-    if (n == 0) {
-        isl_ctx *ctx = isl_constraint_list_get_ctx(list);
-        isl_constraint_list_free(list);
-        return isl_ast_expr_alloc_int_si(ctx, 1);
-    }
+  list = isl_basic_set_get_constraint_list(bset);
+  isl_basic_set_free(bset);
+  list = isl_constraint_list_sort(list, &cmp_constraint, NULL);
+  n = isl_constraint_list_n_constraint(list);
+  if (n < 0)
+    build = NULL;
+  if (n == 0) {
+    isl_ctx *ctx = isl_constraint_list_get_ctx(list);
+    isl_constraint_list_free(list);
+    return isl_ast_expr_alloc_int_si(ctx, 1);
+  }
 
-    build = isl_ast_build_copy(build);
+  build = isl_ast_build_copy(build);
 
-    c = isl_constraint_list_get_constraint(list, 0);
+  c = isl_constraint_list_get_constraint(list, 0);
+  bset = isl_basic_set_from_constraint(isl_constraint_copy(c));
+  set = isl_set_from_basic_set(bset);
+  res = isl_ast_expr_from_constraint(c, build);
+  build = isl_ast_build_restrict_generated(build, set);
+
+  for (i = 1; i < n; ++i) {
+    isl_ast_expr *expr;
+
+    c = isl_constraint_list_get_constraint(list, i);
     bset = isl_basic_set_from_constraint(isl_constraint_copy(c));
     set = isl_set_from_basic_set(bset);
-    res = isl_ast_expr_from_constraint(c, build);
+    expr = isl_ast_expr_from_constraint(c, build);
     build = isl_ast_build_restrict_generated(build, set);
+    res = isl_ast_expr_and(res, expr);
+  }
 
-    for (i = 1; i < n; ++i) {
-        isl_ast_expr *expr;
-
-        c = isl_constraint_list_get_constraint(list, i);
-        bset = isl_basic_set_from_constraint(isl_constraint_copy(c));
-        set = isl_set_from_basic_set(bset);
-        expr = isl_ast_expr_from_constraint(c, build);
-        build = isl_ast_build_restrict_generated(build, set);
-        res = isl_ast_expr_and(res, expr);
-    }
-
-    isl_constraint_list_free(list);
-    isl_ast_build_free(build);
-    return res;
+  isl_constraint_list_free(list);
+  isl_ast_build_free(build);
+  return res;
 }
 
 /* Construct an isl_ast_expr that evaluates the conditions defining "set".
@@ -1589,53 +1561,52 @@ __isl_give isl_ast_expr *isl_ast_build_expr_from_basic_set(
  *
  * "set" lives in the internal schedule space.
  */
-__isl_give isl_ast_expr *isl_ast_build_expr_from_set_internal(
-    __isl_keep isl_ast_build *build, __isl_take isl_set *set)
-{
-    int i;
-    isl_size n;
-    isl_basic_set *bset;
-    isl_basic_set_list *list;
-    isl_set *domain;
-    isl_ast_expr *res;
+__isl_give isl_ast_expr *
+isl_ast_build_expr_from_set_internal(__isl_keep isl_ast_build *build,
+                                     __isl_take isl_set *set) {
+  int i;
+  isl_size n;
+  isl_basic_set *bset;
+  isl_basic_set_list *list;
+  isl_set *domain;
+  isl_ast_expr *res;
 
-    list = isl_set_get_basic_set_list(set);
-    isl_set_free(set);
+  list = isl_set_get_basic_set_list(set);
+  isl_set_free(set);
 
-    n = isl_basic_set_list_n_basic_set(list);
-    if (n < 0)
-        build = NULL;
-    if (n == 0) {
-        isl_ctx *ctx = isl_ast_build_get_ctx(build);
-        isl_basic_set_list_free(list);
-        return isl_ast_expr_from_val(isl_val_zero(ctx));
-    }
-
-    domain = isl_ast_build_get_domain(build);
-
-    bset = isl_basic_set_list_get_basic_set(list, 0);
-    set = isl_set_from_basic_set(isl_basic_set_copy(bset));
-    res = isl_ast_build_expr_from_basic_set(build, bset);
-
-    for (i = 1; i < n; ++i) {
-        isl_ast_expr *expr;
-        isl_set *rest;
-
-        rest = isl_set_subtract(isl_set_copy(domain), set);
-        rest = isl_set_from_basic_set(isl_set_simple_hull(rest));
-        domain = isl_set_intersect(domain, rest);
-        bset = isl_basic_set_list_get_basic_set(list, i);
-        set = isl_set_from_basic_set(isl_basic_set_copy(bset));
-        bset = isl_basic_set_gist(bset,
-                                  isl_set_simple_hull(isl_set_copy(domain)));
-        expr = isl_ast_build_expr_from_basic_set(build, bset);
-        res = isl_ast_expr_or(res, expr);
-    }
-
-    isl_set_free(domain);
-    isl_set_free(set);
+  n = isl_basic_set_list_n_basic_set(list);
+  if (n < 0)
+    build = NULL;
+  if (n == 0) {
+    isl_ctx *ctx = isl_ast_build_get_ctx(build);
     isl_basic_set_list_free(list);
-    return res;
+    return isl_ast_expr_from_val(isl_val_zero(ctx));
+  }
+
+  domain = isl_ast_build_get_domain(build);
+
+  bset = isl_basic_set_list_get_basic_set(list, 0);
+  set = isl_set_from_basic_set(isl_basic_set_copy(bset));
+  res = isl_ast_build_expr_from_basic_set(build, bset);
+
+  for (i = 1; i < n; ++i) {
+    isl_ast_expr *expr;
+    isl_set *rest;
+
+    rest = isl_set_subtract(isl_set_copy(domain), set);
+    rest = isl_set_from_basic_set(isl_set_simple_hull(rest));
+    domain = isl_set_intersect(domain, rest);
+    bset = isl_basic_set_list_get_basic_set(list, i);
+    set = isl_set_from_basic_set(isl_basic_set_copy(bset));
+    bset = isl_basic_set_gist(bset, isl_set_simple_hull(isl_set_copy(domain)));
+    expr = isl_ast_build_expr_from_basic_set(build, bset);
+    res = isl_ast_expr_or(res, expr);
+  }
+
+  isl_set_free(domain);
+  isl_set_free(set);
+  isl_basic_set_list_free(list);
+  return res;
 }
 
 /* Construct an isl_ast_expr that evaluates the conditions defining "set".
@@ -1650,23 +1621,23 @@ __isl_give isl_ast_expr *isl_ast_build_expr_from_set_internal(
  * Since the set comes from the outside, it may have constraints that
  * are redundant with respect to the build domain.  Remove them first.
  */
-__isl_give isl_ast_expr *isl_ast_build_expr_from_set(
-    __isl_keep isl_ast_build *build, __isl_take isl_set *set)
-{
-    isl_bool needs_map;
+__isl_give isl_ast_expr *
+isl_ast_build_expr_from_set(__isl_keep isl_ast_build *build,
+                            __isl_take isl_set *set) {
+  isl_bool needs_map;
 
-    needs_map = isl_ast_build_need_schedule_map(build);
-    if (needs_map < 0) {
-        set = isl_set_free(set);
-    } else if (needs_map) {
-        isl_multi_aff *ma;
-        ma = isl_ast_build_get_schedule_map_multi_aff(build);
-        set = isl_set_preimage_multi_aff(set, ma);
-    }
+  needs_map = isl_ast_build_need_schedule_map(build);
+  if (needs_map < 0) {
+    set = isl_set_free(set);
+  } else if (needs_map) {
+    isl_multi_aff *ma;
+    ma = isl_ast_build_get_schedule_map_multi_aff(build);
+    set = isl_set_preimage_multi_aff(set, ma);
+  }
 
-    set = isl_set_compute_divs(set);
-    set = isl_ast_build_compute_gist(build, set);
-    return isl_ast_build_expr_from_set_internal(build, set);
+  set = isl_set_compute_divs(set);
+  set = isl_ast_build_compute_gist(build, set);
+  return isl_ast_build_expr_from_set_internal(build, set);
 }
 
 /* State of data about previous pieces in
@@ -1678,10 +1649,10 @@ __isl_give isl_ast_expr *isl_ast_build_expr_from_set(
  * isl_state_max: data represents maximum of several pieces
  */
 enum isl_from_pw_aff_state {
-    isl_state_none,
-    isl_state_single,
-    isl_state_min,
-    isl_state_max
+  isl_state_none,
+  isl_state_single,
+  isl_state_min,
+  isl_state_max
 };
 
 /* Internal date structure representing a single piece in the input of
@@ -1702,10 +1673,10 @@ enum isl_from_pw_aff_state {
  * in "set_list", at which point "set_list" is set to NULL.
  */
 struct isl_from_pw_aff_piece {
-    enum isl_from_pw_aff_state state;
-    isl_set *set;
-    isl_set_list *set_list;
-    isl_aff_list *aff_list;
+  enum isl_from_pw_aff_state state;
+  isl_set *set;
+  isl_set_list *set_list;
+  isl_aff_list *aff_list;
 };
 
 /* Internal data structure for isl_ast_build_expr_from_pw_aff_internal.
@@ -1721,107 +1692,102 @@ struct isl_from_pw_aff_piece {
  * "p" contains the individual pieces.
  */
 struct isl_from_pw_aff_data {
-    isl_ast_build *build;
-    isl_set *dom;
+  isl_ast_build *build;
+  isl_set *dom;
 
-    int n;
-    int max;
-    struct isl_from_pw_aff_piece *p;
+  int n;
+  int max;
+  struct isl_from_pw_aff_piece *p;
 };
 
 /* Initialize "data" based on "build" and "pa".
  */
 static isl_stat isl_from_pw_aff_data_init(struct isl_from_pw_aff_data *data,
-        __isl_keep isl_ast_build *build, __isl_keep isl_pw_aff *pa)
-{
-    isl_size n;
-    isl_ctx *ctx;
+                                          __isl_keep isl_ast_build *build,
+                                          __isl_keep isl_pw_aff *pa) {
+  isl_size n;
+  isl_ctx *ctx;
 
-    ctx = isl_pw_aff_get_ctx(pa);
-    n = isl_pw_aff_n_piece(pa);
-    if (n < 0)
-        return isl_stat_error;
-    if (n == 0)
-        isl_die(ctx, isl_error_invalid,
-                "cannot handle void expression", return isl_stat_error);
-    data->max = n;
-    data->p = isl_calloc_array(ctx, struct isl_from_pw_aff_piece, n);
-    if (!data->p)
-        return isl_stat_error;
-    data->build = build;
-    data->dom = isl_pw_aff_domain(isl_pw_aff_copy(pa));
-    data->n = 0;
+  ctx = isl_pw_aff_get_ctx(pa);
+  n = isl_pw_aff_n_piece(pa);
+  if (n < 0)
+    return isl_stat_error;
+  if (n == 0)
+    isl_die(ctx, isl_error_invalid, "cannot handle void expression",
+            return isl_stat_error);
+  data->max = n;
+  data->p = isl_calloc_array(ctx, struct isl_from_pw_aff_piece, n);
+  if (!data->p)
+    return isl_stat_error;
+  data->build = build;
+  data->dom = isl_pw_aff_domain(isl_pw_aff_copy(pa));
+  data->n = 0;
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Free all memory allocated for "data".
  */
-static void isl_from_pw_aff_data_clear(struct isl_from_pw_aff_data *data)
-{
-    int i;
+static void isl_from_pw_aff_data_clear(struct isl_from_pw_aff_data *data) {
+  int i;
 
-    isl_set_free(data->dom);
-    if (!data->p)
-        return;
+  isl_set_free(data->dom);
+  if (!data->p)
+    return;
 
-    for (i = 0; i < data->max; ++i) {
-        isl_set_free(data->p[i].set);
-        isl_set_list_free(data->p[i].set_list);
-        isl_aff_list_free(data->p[i].aff_list);
-    }
-    free(data->p);
+  for (i = 0; i < data->max; ++i) {
+    isl_set_free(data->p[i].set);
+    isl_set_list_free(data->p[i].set_list);
+    isl_aff_list_free(data->p[i].aff_list);
+  }
+  free(data->p);
 }
 
 /* Initialize the current entry of "data" to an unused piece.
  */
-static void set_none(struct isl_from_pw_aff_data *data)
-{
-    data->p[data->n].state = isl_state_none;
-    data->p[data->n].set_list = NULL;
-    data->p[data->n].aff_list = NULL;
+static void set_none(struct isl_from_pw_aff_data *data) {
+  data->p[data->n].state = isl_state_none;
+  data->p[data->n].set_list = NULL;
+  data->p[data->n].aff_list = NULL;
 }
 
 /* Store "set" and "aff" in the current entry of "data" as a single subpiece.
  */
 static void set_single(struct isl_from_pw_aff_data *data,
-                       __isl_take isl_set *set, __isl_take isl_aff *aff)
-{
-    data->p[data->n].state = isl_state_single;
-    data->p[data->n].set_list = isl_set_list_from_set(set);
-    data->p[data->n].aff_list = isl_aff_list_from_aff(aff);
+                       __isl_take isl_set *set, __isl_take isl_aff *aff) {
+  data->p[data->n].state = isl_state_single;
+  data->p[data->n].set_list = isl_set_list_from_set(set);
+  data->p[data->n].aff_list = isl_aff_list_from_aff(aff);
 }
 
 /* Extend the current entry of "data" with "set" and "aff"
  * as a minimum expression.
  */
 static isl_stat extend_min(struct isl_from_pw_aff_data *data,
-                           __isl_take isl_set *set, __isl_take isl_aff *aff)
-{
-    int n = data->n;
-    data->p[n].state = isl_state_min;
-    data->p[n].set_list = isl_set_list_add(data->p[n].set_list, set);
-    data->p[n].aff_list = isl_aff_list_add(data->p[n].aff_list, aff);
+                           __isl_take isl_set *set, __isl_take isl_aff *aff) {
+  int n = data->n;
+  data->p[n].state = isl_state_min;
+  data->p[n].set_list = isl_set_list_add(data->p[n].set_list, set);
+  data->p[n].aff_list = isl_aff_list_add(data->p[n].aff_list, aff);
 
-    if (!data->p[n].set_list || !data->p[n].aff_list)
-        return isl_stat_error;
-    return isl_stat_ok;
+  if (!data->p[n].set_list || !data->p[n].aff_list)
+    return isl_stat_error;
+  return isl_stat_ok;
 }
 
 /* Extend the current entry of "data" with "set" and "aff"
  * as a maximum expression.
  */
 static isl_stat extend_max(struct isl_from_pw_aff_data *data,
-                           __isl_take isl_set *set, __isl_take isl_aff *aff)
-{
-    int n = data->n;
-    data->p[n].state = isl_state_max;
-    data->p[n].set_list = isl_set_list_add(data->p[n].set_list, set);
-    data->p[n].aff_list = isl_aff_list_add(data->p[n].aff_list, aff);
+                           __isl_take isl_set *set, __isl_take isl_aff *aff) {
+  int n = data->n;
+  data->p[n].state = isl_state_max;
+  data->p[n].set_list = isl_set_list_add(data->p[n].set_list, set);
+  data->p[n].aff_list = isl_aff_list_add(data->p[n].aff_list, aff);
 
-    if (!data->p[n].set_list || !data->p[n].aff_list)
-        return isl_stat_error;
-    return isl_stat_ok;
+  if (!data->p[n].set_list || !data->p[n].aff_list)
+    return isl_stat_error;
+  return isl_stat_ok;
 }
 
 /* Extend the domain of the current entry of "data", which is assumed
@@ -1830,25 +1796,23 @@ static isl_stat extend_max(struct isl_from_pw_aff_data *data,
  * simply free "aff".
  */
 static isl_stat extend_domain(struct isl_from_pw_aff_data *data,
-                              __isl_take isl_set *set, __isl_take isl_aff *aff, int replace)
-{
-    int n = data->n;
-    isl_set *set_n;
+                              __isl_take isl_set *set, __isl_take isl_aff *aff,
+                              int replace) {
+  int n = data->n;
+  isl_set *set_n;
 
-    set_n = isl_set_list_get_set(data->p[n].set_list, 0);
-    set_n = isl_set_union(set_n, set);
-    data->p[n].set_list =
-        isl_set_list_set_set(data->p[n].set_list, 0, set_n);
+  set_n = isl_set_list_get_set(data->p[n].set_list, 0);
+  set_n = isl_set_union(set_n, set);
+  data->p[n].set_list = isl_set_list_set_set(data->p[n].set_list, 0, set_n);
 
-    if (replace)
-        data->p[n].aff_list =
-            isl_aff_list_set_aff(data->p[n].aff_list, 0, aff);
-    else
-        isl_aff_free(aff);
+  if (replace)
+    data->p[n].aff_list = isl_aff_list_set_aff(data->p[n].aff_list, 0, aff);
+  else
+    isl_aff_free(aff);
 
-    if (!data->p[n].set_list || !data->p[n].aff_list)
-        return isl_stat_error;
-    return isl_stat_ok;
+  if (!data->p[n].set_list || !data->p[n].aff_list)
+    return isl_stat_error;
+  return isl_stat_ok;
 }
 
 /* Construct an isl_ast_expr from "list" within "build".
@@ -1857,46 +1821,45 @@ static isl_stat extend_domain(struct isl_from_pw_aff_data *data,
  * Otherwise a min or max expression is constructed from "list"
  * depending on "state".
  */
-static __isl_give isl_ast_expr *ast_expr_from_aff_list(
-    __isl_take isl_aff_list *list, enum isl_from_pw_aff_state state,
-    __isl_keep isl_ast_build *build)
-{
-    int i;
-    isl_size n;
-    isl_aff *aff;
-    isl_ast_expr *expr = NULL;
-    enum isl_ast_expr_op_type op_type;
+static __isl_give isl_ast_expr *
+ast_expr_from_aff_list(__isl_take isl_aff_list *list,
+                       enum isl_from_pw_aff_state state,
+                       __isl_keep isl_ast_build *build) {
+  int i;
+  isl_size n;
+  isl_aff *aff;
+  isl_ast_expr *expr = NULL;
+  enum isl_ast_expr_op_type op_type;
 
-    if (state == isl_state_single) {
-        aff = isl_aff_list_get_aff(list, 0);
-        isl_aff_list_free(list);
-        return isl_ast_expr_from_aff(aff, build);
-    }
-    n = isl_aff_list_n_aff(list);
-    if (n < 0)
-        goto error;
-    op_type = state == isl_state_min ? isl_ast_expr_op_min
-              : isl_ast_expr_op_max;
-    expr = isl_ast_expr_alloc_op(isl_ast_build_get_ctx(build), op_type, n);
-    if (!expr)
-        goto error;
-
-    for (i = 0; i < n; ++i) {
-        isl_ast_expr *expr_i;
-
-        aff = isl_aff_list_get_aff(list, i);
-        expr_i = isl_ast_expr_from_aff(aff, build);
-        if (!expr_i)
-            goto error;
-        expr->u.op.args[i] = expr_i;
-    }
-
+  if (state == isl_state_single) {
+    aff = isl_aff_list_get_aff(list, 0);
     isl_aff_list_free(list);
-    return expr;
+    return isl_ast_expr_from_aff(aff, build);
+  }
+  n = isl_aff_list_n_aff(list);
+  if (n < 0)
+    goto error;
+  op_type = state == isl_state_min ? isl_ast_expr_op_min : isl_ast_expr_op_max;
+  expr = isl_ast_expr_alloc_op(isl_ast_build_get_ctx(build), op_type, n);
+  if (!expr)
+    goto error;
+
+  for (i = 0; i < n; ++i) {
+    isl_ast_expr *expr_i;
+
+    aff = isl_aff_list_get_aff(list, i);
+    expr_i = isl_ast_expr_from_aff(aff, build);
+    if (!expr_i)
+      goto error;
+    expr->u.op.args[i] = expr_i;
+  }
+
+  isl_aff_list_free(list);
+  return expr;
 error:
-    isl_aff_list_free(list);
-    isl_ast_expr_free(expr);
-    return NULL;
+  isl_aff_list_free(list);
+  isl_ast_expr_free(expr);
+  return NULL;
 }
 
 /* Extend the expression in "next" to take into account
@@ -1913,33 +1876,32 @@ error:
  * the AST expression constructed from data->aff_list.
  */
 static isl_ast_expr **add_intermediate_piece(struct isl_from_pw_aff_data *data,
-        int pos, isl_ast_expr **next)
-{
-    isl_ctx *ctx;
-    isl_ast_build *build;
-    isl_ast_expr *ternary, *arg;
-    isl_set *set, *gist;
+                                             int pos, isl_ast_expr **next) {
+  isl_ctx *ctx;
+  isl_ast_build *build;
+  isl_ast_expr *ternary, *arg;
+  isl_set *set, *gist;
 
-    set = data->p[pos].set;
-    data->p[pos].set = NULL;
-    ctx = isl_ast_build_get_ctx(data->build);
-    ternary = isl_ast_expr_alloc_op(ctx, isl_ast_expr_op_select, 3);
-    gist = isl_set_gist(isl_set_copy(set), isl_set_copy(data->dom));
-    arg = isl_ast_build_expr_from_set_internal(data->build, gist);
-    ternary = isl_ast_expr_set_op_arg(ternary, 0, arg);
-    build = isl_ast_build_copy(data->build);
-    build = isl_ast_build_restrict_generated(build, set);
-    arg = ast_expr_from_aff_list(data->p[pos].aff_list,
-                                 data->p[pos].state, build);
-    data->p[pos].aff_list = NULL;
-    isl_ast_build_free(build);
-    ternary = isl_ast_expr_set_op_arg(ternary, 1, arg);
-    data->p[pos].state = isl_state_none;
-    if (!ternary)
-        return NULL;
+  set = data->p[pos].set;
+  data->p[pos].set = NULL;
+  ctx = isl_ast_build_get_ctx(data->build);
+  ternary = isl_ast_expr_alloc_op(ctx, isl_ast_expr_op_select, 3);
+  gist = isl_set_gist(isl_set_copy(set), isl_set_copy(data->dom));
+  arg = isl_ast_build_expr_from_set_internal(data->build, gist);
+  ternary = isl_ast_expr_set_op_arg(ternary, 0, arg);
+  build = isl_ast_build_copy(data->build);
+  build = isl_ast_build_restrict_generated(build, set);
+  arg =
+      ast_expr_from_aff_list(data->p[pos].aff_list, data->p[pos].state, build);
+  data->p[pos].aff_list = NULL;
+  isl_ast_build_free(build);
+  ternary = isl_ast_expr_set_op_arg(ternary, 1, arg);
+  data->p[pos].state = isl_state_none;
+  if (!ternary)
+    return NULL;
 
-    *next = ternary;
-    return &ternary->u.op.args[2];
+  *next = ternary;
+  return &ternary->u.op.args[2];
 }
 
 /* Extend the expression in "next" to take into account
@@ -1952,27 +1914,26 @@ static isl_ast_expr **add_intermediate_piece(struct isl_from_pw_aff_data *data,
  * constraints of the build such that they can be exploited to simplify
  * the AST expression constructed from data->aff_list.
  */
-static isl_stat add_last_piece(struct isl_from_pw_aff_data *data,
-                               int pos, isl_ast_expr **next)
-{
-    isl_ast_build *build;
+static isl_stat add_last_piece(struct isl_from_pw_aff_data *data, int pos,
+                               isl_ast_expr **next) {
+  isl_ast_build *build;
 
-    if (data->p[pos].state == isl_state_none)
-        isl_die(isl_ast_build_get_ctx(data->build), isl_error_invalid,
-                "cannot handle void expression", return isl_stat_error);
+  if (data->p[pos].state == isl_state_none)
+    isl_die(isl_ast_build_get_ctx(data->build), isl_error_invalid,
+            "cannot handle void expression", return isl_stat_error);
 
-    build = isl_ast_build_copy(data->build);
-    build = isl_ast_build_restrict_generated(build, data->p[pos].set);
-    data->p[pos].set = NULL;
-    *next = ast_expr_from_aff_list(data->p[pos].aff_list,
-                                   data->p[pos].state, build);
-    data->p[pos].aff_list = NULL;
-    isl_ast_build_free(build);
-    data->p[pos].state = isl_state_none;
-    if (!*next)
-        return isl_stat_error;
+  build = isl_ast_build_copy(data->build);
+  build = isl_ast_build_restrict_generated(build, data->p[pos].set);
+  data->p[pos].set = NULL;
+  *next =
+      ast_expr_from_aff_list(data->p[pos].aff_list, data->p[pos].state, build);
+  data->p[pos].aff_list = NULL;
+  isl_ast_build_free(build);
+  data->p[pos].state = isl_state_none;
+  if (!*next)
+    return isl_stat_error;
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Return -1 if the piece "p1" should be sorted before "p2"
@@ -1982,16 +1943,15 @@ static isl_stat add_last_piece(struct isl_from_pw_aff_data *data,
  * Pieces are sorted according to the number of disjuncts
  * in their domains.
  */
-static int sort_pieces_cmp(const void *p1, const void *p2, void *arg)
-{
-    const struct isl_from_pw_aff_piece *piece1 = p1;
-    const struct isl_from_pw_aff_piece *piece2 = p2;
-    isl_size n1, n2;
+static int sort_pieces_cmp(const void *p1, const void *p2, void *arg) {
+  const struct isl_from_pw_aff_piece *piece1 = p1;
+  const struct isl_from_pw_aff_piece *piece2 = p2;
+  isl_size n1, n2;
 
-    n1 = isl_set_n_basic_set(piece1->set);
-    n2 = isl_set_n_basic_set(piece2->set);
+  n1 = isl_set_n_basic_set(piece1->set);
+  n2 = isl_set_n_basic_set(piece2->set);
 
-    return n1 - n2;
+  return n1 - n2;
 }
 
 /* Construct an isl_ast_expr from the pieces in "data".
@@ -2007,90 +1967,86 @@ static int sort_pieces_cmp(const void *p1, const void *p2, void *arg)
  * Construct intermediate AST expressions for the initial pieces and
  * finish off with the final pieces.
  */
-static isl_ast_expr *build_pieces(struct isl_from_pw_aff_data *data)
-{
-    int i;
-    isl_ast_expr *res = NULL;
-    isl_ast_expr **next = &res;
+static isl_ast_expr *build_pieces(struct isl_from_pw_aff_data *data) {
+  int i;
+  isl_ast_expr *res = NULL;
+  isl_ast_expr **next = &res;
 
-    if (data->p[data->n].state != isl_state_none)
-        data->n++;
-    if (data->n == 0)
-        isl_die(isl_ast_build_get_ctx(data->build), isl_error_invalid,
-                "cannot handle void expression", return NULL);
+  if (data->p[data->n].state != isl_state_none)
+    data->n++;
+  if (data->n == 0)
+    isl_die(isl_ast_build_get_ctx(data->build), isl_error_invalid,
+            "cannot handle void expression", return NULL);
 
-    for (i = 0; i < data->n; ++i) {
-        data->p[i].set = isl_set_list_union(data->p[i].set_list);
-        if (data->p[i].state != isl_state_single)
-            data->p[i].set = isl_set_coalesce(data->p[i].set);
-        data->p[i].set_list = NULL;
-    }
+  for (i = 0; i < data->n; ++i) {
+    data->p[i].set = isl_set_list_union(data->p[i].set_list);
+    if (data->p[i].state != isl_state_single)
+      data->p[i].set = isl_set_coalesce(data->p[i].set);
+    data->p[i].set_list = NULL;
+  }
 
-    if (isl_sort(data->p, data->n, sizeof(data->p[0]),
-                 &sort_pieces_cmp, NULL) < 0)
-        return isl_ast_expr_free(res);
+  if (isl_sort(data->p, data->n, sizeof(data->p[0]), &sort_pieces_cmp, NULL) <
+      0)
+    return isl_ast_expr_free(res);
 
-    for (i = 0; i + 1 < data->n; ++i) {
-        next = add_intermediate_piece(data, i, next);
-        if (!next)
-            return isl_ast_expr_free(res);
-    }
+  for (i = 0; i + 1 < data->n; ++i) {
+    next = add_intermediate_piece(data, i, next);
+    if (!next)
+      return isl_ast_expr_free(res);
+  }
 
-    if (add_last_piece(data, data->n - 1, next) < 0)
-        return isl_ast_expr_free(res);
+  if (add_last_piece(data, data->n - 1, next) < 0)
+    return isl_ast_expr_free(res);
 
-    return res;
+  return res;
 }
 
 /* Is the domain of the current entry of "data", which is assumed
  * to contain a single subpiece, a subset of "set"?
  */
 static isl_bool single_is_subset(struct isl_from_pw_aff_data *data,
-                                 __isl_keep isl_set *set)
-{
-    isl_bool subset;
-    isl_set *set_n;
+                                 __isl_keep isl_set *set) {
+  isl_bool subset;
+  isl_set *set_n;
 
-    set_n = isl_set_list_get_set(data->p[data->n].set_list, 0);
-    subset = isl_set_is_subset(set_n, set);
-    isl_set_free(set_n);
+  set_n = isl_set_list_get_set(data->p[data->n].set_list, 0);
+  subset = isl_set_is_subset(set_n, set);
+  isl_set_free(set_n);
 
-    return subset;
+  return subset;
 }
 
 /* Is "aff" a rational expression, i.e., does it have a denominator
  * different from one?
  */
-static isl_bool aff_is_rational(__isl_keep isl_aff *aff)
-{
-    isl_bool rational;
-    isl_val *den;
+static isl_bool aff_is_rational(__isl_keep isl_aff *aff) {
+  isl_bool rational;
+  isl_val *den;
 
-    den = isl_aff_get_denominator_val(aff);
-    rational = isl_bool_not(isl_val_is_one(den));
-    isl_val_free(den);
+  den = isl_aff_get_denominator_val(aff);
+  rational = isl_bool_not(isl_val_is_one(den));
+  isl_val_free(den);
 
-    return rational;
+  return rational;
 }
 
 /* Does "list" consist of a single rational affine expression?
  */
-static isl_bool is_single_rational_aff(__isl_keep isl_aff_list *list)
-{
-    isl_size n;
-    isl_bool rational;
-    isl_aff *aff;
+static isl_bool is_single_rational_aff(__isl_keep isl_aff_list *list) {
+  isl_size n;
+  isl_bool rational;
+  isl_aff *aff;
 
-    n = isl_aff_list_n_aff(list);
-    if (n < 0)
-        return isl_bool_error;
-    if (n != 1)
-        return isl_bool_false;
-    aff = isl_aff_list_get_aff(list, 0);
-    rational = aff_is_rational(aff);
-    isl_aff_free(aff);
+  n = isl_aff_list_n_aff(list);
+  if (n < 0)
+    return isl_bool_error;
+  if (n != 1)
+    return isl_bool_false;
+  aff = isl_aff_list_get_aff(list, 0);
+  rational = aff_is_rational(aff);
+  isl_aff_free(aff);
 
-    return rational;
+  return rational;
 }
 
 /* Can the list of subpieces in the last piece of "data" be extended with
@@ -2112,65 +2068,65 @@ static isl_bool is_single_rational_aff(__isl_keep isl_aff_list *list)
  * while a rational expression may only yield integer values
  * on its own definition domain.
  */
-static isl_bool extends(struct isl_from_pw_aff_data *data,
-                        __isl_keep isl_set *set, __isl_keep isl_aff *aff,
-                        __isl_give isl_basic_set *(*test)(__isl_take isl_aff *aff1,
-                                __isl_take isl_aff *aff2))
-{
-    int i;
-    isl_size n;
-    isl_bool is_rational;
-    isl_ctx *ctx;
-    isl_set *dom;
+static isl_bool
+extends(struct isl_from_pw_aff_data *data, __isl_keep isl_set *set,
+        __isl_keep isl_aff *aff,
+        __isl_give isl_basic_set *(*test)(__isl_take isl_aff *aff1,
+                                          __isl_take isl_aff *aff2)) {
+  int i;
+  isl_size n;
+  isl_bool is_rational;
+  isl_ctx *ctx;
+  isl_set *dom;
 
-    is_rational = aff_is_rational(aff);
-    if (is_rational >= 0 && !is_rational)
-        is_rational = is_single_rational_aff(data->p[data->n].aff_list);
-    if (is_rational < 0 || is_rational)
-        return isl_bool_not(is_rational);
+  is_rational = aff_is_rational(aff);
+  if (is_rational >= 0 && !is_rational)
+    is_rational = is_single_rational_aff(data->p[data->n].aff_list);
+  if (is_rational < 0 || is_rational)
+    return isl_bool_not(is_rational);
 
-    ctx = isl_ast_build_get_ctx(data->build);
-    if (!isl_options_get_ast_build_detect_min_max(ctx))
-        return isl_bool_false;
+  ctx = isl_ast_build_get_ctx(data->build);
+  if (!isl_options_get_ast_build_detect_min_max(ctx))
+    return isl_bool_false;
 
-    n = isl_set_list_n_set(data->p[data->n].set_list);
-    if (n < 0)
-        return isl_bool_error;
+  n = isl_set_list_n_set(data->p[data->n].set_list);
+  if (n < 0)
+    return isl_bool_error;
 
+  dom = isl_ast_build_get_domain(data->build);
+  set = isl_set_intersect(dom, isl_set_copy(set));
+
+  for (i = 0; i < n; ++i) {
+    isl_aff *aff_i;
+    isl_set *valid;
+    isl_set *dom, *required;
+    isl_bool is_valid;
+
+    aff_i = isl_aff_list_get_aff(data->p[data->n].aff_list, i);
+    valid = isl_set_from_basic_set(test(isl_aff_copy(aff), aff_i));
+    required = isl_set_list_get_set(data->p[data->n].set_list, i);
     dom = isl_ast_build_get_domain(data->build);
-    set = isl_set_intersect(dom, isl_set_copy(set));
-
-    for (i = 0; i < n ; ++i) {
-        isl_aff *aff_i;
-        isl_set *valid;
-        isl_set *dom, *required;
-        isl_bool is_valid;
-
-        aff_i = isl_aff_list_get_aff(data->p[data->n].aff_list, i);
-        valid = isl_set_from_basic_set(test(isl_aff_copy(aff), aff_i));
-        required = isl_set_list_get_set(data->p[data->n].set_list, i);
-        dom = isl_ast_build_get_domain(data->build);
-        required = isl_set_intersect(dom, required);
-        is_valid = isl_set_is_subset(required, valid);
-        isl_set_free(required);
-        isl_set_free(valid);
-        if (is_valid < 0 || !is_valid) {
-            isl_set_free(set);
-            return is_valid;
-        }
-
-        aff_i = isl_aff_list_get_aff(data->p[data->n].aff_list, i);
-        valid = isl_set_from_basic_set(test(aff_i, isl_aff_copy(aff)));
-        is_valid = isl_set_is_subset(set, valid);
-        isl_set_free(valid);
-        if (is_valid < 0 || !is_valid) {
-            isl_set_free(set);
-            return is_valid;
-        }
+    required = isl_set_intersect(dom, required);
+    is_valid = isl_set_is_subset(required, valid);
+    isl_set_free(required);
+    isl_set_free(valid);
+    if (is_valid < 0 || !is_valid) {
+      isl_set_free(set);
+      return is_valid;
     }
 
-    isl_set_free(set);
-    return isl_bool_true;
+    aff_i = isl_aff_list_get_aff(data->p[data->n].aff_list, i);
+    valid = isl_set_from_basic_set(test(aff_i, isl_aff_copy(aff)));
+    is_valid = isl_set_is_subset(set, valid);
+    isl_set_free(valid);
+    if (is_valid < 0 || !is_valid) {
+      isl_set_free(set);
+      return is_valid;
+    }
+  }
+
+  isl_set_free(set);
+  return isl_bool_true;
 }
 
 /* Can the list of pieces in "data" be extended with "set" and "aff"
@@ -2181,9 +2137,8 @@ static isl_bool extends(struct isl_from_pw_aff_data *data,
  *	aff_i >= aff on set?
  */
 static isl_bool extends_min(struct isl_from_pw_aff_data *data,
-                            __isl_keep isl_set *set,  __isl_keep isl_aff *aff)
-{
-    return extends(data, set, aff, &isl_aff_ge_basic_set);
+                            __isl_keep isl_set *set, __isl_keep isl_aff *aff) {
+  return extends(data, set, aff, &isl_aff_ge_basic_set);
 }
 
 /* Can the list of pieces in "data" be extended with "set" and "aff"
@@ -2194,9 +2149,8 @@ static isl_bool extends_min(struct isl_from_pw_aff_data *data,
  *	aff_i <= aff on set?
  */
 static isl_bool extends_max(struct isl_from_pw_aff_data *data,
-                            __isl_keep isl_set *set,  __isl_keep isl_aff *aff)
-{
-    return extends(data, set, aff, &isl_aff_le_basic_set);
+                            __isl_keep isl_set *set, __isl_keep isl_aff *aff) {
+  return extends(data, set, aff, &isl_aff_le_basic_set);
 }
 
 /* This function is called during the construction of an isl_ast_expr
@@ -2218,53 +2172,52 @@ static isl_bool extends_max(struct isl_from_pw_aff_data *data,
  * the current subpiece in the current piece of "data" for later handling.
  */
 static isl_stat ast_expr_from_pw_aff(__isl_take isl_set *set,
-                                     __isl_take isl_aff *aff, void *user)
-{
-    struct isl_from_pw_aff_data *data = user;
-    isl_bool test;
-    enum isl_from_pw_aff_state state;
+                                     __isl_take isl_aff *aff, void *user) {
+  struct isl_from_pw_aff_data *data = user;
+  isl_bool test;
+  enum isl_from_pw_aff_state state;
 
-    state = data->p[data->n].state;
-    if (state == isl_state_single) {
-        isl_aff *aff0;
-        isl_set *eq;
-        isl_bool subset1, subset2 = isl_bool_false;
-        aff0 = isl_aff_list_get_aff(data->p[data->n].aff_list, 0);
-        eq = isl_aff_eq_set(isl_aff_copy(aff), aff0);
-        subset1 = isl_set_is_subset(set, eq);
-        if (subset1 >= 0 && !subset1)
-            subset2 = single_is_subset(data, eq);
-        isl_set_free(eq);
-        if (subset1 < 0 || subset2 < 0)
-            goto error;
-        if (subset1)
-            return extend_domain(data, set, aff, 0);
-        if (subset2)
-            return extend_domain(data, set, aff, 1);
-    }
-    if (state == isl_state_single || state == isl_state_min) {
-        test = extends_min(data, set, aff);
-        if (test < 0)
-            goto error;
-        if (test)
-            return extend_min(data, set, aff);
-    }
-    if (state == isl_state_single || state == isl_state_max) {
-        test = extends_max(data, set, aff);
-        if (test < 0)
-            goto error;
-        if (test)
-            return extend_max(data, set, aff);
-    }
-    if (state != isl_state_none)
-        data->n++;
-    set_single(data, set, aff);
+  state = data->p[data->n].state;
+  if (state == isl_state_single) {
+    isl_aff *aff0;
+    isl_set *eq;
+    isl_bool subset1, subset2 = isl_bool_false;
+    aff0 = isl_aff_list_get_aff(data->p[data->n].aff_list, 0);
+    eq = isl_aff_eq_set(isl_aff_copy(aff), aff0);
+    subset1 = isl_set_is_subset(set, eq);
+    if (subset1 >= 0 && !subset1)
+      subset2 = single_is_subset(data, eq);
+    isl_set_free(eq);
+    if (subset1 < 0 || subset2 < 0)
+      goto error;
+    if (subset1)
+      return extend_domain(data, set, aff, 0);
+    if (subset2)
+      return extend_domain(data, set, aff, 1);
+  }
+  if (state == isl_state_single || state == isl_state_min) {
+    test = extends_min(data, set, aff);
+    if (test < 0)
+      goto error;
+    if (test)
+      return extend_min(data, set, aff);
+  }
+  if (state == isl_state_single || state == isl_state_max) {
+    test = extends_max(data, set, aff);
+    if (test < 0)
+      goto error;
+    if (test)
+      return extend_max(data, set, aff);
+  }
+  if (state != isl_state_none)
+    data->n++;
+  set_single(data, set, aff);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 error:
-    isl_set_free(set);
-    isl_aff_free(aff);
-    return isl_stat_error;
+  isl_set_free(set);
+  isl_aff_free(aff);
+  return isl_stat_error;
 }
 
 /* Construct an isl_ast_expr that evaluates "pa".
@@ -2272,31 +2225,31 @@ error:
  *
  * The domain of "pa" lives in the internal schedule space.
  */
-__isl_give isl_ast_expr *isl_ast_build_expr_from_pw_aff_internal(
-    __isl_keep isl_ast_build *build, __isl_take isl_pw_aff *pa)
-{
-    struct isl_from_pw_aff_data data = { NULL };
-    isl_ast_expr *res = NULL;
+__isl_give isl_ast_expr *
+isl_ast_build_expr_from_pw_aff_internal(__isl_keep isl_ast_build *build,
+                                        __isl_take isl_pw_aff *pa) {
+  struct isl_from_pw_aff_data data = {NULL};
+  isl_ast_expr *res = NULL;
 
-    pa = isl_ast_build_compute_gist_pw_aff(build, pa);
-    pa = isl_pw_aff_coalesce(pa);
-    if (!pa)
-        return NULL;
-
-    if (isl_from_pw_aff_data_init(&data, build, pa) < 0)
-        goto error;
-    set_none(&data);
-
-    if (isl_pw_aff_foreach_piece(pa, &ast_expr_from_pw_aff, &data) >= 0)
-        res = build_pieces(&data);
-
-    isl_pw_aff_free(pa);
-    isl_from_pw_aff_data_clear(&data);
-    return res;
-error:
-    isl_pw_aff_free(pa);
-    isl_from_pw_aff_data_clear(&data);
+  pa = isl_ast_build_compute_gist_pw_aff(build, pa);
+  pa = isl_pw_aff_coalesce(pa);
+  if (!pa)
     return NULL;
+
+  if (isl_from_pw_aff_data_init(&data, build, pa) < 0)
+    goto error;
+  set_none(&data);
+
+  if (isl_pw_aff_foreach_piece(pa, &ast_expr_from_pw_aff, &data) >= 0)
+    res = build_pieces(&data);
+
+  isl_pw_aff_free(pa);
+  isl_from_pw_aff_data_clear(&data);
+  return res;
+error:
+  isl_pw_aff_free(pa);
+  isl_from_pw_aff_data_clear(&data);
+  return NULL;
 }
 
 /* Construct an isl_ast_expr that evaluates "pa".
@@ -2304,22 +2257,22 @@ error:
  *
  * The domain of "pa" lives in the external schedule space.
  */
-__isl_give isl_ast_expr *isl_ast_build_expr_from_pw_aff(
-    __isl_keep isl_ast_build *build, __isl_take isl_pw_aff *pa)
-{
-    isl_ast_expr *expr;
-    isl_bool needs_map;
+__isl_give isl_ast_expr *
+isl_ast_build_expr_from_pw_aff(__isl_keep isl_ast_build *build,
+                               __isl_take isl_pw_aff *pa) {
+  isl_ast_expr *expr;
+  isl_bool needs_map;
 
-    needs_map = isl_ast_build_need_schedule_map(build);
-    if (needs_map < 0) {
-        pa = isl_pw_aff_free(pa);
-    } else if (needs_map) {
-        isl_multi_aff *ma;
-        ma = isl_ast_build_get_schedule_map_multi_aff(build);
-        pa = isl_pw_aff_pullback_multi_aff(pa, ma);
-    }
-    expr = isl_ast_build_expr_from_pw_aff_internal(build, pa);
-    return expr;
+  needs_map = isl_ast_build_need_schedule_map(build);
+  if (needs_map < 0) {
+    pa = isl_pw_aff_free(pa);
+  } else if (needs_map) {
+    isl_multi_aff *ma;
+    ma = isl_ast_build_get_schedule_map_multi_aff(build);
+    pa = isl_pw_aff_pullback_multi_aff(pa, ma);
+  }
+  expr = isl_ast_build_expr_from_pw_aff_internal(build, pa);
+  return expr;
 }
 
 /* Set the ids of the input dimensions of "mpa" to the iterator ids
@@ -2327,23 +2280,23 @@ __isl_give isl_ast_expr *isl_ast_build_expr_from_pw_aff(
  *
  * The domain of "mpa" is assumed to live in the internal schedule domain.
  */
-static __isl_give isl_multi_pw_aff *set_iterator_names(
-    __isl_keep isl_ast_build *build, __isl_take isl_multi_pw_aff *mpa)
-{
-    int i;
-    isl_size n;
+static __isl_give isl_multi_pw_aff *
+set_iterator_names(__isl_keep isl_ast_build *build,
+                   __isl_take isl_multi_pw_aff *mpa) {
+  int i;
+  isl_size n;
 
-    n = isl_multi_pw_aff_dim(mpa, isl_dim_in);
-    if (n < 0)
-        return isl_multi_pw_aff_free(mpa);
-    for (i = 0; i < n; ++i) {
-        isl_id *id;
+  n = isl_multi_pw_aff_dim(mpa, isl_dim_in);
+  if (n < 0)
+    return isl_multi_pw_aff_free(mpa);
+  for (i = 0; i < n; ++i) {
+    isl_id *id;
 
-        id = isl_ast_build_get_iterator_id(build, i);
-        mpa = isl_multi_pw_aff_set_dim_id(mpa, isl_dim_in, i, id);
-    }
+    id = isl_ast_build_get_iterator_id(build, i);
+    mpa = isl_multi_pw_aff_set_dim_id(mpa, isl_dim_in, i, id);
+  }
 
-    return mpa;
+  return mpa;
 }
 
 /* Construct an isl_ast_expr of type "type" with as first argument "arg0" and
@@ -2353,34 +2306,34 @@ static __isl_give isl_multi_pw_aff *set_iterator_names(
  */
 static __isl_give isl_ast_expr *isl_ast_build_with_arguments(
     __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_ast_expr *arg0, __isl_take isl_multi_pw_aff *mpa)
-{
-    int i;
-    isl_size n;
-    isl_ctx *ctx;
-    isl_ast_expr *expr;
+    __isl_take isl_ast_expr *arg0, __isl_take isl_multi_pw_aff *mpa) {
+  int i;
+  isl_size n;
+  isl_ctx *ctx;
+  isl_ast_expr *expr;
 
-    ctx = isl_ast_build_get_ctx(build);
+  ctx = isl_ast_build_get_ctx(build);
 
-    n = isl_multi_pw_aff_dim(mpa, isl_dim_out);
-    expr = n >= 0 ? isl_ast_expr_alloc_op(ctx, type, 1 + n) : NULL;
-    expr = isl_ast_expr_set_op_arg(expr, 0, arg0);
-    for (i = 0; i < n; ++i) {
-        isl_pw_aff *pa;
-        isl_ast_expr *arg;
+  n = isl_multi_pw_aff_dim(mpa, isl_dim_out);
+  expr = n >= 0 ? isl_ast_expr_alloc_op(ctx, type, 1 + n) : NULL;
+  expr = isl_ast_expr_set_op_arg(expr, 0, arg0);
+  for (i = 0; i < n; ++i) {
+    isl_pw_aff *pa;
+    isl_ast_expr *arg;
 
-        pa = isl_multi_pw_aff_get_pw_aff(mpa, i);
-        arg = isl_ast_build_expr_from_pw_aff_internal(build, pa);
-        expr = isl_ast_expr_set_op_arg(expr, 1 + i, arg);
-    }
+    pa = isl_multi_pw_aff_get_pw_aff(mpa, i);
+    arg = isl_ast_build_expr_from_pw_aff_internal(build, pa);
+    expr = isl_ast_expr_set_op_arg(expr, 1 + i, arg);
+  }
 
-    isl_multi_pw_aff_free(mpa);
-    return expr;
+  isl_multi_pw_aff_free(mpa);
+  return expr;
 }
 
-static __isl_give isl_ast_expr *isl_ast_build_from_multi_pw_aff_internal(
-    __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_multi_pw_aff *mpa);
+static __isl_give isl_ast_expr *
+isl_ast_build_from_multi_pw_aff_internal(__isl_keep isl_ast_build *build,
+                                         enum isl_ast_expr_op_type type,
+                                         __isl_take isl_multi_pw_aff *mpa);
 
 /* Construct an isl_ast_expr that accesses the member specified by "mpa".
  * The range of "mpa" is assumed to be wrapped relation.
@@ -2390,30 +2343,28 @@ static __isl_give isl_ast_expr *isl_ast_build_from_multi_pw_aff_internal(
  *
  * The domain of "mpa" is assumed to live in the internal schedule domain.
  */
-static __isl_give isl_ast_expr *isl_ast_build_from_multi_pw_aff_member(
-    __isl_keep isl_ast_build *build, __isl_take isl_multi_pw_aff *mpa)
-{
-    isl_id *id;
-    isl_multi_pw_aff *domain;
-    isl_ast_expr *domain_expr, *expr;
-    enum isl_ast_expr_op_type type = isl_ast_expr_op_access;
+static __isl_give isl_ast_expr *
+isl_ast_build_from_multi_pw_aff_member(__isl_keep isl_ast_build *build,
+                                       __isl_take isl_multi_pw_aff *mpa) {
+  isl_id *id;
+  isl_multi_pw_aff *domain;
+  isl_ast_expr *domain_expr, *expr;
+  enum isl_ast_expr_op_type type = isl_ast_expr_op_access;
 
-    domain = isl_multi_pw_aff_copy(mpa);
-    domain = isl_multi_pw_aff_range_factor_domain(domain);
-    domain_expr = isl_ast_build_from_multi_pw_aff_internal(build,
-                  type, domain);
-    mpa = isl_multi_pw_aff_range_factor_range(mpa);
-    if (!isl_multi_pw_aff_has_tuple_id(mpa, isl_dim_out))
-        isl_die(isl_ast_build_get_ctx(build), isl_error_invalid,
-                "missing field name", goto error);
-    id = isl_multi_pw_aff_get_tuple_id(mpa, isl_dim_out);
-    expr = isl_ast_expr_from_id(id);
-    expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_member,
-                                     domain_expr, expr);
-    return isl_ast_build_with_arguments(build, type, expr, mpa);
+  domain = isl_multi_pw_aff_copy(mpa);
+  domain = isl_multi_pw_aff_range_factor_domain(domain);
+  domain_expr = isl_ast_build_from_multi_pw_aff_internal(build, type, domain);
+  mpa = isl_multi_pw_aff_range_factor_range(mpa);
+  if (!isl_multi_pw_aff_has_tuple_id(mpa, isl_dim_out))
+    isl_die(isl_ast_build_get_ctx(build), isl_error_invalid,
+            "missing field name", goto error);
+  id = isl_multi_pw_aff_get_tuple_id(mpa, isl_dim_out);
+  expr = isl_ast_expr_from_id(id);
+  expr = isl_ast_expr_alloc_binary(isl_ast_expr_op_member, domain_expr, expr);
+  return isl_ast_build_with_arguments(build, type, expr, mpa);
 error:
-    isl_multi_pw_aff_free(mpa);
-    return NULL;
+  isl_multi_pw_aff_free(mpa);
+  return NULL;
 }
 
 /* Construct an isl_ast_expr of type "type" that calls or accesses
@@ -2426,37 +2377,36 @@ error:
  *
  * The domain of "mpa" is assumed to live in the internal schedule domain.
  */
-static __isl_give isl_ast_expr *isl_ast_build_from_multi_pw_aff_internal(
-    __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_multi_pw_aff *mpa)
-{
-    isl_ctx *ctx;
-    isl_id *id;
-    isl_ast_expr *expr;
+static __isl_give isl_ast_expr *
+isl_ast_build_from_multi_pw_aff_internal(__isl_keep isl_ast_build *build,
+                                         enum isl_ast_expr_op_type type,
+                                         __isl_take isl_multi_pw_aff *mpa) {
+  isl_ctx *ctx;
+  isl_id *id;
+  isl_ast_expr *expr;
 
-    if (!mpa)
-        goto error;
+  if (!mpa)
+    goto error;
 
-    if (type == isl_ast_expr_op_access &&
-            isl_multi_pw_aff_range_is_wrapping(mpa))
-        return isl_ast_build_from_multi_pw_aff_member(build, mpa);
+  if (type == isl_ast_expr_op_access && isl_multi_pw_aff_range_is_wrapping(mpa))
+    return isl_ast_build_from_multi_pw_aff_member(build, mpa);
 
-    mpa = set_iterator_names(build, mpa);
-    if (!build || !mpa)
-        goto error;
+  mpa = set_iterator_names(build, mpa);
+  if (!build || !mpa)
+    goto error;
 
-    ctx = isl_ast_build_get_ctx(build);
+  ctx = isl_ast_build_get_ctx(build);
 
-    if (isl_multi_pw_aff_has_tuple_id(mpa, isl_dim_out))
-        id = isl_multi_pw_aff_get_tuple_id(mpa, isl_dim_out);
-    else
-        id = isl_id_alloc(ctx, "", NULL);
+  if (isl_multi_pw_aff_has_tuple_id(mpa, isl_dim_out))
+    id = isl_multi_pw_aff_get_tuple_id(mpa, isl_dim_out);
+  else
+    id = isl_id_alloc(ctx, "", NULL);
 
-    expr = isl_ast_expr_from_id(id);
-    return isl_ast_build_with_arguments(build, type, expr, mpa);
+  expr = isl_ast_expr_from_id(id);
+  return isl_ast_build_with_arguments(build, type, expr, mpa);
 error:
-    isl_multi_pw_aff_free(mpa);
-    return NULL;
+  isl_multi_pw_aff_free(mpa);
+  return NULL;
 }
 
 /* Construct an isl_ast_expr of type "type" that calls or accesses
@@ -2466,14 +2416,14 @@ error:
  *
  * The domain of "pma" is assumed to live in the internal schedule domain.
  */
-static __isl_give isl_ast_expr *isl_ast_build_from_pw_multi_aff_internal(
-    __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_pw_multi_aff *pma)
-{
-    isl_multi_pw_aff *mpa;
+static __isl_give isl_ast_expr *
+isl_ast_build_from_pw_multi_aff_internal(__isl_keep isl_ast_build *build,
+                                         enum isl_ast_expr_op_type type,
+                                         __isl_take isl_pw_multi_aff *pma) {
+  isl_multi_pw_aff *mpa;
 
-    mpa = isl_multi_pw_aff_from_pw_multi_aff(pma);
-    return isl_ast_build_from_multi_pw_aff_internal(build, type, mpa);
+  mpa = isl_multi_pw_aff_from_pw_multi_aff(pma);
+  return isl_ast_build_from_multi_pw_aff_internal(build, type, mpa);
 }
 
 /* Construct an isl_ast_expr of type "type" that calls or accesses
@@ -2483,41 +2433,41 @@ static __isl_give isl_ast_expr *isl_ast_build_from_pw_multi_aff_internal(
  *
  * The domain of "mpa" is assumed to live in the external schedule domain.
  */
-static __isl_give isl_ast_expr *isl_ast_build_from_multi_pw_aff(
-    __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_multi_pw_aff *mpa)
-{
-    isl_bool is_domain;
-    isl_bool needs_map;
-    isl_ast_expr *expr;
-    isl_space *space_build, *space_mpa;
+static __isl_give isl_ast_expr *
+isl_ast_build_from_multi_pw_aff(__isl_keep isl_ast_build *build,
+                                enum isl_ast_expr_op_type type,
+                                __isl_take isl_multi_pw_aff *mpa) {
+  isl_bool is_domain;
+  isl_bool needs_map;
+  isl_ast_expr *expr;
+  isl_space *space_build, *space_mpa;
 
-    space_build = isl_ast_build_get_space(build, 0);
-    space_mpa = isl_multi_pw_aff_get_space(mpa);
-    is_domain = isl_space_tuple_is_equal(space_build, isl_dim_set,
-                                         space_mpa, isl_dim_in);
-    isl_space_free(space_build);
-    isl_space_free(space_mpa);
-    if (is_domain < 0)
-        goto error;
-    if (!is_domain)
-        isl_die(isl_ast_build_get_ctx(build), isl_error_invalid,
-                "spaces don't match", goto error);
+  space_build = isl_ast_build_get_space(build, 0);
+  space_mpa = isl_multi_pw_aff_get_space(mpa);
+  is_domain =
+      isl_space_tuple_is_equal(space_build, isl_dim_set, space_mpa, isl_dim_in);
+  isl_space_free(space_build);
+  isl_space_free(space_mpa);
+  if (is_domain < 0)
+    goto error;
+  if (!is_domain)
+    isl_die(isl_ast_build_get_ctx(build), isl_error_invalid,
+            "spaces don't match", goto error);
 
-    needs_map = isl_ast_build_need_schedule_map(build);
-    if (needs_map < 0)
-        goto error;
-    if (needs_map) {
-        isl_multi_aff *ma;
-        ma = isl_ast_build_get_schedule_map_multi_aff(build);
-        mpa = isl_multi_pw_aff_pullback_multi_aff(mpa, ma);
-    }
+  needs_map = isl_ast_build_need_schedule_map(build);
+  if (needs_map < 0)
+    goto error;
+  if (needs_map) {
+    isl_multi_aff *ma;
+    ma = isl_ast_build_get_schedule_map_multi_aff(build);
+    mpa = isl_multi_pw_aff_pullback_multi_aff(mpa, ma);
+  }
 
-    expr = isl_ast_build_from_multi_pw_aff_internal(build, type, mpa);
-    return expr;
+  expr = isl_ast_build_from_multi_pw_aff_internal(build, type, mpa);
+  return expr;
 error:
-    isl_multi_pw_aff_free(mpa);
-    return NULL;
+  isl_multi_pw_aff_free(mpa);
+  return NULL;
 }
 
 /* Construct an isl_ast_expr that calls the domain element specified by "mpa".
@@ -2526,11 +2476,10 @@ error:
  *
  * The domain of "mpa" is assumed to live in the external schedule domain.
  */
-__isl_give isl_ast_expr *isl_ast_build_call_from_multi_pw_aff(
-    __isl_keep isl_ast_build *build, __isl_take isl_multi_pw_aff *mpa)
-{
-    return isl_ast_build_from_multi_pw_aff(build,
-                                           isl_ast_expr_op_call, mpa);
+__isl_give isl_ast_expr *
+isl_ast_build_call_from_multi_pw_aff(__isl_keep isl_ast_build *build,
+                                     __isl_take isl_multi_pw_aff *mpa) {
+  return isl_ast_build_from_multi_pw_aff(build, isl_ast_expr_op_call, mpa);
 }
 
 /* Construct an isl_ast_expr that accesses the array element specified by "mpa".
@@ -2539,11 +2488,10 @@ __isl_give isl_ast_expr *isl_ast_build_call_from_multi_pw_aff(
  *
  * The domain of "mpa" is assumed to live in the external schedule domain.
  */
-__isl_give isl_ast_expr *isl_ast_build_access_from_multi_pw_aff(
-    __isl_keep isl_ast_build *build, __isl_take isl_multi_pw_aff *mpa)
-{
-    return isl_ast_build_from_multi_pw_aff(build,
-                                           isl_ast_expr_op_access, mpa);
+__isl_give isl_ast_expr *
+isl_ast_build_access_from_multi_pw_aff(__isl_keep isl_ast_build *build,
+                                       __isl_take isl_multi_pw_aff *mpa) {
+  return isl_ast_build_from_multi_pw_aff(build, isl_ast_expr_op_access, mpa);
 }
 
 /* Construct an isl_ast_expr of type "type" that calls or accesses
@@ -2553,14 +2501,14 @@ __isl_give isl_ast_expr *isl_ast_build_access_from_multi_pw_aff(
  *
  * The domain of "pma" is assumed to live in the external schedule domain.
  */
-static __isl_give isl_ast_expr *isl_ast_build_from_pw_multi_aff(
-    __isl_keep isl_ast_build *build, enum isl_ast_expr_op_type type,
-    __isl_take isl_pw_multi_aff *pma)
-{
-    isl_multi_pw_aff *mpa;
+static __isl_give isl_ast_expr *
+isl_ast_build_from_pw_multi_aff(__isl_keep isl_ast_build *build,
+                                enum isl_ast_expr_op_type type,
+                                __isl_take isl_pw_multi_aff *pma) {
+  isl_multi_pw_aff *mpa;
 
-    mpa = isl_multi_pw_aff_from_pw_multi_aff(pma);
-    return isl_ast_build_from_multi_pw_aff(build, type, mpa);
+  mpa = isl_multi_pw_aff_from_pw_multi_aff(pma);
+  return isl_ast_build_from_multi_pw_aff(build, type, mpa);
 }
 
 /* Construct an isl_ast_expr that calls the domain element specified by "pma".
@@ -2569,11 +2517,10 @@ static __isl_give isl_ast_expr *isl_ast_build_from_pw_multi_aff(
  *
  * The domain of "pma" is assumed to live in the external schedule domain.
  */
-__isl_give isl_ast_expr *isl_ast_build_call_from_pw_multi_aff(
-    __isl_keep isl_ast_build *build, __isl_take isl_pw_multi_aff *pma)
-{
-    return isl_ast_build_from_pw_multi_aff(build,
-                                           isl_ast_expr_op_call, pma);
+__isl_give isl_ast_expr *
+isl_ast_build_call_from_pw_multi_aff(__isl_keep isl_ast_build *build,
+                                     __isl_take isl_pw_multi_aff *pma) {
+  return isl_ast_build_from_pw_multi_aff(build, isl_ast_expr_op_call, pma);
 }
 
 /* Construct an isl_ast_expr that accesses the array element specified by "pma".
@@ -2582,11 +2529,10 @@ __isl_give isl_ast_expr *isl_ast_build_call_from_pw_multi_aff(
  *
  * The domain of "pma" is assumed to live in the external schedule domain.
  */
-__isl_give isl_ast_expr *isl_ast_build_access_from_pw_multi_aff(
-    __isl_keep isl_ast_build *build, __isl_take isl_pw_multi_aff *pma)
-{
-    return isl_ast_build_from_pw_multi_aff(build,
-                                           isl_ast_expr_op_access, pma);
+__isl_give isl_ast_expr *
+isl_ast_build_access_from_pw_multi_aff(__isl_keep isl_ast_build *build,
+                                       __isl_take isl_pw_multi_aff *pma) {
+  return isl_ast_build_from_pw_multi_aff(build, isl_ast_expr_op_access, pma);
 }
 
 /* Construct an isl_ast_expr that calls the domain element
@@ -2595,17 +2541,17 @@ __isl_give isl_ast_expr *isl_ast_build_access_from_pw_multi_aff(
  * "executed" is assumed to be single-valued, with a domain that lives
  * in the internal schedule space.
  */
-__isl_give isl_ast_node *isl_ast_build_call_from_executed(
-    __isl_keep isl_ast_build *build, __isl_take isl_map *executed)
-{
-    isl_pw_multi_aff *iteration;
-    isl_ast_expr *expr;
+__isl_give isl_ast_node *
+isl_ast_build_call_from_executed(__isl_keep isl_ast_build *build,
+                                 __isl_take isl_map *executed) {
+  isl_pw_multi_aff *iteration;
+  isl_ast_expr *expr;
 
-    iteration = isl_pw_multi_aff_from_map(executed);
-    iteration = isl_ast_build_compute_gist_pw_multi_aff(build, iteration);
-    iteration = isl_pw_multi_aff_intersect_domain(iteration,
-                isl_ast_build_get_domain(build));
-    expr = isl_ast_build_from_pw_multi_aff_internal(build,
-            isl_ast_expr_op_call, iteration);
-    return isl_ast_node_alloc_user(expr);
+  iteration = isl_pw_multi_aff_from_map(executed);
+  iteration = isl_ast_build_compute_gist_pw_multi_aff(build, iteration);
+  iteration = isl_pw_multi_aff_intersect_domain(
+      iteration, isl_ast_build_get_domain(build));
+  expr = isl_ast_build_from_pw_multi_aff_internal(build, isl_ast_expr_op_call,
+                                                  iteration);
+  return isl_ast_node_alloc_user(expr);
 }

@@ -23,22 +23,22 @@ namespace pdl {
 
 /// This type represents a handle to an `mlir::Attribute`.
 struct AttributeType : public Type::TypeBase<AttributeType, Type, TypeStorage> {
-    using Base::Base;
+  using Base::Base;
 };
 
 /// This type represents a handle to an `mlir::Operation*`.
 struct OperationType : public Type::TypeBase<OperationType, Type, TypeStorage> {
-    using Base::Base;
+  using Base::Base;
 };
 
 /// This type represents a handle to an `mlir::Type`.
 struct TypeType : public Type::TypeBase<TypeType, Type, TypeStorage> {
-    using Base::Base;
+  using Base::Base;
 };
 
 /// This type represents a handle to an `mlir::Value`.
 struct ValueType : public Type::TypeBase<ValueType, Type, TypeStorage> {
-    using Base::Base;
+  using Base::Base;
 };
 
 } // end namespace pdl

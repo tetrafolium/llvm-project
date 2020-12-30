@@ -27,39 +27,32 @@ class Region;
 /// A utility result that is used to signal if a walk method should be
 /// interrupted or advance.
 class WalkResult {
-    enum ResultEnum { Interrupt, Advance } result;
+  enum ResultEnum { Interrupt, Advance } result;
 
 public:
-    WalkResult(ResultEnum result) : result(result) {}
+  WalkResult(ResultEnum result) : result(result) {}
 
-    /// Allow LogicalResult to interrupt the walk on failure.
-    WalkResult(LogicalResult result)
-        : result(failed(result) ? Interrupt : Advance) {}
+  /// Allow LogicalResult to interrupt the walk on failure.
+  WalkResult(LogicalResult result)
+      : result(failed(result) ? Interrupt : Advance) {}
 
-    /// Allow diagnostics to interrupt the walk.
-    WalkResult(Diagnostic &&) : result(Interrupt) {}
-    WalkResult(InFlightDiagnostic &&) : result(Interrupt) {}
+  /// Allow diagnostics to interrupt the walk.
+  WalkResult(Diagnostic &&) : result(Interrupt) {}
+  WalkResult(InFlightDiagnostic &&) : result(Interrupt) {}
 
-    bool operator==(const WalkResult &rhs) const {
-        return result == rhs.result;
-    }
+  bool operator==(const WalkResult &rhs) const { return result == rhs.result; }
 
-    static WalkResult interrupt() {
-        return {Interrupt};
-    }
-    static WalkResult advance() {
-        return {Advance};
-    }
+  static WalkResult interrupt() { return {Interrupt}; }
+  static WalkResult advance() { return {Advance}; }
 
-    /// Returns true if the walk was interrupted.
-    bool wasInterrupted() const {
-        return result == Interrupt;
-    }
+  /// Returns true if the walk was interrupted.
+  bool wasInterrupted() const { return result == Interrupt; }
 };
 
 namespace detail {
 /// Helper templates to deduce the first argument of a callback parameter.
-template <typename Ret, typename Arg> Arg first_argument_type(Ret (*)(Arg));
+template <typename Ret, typename Arg>
+Arg first_argument_type(Ret (*)(Arg));
 template <typename Ret, typename F, typename Arg>
 Arg first_argument_type(Ret (F::*)(Arg));
 template <typename Ret, typename F, typename Arg>
@@ -101,9 +94,9 @@ template <
     typename FuncTy, typename ArgT = detail::first_argument<FuncTy>,
     typename RetT = decltype(std::declval<FuncTy>()(std::declval<ArgT>()))>
 typename std::enable_if<
-llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value, RetT>::type
+    llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value, RetT>::type
 walk(Operation *op, FuncTy &&callback) {
-    return walk(op, function_ref<RetT(ArgT)>(callback));
+  return walk(op, function_ref<RetT(ArgT)>(callback));
 }
 
 /// Walk all of the operations of type 'ArgT' nested under and including the
@@ -116,15 +109,15 @@ template <
     typename FuncTy, typename ArgT = detail::first_argument<FuncTy>,
     typename RetT = decltype(std::declval<FuncTy>()(std::declval<ArgT>()))>
 typename std::enable_if<
-!llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value &&
-std::is_same<RetT, void>::value,
+    !llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value &&
+        std::is_same<RetT, void>::value,
     RetT>::type
 walk(Operation *op, FuncTy &&callback) {
-    auto wrapperFn = [&](Operation *op) {
-        if (auto derivedOp = dyn_cast<ArgT>(op))
-            callback(derivedOp);
-    };
-    return detail::walk(op, function_ref<RetT(Operation *)>(wrapperFn));
+  auto wrapperFn = [&](Operation *op) {
+    if (auto derivedOp = dyn_cast<ArgT>(op))
+      callback(derivedOp);
+  };
+  return detail::walk(op, function_ref<RetT(Operation *)>(wrapperFn));
 }
 
 /// Walk all of the operations of type 'ArgT' nested under and including the
@@ -141,16 +134,16 @@ template <
     typename FuncTy, typename ArgT = detail::first_argument<FuncTy>,
     typename RetT = decltype(std::declval<FuncTy>()(std::declval<ArgT>()))>
 typename std::enable_if<
-!llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value &&
-std::is_same<RetT, WalkResult>::value,
+    !llvm::is_one_of<ArgT, Operation *, Region *, Block *>::value &&
+        std::is_same<RetT, WalkResult>::value,
     RetT>::type
 walk(Operation *op, FuncTy &&callback) {
-    auto wrapperFn = [&](Operation *op) {
-        if (auto derivedOp = dyn_cast<ArgT>(op))
-            return callback(derivedOp);
-        return WalkResult::advance();
-    };
-    return detail::walk(op, function_ref<RetT(Operation *)>(wrapperFn));
+  auto wrapperFn = [&](Operation *op) {
+    if (auto derivedOp = dyn_cast<ArgT>(op))
+      return callback(derivedOp);
+    return WalkResult::advance();
+  };
+  return detail::walk(op, function_ref<RetT(Operation *)>(wrapperFn));
 }
 
 /// Utility to provide the return type of a templated walk method.

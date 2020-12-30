@@ -16,8 +16,6 @@ using namespace lldb_private;
 AbstractSocket::AbstractSocket(bool child_processes_inherit)
     : DomainSocket(ProtocolUnixAbstract, child_processes_inherit) {}
 
-size_t AbstractSocket::GetNameOffset() const {
-    return 1;
-}
+size_t AbstractSocket::GetNameOffset() const { return 1; }
 
 void AbstractSocket::DeleteSocketFile(llvm::StringRef name) {}

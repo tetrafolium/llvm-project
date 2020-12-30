@@ -34,41 +34,41 @@ namespace clang {
 namespace clangd {
 
 enum class IndexFileFormat {
-    RIFF, // Versioned binary format, suitable for production use.
-    YAML, // Human-readable format, suitable for experiments and debugging.
+  RIFF, // Versioned binary format, suitable for production use.
+  YAML, // Human-readable format, suitable for experiments and debugging.
 };
 
 // Holds the contents of an index file that was read.
 struct IndexFileIn {
-    llvm::Optional<SymbolSlab> Symbols;
-    llvm::Optional<RefSlab> Refs;
-    llvm::Optional<RelationSlab> Relations;
-    // Keys are URIs of the source files.
-    llvm::Optional<IncludeGraph> Sources;
-    // This contains only the Directory and CommandLine.
-    llvm::Optional<tooling::CompileCommand> Cmd;
+  llvm::Optional<SymbolSlab> Symbols;
+  llvm::Optional<RefSlab> Refs;
+  llvm::Optional<RelationSlab> Relations;
+  // Keys are URIs of the source files.
+  llvm::Optional<IncludeGraph> Sources;
+  // This contains only the Directory and CommandLine.
+  llvm::Optional<tooling::CompileCommand> Cmd;
 };
 // Parse an index file. The input must be a RIFF or YAML file.
 llvm::Expected<IndexFileIn> readIndexFile(llvm::StringRef);
 
 // Specifies the contents of an index file to be written.
 struct IndexFileOut {
-    const SymbolSlab *Symbols = nullptr;
-    const RefSlab *Refs = nullptr;
-    const RelationSlab *Relations = nullptr;
-    // Keys are URIs of the source files.
-    const IncludeGraph *Sources = nullptr;
-    // TODO: Support serializing Dex posting lists.
-    IndexFileFormat Format = IndexFileFormat::RIFF;
-    const tooling::CompileCommand *Cmd = nullptr;
+  const SymbolSlab *Symbols = nullptr;
+  const RefSlab *Refs = nullptr;
+  const RelationSlab *Relations = nullptr;
+  // Keys are URIs of the source files.
+  const IncludeGraph *Sources = nullptr;
+  // TODO: Support serializing Dex posting lists.
+  IndexFileFormat Format = IndexFileFormat::RIFF;
+  const tooling::CompileCommand *Cmd = nullptr;
 
-    IndexFileOut() = default;
-    IndexFileOut(const IndexFileIn &I)
-        : Symbols(I.Symbols ? I.Symbols.getPointer() : nullptr),
-          Refs(I.Refs ? I.Refs.getPointer() : nullptr),
-          Relations(I.Relations ? I.Relations.getPointer() : nullptr),
-          Sources(I.Sources ? I.Sources.getPointer() : nullptr),
-          Cmd(I.Cmd ? I.Cmd.getPointer() : nullptr) {}
+  IndexFileOut() = default;
+  IndexFileOut(const IndexFileIn &I)
+      : Symbols(I.Symbols ? I.Symbols.getPointer() : nullptr),
+        Refs(I.Refs ? I.Refs.getPointer() : nullptr),
+        Relations(I.Relations ? I.Relations.getPointer() : nullptr),
+        Sources(I.Sources ? I.Sources.getPointer() : nullptr),
+        Cmd(I.Cmd ? I.Cmd.getPointer() : nullptr) {}
 };
 // Serializes an index file.
 llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const IndexFileOut &O);
@@ -81,7 +81,7 @@ std::string toYAML(const Ref &);
 
 // Deserialize a single symbol from YAML.
 llvm::Expected<clangd::Symbol> symbolFromYAML(StringRef YAML,
-        llvm::UniqueStringSaver *Strings);
+                                              llvm::UniqueStringSaver *Strings);
 llvm::Expected<clangd::Ref> refFromYAML(StringRef YAML,
                                         llvm::UniqueStringSaver *Strings);
 

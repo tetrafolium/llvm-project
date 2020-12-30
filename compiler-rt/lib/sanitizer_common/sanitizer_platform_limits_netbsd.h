@@ -62,15 +62,15 @@ extern unsigned struct_regmatch_sz;
 extern unsigned struct_fstab_sz;
 
 struct __sanitizer_regmatch {
-    OFF_T rm_so;
-    OFF_T rm_eo;
+  OFF_T rm_so;
+  OFF_T rm_eo;
 };
 
 typedef struct __sanitizer_modctl_load {
-    const char *ml_filename;
-    int ml_flags;
-    const char *ml_props;
-    uptr ml_propslen;
+  const char *ml_filename;
+  int ml_flags;
+  const char *ml_props;
+  uptr ml_propslen;
 } __sanitizer_modctl_load_t;
 extern const int modctl_load;
 extern const int modctl_unload;
@@ -78,68 +78,68 @@ extern const int modctl_stat;
 extern const int modctl_exists;
 
 union __sanitizer_sigval {
-    int sival_int;
-    uptr sival_ptr;
+  int sival_int;
+  uptr sival_ptr;
 };
 
 struct __sanitizer_sigevent {
-    int sigev_notify;
-    int sigev_signo;
-    union __sanitizer_sigval sigev_value;
-    uptr sigev_notify_function;
-    uptr sigev_notify_attributes;
+  int sigev_notify;
+  int sigev_signo;
+  union __sanitizer_sigval sigev_value;
+  uptr sigev_notify_function;
+  uptr sigev_notify_attributes;
 };
 
 struct __sanitizer_aiocb {
-    u64 aio_offset;
-    uptr aio_buf;
-    uptr aio_nbytes;
-    int aio_fildes;
-    int aio_lio_opcode;
-    int aio_reqprio;
-    struct __sanitizer_sigevent aio_sigevent;
-    int _state;
-    int _errno;
-    long _retval;
+  u64 aio_offset;
+  uptr aio_buf;
+  uptr aio_nbytes;
+  int aio_fildes;
+  int aio_lio_opcode;
+  int aio_reqprio;
+  struct __sanitizer_sigevent aio_sigevent;
+  int _state;
+  int _errno;
+  long _retval;
 };
 
 struct __sanitizer_sem_t {
-    uptr data[5];
+  uptr data[5];
 };
 
 struct __sanitizer_ipc_perm {
-    u32 uid;
-    u32 gid;
-    u32 cuid;
-    u32 cgid;
-    u32 mode;
-    unsigned short _seq;
-    long _key;
+  u32 uid;
+  u32 gid;
+  u32 cuid;
+  u32 cgid;
+  u32 mode;
+  unsigned short _seq;
+  long _key;
 };
 
 struct __sanitizer_shmid_ds {
-    __sanitizer_ipc_perm shm_perm;
-    unsigned long shm_segsz;
-    u32 shm_lpid;
-    u32 shm_cpid;
-    unsigned int shm_nattch;
-    u64 shm_atime;
-    u64 shm_dtime;
-    u64 shm_ctime;
-    void *_shm_internal;
+  __sanitizer_ipc_perm shm_perm;
+  unsigned long shm_segsz;
+  u32 shm_lpid;
+  u32 shm_cpid;
+  unsigned int shm_nattch;
+  u64 shm_atime;
+  u64 shm_dtime;
+  u64 shm_ctime;
+  void *_shm_internal;
 };
 
 struct __sanitizer_protoent {
-    char *p_name;
-    char **p_aliases;
-    int p_proto;
+  char *p_name;
+  char **p_aliases;
+  int p_proto;
 };
 
 struct __sanitizer_netent {
-    char *n_name;
-    char **n_aliases;
-    int n_addrtype;
-    u32 n_net;
+  char *n_name;
+  char **n_aliases;
+  int n_addrtype;
+  u32 n_net;
 };
 
 extern unsigned struct_msqid_ds_sz;
@@ -148,19 +148,19 @@ extern unsigned struct_timex_sz;
 extern unsigned struct_statvfs_sz;
 
 struct __sanitizer_iovec {
-    void *iov_base;
-    uptr iov_len;
+  void *iov_base;
+  uptr iov_len;
 };
 
 struct __sanitizer_ifaddrs {
-    struct __sanitizer_ifaddrs *ifa_next;
-    char *ifa_name;
-    unsigned int ifa_flags;
-    void *ifa_addr;     // (struct sockaddr *)
-    void *ifa_netmask;  // (struct sockaddr *)
-    void *ifa_dstaddr;  // (struct sockaddr *)
-    void *ifa_data;
-    unsigned int ifa_addrflags;
+  struct __sanitizer_ifaddrs *ifa_next;
+  char *ifa_name;
+  unsigned int ifa_flags;
+  void *ifa_addr;     // (struct sockaddr *)
+  void *ifa_netmask;  // (struct sockaddr *)
+  void *ifa_dstaddr;  // (struct sockaddr *)
+  void *ifa_data;
+  unsigned int ifa_addrflags;
 };
 
 typedef unsigned int __sanitizer_socklen_t;
@@ -171,90 +171,90 @@ typedef long long __sanitizer_time_t;
 typedef int __sanitizer_suseconds_t;
 
 struct __sanitizer_timeval {
-    __sanitizer_time_t tv_sec;
-    __sanitizer_suseconds_t tv_usec;
+  __sanitizer_time_t tv_sec;
+  __sanitizer_suseconds_t tv_usec;
 };
 
 struct __sanitizer_itimerval {
-    struct __sanitizer_timeval it_interval;
-    struct __sanitizer_timeval it_value;
+  struct __sanitizer_timeval it_interval;
+  struct __sanitizer_timeval it_value;
 };
 
 struct __sanitizer_timespec {
-    __sanitizer_time_t tv_sec;
-    long tv_nsec;
+  __sanitizer_time_t tv_sec;
+  long tv_nsec;
 };
 
 struct __sanitizer_passwd {
-    char *pw_name;
-    char *pw_passwd;
-    int pw_uid;
-    int pw_gid;
-    __sanitizer_time_t pw_change;
-    char *pw_class;
-    char *pw_gecos;
-    char *pw_dir;
-    char *pw_shell;
-    __sanitizer_time_t pw_expire;
+  char *pw_name;
+  char *pw_passwd;
+  int pw_uid;
+  int pw_gid;
+  __sanitizer_time_t pw_change;
+  char *pw_class;
+  char *pw_gecos;
+  char *pw_dir;
+  char *pw_shell;
+  __sanitizer_time_t pw_expire;
 };
 
 struct __sanitizer_group {
-    char *gr_name;
-    char *gr_passwd;
-    int gr_gid;
-    char **gr_mem;
+  char *gr_name;
+  char *gr_passwd;
+  int gr_gid;
+  char **gr_mem;
 };
 
 struct __sanitizer_timeb {
-    __sanitizer_time_t time;
-    unsigned short millitm;
-    short timezone;
-    short dstflag;
+  __sanitizer_time_t time;
+  unsigned short millitm;
+  short timezone;
+  short dstflag;
 };
 
 struct __sanitizer_ether_addr {
-    u8 octet[6];
+  u8 octet[6];
 };
 
 struct __sanitizer_tm {
-    int tm_sec;
-    int tm_min;
-    int tm_hour;
-    int tm_mday;
-    int tm_mon;
-    int tm_year;
-    int tm_wday;
-    int tm_yday;
-    int tm_isdst;
-    long int tm_gmtoff;
-    const char *tm_zone;
+  int tm_sec;
+  int tm_min;
+  int tm_hour;
+  int tm_mday;
+  int tm_mon;
+  int tm_year;
+  int tm_wday;
+  int tm_yday;
+  int tm_isdst;
+  long int tm_gmtoff;
+  const char *tm_zone;
 };
 
 struct __sanitizer_msghdr {
-    void *msg_name;
-    unsigned msg_namelen;
-    struct __sanitizer_iovec *msg_iov;
-    unsigned msg_iovlen;
-    void *msg_control;
-    unsigned msg_controllen;
-    int msg_flags;
+  void *msg_name;
+  unsigned msg_namelen;
+  struct __sanitizer_iovec *msg_iov;
+  unsigned msg_iovlen;
+  void *msg_control;
+  unsigned msg_controllen;
+  int msg_flags;
 };
 
 struct __sanitizer_mmsghdr {
-    struct __sanitizer_msghdr msg_hdr;
-    unsigned int msg_len;
+  struct __sanitizer_msghdr msg_hdr;
+  unsigned int msg_len;
 };
 
 struct __sanitizer_cmsghdr {
-    unsigned cmsg_len;
-    int cmsg_level;
-    int cmsg_type;
+  unsigned cmsg_len;
+  int cmsg_level;
+  int cmsg_type;
 };
 
 struct __sanitizer_dirent {
-    u64 d_fileno;
-    u16 d_reclen;
-    // more fields that we don't care about
+  u64 d_fileno;
+  u16 d_reclen;
+  // more fields that we don't care about
 };
 
 typedef int __sanitizer_clock_t;
@@ -264,37 +264,37 @@ typedef u32 __sanitizer___kernel_uid_t;
 typedef u32 __sanitizer___kernel_gid_t;
 typedef u64 __sanitizer___kernel_off_t;
 typedef struct {
-    u32 fds_bits[8];
+  u32 fds_bits[8];
 } __sanitizer___kernel_fd_set;
 
 typedef struct {
-    unsigned int pta_magic;
-    int pta_flags;
-    void *pta_private;
+  unsigned int pta_magic;
+  int pta_flags;
+  void *pta_private;
 } __sanitizer_pthread_attr_t;
 
 struct __sanitizer_sigset_t {
-    // uint32_t * 4
-    unsigned int __bits[4];
+  // uint32_t * 4
+  unsigned int __bits[4];
 };
 
 struct __sanitizer_siginfo {
-    // The size is determined by looking at sizeof of real siginfo_t on linux.
-    u64 opaque[128 / sizeof(u64)];
+  // The size is determined by looking at sizeof of real siginfo_t on linux.
+  u64 opaque[128 / sizeof(u64)];
 };
 
 using __sanitizer_sighandler_ptr = void (*)(int sig);
 using __sanitizer_sigactionhandler_ptr = void (*)(int sig,
-        __sanitizer_siginfo *siginfo,
-        void *uctx);
+                                                  __sanitizer_siginfo *siginfo,
+                                                  void *uctx);
 
 struct __sanitizer_sigaction {
-    union {
-        __sanitizer_sighandler_ptr handler;
-        __sanitizer_sigactionhandler_ptr sigaction;
-    };
-    __sanitizer_sigset_t sa_mask;
-    int sa_flags;
+  union {
+    __sanitizer_sighandler_ptr handler;
+    __sanitizer_sigactionhandler_ptr sigaction;
+  };
+  __sanitizer_sigset_t sa_mask;
+  int sa_flags;
 };
 
 extern unsigned struct_sigaltstack_sz;
@@ -302,27 +302,27 @@ extern unsigned struct_sigaltstack_sz;
 typedef unsigned int __sanitizer_sigset13_t;
 
 struct __sanitizer_sigaction13 {
-    __sanitizer_sighandler_ptr osa_handler;
-    __sanitizer_sigset13_t osa_mask;
-    int osa_flags;
+  __sanitizer_sighandler_ptr osa_handler;
+  __sanitizer_sigset13_t osa_mask;
+  int osa_flags;
 };
 
 struct __sanitizer_sigaltstack {
-    void *ss_sp;
-    uptr ss_size;
-    int ss_flags;
+  void *ss_sp;
+  uptr ss_size;
+  int ss_flags;
 };
 
 typedef __sanitizer_sigset_t __sanitizer_kernel_sigset_t;
 
 struct __sanitizer_kernel_sigaction_t {
-    union {
-        void (*handler)(int signo);
-        void (*sigaction)(int signo, void *info, void *ctx);
-    };
-    unsigned long sa_flags;
-    void (*sa_restorer)(void);
-    __sanitizer_kernel_sigset_t sa_mask;
+  union {
+    void (*handler)(int signo);
+    void (*sigaction)(int signo, void *info, void *ctx);
+  };
+  unsigned long sa_flags;
+  void (*sa_restorer)(void);
+  __sanitizer_kernel_sigset_t sa_mask;
 };
 
 extern const uptr sig_ign;
@@ -335,43 +335,43 @@ extern int af_inet6;
 uptr __sanitizer_in_addr_sz(int af);
 
 struct __sanitizer_dl_phdr_info {
-    uptr dlpi_addr;
-    const char *dlpi_name;
-    const void *dlpi_phdr;
-    short dlpi_phnum;
+  uptr dlpi_addr;
+  const char *dlpi_name;
+  const void *dlpi_phdr;
+  short dlpi_phnum;
 };
 
 extern unsigned struct_ElfW_Phdr_sz;
 
 struct __sanitizer_addrinfo {
-    int ai_flags;
-    int ai_family;
-    int ai_socktype;
-    int ai_protocol;
+  int ai_flags;
+  int ai_family;
+  int ai_socktype;
+  int ai_protocol;
 #if defined(__sparc__) && defined(_LP64)
-    int __ai_pad0;
+  int __ai_pad0;
 #endif
-    unsigned ai_addrlen;
+  unsigned ai_addrlen;
 #if defined(__alpha__) || (defined(__i386__) && defined(_LP64))
-    int __ai_pad0;
+  int __ai_pad0;
 #endif
-    char *ai_canonname;
-    void *ai_addr;
-    struct __sanitizer_addrinfo *ai_next;
+  char *ai_canonname;
+  void *ai_addr;
+  struct __sanitizer_addrinfo *ai_next;
 };
 
 struct __sanitizer_hostent {
-    char *h_name;
-    char **h_aliases;
-    int h_addrtype;
-    int h_length;
-    char **h_addr_list;
+  char *h_name;
+  char **h_aliases;
+  int h_addrtype;
+  int h_length;
+  char **h_addr_list;
 };
 
 struct __sanitizer_pollfd {
-    int fd;
-    short events;
-    short revents;
+  int fd;
+  short events;
+  short revents;
 };
 
 typedef unsigned __sanitizer_nfds_t;
@@ -379,17 +379,17 @@ typedef unsigned __sanitizer_nfds_t;
 typedef int __sanitizer_lwpid_t;
 
 struct __sanitizer_glob_t {
-    uptr gl_pathc;
-    uptr gl_matchc;
-    uptr gl_offs;
-    int gl_flags;
-    char **gl_pathv;
-    int (*gl_errfunc)(const char *, int);
-    void (*gl_closedir)(void *dirp);
-    struct dirent *(*gl_readdir)(void *dirp);
-    void *(*gl_opendir)(const char *);
-    int (*gl_lstat)(const char *, void * /* struct stat* */);
-    int (*gl_stat)(const char *, void * /* struct stat* */);
+  uptr gl_pathc;
+  uptr gl_matchc;
+  uptr gl_offs;
+  int gl_flags;
+  char **gl_pathv;
+  int (*gl_errfunc)(const char *, int);
+  void (*gl_closedir)(void *dirp);
+  struct dirent *(*gl_readdir)(void *dirp);
+  void *(*gl_opendir)(const char *);
+  int (*gl_lstat)(const char *, void * /* struct stat* */);
+  int (*gl_stat)(const char *, void * /* struct stat* */);
 };
 
 extern int glob_nomatch;
@@ -421,23 +421,23 @@ extern int ptrace_pt_setdbregs;
 extern int ptrace_pt_getdbregs;
 
 struct __sanitizer_ptrace_io_desc {
-    int piod_op;
-    void *piod_offs;
-    void *piod_addr;
-    uptr piod_len;
+  int piod_op;
+  void *piod_offs;
+  void *piod_addr;
+  uptr piod_len;
 };
 
 struct __sanitizer_ptrace_lwpinfo {
-    __sanitizer_lwpid_t pl_lwpid;
-    int pl_event;
+  __sanitizer_lwpid_t pl_lwpid;
+  int pl_event;
 };
 
 struct __sanitizer_ptrace_lwpstatus {
-    __sanitizer_lwpid_t pl_lwpid;
-    __sanitizer_sigset_t pl_sigpend;
-    __sanitizer_sigset_t pl_sigmask;
-    char pl_name[20];
-    void *pl_private;
+  __sanitizer_lwpid_t pl_lwpid;
+  __sanitizer_sigset_t pl_sigpend;
+  __sanitizer_sigset_t pl_sigmask;
+  char pl_name[20];
+  void *pl_private;
 };
 
 extern unsigned struct_ptrace_ptrace_io_desc_struct_sz;
@@ -451,41 +451,41 @@ extern unsigned struct_ptrace_fpreg_struct_sz;
 extern unsigned struct_ptrace_dbreg_struct_sz;
 
 struct __sanitizer_wordexp_t {
-    uptr we_wordc;
-    char **we_wordv;
-    uptr we_offs;
-    char *we_strings;
-    uptr we_nbytes;
+  uptr we_wordc;
+  char **we_wordv;
+  uptr we_offs;
+  char *we_strings;
+  uptr we_nbytes;
 };
 
 struct __sanitizer_FILE {
-    unsigned char *_p;
-    int _r;
-    int _w;
-    unsigned short _flags;
-    short _file;
-    struct {
-        unsigned char *_base;
-        int _size;
-    } _bf;
-    int _lbfsize;
-    void *_cookie;
-    int (*_close)(void *ptr);
-    u64 (*_read)(void *, void *, uptr);
-    u64 (*_seek)(void *, u64, int);
-    uptr (*_write)(void *, const void *, uptr);
-    struct {
-        unsigned char *_base;
-        int _size;
-    } _ext;
-    unsigned char *_up;
-    int _ur;
-    unsigned char _ubuf[3];
-    unsigned char _nbuf[1];
-    int (*_flush)(void *ptr);
-    char _lb_unused[sizeof(uptr)];
-    int _blksize;
-    u64 _offset;
+  unsigned char *_p;
+  int _r;
+  int _w;
+  unsigned short _flags;
+  short _file;
+  struct {
+    unsigned char *_base;
+    int _size;
+  } _bf;
+  int _lbfsize;
+  void *_cookie;
+  int (*_close)(void *ptr);
+  u64 (*_read)(void *, void *, uptr);
+  u64 (*_seek)(void *, u64, int);
+  uptr (*_write)(void *, const void *, uptr);
+  struct {
+    unsigned char *_base;
+    int _size;
+  } _ext;
+  unsigned char *_up;
+  int _ur;
+  unsigned char _ubuf[3];
+  unsigned char _nbuf[1];
+  int (*_flush)(void *ptr);
+  char _lb_unused[sizeof(uptr)];
+  int _blksize;
+  u64 _offset;
 };
 #define SANITIZER_HAS_STRUCT_FILE 1
 
@@ -505,20 +505,20 @@ extern int map_fixed;
 
 // ioctl arguments
 struct __sanitizer_ifconf {
-    int ifc_len;
-    union {
-        void *ifcu_req;
-    } ifc_ifcu;
+  int ifc_len;
+  union {
+    void *ifcu_req;
+  } ifc_ifcu;
 };
 
 struct __sanitizer_ttyent {
-    char *ty_name;
-    char *ty_getty;
-    char *ty_type;
-    int ty_status;
-    char *ty_window;
-    char *ty_comment;
-    char *ty_class;
+  char *ty_name;
+  char *ty_getty;
+  char *ty_type;
+  int ty_status;
+  char *ty_window;
+  char *ty_comment;
+  char *ty_class;
 };
 
 extern const unsigned long __sanitizer_bufsiz;
@@ -2358,38 +2358,38 @@ extern const int unvis_valid;
 extern const int unvis_validpush;
 
 struct __sanitizer_cdbr {
-    void (*unmap)(void *, void *, uptr);
-    void *cookie;
-    u8 *mmap_base;
-    uptr mmap_size;
+  void (*unmap)(void *, void *, uptr);
+  void *cookie;
+  u8 *mmap_base;
+  uptr mmap_size;
 
-    u8 *hash_base;
-    u8 *offset_base;
-    u8 *data_base;
+  u8 *hash_base;
+  u8 *offset_base;
+  u8 *data_base;
 
-    u32 data_size;
-    u32 entries;
-    u32 entries_index;
-    u32 seed;
+  u32 data_size;
+  u32 entries;
+  u32 entries_index;
+  u32 seed;
 
-    u8 offset_size;
-    u8 index_size;
+  u8 offset_size;
+  u8 index_size;
 
-    u32 entries_m;
-    u32 entries_index_m;
-    u8 entries_s1, entries_s2;
-    u8 entries_index_s1, entries_index_s2;
+  u32 entries_m;
+  u32 entries_index_m;
+  u8 entries_s1, entries_s2;
+  u8 entries_index_s1, entries_index_s2;
 };
 
 struct __sanitizer_cdbw {
-    uptr data_counter;
-    uptr data_allocated;
-    uptr data_size;
-    uptr *data_len;
-    void **data_ptr;
-    uptr hash_size;
-    void *hash;
-    uptr key_counter;
+  uptr data_counter;
+  uptr data_allocated;
+  uptr data_size;
+  uptr *data_len;
+  void **data_ptr;
+  uptr hash_size;
+  void *hash;
+  uptr key_counter;
 };
 }  // namespace __sanitizer
 

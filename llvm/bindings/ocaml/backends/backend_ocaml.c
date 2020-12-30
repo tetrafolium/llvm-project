@@ -15,9 +15,9 @@
 |*                                                                            *|
 \*===----------------------------------------------------------------------===*/
 
-#include "llvm-c/Target.h"
 #include "caml/alloc.h"
 #include "caml/memory.h"
+#include "llvm-c/Target.h"
 
 /* TODO: Figure out how to call these only for targets which support them.
  * LLVMInitialize ## target ## AsmPrinter();
@@ -25,12 +25,12 @@
  * LLVMInitialize ## target ## Disassembler();
  */
 
-#define INITIALIZER1(target) \
-  CAMLprim value llvm_initialize_ ## target(value Unit) {  \
-    LLVMInitialize ## target ## TargetInfo();              \
-    LLVMInitialize ## target ## Target();                  \
-    LLVMInitialize ## target ## TargetMC();                \
-    return Val_unit;                                       \
+#define INITIALIZER1(target)                                                   \
+  CAMLprim value llvm_initialize_##target(value Unit) {                        \
+    LLVMInitialize##target##TargetInfo();                                      \
+    LLVMInitialize##target##Target();                                          \
+    LLVMInitialize##target##TargetMC();                                        \
+    return Val_unit;                                                           \
   }
 
 #define INITIALIZER(target) INITIALIZER1(target)

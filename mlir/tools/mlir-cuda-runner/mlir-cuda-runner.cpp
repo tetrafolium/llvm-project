@@ -40,11 +40,11 @@ using namespace mlir;
 
 inline void emit_cuda_error(const llvm::Twine &message, const char *buffer,
                             CUresult error, Location loc) {
-    emitError(loc, message.concat(" failed with error code ")
-              .concat(llvm::Twine{error})
-              .concat("[")
-              .concat(buffer)
-              .concat("]"));
+  emitError(loc, message.concat(" failed with error code ")
+                     .concat(llvm::Twine{error})
+                     .concat("[")
+                     .concat(buffer)
+                     .concat("]"));
 }
 
 #define RETURN_ON_CUDA_ERROR(expr, msg)                                        \
@@ -58,88 +58,86 @@ inline void emit_cuda_error(const llvm::Twine &message, const char *buffer,
 
 OwnedBlob compilePtxToCubin(const std::string ptx, Location loc,
                             StringRef name) {
-    char jitErrorBuffer[4096] = {0};
+  char jitErrorBuffer[4096] = {0};
 
-    RETURN_ON_CUDA_ERROR(cuInit(0), "cuInit");
+  RETURN_ON_CUDA_ERROR(cuInit(0), "cuInit");
 
-    // Linking requires a device context.
-    CUdevice device;
-    RETURN_ON_CUDA_ERROR(cuDeviceGet(&device, 0), "cuDeviceGet");
-    CUcontext context;
-    RETURN_ON_CUDA_ERROR(cuCtxCreate(&context, 0, device), "cuCtxCreate");
-    CUlinkState linkState;
+  // Linking requires a device context.
+  CUdevice device;
+  RETURN_ON_CUDA_ERROR(cuDeviceGet(&device, 0), "cuDeviceGet");
+  CUcontext context;
+  RETURN_ON_CUDA_ERROR(cuCtxCreate(&context, 0, device), "cuCtxCreate");
+  CUlinkState linkState;
 
-    CUjit_option jitOptions[] = {CU_JIT_ERROR_LOG_BUFFER,
-                                 CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES
-                                };
-    void *jitOptionsVals[] = {jitErrorBuffer,
-                              reinterpret_cast<void *>(sizeof(jitErrorBuffer))
-                             };
+  CUjit_option jitOptions[] = {CU_JIT_ERROR_LOG_BUFFER,
+                               CU_JIT_ERROR_LOG_BUFFER_SIZE_BYTES};
+  void *jitOptionsVals[] = {jitErrorBuffer,
+                            reinterpret_cast<void *>(sizeof(jitErrorBuffer))};
 
-    RETURN_ON_CUDA_ERROR(cuLinkCreate(2,              /* number of jit options */
-                                      jitOptions,     /* jit options */
-                                      jitOptionsVals, /* jit option values */
-                                      &linkState),
-                         "cuLinkCreate");
+  RETURN_ON_CUDA_ERROR(cuLinkCreate(2,              /* number of jit options */
+                                    jitOptions,     /* jit options */
+                                    jitOptionsVals, /* jit option values */
+                                    &linkState),
+                       "cuLinkCreate");
 
-    RETURN_ON_CUDA_ERROR(
-        cuLinkAddData(linkState, CUjitInputType::CU_JIT_INPUT_PTX,
-                      const_cast<void *>(static_cast<const void *>(ptx.c_str())),
-                      ptx.length(), name.data(), /* kernel name */
-                      0,                         /* number of jit options */
-                      nullptr,                   /* jit options */
-                      nullptr                    /* jit option values */
-                     ),
-        "cuLinkAddData");
+  RETURN_ON_CUDA_ERROR(
+      cuLinkAddData(linkState, CUjitInputType::CU_JIT_INPUT_PTX,
+                    const_cast<void *>(static_cast<const void *>(ptx.c_str())),
+                    ptx.length(), name.data(), /* kernel name */
+                    0,                         /* number of jit options */
+                    nullptr,                   /* jit options */
+                    nullptr                    /* jit option values */
+                    ),
+      "cuLinkAddData");
 
-    void *cubinData;
-    size_t cubinSize;
-    RETURN_ON_CUDA_ERROR(cuLinkComplete(linkState, &cubinData, &cubinSize),
-                         "cuLinkComplete");
+  void *cubinData;
+  size_t cubinSize;
+  RETURN_ON_CUDA_ERROR(cuLinkComplete(linkState, &cubinData, &cubinSize),
+                       "cuLinkComplete");
 
-    char *cubinAsChar = static_cast<char *>(cubinData);
-    OwnedBlob result =
-        std::make_unique<std::vector<char>>(cubinAsChar, cubinAsChar + cubinSize);
+  char *cubinAsChar = static_cast<char *>(cubinData);
+  OwnedBlob result =
+      std::make_unique<std::vector<char>>(cubinAsChar, cubinAsChar + cubinSize);
 
-    // This will also destroy the cubin data.
-    RETURN_ON_CUDA_ERROR(cuLinkDestroy(linkState), "cuLinkDestroy");
+  // This will also destroy the cubin data.
+  RETURN_ON_CUDA_ERROR(cuLinkDestroy(linkState), "cuLinkDestroy");
 
-    return result;
+  return result;
 }
 
 static LogicalResult runMLIRPasses(ModuleOp m) {
-    PassManager pm(m.getContext());
-    applyPassManagerCLOptions(pm);
+  PassManager pm(m.getContext());
+  applyPassManagerCLOptions(pm);
 
-    const char gpuBinaryAnnotation[] = "nvvm.cubin";
-    pm.addPass(createGpuKernelOutliningPass());
-    auto &kernelPm = pm.nest<gpu::GPUModuleOp>();
-    kernelPm.addPass(createStripDebugInfoPass());
-    kernelPm.addPass(createLowerGpuOpsToNVVMOpsPass());
-    kernelPm.addPass(createConvertGPUKernelToBlobPass(
-                         translateModuleToNVVMIR, compilePtxToCubin, "nvptx64-nvidia-cuda",
-                         "sm_35", "+ptx60", gpuBinaryAnnotation));
-    pm.addPass(createGpuToLLVMConversionPass(gpuBinaryAnnotation));
+  const char gpuBinaryAnnotation[] = "nvvm.cubin";
+  pm.addPass(createGpuKernelOutliningPass());
+  auto &kernelPm = pm.nest<gpu::GPUModuleOp>();
+  kernelPm.addPass(createStripDebugInfoPass());
+  kernelPm.addPass(createLowerGpuOpsToNVVMOpsPass());
+  kernelPm.addPass(createConvertGPUKernelToBlobPass(
+      translateModuleToNVVMIR, compilePtxToCubin, "nvptx64-nvidia-cuda",
+      "sm_35", "+ptx60", gpuBinaryAnnotation));
+  pm.addPass(createGpuToLLVMConversionPass(gpuBinaryAnnotation));
 
-    return pm.run(m);
+  return pm.run(m);
 }
 
 int main(int argc, char **argv) {
-    registerPassManagerCLOptions();
-    llvm::InitLLVM y(argc, argv);
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
+  registerPassManagerCLOptions();
+  llvm::InitLLVM y(argc, argv);
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
 
-    // Initialize LLVM NVPTX backend.
-    LLVMInitializeNVPTXTarget();
-    LLVMInitializeNVPTXTargetInfo();
-    LLVMInitializeNVPTXTargetMC();
-    LLVMInitializeNVPTXAsmPrinter();
+  // Initialize LLVM NVPTX backend.
+  LLVMInitializeNVPTXTarget();
+  LLVMInitializeNVPTXTargetInfo();
+  LLVMInitializeNVPTXTargetMC();
+  LLVMInitializeNVPTXAsmPrinter();
 
-    mlir::initializeLLVMPasses();
+  mlir::initializeLLVMPasses();
 
-    mlir::JitRunnerConfig jitRunnerConfig;
-    jitRunnerConfig.mlirTransformer = runMLIRPasses;
+  mlir::JitRunnerConfig jitRunnerConfig;
+  jitRunnerConfig.mlirTransformer = runMLIRPasses;
 
-    return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
+  return mlir::JitRunnerMain(argc, argv, jitRunnerConfig);
 }

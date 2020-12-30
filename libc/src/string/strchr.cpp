@@ -14,12 +14,12 @@ namespace __llvm_libc {
 
 // TODO: Look at performance benefits of comparing words.
 char *LLVM_LIBC_ENTRYPOINT(strchr)(const char *src, int c) {
-    unsigned char *str =
-        const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(src));
-    const unsigned char ch = c;
-    for (; *str && *str != ch; ++str)
-        ;
-    return *str == ch ? reinterpret_cast<char *>(str) : nullptr;
+  unsigned char *str =
+      const_cast<unsigned char *>(reinterpret_cast<const unsigned char *>(src));
+  const unsigned char ch = c;
+  for (; *str && *str != ch; ++str)
+    ;
+  return *str == ch ? reinterpret_cast<char *>(str) : nullptr;
 }
 
 } // namespace __llvm_libc

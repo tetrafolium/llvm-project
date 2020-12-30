@@ -16,15 +16,15 @@ using namespace clang;
 using namespace ento;
 
 unsigned FunctionSummariesTy::getTotalNumBasicBlocks() {
-    unsigned Total = 0;
-    for (const auto &I : Map)
-        Total += I.second.TotalBasicBlocks;
-    return Total;
+  unsigned Total = 0;
+  for (const auto &I : Map)
+    Total += I.second.TotalBasicBlocks;
+  return Total;
 }
 
 unsigned FunctionSummariesTy::getTotalNumVisitedBasicBlocks() {
-    unsigned Total = 0;
-    for (const auto &I : Map)
-        Total += I.second.VisitedBasicBlocks.count();
-    return Total;
+  unsigned Total = 0;
+  for (const auto &I : Map)
+    Total += I.second.VisitedBasicBlocks.count();
+  return Total;
 }

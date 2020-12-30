@@ -20,7 +20,7 @@ using namespace llvm;
 #include "R600GenInstrInfo.inc"
 
 MCInstrInfo *llvm::createR600MCInstrInfo() {
-    MCInstrInfo *X = new MCInstrInfo();
-    InitR600MCInstrInfo(X);
-    return X;
+  MCInstrInfo *X = new MCInstrInfo();
+  InitR600MCInstrInfo(X);
+  return X;
 }

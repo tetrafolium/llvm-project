@@ -17,33 +17,33 @@ namespace tidy {
 namespace bugprone {
 
 void NoEscapeCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(callExpr(callee(functionDecl(hasName("::dispatch_async"))),
-                                argumentCountIs(2),
-                                hasArgument(1, blockExpr().bind("arg-block"))),
-                       this);
-    Finder->addMatcher(callExpr(callee(functionDecl(hasName("::dispatch_after"))),
-                                argumentCountIs(3),
-                                hasArgument(2, blockExpr().bind("arg-block"))),
-                       this);
+  Finder->addMatcher(callExpr(callee(functionDecl(hasName("::dispatch_async"))),
+                              argumentCountIs(2),
+                              hasArgument(1, blockExpr().bind("arg-block"))),
+                     this);
+  Finder->addMatcher(callExpr(callee(functionDecl(hasName("::dispatch_after"))),
+                              argumentCountIs(3),
+                              hasArgument(2, blockExpr().bind("arg-block"))),
+                     this);
 }
 
 void NoEscapeCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedEscapingBlock =
-        Result.Nodes.getNodeAs<BlockExpr>("arg-block");
-    const BlockDecl *EscapingBlockDecl = MatchedEscapingBlock->getBlockDecl();
-    for (const BlockDecl::Capture &CapturedVar : EscapingBlockDecl->captures()) {
-        const VarDecl *Var = CapturedVar.getVariable();
-        if (Var && Var->hasAttr<NoEscapeAttr>()) {
-            // FIXME: Add a method to get the location of the use of a CapturedVar so
-            // that we can diagnose the use of the pointer instead of the block.
-            diag(MatchedEscapingBlock->getBeginLoc(),
-                 "pointer %0 with attribute 'noescape' is captured by an "
-                 "asynchronously-executed block")
-                    << Var;
-            diag(Var->getBeginLoc(), "the 'noescape' attribute is declared here.",
-                 DiagnosticIDs::Note);
-        }
+  const auto *MatchedEscapingBlock =
+      Result.Nodes.getNodeAs<BlockExpr>("arg-block");
+  const BlockDecl *EscapingBlockDecl = MatchedEscapingBlock->getBlockDecl();
+  for (const BlockDecl::Capture &CapturedVar : EscapingBlockDecl->captures()) {
+    const VarDecl *Var = CapturedVar.getVariable();
+    if (Var && Var->hasAttr<NoEscapeAttr>()) {
+      // FIXME: Add a method to get the location of the use of a CapturedVar so
+      // that we can diagnose the use of the pointer instead of the block.
+      diag(MatchedEscapingBlock->getBeginLoc(),
+           "pointer %0 with attribute 'noescape' is captured by an "
+           "asynchronously-executed block")
+          << Var;
+      diag(Var->getBeginLoc(), "the 'noescape' attribute is declared here.",
+           DiagnosticIDs::Note);
     }
+  }
 }
 
 } // namespace bugprone

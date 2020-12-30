@@ -35,713 +35,698 @@ class ARMBaseRegisterInfo;
 class ARMSubtarget;
 
 class ARMBaseInstrInfo : public ARMGenInstrInfo {
-    const ARMSubtarget &Subtarget;
+  const ARMSubtarget &Subtarget;
 
 protected:
-    // Can be only subclassed.
-    explicit ARMBaseInstrInfo(const ARMSubtarget &STI);
+  // Can be only subclassed.
+  explicit ARMBaseInstrInfo(const ARMSubtarget &STI);
 
-    void expandLoadStackGuardBase(MachineBasicBlock::iterator MI,
-                                  unsigned LoadImmOpc, unsigned LoadOpc) const;
+  void expandLoadStackGuardBase(MachineBasicBlock::iterator MI,
+                                unsigned LoadImmOpc, unsigned LoadOpc) const;
 
-    /// Build the equivalent inputs of a REG_SEQUENCE for the given \p MI
-    /// and \p DefIdx.
-    /// \p [out] InputRegs of the equivalent REG_SEQUENCE. Each element of
-    /// the list is modeled as <Reg:SubReg, SubIdx>.
-    /// E.g., REG_SEQUENCE %1:sub1, sub0, %2, sub1 would produce
-    /// two elements:
-    /// - %1:sub1, sub0
-    /// - %2<:0>, sub1
-    ///
-    /// \returns true if it is possible to build such an input sequence
-    /// with the pair \p MI, \p DefIdx. False otherwise.
-    ///
-    /// \pre MI.isRegSequenceLike().
-    bool getRegSequenceLikeInputs(
-        const MachineInstr &MI, unsigned DefIdx,
-        SmallVectorImpl<RegSubRegPairAndIdx> &InputRegs) const override;
+  /// Build the equivalent inputs of a REG_SEQUENCE for the given \p MI
+  /// and \p DefIdx.
+  /// \p [out] InputRegs of the equivalent REG_SEQUENCE. Each element of
+  /// the list is modeled as <Reg:SubReg, SubIdx>.
+  /// E.g., REG_SEQUENCE %1:sub1, sub0, %2, sub1 would produce
+  /// two elements:
+  /// - %1:sub1, sub0
+  /// - %2<:0>, sub1
+  ///
+  /// \returns true if it is possible to build such an input sequence
+  /// with the pair \p MI, \p DefIdx. False otherwise.
+  ///
+  /// \pre MI.isRegSequenceLike().
+  bool getRegSequenceLikeInputs(
+      const MachineInstr &MI, unsigned DefIdx,
+      SmallVectorImpl<RegSubRegPairAndIdx> &InputRegs) const override;
 
-    /// Build the equivalent inputs of a EXTRACT_SUBREG for the given \p MI
-    /// and \p DefIdx.
-    /// \p [out] InputReg of the equivalent EXTRACT_SUBREG.
-    /// E.g., EXTRACT_SUBREG %1:sub1, sub0, sub1 would produce:
-    /// - %1:sub1, sub0
-    ///
-    /// \returns true if it is possible to build such an input sequence
-    /// with the pair \p MI, \p DefIdx. False otherwise.
-    ///
-    /// \pre MI.isExtractSubregLike().
-    bool getExtractSubregLikeInputs(const MachineInstr &MI, unsigned DefIdx,
-                                    RegSubRegPairAndIdx &InputReg) const override;
+  /// Build the equivalent inputs of a EXTRACT_SUBREG for the given \p MI
+  /// and \p DefIdx.
+  /// \p [out] InputReg of the equivalent EXTRACT_SUBREG.
+  /// E.g., EXTRACT_SUBREG %1:sub1, sub0, sub1 would produce:
+  /// - %1:sub1, sub0
+  ///
+  /// \returns true if it is possible to build such an input sequence
+  /// with the pair \p MI, \p DefIdx. False otherwise.
+  ///
+  /// \pre MI.isExtractSubregLike().
+  bool getExtractSubregLikeInputs(const MachineInstr &MI, unsigned DefIdx,
+                                  RegSubRegPairAndIdx &InputReg) const override;
 
-    /// Build the equivalent inputs of a INSERT_SUBREG for the given \p MI
-    /// and \p DefIdx.
-    /// \p [out] BaseReg and \p [out] InsertedReg contain
-    /// the equivalent inputs of INSERT_SUBREG.
-    /// E.g., INSERT_SUBREG %0:sub0, %1:sub1, sub3 would produce:
-    /// - BaseReg: %0:sub0
-    /// - InsertedReg: %1:sub1, sub3
-    ///
-    /// \returns true if it is possible to build such an input sequence
-    /// with the pair \p MI, \p DefIdx. False otherwise.
-    ///
-    /// \pre MI.isInsertSubregLike().
-    bool
-    getInsertSubregLikeInputs(const MachineInstr &MI, unsigned DefIdx,
-                              RegSubRegPair &BaseReg,
-                              RegSubRegPairAndIdx &InsertedReg) const override;
+  /// Build the equivalent inputs of a INSERT_SUBREG for the given \p MI
+  /// and \p DefIdx.
+  /// \p [out] BaseReg and \p [out] InsertedReg contain
+  /// the equivalent inputs of INSERT_SUBREG.
+  /// E.g., INSERT_SUBREG %0:sub0, %1:sub1, sub3 would produce:
+  /// - BaseReg: %0:sub0
+  /// - InsertedReg: %1:sub1, sub3
+  ///
+  /// \returns true if it is possible to build such an input sequence
+  /// with the pair \p MI, \p DefIdx. False otherwise.
+  ///
+  /// \pre MI.isInsertSubregLike().
+  bool
+  getInsertSubregLikeInputs(const MachineInstr &MI, unsigned DefIdx,
+                            RegSubRegPair &BaseReg,
+                            RegSubRegPairAndIdx &InsertedReg) const override;
 
-    /// Commutes the operands in the given instruction.
-    /// The commutable operands are specified by their indices OpIdx1 and OpIdx2.
-    ///
-    /// Do not call this method for a non-commutable instruction or for
-    /// non-commutable pair of operand indices OpIdx1 and OpIdx2.
-    /// Even though the instruction is commutable, the method may still
-    /// fail to commute the operands, null pointer is returned in such cases.
-    MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
-                                         unsigned OpIdx1,
-                                         unsigned OpIdx2) const override;
-    /// If the specific machine instruction is an instruction that moves/copies
-    /// value from one register to another register return destination and source
-    /// registers as machine operands.
-    Optional<DestSourcePair>
-    isCopyInstrImpl(const MachineInstr &MI) const override;
+  /// Commutes the operands in the given instruction.
+  /// The commutable operands are specified by their indices OpIdx1 and OpIdx2.
+  ///
+  /// Do not call this method for a non-commutable instruction or for
+  /// non-commutable pair of operand indices OpIdx1 and OpIdx2.
+  /// Even though the instruction is commutable, the method may still
+  /// fail to commute the operands, null pointer is returned in such cases.
+  MachineInstr *commuteInstructionImpl(MachineInstr &MI, bool NewMI,
+                                       unsigned OpIdx1,
+                                       unsigned OpIdx2) const override;
+  /// If the specific machine instruction is an instruction that moves/copies
+  /// value from one register to another register return destination and source
+  /// registers as machine operands.
+  Optional<DestSourcePair>
+  isCopyInstrImpl(const MachineInstr &MI) const override;
 
-    /// Specialization of \ref TargetInstrInfo::describeLoadedValue, used to
-    /// enhance debug entry value descriptions for ARM targets.
-    Optional<ParamLoadedValue> describeLoadedValue(const MachineInstr &MI,
-            Register Reg) const override;
+  /// Specialization of \ref TargetInstrInfo::describeLoadedValue, used to
+  /// enhance debug entry value descriptions for ARM targets.
+  Optional<ParamLoadedValue> describeLoadedValue(const MachineInstr &MI,
+                                                 Register Reg) const override;
 
 public:
-    // Return whether the target has an explicit NOP encoding.
-    bool hasNOP() const;
+  // Return whether the target has an explicit NOP encoding.
+  bool hasNOP() const;
 
-    // Return the non-pre/post incrementing version of 'Opc'. Return 0
-    // if there is not such an opcode.
-    virtual unsigned getUnindexedOpcode(unsigned Opc) const = 0;
+  // Return the non-pre/post incrementing version of 'Opc'. Return 0
+  // if there is not such an opcode.
+  virtual unsigned getUnindexedOpcode(unsigned Opc) const = 0;
 
-    MachineInstr *convertToThreeAddress(MachineFunction::iterator &MFI,
-                                        MachineInstr &MI,
-                                        LiveVariables *LV) const override;
+  MachineInstr *convertToThreeAddress(MachineFunction::iterator &MFI,
+                                      MachineInstr &MI,
+                                      LiveVariables *LV) const override;
 
-    virtual const ARMBaseRegisterInfo &getRegisterInfo() const = 0;
-    const ARMSubtarget &getSubtarget() const {
-        return Subtarget;
-    }
+  virtual const ARMBaseRegisterInfo &getRegisterInfo() const = 0;
+  const ARMSubtarget &getSubtarget() const { return Subtarget; }
 
-    ScheduleHazardRecognizer *
-    CreateTargetHazardRecognizer(const TargetSubtargetInfo *STI,
-                                 const ScheduleDAG *DAG) const override;
+  ScheduleHazardRecognizer *
+  CreateTargetHazardRecognizer(const TargetSubtargetInfo *STI,
+                               const ScheduleDAG *DAG) const override;
 
-    ScheduleHazardRecognizer *
-    CreateTargetPostRAHazardRecognizer(const InstrItineraryData *II,
-                                       const ScheduleDAG *DAG) const override;
+  ScheduleHazardRecognizer *
+  CreateTargetPostRAHazardRecognizer(const InstrItineraryData *II,
+                                     const ScheduleDAG *DAG) const override;
 
-    // Branch analysis.
-    bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-                       MachineBasicBlock *&FBB,
-                       SmallVectorImpl<MachineOperand> &Cond,
-                       bool AllowModify = false) const override;
-    unsigned removeBranch(MachineBasicBlock &MBB,
-                          int *BytesRemoved = nullptr) const override;
-    unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-                          MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
-                          const DebugLoc &DL,
-                          int *BytesAdded = nullptr) const override;
+  // Branch analysis.
+  bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                     MachineBasicBlock *&FBB,
+                     SmallVectorImpl<MachineOperand> &Cond,
+                     bool AllowModify = false) const override;
+  unsigned removeBranch(MachineBasicBlock &MBB,
+                        int *BytesRemoved = nullptr) const override;
+  unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                        const DebugLoc &DL,
+                        int *BytesAdded = nullptr) const override;
 
-    bool
-    reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+  bool
+  reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
 
-    // Predication support.
-    bool isPredicated(const MachineInstr &MI) const override;
+  // Predication support.
+  bool isPredicated(const MachineInstr &MI) const override;
 
-    // MIR printer helper function to annotate Operands with a comment.
-    std::string
-    createMIROperandComment(const MachineInstr &MI, const MachineOperand &Op,
-                            unsigned OpIdx,
+  // MIR printer helper function to annotate Operands with a comment.
+  std::string
+  createMIROperandComment(const MachineInstr &MI, const MachineOperand &Op,
+                          unsigned OpIdx,
+                          const TargetRegisterInfo *TRI) const override;
+
+  ARMCC::CondCodes getPredicate(const MachineInstr &MI) const {
+    int PIdx = MI.findFirstPredOperandIdx();
+    return PIdx != -1 ? (ARMCC::CondCodes)MI.getOperand(PIdx).getImm()
+                      : ARMCC::AL;
+  }
+
+  bool PredicateInstruction(MachineInstr &MI,
+                            ArrayRef<MachineOperand> Pred) const override;
+
+  bool SubsumesPredicate(ArrayRef<MachineOperand> Pred1,
+                         ArrayRef<MachineOperand> Pred2) const override;
+
+  bool ClobbersPredicate(MachineInstr &MI, std::vector<MachineOperand> &Pred,
+                         bool SkipDead) const override;
+
+  bool isPredicable(const MachineInstr &MI) const override;
+
+  // CPSR defined in instruction
+  static bool isCPSRDefined(const MachineInstr &MI);
+
+  /// GetInstSize - Returns the size of the specified MachineInstr.
+  ///
+  unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+
+  unsigned isLoadFromStackSlot(const MachineInstr &MI,
+                               int &FrameIndex) const override;
+  unsigned isStoreToStackSlot(const MachineInstr &MI,
+                              int &FrameIndex) const override;
+  unsigned isLoadFromStackSlotPostFE(const MachineInstr &MI,
+                                     int &FrameIndex) const override;
+  unsigned isStoreToStackSlotPostFE(const MachineInstr &MI,
+                                    int &FrameIndex) const override;
+
+  void copyToCPSR(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                  unsigned SrcReg, bool KillSrc,
+                  const ARMSubtarget &Subtarget) const;
+  void copyFromCPSR(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                    unsigned DestReg, bool KillSrc,
+                    const ARMSubtarget &Subtarget) const;
+
+  void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                   const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                   bool KillSrc) const override;
+
+  void storeRegToStackSlot(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MBBI, Register SrcReg,
+                           bool isKill, int FrameIndex,
+                           const TargetRegisterClass *RC,
+                           const TargetRegisterInfo *TRI) const override;
+
+  void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI, Register DestReg,
+                            int FrameIndex, const TargetRegisterClass *RC,
                             const TargetRegisterInfo *TRI) const override;
 
-    ARMCC::CondCodes getPredicate(const MachineInstr &MI) const {
-        int PIdx = MI.findFirstPredOperandIdx();
-        return PIdx != -1 ? (ARMCC::CondCodes)MI.getOperand(PIdx).getImm()
-               : ARMCC::AL;
-    }
+  bool expandPostRAPseudo(MachineInstr &MI) const override;
 
-    bool PredicateInstruction(MachineInstr &MI,
-                              ArrayRef<MachineOperand> Pred) const override;
+  bool shouldSink(const MachineInstr &MI) const override;
 
-    bool SubsumesPredicate(ArrayRef<MachineOperand> Pred1,
-                           ArrayRef<MachineOperand> Pred2) const override;
+  void reMaterialize(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
+                     Register DestReg, unsigned SubIdx,
+                     const MachineInstr &Orig,
+                     const TargetRegisterInfo &TRI) const override;
 
-    bool ClobbersPredicate(MachineInstr &MI, std::vector<MachineOperand> &Pred,
-                           bool SkipDead) const override;
+  MachineInstr &duplicate(MachineBasicBlock &MBB,
+                          MachineBasicBlock::iterator InsertBefore,
+                          const MachineInstr &Orig) const override;
 
-    bool isPredicable(const MachineInstr &MI) const override;
+  const MachineInstrBuilder &AddDReg(MachineInstrBuilder &MIB, unsigned Reg,
+                                     unsigned SubIdx, unsigned State,
+                                     const TargetRegisterInfo *TRI) const;
 
-    // CPSR defined in instruction
-    static bool isCPSRDefined(const MachineInstr &MI);
+  bool produceSameValue(const MachineInstr &MI0, const MachineInstr &MI1,
+                        const MachineRegisterInfo *MRI) const override;
 
-    /// GetInstSize - Returns the size of the specified MachineInstr.
-    ///
-    unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+  /// areLoadsFromSameBasePtr - This is used by the pre-regalloc scheduler to
+  /// determine if two loads are loading from the same base address. It should
+  /// only return true if the base pointers are the same and the only
+  /// differences between the two addresses is the offset. It also returns the
+  /// offsets by reference.
+  bool areLoadsFromSameBasePtr(SDNode *Load1, SDNode *Load2, int64_t &Offset1,
+                               int64_t &Offset2) const override;
 
-    unsigned isLoadFromStackSlot(const MachineInstr &MI,
-                                 int &FrameIndex) const override;
-    unsigned isStoreToStackSlot(const MachineInstr &MI,
-                                int &FrameIndex) const override;
-    unsigned isLoadFromStackSlotPostFE(const MachineInstr &MI,
-                                       int &FrameIndex) const override;
-    unsigned isStoreToStackSlotPostFE(const MachineInstr &MI,
-                                      int &FrameIndex) const override;
+  /// shouldScheduleLoadsNear - This is a used by the pre-regalloc scheduler to
+  /// determine (in conjunction with areLoadsFromSameBasePtr) if two loads
+  /// should be scheduled togther. On some targets if two loads are loading from
+  /// addresses in the same cache line, it's better if they are scheduled
+  /// together. This function takes two integers that represent the load offsets
+  /// from the common base address. It returns true if it decides it's desirable
+  /// to schedule the two loads together. "NumLoads" is the number of loads that
+  /// have already been scheduled after Load1.
+  bool shouldScheduleLoadsNear(SDNode *Load1, SDNode *Load2, int64_t Offset1,
+                               int64_t Offset2,
+                               unsigned NumLoads) const override;
 
-    void copyToCPSR(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                    unsigned SrcReg, bool KillSrc,
-                    const ARMSubtarget &Subtarget) const;
-    void copyFromCPSR(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                      unsigned DestReg, bool KillSrc,
-                      const ARMSubtarget &Subtarget) const;
+  bool isSchedulingBoundary(const MachineInstr &MI,
+                            const MachineBasicBlock *MBB,
+                            const MachineFunction &MF) const override;
 
-    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                     const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
-                     bool KillSrc) const override;
+  bool isProfitableToIfCvt(MachineBasicBlock &MBB, unsigned NumCycles,
+                           unsigned ExtraPredCycles,
+                           BranchProbability Probability) const override;
 
-    void storeRegToStackSlot(MachineBasicBlock &MBB,
-                             MachineBasicBlock::iterator MBBI,
-                             Register SrcReg, bool isKill, int FrameIndex,
-                             const TargetRegisterClass *RC,
-                             const TargetRegisterInfo *TRI) const override;
+  bool isProfitableToIfCvt(MachineBasicBlock &TMBB, unsigned NumT,
+                           unsigned ExtraT, MachineBasicBlock &FMBB,
+                           unsigned NumF, unsigned ExtraF,
+                           BranchProbability Probability) const override;
 
-    void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                              MachineBasicBlock::iterator MBBI,
-                              Register DestReg, int FrameIndex,
-                              const TargetRegisterClass *RC,
-                              const TargetRegisterInfo *TRI) const override;
+  bool isProfitableToDupForIfCvt(MachineBasicBlock &MBB, unsigned NumCycles,
+                                 BranchProbability Probability) const override {
+    return NumCycles == 1;
+  }
 
-    bool expandPostRAPseudo(MachineInstr &MI) const override;
+  unsigned extraSizeToPredicateInstructions(const MachineFunction &MF,
+                                            unsigned NumInsts) const override;
+  unsigned predictBranchSizeForIfCvt(MachineInstr &MI) const override;
 
-    bool shouldSink(const MachineInstr &MI) const override;
+  bool isProfitableToUnpredicate(MachineBasicBlock &TMBB,
+                                 MachineBasicBlock &FMBB) const override;
 
-    void reMaterialize(MachineBasicBlock &MBB, MachineBasicBlock::iterator MI,
-                       Register DestReg, unsigned SubIdx,
-                       const MachineInstr &Orig,
-                       const TargetRegisterInfo &TRI) const override;
+  /// analyzeCompare - For a comparison instruction, return the source registers
+  /// in SrcReg and SrcReg2 if having two register operands, and the value it
+  /// compares against in CmpValue. Return true if the comparison instruction
+  /// can be analyzed.
+  bool analyzeCompare(const MachineInstr &MI, Register &SrcReg,
+                      Register &SrcReg2, int &CmpMask,
+                      int &CmpValue) const override;
 
-    MachineInstr &
-    duplicate(MachineBasicBlock &MBB, MachineBasicBlock::iterator InsertBefore,
-              const MachineInstr &Orig) const override;
+  /// optimizeCompareInstr - Convert the instruction to set the zero flag so
+  /// that we can remove a "comparison with zero"; Remove a redundant CMP
+  /// instruction if the flags can be updated in the same way by an earlier
+  /// instruction such as SUB.
+  bool optimizeCompareInstr(MachineInstr &CmpInstr, Register SrcReg,
+                            Register SrcReg2, int CmpMask, int CmpValue,
+                            const MachineRegisterInfo *MRI) const override;
 
-    const MachineInstrBuilder &AddDReg(MachineInstrBuilder &MIB, unsigned Reg,
-                                       unsigned SubIdx, unsigned State,
-                                       const TargetRegisterInfo *TRI) const;
+  bool analyzeSelect(const MachineInstr &MI,
+                     SmallVectorImpl<MachineOperand> &Cond, unsigned &TrueOp,
+                     unsigned &FalseOp, bool &Optimizable) const override;
 
-    bool produceSameValue(const MachineInstr &MI0, const MachineInstr &MI1,
-                          const MachineRegisterInfo *MRI) const override;
+  MachineInstr *optimizeSelect(MachineInstr &MI,
+                               SmallPtrSetImpl<MachineInstr *> &SeenMIs,
+                               bool) const override;
 
-    /// areLoadsFromSameBasePtr - This is used by the pre-regalloc scheduler to
-    /// determine if two loads are loading from the same base address. It should
-    /// only return true if the base pointers are the same and the only
-    /// differences between the two addresses is the offset. It also returns the
-    /// offsets by reference.
-    bool areLoadsFromSameBasePtr(SDNode *Load1, SDNode *Load2, int64_t &Offset1,
-                                 int64_t &Offset2) const override;
+  /// FoldImmediate - 'Reg' is known to be defined by a move immediate
+  /// instruction, try to fold the immediate into the use instruction.
+  bool FoldImmediate(MachineInstr &UseMI, MachineInstr &DefMI, Register Reg,
+                     MachineRegisterInfo *MRI) const override;
 
-    /// shouldScheduleLoadsNear - This is a used by the pre-regalloc scheduler to
-    /// determine (in conjunction with areLoadsFromSameBasePtr) if two loads
-    /// should be scheduled togther. On some targets if two loads are loading from
-    /// addresses in the same cache line, it's better if they are scheduled
-    /// together. This function takes two integers that represent the load offsets
-    /// from the common base address. It returns true if it decides it's desirable
-    /// to schedule the two loads together. "NumLoads" is the number of loads that
-    /// have already been scheduled after Load1.
-    bool shouldScheduleLoadsNear(SDNode *Load1, SDNode *Load2,
-                                 int64_t Offset1, int64_t Offset2,
-                                 unsigned NumLoads) const override;
+  unsigned getNumMicroOps(const InstrItineraryData *ItinData,
+                          const MachineInstr &MI) const override;
 
-    bool isSchedulingBoundary(const MachineInstr &MI,
-                              const MachineBasicBlock *MBB,
-                              const MachineFunction &MF) const override;
+  int getOperandLatency(const InstrItineraryData *ItinData,
+                        const MachineInstr &DefMI, unsigned DefIdx,
+                        const MachineInstr &UseMI,
+                        unsigned UseIdx) const override;
+  int getOperandLatency(const InstrItineraryData *ItinData, SDNode *DefNode,
+                        unsigned DefIdx, SDNode *UseNode,
+                        unsigned UseIdx) const override;
 
-    bool isProfitableToIfCvt(MachineBasicBlock &MBB,
-                             unsigned NumCycles, unsigned ExtraPredCycles,
-                             BranchProbability Probability) const override;
+  /// VFP/NEON execution domains.
+  std::pair<uint16_t, uint16_t>
+  getExecutionDomain(const MachineInstr &MI) const override;
+  void setExecutionDomain(MachineInstr &MI, unsigned Domain) const override;
 
-    bool isProfitableToIfCvt(MachineBasicBlock &TMBB, unsigned NumT,
-                             unsigned ExtraT, MachineBasicBlock &FMBB,
-                             unsigned NumF, unsigned ExtraF,
-                             BranchProbability Probability) const override;
+  unsigned
+  getPartialRegUpdateClearance(const MachineInstr &, unsigned,
+                               const TargetRegisterInfo *) const override;
+  void breakPartialRegDependency(MachineInstr &, unsigned,
+                                 const TargetRegisterInfo *TRI) const override;
 
-    bool isProfitableToDupForIfCvt(MachineBasicBlock &MBB, unsigned NumCycles,
-                                   BranchProbability Probability) const override {
-        return NumCycles == 1;
-    }
+  /// Get the number of addresses by LDM or VLDM or zero for unknown.
+  unsigned getNumLDMAddresses(const MachineInstr &MI) const;
 
-    unsigned extraSizeToPredicateInstructions(const MachineFunction &MF,
-            unsigned NumInsts) const override;
-    unsigned predictBranchSizeForIfCvt(MachineInstr &MI) const override;
+  std::pair<unsigned, unsigned>
+  decomposeMachineOperandsTargetFlags(unsigned TF) const override;
+  ArrayRef<std::pair<unsigned, const char *>>
+  getSerializableDirectMachineOperandTargetFlags() const override;
+  ArrayRef<std::pair<unsigned, const char *>>
+  getSerializableBitmaskMachineOperandTargetFlags() const override;
 
-    bool isProfitableToUnpredicate(MachineBasicBlock &TMBB,
-                                   MachineBasicBlock &FMBB) const override;
+  /// ARM supports the MachineOutliner.
+  bool isFunctionSafeToOutlineFrom(MachineFunction &MF,
+                                   bool OutlineFromLinkOnceODRs) const override;
+  outliner::OutlinedFunction getOutliningCandidateInfo(
+      std::vector<outliner::Candidate> &RepeatedSequenceLocs) const override;
+  outliner::InstrType getOutliningType(MachineBasicBlock::iterator &MIT,
+                                       unsigned Flags) const override;
+  bool isMBBSafeToOutlineFrom(MachineBasicBlock &MBB,
+                              unsigned &Flags) const override;
+  void buildOutlinedFrame(MachineBasicBlock &MBB, MachineFunction &MF,
+                          const outliner::OutlinedFunction &OF) const override;
+  MachineBasicBlock::iterator
+  insertOutlinedCall(Module &M, MachineBasicBlock &MBB,
+                     MachineBasicBlock::iterator &It, MachineFunction &MF,
+                     const outliner::Candidate &C) const override;
 
-    /// analyzeCompare - For a comparison instruction, return the source registers
-    /// in SrcReg and SrcReg2 if having two register operands, and the value it
-    /// compares against in CmpValue. Return true if the comparison instruction
-    /// can be analyzed.
-    bool analyzeCompare(const MachineInstr &MI, Register &SrcReg,
-                        Register &SrcReg2, int &CmpMask,
-                        int &CmpValue) const override;
+  /// Enable outlining by default at -Oz.
+  bool shouldOutlineFromFunctionByDefault(MachineFunction &MF) const override;
 
-    /// optimizeCompareInstr - Convert the instruction to set the zero flag so
-    /// that we can remove a "comparison with zero"; Remove a redundant CMP
-    /// instruction if the flags can be updated in the same way by an earlier
-    /// instruction such as SUB.
-    bool optimizeCompareInstr(MachineInstr &CmpInstr, Register SrcReg,
-                              Register SrcReg2, int CmpMask, int CmpValue,
-                              const MachineRegisterInfo *MRI) const override;
-
-    bool analyzeSelect(const MachineInstr &MI,
-                       SmallVectorImpl<MachineOperand> &Cond, unsigned &TrueOp,
-                       unsigned &FalseOp, bool &Optimizable) const override;
-
-    MachineInstr *optimizeSelect(MachineInstr &MI,
-                                 SmallPtrSetImpl<MachineInstr *> &SeenMIs,
-                                 bool) const override;
-
-    /// FoldImmediate - 'Reg' is known to be defined by a move immediate
-    /// instruction, try to fold the immediate into the use instruction.
-    bool FoldImmediate(MachineInstr &UseMI, MachineInstr &DefMI, Register Reg,
-                       MachineRegisterInfo *MRI) const override;
-
-    unsigned getNumMicroOps(const InstrItineraryData *ItinData,
-                            const MachineInstr &MI) const override;
-
-    int getOperandLatency(const InstrItineraryData *ItinData,
-                          const MachineInstr &DefMI, unsigned DefIdx,
-                          const MachineInstr &UseMI,
-                          unsigned UseIdx) const override;
-    int getOperandLatency(const InstrItineraryData *ItinData,
-                          SDNode *DefNode, unsigned DefIdx,
-                          SDNode *UseNode, unsigned UseIdx) const override;
-
-    /// VFP/NEON execution domains.
-    std::pair<uint16_t, uint16_t>
-    getExecutionDomain(const MachineInstr &MI) const override;
-    void setExecutionDomain(MachineInstr &MI, unsigned Domain) const override;
-
-    unsigned
-    getPartialRegUpdateClearance(const MachineInstr &, unsigned,
-                                 const TargetRegisterInfo *) const override;
-    void breakPartialRegDependency(MachineInstr &, unsigned,
-                                   const TargetRegisterInfo *TRI) const override;
-
-    /// Get the number of addresses by LDM or VLDM or zero for unknown.
-    unsigned getNumLDMAddresses(const MachineInstr &MI) const;
-
-    std::pair<unsigned, unsigned>
-    decomposeMachineOperandsTargetFlags(unsigned TF) const override;
-    ArrayRef<std::pair<unsigned, const char *>>
-            getSerializableDirectMachineOperandTargetFlags() const override;
-    ArrayRef<std::pair<unsigned, const char *>>
-            getSerializableBitmaskMachineOperandTargetFlags() const override;
-
-    /// ARM supports the MachineOutliner.
-    bool isFunctionSafeToOutlineFrom(MachineFunction &MF,
-                                     bool OutlineFromLinkOnceODRs) const override;
-    outliner::OutlinedFunction getOutliningCandidateInfo(
-        std::vector<outliner::Candidate> &RepeatedSequenceLocs) const override;
-    outliner::InstrType getOutliningType(MachineBasicBlock::iterator &MIT,
-                                         unsigned Flags) const override;
-    bool isMBBSafeToOutlineFrom(MachineBasicBlock &MBB,
-                                unsigned &Flags) const override;
-    void buildOutlinedFrame(MachineBasicBlock &MBB, MachineFunction &MF,
-                            const outliner::OutlinedFunction &OF) const override;
-    MachineBasicBlock::iterator
-    insertOutlinedCall(Module &M, MachineBasicBlock &MBB,
-                       MachineBasicBlock::iterator &It, MachineFunction &MF,
-                       const outliner::Candidate &C) const override;
-
-    /// Enable outlining by default at -Oz.
-    bool shouldOutlineFromFunctionByDefault(MachineFunction &MF) const override;
-
-    bool isUnspillableTerminatorImpl(const MachineInstr *MI) const override {
-        return MI->getOpcode() == ARM::t2LoopEndDec ||
-               MI->getOpcode() == ARM::t2DoLoopStartTP;
-    }
+  bool isUnspillableTerminatorImpl(const MachineInstr *MI) const override {
+    return MI->getOpcode() == ARM::t2LoopEndDec ||
+           MI->getOpcode() == ARM::t2DoLoopStartTP;
+  }
 
 private:
-    /// Returns an unused general-purpose register which can be used for
-    /// constructing an outlined call if one exists. Returns 0 otherwise.
-    unsigned findRegisterToSaveLRTo(const outliner::Candidate &C) const;
+  /// Returns an unused general-purpose register which can be used for
+  /// constructing an outlined call if one exists. Returns 0 otherwise.
+  unsigned findRegisterToSaveLRTo(const outliner::Candidate &C) const;
 
-    // Adds an instruction which saves the link register on top of the stack into
-    /// the MachineBasicBlock \p MBB at position \p It.
-    void saveLROnStack(MachineBasicBlock &MBB,
-                       MachineBasicBlock::iterator It) const;
+  // Adds an instruction which saves the link register on top of the stack into
+  /// the MachineBasicBlock \p MBB at position \p It.
+  void saveLROnStack(MachineBasicBlock &MBB,
+                     MachineBasicBlock::iterator It) const;
 
-    /// Adds an instruction which restores the link register from the top the
-    /// stack into the MachineBasicBlock \p MBB at position \p It.
-    void restoreLRFromStack(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator It) const;
+  /// Adds an instruction which restores the link register from the top the
+  /// stack into the MachineBasicBlock \p MBB at position \p It.
+  void restoreLRFromStack(MachineBasicBlock &MBB,
+                          MachineBasicBlock::iterator It) const;
 
-    /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
-    /// for the case when the LR is saved on the stack.
-    void emitCFIForLRSaveOnStack(MachineBasicBlock &MBB,
-                                 MachineBasicBlock::iterator It) const;
+  /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
+  /// for the case when the LR is saved on the stack.
+  void emitCFIForLRSaveOnStack(MachineBasicBlock &MBB,
+                               MachineBasicBlock::iterator It) const;
 
-    /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
-    /// for the case when the LR is saved in the register \p Reg.
-    void emitCFIForLRSaveToReg(MachineBasicBlock &MBB,
-                               MachineBasicBlock::iterator It,
-                               Register Reg) const;
+  /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
+  /// for the case when the LR is saved in the register \p Reg.
+  void emitCFIForLRSaveToReg(MachineBasicBlock &MBB,
+                             MachineBasicBlock::iterator It,
+                             Register Reg) const;
 
-    /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
-    /// after the LR is was restored from the stack.
-    void emitCFIForLRRestoreFromStack(MachineBasicBlock &MBB,
-                                      MachineBasicBlock::iterator It) const;
-
-    /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
-    /// after the LR is was restored from a register.
-    void emitCFIForLRRestoreFromReg(MachineBasicBlock &MBB,
+  /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
+  /// after the LR is was restored from the stack.
+  void emitCFIForLRRestoreFromStack(MachineBasicBlock &MBB,
                                     MachineBasicBlock::iterator It) const;
 
-    unsigned getInstBundleLength(const MachineInstr &MI) const;
+  /// Emit CFI instructions into the MachineBasicBlock \p MBB at position \p It,
+  /// after the LR is was restored from a register.
+  void emitCFIForLRRestoreFromReg(MachineBasicBlock &MBB,
+                                  MachineBasicBlock::iterator It) const;
 
-    int getVLDMDefCycle(const InstrItineraryData *ItinData,
-                        const MCInstrDesc &DefMCID,
-                        unsigned DefClass,
-                        unsigned DefIdx, unsigned DefAlign) const;
-    int getLDMDefCycle(const InstrItineraryData *ItinData,
-                       const MCInstrDesc &DefMCID,
-                       unsigned DefClass,
-                       unsigned DefIdx, unsigned DefAlign) const;
-    int getVSTMUseCycle(const InstrItineraryData *ItinData,
-                        const MCInstrDesc &UseMCID,
-                        unsigned UseClass,
+  unsigned getInstBundleLength(const MachineInstr &MI) const;
+
+  int getVLDMDefCycle(const InstrItineraryData *ItinData,
+                      const MCInstrDesc &DefMCID, unsigned DefClass,
+                      unsigned DefIdx, unsigned DefAlign) const;
+  int getLDMDefCycle(const InstrItineraryData *ItinData,
+                     const MCInstrDesc &DefMCID, unsigned DefClass,
+                     unsigned DefIdx, unsigned DefAlign) const;
+  int getVSTMUseCycle(const InstrItineraryData *ItinData,
+                      const MCInstrDesc &UseMCID, unsigned UseClass,
+                      unsigned UseIdx, unsigned UseAlign) const;
+  int getSTMUseCycle(const InstrItineraryData *ItinData,
+                     const MCInstrDesc &UseMCID, unsigned UseClass,
+                     unsigned UseIdx, unsigned UseAlign) const;
+  int getOperandLatency(const InstrItineraryData *ItinData,
+                        const MCInstrDesc &DefMCID, unsigned DefIdx,
+                        unsigned DefAlign, const MCInstrDesc &UseMCID,
                         unsigned UseIdx, unsigned UseAlign) const;
-    int getSTMUseCycle(const InstrItineraryData *ItinData,
-                       const MCInstrDesc &UseMCID,
-                       unsigned UseClass,
-                       unsigned UseIdx, unsigned UseAlign) const;
-    int getOperandLatency(const InstrItineraryData *ItinData,
-                          const MCInstrDesc &DefMCID,
-                          unsigned DefIdx, unsigned DefAlign,
-                          const MCInstrDesc &UseMCID,
-                          unsigned UseIdx, unsigned UseAlign) const;
 
-    int getOperandLatencyImpl(const InstrItineraryData *ItinData,
-                              const MachineInstr &DefMI, unsigned DefIdx,
-                              const MCInstrDesc &DefMCID, unsigned DefAdj,
-                              const MachineOperand &DefMO, unsigned Reg,
-                              const MachineInstr &UseMI, unsigned UseIdx,
-                              const MCInstrDesc &UseMCID, unsigned UseAdj) const;
+  int getOperandLatencyImpl(const InstrItineraryData *ItinData,
+                            const MachineInstr &DefMI, unsigned DefIdx,
+                            const MCInstrDesc &DefMCID, unsigned DefAdj,
+                            const MachineOperand &DefMO, unsigned Reg,
+                            const MachineInstr &UseMI, unsigned UseIdx,
+                            const MCInstrDesc &UseMCID, unsigned UseAdj) const;
 
-    unsigned getPredicationCost(const MachineInstr &MI) const override;
+  unsigned getPredicationCost(const MachineInstr &MI) const override;
 
-    unsigned getInstrLatency(const InstrItineraryData *ItinData,
-                             const MachineInstr &MI,
-                             unsigned *PredCost = nullptr) const override;
+  unsigned getInstrLatency(const InstrItineraryData *ItinData,
+                           const MachineInstr &MI,
+                           unsigned *PredCost = nullptr) const override;
 
-    int getInstrLatency(const InstrItineraryData *ItinData,
-                        SDNode *Node) const override;
+  int getInstrLatency(const InstrItineraryData *ItinData,
+                      SDNode *Node) const override;
 
-    bool hasHighOperandLatency(const TargetSchedModel &SchedModel,
-                               const MachineRegisterInfo *MRI,
-                               const MachineInstr &DefMI, unsigned DefIdx,
-                               const MachineInstr &UseMI,
-                               unsigned UseIdx) const override;
-    bool hasLowDefLatency(const TargetSchedModel &SchedModel,
-                          const MachineInstr &DefMI,
-                          unsigned DefIdx) const override;
+  bool hasHighOperandLatency(const TargetSchedModel &SchedModel,
+                             const MachineRegisterInfo *MRI,
+                             const MachineInstr &DefMI, unsigned DefIdx,
+                             const MachineInstr &UseMI,
+                             unsigned UseIdx) const override;
+  bool hasLowDefLatency(const TargetSchedModel &SchedModel,
+                        const MachineInstr &DefMI,
+                        unsigned DefIdx) const override;
 
-    /// verifyInstruction - Perform target specific instruction verification.
-    bool verifyInstruction(const MachineInstr &MI,
-                           StringRef &ErrInfo) const override;
+  /// verifyInstruction - Perform target specific instruction verification.
+  bool verifyInstruction(const MachineInstr &MI,
+                         StringRef &ErrInfo) const override;
 
-    virtual void expandLoadStackGuard(MachineBasicBlock::iterator MI) const = 0;
+  virtual void expandLoadStackGuard(MachineBasicBlock::iterator MI) const = 0;
 
-    void expandMEMCPY(MachineBasicBlock::iterator) const;
+  void expandMEMCPY(MachineBasicBlock::iterator) const;
 
-    /// Identify instructions that can be folded into a MOVCC instruction, and
-    /// return the defining instruction.
-    MachineInstr *canFoldIntoMOVCC(Register Reg, const MachineRegisterInfo &MRI,
-                                   const TargetInstrInfo *TII) const;
+  /// Identify instructions that can be folded into a MOVCC instruction, and
+  /// return the defining instruction.
+  MachineInstr *canFoldIntoMOVCC(Register Reg, const MachineRegisterInfo &MRI,
+                                 const TargetInstrInfo *TII) const;
 
-    bool isReallyTriviallyReMaterializable(const MachineInstr &MI,
-                                           AAResults *AA) const override;
+  bool isReallyTriviallyReMaterializable(const MachineInstr &MI,
+                                         AAResults *AA) const override;
 
 private:
-    /// Modeling special VFP / NEON fp MLA / MLS hazards.
+  /// Modeling special VFP / NEON fp MLA / MLS hazards.
 
-    /// MLxEntryMap - Map fp MLA / MLS to the corresponding entry in the internal
-    /// MLx table.
-    DenseMap<unsigned, unsigned> MLxEntryMap;
+  /// MLxEntryMap - Map fp MLA / MLS to the corresponding entry in the internal
+  /// MLx table.
+  DenseMap<unsigned, unsigned> MLxEntryMap;
 
-    /// MLxHazardOpcodes - Set of add / sub and multiply opcodes that would cause
-    /// stalls when scheduled together with fp MLA / MLS opcodes.
-    SmallSet<unsigned, 16> MLxHazardOpcodes;
+  /// MLxHazardOpcodes - Set of add / sub and multiply opcodes that would cause
+  /// stalls when scheduled together with fp MLA / MLS opcodes.
+  SmallSet<unsigned, 16> MLxHazardOpcodes;
 
 public:
-    /// isFpMLxInstruction - Return true if the specified opcode is a fp MLA / MLS
-    /// instruction.
-    bool isFpMLxInstruction(unsigned Opcode) const {
-        return MLxEntryMap.count(Opcode);
-    }
+  /// isFpMLxInstruction - Return true if the specified opcode is a fp MLA / MLS
+  /// instruction.
+  bool isFpMLxInstruction(unsigned Opcode) const {
+    return MLxEntryMap.count(Opcode);
+  }
 
-    /// isFpMLxInstruction - This version also returns the multiply opcode and the
-    /// addition / subtraction opcode to expand to. Return true for 'HasLane' for
-    /// the MLX instructions with an extra lane operand.
-    bool isFpMLxInstruction(unsigned Opcode, unsigned &MulOpc,
-                            unsigned &AddSubOpc, bool &NegAcc,
-                            bool &HasLane) const;
+  /// isFpMLxInstruction - This version also returns the multiply opcode and the
+  /// addition / subtraction opcode to expand to. Return true for 'HasLane' for
+  /// the MLX instructions with an extra lane operand.
+  bool isFpMLxInstruction(unsigned Opcode, unsigned &MulOpc,
+                          unsigned &AddSubOpc, bool &NegAcc,
+                          bool &HasLane) const;
 
-    /// canCauseFpMLxStall - Return true if an instruction of the specified opcode
-    /// will cause stalls when scheduled after (within 4-cycle window) a fp
-    /// MLA / MLS instruction.
-    bool canCauseFpMLxStall(unsigned Opcode) const {
-        return MLxHazardOpcodes.count(Opcode);
-    }
+  /// canCauseFpMLxStall - Return true if an instruction of the specified opcode
+  /// will cause stalls when scheduled after (within 4-cycle window) a fp
+  /// MLA / MLS instruction.
+  bool canCauseFpMLxStall(unsigned Opcode) const {
+    return MLxHazardOpcodes.count(Opcode);
+  }
 
-    /// Returns true if the instruction has a shift by immediate that can be
-    /// executed in one cycle less.
-    bool isSwiftFastImmShift(const MachineInstr *MI) const;
+  /// Returns true if the instruction has a shift by immediate that can be
+  /// executed in one cycle less.
+  bool isSwiftFastImmShift(const MachineInstr *MI) const;
 
-    /// Returns predicate register associated with the given frame instruction.
-    unsigned getFramePred(const MachineInstr &MI) const {
-        assert(isFrameInstr(MI));
-        // Operands of ADJCALLSTACKDOWN/ADJCALLSTACKUP:
-        // - argument declared in the pattern:
-        // 0 - frame size
-        // 1 - arg of CALLSEQ_START/CALLSEQ_END
-        // 2 - predicate code (like ARMCC::AL)
-        // - added by predOps:
-        // 3 - predicate reg
-        return MI.getOperand(3).getReg();
-    }
+  /// Returns predicate register associated with the given frame instruction.
+  unsigned getFramePred(const MachineInstr &MI) const {
+    assert(isFrameInstr(MI));
+    // Operands of ADJCALLSTACKDOWN/ADJCALLSTACKUP:
+    // - argument declared in the pattern:
+    // 0 - frame size
+    // 1 - arg of CALLSEQ_START/CALLSEQ_END
+    // 2 - predicate code (like ARMCC::AL)
+    // - added by predOps:
+    // 3 - predicate reg
+    return MI.getOperand(3).getReg();
+  }
 
-    Optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
-                                        Register Reg) const override;
+  Optional<RegImmPair> isAddImmediate(const MachineInstr &MI,
+                                      Register Reg) const override;
 };
 
 /// Get the operands corresponding to the given \p Pred value. By default, the
 /// predicate register is assumed to be 0 (no register), but you can pass in a
 /// \p PredReg if that is not the case.
 static inline std::array<MachineOperand, 2> predOps(ARMCC::CondCodes Pred,
-        unsigned PredReg = 0) {
-    return {{
-            MachineOperand::CreateImm(static_cast<int64_t>(Pred)),
-            MachineOperand::CreateReg(PredReg, false)
-        }};
+                                                    unsigned PredReg = 0) {
+  return {{MachineOperand::CreateImm(static_cast<int64_t>(Pred)),
+           MachineOperand::CreateReg(PredReg, false)}};
 }
 
 /// Get the operand corresponding to the conditional code result. By default,
 /// this is 0 (no register).
 static inline MachineOperand condCodeOp(unsigned CCReg = 0) {
-    return MachineOperand::CreateReg(CCReg, false);
+  return MachineOperand::CreateReg(CCReg, false);
 }
 
 /// Get the operand corresponding to the conditional code result for Thumb1.
 /// This operand will always refer to CPSR and it will have the Define flag set.
 /// You can optionally set the Dead flag by means of \p isDead.
 static inline MachineOperand t1CondCodeOp(bool isDead = false) {
-    return MachineOperand::CreateReg(ARM::CPSR,
-                                     /*Define*/ true, /*Implicit*/ false,
-                                     /*Kill*/ false, isDead);
+  return MachineOperand::CreateReg(ARM::CPSR,
+                                   /*Define*/ true, /*Implicit*/ false,
+                                   /*Kill*/ false, isDead);
 }
 
-static inline
-bool isUncondBranchOpcode(int Opc) {
-    return Opc == ARM::B || Opc == ARM::tB || Opc == ARM::t2B;
+static inline bool isUncondBranchOpcode(int Opc) {
+  return Opc == ARM::B || Opc == ARM::tB || Opc == ARM::t2B;
 }
 
 // This table shows the VPT instruction variants, i.e. the different
 // mask field encodings, see also B5.6. Predication/conditional execution in
 // the ArmARM.
 static inline bool isVPTOpcode(int Opc) {
-    return Opc == ARM::MVE_VPTv16i8 || Opc == ARM::MVE_VPTv16u8 ||
-           Opc == ARM::MVE_VPTv16s8 || Opc == ARM::MVE_VPTv8i16 ||
-           Opc == ARM::MVE_VPTv8u16 || Opc == ARM::MVE_VPTv8s16 ||
-           Opc == ARM::MVE_VPTv4i32 || Opc == ARM::MVE_VPTv4u32 ||
-           Opc == ARM::MVE_VPTv4s32 || Opc == ARM::MVE_VPTv4f32 ||
-           Opc == ARM::MVE_VPTv8f16 || Opc == ARM::MVE_VPTv16i8r ||
-           Opc == ARM::MVE_VPTv16u8r || Opc == ARM::MVE_VPTv16s8r ||
-           Opc == ARM::MVE_VPTv8i16r || Opc == ARM::MVE_VPTv8u16r ||
-           Opc == ARM::MVE_VPTv8s16r || Opc == ARM::MVE_VPTv4i32r ||
-           Opc == ARM::MVE_VPTv4u32r || Opc == ARM::MVE_VPTv4s32r ||
-           Opc == ARM::MVE_VPTv4f32r || Opc == ARM::MVE_VPTv8f16r ||
-           Opc == ARM::MVE_VPST;
+  return Opc == ARM::MVE_VPTv16i8 || Opc == ARM::MVE_VPTv16u8 ||
+         Opc == ARM::MVE_VPTv16s8 || Opc == ARM::MVE_VPTv8i16 ||
+         Opc == ARM::MVE_VPTv8u16 || Opc == ARM::MVE_VPTv8s16 ||
+         Opc == ARM::MVE_VPTv4i32 || Opc == ARM::MVE_VPTv4u32 ||
+         Opc == ARM::MVE_VPTv4s32 || Opc == ARM::MVE_VPTv4f32 ||
+         Opc == ARM::MVE_VPTv8f16 || Opc == ARM::MVE_VPTv16i8r ||
+         Opc == ARM::MVE_VPTv16u8r || Opc == ARM::MVE_VPTv16s8r ||
+         Opc == ARM::MVE_VPTv8i16r || Opc == ARM::MVE_VPTv8u16r ||
+         Opc == ARM::MVE_VPTv8s16r || Opc == ARM::MVE_VPTv4i32r ||
+         Opc == ARM::MVE_VPTv4u32r || Opc == ARM::MVE_VPTv4s32r ||
+         Opc == ARM::MVE_VPTv4f32r || Opc == ARM::MVE_VPTv8f16r ||
+         Opc == ARM::MVE_VPST;
 }
 
-static inline
-unsigned VCMPOpcodeToVPT(unsigned Opcode) {
-    switch (Opcode) {
-    default:
-        return 0;
-    case ARM::MVE_VCMPf32:
-        return ARM::MVE_VPTv4f32;
-    case ARM::MVE_VCMPf16:
-        return ARM::MVE_VPTv8f16;
-    case ARM::MVE_VCMPi8:
-        return ARM::MVE_VPTv16i8;
-    case ARM::MVE_VCMPi16:
-        return ARM::MVE_VPTv8i16;
-    case ARM::MVE_VCMPi32:
-        return ARM::MVE_VPTv4i32;
-    case ARM::MVE_VCMPu8:
-        return ARM::MVE_VPTv16u8;
-    case ARM::MVE_VCMPu16:
-        return ARM::MVE_VPTv8u16;
-    case ARM::MVE_VCMPu32:
-        return ARM::MVE_VPTv4u32;
-    case ARM::MVE_VCMPs8:
-        return ARM::MVE_VPTv16s8;
-    case ARM::MVE_VCMPs16:
-        return ARM::MVE_VPTv8s16;
-    case ARM::MVE_VCMPs32:
-        return ARM::MVE_VPTv4s32;
+static inline unsigned VCMPOpcodeToVPT(unsigned Opcode) {
+  switch (Opcode) {
+  default:
+    return 0;
+  case ARM::MVE_VCMPf32:
+    return ARM::MVE_VPTv4f32;
+  case ARM::MVE_VCMPf16:
+    return ARM::MVE_VPTv8f16;
+  case ARM::MVE_VCMPi8:
+    return ARM::MVE_VPTv16i8;
+  case ARM::MVE_VCMPi16:
+    return ARM::MVE_VPTv8i16;
+  case ARM::MVE_VCMPi32:
+    return ARM::MVE_VPTv4i32;
+  case ARM::MVE_VCMPu8:
+    return ARM::MVE_VPTv16u8;
+  case ARM::MVE_VCMPu16:
+    return ARM::MVE_VPTv8u16;
+  case ARM::MVE_VCMPu32:
+    return ARM::MVE_VPTv4u32;
+  case ARM::MVE_VCMPs8:
+    return ARM::MVE_VPTv16s8;
+  case ARM::MVE_VCMPs16:
+    return ARM::MVE_VPTv8s16;
+  case ARM::MVE_VCMPs32:
+    return ARM::MVE_VPTv4s32;
 
-    case ARM::MVE_VCMPf32r:
-        return ARM::MVE_VPTv4f32r;
-    case ARM::MVE_VCMPf16r:
-        return ARM::MVE_VPTv8f16r;
-    case ARM::MVE_VCMPi8r:
-        return ARM::MVE_VPTv16i8r;
-    case ARM::MVE_VCMPi16r:
-        return ARM::MVE_VPTv8i16r;
-    case ARM::MVE_VCMPi32r:
-        return ARM::MVE_VPTv4i32r;
-    case ARM::MVE_VCMPu8r:
-        return ARM::MVE_VPTv16u8r;
-    case ARM::MVE_VCMPu16r:
-        return ARM::MVE_VPTv8u16r;
-    case ARM::MVE_VCMPu32r:
-        return ARM::MVE_VPTv4u32r;
-    case ARM::MVE_VCMPs8r:
-        return ARM::MVE_VPTv16s8r;
-    case ARM::MVE_VCMPs16r:
-        return ARM::MVE_VPTv8s16r;
-    case ARM::MVE_VCMPs32r:
-        return ARM::MVE_VPTv4s32r;
-    }
+  case ARM::MVE_VCMPf32r:
+    return ARM::MVE_VPTv4f32r;
+  case ARM::MVE_VCMPf16r:
+    return ARM::MVE_VPTv8f16r;
+  case ARM::MVE_VCMPi8r:
+    return ARM::MVE_VPTv16i8r;
+  case ARM::MVE_VCMPi16r:
+    return ARM::MVE_VPTv8i16r;
+  case ARM::MVE_VCMPi32r:
+    return ARM::MVE_VPTv4i32r;
+  case ARM::MVE_VCMPu8r:
+    return ARM::MVE_VPTv16u8r;
+  case ARM::MVE_VCMPu16r:
+    return ARM::MVE_VPTv8u16r;
+  case ARM::MVE_VCMPu32r:
+    return ARM::MVE_VPTv4u32r;
+  case ARM::MVE_VCMPs8r:
+    return ARM::MVE_VPTv16s8r;
+  case ARM::MVE_VCMPs16r:
+    return ARM::MVE_VPTv8s16r;
+  case ARM::MVE_VCMPs32r:
+    return ARM::MVE_VPTv4s32r;
+  }
 }
 
-static inline
-bool isCondBranchOpcode(int Opc) {
-    return Opc == ARM::Bcc || Opc == ARM::tBcc || Opc == ARM::t2Bcc;
+static inline bool isCondBranchOpcode(int Opc) {
+  return Opc == ARM::Bcc || Opc == ARM::tBcc || Opc == ARM::t2Bcc;
 }
 
 static inline bool isJumpTableBranchOpcode(int Opc) {
-    return Opc == ARM::BR_JTr || Opc == ARM::BR_JTm_i12 ||
-           Opc == ARM::BR_JTm_rs || Opc == ARM::BR_JTadd || Opc == ARM::tBR_JTr ||
-           Opc == ARM::t2BR_JT;
+  return Opc == ARM::BR_JTr || Opc == ARM::BR_JTm_i12 ||
+         Opc == ARM::BR_JTm_rs || Opc == ARM::BR_JTadd || Opc == ARM::tBR_JTr ||
+         Opc == ARM::t2BR_JT;
 }
 
-static inline
-bool isIndirectBranchOpcode(int Opc) {
-    return Opc == ARM::BX || Opc == ARM::MOVPCRX || Opc == ARM::tBRIND;
+static inline bool isIndirectBranchOpcode(int Opc) {
+  return Opc == ARM::BX || Opc == ARM::MOVPCRX || Opc == ARM::tBRIND;
 }
 
 static inline bool isIndirectCall(const MachineInstr &MI) {
-    int Opc = MI.getOpcode();
-    switch (Opc) {
-    // indirect calls:
-    case ARM::BLX:
-    case ARM::BLX_noip:
-    case ARM::BLX_pred:
-    case ARM::BLX_pred_noip:
-    case ARM::BX_CALL:
-    case ARM::BMOVPCRX_CALL:
-    case ARM::TCRETURNri:
-    case ARM::TAILJMPr:
-    case ARM::TAILJMPr4:
-    case ARM::tBLXr:
-    case ARM::tBLXr_noip:
-    case ARM::tBLXNSr:
-    case ARM::tBLXNS_CALL:
-    case ARM::tBX_CALL:
-    case ARM::tTAILJMPr:
-        assert(MI.isCall(MachineInstr::IgnoreBundle));
-        return true;
-    // direct calls:
-    case ARM::BL:
-    case ARM::BL_pred:
-    case ARM::BMOVPCB_CALL:
-    case ARM::BL_PUSHLR:
-    case ARM::BLXi:
-    case ARM::TCRETURNdi:
-    case ARM::TAILJMPd:
-    case ARM::SVC:
-    case ARM::HVC:
-    case ARM::TPsoft:
-    case ARM::tTAILJMPd:
-    case ARM::t2SMC:
-    case ARM::t2HVC:
-    case ARM::tBL:
-    case ARM::tBLXi:
-    case ARM::tBL_PUSHLR:
-    case ARM::tTAILJMPdND:
-    case ARM::tSVC:
-    case ARM::tTPsoft:
-        assert(MI.isCall(MachineInstr::IgnoreBundle));
-        return false;
-    }
-    assert(!MI.isCall(MachineInstr::IgnoreBundle));
+  int Opc = MI.getOpcode();
+  switch (Opc) {
+  // indirect calls:
+  case ARM::BLX:
+  case ARM::BLX_noip:
+  case ARM::BLX_pred:
+  case ARM::BLX_pred_noip:
+  case ARM::BX_CALL:
+  case ARM::BMOVPCRX_CALL:
+  case ARM::TCRETURNri:
+  case ARM::TAILJMPr:
+  case ARM::TAILJMPr4:
+  case ARM::tBLXr:
+  case ARM::tBLXr_noip:
+  case ARM::tBLXNSr:
+  case ARM::tBLXNS_CALL:
+  case ARM::tBX_CALL:
+  case ARM::tTAILJMPr:
+    assert(MI.isCall(MachineInstr::IgnoreBundle));
+    return true;
+  // direct calls:
+  case ARM::BL:
+  case ARM::BL_pred:
+  case ARM::BMOVPCB_CALL:
+  case ARM::BL_PUSHLR:
+  case ARM::BLXi:
+  case ARM::TCRETURNdi:
+  case ARM::TAILJMPd:
+  case ARM::SVC:
+  case ARM::HVC:
+  case ARM::TPsoft:
+  case ARM::tTAILJMPd:
+  case ARM::t2SMC:
+  case ARM::t2HVC:
+  case ARM::tBL:
+  case ARM::tBLXi:
+  case ARM::tBL_PUSHLR:
+  case ARM::tTAILJMPdND:
+  case ARM::tSVC:
+  case ARM::tTPsoft:
+    assert(MI.isCall(MachineInstr::IgnoreBundle));
     return false;
+  }
+  assert(!MI.isCall(MachineInstr::IgnoreBundle));
+  return false;
 }
 
 static inline bool isIndirectControlFlowNotComingBack(const MachineInstr &MI) {
-    int opc = MI.getOpcode();
-    return MI.isReturn() || isIndirectBranchOpcode(MI.getOpcode()) ||
-           isJumpTableBranchOpcode(opc);
+  int opc = MI.getOpcode();
+  return MI.isReturn() || isIndirectBranchOpcode(MI.getOpcode()) ||
+         isJumpTableBranchOpcode(opc);
 }
 
 static inline bool isSpeculationBarrierEndBBOpcode(int Opc) {
-    return Opc == ARM::SpeculationBarrierISBDSBEndBB ||
-           Opc == ARM::SpeculationBarrierSBEndBB ||
-           Opc == ARM::t2SpeculationBarrierISBDSBEndBB ||
-           Opc == ARM::t2SpeculationBarrierSBEndBB;
+  return Opc == ARM::SpeculationBarrierISBDSBEndBB ||
+         Opc == ARM::SpeculationBarrierSBEndBB ||
+         Opc == ARM::t2SpeculationBarrierISBDSBEndBB ||
+         Opc == ARM::t2SpeculationBarrierSBEndBB;
 }
 
 static inline bool isPopOpcode(int Opc) {
-    return Opc == ARM::tPOP_RET || Opc == ARM::LDMIA_RET ||
-           Opc == ARM::t2LDMIA_RET || Opc == ARM::tPOP || Opc == ARM::LDMIA_UPD ||
-           Opc == ARM::t2LDMIA_UPD || Opc == ARM::VLDMDIA_UPD;
+  return Opc == ARM::tPOP_RET || Opc == ARM::LDMIA_RET ||
+         Opc == ARM::t2LDMIA_RET || Opc == ARM::tPOP || Opc == ARM::LDMIA_UPD ||
+         Opc == ARM::t2LDMIA_UPD || Opc == ARM::VLDMDIA_UPD;
 }
 
 static inline bool isPushOpcode(int Opc) {
-    return Opc == ARM::tPUSH || Opc == ARM::t2STMDB_UPD ||
-           Opc == ARM::STMDB_UPD || Opc == ARM::VSTMDDB_UPD;
+  return Opc == ARM::tPUSH || Opc == ARM::t2STMDB_UPD ||
+         Opc == ARM::STMDB_UPD || Opc == ARM::VSTMDDB_UPD;
 }
 
 static inline bool isSubImmOpcode(int Opc) {
-    return Opc == ARM::SUBri ||
-           Opc == ARM::tSUBi3 || Opc == ARM::tSUBi8 ||
-           Opc == ARM::tSUBSi3 || Opc == ARM::tSUBSi8 ||
-           Opc == ARM::t2SUBri || Opc == ARM::t2SUBri12 || Opc == ARM::t2SUBSri;
+  return Opc == ARM::SUBri || Opc == ARM::tSUBi3 || Opc == ARM::tSUBi8 ||
+         Opc == ARM::tSUBSi3 || Opc == ARM::tSUBSi8 || Opc == ARM::t2SUBri ||
+         Opc == ARM::t2SUBri12 || Opc == ARM::t2SUBSri;
 }
 
 static inline bool isMovRegOpcode(int Opc) {
-    return Opc == ARM::MOVr || Opc == ARM::tMOVr || Opc == ARM::t2MOVr;
+  return Opc == ARM::MOVr || Opc == ARM::tMOVr || Opc == ARM::t2MOVr;
 }
 /// isValidCoprocessorNumber - decide whether an explicit coprocessor
 /// number is legal in generic instructions like CDP. The answer can
 /// vary with the subtarget.
 static inline bool isValidCoprocessorNumber(unsigned Num,
-        const FeatureBitset& featureBits) {
-    // In Armv7 and Armv8-M CP10 and CP11 clash with VFP/NEON, however, the
-    // coprocessor is still valid for CDP/MCR/MRC and friends. Allowing it is
-    // useful for code which is shared with older architectures which do not know
-    // the new VFP/NEON mnemonics.
+                                            const FeatureBitset &featureBits) {
+  // In Armv7 and Armv8-M CP10 and CP11 clash with VFP/NEON, however, the
+  // coprocessor is still valid for CDP/MCR/MRC and friends. Allowing it is
+  // useful for code which is shared with older architectures which do not know
+  // the new VFP/NEON mnemonics.
 
-    // Armv8-A disallows everything *other* than 111x (CP14 and CP15).
-    if (featureBits[ARM::HasV8Ops] && (Num & 0xE) != 0xE)
-        return false;
+  // Armv8-A disallows everything *other* than 111x (CP14 and CP15).
+  if (featureBits[ARM::HasV8Ops] && (Num & 0xE) != 0xE)
+    return false;
 
-    // Armv8.1-M disallows 100x (CP8,CP9) and 111x (CP14,CP15)
-    // which clash with MVE.
-    if (featureBits[ARM::HasV8_1MMainlineOps] &&
-            ((Num & 0xE) == 0x8 || (Num & 0xE) == 0xE))
-        return false;
+  // Armv8.1-M disallows 100x (CP8,CP9) and 111x (CP14,CP15)
+  // which clash with MVE.
+  if (featureBits[ARM::HasV8_1MMainlineOps] &&
+      ((Num & 0xE) == 0x8 || (Num & 0xE) == 0xE))
+    return false;
 
-    return true;
+  return true;
 }
 
 /// getInstrPredicate - If instruction is predicated, returns its predicate
@@ -830,89 +815,89 @@ unsigned ConstantMaterializationCost(unsigned Val,
 /// Uses the cost from ConstantMaterializationCost, first with ForCodesize as
 /// specified. If the scores are equal, return the comparison for !ForCodesize.
 bool HasLowerConstantMaterializationCost(unsigned Val1, unsigned Val2,
-        const ARMSubtarget *Subtarget,
-        bool ForCodesize = false);
+                                         const ARMSubtarget *Subtarget,
+                                         bool ForCodesize = false);
 
 // Return the immediate if this is ADDri or SUBri, scaled as appropriate.
 // Returns 0 for unknown instructions.
 inline int getAddSubImmediate(MachineInstr &MI) {
-    int Scale = 1;
-    unsigned ImmOp;
-    switch (MI.getOpcode()) {
-    case ARM::t2ADDri:
-        ImmOp = 2;
-        break;
-    case ARM::t2SUBri:
-    case ARM::t2SUBri12:
-        ImmOp = 2;
-        Scale = -1;
-        break;
-    case ARM::tSUBi3:
-    case ARM::tSUBi8:
-        ImmOp = 3;
-        Scale = -1;
-        break;
-    default:
-        return 0;
-    }
-    return Scale * MI.getOperand(ImmOp).getImm();
+  int Scale = 1;
+  unsigned ImmOp;
+  switch (MI.getOpcode()) {
+  case ARM::t2ADDri:
+    ImmOp = 2;
+    break;
+  case ARM::t2SUBri:
+  case ARM::t2SUBri12:
+    ImmOp = 2;
+    Scale = -1;
+    break;
+  case ARM::tSUBi3:
+  case ARM::tSUBi8:
+    ImmOp = 3;
+    Scale = -1;
+    break;
+  default:
+    return 0;
+  }
+  return Scale * MI.getOperand(ImmOp).getImm();
 }
 
 // Given a memory access Opcode, check that the give Imm would be a valid Offset
 // for this instruction using its addressing mode.
 inline bool isLegalAddressImm(unsigned Opcode, int Imm,
                               const TargetInstrInfo *TII) {
-    const MCInstrDesc &Desc = TII->get(Opcode);
-    unsigned AddrMode = (Desc.TSFlags & ARMII::AddrModeMask);
-    switch (AddrMode) {
-    case ARMII::AddrModeT2_i7:
-        return std::abs(Imm) < (((1 << 7) * 1) - 1);
-    case ARMII::AddrModeT2_i7s2:
-        return std::abs(Imm) < (((1 << 7) * 2) - 1) && Imm % 2 == 0;
-    case ARMII::AddrModeT2_i7s4:
-        return std::abs(Imm) < (((1 << 7) * 4) - 1) && Imm % 4 == 0;
-    case ARMII::AddrModeT2_i8:
-        return std::abs(Imm) < (((1 << 8) * 1) - 1);
-    case ARMII::AddrModeT2_i12:
-        return Imm >= 0 && Imm < (((1 << 12) * 1) - 1);
-    default:
-        llvm_unreachable("Unhandled Addressing mode");
-    }
+  const MCInstrDesc &Desc = TII->get(Opcode);
+  unsigned AddrMode = (Desc.TSFlags & ARMII::AddrModeMask);
+  switch (AddrMode) {
+  case ARMII::AddrModeT2_i7:
+    return std::abs(Imm) < (((1 << 7) * 1) - 1);
+  case ARMII::AddrModeT2_i7s2:
+    return std::abs(Imm) < (((1 << 7) * 2) - 1) && Imm % 2 == 0;
+  case ARMII::AddrModeT2_i7s4:
+    return std::abs(Imm) < (((1 << 7) * 4) - 1) && Imm % 4 == 0;
+  case ARMII::AddrModeT2_i8:
+    return std::abs(Imm) < (((1 << 8) * 1) - 1);
+  case ARMII::AddrModeT2_i12:
+    return Imm >= 0 && Imm < (((1 << 12) * 1) - 1);
+  default:
+    llvm_unreachable("Unhandled Addressing mode");
+  }
 }
 
 // Return true if the given intrinsic is a gather
 inline bool isGather(IntrinsicInst *IntInst) {
-    if (IntInst == nullptr)
-        return false;
-    unsigned IntrinsicID = IntInst->getIntrinsicID();
-    return (IntrinsicID == Intrinsic::masked_gather ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_base ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_predicated ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_wb ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_wb_predicated ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_offset ||
-            IntrinsicID == Intrinsic::arm_mve_vldr_gather_offset_predicated);
+  if (IntInst == nullptr)
+    return false;
+  unsigned IntrinsicID = IntInst->getIntrinsicID();
+  return (IntrinsicID == Intrinsic::masked_gather ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_base ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_predicated ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_wb ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_base_wb_predicated ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_offset ||
+          IntrinsicID == Intrinsic::arm_mve_vldr_gather_offset_predicated);
 }
 
 // Return true if the given intrinsic is a scatter
 inline bool isScatter(IntrinsicInst *IntInst) {
-    if (IntInst == nullptr)
-        return false;
-    unsigned IntrinsicID = IntInst->getIntrinsicID();
-    return (IntrinsicID == Intrinsic::masked_scatter ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_predicated ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_wb ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_wb_predicated ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_offset ||
-            IntrinsicID == Intrinsic::arm_mve_vstr_scatter_offset_predicated);
+  if (IntInst == nullptr)
+    return false;
+  unsigned IntrinsicID = IntInst->getIntrinsicID();
+  return (IntrinsicID == Intrinsic::masked_scatter ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_predicated ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_wb ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_base_wb_predicated ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_offset ||
+          IntrinsicID == Intrinsic::arm_mve_vstr_scatter_offset_predicated);
 }
 
 // Return true if the given intrinsic is a gather or scatter
 inline bool isGatherScatter(IntrinsicInst *IntInst) {
-    if (IntInst == nullptr)
-        return false;
-    return isGather(IntInst) || isScatter(IntInst);
+  if (IntInst == nullptr)
+    return false;
+  return isGather(IntInst) || isScatter(IntInst);
 }
 
 unsigned getBLXOpcode(const MachineFunction &MF);

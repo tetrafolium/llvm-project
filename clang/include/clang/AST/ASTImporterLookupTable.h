@@ -46,27 +46,27 @@ class DeclContext;
 // given DC. Once we found it then we can handle any visibility related tasks.
 class ASTImporterLookupTable {
 
-    // We store a list of declarations for each name.
-    // And we collect these lists for each DeclContext.
-    // We could have a flat map with (DeclContext, Name) tuple as key, but a two
-    // level map seems easier to handle.
-    using DeclList = llvm::SmallSetVector<NamedDecl *, 2>;
-    using NameMap = llvm::SmallDenseMap<DeclarationName, DeclList, 4>;
-    using DCMap = llvm::DenseMap<DeclContext *, NameMap>;
+  // We store a list of declarations for each name.
+  // And we collect these lists for each DeclContext.
+  // We could have a flat map with (DeclContext, Name) tuple as key, but a two
+  // level map seems easier to handle.
+  using DeclList = llvm::SmallSetVector<NamedDecl *, 2>;
+  using NameMap = llvm::SmallDenseMap<DeclarationName, DeclList, 4>;
+  using DCMap = llvm::DenseMap<DeclContext *, NameMap>;
 
-    void add(DeclContext *DC, NamedDecl *ND);
-    void remove(DeclContext *DC, NamedDecl *ND);
+  void add(DeclContext *DC, NamedDecl *ND);
+  void remove(DeclContext *DC, NamedDecl *ND);
 
-    DCMap LookupTable;
+  DCMap LookupTable;
 
 public:
-    ASTImporterLookupTable(TranslationUnitDecl &TU);
-    void add(NamedDecl *ND);
-    void remove(NamedDecl *ND);
-    using LookupResult = DeclList;
-    LookupResult lookup(DeclContext *DC, DeclarationName Name) const;
-    void dump(DeclContext *DC) const;
-    void dump() const;
+  ASTImporterLookupTable(TranslationUnitDecl &TU);
+  void add(NamedDecl *ND);
+  void remove(NamedDecl *ND);
+  using LookupResult = DeclList;
+  LookupResult lookup(DeclContext *DC, DeclarationName Name) const;
+  void dump(DeclContext *DC) const;
+  void dump() const;
 };
 
 } // namespace clang

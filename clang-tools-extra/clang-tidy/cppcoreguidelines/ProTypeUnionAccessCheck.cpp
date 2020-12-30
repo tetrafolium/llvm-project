@@ -17,16 +17,16 @@ namespace tidy {
 namespace cppcoreguidelines {
 
 void ProTypeUnionAccessCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        memberExpr(hasObjectExpression(hasType(recordDecl(isUnion()))))
-        .bind("expr"),
-        this);
+  Finder->addMatcher(
+      memberExpr(hasObjectExpression(hasType(recordDecl(isUnion()))))
+          .bind("expr"),
+      this);
 }
 
 void ProTypeUnionAccessCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *Matched = Result.Nodes.getNodeAs<MemberExpr>("expr");
-    diag(Matched->getMemberLoc(),
-         "do not access members of unions; use (boost::)variant instead");
+  const auto *Matched = Result.Nodes.getNodeAs<MemberExpr>("expr");
+  diag(Matched->getMemberLoc(),
+       "do not access members of unions; use (boost::)variant instead");
 }
 
 } // namespace cppcoreguidelines

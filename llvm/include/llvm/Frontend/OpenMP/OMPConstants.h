@@ -74,7 +74,7 @@ enum class DefaultKind {
 enum class IdentFlag {
 #define OMP_IDENT_FLAG(Enum, Str, Value) Enum = Value,
 #include "llvm/Frontend/OpenMP/OMPKinds.def"
-    LLVM_MARK_AS_BITMASK_ENUM(0x7FFFFFFF)
+  LLVM_MARK_AS_BITMASK_ENUM(0x7FFFFFFF)
 };
 
 #define OMP_IDENT_FLAG(Enum, ...) constexpr auto Enum = omp::IdentFlag::Enum;
@@ -82,14 +82,14 @@ enum class IdentFlag {
 
 /// Helper to describe assume clauses.
 struct AssumptionClauseMappingInfo {
-    /// The identifier describing the (beginning of the) clause.
-    llvm::StringLiteral Identifier;
-    /// Flag to determine if the identifier is a full name or the start of a name.
-    bool StartsWith;
-    /// Flag to determine if a directive lists follows.
-    bool HasDirectiveList;
-    /// Flag to determine if an expression follows.
-    bool HasExpression;
+  /// The identifier describing the (beginning of the) clause.
+  llvm::StringLiteral Identifier;
+  /// Flag to determine if the identifier is a full name or the start of a name.
+  bool StartsWith;
+  /// Flag to determine if a directive lists follows.
+  bool HasDirectiveList;
+  /// Flag to determine if an expression follows.
+  bool HasExpression;
 };
 
 /// All known assume clauses.
@@ -101,10 +101,10 @@ static constexpr AssumptionClauseMappingInfo AssumptionClauseMappings[] = {
 };
 
 inline std::string getAllAssumeClauseOptions() {
-    std::string S;
-    for (const AssumptionClauseMappingInfo &ACMI : AssumptionClauseMappings)
-        S += (S.empty() ? "'" : "', '") + ACMI.Identifier.str();
-    return S + "'";
+  std::string S;
+  for (const AssumptionClauseMappingInfo &ACMI : AssumptionClauseMappings)
+    S += (S.empty() ? "'" : "', '") + ACMI.Identifier.str();
+  return S + "'";
 }
 
 } // end namespace omp

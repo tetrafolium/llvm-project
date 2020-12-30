@@ -22,6 +22,4 @@
 using namespace llvm;
 using namespace llvm::pdb;
 
-void PDBSymbolTypeUDT::dump(PDBSymDumper &Dumper) const {
-    Dumper.dump(*this);
-}
+void PDBSymbolTypeUDT::dump(PDBSymDumper &Dumper) const { Dumper.dump(*this); }

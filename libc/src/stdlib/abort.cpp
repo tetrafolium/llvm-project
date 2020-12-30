@@ -15,16 +15,16 @@
 namespace __llvm_libc {
 
 void LLVM_LIBC_ENTRYPOINT(abort)() {
-    // TODO: When sigprocmask and sigaction land:
-    // Unblock SIGABRT, raise it, if it was ignored or the handler returned,
-    // change its action to SIG_DFL, raise it again.
-    // TODO: When C11 mutexes land:
-    // Acquire recursive mutex (in case the current signal handler for SIGABRT
-    // itself calls abort we don't want to deadlock on the same thread trying
-    // to acquire it's own mutex.)
-    __llvm_libc::raise(SIGABRT);
-    __llvm_libc::raise(SIGKILL);
-    __llvm_libc::_Exit(127);
+  // TODO: When sigprocmask and sigaction land:
+  // Unblock SIGABRT, raise it, if it was ignored or the handler returned,
+  // change its action to SIG_DFL, raise it again.
+  // TODO: When C11 mutexes land:
+  // Acquire recursive mutex (in case the current signal handler for SIGABRT
+  // itself calls abort we don't want to deadlock on the same thread trying
+  // to acquire it's own mutex.)
+  __llvm_libc::raise(SIGABRT);
+  __llvm_libc::raise(SIGKILL);
+  __llvm_libc::_Exit(127);
 }
 
 } // namespace __llvm_libc

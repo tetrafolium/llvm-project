@@ -28,21 +28,22 @@ namespace cxloc {
 static inline CXSourceLocation
 translateSourceLocation(const SourceManager &SM, const LangOptions &LangOpts,
                         SourceLocation Loc) {
-    if (Loc.isInvalid())
-        clang_getNullLocation();
+  if (Loc.isInvalid())
+    clang_getNullLocation();
 
-    CXSourceLocation Result = { { &SM, &LangOpts, },
-        Loc.getRawEncoding()
-    };
-    return Result;
+  CXSourceLocation Result = {{
+                                 &SM,
+                                 &LangOpts,
+                             },
+                             Loc.getRawEncoding()};
+  return Result;
 }
 
 /// Translate a Clang source location into a CIndex source location.
 static inline CXSourceLocation translateSourceLocation(ASTContext &Context,
-        SourceLocation Loc) {
-    return translateSourceLocation(Context.getSourceManager(),
-                                   Context.getLangOpts(),
-                                   Loc);
+                                                       SourceLocation Loc) {
+  return translateSourceLocation(Context.getSourceManager(),
+                                 Context.getLangOpts(), Loc);
 }
 
 /// Translate a Clang source range into a CIndex source range.
@@ -57,19 +58,18 @@ CXSourceRange translateSourceRange(const SourceManager &SM,
 
 /// Translate a Clang source range into a CIndex source range.
 static inline CXSourceRange translateSourceRange(ASTContext &Context,
-        SourceRange R) {
-    return translateSourceRange(Context.getSourceManager(),
-                                Context.getLangOpts(),
-                                CharSourceRange::getTokenRange(R));
+                                                 SourceRange R) {
+  return translateSourceRange(Context.getSourceManager(), Context.getLangOpts(),
+                              CharSourceRange::getTokenRange(R));
 }
 
 static inline SourceLocation translateSourceLocation(CXSourceLocation L) {
-    return SourceLocation::getFromRawEncoding(L.int_data);
+  return SourceLocation::getFromRawEncoding(L.int_data);
 }
 
 static inline SourceRange translateCXSourceRange(CXSourceRange R) {
-    return SourceRange(SourceLocation::getFromRawEncoding(R.begin_int_data),
-                       SourceLocation::getFromRawEncoding(R.end_int_data));
+  return SourceRange(SourceLocation::getFromRawEncoding(R.begin_int_data),
+                     SourceLocation::getFromRawEncoding(R.end_int_data));
 }
 
 /// Translates CXSourceRange to CharSourceRange.
@@ -77,7 +77,7 @@ static inline SourceRange translateCXSourceRange(CXSourceRange R) {
 /// R.begin_int_data is first character of the range.
 /// R.end_int_data is one character past the end of the range.
 CharSourceRange translateCXRangeToCharRange(CXSourceRange R);
-}
-} // end namespace: clang::cxloc
+} // namespace cxloc
+} // namespace clang
 
 #endif

@@ -18,31 +18,28 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY RISCVToolChain : public Generic_ELF {
 public:
-    RISCVToolChain(const Driver &D, const llvm::Triple &Triple,
-                   const llvm::opt::ArgList &Args);
+  RISCVToolChain(const Driver &D, const llvm::Triple &Triple,
+                 const llvm::opt::ArgList &Args);
 
-    static bool hasGCCToolchain(const Driver &D, const llvm::opt::ArgList &Args);
-    bool IsIntegratedAssemblerDefault() const override {
-        return true;
-    }
-    void addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
-                               llvm::opt::ArgStringList &CC1Args,
-                               Action::OffloadKind) const override;
-    RuntimeLibType GetDefaultRuntimeLibType() const override;
-    UnwindLibType
-    GetUnwindLibType(const llvm::opt::ArgList &Args) const override;
-    void
-    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                              llvm::opt::ArgStringList &CC1Args) const override;
-    void
-    addLibStdCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
-                             llvm::opt::ArgStringList &CC1Args) const override;
+  static bool hasGCCToolchain(const Driver &D, const llvm::opt::ArgList &Args);
+  bool IsIntegratedAssemblerDefault() const override { return true; }
+  void addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
+                             llvm::opt::ArgStringList &CC1Args,
+                             Action::OffloadKind) const override;
+  RuntimeLibType GetDefaultRuntimeLibType() const override;
+  UnwindLibType GetUnwindLibType(const llvm::opt::ArgList &Args) const override;
+  void
+  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                            llvm::opt::ArgStringList &CC1Args) const override;
+  void
+  addLibStdCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
+                           llvm::opt::ArgStringList &CC1Args) const override;
 
 protected:
-    Tool *buildLinker() const override;
+  Tool *buildLinker() const override;
 
 private:
-    std::string computeSysRoot() const override;
+  std::string computeSysRoot() const override;
 };
 
 } // end namespace toolchains
@@ -51,17 +48,13 @@ namespace tools {
 namespace RISCV {
 class LLVM_LIBRARY_VISIBILITY Linker : public Tool {
 public:
-    Linker(const ToolChain &TC) : Tool("RISCV::Linker", "ld", TC) {}
-    bool hasIntegratedCPP() const override {
-        return false;
-    }
-    bool isLinkJob() const override {
-        return true;
-    }
-    void ConstructJob(Compilation &C, const JobAction &JA,
-                      const InputInfo &Output, const InputInfoList &Inputs,
-                      const llvm::opt::ArgList &TCArgs,
-                      const char *LinkingOutput) const override;
+  Linker(const ToolChain &TC) : Tool("RISCV::Linker", "ld", TC) {}
+  bool hasIntegratedCPP() const override { return false; }
+  bool isLinkJob() const override { return true; }
+  void ConstructJob(Compilation &C, const JobAction &JA,
+                    const InputInfo &Output, const InputInfoList &Inputs,
+                    const llvm::opt::ArgList &TCArgs,
+                    const char *LinkingOutput) const override;
 };
 } // end namespace RISCV
 } // end namespace tools

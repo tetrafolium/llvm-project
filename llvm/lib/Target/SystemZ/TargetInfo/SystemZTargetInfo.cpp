@@ -12,11 +12,11 @@
 using namespace llvm;
 
 Target &llvm::getTheSystemZTarget() {
-    static Target TheSystemZTarget;
-    return TheSystemZTarget;
+  static Target TheSystemZTarget;
+  return TheSystemZTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeSystemZTargetInfo() {
-    RegisterTarget<Triple::systemz, /*HasJIT=*/true> X(
-                       getTheSystemZTarget(), "systemz", "SystemZ", "SystemZ");
+  RegisterTarget<Triple::systemz, /*HasJIT=*/true> X(
+      getTheSystemZTarget(), "systemz", "SystemZ", "SystemZ");
 }

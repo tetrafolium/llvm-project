@@ -26,26 +26,26 @@ PPCCallLowering::PPCCallLowering(const PPCTargetLowering &TLI)
 bool PPCCallLowering::lowerReturn(MachineIRBuilder &MIRBuilder,
                                   const Value *Val, ArrayRef<Register> VRegs,
                                   Register SwiftErrorVReg) const {
-    assert(((Val && !VRegs.empty()) || (!Val && VRegs.empty())) &&
-           "Return value without a vreg");
-    if (VRegs.size() > 0)
-        return false;
+  assert(((Val && !VRegs.empty()) || (!Val && VRegs.empty())) &&
+         "Return value without a vreg");
+  if (VRegs.size() > 0)
+    return false;
 
-    MIRBuilder.buildInstr(PPC::BLR8);
-    return true;
+  MIRBuilder.buildInstr(PPC::BLR8);
+  return true;
 }
 
 bool PPCCallLowering::lowerFormalArguments(
     MachineIRBuilder &MIRBuilder, const Function &F,
     ArrayRef<ArrayRef<Register>> VRegs) const {
 
-    // If VRegs is empty, then there are no formal arguments to lower and thus can
-    // always return true. If there are formal arguments, we currently do not
-    // handle them and thus return false.
-    return VRegs.empty();
+  // If VRegs is empty, then there are no formal arguments to lower and thus can
+  // always return true. If there are formal arguments, we currently do not
+  // handle them and thus return false.
+  return VRegs.empty();
 }
 
 bool PPCCallLowering::lowerCall(MachineIRBuilder &MIRBuilder,
                                 CallLoweringInfo &Info) const {
-    return false;
+  return false;
 }

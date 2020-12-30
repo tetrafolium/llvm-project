@@ -13,7 +13,7 @@
 #define SANITIZER_LINUX_H
 
 #include "sanitizer_platform.h"
-#if SANITIZER_FREEBSD || SANITIZER_LINUX || SANITIZER_NETBSD ||                \
+#if SANITIZER_FREEBSD || SANITIZER_LINUX || SANITIZER_NETBSD || \
     SANITIZER_SOLARIS
 #include "sanitizer_common.h"
 #include "sanitizer_internal_defs.h"
@@ -32,21 +32,21 @@ namespace __sanitizer {
 struct linux_dirent;
 
 struct ProcSelfMapsBuff {
-    char *data;
-    uptr mmaped_size;
-    uptr len;
+  char *data;
+  uptr mmaped_size;
+  uptr len;
 };
 
 struct MemoryMappingLayoutData {
-    ProcSelfMapsBuff proc_self_maps;
-    const char *current;
+  ProcSelfMapsBuff proc_self_maps;
+  const char *current;
 };
 
 void ReadProcMaps(ProcSelfMapsBuff *proc_maps);
 
 // Syscall wrappers.
 uptr internal_getdents(fd_t fd, struct linux_dirent *dirp, unsigned int count);
-uptr internal_sigaltstack(const void* ss, void* oss);
+uptr internal_sigaltstack(const void *ss, void *oss);
 uptr internal_sigprocmask(int how, __sanitizer_sigset_t *set,
                           __sanitizer_sigset_t *oldset);
 uptr internal_clock_gettime(__sanitizer_clockid_t clk_id, void *tp);
@@ -75,22 +75,22 @@ uptr internal_clone(int (*fn)(void *), void *child_stack, int flags, void *arg);
 
 // This class reads thread IDs from /proc/<pid>/task using only syscalls.
 class ThreadLister {
-public:
-    explicit ThreadLister(pid_t pid);
-    ~ThreadLister();
-    enum Result {
-        Error,
-        Incomplete,
-        Ok,
-    };
-    Result ListThreads(InternalMmapVector<tid_t> *threads);
+ public:
+  explicit ThreadLister(pid_t pid);
+  ~ThreadLister();
+  enum Result {
+    Error,
+    Incomplete,
+    Ok,
+  };
+  Result ListThreads(InternalMmapVector<tid_t> *threads);
 
-private:
-    bool IsAlive(int tid);
+ private:
+  bool IsAlive(int tid);
 
-    pid_t pid_;
-    int descriptor_ = -1;
-    InternalMmapVector<char> buffer_;
+  pid_t pid_;
+  int descriptor_ = -1;
+  InternalMmapVector<char> buffer_;
 };
 
 // Exposed for testing.
@@ -109,37 +109,57 @@ void ForEachMappedRegion(link_map *map, void (*cb)(const void *, uptr));
 // The pages no longer count toward RSS; reads are guaranteed to return 0.
 // Requires (but does not verify!) that pages are MAP_PRIVATE.
 inline void ReleaseMemoryPagesToOSAndZeroFill(uptr beg, uptr end) {
-    // man madvise on Linux promises zero-fill for anonymous private pages.
-    // Testing shows the same behaviour for private (but not anonymous) mappings
-    // of shm_open() files, as long as the underlying file is untouched.
-    CHECK(SANITIZER_LINUX);
-    ReleaseMemoryPagesToOS(beg, end);
+  // man madvise on Linux promises zero-fill for anonymous private pages.
+  // Testing shows the same behaviour for private (but not anonymous) mappings
+  // of shm_open() files, as long as the underlying file is untouched.
+  CHECK(SANITIZER_LINUX);
+  ReleaseMemoryPagesToOS(beg, end);
 }
 
 #if SANITIZER_ANDROID
 
 #if defined(__aarch64__)
-# define __get_tls() \
-    ({ void** __v; __asm__("mrs %0, tpidr_el0" : "=r"(__v)); __v; })
+#define __get_tls()                           \
+  ({                                          \
+    void **__v;                               \
+    __asm__("mrs %0, tpidr_el0" : "=r"(__v)); \
+    __v;                                      \
+  })
 #elif defined(__arm__)
-# define __get_tls() \
-    ({ void** __v; __asm__("mrc p15, 0, %0, c13, c0, 3" : "=r"(__v)); __v; })
+#define __get_tls()                                    \
+  ({                                                   \
+    void **__v;                                        \
+    __asm__("mrc p15, 0, %0, c13, c0, 3" : "=r"(__v)); \
+    __v;                                               \
+  })
 #elif defined(__mips__)
 // On mips32r1, this goes via a kernel illegal instruction trap that's
 // optimized for v1.
-# define __get_tls() \
-    ({ register void** __v asm("v1"); \
-       __asm__(".set    push\n" \
-               ".set    mips32r2\n" \
-               "rdhwr   %0,$29\n" \
-               ".set    pop\n" : "=r"(__v)); \
-       __v; })
+#define __get_tls()                \
+  ({                               \
+    register void **__v asm("v1"); \
+    __asm__(                       \
+        ".set    push\n"           \
+        ".set    mips32r2\n"       \
+        "rdhwr   %0,$29\n"         \
+        ".set    pop\n"            \
+        : "=r"(__v));              \
+    __v;                           \
+  })
 #elif defined(__i386__)
-# define __get_tls() \
-    ({ void** __v; __asm__("movl %%gs:0, %0" : "=r"(__v)); __v; })
+#define __get_tls()                         \
+  ({                                        \
+    void **__v;                             \
+    __asm__("movl %%gs:0, %0" : "=r"(__v)); \
+    __v;                                    \
+  })
 #elif defined(__x86_64__)
-# define __get_tls() \
-    ({ void** __v; __asm__("mov %%fs:0, %0" : "=r"(__v)); __v; })
+#define __get_tls()                        \
+  ({                                       \
+    void **__v;                            \
+    __asm__("mov %%fs:0, %0" : "=r"(__v)); \
+    __v;                                   \
+  })
 #else
 #error "Unsupported architecture."
 #endif
@@ -150,7 +170,7 @@ inline void ReleaseMemoryPagesToOSAndZeroFill(uptr beg, uptr end) {
 static const int TLS_SLOT_SANITIZER = 6;
 
 ALWAYS_INLINE uptr *get_android_tls_ptr() {
-    return reinterpret_cast<uptr *>(&__get_tls()[TLS_SLOT_SANITIZER]);
+  return reinterpret_cast<uptr *>(&__get_tls()[TLS_SLOT_SANITIZER]);
 }
 
 #endif  // SANITIZER_ANDROID

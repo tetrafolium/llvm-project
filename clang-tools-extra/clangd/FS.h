@@ -37,34 +37,34 @@ namespace clangd {
 /// Note that the cache is only valid when reusing preamble.
 class PreambleFileStatusCache {
 public:
-    /// \p MainFilePath is the absolute path of the main source file this preamble
-    /// corresponds to. The stat for the main file will not be cached.
-    PreambleFileStatusCache(llvm::StringRef MainFilePath);
+  /// \p MainFilePath is the absolute path of the main source file this preamble
+  /// corresponds to. The stat for the main file will not be cached.
+  PreambleFileStatusCache(llvm::StringRef MainFilePath);
 
-    void update(const llvm::vfs::FileSystem &FS, llvm::vfs::Status S);
+  void update(const llvm::vfs::FileSystem &FS, llvm::vfs::Status S);
 
-    /// \p Path is a path stored in preamble.
-    llvm::Optional<llvm::vfs::Status> lookup(llvm::StringRef Path) const;
+  /// \p Path is a path stored in preamble.
+  llvm::Optional<llvm::vfs::Status> lookup(llvm::StringRef Path) const;
 
-    /// Returns a VFS that collects file status.
-    /// Only cache stats for files that exist because
-    ///   1) we only care about existing files when reusing preamble, unlike
-    ///   building preamble.
-    ///   2) we use the file name in the Status as the cache key.
-    ///
-    /// Note that the returned VFS should not outlive the cache.
-    IntrusiveRefCntPtr<llvm::vfs::FileSystem>
-    getProducingFS(IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS);
+  /// Returns a VFS that collects file status.
+  /// Only cache stats for files that exist because
+  ///   1) we only care about existing files when reusing preamble, unlike
+  ///   building preamble.
+  ///   2) we use the file name in the Status as the cache key.
+  ///
+  /// Note that the returned VFS should not outlive the cache.
+  IntrusiveRefCntPtr<llvm::vfs::FileSystem>
+  getProducingFS(IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS);
 
-    /// Returns a VFS that uses the cache collected.
-    ///
-    /// Note that the returned VFS should not outlive the cache.
-    IntrusiveRefCntPtr<llvm::vfs::FileSystem>
-    getConsumingFS(IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS) const;
+  /// Returns a VFS that uses the cache collected.
+  ///
+  /// Note that the returned VFS should not outlive the cache.
+  IntrusiveRefCntPtr<llvm::vfs::FileSystem>
+  getConsumingFS(IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS) const;
 
 private:
-    std::string MainFilePath;
-    llvm::StringMap<llvm::vfs::Status> StatCache;
+  std::string MainFilePath;
+  llvm::StringMap<llvm::vfs::Status> StatCache;
 };
 
 /// Returns a version of \p File that doesn't contain dots and dot dots.

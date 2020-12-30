@@ -23,41 +23,41 @@ LangOptions::LangOptions() {
 void LangOptions::resetNonModularOptions() {
 #define LANGOPT(Name, Bits, Default, Description)
 #define BENIGN_LANGOPT(Name, Bits, Default, Description) Name = Default;
-#define BENIGN_ENUM_LANGOPT(Name, Type, Bits, Default, Description) \
+#define BENIGN_ENUM_LANGOPT(Name, Type, Bits, Default, Description)            \
   Name = static_cast<unsigned>(Default);
 #include "clang/Basic/LangOptions.def"
 
-    // These options do not affect AST generation.
-    SanitizerBlacklistFiles.clear();
-    XRayAlwaysInstrumentFiles.clear();
-    XRayNeverInstrumentFiles.clear();
+  // These options do not affect AST generation.
+  SanitizerBlacklistFiles.clear();
+  XRayAlwaysInstrumentFiles.clear();
+  XRayNeverInstrumentFiles.clear();
 
-    CurrentModule.clear();
-    IsHeaderFile = false;
+  CurrentModule.clear();
+  IsHeaderFile = false;
 }
 
 bool LangOptions::isNoBuiltinFunc(StringRef FuncName) const {
-    for (unsigned i = 0, e = NoBuiltinFuncs.size(); i != e; ++i)
-        if (FuncName.equals(NoBuiltinFuncs[i]))
-            return true;
-    return false;
+  for (unsigned i = 0, e = NoBuiltinFuncs.size(); i != e; ++i)
+    if (FuncName.equals(NoBuiltinFuncs[i]))
+      return true;
+  return false;
 }
 
 VersionTuple LangOptions::getOpenCLVersionTuple() const {
-    const int Ver = OpenCLCPlusPlus ? OpenCLCPlusPlusVersion : OpenCLVersion;
-    return VersionTuple(Ver / 100, (Ver % 100) / 10);
+  const int Ver = OpenCLCPlusPlus ? OpenCLCPlusPlusVersion : OpenCLVersion;
+  return VersionTuple(Ver / 100, (Ver % 100) / 10);
 }
 
 FPOptions FPOptions::defaultWithoutTrailingStorage(const LangOptions &LO) {
-    FPOptions result(LO);
-    return result;
+  FPOptions result(LO);
+  return result;
 }
 
 LLVM_DUMP_METHOD void FPOptions::dump() {
 #define OPTION(NAME, TYPE, WIDTH, PREVIOUS)                                    \
   llvm::errs() << "\n " #NAME " " << get##NAME();
 #include "clang/Basic/FPOptions.def"
-    llvm::errs() << "\n";
+  llvm::errs() << "\n";
 }
 
 LLVM_DUMP_METHOD void FPOptionsOverride::dump() {
@@ -65,5 +65,5 @@ LLVM_DUMP_METHOD void FPOptionsOverride::dump() {
   if (has##NAME##Override())                                                   \
     llvm::errs() << "\n " #NAME " Override is " << get##NAME##Override();
 #include "clang/Basic/FPOptions.def"
-    llvm::errs() << "\n";
+  llvm::errs() << "\n";
 }

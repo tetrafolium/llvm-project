@@ -36,72 +36,72 @@ ENUM_CLASS(Relation, Less, Equal, Greater, Unordered)
 
 template <typename A>
 static constexpr Ordering Compare(const A &x, const A &y) {
-    if (x < y) {
-        return Ordering::Less;
-    } else if (x > y) {
-        return Ordering::Greater;
-    } else {
-        return Ordering::Equal;
-    }
+  if (x < y) {
+    return Ordering::Less;
+  } else if (x > y) {
+    return Ordering::Greater;
+  } else {
+    return Ordering::Equal;
+  }
 }
 
 static constexpr Ordering Reverse(Ordering ordering) {
-    if (ordering == Ordering::Less) {
-        return Ordering::Greater;
-    } else if (ordering == Ordering::Greater) {
-        return Ordering::Less;
-    } else {
-        return Ordering::Equal;
-    }
+  if (ordering == Ordering::Less) {
+    return Ordering::Greater;
+  } else if (ordering == Ordering::Greater) {
+    return Ordering::Less;
+  } else {
+    return Ordering::Equal;
+  }
 }
 
 static constexpr Relation RelationFromOrdering(Ordering ordering) {
-    if (ordering == Ordering::Less) {
-        return Relation::Less;
-    } else if (ordering == Ordering::Greater) {
-        return Relation::Greater;
-    } else {
-        return Relation::Equal;
-    }
+  if (ordering == Ordering::Less) {
+    return Relation::Less;
+  } else if (ordering == Ordering::Greater) {
+    return Relation::Greater;
+  } else {
+    return Relation::Equal;
+  }
 }
 
 static constexpr Relation Reverse(Relation relation) {
-    if (relation == Relation::Less) {
-        return Relation::Greater;
-    } else if (relation == Relation::Greater) {
-        return Relation::Less;
-    } else {
-        return relation;
-    }
+  if (relation == Relation::Less) {
+    return Relation::Greater;
+  } else if (relation == Relation::Greater) {
+    return Relation::Less;
+  } else {
+    return relation;
+  }
 }
 
 static constexpr bool Satisfies(RelationalOperator op, Ordering order) {
-    switch (order) {
-    case Ordering::Less:
-        return op == RelationalOperator::LT || op == RelationalOperator::LE ||
-               op == RelationalOperator::NE;
-    case Ordering::Equal:
-        return op == RelationalOperator::LE || op == RelationalOperator::EQ ||
-               op == RelationalOperator::GE;
-    case Ordering::Greater:
-        return op == RelationalOperator::NE || op == RelationalOperator::GE ||
-               op == RelationalOperator::GT;
-    }
-    return false; // silence g++ warning
+  switch (order) {
+  case Ordering::Less:
+    return op == RelationalOperator::LT || op == RelationalOperator::LE ||
+        op == RelationalOperator::NE;
+  case Ordering::Equal:
+    return op == RelationalOperator::LE || op == RelationalOperator::EQ ||
+        op == RelationalOperator::GE;
+  case Ordering::Greater:
+    return op == RelationalOperator::NE || op == RelationalOperator::GE ||
+        op == RelationalOperator::GT;
+  }
+  return false; // silence g++ warning
 }
 
 static constexpr bool Satisfies(RelationalOperator op, Relation relation) {
-    switch (relation) {
-    case Relation::Less:
-        return Satisfies(op, Ordering::Less);
-    case Relation::Equal:
-        return Satisfies(op, Ordering::Equal);
-    case Relation::Greater:
-        return Satisfies(op, Ordering::Greater);
-    case Relation::Unordered:
-        return false;
-    }
-    return false; // silence g++ warning
+  switch (relation) {
+  case Relation::Less:
+    return Satisfies(op, Ordering::Less);
+  case Relation::Equal:
+    return Satisfies(op, Ordering::Equal);
+  case Relation::Greater:
+    return Satisfies(op, Ordering::Greater);
+  case Relation::Unordered:
+    return false;
+  }
+  return false; // silence g++ warning
 }
 
 ENUM_CLASS(
@@ -110,33 +110,33 @@ ENUM_CLASS(
 using RealFlags = common::EnumSet<RealFlag, RealFlag_enumSize>;
 
 template <typename A> struct ValueWithRealFlags {
-    A AccumulateFlags(RealFlags &f) {
-        f |= flags;
-        return value;
-    }
-    A value;
-    RealFlags flags{};
+  A AccumulateFlags(RealFlags &f) {
+    f |= flags;
+    return value;
+  }
+  A value;
+  RealFlags flags{};
 };
 
 struct Rounding {
-    common::RoundingMode mode{common::RoundingMode::TiesToEven};
-    // When set, emulate status flag behavior peculiar to x86
-    // (viz., fail to set the Underflow flag when an inexact product of a
-    // multiplication is rounded up to a normal number from a subnormal
-    // in some rounding modes)
+  common::RoundingMode mode{common::RoundingMode::TiesToEven};
+  // When set, emulate status flag behavior peculiar to x86
+  // (viz., fail to set the Underflow flag when an inexact product of a
+  // multiplication is rounded up to a normal number from a subnormal
+  // in some rounding modes)
 #if __x86_64__
-    bool x86CompatibleBehavior {true};
+  bool x86CompatibleBehavior{true};
 #else
-    bool x86CompatibleBehavior {false};
+  bool x86CompatibleBehavior{false};
 #endif
 };
 
 static constexpr Rounding defaultRounding;
 
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-constexpr bool isHostLittleEndian {false};
+constexpr bool isHostLittleEndian{false};
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-constexpr bool isHostLittleEndian {true};
+constexpr bool isHostLittleEndian{true};
 #else
 #error host endianness is not known
 #endif
@@ -145,16 +145,16 @@ constexpr bool isHostLittleEndian {true};
 // whose size is >= BITS.
 template <bool LE8, bool LE16, bool LE32, bool LE64> struct SmallestUInt {};
 template <> struct SmallestUInt<true, true, true, true> {
-    using type = std::uint8_t;
+  using type = std::uint8_t;
 };
 template <> struct SmallestUInt<false, true, true, true> {
-    using type = std::uint16_t;
+  using type = std::uint16_t;
 };
 template <> struct SmallestUInt<false, false, true, true> {
-    using type = std::uint32_t;
+  using type = std::uint32_t;
 };
 template <> struct SmallestUInt<false, false, false, true> {
-    using type = std::uint64_t;
+  using type = std::uint64_t;
 };
 template <int BITS>
 using HostUnsignedInt =
@@ -207,77 +207,61 @@ template <typename A> class Expr;
 
 class FoldingContext {
 public:
-    FoldingContext(
-        const common::IntrinsicTypeDefaultKinds &d, const IntrinsicProcTable &t)
-        : defaults_{d}, intrinsics_{t} {}
-    FoldingContext(const parser::ContextualMessages &m,
-                   const common::IntrinsicTypeDefaultKinds &d, const IntrinsicProcTable &t,
-                   Rounding round = defaultRounding, bool flush = false)
-        : messages_{m}, defaults_{d}, intrinsics_{t}, rounding_{round},
-          flushSubnormalsToZero_{flush} {}
-    FoldingContext(const FoldingContext &that)
-        : messages_{that.messages_}, defaults_{that.defaults_},
-          intrinsics_{that.intrinsics_}, rounding_{that.rounding_},
-          flushSubnormalsToZero_{that.flushSubnormalsToZero_},
-          pdtInstance_{that.pdtInstance_}, impliedDos_{that.impliedDos_} {}
-    FoldingContext(
-        const FoldingContext &that, const parser::ContextualMessages &m)
-        : messages_{m}, defaults_{that.defaults_},
-          intrinsics_{that.intrinsics_}, rounding_{that.rounding_},
-          flushSubnormalsToZero_{that.flushSubnormalsToZero_},
-          pdtInstance_{that.pdtInstance_}, impliedDos_{that.impliedDos_} {}
+  FoldingContext(
+      const common::IntrinsicTypeDefaultKinds &d, const IntrinsicProcTable &t)
+      : defaults_{d}, intrinsics_{t} {}
+  FoldingContext(const parser::ContextualMessages &m,
+      const common::IntrinsicTypeDefaultKinds &d, const IntrinsicProcTable &t,
+      Rounding round = defaultRounding, bool flush = false)
+      : messages_{m}, defaults_{d}, intrinsics_{t}, rounding_{round},
+        flushSubnormalsToZero_{flush} {}
+  FoldingContext(const FoldingContext &that)
+      : messages_{that.messages_}, defaults_{that.defaults_},
+        intrinsics_{that.intrinsics_}, rounding_{that.rounding_},
+        flushSubnormalsToZero_{that.flushSubnormalsToZero_},
+        pdtInstance_{that.pdtInstance_}, impliedDos_{that.impliedDos_} {}
+  FoldingContext(
+      const FoldingContext &that, const parser::ContextualMessages &m)
+      : messages_{m}, defaults_{that.defaults_},
+        intrinsics_{that.intrinsics_}, rounding_{that.rounding_},
+        flushSubnormalsToZero_{that.flushSubnormalsToZero_},
+        pdtInstance_{that.pdtInstance_}, impliedDos_{that.impliedDos_} {}
 
-    parser::ContextualMessages &messages() {
-        return messages_;
-    }
-    const parser::ContextualMessages &messages() const {
-        return messages_;
-    }
-    const common::IntrinsicTypeDefaultKinds &defaults() const {
-        return defaults_;
-    }
-    Rounding rounding() const {
-        return rounding_;
-    }
-    bool flushSubnormalsToZero() const {
-        return flushSubnormalsToZero_;
-    }
-    bool bigEndian() const {
-        return bigEndian_;
-    }
-    std::size_t maxAlignment() const {
-        return maxAlignment_;
-    }
-    const semantics::DerivedTypeSpec *pdtInstance() const {
-        return pdtInstance_;
-    }
-    const IntrinsicProcTable &intrinsics() const {
-        return intrinsics_;
-    }
+  parser::ContextualMessages &messages() { return messages_; }
+  const parser::ContextualMessages &messages() const { return messages_; }
+  const common::IntrinsicTypeDefaultKinds &defaults() const {
+    return defaults_;
+  }
+  Rounding rounding() const { return rounding_; }
+  bool flushSubnormalsToZero() const { return flushSubnormalsToZero_; }
+  bool bigEndian() const { return bigEndian_; }
+  std::size_t maxAlignment() const { return maxAlignment_; }
+  const semantics::DerivedTypeSpec *pdtInstance() const { return pdtInstance_; }
+  const IntrinsicProcTable &intrinsics() const { return intrinsics_; }
 
-    ConstantSubscript &StartImpliedDo(parser::CharBlock, ConstantSubscript = 1);
-    std::optional<ConstantSubscript> GetImpliedDo(parser::CharBlock) const;
-    void EndImpliedDo(parser::CharBlock);
+  ConstantSubscript &StartImpliedDo(parser::CharBlock, ConstantSubscript = 1);
+  std::optional<ConstantSubscript> GetImpliedDo(parser::CharBlock) const;
+  void EndImpliedDo(parser::CharBlock);
 
-    std::map<parser::CharBlock, ConstantSubscript> &impliedDos() {
-        return impliedDos_;
-    }
+  std::map<parser::CharBlock, ConstantSubscript> &impliedDos() {
+    return impliedDos_;
+  }
 
-    common::Restorer<const semantics::DerivedTypeSpec *> WithPDTInstance(
-        const semantics::DerivedTypeSpec &spec) {
-        return common::ScopedSet(pdtInstance_, &spec);
-    }
+  common::Restorer<const semantics::DerivedTypeSpec *> WithPDTInstance(
+      const semantics::DerivedTypeSpec &spec) {
+    return common::ScopedSet(pdtInstance_, &spec);
+  }
 
 private:
-    parser::ContextualMessages messages_;
-    const common::IntrinsicTypeDefaultKinds &defaults_;
-    const IntrinsicProcTable &intrinsics_;
-    Rounding rounding_{defaultRounding};
-    bool flushSubnormalsToZero_{false};
-    static constexpr bool bigEndian_{false}; // TODO: configure for target
-    static constexpr std::size_t maxAlignment_{8}; // TODO: configure for target
-    const semantics::DerivedTypeSpec *pdtInstance_{nullptr};
-    std::map<parser::CharBlock, ConstantSubscript> impliedDos_;
+  parser::ContextualMessages messages_;
+  const common::IntrinsicTypeDefaultKinds &defaults_;
+  const IntrinsicProcTable &intrinsics_;
+  Rounding rounding_{defaultRounding};
+  bool flushSubnormalsToZero_{false};
+  static constexpr bool bigEndian_{false}; // TODO: configure for target
+  static constexpr std::size_t maxAlignment_{8}; // TODO: configure for target
+  const semantics::DerivedTypeSpec *pdtInstance_{nullptr};
+  std::map<parser::CharBlock, ConstantSubscript> impliedDos_;
 };
 
 void RealFlagWarnings(FoldingContext &, const RealFlags &, const char *op);

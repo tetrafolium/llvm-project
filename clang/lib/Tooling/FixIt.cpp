@@ -19,8 +19,8 @@ namespace fixit {
 
 namespace internal {
 StringRef getText(CharSourceRange Range, const ASTContext &Context) {
-    return Lexer::getSourceText(Range, Context.getSourceManager(),
-                                Context.getLangOpts());
+  return Lexer::getSourceText(Range, Context.getSourceManager(),
+                              Context.getLangOpts());
 }
 } // namespace internal
 

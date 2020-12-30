@@ -34,27 +34,25 @@ class AsmStateImpl;
 /// parent operation cannot reuse this state.
 class AsmState {
 public:
-    /// This map represents the raw locations of operations within the output
-    /// stream. This maps the original pointer to the operation, to a pair of line
-    /// and column in the output stream.
-    using LocationMap = DenseMap<Operation *, std::pair<unsigned, unsigned>>;
+  /// This map represents the raw locations of operations within the output
+  /// stream. This maps the original pointer to the operation, to a pair of line
+  /// and column in the output stream.
+  using LocationMap = DenseMap<Operation *, std::pair<unsigned, unsigned>>;
 
-    /// Initialize the asm state at the level of the given operation. A location
-    /// map may optionally be provided to be populated when printing.
-    AsmState(Operation *op, LocationMap *locationMap = nullptr);
-    ~AsmState();
+  /// Initialize the asm state at the level of the given operation. A location
+  /// map may optionally be provided to be populated when printing.
+  AsmState(Operation *op, LocationMap *locationMap = nullptr);
+  ~AsmState();
 
-    /// Return an instance of the internal implementation. Returns nullptr if the
-    /// state has not been initialized.
-    detail::AsmStateImpl &getImpl() {
-        return *impl;
-    }
+  /// Return an instance of the internal implementation. Returns nullptr if the
+  /// state has not been initialized.
+  detail::AsmStateImpl &getImpl() { return *impl; }
 
 private:
-    AsmState() = delete;
+  AsmState() = delete;
 
-    /// A pointer to allocated storage for the impl state.
-    std::unique_ptr<detail::AsmStateImpl> impl;
+  /// A pointer to allocated storage for the impl state.
+  std::unique_ptr<detail::AsmStateImpl> impl;
 };
 
 //===----------------------------------------------------------------------===//

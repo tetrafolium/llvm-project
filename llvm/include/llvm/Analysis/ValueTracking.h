@@ -55,9 +55,8 @@ constexpr unsigned MaxAnalysisRecursionDepth = 6;
 /// where V is a vector, the known zero and known one values are the
 /// same width as the vector element, and the bit is set only if it is true
 /// for all of the elements in the vector.
-void computeKnownBits(const Value *V, KnownBits &Known,
-                      const DataLayout &DL, unsigned Depth = 0,
-                      AssumptionCache *AC = nullptr,
+void computeKnownBits(const Value *V, KnownBits &Known, const DataLayout &DL,
+                      unsigned Depth = 0, AssumptionCache *AC = nullptr,
                       const Instruction *CxtI = nullptr,
                       const DominatorTree *DT = nullptr,
                       OptimizationRemarkEmitter *ORE = nullptr,
@@ -99,13 +98,11 @@ KnownBits computeKnownBits(const Value *V, const APInt &DemandedElts,
 /// Compute known bits from the range metadata.
 /// \p KnownZero the set of bits that are known to be zero
 /// \p KnownOne the set of bits that are known to be one
-void computeKnownBitsFromRangeMetadata(const MDNode &Ranges,
-                                       KnownBits &Known);
+void computeKnownBitsFromRangeMetadata(const MDNode &Ranges, KnownBits &Known);
 
 /// Return true if LHS and RHS have no common bits set.
 bool haveNoCommonBitsSet(const Value *LHS, const Value *RHS,
-                         const DataLayout &DL,
-                         AssumptionCache *AC = nullptr,
+                         const DataLayout &DL, AssumptionCache *AC = nullptr,
                          const Instruction *CxtI = nullptr,
                          const DominatorTree *DT = nullptr,
                          bool UseInstrInfo = true);
@@ -144,8 +141,7 @@ bool isKnownNegation(const Value *X, const Value *Y, bool NeedNSW = false);
 
 /// Returns true if the give value is known to be non-negative.
 bool isKnownNonNegative(const Value *V, const DataLayout &DL,
-                        unsigned Depth = 0,
-                        AssumptionCache *AC = nullptr,
+                        unsigned Depth = 0, AssumptionCache *AC = nullptr,
                         const Instruction *CxtI = nullptr,
                         const DominatorTree *DT = nullptr,
                         bool UseInstrInfo = true);
@@ -183,8 +179,7 @@ bool isKnownNonEqual(const Value *V1, const Value *V2, const DataLayout &DL,
 /// where V is a vector, the mask, known zero, and known one values are the
 /// same width as the vector element, and the bit is set only if it is true
 /// for all of the elements in the vector.
-bool MaskedValueIsZero(const Value *V, const APInt &Mask,
-                       const DataLayout &DL,
+bool MaskedValueIsZero(const Value *V, const APInt &Mask, const DataLayout &DL,
                        unsigned Depth = 0, AssumptionCache *AC = nullptr,
                        const Instruction *CxtI = nullptr,
                        const DominatorTree *DT = nullptr,
@@ -209,8 +204,7 @@ unsigned ComputeNumSignBits(const Value *Op, const DataLayout &DL,
 /// integer, then the simplified V is returned in Val. Look through sext only
 /// if LookThroughSExt=true.
 bool ComputeMultiple(Value *V, unsigned Base, Value *&Multiple,
-                     bool LookThroughSExt = false,
-                     unsigned Depth = 0);
+                     bool LookThroughSExt = false, unsigned Depth = 0);
 
 /// Map a call instruction to an intrinsic ID.  Libcalls which have equivalent
 /// intrinsics are treated as-if they were intrinsics.
@@ -267,8 +261,7 @@ Value *isBytewiseValue(Value *V, const DataLayout &DL);
 ///
 /// If InsertBefore is not null, this function will duplicate (modified)
 /// insertvalues when a part of a nested struct is extracted.
-Value *FindInsertedValue(Value *V,
-                         ArrayRef<unsigned> idx_range,
+Value *FindInsertedValue(Value *V, ArrayRef<unsigned> idx_range,
                          Instruction *InsertBefore = nullptr);
 
 /// Analyze the specified pointer to see if it can be expressed as a base
@@ -277,51 +270,50 @@ Value *FindInsertedValue(Value *V,
 /// This is a wrapper around Value::stripAndAccumulateConstantOffsets that
 /// creates and later unpacks the required APInt.
 inline Value *GetPointerBaseWithConstantOffset(Value *Ptr, int64_t &Offset,
-        const DataLayout &DL,
-        bool AllowNonInbounds = true) {
-    APInt OffsetAPInt(DL.getIndexTypeSizeInBits(Ptr->getType()), 0);
-    Value *Base =
-        Ptr->stripAndAccumulateConstantOffsets(DL, OffsetAPInt, AllowNonInbounds);
+                                               const DataLayout &DL,
+                                               bool AllowNonInbounds = true) {
+  APInt OffsetAPInt(DL.getIndexTypeSizeInBits(Ptr->getType()), 0);
+  Value *Base =
+      Ptr->stripAndAccumulateConstantOffsets(DL, OffsetAPInt, AllowNonInbounds);
 
-    Offset = OffsetAPInt.getSExtValue();
-    return Base;
+  Offset = OffsetAPInt.getSExtValue();
+  return Base;
 }
 inline const Value *
 GetPointerBaseWithConstantOffset(const Value *Ptr, int64_t &Offset,
                                  const DataLayout &DL,
                                  bool AllowNonInbounds = true) {
-    return GetPointerBaseWithConstantOffset(const_cast<Value *>(Ptr), Offset, DL,
-                                            AllowNonInbounds);
+  return GetPointerBaseWithConstantOffset(const_cast<Value *>(Ptr), Offset, DL,
+                                          AllowNonInbounds);
 }
 
 /// Returns true if the GEP is based on a pointer to a string (array of
 // \p CharSize integers) and is indexing into this string.
-bool isGEPBasedOnPointerToString(const GEPOperator *GEP,
-                                 unsigned CharSize = 8);
+bool isGEPBasedOnPointerToString(const GEPOperator *GEP, unsigned CharSize = 8);
 
 /// Represents offset+length into a ConstantDataArray.
 struct ConstantDataArraySlice {
-    /// ConstantDataArray pointer. nullptr indicates a zeroinitializer (a valid
-    /// initializer, it just doesn't fit the ConstantDataArray interface).
-    const ConstantDataArray *Array;
+  /// ConstantDataArray pointer. nullptr indicates a zeroinitializer (a valid
+  /// initializer, it just doesn't fit the ConstantDataArray interface).
+  const ConstantDataArray *Array;
 
-    /// Slice starts at this Offset.
-    uint64_t Offset;
+  /// Slice starts at this Offset.
+  uint64_t Offset;
 
-    /// Length of the slice.
-    uint64_t Length;
+  /// Length of the slice.
+  uint64_t Length;
 
-    /// Moves the Offset and adjusts Length accordingly.
-    void move(uint64_t Delta) {
-        assert(Delta < Length);
-        Offset += Delta;
-        Length -= Delta;
-    }
+  /// Moves the Offset and adjusts Length accordingly.
+  void move(uint64_t Delta) {
+    assert(Delta < Length);
+    Offset += Delta;
+    Length -= Delta;
+  }
 
-    /// Convenience accessor for elements in the slice.
-    uint64_t operator[](unsigned I) const {
-        return Array==nullptr ? 0 : Array->getElementAsInteger(I + Offset);
-    }
+  /// Convenience accessor for elements in the slice.
+  uint64_t operator[](unsigned I) const {
+    return Array == nullptr ? 0 : Array->getElementAsInteger(I + Offset);
+  }
 };
 
 /// Returns true if the value \p V is a pointer into a ConstantDataArray.
@@ -336,8 +328,8 @@ bool getConstantDataArrayInfo(const Value *V, ConstantDataArraySlice &Slice,
 /// character by default. If TrimAtNul is set to false, then this returns any
 /// trailing null characters as well as any other characters that come after
 /// it.
-bool getConstantStringInfo(const Value *V, StringRef &Str,
-                           uint64_t Offset = 0, bool TrimAtNul = true);
+bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset = 0,
+                           bool TrimAtNul = true);
 
 /// If we can compute the length of the string pointed to by the specified
 /// pointer, return 'len+1'.  If we can't, return 0.
@@ -348,12 +340,11 @@ uint64_t GetStringLength(const Value *V, unsigned CharSize = 8);
 /// \p MustPreserveNullness is true, the call must preserve the nullness of
 /// the pointer.
 const Value *getArgumentAliasingToReturnedPointer(const CallBase *Call,
-        bool MustPreserveNullness);
-inline Value *
-getArgumentAliasingToReturnedPointer(CallBase *Call,
-                                     bool MustPreserveNullness) {
-    return const_cast<Value *>(getArgumentAliasingToReturnedPointer(
-                                   const_cast<const CallBase *>(Call), MustPreserveNullness));
+                                                  bool MustPreserveNullness);
+inline Value *getArgumentAliasingToReturnedPointer(CallBase *Call,
+                                                   bool MustPreserveNullness) {
+  return const_cast<Value *>(getArgumentAliasingToReturnedPointer(
+      const_cast<const CallBase *>(Call), MustPreserveNullness));
 }
 
 /// {launder,strip}.invariant.group returns pointer that aliases its argument,
@@ -373,7 +364,7 @@ bool isIntrinsicReturningPointerAliasingArgumentWithoutCapturing(
 Value *getUnderlyingObject(Value *V, unsigned MaxLookup = 6);
 inline const Value *getUnderlyingObject(const Value *V,
                                         unsigned MaxLookup = 6) {
-    return getUnderlyingObject(const_cast<Value *>(V), MaxLookup);
+  return getUnderlyingObject(const_cast<Value *>(V), MaxLookup);
 }
 
 /// This method is similar to getUnderlyingObject except that it can
@@ -417,8 +408,8 @@ bool getUnderlyingObjectsForCodeGen(const Value *V,
 /// If OffsetZero is true check that V points to the begining of the alloca.
 AllocaInst *findAllocaForValue(Value *V, bool OffsetZero = false);
 inline const AllocaInst *findAllocaForValue(const Value *V,
-        bool OffsetZero = false) {
-    return findAllocaForValue(const_cast<Value *>(V), OffsetZero);
+                                            bool OffsetZero = false) {
+  return findAllocaForValue(const_cast<Value *>(V), OffsetZero);
 }
 
 /// Return true if the only users of this pointer are lifetime markers.
@@ -483,64 +474,61 @@ bool isValidAssumeForContext(const Instruction *I, const Instruction *CxtI,
                              const DominatorTree *DT = nullptr);
 
 enum class OverflowResult {
-    /// Always overflows in the direction of signed/unsigned min value.
-    AlwaysOverflowsLow,
-    /// Always overflows in the direction of signed/unsigned max value.
-    AlwaysOverflowsHigh,
-    /// May or may not overflow.
-    MayOverflow,
-    /// Never overflows.
-    NeverOverflows,
+  /// Always overflows in the direction of signed/unsigned min value.
+  AlwaysOverflowsLow,
+  /// Always overflows in the direction of signed/unsigned max value.
+  AlwaysOverflowsHigh,
+  /// May or may not overflow.
+  MayOverflow,
+  /// Never overflows.
+  NeverOverflows,
 };
 
-OverflowResult computeOverflowForUnsignedMul(const Value *LHS,
-        const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC,
-        const Instruction *CxtI,
-        const DominatorTree *DT,
-        bool UseInstrInfo = true);
+OverflowResult computeOverflowForUnsignedMul(const Value *LHS, const Value *RHS,
+                                             const DataLayout &DL,
+                                             AssumptionCache *AC,
+                                             const Instruction *CxtI,
+                                             const DominatorTree *DT,
+                                             bool UseInstrInfo = true);
 OverflowResult computeOverflowForSignedMul(const Value *LHS, const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC,
-        const Instruction *CxtI,
-        const DominatorTree *DT,
-        bool UseInstrInfo = true);
-OverflowResult computeOverflowForUnsignedAdd(const Value *LHS,
-        const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC,
-        const Instruction *CxtI,
-        const DominatorTree *DT,
-        bool UseInstrInfo = true);
+                                           const DataLayout &DL,
+                                           AssumptionCache *AC,
+                                           const Instruction *CxtI,
+                                           const DominatorTree *DT,
+                                           bool UseInstrInfo = true);
+OverflowResult computeOverflowForUnsignedAdd(const Value *LHS, const Value *RHS,
+                                             const DataLayout &DL,
+                                             AssumptionCache *AC,
+                                             const Instruction *CxtI,
+                                             const DominatorTree *DT,
+                                             bool UseInstrInfo = true);
 OverflowResult computeOverflowForSignedAdd(const Value *LHS, const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC = nullptr,
-        const Instruction *CxtI = nullptr,
-        const DominatorTree *DT = nullptr);
+                                           const DataLayout &DL,
+                                           AssumptionCache *AC = nullptr,
+                                           const Instruction *CxtI = nullptr,
+                                           const DominatorTree *DT = nullptr);
 /// This version also leverages the sign bit of Add if known.
 OverflowResult computeOverflowForSignedAdd(const AddOperator *Add,
-        const DataLayout &DL,
-        AssumptionCache *AC = nullptr,
-        const Instruction *CxtI = nullptr,
-        const DominatorTree *DT = nullptr);
+                                           const DataLayout &DL,
+                                           AssumptionCache *AC = nullptr,
+                                           const Instruction *CxtI = nullptr,
+                                           const DominatorTree *DT = nullptr);
 OverflowResult computeOverflowForUnsignedSub(const Value *LHS, const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC,
-        const Instruction *CxtI,
-        const DominatorTree *DT);
+                                             const DataLayout &DL,
+                                             AssumptionCache *AC,
+                                             const Instruction *CxtI,
+                                             const DominatorTree *DT);
 OverflowResult computeOverflowForSignedSub(const Value *LHS, const Value *RHS,
-        const DataLayout &DL,
-        AssumptionCache *AC,
-        const Instruction *CxtI,
-        const DominatorTree *DT);
+                                           const DataLayout &DL,
+                                           AssumptionCache *AC,
+                                           const Instruction *CxtI,
+                                           const DominatorTree *DT);
 
 /// Returns true if the arithmetic part of the \p WO 's result is
 /// used only along the paths control dependent on the computation
 /// not overflowing, \p WO being an <op>.with.overflow intrinsic.
 bool isOverflowIntrinsicNoWrap(const WithOverflowInst *WO,
                                const DominatorTree &DT);
-
 
 /// Determine the possible constant range of an integer or vector of integer
 /// value. This is intended as a cheap, non-recursive check.
@@ -576,7 +564,7 @@ bool isGuaranteedToTransferExecutionToSuccessor(const BasicBlock *BB);
 ///
 /// Note that this currently only considers the loop header.
 bool isGuaranteedToExecuteForEveryIteration(const Instruction *I,
-        const Loop *L);
+                                            const Loop *L);
 
 /// Return true if I yields poison or raises UB if any of its operands is
 /// poison.
@@ -595,7 +583,7 @@ void getGuaranteedNonPoisonOps(const Instruction *I,
 /// when I is executed with any operands which appear in KnownPoison holding
 /// a poison value at the point of execution.
 bool mustTriggerUB(const Instruction *I,
-                   const SmallSet<const Value *, 16>& KnownPoison);
+                   const SmallSet<const Value *, 16> &KnownPoison);
 
 /// Return true if this function can prove that if Inst is executed
 /// and yields a poison value or undef bits, then that will trigger
@@ -641,40 +629,40 @@ bool isGuaranteedNotToBePoison(const Value *V, AssumptionCache *AC = nullptr,
 
 /// Specific patterns of select instructions we can match.
 enum SelectPatternFlavor {
-    SPF_UNKNOWN = 0,
-    SPF_SMIN,                   /// Signed minimum
-    SPF_UMIN,                   /// Unsigned minimum
-    SPF_SMAX,                   /// Signed maximum
-    SPF_UMAX,                   /// Unsigned maximum
-    SPF_FMINNUM,                /// Floating point minnum
-    SPF_FMAXNUM,                /// Floating point maxnum
-    SPF_ABS,                    /// Absolute value
-    SPF_NABS                    /// Negated absolute value
+  SPF_UNKNOWN = 0,
+  SPF_SMIN,    /// Signed minimum
+  SPF_UMIN,    /// Unsigned minimum
+  SPF_SMAX,    /// Signed maximum
+  SPF_UMAX,    /// Unsigned maximum
+  SPF_FMINNUM, /// Floating point minnum
+  SPF_FMAXNUM, /// Floating point maxnum
+  SPF_ABS,     /// Absolute value
+  SPF_NABS     /// Negated absolute value
 };
 
 /// Behavior when a floating point min/max is given one NaN and one
 /// non-NaN as input.
 enum SelectPatternNaNBehavior {
-    SPNB_NA = 0,                /// NaN behavior not applicable.
-    SPNB_RETURNS_NAN,           /// Given one NaN input, returns the NaN.
-    SPNB_RETURNS_OTHER,         /// Given one NaN input, returns the non-NaN.
-    SPNB_RETURNS_ANY            /// Given one NaN input, can return either (or
-    /// it has been determined that no operands can
-    /// be NaN).
+  SPNB_NA = 0,        /// NaN behavior not applicable.
+  SPNB_RETURNS_NAN,   /// Given one NaN input, returns the NaN.
+  SPNB_RETURNS_OTHER, /// Given one NaN input, returns the non-NaN.
+  SPNB_RETURNS_ANY    /// Given one NaN input, can return either (or
+                      /// it has been determined that no operands can
+                      /// be NaN).
 };
 
 struct SelectPatternResult {
-    SelectPatternFlavor Flavor;
-    SelectPatternNaNBehavior NaNBehavior; /// Only applicable if Flavor is
-    /// SPF_FMINNUM or SPF_FMAXNUM.
-    bool Ordered;               /// When implementing this min/max pattern as
-    /// fcmp; select, does the fcmp have to be
-    /// ordered?
+  SelectPatternFlavor Flavor;
+  SelectPatternNaNBehavior NaNBehavior; /// Only applicable if Flavor is
+  /// SPF_FMINNUM or SPF_FMAXNUM.
+  bool Ordered; /// When implementing this min/max pattern as
+  /// fcmp; select, does the fcmp have to be
+  /// ordered?
 
-    /// Return true if \p SPF is a min or a max pattern.
-    static bool isMinOrMax(SelectPatternFlavor SPF) {
-        return SPF != SPF_UNKNOWN && SPF != SPF_ABS && SPF != SPF_NABS;
-    }
+  /// Return true if \p SPF is a min or a max pattern.
+  static bool isMinOrMax(SelectPatternFlavor SPF) {
+    return SPF != SPF_UNKNOWN && SPF != SPF_ABS && SPF != SPF_NABS;
+  }
 };
 
 /// Pattern match integer [SU]MIN, [SU]MAX and ABS idioms, returning the kind
@@ -699,14 +687,14 @@ SelectPatternResult matchSelectPattern(Value *V, Value *&LHS, Value *&RHS,
                                        Instruction::CastOps *CastOp = nullptr,
                                        unsigned Depth = 0);
 
-inline SelectPatternResult
-matchSelectPattern(const Value *V, const Value *&LHS, const Value *&RHS) {
-    Value *L = const_cast<Value *>(LHS);
-    Value *R = const_cast<Value *>(RHS);
-    auto Result = matchSelectPattern(const_cast<Value *>(V), L, R);
-    LHS = L;
-    RHS = R;
-    return Result;
+inline SelectPatternResult matchSelectPattern(const Value *V, const Value *&LHS,
+                                              const Value *&RHS) {
+  Value *L = const_cast<Value *>(LHS);
+  Value *R = const_cast<Value *>(RHS);
+  auto Result = matchSelectPattern(const_cast<Value *>(V), L, R);
+  LHS = L;
+  RHS = R;
+  return Result;
 }
 
 /// Determine the pattern that a select with the given compare as its
@@ -717,8 +705,7 @@ SelectPatternResult matchDecomposedSelectPattern(
 
 /// Return the canonical comparison predicate for the specified
 /// minimum/maximum flavor.
-CmpInst::Predicate getMinMaxPred(SelectPatternFlavor SPF,
-                                 bool Ordered = false);
+CmpInst::Predicate getMinMaxPred(SelectPatternFlavor SPF, bool Ordered = false);
 
 /// Return the inverse minimum/maximum flavor of the specified flavor.
 /// For example, signed minimum is the inverse of signed maximum.
@@ -749,8 +736,7 @@ canConvertToMinOrMaxIntrinsic(ArrayRef<Value *> VL);
 Optional<bool> isImpliedCondition(const Value *LHS, const Value *RHS,
                                   const DataLayout &DL, bool LHSIsTrue = true,
                                   unsigned Depth = 0);
-Optional<bool> isImpliedCondition(const Value *LHS,
-                                  CmpInst::Predicate RHSPred,
+Optional<bool> isImpliedCondition(const Value *LHS, CmpInst::Predicate RHSPred,
                                   const Value *RHSOp0, const Value *RHSOp1,
                                   const DataLayout &DL, bool LHSIsTrue = true,
                                   unsigned Depth = 0);

@@ -19,37 +19,35 @@ using namespace mlir;
 
 static Value materializeTensorLoad(OpBuilder &builder, TensorType type,
                                    ValueRange inputs, Location loc) {
-    assert(inputs.size() == 1);
-    assert(inputs[0].getType().isa<BaseMemRefType>());
-    return builder.create<TensorLoadOp>(loc, type, inputs[0]);
+  assert(inputs.size() == 1);
+  assert(inputs[0].getType().isa<BaseMemRefType>());
+  return builder.create<TensorLoadOp>(loc, type, inputs[0]);
 }
 
 /// Registers conversions into BufferizeTypeConverter
 BufferizeTypeConverter::BufferizeTypeConverter() {
-    // Keep all types unchanged.
-    addConversion([](Type type) {
-        return type;
-    });
-    // Convert RankedTensorType to MemRefType.
-    addConversion([](RankedTensorType type) -> Type {
-        return MemRefType::get(type.getShape(), type.getElementType());
-    });
-    // Convert UnrankedTensorType to UnrankedMemRefType.
-    addConversion([](UnrankedTensorType type) -> Type {
-        return UnrankedMemRefType::get(type.getElementType(), 0);
-    });
-    addArgumentMaterialization(materializeTensorLoad);
-    addSourceMaterialization(materializeTensorLoad);
-    addTargetMaterialization([](OpBuilder &builder, BaseMemRefType type,
-    ValueRange inputs, Location loc) -> Value {
-        assert(inputs.size() == 1);
-        assert(inputs[0].getType().isa<TensorType>());
-        return builder.create<TensorToMemrefOp>(loc, type, inputs[0]);
-    });
+  // Keep all types unchanged.
+  addConversion([](Type type) { return type; });
+  // Convert RankedTensorType to MemRefType.
+  addConversion([](RankedTensorType type) -> Type {
+    return MemRefType::get(type.getShape(), type.getElementType());
+  });
+  // Convert UnrankedTensorType to UnrankedMemRefType.
+  addConversion([](UnrankedTensorType type) -> Type {
+    return UnrankedMemRefType::get(type.getElementType(), 0);
+  });
+  addArgumentMaterialization(materializeTensorLoad);
+  addSourceMaterialization(materializeTensorLoad);
+  addTargetMaterialization([](OpBuilder &builder, BaseMemRefType type,
+                              ValueRange inputs, Location loc) -> Value {
+    assert(inputs.size() == 1);
+    assert(inputs[0].getType().isa<TensorType>());
+    return builder.create<TensorToMemrefOp>(loc, type, inputs[0]);
+  });
 }
 
 void mlir::populateBufferizeMaterializationLegality(ConversionTarget &target) {
-    target.addLegalOp<TensorLoadOp, TensorToMemrefOp>();
+  target.addLegalOp<TensorLoadOp, TensorToMemrefOp>();
 }
 
 namespace {
@@ -57,14 +55,14 @@ namespace {
 // converted to memrefs, thus, this op becomes an identity.
 class BufferizeTensorLoadOp : public OpConversionPattern<TensorLoadOp> {
 public:
-    using OpConversionPattern::OpConversionPattern;
-    LogicalResult
-    matchAndRewrite(TensorLoadOp op, ArrayRef<Value> operands,
-                    ConversionPatternRewriter &rewriter) const override {
-        TensorLoadOp::Adaptor adaptor(operands);
-        rewriter.replaceOp(op, adaptor.memref());
-        return success();
-    }
+  using OpConversionPattern::OpConversionPattern;
+  LogicalResult
+  matchAndRewrite(TensorLoadOp op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter &rewriter) const override {
+    TensorLoadOp::Adaptor adaptor(operands);
+    rewriter.replaceOp(op, adaptor.memref());
+    return success();
+  }
 };
 } // namespace
 
@@ -73,60 +71,58 @@ namespace {
 // converted to memrefs, thus, this op becomes an identity.
 class BufferizeTensorToMemrefOp : public OpConversionPattern<TensorToMemrefOp> {
 public:
-    using OpConversionPattern::OpConversionPattern;
-    LogicalResult
-    matchAndRewrite(TensorToMemrefOp op, ArrayRef<Value> operands,
-                    ConversionPatternRewriter &rewriter) const override {
-        TensorToMemrefOp::Adaptor adaptor(operands);
-        rewriter.replaceOp(op, adaptor.tensor());
-        return success();
-    }
+  using OpConversionPattern::OpConversionPattern;
+  LogicalResult
+  matchAndRewrite(TensorToMemrefOp op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter &rewriter) const override {
+    TensorToMemrefOp::Adaptor adaptor(operands);
+    rewriter.replaceOp(op, adaptor.tensor());
+    return success();
+  }
 };
 } // namespace
 
 void mlir::populateEliminateBufferizeMaterializationsPatterns(
     MLIRContext *context, BufferizeTypeConverter &typeConverter,
     OwningRewritePatternList &patterns) {
-    patterns.insert<BufferizeTensorLoadOp, BufferizeTensorToMemrefOp>(
-        typeConverter, context);
+  patterns.insert<BufferizeTensorLoadOp, BufferizeTensorToMemrefOp>(
+      typeConverter, context);
 }
 
 namespace {
 struct FinalizingBufferizePass
     : public FinalizingBufferizeBase<FinalizingBufferizePass> {
-    using FinalizingBufferizeBase<
-    FinalizingBufferizePass>::FinalizingBufferizeBase;
+  using FinalizingBufferizeBase<
+      FinalizingBufferizePass>::FinalizingBufferizeBase;
 
-    void runOnFunction() override {
-        auto func = getFunction();
-        auto *context = &getContext();
+  void runOnFunction() override {
+    auto func = getFunction();
+    auto *context = &getContext();
 
-        BufferizeTypeConverter typeConverter;
-        OwningRewritePatternList patterns;
-        ConversionTarget target(*context);
+    BufferizeTypeConverter typeConverter;
+    OwningRewritePatternList patterns;
+    ConversionTarget target(*context);
 
-        populateEliminateBufferizeMaterializationsPatterns(context, typeConverter,
-                patterns);
+    populateEliminateBufferizeMaterializationsPatterns(context, typeConverter,
+                                                       patterns);
 
-        // If all result types are legal, and all block arguments are legal (ensured
-        // by func conversion above), then all types in the program are legal.
-        //
-        // We also check that the operand types are legal to avoid creating invalid
-        // IR. For example, this prevents
-        // populateEliminateBufferizeMaterializationsPatterns from updating the
-        // types of the operands to a return op without updating the enclosing
-        // function.
-        target.markUnknownOpDynamicallyLegal(
-        [&](Operation *op) {
-            return typeConverter.isLegal(op);
-        });
+    // If all result types are legal, and all block arguments are legal (ensured
+    // by func conversion above), then all types in the program are legal.
+    //
+    // We also check that the operand types are legal to avoid creating invalid
+    // IR. For example, this prevents
+    // populateEliminateBufferizeMaterializationsPatterns from updating the
+    // types of the operands to a return op without updating the enclosing
+    // function.
+    target.markUnknownOpDynamicallyLegal(
+        [&](Operation *op) { return typeConverter.isLegal(op); });
 
-        if (failed(applyFullConversion(func, target, std::move(patterns))))
-            signalPassFailure();
-    }
+    if (failed(applyFullConversion(func, target, std::move(patterns))))
+      signalPassFailure();
+  }
 };
 } // namespace
 
 std::unique_ptr<FunctionPass> mlir::createFinalizingBufferizePass() {
-    return std::make_unique<FinalizingBufferizePass>();
+  return std::make_unique<FinalizingBufferizePass>();
 }

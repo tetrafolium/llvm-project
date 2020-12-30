@@ -31,38 +31,32 @@ namespace clangd {
 // SymbolID can be used as key in the symbol indexes to lookup the symbol.
 class SymbolID {
 public:
-    SymbolID() = default;
-    explicit SymbolID(llvm::StringRef USR);
+  SymbolID() = default;
+  explicit SymbolID(llvm::StringRef USR);
 
-    bool operator==(const SymbolID &Sym) const {
-        return HashValue == Sym.HashValue;
-    }
-    bool operator!=(const SymbolID &Sym) const {
-        return !(*this == Sym);
-    }
-    bool operator<(const SymbolID &Sym) const {
-        return HashValue < Sym.HashValue;
-    }
+  bool operator==(const SymbolID &Sym) const {
+    return HashValue == Sym.HashValue;
+  }
+  bool operator!=(const SymbolID &Sym) const { return !(*this == Sym); }
+  bool operator<(const SymbolID &Sym) const {
+    return HashValue < Sym.HashValue;
+  }
 
-    // The stored hash is truncated to RawSize bytes.
-    // This trades off memory against the number of symbols we can handle.
-    constexpr static size_t RawSize = 8;
-    llvm::StringRef raw() const;
-    static SymbolID fromRaw(llvm::StringRef);
+  // The stored hash is truncated to RawSize bytes.
+  // This trades off memory against the number of symbols we can handle.
+  constexpr static size_t RawSize = 8;
+  llvm::StringRef raw() const;
+  static SymbolID fromRaw(llvm::StringRef);
 
-    // Returns a hex encoded string.
-    std::string str() const;
-    static llvm::Expected<SymbolID> fromStr(llvm::StringRef);
+  // Returns a hex encoded string.
+  std::string str() const;
+  static llvm::Expected<SymbolID> fromStr(llvm::StringRef);
 
-    bool isNull() const {
-        return *this == SymbolID();
-    }
-    explicit operator bool() const {
-        return !isNull();
-    }
+  bool isNull() const { return *this == SymbolID(); }
+  explicit operator bool() const { return !isNull(); }
 
 private:
-    std::array<uint8_t, RawSize> HashValue{};
+  std::array<uint8_t, RawSize> HashValue{};
 };
 
 llvm::hash_code hash_value(const SymbolID &ID);
@@ -76,21 +70,21 @@ llvm::raw_ostream &operator<<(llvm::raw_ostream &OS, const SymbolID &ID);
 namespace llvm {
 // Support SymbolIDs as DenseMap keys.
 template <> struct DenseMapInfo<clang::clangd::SymbolID> {
-    static inline clang::clangd::SymbolID getEmptyKey() {
-        static clang::clangd::SymbolID EmptyKey("EMPTYKEY");
-        return EmptyKey;
-    }
-    static inline clang::clangd::SymbolID getTombstoneKey() {
-        static clang::clangd::SymbolID TombstoneKey("TOMBSTONEKEY");
-        return TombstoneKey;
-    }
-    static unsigned getHashValue(const clang::clangd::SymbolID &Sym) {
-        return hash_value(Sym);
-    }
-    static bool isEqual(const clang::clangd::SymbolID &LHS,
-                        const clang::clangd::SymbolID &RHS) {
-        return LHS == RHS;
-    }
+  static inline clang::clangd::SymbolID getEmptyKey() {
+    static clang::clangd::SymbolID EmptyKey("EMPTYKEY");
+    return EmptyKey;
+  }
+  static inline clang::clangd::SymbolID getTombstoneKey() {
+    static clang::clangd::SymbolID TombstoneKey("TOMBSTONEKEY");
+    return TombstoneKey;
+  }
+  static unsigned getHashValue(const clang::clangd::SymbolID &Sym) {
+    return hash_value(Sym);
+  }
+  static bool isEqual(const clang::clangd::SymbolID &LHS,
+                      const clang::clangd::SymbolID &RHS) {
+    return LHS == RHS;
+  }
 };
 } // namespace llvm
 

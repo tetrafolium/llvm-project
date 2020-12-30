@@ -23,18 +23,16 @@
 namespace llvm {
 
 class InstCombinePass : public PassInfoMixin<InstCombinePass> {
-    InstCombineWorklist Worklist;
-    const unsigned MaxIterations;
+  InstCombineWorklist Worklist;
+  const unsigned MaxIterations;
 
 public:
-    static StringRef name() {
-        return "InstCombinePass";
-    }
+  static StringRef name() { return "InstCombinePass"; }
 
-    explicit InstCombinePass();
-    explicit InstCombinePass(unsigned MaxIterations);
+  explicit InstCombinePass();
+  explicit InstCombinePass(unsigned MaxIterations);
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// The legacy pass manager's instcombine pass.
@@ -42,17 +40,17 @@ public:
 /// This is a basic whole-function wrapper around the instcombine utility. It
 /// will try to combine all instructions in the function.
 class InstructionCombiningPass : public FunctionPass {
-    InstCombineWorklist Worklist;
-    const unsigned MaxIterations;
+  InstCombineWorklist Worklist;
+  const unsigned MaxIterations;
 
 public:
-    static char ID; // Pass identification, replacement for typeid
+  static char ID; // Pass identification, replacement for typeid
 
-    explicit InstructionCombiningPass();
-    explicit InstructionCombiningPass(unsigned MaxIterations);
+  explicit InstructionCombiningPass();
+  explicit InstructionCombiningPass(unsigned MaxIterations);
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
-    bool runOnFunction(Function &F) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnFunction(Function &F) override;
 };
 
 //===----------------------------------------------------------------------===//
@@ -69,6 +67,6 @@ public:
 //
 FunctionPass *createInstructionCombiningPass();
 FunctionPass *createInstructionCombiningPass(unsigned MaxIterations);
-}
+} // namespace llvm
 
 #endif

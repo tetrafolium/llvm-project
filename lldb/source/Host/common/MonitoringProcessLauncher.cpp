@@ -23,48 +23,48 @@ MonitoringProcessLauncher::MonitoringProcessLauncher(
 
 HostProcess
 MonitoringProcessLauncher::LaunchProcess(const ProcessLaunchInfo &launch_info,
-        Status &error) {
-    ProcessLaunchInfo resolved_info(launch_info);
+                                         Status &error) {
+  ProcessLaunchInfo resolved_info(launch_info);
 
-    error.Clear();
+  error.Clear();
 
-    FileSystem &fs = FileSystem::Instance();
-    FileSpec exe_spec(resolved_info.GetExecutableFile());
+  FileSystem &fs = FileSystem::Instance();
+  FileSpec exe_spec(resolved_info.GetExecutableFile());
 
-    if (!fs.Exists(exe_spec))
-        FileSystem::Instance().Resolve(exe_spec);
+  if (!fs.Exists(exe_spec))
+    FileSystem::Instance().Resolve(exe_spec);
 
-    if (!fs.Exists(exe_spec))
-        FileSystem::Instance().ResolveExecutableLocation(exe_spec);
+  if (!fs.Exists(exe_spec))
+    FileSystem::Instance().ResolveExecutableLocation(exe_spec);
 
-    if (!fs.Exists(exe_spec)) {
-        error.SetErrorStringWithFormatv("executable doesn't exist: '{0}'",
-                                        exe_spec);
-        return HostProcess();
-    }
+  if (!fs.Exists(exe_spec)) {
+    error.SetErrorStringWithFormatv("executable doesn't exist: '{0}'",
+                                    exe_spec);
+    return HostProcess();
+  }
 
-    resolved_info.SetExecutableFile(exe_spec, false);
-    assert(!resolved_info.GetFlags().Test(eLaunchFlagLaunchInTTY));
+  resolved_info.SetExecutableFile(exe_spec, false);
+  assert(!resolved_info.GetFlags().Test(eLaunchFlagLaunchInTTY));
 
-    HostProcess process =
-        m_delegate_launcher->LaunchProcess(resolved_info, error);
+  HostProcess process =
+      m_delegate_launcher->LaunchProcess(resolved_info, error);
 
-    if (process.GetProcessId() != LLDB_INVALID_PROCESS_ID) {
-        Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_PROCESS));
+  if (process.GetProcessId() != LLDB_INVALID_PROCESS_ID) {
+    Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_PROCESS));
 
-        assert(launch_info.GetMonitorProcessCallback());
-        llvm::Expected<HostThread> maybe_thread =
-            process.StartMonitoring(launch_info.GetMonitorProcessCallback(),
-                                    launch_info.GetMonitorSignals());
-        if (!maybe_thread)
-            error.SetErrorStringWithFormatv("failed to launch host thread: {}",
-                                            llvm::toString(maybe_thread.takeError()));
-        if (log)
-            log->PutCString("started monitoring child process.");
-    } else {
-        // Invalid process ID, something didn't go well
-        if (error.Success())
-            error.SetErrorString("process launch failed for unknown reasons");
-    }
-    return process;
+    assert(launch_info.GetMonitorProcessCallback());
+    llvm::Expected<HostThread> maybe_thread =
+        process.StartMonitoring(launch_info.GetMonitorProcessCallback(),
+                                launch_info.GetMonitorSignals());
+    if (!maybe_thread)
+      error.SetErrorStringWithFormatv("failed to launch host thread: {}",
+                                      llvm::toString(maybe_thread.takeError()));
+    if (log)
+      log->PutCString("started monitoring child process.");
+  } else {
+    // Invalid process ID, something didn't go well
+    if (error.Success())
+      error.SetErrorString("process launch failed for unknown reasons");
+  }
+  return process;
 }

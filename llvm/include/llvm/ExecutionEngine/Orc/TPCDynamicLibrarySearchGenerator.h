@@ -22,42 +22,42 @@ namespace orc {
 
 class TPCDynamicLibrarySearchGenerator : public DefinitionGenerator {
 public:
-    using SymbolPredicate = unique_function<bool(const SymbolStringPtr &)>;
+  using SymbolPredicate = unique_function<bool(const SymbolStringPtr &)>;
 
-    /// Create a DynamicLibrarySearchGenerator that searches for symbols in the
-    /// library with the given handle.
-    ///
-    /// If the Allow predicate is given then only symbols matching the predicate
-    /// will be searched for. If the predicate is not given then all symbols will
-    /// be searched for.
-    TPCDynamicLibrarySearchGenerator(TargetProcessControl &TPC,
-                                     tpctypes::DylibHandle H,
-                                     SymbolPredicate Allow = SymbolPredicate())
-        : TPC(TPC), H(H), Allow(std::move(Allow)) {}
+  /// Create a DynamicLibrarySearchGenerator that searches for symbols in the
+  /// library with the given handle.
+  ///
+  /// If the Allow predicate is given then only symbols matching the predicate
+  /// will be searched for. If the predicate is not given then all symbols will
+  /// be searched for.
+  TPCDynamicLibrarySearchGenerator(TargetProcessControl &TPC,
+                                   tpctypes::DylibHandle H,
+                                   SymbolPredicate Allow = SymbolPredicate())
+      : TPC(TPC), H(H), Allow(std::move(Allow)) {}
 
-    /// Permanently loads the library at the given path and, on success, returns
-    /// a DynamicLibrarySearchGenerator that will search it for symbol definitions
-    /// in the library. On failure returns the reason the library failed to load.
-    static Expected<std::unique_ptr<TPCDynamicLibrarySearchGenerator>>
-            Load(TargetProcessControl &TPC, const char *LibraryPath,
-                 SymbolPredicate Allow = SymbolPredicate());
+  /// Permanently loads the library at the given path and, on success, returns
+  /// a DynamicLibrarySearchGenerator that will search it for symbol definitions
+  /// in the library. On failure returns the reason the library failed to load.
+  static Expected<std::unique_ptr<TPCDynamicLibrarySearchGenerator>>
+  Load(TargetProcessControl &TPC, const char *LibraryPath,
+       SymbolPredicate Allow = SymbolPredicate());
 
-    /// Creates a TPCDynamicLibrarySearchGenerator that searches for symbols in
-    /// the target process.
-    static Expected<std::unique_ptr<TPCDynamicLibrarySearchGenerator>>
-            GetForTargetProcess(TargetProcessControl &TPC,
-    SymbolPredicate Allow = SymbolPredicate()) {
-        return Load(TPC, nullptr, std::move(Allow));
-    }
+  /// Creates a TPCDynamicLibrarySearchGenerator that searches for symbols in
+  /// the target process.
+  static Expected<std::unique_ptr<TPCDynamicLibrarySearchGenerator>>
+  GetForTargetProcess(TargetProcessControl &TPC,
+                      SymbolPredicate Allow = SymbolPredicate()) {
+    return Load(TPC, nullptr, std::move(Allow));
+  }
 
-    Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
-                        JITDylibLookupFlags JDLookupFlags,
-                        const SymbolLookupSet &Symbols) override;
+  Error tryToGenerate(LookupState &LS, LookupKind K, JITDylib &JD,
+                      JITDylibLookupFlags JDLookupFlags,
+                      const SymbolLookupSet &Symbols) override;
 
 private:
-    TargetProcessControl &TPC;
-    tpctypes::DylibHandle H;
-    SymbolPredicate Allow;
+  TargetProcessControl &TPC;
+  tpctypes::DylibHandle H;
+  SymbolPredicate Allow;
 };
 
 } // end namespace orc

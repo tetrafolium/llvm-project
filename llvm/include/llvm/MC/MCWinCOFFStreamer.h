@@ -26,61 +26,61 @@ class raw_pwrite_stream;
 
 class MCWinCOFFStreamer : public MCObjectStreamer {
 public:
-    MCWinCOFFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> MAB,
-                      std::unique_ptr<MCCodeEmitter> CE,
-                      std::unique_ptr<MCObjectWriter> OW);
+  MCWinCOFFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> MAB,
+                    std::unique_ptr<MCCodeEmitter> CE,
+                    std::unique_ptr<MCObjectWriter> OW);
 
-    /// state management
-    void reset() override {
-        CurSymbol = nullptr;
-        MCObjectStreamer::reset();
-    }
+  /// state management
+  void reset() override {
+    CurSymbol = nullptr;
+    MCObjectStreamer::reset();
+  }
 
-    /// \name MCStreamer interface
-    /// \{
+  /// \name MCStreamer interface
+  /// \{
 
-    void InitSections(bool NoExecStack) override;
-    void emitLabel(MCSymbol *Symbol, SMLoc Loc = SMLoc()) override;
-    void emitAssemblerFlag(MCAssemblerFlag Flag) override;
-    void emitThumbFunc(MCSymbol *Func) override;
-    bool emitSymbolAttribute(MCSymbol *Symbol, MCSymbolAttr Attribute) override;
-    void emitSymbolDesc(MCSymbol *Symbol, unsigned DescValue) override;
-    void BeginCOFFSymbolDef(MCSymbol const *Symbol) override;
-    void EmitCOFFSymbolStorageClass(int StorageClass) override;
-    void EmitCOFFSymbolType(int Type) override;
-    void EndCOFFSymbolDef() override;
-    void EmitCOFFSafeSEH(MCSymbol const *Symbol) override;
-    void EmitCOFFSymbolIndex(MCSymbol const *Symbol) override;
-    void EmitCOFFSectionIndex(MCSymbol const *Symbol) override;
-    void EmitCOFFSecRel32(MCSymbol const *Symbol, uint64_t Offset) override;
-    void EmitCOFFImgRel32(MCSymbol const *Symbol, int64_t Offset) override;
-    void emitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                          unsigned ByteAlignment) override;
-    void emitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                               unsigned ByteAlignment) override;
-    void emitWeakReference(MCSymbol *Alias, const MCSymbol *Symbol) override;
-    void emitZerofill(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
-                      unsigned ByteAlignment, SMLoc Loc = SMLoc()) override;
-    void emitTBSSSymbol(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
+  void InitSections(bool NoExecStack) override;
+  void emitLabel(MCSymbol *Symbol, SMLoc Loc = SMLoc()) override;
+  void emitAssemblerFlag(MCAssemblerFlag Flag) override;
+  void emitThumbFunc(MCSymbol *Func) override;
+  bool emitSymbolAttribute(MCSymbol *Symbol, MCSymbolAttr Attribute) override;
+  void emitSymbolDesc(MCSymbol *Symbol, unsigned DescValue) override;
+  void BeginCOFFSymbolDef(MCSymbol const *Symbol) override;
+  void EmitCOFFSymbolStorageClass(int StorageClass) override;
+  void EmitCOFFSymbolType(int Type) override;
+  void EndCOFFSymbolDef() override;
+  void EmitCOFFSafeSEH(MCSymbol const *Symbol) override;
+  void EmitCOFFSymbolIndex(MCSymbol const *Symbol) override;
+  void EmitCOFFSectionIndex(MCSymbol const *Symbol) override;
+  void EmitCOFFSecRel32(MCSymbol const *Symbol, uint64_t Offset) override;
+  void EmitCOFFImgRel32(MCSymbol const *Symbol, int64_t Offset) override;
+  void emitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
                         unsigned ByteAlignment) override;
-    void emitIdent(StringRef IdentString) override;
-    void EmitWinEHHandlerData(SMLoc Loc) override;
-    void emitCGProfileEntry(const MCSymbolRefExpr *From,
-                            const MCSymbolRefExpr *To, uint64_t Count) override;
-    void finishImpl() override;
+  void emitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
+                             unsigned ByteAlignment) override;
+  void emitWeakReference(MCSymbol *Alias, const MCSymbol *Symbol) override;
+  void emitZerofill(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
+                    unsigned ByteAlignment, SMLoc Loc = SMLoc()) override;
+  void emitTBSSSymbol(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
+                      unsigned ByteAlignment) override;
+  void emitIdent(StringRef IdentString) override;
+  void EmitWinEHHandlerData(SMLoc Loc) override;
+  void emitCGProfileEntry(const MCSymbolRefExpr *From,
+                          const MCSymbolRefExpr *To, uint64_t Count) override;
+  void finishImpl() override;
 
-    /// \}
+  /// \}
 
 protected:
-    const MCSymbol *CurSymbol;
+  const MCSymbol *CurSymbol;
 
-    void emitInstToData(const MCInst &Inst, const MCSubtargetInfo &STI) override;
+  void emitInstToData(const MCInst &Inst, const MCSubtargetInfo &STI) override;
 
-    void finalizeCGProfileEntry(const MCSymbolRefExpr *&S);
-    void finalizeCGProfile();
+  void finalizeCGProfileEntry(const MCSymbolRefExpr *&S);
+  void finalizeCGProfile();
 
 private:
-    void Error(const Twine &Msg) const;
+  void Error(const Twine &Msg) const;
 };
 
 } // end namespace llvm

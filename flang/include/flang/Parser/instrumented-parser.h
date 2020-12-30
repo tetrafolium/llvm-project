@@ -24,61 +24,61 @@ namespace Fortran::parser {
 
 class ParsingLog {
 public:
-    ParsingLog() {}
+  ParsingLog() {}
 
-    void clear();
+  void clear();
 
-    bool Fails(const char *at, const MessageFixedText &tag, ParseState &);
-    void Note(const char *at, const MessageFixedText &tag, bool pass,
-              const ParseState &);
-    void Dump(llvm::raw_ostream &, const AllCookedSources &) const;
+  bool Fails(const char *at, const MessageFixedText &tag, ParseState &);
+  void Note(const char *at, const MessageFixedText &tag, bool pass,
+      const ParseState &);
+  void Dump(llvm::raw_ostream &, const AllCookedSources &) const;
 
 private:
-    struct LogForPosition {
-        struct Entry {
-            Entry() {}
-            bool pass{true};
-            int count{0};
-            bool deferred{false};
-            Messages messages;
-        };
-        std::map<MessageFixedText, Entry> perTag;
+  struct LogForPosition {
+    struct Entry {
+      Entry() {}
+      bool pass{true};
+      int count{0};
+      bool deferred{false};
+      Messages messages;
     };
-    std::map<std::size_t, LogForPosition> perPos_;
+    std::map<MessageFixedText, Entry> perTag;
+  };
+  std::map<std::size_t, LogForPosition> perPos_;
 };
 
 template <typename PA> class InstrumentedParser {
 public:
-    using resultType = typename PA::resultType;
-    constexpr InstrumentedParser(const InstrumentedParser &) = default;
-    constexpr InstrumentedParser(const MessageFixedText &tag, const PA &parser)
-        : tag_{tag}, parser_{parser} {}
-    std::optional<resultType> Parse(ParseState &state) const {
-        if (UserState * ustate{state.userState()}) {
-            if (ParsingLog * log{ustate->log()}) {
-                const char *at{state.GetLocation()};
-                if (log->Fails(at, tag_, state)) {
-                    return std::nullopt;
-                }
-                Messages messages{std::move(state.messages())};
-                std::optional<resultType> result{parser_.Parse(state)};
-                log->Note(at, tag_, result.has_value(), state);
-                state.messages().Annex(std::move(messages));
-                return result;
-            }
+  using resultType = typename PA::resultType;
+  constexpr InstrumentedParser(const InstrumentedParser &) = default;
+  constexpr InstrumentedParser(const MessageFixedText &tag, const PA &parser)
+      : tag_{tag}, parser_{parser} {}
+  std::optional<resultType> Parse(ParseState &state) const {
+    if (UserState * ustate{state.userState()}) {
+      if (ParsingLog * log{ustate->log()}) {
+        const char *at{state.GetLocation()};
+        if (log->Fails(at, tag_, state)) {
+          return std::nullopt;
         }
-        return parser_.Parse(state);
+        Messages messages{std::move(state.messages())};
+        std::optional<resultType> result{parser_.Parse(state)};
+        log->Note(at, tag_, result.has_value(), state);
+        state.messages().Annex(std::move(messages));
+        return result;
+      }
     }
+    return parser_.Parse(state);
+  }
 
 private:
-    const MessageFixedText tag_;
-    const PA parser_;
+  const MessageFixedText tag_;
+  const PA parser_;
 };
 
 template <typename PA>
 inline constexpr auto instrumented(
     const MessageFixedText &tag, const PA &parser) {
-    return InstrumentedParser{tag, parser};
+  return InstrumentedParser{tag, parser};
 }
 } // namespace Fortran::parser
 #endif // FORTRAN_PARSER_INSTRUMENTED_PARSER_H_

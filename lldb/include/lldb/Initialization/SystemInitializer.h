@@ -17,12 +17,12 @@ namespace lldb_private {
 
 class SystemInitializer {
 public:
-    SystemInitializer();
-    virtual ~SystemInitializer();
+  SystemInitializer();
+  virtual ~SystemInitializer();
 
-    virtual llvm::Error Initialize() = 0;
-    virtual void Terminate() = 0;
+  virtual llvm::Error Initialize() = 0;
+  virtual void Terminate() = 0;
 };
-}
+} // namespace lldb_private
 
 #endif

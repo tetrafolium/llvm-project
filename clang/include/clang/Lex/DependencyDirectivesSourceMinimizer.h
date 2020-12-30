@@ -31,50 +31,50 @@ namespace minimize_source_to_dependency_directives {
 /// Represents the kind of preprocessor directive or a module declaration that
 /// is tracked by the source minimizer in its token output.
 enum TokenKind {
-    pp_none,
-    pp_include,
-    pp___include_macros,
-    pp_define,
-    pp_undef,
-    pp_import,
-    pp_pragma_import,
-    pp_pragma_once,
-    pp_include_next,
-    pp_if,
-    pp_ifdef,
-    pp_ifndef,
-    pp_elif,
-    pp_else,
-    pp_endif,
-    decl_at_import,
-    cxx_export_decl,
-    cxx_module_decl,
-    cxx_import_decl,
-    pp_eof,
+  pp_none,
+  pp_include,
+  pp___include_macros,
+  pp_define,
+  pp_undef,
+  pp_import,
+  pp_pragma_import,
+  pp_pragma_once,
+  pp_include_next,
+  pp_if,
+  pp_ifdef,
+  pp_ifndef,
+  pp_elif,
+  pp_else,
+  pp_endif,
+  decl_at_import,
+  cxx_export_decl,
+  cxx_module_decl,
+  cxx_import_decl,
+  pp_eof,
 };
 
 /// Represents a simplified token that's lexed as part of the source
 /// minimization. It's used to track the location of various preprocessor
 /// directives that could potentially have an effect on the depedencies.
 struct Token {
-    /// The kind of token.
-    TokenKind K = pp_none;
+  /// The kind of token.
+  TokenKind K = pp_none;
 
-    /// Offset into the output byte stream of where the directive begins.
-    int Offset = -1;
+  /// Offset into the output byte stream of where the directive begins.
+  int Offset = -1;
 
-    Token(TokenKind K, int Offset) : K(K), Offset(Offset) {}
+  Token(TokenKind K, int Offset) : K(K), Offset(Offset) {}
 };
 
 /// Simplified token range to track the range of a potentially skippable PP
 /// directive.
 struct SkippedRange {
-    /// Offset into the output byte stream of where the skipped directive begins.
-    int Offset;
+  /// Offset into the output byte stream of where the skipped directive begins.
+  int Offset;
 
-    /// The number of bytes that can be skipped before the preprocessing must
-    /// resume.
-    int Length;
+  /// The number of bytes that can be skipped before the preprocessing must
+  /// resume.
+  int Length;
 };
 
 /// Computes the potential source ranges that can be skipped by the preprocessor
@@ -101,7 +101,7 @@ bool computeSkippedRanges(ArrayRef<Token> Input,
 bool minimizeSourceToDependencyDirectives(
     llvm::StringRef Input, llvm::SmallVectorImpl<char> &Output,
     llvm::SmallVectorImpl<minimize_source_to_dependency_directives::Token>
-    &Tokens,
+        &Tokens,
     DiagnosticsEngine *Diags = nullptr,
     SourceLocation InputSourceLoc = SourceLocation());
 

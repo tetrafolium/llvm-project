@@ -19,33 +19,33 @@ namespace xray {
 
 class RecordConsumer {
 public:
-    virtual Error consume(std::unique_ptr<Record> R) = 0;
-    virtual ~RecordConsumer() = default;
+  virtual Error consume(std::unique_ptr<Record> R) = 0;
+  virtual ~RecordConsumer() = default;
 };
 
 // This consumer will collect all the records into a vector of records, in
 // arrival order.
 class LogBuilderConsumer : public RecordConsumer {
-    std::vector<std::unique_ptr<Record>> &Records;
+  std::vector<std::unique_ptr<Record>> &Records;
 
 public:
-    explicit LogBuilderConsumer(std::vector<std::unique_ptr<Record>> &R)
-        : RecordConsumer(), Records(R) {}
+  explicit LogBuilderConsumer(std::vector<std::unique_ptr<Record>> &R)
+      : RecordConsumer(), Records(R) {}
 
-    Error consume(std::unique_ptr<Record> R) override;
+  Error consume(std::unique_ptr<Record> R) override;
 };
 
 // A PipelineConsumer applies a set of visitors to every consumed Record, in the
 // order by which the visitors are added to the pipeline in the order of
 // appearance.
 class PipelineConsumer : public RecordConsumer {
-    std::vector<RecordVisitor *> Visitors;
+  std::vector<RecordVisitor *> Visitors;
 
 public:
-    PipelineConsumer(std::initializer_list<RecordVisitor *> V)
-        : RecordConsumer(), Visitors(V) {}
+  PipelineConsumer(std::initializer_list<RecordVisitor *> V)
+      : RecordConsumer(), Visitors(V) {}
 
-    Error consume(std::unique_ptr<Record> R) override;
+  Error consume(std::unique_ptr<Record> R) override;
 };
 
 } // namespace xray

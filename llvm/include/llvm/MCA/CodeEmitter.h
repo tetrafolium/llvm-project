@@ -34,33 +34,33 @@ namespace mca {
 /// It provides a simple API to compute and return instruction encodings as
 /// strings. Encodings are cached internally for later usage.
 class CodeEmitter {
-    const MCSubtargetInfo &STI;
-    const MCAsmBackend &MAB;
-    const MCCodeEmitter &MCE;
+  const MCSubtargetInfo &STI;
+  const MCAsmBackend &MAB;
+  const MCCodeEmitter &MCE;
 
-    SmallString<256> Code;
-    raw_svector_ostream VecOS;
-    ArrayRef<MCInst> Sequence;
+  SmallString<256> Code;
+  raw_svector_ostream VecOS;
+  ArrayRef<MCInst> Sequence;
 
-    // An EncodingInfo pair stores <base, length> information.  Base (i.e. first)
-    // is an index to the `Code`. Length (i.e. second) is the encoding size.
-    using EncodingInfo = std::pair<unsigned, unsigned>;
+  // An EncodingInfo pair stores <base, length> information.  Base (i.e. first)
+  // is an index to the `Code`. Length (i.e. second) is the encoding size.
+  using EncodingInfo = std::pair<unsigned, unsigned>;
 
-    // A cache of encodings.
-    SmallVector<EncodingInfo, 16> Encodings;
+  // A cache of encodings.
+  SmallVector<EncodingInfo, 16> Encodings;
 
-    EncodingInfo getOrCreateEncodingInfo(unsigned MCID);
+  EncodingInfo getOrCreateEncodingInfo(unsigned MCID);
 
 public:
-    CodeEmitter(const MCSubtargetInfo &ST, const MCAsmBackend &AB,
-                const MCCodeEmitter &CE, ArrayRef<MCInst> S)
-        : STI(ST), MAB(AB), MCE(CE), VecOS(Code), Sequence(S),
-          Encodings(S.size()) {}
+  CodeEmitter(const MCSubtargetInfo &ST, const MCAsmBackend &AB,
+              const MCCodeEmitter &CE, ArrayRef<MCInst> S)
+      : STI(ST), MAB(AB), MCE(CE), VecOS(Code), Sequence(S),
+        Encodings(S.size()) {}
 
-    StringRef getEncoding(unsigned MCID) {
-        EncodingInfo EI = getOrCreateEncodingInfo(MCID);
-        return StringRef(&Code[EI.first], EI.second);
-    }
+  StringRef getEncoding(unsigned MCID) {
+    EncodingInfo EI = getOrCreateEncodingInfo(MCID);
+    return StringRef(&Code[EI.first], EI.second);
+  }
 };
 
 } // namespace mca

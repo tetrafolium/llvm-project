@@ -134,233 +134,233 @@ class GBRSimplex;
 /// algorithm. See the documentation for findIntegerSample and reduceBasis.
 class Simplex {
 public:
-    enum class Direction { Up, Down };
+  enum class Direction { Up, Down };
 
-    Simplex() = delete;
-    explicit Simplex(unsigned nVar);
-    explicit Simplex(const FlatAffineConstraints &constraints);
+  Simplex() = delete;
+  explicit Simplex(unsigned nVar);
+  explicit Simplex(const FlatAffineConstraints &constraints);
 
-    /// Returns true if the tableau is empty (has conflicting constraints),
-    /// false otherwise.
-    bool isEmpty() const;
+  /// Returns true if the tableau is empty (has conflicting constraints),
+  /// false otherwise.
+  bool isEmpty() const;
 
-    /// Add an inequality to the tableau. If coeffs is c_0, c_1, ... c_n, where n
-    /// is the current number of variables, then the corresponding inequality is
-    /// c_n + c_0*x_0 + c_1*x_1 + ... + c_{n-1}*x_{n-1} >= 0.
-    void addInequality(ArrayRef<int64_t> coeffs);
+  /// Add an inequality to the tableau. If coeffs is c_0, c_1, ... c_n, where n
+  /// is the current number of variables, then the corresponding inequality is
+  /// c_n + c_0*x_0 + c_1*x_1 + ... + c_{n-1}*x_{n-1} >= 0.
+  void addInequality(ArrayRef<int64_t> coeffs);
 
-    /// Returns the number of variables in the tableau.
-    unsigned numVariables() const;
+  /// Returns the number of variables in the tableau.
+  unsigned numVariables() const;
 
-    /// Returns the number of constraints in the tableau.
-    unsigned numConstraints() const;
+  /// Returns the number of constraints in the tableau.
+  unsigned numConstraints() const;
 
-    /// Add an equality to the tableau. If coeffs is c_0, c_1, ... c_n, where n
-    /// is the current number of variables, then the corresponding equality is
-    /// c_n + c_0*x_0 + c_1*x_1 + ... + c_{n-1}*x_{n-1} == 0.
-    void addEquality(ArrayRef<int64_t> coeffs);
+  /// Add an equality to the tableau. If coeffs is c_0, c_1, ... c_n, where n
+  /// is the current number of variables, then the corresponding equality is
+  /// c_n + c_0*x_0 + c_1*x_1 + ... + c_{n-1}*x_{n-1} == 0.
+  void addEquality(ArrayRef<int64_t> coeffs);
 
-    /// Mark the tableau as being empty.
-    void markEmpty();
+  /// Mark the tableau as being empty.
+  void markEmpty();
 
-    /// Get a snapshot of the current state. This is used for rolling back.
-    unsigned getSnapshot() const;
+  /// Get a snapshot of the current state. This is used for rolling back.
+  unsigned getSnapshot() const;
 
-    /// Rollback to a snapshot. This invalidates all later snapshots.
-    void rollback(unsigned snapshot);
+  /// Rollback to a snapshot. This invalidates all later snapshots.
+  void rollback(unsigned snapshot);
 
-    /// Add all the constraints from the given FlatAffineConstraints.
-    void intersectFlatAffineConstraints(const FlatAffineConstraints &fac);
+  /// Add all the constraints from the given FlatAffineConstraints.
+  void intersectFlatAffineConstraints(const FlatAffineConstraints &fac);
 
-    /// Compute the maximum or minimum value of the given row, depending on
-    /// direction. The specified row is never pivoted.
-    ///
-    /// Returns a (num, den) pair denoting the optimum, or None if no
-    /// optimum exists, i.e., if the expression is unbounded in this direction.
-    Optional<Fraction> computeRowOptimum(Direction direction, unsigned row);
+  /// Compute the maximum or minimum value of the given row, depending on
+  /// direction. The specified row is never pivoted.
+  ///
+  /// Returns a (num, den) pair denoting the optimum, or None if no
+  /// optimum exists, i.e., if the expression is unbounded in this direction.
+  Optional<Fraction> computeRowOptimum(Direction direction, unsigned row);
 
-    /// Compute the maximum or minimum value of the given expression, depending on
-    /// direction.
-    ///
-    /// Returns a (num, den) pair denoting the optimum, or a null value if no
-    /// optimum exists, i.e., if the expression is unbounded in this direction.
-    Optional<Fraction> computeOptimum(Direction direction,
-                                      ArrayRef<int64_t> coeffs);
+  /// Compute the maximum or minimum value of the given expression, depending on
+  /// direction.
+  ///
+  /// Returns a (num, den) pair denoting the optimum, or a null value if no
+  /// optimum exists, i.e., if the expression is unbounded in this direction.
+  Optional<Fraction> computeOptimum(Direction direction,
+                                    ArrayRef<int64_t> coeffs);
 
-    /// Returns whether the specified constraint has been marked as redundant.
-    /// Constraints are numbered from 0 starting at the first added inequality.
-    /// Equalities are added as a pair of inequalities and so correspond to two
-    /// inequalities with successive indices.
-    bool isMarkedRedundant(unsigned constraintIndex) const;
+  /// Returns whether the specified constraint has been marked as redundant.
+  /// Constraints are numbered from 0 starting at the first added inequality.
+  /// Equalities are added as a pair of inequalities and so correspond to two
+  /// inequalities with successive indices.
+  bool isMarkedRedundant(unsigned constraintIndex) const;
 
-    /// Finds a subset of constraints that is redundant, i.e., such that
-    /// the set of solutions does not change if these constraints are removed.
-    /// Marks these constraints as redundant. Whether a specific constraint has
-    /// been marked redundant can be queried using isMarkedRedundant.
-    void detectRedundant();
+  /// Finds a subset of constraints that is redundant, i.e., such that
+  /// the set of solutions does not change if these constraints are removed.
+  /// Marks these constraints as redundant. Whether a specific constraint has
+  /// been marked redundant can be queried using isMarkedRedundant.
+  void detectRedundant();
 
-    /// Returns a (min, max) pair denoting the minimum and maximum integer values
-    /// of the given expression.
-    std::pair<int64_t, int64_t> computeIntegerBounds(ArrayRef<int64_t> coeffs);
+  /// Returns a (min, max) pair denoting the minimum and maximum integer values
+  /// of the given expression.
+  std::pair<int64_t, int64_t> computeIntegerBounds(ArrayRef<int64_t> coeffs);
 
-    /// Returns true if the polytope is unbounded, i.e., extends to infinity in
-    /// some direction. Otherwise, returns false.
-    bool isUnbounded();
+  /// Returns true if the polytope is unbounded, i.e., extends to infinity in
+  /// some direction. Otherwise, returns false.
+  bool isUnbounded();
 
-    /// Make a tableau to represent a pair of points in the given tableaus, one in
-    /// tableau A and one in B.
-    static Simplex makeProduct(const Simplex &a, const Simplex &b);
+  /// Make a tableau to represent a pair of points in the given tableaus, one in
+  /// tableau A and one in B.
+  static Simplex makeProduct(const Simplex &a, const Simplex &b);
 
-    /// Returns the current sample point if it is integral. Otherwise, returns an
-    /// None.
-    Optional<SmallVector<int64_t, 8>> getSamplePointIfIntegral() const;
+  /// Returns the current sample point if it is integral. Otherwise, returns an
+  /// None.
+  Optional<SmallVector<int64_t, 8>> getSamplePointIfIntegral() const;
 
-    /// Returns an integer sample point if one exists, or None
-    /// otherwise. This should only be called for bounded sets.
-    Optional<SmallVector<int64_t, 8>> findIntegerSample();
+  /// Returns an integer sample point if one exists, or None
+  /// otherwise. This should only be called for bounded sets.
+  Optional<SmallVector<int64_t, 8>> findIntegerSample();
 
-    /// Print the tableau's internal state.
-    void print(raw_ostream &os) const;
-    void dump() const;
+  /// Print the tableau's internal state.
+  void print(raw_ostream &os) const;
+  void dump() const;
 
 private:
-    friend class GBRSimplex;
+  friend class GBRSimplex;
 
-    enum class Orientation { Row, Column };
+  enum class Orientation { Row, Column };
 
-    /// An Unknown is either a variable or a constraint. It is always associated
-    /// with either a row or column. Whether it's a row or a column is specified
-    /// by the orientation and pos identifies the specific row or column it is
-    /// associated with. If the unknown is restricted, then it has a
-    /// non-negativity constraint associated with it, i.e., its sample value must
-    /// always be non-negative and if it cannot be made non-negative without
-    /// violating other constraints, the tableau is empty.
-    struct Unknown {
-        Unknown(Orientation oOrientation, bool oRestricted, unsigned oPos)
-            : pos(oPos), orientation(oOrientation), restricted(oRestricted) {}
-        unsigned pos;
-        Orientation orientation;
-        bool restricted : 1;
+  /// An Unknown is either a variable or a constraint. It is always associated
+  /// with either a row or column. Whether it's a row or a column is specified
+  /// by the orientation and pos identifies the specific row or column it is
+  /// associated with. If the unknown is restricted, then it has a
+  /// non-negativity constraint associated with it, i.e., its sample value must
+  /// always be non-negative and if it cannot be made non-negative without
+  /// violating other constraints, the tableau is empty.
+  struct Unknown {
+    Unknown(Orientation oOrientation, bool oRestricted, unsigned oPos)
+        : pos(oPos), orientation(oOrientation), restricted(oRestricted) {}
+    unsigned pos;
+    Orientation orientation;
+    bool restricted : 1;
 
-        void print(raw_ostream &os) const {
-            os << (orientation == Orientation::Row ? "r" : "c");
-            os << pos;
-            if (restricted)
-                os << " [>=0]";
-        }
-    };
+    void print(raw_ostream &os) const {
+      os << (orientation == Orientation::Row ? "r" : "c");
+      os << pos;
+      if (restricted)
+        os << " [>=0]";
+    }
+  };
 
-    struct Pivot {
-        unsigned row, column;
-    };
+  struct Pivot {
+    unsigned row, column;
+  };
 
-    /// Find a pivot to change the sample value of row in the specified
-    /// direction. The returned pivot row will be row if and only
-    /// if the unknown is unbounded in the specified direction.
-    ///
-    /// Returns a (row, col) pair denoting a pivot, or an empty Optional if
-    /// no valid pivot exists.
-    Optional<Pivot> findPivot(int row, Direction direction) const;
+  /// Find a pivot to change the sample value of row in the specified
+  /// direction. The returned pivot row will be row if and only
+  /// if the unknown is unbounded in the specified direction.
+  ///
+  /// Returns a (row, col) pair denoting a pivot, or an empty Optional if
+  /// no valid pivot exists.
+  Optional<Pivot> findPivot(int row, Direction direction) const;
 
-    /// Swap the row with the column in the tableau's data structures but not the
-    /// tableau itself. This is used by pivot.
-    void swapRowWithCol(unsigned row, unsigned col);
+  /// Swap the row with the column in the tableau's data structures but not the
+  /// tableau itself. This is used by pivot.
+  void swapRowWithCol(unsigned row, unsigned col);
 
-    /// Pivot the row with the column.
-    void pivot(unsigned row, unsigned col);
-    void pivot(Pivot pair);
+  /// Pivot the row with the column.
+  void pivot(unsigned row, unsigned col);
+  void pivot(Pivot pair);
 
-    /// Returns the unknown associated with index.
-    const Unknown &unknownFromIndex(int index) const;
-    /// Returns the unknown associated with col.
-    const Unknown &unknownFromColumn(unsigned col) const;
-    /// Returns the unknown associated with row.
-    const Unknown &unknownFromRow(unsigned row) const;
-    /// Returns the unknown associated with index.
-    Unknown &unknownFromIndex(int index);
-    /// Returns the unknown associated with col.
-    Unknown &unknownFromColumn(unsigned col);
-    /// Returns the unknown associated with row.
-    Unknown &unknownFromRow(unsigned row);
+  /// Returns the unknown associated with index.
+  const Unknown &unknownFromIndex(int index) const;
+  /// Returns the unknown associated with col.
+  const Unknown &unknownFromColumn(unsigned col) const;
+  /// Returns the unknown associated with row.
+  const Unknown &unknownFromRow(unsigned row) const;
+  /// Returns the unknown associated with index.
+  Unknown &unknownFromIndex(int index);
+  /// Returns the unknown associated with col.
+  Unknown &unknownFromColumn(unsigned col);
+  /// Returns the unknown associated with row.
+  Unknown &unknownFromRow(unsigned row);
 
-    /// Add a new row to the tableau and the associated data structures.
-    unsigned addRow(ArrayRef<int64_t> coeffs);
+  /// Add a new row to the tableau and the associated data structures.
+  unsigned addRow(ArrayRef<int64_t> coeffs);
 
-    /// Normalize the given row by removing common factors between the numerator
-    /// and the denominator.
-    void normalizeRow(unsigned row);
+  /// Normalize the given row by removing common factors between the numerator
+  /// and the denominator.
+  void normalizeRow(unsigned row);
 
-    /// Swap the two rows in the tableau and associated data structures.
-    void swapRows(unsigned i, unsigned j);
+  /// Swap the two rows in the tableau and associated data structures.
+  void swapRows(unsigned i, unsigned j);
 
-    /// Restore the unknown to a non-negative sample value.
-    ///
-    /// Returns true if the unknown was successfully restored to a non-negative
-    /// sample value, false otherwise.
-    LogicalResult restoreRow(Unknown &u);
+  /// Restore the unknown to a non-negative sample value.
+  ///
+  /// Returns true if the unknown was successfully restored to a non-negative
+  /// sample value, false otherwise.
+  LogicalResult restoreRow(Unknown &u);
 
-    /// Mark the specified unknown redundant. This operation is added to the undo
-    /// log and will be undone by rollbacks. The specified unknown must be in row
-    /// orientation.
-    void markRowRedundant(Unknown &u);
+  /// Mark the specified unknown redundant. This operation is added to the undo
+  /// log and will be undone by rollbacks. The specified unknown must be in row
+  /// orientation.
+  void markRowRedundant(Unknown &u);
 
-    /// Enum to denote operations that need to be undone during rollback.
-    enum class UndoLogEntry {
-        RemoveLastConstraint,
-        UnmarkEmpty,
-        UnmarkLastRedundant
-    };
+  /// Enum to denote operations that need to be undone during rollback.
+  enum class UndoLogEntry {
+    RemoveLastConstraint,
+    UnmarkEmpty,
+    UnmarkLastRedundant
+  };
 
-    /// Undo the operation represented by the log entry.
-    void undo(UndoLogEntry entry);
+  /// Undo the operation represented by the log entry.
+  void undo(UndoLogEntry entry);
 
-    /// Find a row that can be used to pivot the column in the specified
-    /// direction. If skipRow is not null, then this row is excluded
-    /// from consideration. The returned pivot will maintain all constraints
-    /// except the column itself and skipRow, if it is set. (if these unknowns
-    /// are restricted).
-    ///
-    /// Returns the row to pivot to, or an empty Optional if the column
-    /// is unbounded in the specified direction.
-    Optional<unsigned> findPivotRow(Optional<unsigned> skipRow,
-                                    Direction direction, unsigned col) const;
+  /// Find a row that can be used to pivot the column in the specified
+  /// direction. If skipRow is not null, then this row is excluded
+  /// from consideration. The returned pivot will maintain all constraints
+  /// except the column itself and skipRow, if it is set. (if these unknowns
+  /// are restricted).
+  ///
+  /// Returns the row to pivot to, or an empty Optional if the column
+  /// is unbounded in the specified direction.
+  Optional<unsigned> findPivotRow(Optional<unsigned> skipRow,
+                                  Direction direction, unsigned col) const;
 
-    /// Reduce the given basis, starting at the specified level, using general
-    /// basis reduction.
-    void reduceBasis(Matrix &basis, unsigned level);
+  /// Reduce the given basis, starting at the specified level, using general
+  /// basis reduction.
+  void reduceBasis(Matrix &basis, unsigned level);
 
-    /// The number of rows in the tableau.
-    unsigned nRow;
+  /// The number of rows in the tableau.
+  unsigned nRow;
 
-    /// The number of columns in the tableau, including the common denominator
-    /// and the constant column.
-    unsigned nCol;
+  /// The number of columns in the tableau, including the common denominator
+  /// and the constant column.
+  unsigned nCol;
 
-    /// The number of redundant rows in the tableau. These are the first
-    /// nRedundant rows.
-    unsigned nRedundant;
+  /// The number of redundant rows in the tableau. These are the first
+  /// nRedundant rows.
+  unsigned nRedundant;
 
-    /// The matrix representing the tableau.
-    Matrix tableau;
+  /// The matrix representing the tableau.
+  Matrix tableau;
 
-    /// This is true if the tableau has been detected to be empty, false
-    /// otherwise.
-    bool empty;
+  /// This is true if the tableau has been detected to be empty, false
+  /// otherwise.
+  bool empty;
 
-    /// Holds a log of operations, used for rolling back to a previous state.
-    SmallVector<UndoLogEntry, 8> undoLog;
+  /// Holds a log of operations, used for rolling back to a previous state.
+  SmallVector<UndoLogEntry, 8> undoLog;
 
-    /// These hold the indexes of the unknown at a given row or column position.
-    /// We keep these as signed integers since that makes it convenient to check
-    /// if an index corresponds to a variable or a constraint by checking the
-    /// sign.
-    ///
-    /// colUnknown is padded with two null indexes at the front since the first
-    /// two columns don't correspond to any unknowns.
-    SmallVector<int, 8> rowUnknown, colUnknown;
+  /// These hold the indexes of the unknown at a given row or column position.
+  /// We keep these as signed integers since that makes it convenient to check
+  /// if an index corresponds to a variable or a constraint by checking the
+  /// sign.
+  ///
+  /// colUnknown is padded with two null indexes at the front since the first
+  /// two columns don't correspond to any unknowns.
+  SmallVector<int, 8> rowUnknown, colUnknown;
 
-    /// These hold information about each unknown.
-    SmallVector<Unknown, 8> con, var;
+  /// These hold information about each unknown.
+  SmallVector<Unknown, 8> con, var;
 };
 
 } // namespace mlir

@@ -33,96 +33,82 @@ class PMStack;
 
 class CallGraphSCCPass : public Pass {
 public:
-    explicit CallGraphSCCPass(char &pid) : Pass(PT_CallGraphSCC, pid) {}
+  explicit CallGraphSCCPass(char &pid) : Pass(PT_CallGraphSCC, pid) {}
 
-    /// createPrinterPass - Get a pass that prints the Module
-    /// corresponding to a CallGraph.
-    Pass *createPrinterPass(raw_ostream &OS,
-                            const std::string &Banner) const override;
+  /// createPrinterPass - Get a pass that prints the Module
+  /// corresponding to a CallGraph.
+  Pass *createPrinterPass(raw_ostream &OS,
+                          const std::string &Banner) const override;
 
-    using llvm::Pass::doInitialization;
-    using llvm::Pass::doFinalization;
+  using llvm::Pass::doFinalization;
+  using llvm::Pass::doInitialization;
 
-    /// doInitialization - This method is called before the SCC's of the program
-    /// has been processed, allowing the pass to do initialization as necessary.
-    virtual bool doInitialization(CallGraph &CG) {
-        return false;
-    }
+  /// doInitialization - This method is called before the SCC's of the program
+  /// has been processed, allowing the pass to do initialization as necessary.
+  virtual bool doInitialization(CallGraph &CG) { return false; }
 
-    /// runOnSCC - This method should be implemented by the subclass to perform
-    /// whatever action is necessary for the specified SCC.  Note that
-    /// non-recursive (or only self-recursive) functions will have an SCC size of
-    /// 1, where recursive portions of the call graph will have SCC size > 1.
-    ///
-    /// SCC passes that add or delete functions to the SCC are required to update
-    /// the SCC list, otherwise stale pointers may be dereferenced.
-    virtual bool runOnSCC(CallGraphSCC &SCC) = 0;
+  /// runOnSCC - This method should be implemented by the subclass to perform
+  /// whatever action is necessary for the specified SCC.  Note that
+  /// non-recursive (or only self-recursive) functions will have an SCC size of
+  /// 1, where recursive portions of the call graph will have SCC size > 1.
+  ///
+  /// SCC passes that add or delete functions to the SCC are required to update
+  /// the SCC list, otherwise stale pointers may be dereferenced.
+  virtual bool runOnSCC(CallGraphSCC &SCC) = 0;
 
-    /// doFinalization - This method is called after the SCC's of the program has
-    /// been processed, allowing the pass to do final cleanup as necessary.
-    virtual bool doFinalization(CallGraph &CG) {
-        return false;
-    }
+  /// doFinalization - This method is called after the SCC's of the program has
+  /// been processed, allowing the pass to do final cleanup as necessary.
+  virtual bool doFinalization(CallGraph &CG) { return false; }
 
-    /// Assign pass manager to manager this pass
-    void assignPassManager(PMStack &PMS, PassManagerType PMT) override;
+  /// Assign pass manager to manager this pass
+  void assignPassManager(PMStack &PMS, PassManagerType PMT) override;
 
-    ///  Return what kind of Pass Manager can manage this pass.
-    PassManagerType getPotentialPassManagerType() const override {
-        return PMT_CallGraphPassManager;
-    }
+  ///  Return what kind of Pass Manager can manage this pass.
+  PassManagerType getPotentialPassManagerType() const override {
+    return PMT_CallGraphPassManager;
+  }
 
-    /// getAnalysisUsage - For this class, we declare that we require and preserve
-    /// the call graph.  If the derived class implements this method, it should
-    /// always explicitly call the implementation here.
-    void getAnalysisUsage(AnalysisUsage &Info) const override;
+  /// getAnalysisUsage - For this class, we declare that we require and preserve
+  /// the call graph.  If the derived class implements this method, it should
+  /// always explicitly call the implementation here.
+  void getAnalysisUsage(AnalysisUsage &Info) const override;
 
 protected:
-    /// Optional passes call this function to check whether the pass should be
-    /// skipped. This is the case when optimization bisect is over the limit.
-    bool skipSCC(CallGraphSCC &SCC) const;
+  /// Optional passes call this function to check whether the pass should be
+  /// skipped. This is the case when optimization bisect is over the limit.
+  bool skipSCC(CallGraphSCC &SCC) const;
 };
 
 /// CallGraphSCC - This is a single SCC that a CallGraphSCCPass is run on.
 class CallGraphSCC {
-    const CallGraph &CG; // The call graph for this SCC.
-    void *Context; // The CGPassManager object that is vending this.
-    std::vector<CallGraphNode *> Nodes;
+  const CallGraph &CG; // The call graph for this SCC.
+  void *Context;       // The CGPassManager object that is vending this.
+  std::vector<CallGraphNode *> Nodes;
 
 public:
-    CallGraphSCC(CallGraph &cg, void *context) : CG(cg), Context(context) {}
+  CallGraphSCC(CallGraph &cg, void *context) : CG(cg), Context(context) {}
 
-    void initialize(ArrayRef<CallGraphNode *> NewNodes) {
-        Nodes.assign(NewNodes.begin(), NewNodes.end());
-    }
+  void initialize(ArrayRef<CallGraphNode *> NewNodes) {
+    Nodes.assign(NewNodes.begin(), NewNodes.end());
+  }
 
-    bool isSingular() const {
-        return Nodes.size() == 1;
-    }
-    unsigned size() const {
-        return Nodes.size();
-    }
+  bool isSingular() const { return Nodes.size() == 1; }
+  unsigned size() const { return Nodes.size(); }
 
-    /// ReplaceNode - This informs the SCC and the pass manager that the specified
-    /// Old node has been deleted, and New is to be used in its place.
-    void ReplaceNode(CallGraphNode *Old, CallGraphNode *New);
+  /// ReplaceNode - This informs the SCC and the pass manager that the specified
+  /// Old node has been deleted, and New is to be used in its place.
+  void ReplaceNode(CallGraphNode *Old, CallGraphNode *New);
 
-    /// DeleteNode - This informs the SCC and the pass manager that the specified
-    /// Old node has been deleted.
-    void DeleteNode(CallGraphNode *Old);
+  /// DeleteNode - This informs the SCC and the pass manager that the specified
+  /// Old node has been deleted.
+  void DeleteNode(CallGraphNode *Old);
 
-    using iterator = std::vector<CallGraphNode *>::const_iterator;
+  using iterator = std::vector<CallGraphNode *>::const_iterator;
 
-    iterator begin() const {
-        return Nodes.begin();
-    }
-    iterator end() const {
-        return Nodes.end();
-    }
+  iterator begin() const { return Nodes.begin(); }
+  iterator end() const { return Nodes.end(); }
 
-    const CallGraph &getCallGraph() {
-        return CG;
-    }
+  const CallGraph &getCallGraph() { return CG; }
 };
 
 void initializeDummyCGSCCPassPass(PassRegistry &);
@@ -131,20 +117,18 @@ void initializeDummyCGSCCPassPass(PassRegistry &);
 /// codegen to follow bottom up order on call graph.
 class DummyCGSCCPass : public CallGraphSCCPass {
 public:
-    static char ID;
+  static char ID;
 
-    DummyCGSCCPass() : CallGraphSCCPass(ID) {
-        PassRegistry &Registry = *PassRegistry::getPassRegistry();
-        initializeDummyCGSCCPassPass(Registry);
-    }
+  DummyCGSCCPass() : CallGraphSCCPass(ID) {
+    PassRegistry &Registry = *PassRegistry::getPassRegistry();
+    initializeDummyCGSCCPassPass(Registry);
+  }
 
-    bool runOnSCC(CallGraphSCC &SCC) override {
-        return false;
-    }
+  bool runOnSCC(CallGraphSCC &SCC) override { return false; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesAll();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesAll();
+  }
 };
 
 } // end namespace llvm

@@ -30,46 +30,46 @@ using namespace llvm;
 
 namespace {
 struct LowerGuardIntrinsicLegacyPass : public FunctionPass {
-    static char ID;
-    LowerGuardIntrinsicLegacyPass() : FunctionPass(ID) {
-        initializeLowerGuardIntrinsicLegacyPassPass(
-            *PassRegistry::getPassRegistry());
-    }
+  static char ID;
+  LowerGuardIntrinsicLegacyPass() : FunctionPass(ID) {
+    initializeLowerGuardIntrinsicLegacyPassPass(
+        *PassRegistry::getPassRegistry());
+  }
 
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 };
-}
+} // namespace
 
 static bool lowerGuardIntrinsic(Function &F) {
-    // Check if we can cheaply rule out the possibility of not having any work to
-    // do.
-    auto *GuardDecl = F.getParent()->getFunction(
-                          Intrinsic::getName(Intrinsic::experimental_guard));
-    if (!GuardDecl || GuardDecl->use_empty())
-        return false;
+  // Check if we can cheaply rule out the possibility of not having any work to
+  // do.
+  auto *GuardDecl = F.getParent()->getFunction(
+      Intrinsic::getName(Intrinsic::experimental_guard));
+  if (!GuardDecl || GuardDecl->use_empty())
+    return false;
 
-    SmallVector<CallInst *, 8> ToLower;
-    for (auto &I : instructions(F))
-        if (isGuard(&I))
-            ToLower.push_back(cast<CallInst>(&I));
+  SmallVector<CallInst *, 8> ToLower;
+  for (auto &I : instructions(F))
+    if (isGuard(&I))
+      ToLower.push_back(cast<CallInst>(&I));
 
-    if (ToLower.empty())
-        return false;
+  if (ToLower.empty())
+    return false;
 
-    auto *DeoptIntrinsic = Intrinsic::getDeclaration(
-                               F.getParent(), Intrinsic::experimental_deoptimize, {F.getReturnType()});
-    DeoptIntrinsic->setCallingConv(GuardDecl->getCallingConv());
+  auto *DeoptIntrinsic = Intrinsic::getDeclaration(
+      F.getParent(), Intrinsic::experimental_deoptimize, {F.getReturnType()});
+  DeoptIntrinsic->setCallingConv(GuardDecl->getCallingConv());
 
-    for (auto *CI : ToLower) {
-        makeGuardControlFlowExplicit(DeoptIntrinsic, CI, false);
-        CI->eraseFromParent();
-    }
+  for (auto *CI : ToLower) {
+    makeGuardControlFlowExplicit(DeoptIntrinsic, CI, false);
+    CI->eraseFromParent();
+  }
 
-    return true;
+  return true;
 }
 
 bool LowerGuardIntrinsicLegacyPass::runOnFunction(Function &F) {
-    return lowerGuardIntrinsic(F);
+  return lowerGuardIntrinsic(F);
 }
 
 char LowerGuardIntrinsicLegacyPass::ID = 0;
@@ -78,13 +78,13 @@ INITIALIZE_PASS(LowerGuardIntrinsicLegacyPass, "lower-guard-intrinsic",
                 false)
 
 Pass *llvm::createLowerGuardIntrinsicPass() {
-    return new LowerGuardIntrinsicLegacyPass();
+  return new LowerGuardIntrinsicLegacyPass();
 }
 
 PreservedAnalyses LowerGuardIntrinsicPass::run(Function &F,
-        FunctionAnalysisManager &AM) {
-    if (lowerGuardIntrinsic(F))
-        return PreservedAnalyses::none();
+                                               FunctionAnalysisManager &AM) {
+  if (lowerGuardIntrinsic(F))
+    return PreservedAnalyses::none();
 
-    return PreservedAnalyses::all();
+  return PreservedAnalyses::all();
 }

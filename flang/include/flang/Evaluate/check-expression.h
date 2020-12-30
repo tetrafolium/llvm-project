@@ -56,8 +56,8 @@ bool IsInitialProcedureTarget(const Expr<SomeType> &);
 // default initializer of a component of a derived type (or instantiation
 // of a derived type).  Converts type and expands scalars as necessary.
 std::optional<Expr<SomeType>> NonPointerInitializationExpr(const Symbol &,
-                           Expr<SomeType> &&, FoldingContext &,
-                           const semantics::Scope *instantiation = nullptr);
+    Expr<SomeType> &&, FoldingContext &,
+    const semantics::Scope *instantiation = nullptr);
 
 // Check whether an expression is a specification expression
 // (10.1.11(2), C1010).  Constant expressions are always valid
@@ -71,7 +71,7 @@ extern template void CheckSpecificationExpr(
 extern template void CheckSpecificationExpr(
     const Expr<SomeInteger> &x, const semantics::Scope &, FoldingContext &);
 extern template void CheckSpecificationExpr(const Expr<SubscriptInteger> &x,
-        const semantics::Scope &, FoldingContext &);
+    const semantics::Scope &, FoldingContext &);
 extern template void CheckSpecificationExpr(
     const std::optional<Expr<SomeType>> &x, const semantics::Scope &,
     FoldingContext &);

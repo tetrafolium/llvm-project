@@ -10,13 +10,9 @@
 
 using namespace lldb_private;
 
-GDBRemoteSignals::GDBRemoteSignals() : UnixSignals() {
-    Reset();
-}
+GDBRemoteSignals::GDBRemoteSignals() : UnixSignals() { Reset(); }
 
 GDBRemoteSignals::GDBRemoteSignals(const lldb::UnixSignalsSP &rhs)
     : UnixSignals(*rhs) {}
 
-void GDBRemoteSignals::Reset() {
-    m_signals.clear();
-}
+void GDBRemoteSignals::Reset() { m_signals.clear(); }

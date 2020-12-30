@@ -24,35 +24,33 @@ class TypeCollection;
 /// Dumper for CodeView symbol streams found in COFF object files and PDB files.
 class CVSymbolDumper {
 public:
-    CVSymbolDumper(ScopedPrinter &W, TypeCollection &Types,
-                   CodeViewContainer Container,
-                   std::unique_ptr<SymbolDumpDelegate> ObjDelegate, CPUType CPU,
-                   bool PrintRecordBytes)
-        : W(W), Types(Types), Container(Container),
-          ObjDelegate(std::move(ObjDelegate)), CompilationCPUType(CPU),
-          PrintRecordBytes(PrintRecordBytes) {}
+  CVSymbolDumper(ScopedPrinter &W, TypeCollection &Types,
+                 CodeViewContainer Container,
+                 std::unique_ptr<SymbolDumpDelegate> ObjDelegate, CPUType CPU,
+                 bool PrintRecordBytes)
+      : W(W), Types(Types), Container(Container),
+        ObjDelegate(std::move(ObjDelegate)), CompilationCPUType(CPU),
+        PrintRecordBytes(PrintRecordBytes) {}
 
-    /// Dumps one type record.  Returns false if there was a type parsing error,
-    /// and true otherwise.  This should be called in order, since the dumper
-    /// maintains state about previous records which are necessary for cross
-    /// type references.
-    Error dump(CVRecord<SymbolKind> &Record);
+  /// Dumps one type record.  Returns false if there was a type parsing error,
+  /// and true otherwise.  This should be called in order, since the dumper
+  /// maintains state about previous records which are necessary for cross
+  /// type references.
+  Error dump(CVRecord<SymbolKind> &Record);
 
-    /// Dumps the type records in Data. Returns false if there was a type stream
-    /// parse error, and true otherwise.
-    Error dump(const CVSymbolArray &Symbols);
+  /// Dumps the type records in Data. Returns false if there was a type stream
+  /// parse error, and true otherwise.
+  Error dump(const CVSymbolArray &Symbols);
 
-    CPUType getCompilationCPUType() const {
-        return CompilationCPUType;
-    }
+  CPUType getCompilationCPUType() const { return CompilationCPUType; }
 
 private:
-    ScopedPrinter &W;
-    TypeCollection &Types;
-    CodeViewContainer Container;
-    std::unique_ptr<SymbolDumpDelegate> ObjDelegate;
-    CPUType CompilationCPUType;
-    bool PrintRecordBytes;
+  ScopedPrinter &W;
+  TypeCollection &Types;
+  CodeViewContainer Container;
+  std::unique_ptr<SymbolDumpDelegate> ObjDelegate;
+  CPUType CompilationCPUType;
+  bool PrintRecordBytes;
 };
 } // end namespace codeview
 } // end namespace llvm

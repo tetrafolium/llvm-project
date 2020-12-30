@@ -21,12 +21,12 @@
  * THE SOFTWARE.
  */
 
-#include <clc/clc.h>
 #include "../clcmacro.h"
+#include <clc/clc.h>
 
 _CLC_OVERLOAD _CLC_DEF float lgamma(float x) {
-    int s;
-    return lgamma_r(x, &s);
+  int s;
+  return lgamma_r(x, &s);
 }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, lgamma, float)
@@ -35,8 +35,8 @@ _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, float, lgamma, float)
 #pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 _CLC_OVERLOAD _CLC_DEF double lgamma(double x) {
-    int s;
-    return lgamma_r(x, &s);
+  int s;
+  return lgamma_r(x, &s);
 }
 
 _CLC_UNARY_VECTORIZE(_CLC_OVERLOAD _CLC_DEF, double, lgamma, double)

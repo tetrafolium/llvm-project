@@ -18,20 +18,20 @@ namespace tidy {
 namespace android {
 
 void CloexecAccept4Check::registerMatchers(MatchFinder *Finder) {
-    auto SockAddrPointerType =
-        hasType(pointsTo(recordDecl(isStruct(), hasName("sockaddr"))));
-    auto SockLenPointerType = hasType(pointsTo(namedDecl(hasName("socklen_t"))));
+  auto SockAddrPointerType =
+      hasType(pointsTo(recordDecl(isStruct(), hasName("sockaddr"))));
+  auto SockLenPointerType = hasType(pointsTo(namedDecl(hasName("socklen_t"))));
 
-    registerMatchersImpl(Finder,
-                         functionDecl(returns(isInteger()), hasName("accept4"),
-                                      hasParameter(0, hasType(isInteger())),
-                                      hasParameter(1, SockAddrPointerType),
-                                      hasParameter(2, SockLenPointerType),
-                                      hasParameter(3, hasType(isInteger()))));
+  registerMatchersImpl(Finder,
+                       functionDecl(returns(isInteger()), hasName("accept4"),
+                                    hasParameter(0, hasType(isInteger())),
+                                    hasParameter(1, SockAddrPointerType),
+                                    hasParameter(2, SockLenPointerType),
+                                    hasParameter(3, hasType(isInteger()))));
 }
 
 void CloexecAccept4Check::check(const MatchFinder::MatchResult &Result) {
-    insertMacroFlag(Result, /*MacroFlag=*/"SOCK_CLOEXEC", /*ArgPos=*/3);
+  insertMacroFlag(Result, /*MacroFlag=*/"SOCK_CLOEXEC", /*ArgPos=*/3);
 }
 
 } // namespace android

@@ -21,55 +21,55 @@ namespace llvm {
 class AssumptionCache;
 
 struct SimplifyCFGOptions {
-    int BonusInstThreshold = 1;
-    bool ForwardSwitchCondToPhi = false;
-    bool ConvertSwitchToLookupTable = false;
-    bool NeedCanonicalLoop = true;
-    bool HoistCommonInsts = false;
-    bool SinkCommonInsts = false;
-    bool SimplifyCondBranch = true;
-    bool FoldTwoEntryPHINode = true;
+  int BonusInstThreshold = 1;
+  bool ForwardSwitchCondToPhi = false;
+  bool ConvertSwitchToLookupTable = false;
+  bool NeedCanonicalLoop = true;
+  bool HoistCommonInsts = false;
+  bool SinkCommonInsts = false;
+  bool SimplifyCondBranch = true;
+  bool FoldTwoEntryPHINode = true;
 
-    AssumptionCache *AC = nullptr;
+  AssumptionCache *AC = nullptr;
 
-    // Support 'builder' pattern to set members by name at construction time.
-    SimplifyCFGOptions &bonusInstThreshold(int I) {
-        BonusInstThreshold = I;
-        return *this;
-    }
-    SimplifyCFGOptions &forwardSwitchCondToPhi(bool B) {
-        ForwardSwitchCondToPhi = B;
-        return *this;
-    }
-    SimplifyCFGOptions &convertSwitchToLookupTable(bool B) {
-        ConvertSwitchToLookupTable = B;
-        return *this;
-    }
-    SimplifyCFGOptions &needCanonicalLoops(bool B) {
-        NeedCanonicalLoop = B;
-        return *this;
-    }
-    SimplifyCFGOptions &hoistCommonInsts(bool B) {
-        HoistCommonInsts = B;
-        return *this;
-    }
-    SimplifyCFGOptions &sinkCommonInsts(bool B) {
-        SinkCommonInsts = B;
-        return *this;
-    }
-    SimplifyCFGOptions &setAssumptionCache(AssumptionCache *Cache) {
-        AC = Cache;
-        return *this;
-    }
-    SimplifyCFGOptions &setSimplifyCondBranch(bool B) {
-        SimplifyCondBranch = B;
-        return *this;
-    }
+  // Support 'builder' pattern to set members by name at construction time.
+  SimplifyCFGOptions &bonusInstThreshold(int I) {
+    BonusInstThreshold = I;
+    return *this;
+  }
+  SimplifyCFGOptions &forwardSwitchCondToPhi(bool B) {
+    ForwardSwitchCondToPhi = B;
+    return *this;
+  }
+  SimplifyCFGOptions &convertSwitchToLookupTable(bool B) {
+    ConvertSwitchToLookupTable = B;
+    return *this;
+  }
+  SimplifyCFGOptions &needCanonicalLoops(bool B) {
+    NeedCanonicalLoop = B;
+    return *this;
+  }
+  SimplifyCFGOptions &hoistCommonInsts(bool B) {
+    HoistCommonInsts = B;
+    return *this;
+  }
+  SimplifyCFGOptions &sinkCommonInsts(bool B) {
+    SinkCommonInsts = B;
+    return *this;
+  }
+  SimplifyCFGOptions &setAssumptionCache(AssumptionCache *Cache) {
+    AC = Cache;
+    return *this;
+  }
+  SimplifyCFGOptions &setSimplifyCondBranch(bool B) {
+    SimplifyCondBranch = B;
+    return *this;
+  }
 
-    SimplifyCFGOptions &setFoldTwoEntryPHINode(bool B) {
-        FoldTwoEntryPHINode = B;
-        return *this;
-    }
+  SimplifyCFGOptions &setFoldTwoEntryPHINode(bool B) {
+    FoldTwoEntryPHINode = B;
+    return *this;
+  }
 };
 
 } // namespace llvm

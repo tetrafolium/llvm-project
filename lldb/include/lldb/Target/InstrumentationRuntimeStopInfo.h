@@ -18,25 +18,23 @@ namespace lldb_private {
 
 class InstrumentationRuntimeStopInfo : public StopInfo {
 public:
-    ~InstrumentationRuntimeStopInfo() override {}
+  ~InstrumentationRuntimeStopInfo() override {}
 
-    lldb::StopReason GetStopReason() const override {
-        return lldb::eStopReasonInstrumentation;
-    }
+  lldb::StopReason GetStopReason() const override {
+    return lldb::eStopReasonInstrumentation;
+  }
 
-    const char *GetDescription() override;
+  const char *GetDescription() override;
 
-    bool DoShouldNotify(Event *event_ptr) override {
-        return true;
-    }
+  bool DoShouldNotify(Event *event_ptr) override { return true; }
 
-    static lldb::StopInfoSP CreateStopReasonWithInstrumentationData(
-        Thread &thread, std::string description,
-        StructuredData::ObjectSP additional_data);
+  static lldb::StopInfoSP CreateStopReasonWithInstrumentationData(
+      Thread &thread, std::string description,
+      StructuredData::ObjectSP additional_data);
 
 private:
-    InstrumentationRuntimeStopInfo(Thread &thread, std::string description,
-                                   StructuredData::ObjectSP additional_data);
+  InstrumentationRuntimeStopInfo(Thread &thread, std::string description,
+                                 StructuredData::ObjectSP additional_data);
 };
 
 } // namespace lldb_private

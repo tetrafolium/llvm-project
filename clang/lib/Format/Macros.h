@@ -88,51 +88,51 @@ struct FormatStyle;
 ///
 class MacroExpander {
 public:
-    using ArgsList = llvm::ArrayRef<llvm::SmallVector<FormatToken *, 8>>;
+  using ArgsList = llvm::ArrayRef<llvm::SmallVector<FormatToken *, 8>>;
 
-    /// Construct a macro expander from a set of macro definitions.
-    /// Macro definitions must be encoded as UTF-8.
-    ///
-    /// Each entry in \p Macros must conform to the following simple
-    /// macro-definition language:
-    /// <definition> ::= <id> <expansion> | <id> "(" <params> ")" <expansion>
-    /// <params>     ::= <id-list> | ""
-    /// <id-list>    ::= <id> | <id> "," <params>
-    /// <expansion>  ::= "=" <tail> | <eof>
-    /// <tail>       ::= <tok> <tail> | <eof>
-    ///
-    /// Macros that cannot be parsed will be silently discarded.
-    ///
-    MacroExpander(const std::vector<std::string> &Macros,
-                  clang::SourceManager &SourceMgr, const FormatStyle &Style,
-                  llvm::SpecificBumpPtrAllocator<FormatToken> &Allocator,
-                  IdentifierTable &IdentTable);
-    ~MacroExpander();
+  /// Construct a macro expander from a set of macro definitions.
+  /// Macro definitions must be encoded as UTF-8.
+  ///
+  /// Each entry in \p Macros must conform to the following simple
+  /// macro-definition language:
+  /// <definition> ::= <id> <expansion> | <id> "(" <params> ")" <expansion>
+  /// <params>     ::= <id-list> | ""
+  /// <id-list>    ::= <id> | <id> "," <params>
+  /// <expansion>  ::= "=" <tail> | <eof>
+  /// <tail>       ::= <tok> <tail> | <eof>
+  ///
+  /// Macros that cannot be parsed will be silently discarded.
+  ///
+  MacroExpander(const std::vector<std::string> &Macros,
+                clang::SourceManager &SourceMgr, const FormatStyle &Style,
+                llvm::SpecificBumpPtrAllocator<FormatToken> &Allocator,
+                IdentifierTable &IdentTable);
+  ~MacroExpander();
 
-    /// Returns whether a macro \p Name is defined.
-    bool defined(llvm::StringRef Name) const;
+  /// Returns whether a macro \p Name is defined.
+  bool defined(llvm::StringRef Name) const;
 
-    /// Returns whether the macro has no arguments and should not consume
-    /// subsequent parentheses.
-    bool objectLike(llvm::StringRef Name) const;
+  /// Returns whether the macro has no arguments and should not consume
+  /// subsequent parentheses.
+  bool objectLike(llvm::StringRef Name) const;
 
-    /// Returns the expanded stream of format tokens for \p ID, where
-    /// each element in \p Args is a positional argument to the macro call.
-    llvm::SmallVector<FormatToken *, 8> expand(FormatToken *ID,
-            ArgsList Args) const;
+  /// Returns the expanded stream of format tokens for \p ID, where
+  /// each element in \p Args is a positional argument to the macro call.
+  llvm::SmallVector<FormatToken *, 8> expand(FormatToken *ID,
+                                             ArgsList Args) const;
 
 private:
-    struct Definition;
-    class DefinitionParser;
+  struct Definition;
+  class DefinitionParser;
 
-    void parseDefinition(const std::string &Macro);
+  void parseDefinition(const std::string &Macro);
 
-    clang::SourceManager &SourceMgr;
-    const FormatStyle &Style;
-    llvm::SpecificBumpPtrAllocator<FormatToken> &Allocator;
-    IdentifierTable &IdentTable;
-    std::vector<std::unique_ptr<llvm::MemoryBuffer>> Buffers;
-    llvm::StringMap<Definition> Definitions;
+  clang::SourceManager &SourceMgr;
+  const FormatStyle &Style;
+  llvm::SpecificBumpPtrAllocator<FormatToken> &Allocator;
+  IdentifierTable &IdentTable;
+  std::vector<std::unique_ptr<llvm::MemoryBuffer>> Buffers;
+  llvm::StringMap<Definition> Definitions;
 };
 
 } // namespace format

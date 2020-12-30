@@ -24,22 +24,22 @@ namespace readability {
 ///
 class InconsistentDeclarationParameterNameCheck : public ClangTidyCheck {
 public:
-    InconsistentDeclarationParameterNameCheck(StringRef Name,
-            ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context),
-          IgnoreMacros(Options.getLocalOrGlobal("IgnoreMacros", true)),
-          Strict(Options.getLocalOrGlobal("Strict", false)) {}
+  InconsistentDeclarationParameterNameCheck(StringRef Name,
+                                            ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context),
+        IgnoreMacros(Options.getLocalOrGlobal("IgnoreMacros", true)),
+        Strict(Options.getLocalOrGlobal("Strict", false)) {}
 
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void markRedeclarationsAsVisited(const FunctionDecl *FunctionDeclaration);
+  void markRedeclarationsAsVisited(const FunctionDecl *FunctionDeclaration);
 
-    llvm::DenseSet<const FunctionDecl *> VisitedDeclarations;
-    const bool IgnoreMacros;
-    const bool Strict;
+  llvm::DenseSet<const FunctionDecl *> VisitedDeclarations;
+  const bool IgnoreMacros;
+  const bool Strict;
 };
 
 } // namespace readability

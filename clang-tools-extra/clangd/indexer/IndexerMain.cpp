@@ -29,77 +29,77 @@ namespace clangd {
 namespace {
 
 static llvm::cl::opt<IndexFileFormat>
-Format("format", llvm::cl::desc("Format of the index to be written"),
-       llvm::cl::values(clEnumValN(IndexFileFormat::YAML, "yaml",
-                                   "human-readable YAML format"),
-                        clEnumValN(IndexFileFormat::RIFF, "binary",
-                                   "binary RIFF format")),
-       llvm::cl::init(IndexFileFormat::RIFF));
+    Format("format", llvm::cl::desc("Format of the index to be written"),
+           llvm::cl::values(clEnumValN(IndexFileFormat::YAML, "yaml",
+                                       "human-readable YAML format"),
+                            clEnumValN(IndexFileFormat::RIFF, "binary",
+                                       "binary RIFF format")),
+           llvm::cl::init(IndexFileFormat::RIFF));
 
 class IndexActionFactory : public tooling::FrontendActionFactory {
 public:
-    IndexActionFactory(IndexFileIn &Result) : Result(Result) {}
+  IndexActionFactory(IndexFileIn &Result) : Result(Result) {}
 
-    std::unique_ptr<FrontendAction> create() override {
-        SymbolCollector::Options Opts;
-        Opts.CountReferences = true;
-        Opts.FileFilter = [&](const SourceManager &SM, FileID FID) {
-            const auto *F = SM.getFileEntryForID(FID);
-            if (!F)
-                return false; // Skip invalid files.
-            auto AbsPath = getCanonicalPath(F, SM);
-            if (!AbsPath)
-                return false; // Skip files without absolute path.
-            std::lock_guard<std::mutex> Lock(FilesMu);
-            return Files.insert(*AbsPath).second; // Skip already processed files.
-        };
-        return createStaticIndexingAction(
-                   Opts,
+  std::unique_ptr<FrontendAction> create() override {
+    SymbolCollector::Options Opts;
+    Opts.CountReferences = true;
+    Opts.FileFilter = [&](const SourceManager &SM, FileID FID) {
+      const auto *F = SM.getFileEntryForID(FID);
+      if (!F)
+        return false; // Skip invalid files.
+      auto AbsPath = getCanonicalPath(F, SM);
+      if (!AbsPath)
+        return false; // Skip files without absolute path.
+      std::lock_guard<std::mutex> Lock(FilesMu);
+      return Files.insert(*AbsPath).second; // Skip already processed files.
+    };
+    return createStaticIndexingAction(
+        Opts,
         [&](SymbolSlab S) {
-            // Merge as we go.
-            std::lock_guard<std::mutex> Lock(SymbolsMu);
-            for (const auto &Sym : S) {
-                if (const auto *Existing = Symbols.find(Sym.ID))
-                    Symbols.insert(mergeSymbol(*Existing, Sym));
-                else
-                    Symbols.insert(Sym);
-            }
+          // Merge as we go.
+          std::lock_guard<std::mutex> Lock(SymbolsMu);
+          for (const auto &Sym : S) {
+            if (const auto *Existing = Symbols.find(Sym.ID))
+              Symbols.insert(mergeSymbol(*Existing, Sym));
+            else
+              Symbols.insert(Sym);
+          }
         },
         [&](RefSlab S) {
-            std::lock_guard<std::mutex> Lock(RefsMu);
-            for (const auto &Sym : S) {
-                // Deduplication happens during insertion.
-                for (const auto &Ref : Sym.second)
-                    Refs.insert(Sym.first, Ref);
-            }
+          std::lock_guard<std::mutex> Lock(RefsMu);
+          for (const auto &Sym : S) {
+            // Deduplication happens during insertion.
+            for (const auto &Ref : Sym.second)
+              Refs.insert(Sym.first, Ref);
+          }
         },
         [&](RelationSlab S) {
-            std::lock_guard<std::mutex> Lock(RelsMu);
-            for (const auto &R : S) {
-                Relations.insert(R);
-            }
+          std::lock_guard<std::mutex> Lock(RelsMu);
+          for (const auto &R : S) {
+            Relations.insert(R);
+          }
         },
         /*IncludeGraphCallback=*/nullptr);
-    }
+  }
 
-    // Awkward: we write the result in the destructor, because the executor
-    // takes ownership so it's the easiest way to get our data back out.
-    ~IndexActionFactory() {
-        Result.Symbols = std::move(Symbols).build();
-        Result.Refs = std::move(Refs).build();
-        Result.Relations = std::move(Relations).build();
-    }
+  // Awkward: we write the result in the destructor, because the executor
+  // takes ownership so it's the easiest way to get our data back out.
+  ~IndexActionFactory() {
+    Result.Symbols = std::move(Symbols).build();
+    Result.Refs = std::move(Refs).build();
+    Result.Relations = std::move(Relations).build();
+  }
 
 private:
-    IndexFileIn &Result;
-    std::mutex FilesMu;
-    llvm::StringSet<> Files;
-    std::mutex SymbolsMu;
-    SymbolSlab::Builder Symbols;
-    std::mutex RefsMu;
-    RefSlab::Builder Refs;
-    std::mutex RelsMu;
-    RelationSlab::Builder Relations;
+  IndexFileIn &Result;
+  std::mutex FilesMu;
+  llvm::StringSet<> Files;
+  std::mutex SymbolsMu;
+  SymbolSlab::Builder Symbols;
+  std::mutex RefsMu;
+  RefSlab::Builder Refs;
+  std::mutex RelsMu;
+  RelationSlab::Builder Relations;
 };
 
 } // namespace
@@ -107,9 +107,9 @@ private:
 } // namespace clang
 
 int main(int argc, const char **argv) {
-    llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-    const char *Overview = R"(
+  const char *Overview = R"(
   Creates an index of symbol information etc in a whole project.
 
   Example usage for a project using CMake compile commands:
@@ -123,26 +123,26 @@ int main(int argc, const char **argv) {
   Note: only symbols from header files will be indexed.
   )";
 
-    auto Executor = clang::tooling::createExecutorFromCommandLineArgs(
-                        argc, argv, llvm::cl::GeneralCategory, Overview);
+  auto Executor = clang::tooling::createExecutorFromCommandLineArgs(
+      argc, argv, llvm::cl::GeneralCategory, Overview);
 
-    if (!Executor) {
-        llvm::errs() << llvm::toString(Executor.takeError()) << "\n";
-        return 1;
-    }
+  if (!Executor) {
+    llvm::errs() << llvm::toString(Executor.takeError()) << "\n";
+    return 1;
+  }
 
-    // Collect symbols found in each translation unit, merging as we go.
-    clang::clangd::IndexFileIn Data;
-    auto Err = Executor->get()->execute(
-                   std::make_unique<clang::clangd::IndexActionFactory>(Data),
-                   clang::tooling::getStripPluginsAdjuster());
-    if (Err) {
-        clang::clangd::elog("{0}", std::move(Err));
-    }
+  // Collect symbols found in each translation unit, merging as we go.
+  clang::clangd::IndexFileIn Data;
+  auto Err = Executor->get()->execute(
+      std::make_unique<clang::clangd::IndexActionFactory>(Data),
+      clang::tooling::getStripPluginsAdjuster());
+  if (Err) {
+    clang::clangd::elog("{0}", std::move(Err));
+  }
 
-    // Emit collected data.
-    clang::clangd::IndexFileOut Out(Data);
-    Out.Format = clang::clangd::Format;
-    llvm::outs() << Out;
-    return 0;
+  // Emit collected data.
+  clang::clangd::IndexFileOut Out(Data);
+  Out.Format = clang::clangd::Format;
+  llvm::outs() << Out;
+  return 0;
 }

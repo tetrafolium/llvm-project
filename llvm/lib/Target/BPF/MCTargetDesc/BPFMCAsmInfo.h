@@ -20,35 +20,35 @@ namespace llvm {
 
 class BPFMCAsmInfo : public MCAsmInfo {
 public:
-    explicit BPFMCAsmInfo(const Triple &TT, const MCTargetOptions &Options) {
-        if (TT.getArch() == Triple::bpfeb)
-            IsLittleEndian = false;
+  explicit BPFMCAsmInfo(const Triple &TT, const MCTargetOptions &Options) {
+    if (TT.getArch() == Triple::bpfeb)
+      IsLittleEndian = false;
 
-        PrivateGlobalPrefix = ".L";
-        WeakRefDirective = "\t.weak\t";
+    PrivateGlobalPrefix = ".L";
+    WeakRefDirective = "\t.weak\t";
 
-        UsesELFSectionDirectiveForBSS = true;
-        HasSingleParameterDotFile = true;
-        HasDotTypeDotSizeDirective = true;
+    UsesELFSectionDirectiveForBSS = true;
+    HasSingleParameterDotFile = true;
+    HasDotTypeDotSizeDirective = true;
 
-        SupportsDebugInformation = true;
-        ExceptionsType = ExceptionHandling::DwarfCFI;
-        MinInstAlignment = 8;
+    SupportsDebugInformation = true;
+    ExceptionsType = ExceptionHandling::DwarfCFI;
+    MinInstAlignment = 8;
 
-        // the default is 4 and it only affects dwarf elf output
-        // so if not set correctly, the dwarf data will be
-        // messed up in random places by 4 bytes. .debug_line
-        // section will be parsable, but with odd offsets and
-        // line numbers, etc.
-        CodePointerSize = 8;
+    // the default is 4 and it only affects dwarf elf output
+    // so if not set correctly, the dwarf data will be
+    // messed up in random places by 4 bytes. .debug_line
+    // section will be parsable, but with odd offsets and
+    // line numbers, etc.
+    CodePointerSize = 8;
 
-        UseIntegratedAssembler = false;
-    }
+    UseIntegratedAssembler = false;
+  }
 
-    void setDwarfUsesRelocationsAcrossSections(bool enable) {
-        DwarfUsesRelocationsAcrossSections = enable;
-    }
+  void setDwarfUsesRelocationsAcrossSections(bool enable) {
+    DwarfUsesRelocationsAcrossSections = enable;
+  }
 };
-}
+} // namespace llvm
 
 #endif

@@ -27,22 +27,22 @@ static constexpr unsigned kDeriveIndexBitwidthFromDataLayout = 0;
 /// Options to control the Standard dialect to LLVM lowering. The struct is used
 /// to share lowering options between passes, patterns, and type converter.
 struct LowerToLLVMOptions {
-    bool useBarePtrCallConv = false;
-    bool emitCWrappers = false;
-    unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout;
-    /// Use aligned_alloc for heap allocations.
-    bool useAlignedAlloc = false;
+  bool useBarePtrCallConv = false;
+  bool emitCWrappers = false;
+  unsigned indexBitwidth = kDeriveIndexBitwidthFromDataLayout;
+  /// Use aligned_alloc for heap allocations.
+  bool useAlignedAlloc = false;
 
-    /// The data layout of the module to produce. This must be consistent with the
-    /// data layout used in the upper levels of the lowering pipeline.
-    // TODO: this should be replaced by MLIR data layout when one exists.
-    llvm::DataLayout dataLayout = llvm::DataLayout("");
+  /// The data layout of the module to produce. This must be consistent with the
+  /// data layout used in the upper levels of the lowering pipeline.
+  // TODO: this should be replaced by MLIR data layout when one exists.
+  llvm::DataLayout dataLayout = llvm::DataLayout("");
 
-    /// Get a statically allocated copy of the default LowerToLLVMOptions.
-    static const LowerToLLVMOptions &getDefaultOptions() {
-        static LowerToLLVMOptions options;
-        return options;
-    }
+  /// Get a statically allocated copy of the default LowerToLLVMOptions.
+  static const LowerToLLVMOptions &getDefaultOptions() {
+    static LowerToLLVMOptions options;
+    return options;
+  }
 };
 
 /// Collect a set of patterns to convert memory-related operations from the
@@ -68,14 +68,14 @@ void populateStdToLLVMFuncOpConversionPattern(
 /// by reference meaning the references have to remain alive during the entire
 /// pattern lifetime.
 void populateStdToLLVMConversionPatterns(LLVMTypeConverter &converter,
-        OwningRewritePatternList &patterns);
+                                         OwningRewritePatternList &patterns);
 
 /// Creates a pass to convert the Standard dialect into the LLVMIR dialect.
 /// stdlib malloc/free is used by default for allocating memrefs allocated with
 /// std.alloc, while LLVM's alloca is used for those allocated with std.alloca.
 std::unique_ptr<OperationPass<ModuleOp>>
-                                      createLowerToLLVMPass(const LowerToLLVMOptions &options =
-                                              LowerToLLVMOptions::getDefaultOptions());
+createLowerToLLVMPass(const LowerToLLVMOptions &options =
+                          LowerToLLVMOptions::getDefaultOptions());
 
 } // namespace mlir
 

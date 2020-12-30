@@ -32,7 +32,7 @@ extern "C" {
 // align the start of the 8-bit counters array. The array will always start 8
 // bytes after __start_sancov_cntrs.
 #pragma section(".SCOV$CA", read, write)
-    __declspec(allocate(".SCOV$CA")) uint64_t __start___sancov_cntrs = 0;
+__declspec(allocate(".SCOV$CA")) uint64_t __start___sancov_cntrs = 0;
 
 // Even though we said not to align __stop__sancov_cntrs (using the "align"
 // declspec), MSVC's linker may try to align the section, .SCOV$CZ, containing
@@ -42,13 +42,13 @@ extern "C" {
 // byte, the linker won't try to align it on an 8-byte boundary, so use a
 // uint8_t for __stop_sancov_cntrs.
 #pragma section(".SCOV$CZ", read, write)
-    __declspec(allocate(".SCOV$CZ")) __declspec(align(1)) uint8_t
+__declspec(allocate(".SCOV$CZ")) __declspec(align(1)) uint8_t
     __stop___sancov_cntrs = 0;
 
 #pragma section(".SCOV$GA", read, write)
-    __declspec(allocate(".SCOV$GA")) uint64_t __start___sancov_guards = 0;
+__declspec(allocate(".SCOV$GA")) uint64_t __start___sancov_guards = 0;
 #pragma section(".SCOV$GZ", read, write)
-    __declspec(allocate(".SCOV$GZ")) __declspec(align(1)) uint8_t
+__declspec(allocate(".SCOV$GZ")) __declspec(align(1)) uint8_t
     __stop___sancov_guards = 0;
 
 // The guard array and counter array should both be merged into the .data
@@ -57,9 +57,9 @@ extern "C" {
 #pragma comment(linker, "/MERGE:.SCOV=.data")
 
 #pragma section(".SCOVP$A", read)
-    __declspec(allocate(".SCOVP$A")) uint64_t __start___sancov_pcs = 0;
+__declspec(allocate(".SCOVP$A")) uint64_t __start___sancov_pcs = 0;
 #pragma section(".SCOVP$Z", read)
-    __declspec(allocate(".SCOVP$Z")) __declspec(align(1)) uint8_t
+__declspec(allocate(".SCOVP$Z")) __declspec(align(1)) uint8_t
     __stop___sancov_pcs = 0;
 
 #pragma comment(linker, "/MERGE:.SCOVP=.rdata")

@@ -21,7 +21,7 @@ namespace clang {
 enum ExpressionTrait {
 #define EXPRESSION_TRAIT(Spelling, Name, Key) ET_##Name,
 #include "clang/Basic/TokenKinds.def"
-    ET_Last = -1 // ET_Last == last ET_XX in the enum.
+  ET_Last = -1 // ET_Last == last ET_XX in the enum.
 #define EXPRESSION_TRAIT(Spelling, Name, Key) +1
 #include "clang/Basic/TokenKinds.def"
 };

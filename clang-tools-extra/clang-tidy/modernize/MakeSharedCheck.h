@@ -29,10 +29,10 @@ namespace modernize {
 /// http://clang.llvm.org/extra/clang-tidy/checks/modernize-make-shared.html
 class MakeSharedCheck : public MakeSmartPtrCheck {
 public:
-    MakeSharedCheck(StringRef Name, ClangTidyContext *Context);
+  MakeSharedCheck(StringRef Name, ClangTidyContext *Context);
 
 protected:
-    SmartPtrTypeMatcher getSmartPointerTypeMatcher() const override;
+  SmartPtrTypeMatcher getSmartPointerTypeMatcher() const override;
 };
 
 } // namespace modernize

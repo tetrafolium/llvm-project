@@ -22,7 +22,7 @@ bool LibcxxVariantSummaryProvider(
     const TypeSummaryOptions &options); // libc++ std::variant<>
 
 SyntheticChildrenFrontEnd *LibcxxVariantFrontEndCreator(CXXSyntheticChildren *,
-        lldb::ValueObjectSP);
+                                                        lldb::ValueObjectSP);
 
 } // namespace formatters
 } // namespace lldb_private

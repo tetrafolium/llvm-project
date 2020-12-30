@@ -29,18 +29,18 @@ namespace llvm {
 
 // TODO: Add CLI option to run only specified Passes (for unit tests)
 inline void runDeltaPasses(TestRunner &Tester) {
-    reduceSpecialGlobalsDeltaPass(Tester);
-    reduceAliasesDeltaPass(Tester);
-    reduceFunctionBodiesDeltaPass(Tester);
-    reduceFunctionsDeltaPass(Tester);
-    reduceBasicBlocksDeltaPass(Tester);
-    reduceGlobalsDeltaPass(Tester);
-    reduceMetadataDeltaPass(Tester);
-    reduceArgumentsDeltaPass(Tester);
-    reduceInstructionsDeltaPass(Tester);
-    reduceOperandBundesDeltaPass(Tester);
-    reduceAttributesDeltaPass(Tester);
-    // TODO: Implement the remaining Delta Passes
+  reduceSpecialGlobalsDeltaPass(Tester);
+  reduceAliasesDeltaPass(Tester);
+  reduceFunctionBodiesDeltaPass(Tester);
+  reduceFunctionsDeltaPass(Tester);
+  reduceBasicBlocksDeltaPass(Tester);
+  reduceGlobalsDeltaPass(Tester);
+  reduceMetadataDeltaPass(Tester);
+  reduceArgumentsDeltaPass(Tester);
+  reduceInstructionsDeltaPass(Tester);
+  reduceOperandBundesDeltaPass(Tester);
+  reduceAttributesDeltaPass(Tester);
+  // TODO: Implement the remaining Delta Passes
 }
 
 } // namespace llvm

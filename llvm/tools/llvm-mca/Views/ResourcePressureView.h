@@ -70,29 +70,29 @@ namespace mca {
 /// This class collects resource pressure statistics and it is able to print
 /// out all the collected information as a table to an output stream.
 class ResourcePressureView : public InstructionView {
-    unsigned LastInstructionIdx;
+  unsigned LastInstructionIdx;
 
-    // Map to quickly obtain the ResourceUsage column index from a processor
-    // resource ID.
-    llvm::DenseMap<unsigned, unsigned> Resource2VecIndex;
+  // Map to quickly obtain the ResourceUsage column index from a processor
+  // resource ID.
+  llvm::DenseMap<unsigned, unsigned> Resource2VecIndex;
 
-    // Table of resources used by instructions.
-    std::vector<ResourceCycles> ResourceUsage;
-    unsigned NumResourceUnits;
+  // Table of resources used by instructions.
+  std::vector<ResourceCycles> ResourceUsage;
+  unsigned NumResourceUnits;
 
-    void printResourcePressurePerIter(llvm::raw_ostream &OS) const;
-    void printResourcePressurePerInst(llvm::raw_ostream &OS) const;
+  void printResourcePressurePerIter(llvm::raw_ostream &OS) const;
+  void printResourcePressurePerInst(llvm::raw_ostream &OS) const;
 
 public:
-    ResourcePressureView(const llvm::MCSubtargetInfo &sti,
-                         llvm::MCInstPrinter &Printer,
-                         llvm::ArrayRef<llvm::MCInst> S);
+  ResourcePressureView(const llvm::MCSubtargetInfo &sti,
+                       llvm::MCInstPrinter &Printer,
+                       llvm::ArrayRef<llvm::MCInst> S);
 
-    void onEvent(const HWInstructionEvent &Event) override;
-    void printView(llvm::raw_ostream &OS) const override {
-        printResourcePressurePerIter(OS);
-        printResourcePressurePerInst(OS);
-    }
+  void onEvent(const HWInstructionEvent &Event) override;
+  void printView(llvm::raw_ostream &OS) const override {
+    printResourcePressurePerIter(OS);
+    printResourcePressurePerInst(OS);
+  }
 };
 } // namespace mca
 } // namespace llvm

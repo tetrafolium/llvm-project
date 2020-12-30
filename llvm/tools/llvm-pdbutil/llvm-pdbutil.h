@@ -27,40 +27,40 @@ class PDBSymbolData;
 class PDBSymbolFunc;
 class PDBFile;
 uint32_t getTypeLength(const PDBSymbolData &Symbol);
-}
+} // namespace pdb
 typedef llvm::PointerUnion<object::COFFObjectFile *, pdb::PDBFile *>
-PdbOrCoffObj;
-}
+    PdbOrCoffObj;
+} // namespace llvm
 
 namespace opts {
 
 enum class DumpLevel { None, Basic, Verbose };
 
 enum class ModuleSubsection {
-    Unknown,
-    Lines,
-    FileChecksums,
-    InlineeLines,
-    CrossScopeImports,
-    CrossScopeExports,
-    StringTable,
-    Symbols,
-    FrameData,
-    CoffSymbolRVAs,
-    All
+  Unknown,
+  Lines,
+  FileChecksums,
+  InlineeLines,
+  CrossScopeImports,
+  CrossScopeExports,
+  StringTable,
+  Symbols,
+  FrameData,
+  CoffSymbolRVAs,
+  All
 };
 
 namespace pretty {
 
 enum class ClassDefinitionFormat { None, Layout, All };
 enum class ClassSortMode {
-    None,
-    Name,
-    Size,
-    Padding,
-    PaddingPct,
-    PaddingImmediate,
-    PaddingPctImmediate
+  None,
+  Name,
+  Size,
+  Padding,
+  PaddingPct,
+  PaddingImmediate,
+  PaddingPctImmediate
 };
 
 enum class SymbolSortMode { None, Name, Size };
@@ -103,12 +103,12 @@ extern llvm::cl::opt<uint32_t> PaddingThreshold;
 extern llvm::cl::opt<uint32_t> ImmediatePaddingThreshold;
 extern llvm::cl::opt<ClassDefinitionFormat> ClassFormat;
 extern llvm::cl::opt<uint32_t> ClassRecursionDepth;
-}
+} // namespace pretty
 
 namespace bytes {
 struct NumberRange {
-    uint64_t Min;
-    llvm::Optional<uint64_t> Max;
+  uint64_t Min;
+  llvm::Optional<uint64_t> Max;
 };
 
 extern llvm::Optional<NumberRange> DumpBlockRange;
@@ -181,7 +181,7 @@ extern llvm::cl::opt<bool> DumpModules;
 extern llvm::cl::opt<bool> DumpModuleFiles;
 extern llvm::cl::opt<bool> DumpFpo;
 extern llvm::cl::opt<bool> RawAll;
-}
+} // namespace dump
 
 namespace pdb2yaml {
 extern llvm::cl::opt<bool> All;
@@ -215,6 +215,6 @@ extern llvm::cl::opt<std::string> OutputFile;
 extern llvm::cl::opt<std::string> Stream;
 extern llvm::cl::opt<bool> ForceName;
 } // namespace exportstream
-}
+} // namespace opts
 
 #endif

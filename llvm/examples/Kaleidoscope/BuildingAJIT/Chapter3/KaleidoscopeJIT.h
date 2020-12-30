@@ -39,125 +39,119 @@ namespace orc {
 
 class KaleidoscopeJIT {
 private:
-    std::unique_ptr<TargetProcessControl> TPC;
-    std::unique_ptr<ExecutionSession> ES;
-    std::unique_ptr<TPCIndirectionUtils> TPCIU;
+  std::unique_ptr<TargetProcessControl> TPC;
+  std::unique_ptr<ExecutionSession> ES;
+  std::unique_ptr<TPCIndirectionUtils> TPCIU;
 
-    DataLayout DL;
-    MangleAndInterner Mangle;
+  DataLayout DL;
+  MangleAndInterner Mangle;
 
-    RTDyldObjectLinkingLayer ObjectLayer;
-    IRCompileLayer CompileLayer;
-    IRTransformLayer OptimizeLayer;
-    CompileOnDemandLayer CODLayer;
+  RTDyldObjectLinkingLayer ObjectLayer;
+  IRCompileLayer CompileLayer;
+  IRTransformLayer OptimizeLayer;
+  CompileOnDemandLayer CODLayer;
 
-    JITDylib &MainJD;
+  JITDylib &MainJD;
 
-    static void handleLazyCallThroughError() {
-        errs() << "LazyCallThrough error: Could not find function body";
-        exit(1);
-    }
+  static void handleLazyCallThroughError() {
+    errs() << "LazyCallThrough error: Could not find function body";
+    exit(1);
+  }
 
 public:
-    KaleidoscopeJIT(std::unique_ptr<TargetProcessControl> TPC,
-                    std::unique_ptr<ExecutionSession> ES,
-                    std::unique_ptr<TPCIndirectionUtils> TPCIU,
-                    JITTargetMachineBuilder JTMB, DataLayout DL)
-        : TPC(std::move(TPC)), ES(std::move(ES)), TPCIU(std::move(TPCIU)),
-          DL(std::move(DL)), Mangle(*this->ES, this->DL),
-          ObjectLayer(*this->ES,
-                      []() {
-        return std::make_unique<SectionMemoryManager>();
-    }),
-    CompileLayer(*this->ES, ObjectLayer,
-                 std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
-    OptimizeLayer(*this->ES, CompileLayer, optimizeModule),
-    CODLayer(*this->ES, OptimizeLayer,
-             this->TPCIU->getLazyCallThroughManager(),
-             [this] { return this->TPCIU->createIndirectStubsManager(); }),
-    MainJD(this->ES->createBareJITDylib("<main>")) {
-        MainJD.addGenerator(
-            cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
-                         DL.getGlobalPrefix())));
-    }
+  KaleidoscopeJIT(std::unique_ptr<TargetProcessControl> TPC,
+                  std::unique_ptr<ExecutionSession> ES,
+                  std::unique_ptr<TPCIndirectionUtils> TPCIU,
+                  JITTargetMachineBuilder JTMB, DataLayout DL)
+      : TPC(std::move(TPC)), ES(std::move(ES)), TPCIU(std::move(TPCIU)),
+        DL(std::move(DL)), Mangle(*this->ES, this->DL),
+        ObjectLayer(*this->ES,
+                    []() { return std::make_unique<SectionMemoryManager>(); }),
+        CompileLayer(*this->ES, ObjectLayer,
+                     std::make_unique<ConcurrentIRCompiler>(std::move(JTMB))),
+        OptimizeLayer(*this->ES, CompileLayer, optimizeModule),
+        CODLayer(*this->ES, OptimizeLayer,
+                 this->TPCIU->getLazyCallThroughManager(),
+                 [this] { return this->TPCIU->createIndirectStubsManager(); }),
+        MainJD(this->ES->createBareJITDylib("<main>")) {
+    MainJD.addGenerator(
+        cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
+            DL.getGlobalPrefix())));
+  }
 
-    ~KaleidoscopeJIT() {
-        if (auto Err = ES->endSession())
-            ES->reportError(std::move(Err));
-        if (auto Err = TPCIU->cleanup())
-            ES->reportError(std::move(Err));
-    }
+  ~KaleidoscopeJIT() {
+    if (auto Err = ES->endSession())
+      ES->reportError(std::move(Err));
+    if (auto Err = TPCIU->cleanup())
+      ES->reportError(std::move(Err));
+  }
 
-    static Expected<std::unique_ptr<KaleidoscopeJIT>> Create() {
-        auto SSP = std::make_shared<SymbolStringPool>();
-        auto TPC = SelfTargetProcessControl::Create(SSP);
-        if (!TPC)
-            return TPC.takeError();
+  static Expected<std::unique_ptr<KaleidoscopeJIT>> Create() {
+    auto SSP = std::make_shared<SymbolStringPool>();
+    auto TPC = SelfTargetProcessControl::Create(SSP);
+    if (!TPC)
+      return TPC.takeError();
 
-        auto ES = std::make_unique<ExecutionSession>(std::move(SSP));
+    auto ES = std::make_unique<ExecutionSession>(std::move(SSP));
 
-        auto TPCIU = TPCIndirectionUtils::Create(**TPC);
-        if (!TPCIU)
-            return TPCIU.takeError();
+    auto TPCIU = TPCIndirectionUtils::Create(**TPC);
+    if (!TPCIU)
+      return TPCIU.takeError();
 
-        (*TPCIU)->createLazyCallThroughManager(
-            *ES, pointerToJITTargetAddress(&handleLazyCallThroughError));
+    (*TPCIU)->createLazyCallThroughManager(
+        *ES, pointerToJITTargetAddress(&handleLazyCallThroughError));
 
-        if (auto Err = setUpInProcessLCTMReentryViaTPCIU(**TPCIU))
-            return std::move(Err);
+    if (auto Err = setUpInProcessLCTMReentryViaTPCIU(**TPCIU))
+      return std::move(Err);
 
-        JITTargetMachineBuilder JTMB((*TPC)->getTargetTriple());
+    JITTargetMachineBuilder JTMB((*TPC)->getTargetTriple());
 
-        auto DL = JTMB.getDefaultDataLayoutForTarget();
-        if (!DL)
-            return DL.takeError();
+    auto DL = JTMB.getDefaultDataLayoutForTarget();
+    if (!DL)
+      return DL.takeError();
 
-        return std::make_unique<KaleidoscopeJIT>(std::move(*TPC), std::move(ES),
-                std::move(*TPCIU), std::move(JTMB),
-                std::move(*DL));
-    }
+    return std::make_unique<KaleidoscopeJIT>(std::move(*TPC), std::move(ES),
+                                             std::move(*TPCIU), std::move(JTMB),
+                                             std::move(*DL));
+  }
 
-    const DataLayout &getDataLayout() const {
-        return DL;
-    }
+  const DataLayout &getDataLayout() const { return DL; }
 
-    JITDylib &getMainJITDylib() {
-        return MainJD;
-    }
+  JITDylib &getMainJITDylib() { return MainJD; }
 
-    Error addModule(ThreadSafeModule TSM, ResourceTrackerSP RT = nullptr) {
-        if (!RT)
-            RT = MainJD.getDefaultResourceTracker();
+  Error addModule(ThreadSafeModule TSM, ResourceTrackerSP RT = nullptr) {
+    if (!RT)
+      RT = MainJD.getDefaultResourceTracker();
 
-        return OptimizeLayer.add(RT, std::move(TSM));
-    }
+    return OptimizeLayer.add(RT, std::move(TSM));
+  }
 
-    Expected<JITEvaluatedSymbol> lookup(StringRef Name) {
-        return ES->lookup({&MainJD}, Mangle(Name.str()));
-    }
+  Expected<JITEvaluatedSymbol> lookup(StringRef Name) {
+    return ES->lookup({&MainJD}, Mangle(Name.str()));
+  }
 
 private:
-    static Expected<ThreadSafeModule>
-    optimizeModule(ThreadSafeModule TSM, const MaterializationResponsibility &R) {
-        TSM.withModuleDo([](Module &M) {
-            // Create a function pass manager.
-            auto FPM = std::make_unique<legacy::FunctionPassManager>(&M);
+  static Expected<ThreadSafeModule>
+  optimizeModule(ThreadSafeModule TSM, const MaterializationResponsibility &R) {
+    TSM.withModuleDo([](Module &M) {
+      // Create a function pass manager.
+      auto FPM = std::make_unique<legacy::FunctionPassManager>(&M);
 
-            // Add some optimizations.
-            FPM->add(createInstructionCombiningPass());
-            FPM->add(createReassociatePass());
-            FPM->add(createGVNPass());
-            FPM->add(createCFGSimplificationPass());
-            FPM->doInitialization();
+      // Add some optimizations.
+      FPM->add(createInstructionCombiningPass());
+      FPM->add(createReassociatePass());
+      FPM->add(createGVNPass());
+      FPM->add(createCFGSimplificationPass());
+      FPM->doInitialization();
 
-            // Run the optimizations over all functions in the module being added to
-            // the JIT.
-            for (auto &F : M)
-                FPM->run(F);
-        });
+      // Run the optimizations over all functions in the module being added to
+      // the JIT.
+      for (auto &F : M)
+        FPM->run(F);
+    });
 
-        return std::move(TSM);
-    }
+    return std::move(TSM);
+  }
 };
 
 } // end namespace orc

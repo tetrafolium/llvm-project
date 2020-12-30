@@ -22,7 +22,7 @@ class PPCSubtarget;
 /// GlobalISel.
 class PPCLegalizerInfo : public LegalizerInfo {
 public:
-    PPCLegalizerInfo(const PPCSubtarget &ST);
+  PPCLegalizerInfo(const PPCSubtarget &ST);
 };
 } // namespace llvm
 #endif

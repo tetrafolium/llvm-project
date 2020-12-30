@@ -25,8 +25,8 @@ namespace llvm {
 /// https://github.com/microsoft/STL/issues/1533
 /// Using `alignas` here works around the bug.
 template <typename T, typename... Ts> struct AlignedCharArrayUnion {
-    using AlignedUnion = std::aligned_union_t<1, T, Ts...>;
-    alignas(alignof(AlignedUnion)) char buffer[sizeof(AlignedUnion)];
+  using AlignedUnion = std::aligned_union_t<1, T, Ts...>;
+  alignas(alignof(AlignedUnion)) char buffer[sizeof(AlignedUnion)];
 };
 
 } // end namespace llvm

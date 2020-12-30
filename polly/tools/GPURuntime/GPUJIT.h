@@ -78,9 +78,9 @@
  */
 
 typedef enum PollyGPURuntimeT {
-    RUNTIME_NONE,
-    RUNTIME_CUDA,
-    RUNTIME_CL
+  RUNTIME_NONE,
+  RUNTIME_CUDA,
+  RUNTIME_CL
 } PollyGPURuntime;
 
 typedef struct PollyGPUContextT PollyGPUContext;

@@ -129,7 +129,7 @@ typedef unsigned __int64 kmp_uint64;
 #define KMP_UINT64_SPEC "I64u"
 #else
 struct kmp_struct64 {
-    kmp_int32 a, b;
+  kmp_int32 a, b;
 };
 typedef struct kmp_struct64 kmp_int64;
 typedef struct kmp_struct64 kmp_uint64;
@@ -223,51 +223,51 @@ typedef va_list kmp_va_list;
 template <typename T> struct traits_t {};
 // int
 template <> struct traits_t<signed int> {
-    typedef signed int signed_t;
-    typedef unsigned int unsigned_t;
-    typedef double floating_t;
-    static char const *spec;
-    static const signed_t max_value = 0x7fffffff;
-    static const signed_t min_value = 0x80000000;
-    static const int type_size = sizeof(signed_t);
+  typedef signed int signed_t;
+  typedef unsigned int unsigned_t;
+  typedef double floating_t;
+  static char const *spec;
+  static const signed_t max_value = 0x7fffffff;
+  static const signed_t min_value = 0x80000000;
+  static const int type_size = sizeof(signed_t);
 };
 // unsigned int
 template <> struct traits_t<unsigned int> {
-    typedef signed int signed_t;
-    typedef unsigned int unsigned_t;
-    typedef double floating_t;
-    static char const *spec;
-    static const unsigned_t max_value = 0xffffffff;
-    static const unsigned_t min_value = 0x00000000;
-    static const int type_size = sizeof(unsigned_t);
+  typedef signed int signed_t;
+  typedef unsigned int unsigned_t;
+  typedef double floating_t;
+  static char const *spec;
+  static const unsigned_t max_value = 0xffffffff;
+  static const unsigned_t min_value = 0x00000000;
+  static const int type_size = sizeof(unsigned_t);
 };
 // long
 template <> struct traits_t<signed long> {
-    typedef signed long signed_t;
-    typedef unsigned long unsigned_t;
-    typedef long double floating_t;
-    static char const *spec;
-    static const int type_size = sizeof(signed_t);
+  typedef signed long signed_t;
+  typedef unsigned long unsigned_t;
+  typedef long double floating_t;
+  static char const *spec;
+  static const int type_size = sizeof(signed_t);
 };
 // long long
 template <> struct traits_t<signed long long> {
-    typedef signed long long signed_t;
-    typedef unsigned long long unsigned_t;
-    typedef long double floating_t;
-    static char const *spec;
-    static const signed_t max_value = 0x7fffffffffffffffLL;
-    static const signed_t min_value = 0x8000000000000000LL;
-    static const int type_size = sizeof(signed_t);
+  typedef signed long long signed_t;
+  typedef unsigned long long unsigned_t;
+  typedef long double floating_t;
+  static char const *spec;
+  static const signed_t max_value = 0x7fffffffffffffffLL;
+  static const signed_t min_value = 0x8000000000000000LL;
+  static const int type_size = sizeof(signed_t);
 };
 // unsigned long long
 template <> struct traits_t<unsigned long long> {
-    typedef signed long long signed_t;
-    typedef unsigned long long unsigned_t;
-    typedef long double floating_t;
-    static char const *spec;
-    static const unsigned_t max_value = 0xffffffffffffffffLL;
-    static const unsigned_t min_value = 0x0000000000000000LL;
-    static const int type_size = sizeof(unsigned_t);
+  typedef signed long long signed_t;
+  typedef unsigned long long unsigned_t;
+  typedef long double floating_t;
+  static char const *spec;
+  static const unsigned_t max_value = 0xffffffffffffffffLL;
+  static const unsigned_t min_value = 0x0000000000000000LL;
+  static const int type_size = sizeof(unsigned_t);
 };
 //-------------------------------------------------------------------------
 #else
@@ -295,9 +295,9 @@ template <> struct traits_t<unsigned long long> {
 #include <windows.h>
 
 static inline int KMP_GET_PAGE_SIZE(void) {
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-    return si.dwPageSize;
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  return si.dwPageSize;
 }
 #else
 #define KMP_GET_PAGE_SIZE() getpagesize()
@@ -333,13 +333,13 @@ extern "C" {
 //   Code from libcxx/include/__config
 // Use a function like macro to imply that it must be followed by a semicolon
 #if __cplusplus > 201402L && __has_cpp_attribute(fallthrough)
-#  define KMP_FALLTHROUGH() [[fallthrough]]
+#define KMP_FALLTHROUGH() [[fallthrough]]
 #elif __has_cpp_attribute(clang::fallthrough)
-#  define KMP_FALLTHROUGH() [[clang::fallthrough]]
+#define KMP_FALLTHROUGH() [[clang::fallthrough]]
 #elif __has_attribute(fallthrough) || __GNUC__ >= 7
-#  define KMP_FALLTHROUGH() __attribute__((__fallthrough__))
+#define KMP_FALLTHROUGH() __attribute__((__fallthrough__))
 #else
-#  define KMP_FALLTHROUGH() ((void)0)
+#define KMP_FALLTHROUGH() ((void)0)
 #endif
 
 #if KMP_HAVE_ATTRIBUTE_WAITPKG
@@ -419,10 +419,10 @@ extern "C" {
 
 /* General purpose fence types for memory operations */
 enum kmp_mem_fence_type {
-    kmp_no_fence, /* No memory fence */
-    kmp_acquire_fence, /* Acquire (read) memory fence */
-    kmp_release_fence, /* Release (write) memory fence */
-    kmp_full_fence /* Full (read+write) memory fence */
+  kmp_no_fence, /* No memory fence */
+  kmp_acquire_fence, /* Acquire (read) memory fence */
+  kmp_release_fence, /* Release (write) memory fence */
+  kmp_full_fence /* Full (read+write) memory fence */
 };
 
 // Synchronization primitives
@@ -459,8 +459,8 @@ enum kmp_mem_fence_type {
   InterlockedExchange64((volatile kmp_int64 *)(p), (kmp_int64)(v))
 
 inline kmp_real32 KMP_XCHG_REAL32(volatile kmp_real32 *p, kmp_real32 v) {
-    kmp_int32 tmp = InterlockedExchange((volatile long *)p, *(long *)&v);
-    return *(kmp_real32 *)&tmp;
+  kmp_int32 tmp = InterlockedExchange((volatile long *)p, *(long *)&v);
+  return *(kmp_real32 *)&tmp;
 }
 
 // Routines that we still need to implement in assembly.
@@ -475,21 +475,21 @@ extern kmp_uint64 __kmp_test_then_or64(volatile kmp_uint64 *p, kmp_uint64 v);
 extern kmp_uint64 __kmp_test_then_and64(volatile kmp_uint64 *p, kmp_uint64 v);
 
 extern kmp_int8 __kmp_compare_and_store8(volatile kmp_int8 *p, kmp_int8 cv,
-        kmp_int8 sv);
+                                         kmp_int8 sv);
 extern kmp_int16 __kmp_compare_and_store16(volatile kmp_int16 *p, kmp_int16 cv,
-        kmp_int16 sv);
+                                           kmp_int16 sv);
 extern kmp_int32 __kmp_compare_and_store32(volatile kmp_int32 *p, kmp_int32 cv,
-        kmp_int32 sv);
+                                           kmp_int32 sv);
 extern kmp_int32 __kmp_compare_and_store64(volatile kmp_int64 *p, kmp_int64 cv,
-        kmp_int64 sv);
+                                           kmp_int64 sv);
 extern kmp_int8 __kmp_compare_and_store_ret8(volatile kmp_int8 *p, kmp_int8 cv,
-        kmp_int8 sv);
+                                             kmp_int8 sv);
 extern kmp_int16 __kmp_compare_and_store_ret16(volatile kmp_int16 *p,
-        kmp_int16 cv, kmp_int16 sv);
+                                               kmp_int16 cv, kmp_int16 sv);
 extern kmp_int32 __kmp_compare_and_store_ret32(volatile kmp_int32 *p,
-        kmp_int32 cv, kmp_int32 sv);
+                                               kmp_int32 cv, kmp_int32 sv);
 extern kmp_int64 __kmp_compare_and_store_ret64(volatile kmp_int64 *p,
-        kmp_int64 cv, kmp_int64 sv);
+                                               kmp_int64 cv, kmp_int64 sv);
 
 extern kmp_int8 __kmp_xchg_fixed8(volatile kmp_int8 *p, kmp_int8 v);
 extern kmp_int16 __kmp_xchg_fixed16(volatile kmp_int16 *p, kmp_int16 v);
@@ -680,26 +680,28 @@ extern kmp_real64 __kmp_xchg_real64(volatile kmp_real64 *p, kmp_real64 v);
   __sync_val_compare_and_swap((volatile kmp_uint32 *)(p), (kmp_uint32)(cv),    \
                               (kmp_uint32)(sv))
 #if KMP_ARCH_MIPS
-static inline bool mips_sync_bool_compare_and_swap(
-    volatile kmp_uint64 *p, kmp_uint64 cv, kmp_uint64 sv) {
-    return __atomic_compare_exchange(p, &cv, &sv, false, __ATOMIC_SEQ_CST,
-                                     __ATOMIC_SEQ_CST);
+static inline bool mips_sync_bool_compare_and_swap(volatile kmp_uint64 *p,
+                                                   kmp_uint64 cv,
+                                                   kmp_uint64 sv) {
+  return __atomic_compare_exchange(p, &cv, &sv, false, __ATOMIC_SEQ_CST,
+                                   __ATOMIC_SEQ_CST);
 }
-static inline bool mips_sync_val_compare_and_swap(
-    volatile kmp_uint64 *p, kmp_uint64 cv, kmp_uint64 sv) {
-    __atomic_compare_exchange(p, &cv, &sv, false, __ATOMIC_SEQ_CST,
-                              __ATOMIC_SEQ_CST);
-    return cv;
+static inline bool mips_sync_val_compare_and_swap(volatile kmp_uint64 *p,
+                                                  kmp_uint64 cv,
+                                                  kmp_uint64 sv) {
+  __atomic_compare_exchange(p, &cv, &sv, false, __ATOMIC_SEQ_CST,
+                            __ATOMIC_SEQ_CST);
+  return cv;
 }
 #define KMP_COMPARE_AND_STORE_ACQ64(p, cv, sv)                                 \
-  mips_sync_bool_compare_and_swap((volatile kmp_uint64 *)(p), (kmp_uint64)(cv),\
-                               (kmp_uint64)(sv))
+  mips_sync_bool_compare_and_swap((volatile kmp_uint64 *)(p),                  \
+                                  (kmp_uint64)(cv), (kmp_uint64)(sv))
 #define KMP_COMPARE_AND_STORE_REL64(p, cv, sv)                                 \
-  mips_sync_bool_compare_and_swap((volatile kmp_uint64 *)(p), (kmp_uint64)(cv),\
-                               (kmp_uint64)(sv))
+  mips_sync_bool_compare_and_swap((volatile kmp_uint64 *)(p),                  \
+                                  (kmp_uint64)(cv), (kmp_uint64)(sv))
 #define KMP_COMPARE_AND_STORE_RET64(p, cv, sv)                                 \
   mips_sync_val_compare_and_swap((volatile kmp_uint64 *)(p), (kmp_uint64)(cv), \
-                              (kmp_uint64)(sv))
+                                 (kmp_uint64)(sv))
 #else
 #define KMP_COMPARE_AND_STORE_ACQ64(p, cv, sv)                                 \
   __sync_bool_compare_and_swap((volatile kmp_uint64 *)(p), (kmp_uint64)(cv),   \
@@ -722,15 +724,15 @@ static inline bool mips_sync_val_compare_and_swap(
   __sync_lock_test_and_set((volatile kmp_uint64 *)(p), (kmp_uint64)(v))
 
 inline kmp_real32 KMP_XCHG_REAL32(volatile kmp_real32 *p, kmp_real32 v) {
-    kmp_int32 tmp =
-        __sync_lock_test_and_set((volatile kmp_uint32 *)(p), *(kmp_uint32 *)&v);
-    return *(kmp_real32 *)&tmp;
+  kmp_int32 tmp =
+      __sync_lock_test_and_set((volatile kmp_uint32 *)(p), *(kmp_uint32 *)&v);
+  return *(kmp_real32 *)&tmp;
 }
 
 inline kmp_real64 KMP_XCHG_REAL64(volatile kmp_real64 *p, kmp_real64 v) {
-    kmp_int64 tmp =
-        __sync_lock_test_and_set((volatile kmp_uint64 *)(p), *(kmp_uint64 *)&v);
-    return *(kmp_real64 *)&tmp;
+  kmp_int64 tmp =
+      __sync_lock_test_and_set((volatile kmp_uint64 *)(p), *(kmp_uint64 *)&v);
+  return *(kmp_real64 *)&tmp;
 }
 
 #else
@@ -746,21 +748,21 @@ extern kmp_uint64 __kmp_test_then_or64(volatile kmp_uint64 *p, kmp_uint64 v);
 extern kmp_uint64 __kmp_test_then_and64(volatile kmp_uint64 *p, kmp_uint64 v);
 
 extern kmp_int8 __kmp_compare_and_store8(volatile kmp_int8 *p, kmp_int8 cv,
-        kmp_int8 sv);
+                                         kmp_int8 sv);
 extern kmp_int16 __kmp_compare_and_store16(volatile kmp_int16 *p, kmp_int16 cv,
-        kmp_int16 sv);
+                                           kmp_int16 sv);
 extern kmp_int32 __kmp_compare_and_store32(volatile kmp_int32 *p, kmp_int32 cv,
-        kmp_int32 sv);
+                                           kmp_int32 sv);
 extern kmp_int32 __kmp_compare_and_store64(volatile kmp_int64 *p, kmp_int64 cv,
-        kmp_int64 sv);
+                                           kmp_int64 sv);
 extern kmp_int8 __kmp_compare_and_store_ret8(volatile kmp_int8 *p, kmp_int8 cv,
-        kmp_int8 sv);
+                                             kmp_int8 sv);
 extern kmp_int16 __kmp_compare_and_store_ret16(volatile kmp_int16 *p,
-        kmp_int16 cv, kmp_int16 sv);
+                                               kmp_int16 cv, kmp_int16 sv);
 extern kmp_int32 __kmp_compare_and_store_ret32(volatile kmp_int32 *p,
-        kmp_int32 cv, kmp_int32 sv);
+                                               kmp_int32 cv, kmp_int32 sv);
 extern kmp_int64 __kmp_compare_and_store_ret64(volatile kmp_int64 *p,
-        kmp_int64 cv, kmp_int64 sv);
+                                               kmp_int64 cv, kmp_int64 sv);
 
 extern kmp_int8 __kmp_xchg_fixed8(volatile kmp_int8 *p, kmp_int8 v);
 extern kmp_int16 __kmp_xchg_fixed16(volatile kmp_int16 *p, kmp_int16 v);
@@ -1028,10 +1030,10 @@ typedef void (*microtask_t)(int *gtid, int *npr, ...);
 
 // Warning levels
 enum kmp_warnings_level {
-    kmp_warnings_off = 0, /* No warnings */
-    kmp_warnings_low, /* Minimal warnings (default) */
-    kmp_warnings_explicit = 6, /* Explicitly set to ON - more warnings */
-    kmp_warnings_verbose /* reserved */
+  kmp_warnings_off = 0, /* No warnings */
+  kmp_warnings_low, /* Minimal warnings (default) */
+  kmp_warnings_explicit = 6, /* Explicitly set to ON - more warnings */
+  kmp_warnings_verbose /* reserved */
 };
 
 #ifdef __cplusplus
@@ -1061,20 +1063,20 @@ enum kmp_warnings_level {
 // Callers of the following functions cannot see the side effect on "expected".
 template <typename T>
 bool __kmp_atomic_compare_store(std::atomic<T> *p, T expected, T desired) {
-    return p->compare_exchange_strong(
-               expected, desired, std::memory_order_acq_rel, std::memory_order_relaxed);
+  return p->compare_exchange_strong(
+      expected, desired, std::memory_order_acq_rel, std::memory_order_relaxed);
 }
 
 template <typename T>
 bool __kmp_atomic_compare_store_acq(std::atomic<T> *p, T expected, T desired) {
-    return p->compare_exchange_strong(
-               expected, desired, std::memory_order_acquire, std::memory_order_relaxed);
+  return p->compare_exchange_strong(
+      expected, desired, std::memory_order_acquire, std::memory_order_relaxed);
 }
 
 template <typename T>
 bool __kmp_atomic_compare_store_rel(std::atomic<T> *p, T expected, T desired) {
-    return p->compare_exchange_strong(
-               expected, desired, std::memory_order_release, std::memory_order_relaxed);
+  return p->compare_exchange_strong(
+      expected, desired, std::memory_order_release, std::memory_order_relaxed);
 }
 
 #endif /* KMP_OS_H */

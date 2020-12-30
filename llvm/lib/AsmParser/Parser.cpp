@@ -26,50 +26,50 @@ static bool parseAssemblyInto(MemoryBufferRef F, Module *M,
                               ModuleSummaryIndex *Index, SMDiagnostic &Err,
                               SlotMapping *Slots, bool UpgradeDebugInfo,
                               DataLayoutCallbackTy DataLayoutCallback) {
-    SourceMgr SM;
-    std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(F);
-    SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
+  SourceMgr SM;
+  std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(F);
+  SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
 
-    LLVMContext Context;
-    return LLParser(F.getBuffer(), SM, Err, M, Index,
-                    M ? M->getContext() : Context, Slots)
-           .Run(UpgradeDebugInfo, DataLayoutCallback);
+  LLVMContext Context;
+  return LLParser(F.getBuffer(), SM, Err, M, Index,
+                  M ? M->getContext() : Context, Slots)
+      .Run(UpgradeDebugInfo, DataLayoutCallback);
 }
 
 bool llvm::parseAssemblyInto(MemoryBufferRef F, Module *M,
                              ModuleSummaryIndex *Index, SMDiagnostic &Err,
                              SlotMapping *Slots,
                              DataLayoutCallbackTy DataLayoutCallback) {
-    return ::parseAssemblyInto(F, M, Index, Err, Slots,
-                               /*UpgradeDebugInfo*/ true, DataLayoutCallback);
+  return ::parseAssemblyInto(F, M, Index, Err, Slots,
+                             /*UpgradeDebugInfo*/ true, DataLayoutCallback);
 }
 
 std::unique_ptr<Module>
 llvm::parseAssembly(MemoryBufferRef F, SMDiagnostic &Err, LLVMContext &Context,
                     SlotMapping *Slots,
                     DataLayoutCallbackTy DataLayoutCallback) {
-    std::unique_ptr<Module> M =
-        std::make_unique<Module>(F.getBufferIdentifier(), Context);
+  std::unique_ptr<Module> M =
+      std::make_unique<Module>(F.getBufferIdentifier(), Context);
 
-    if (parseAssemblyInto(F, M.get(), nullptr, Err, Slots, DataLayoutCallback))
-        return nullptr;
+  if (parseAssemblyInto(F, M.get(), nullptr, Err, Slots, DataLayoutCallback))
+    return nullptr;
 
-    return M;
+  return M;
 }
 
 std::unique_ptr<Module> llvm::parseAssemblyFile(StringRef Filename,
-        SMDiagnostic &Err,
-        LLVMContext &Context,
-        SlotMapping *Slots) {
-    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-                                            MemoryBuffer::getFileOrSTDIN(Filename);
-    if (std::error_code EC = FileOrErr.getError()) {
-        Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
-                           "Could not open input file: " + EC.message());
-        return nullptr;
-    }
+                                                SMDiagnostic &Err,
+                                                LLVMContext &Context,
+                                                SlotMapping *Slots) {
+  ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
+      MemoryBuffer::getFileOrSTDIN(Filename);
+  if (std::error_code EC = FileOrErr.getError()) {
+    Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
+                       "Could not open input file: " + EC.message());
+    return nullptr;
+  }
 
-    return parseAssembly(FileOrErr.get()->getMemBufferRef(), Err, Context, Slots);
+  return parseAssembly(FileOrErr.get()->getMemBufferRef(), Err, Context, Slots);
 }
 
 static ParsedModuleAndIndex
@@ -77,27 +77,25 @@ parseAssemblyWithIndex(MemoryBufferRef F, SMDiagnostic &Err,
                        LLVMContext &Context, SlotMapping *Slots,
                        bool UpgradeDebugInfo,
                        DataLayoutCallbackTy DataLayoutCallback) {
-    std::unique_ptr<Module> M =
-        std::make_unique<Module>(F.getBufferIdentifier(), Context);
-    std::unique_ptr<ModuleSummaryIndex> Index =
-        std::make_unique<ModuleSummaryIndex>(/*HaveGVs=*/true);
+  std::unique_ptr<Module> M =
+      std::make_unique<Module>(F.getBufferIdentifier(), Context);
+  std::unique_ptr<ModuleSummaryIndex> Index =
+      std::make_unique<ModuleSummaryIndex>(/*HaveGVs=*/true);
 
-    if (parseAssemblyInto(F, M.get(), Index.get(), Err, Slots, UpgradeDebugInfo,
-                          DataLayoutCallback))
-        return {nullptr, nullptr};
+  if (parseAssemblyInto(F, M.get(), Index.get(), Err, Slots, UpgradeDebugInfo,
+                        DataLayoutCallback))
+    return {nullptr, nullptr};
 
-    return {std::move(M), std::move(Index)};
+  return {std::move(M), std::move(Index)};
 }
 
 ParsedModuleAndIndex llvm::parseAssemblyWithIndex(MemoryBufferRef F,
-        SMDiagnostic &Err,
-        LLVMContext &Context,
-        SlotMapping *Slots) {
-    return ::parseAssemblyWithIndex(F, Err, Context, Slots,
-                                    /*UpgradeDebugInfo*/ true,
-    [](StringRef) {
-        return None;
-    });
+                                                  SMDiagnostic &Err,
+                                                  LLVMContext &Context,
+                                                  SlotMapping *Slots) {
+  return ::parseAssemblyWithIndex(F, Err, Context, Slots,
+                                  /*UpgradeDebugInfo*/ true,
+                                  [](StringRef) { return None; });
 }
 
 static ParsedModuleAndIndex
@@ -105,121 +103,119 @@ parseAssemblyFileWithIndex(StringRef Filename, SMDiagnostic &Err,
                            LLVMContext &Context, SlotMapping *Slots,
                            bool UpgradeDebugInfo,
                            DataLayoutCallbackTy DataLayoutCallback) {
-    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-                                            MemoryBuffer::getFileOrSTDIN(Filename);
-    if (std::error_code EC = FileOrErr.getError()) {
-        Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
-                           "Could not open input file: " + EC.message());
-        return {nullptr, nullptr};
-    }
+  ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
+      MemoryBuffer::getFileOrSTDIN(Filename);
+  if (std::error_code EC = FileOrErr.getError()) {
+    Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
+                       "Could not open input file: " + EC.message());
+    return {nullptr, nullptr};
+  }
 
-    return parseAssemblyWithIndex(FileOrErr.get()->getMemBufferRef(), Err,
-                                  Context, Slots, UpgradeDebugInfo,
-                                  DataLayoutCallback);
+  return parseAssemblyWithIndex(FileOrErr.get()->getMemBufferRef(), Err,
+                                Context, Slots, UpgradeDebugInfo,
+                                DataLayoutCallback);
 }
 
 ParsedModuleAndIndex
 llvm::parseAssemblyFileWithIndex(StringRef Filename, SMDiagnostic &Err,
                                  LLVMContext &Context, SlotMapping *Slots,
                                  DataLayoutCallbackTy DataLayoutCallback) {
-    return ::parseAssemblyFileWithIndex(Filename, Err, Context, Slots,
-                                        /*UpgradeDebugInfo*/ true,
-                                        DataLayoutCallback);
+  return ::parseAssemblyFileWithIndex(Filename, Err, Context, Slots,
+                                      /*UpgradeDebugInfo*/ true,
+                                      DataLayoutCallback);
 }
 
 ParsedModuleAndIndex llvm::parseAssemblyFileWithIndexNoUpgradeDebugInfo(
     StringRef Filename, SMDiagnostic &Err, LLVMContext &Context,
     SlotMapping *Slots, DataLayoutCallbackTy DataLayoutCallback) {
-    return ::parseAssemblyFileWithIndex(Filename, Err, Context, Slots,
-                                        /*UpgradeDebugInfo*/ false,
-                                        DataLayoutCallback);
+  return ::parseAssemblyFileWithIndex(Filename, Err, Context, Slots,
+                                      /*UpgradeDebugInfo*/ false,
+                                      DataLayoutCallback);
 }
 
 std::unique_ptr<Module> llvm::parseAssemblyString(StringRef AsmString,
-        SMDiagnostic &Err,
-        LLVMContext &Context,
-        SlotMapping *Slots) {
-    MemoryBufferRef F(AsmString, "<string>");
-    return parseAssembly(F, Err, Context, Slots);
+                                                  SMDiagnostic &Err,
+                                                  LLVMContext &Context,
+                                                  SlotMapping *Slots) {
+  MemoryBufferRef F(AsmString, "<string>");
+  return parseAssembly(F, Err, Context, Slots);
 }
 
 static bool parseSummaryIndexAssemblyInto(MemoryBufferRef F,
-        ModuleSummaryIndex &Index,
-        SMDiagnostic &Err) {
-    SourceMgr SM;
-    std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(F);
-    SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
+                                          ModuleSummaryIndex &Index,
+                                          SMDiagnostic &Err) {
+  SourceMgr SM;
+  std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(F);
+  SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
 
-    // The parser holds a reference to a context that is unused when parsing the
-    // index, but we need to initialize it.
-    LLVMContext unusedContext;
-    return LLParser(F.getBuffer(), SM, Err, nullptr, &Index, unusedContext)
-    .Run(true, [](StringRef) {
-        return None;
-    });
+  // The parser holds a reference to a context that is unused when parsing the
+  // index, but we need to initialize it.
+  LLVMContext unusedContext;
+  return LLParser(F.getBuffer(), SM, Err, nullptr, &Index, unusedContext)
+      .Run(true, [](StringRef) { return None; });
 }
 
 std::unique_ptr<ModuleSummaryIndex>
 llvm::parseSummaryIndexAssembly(MemoryBufferRef F, SMDiagnostic &Err) {
-    std::unique_ptr<ModuleSummaryIndex> Index =
-        std::make_unique<ModuleSummaryIndex>(/*HaveGVs=*/false);
+  std::unique_ptr<ModuleSummaryIndex> Index =
+      std::make_unique<ModuleSummaryIndex>(/*HaveGVs=*/false);
 
-    if (parseSummaryIndexAssemblyInto(F, *Index, Err))
-        return nullptr;
+  if (parseSummaryIndexAssemblyInto(F, *Index, Err))
+    return nullptr;
 
-    return Index;
+  return Index;
 }
 
 std::unique_ptr<ModuleSummaryIndex>
 llvm::parseSummaryIndexAssemblyFile(StringRef Filename, SMDiagnostic &Err) {
-    ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
-                                            MemoryBuffer::getFileOrSTDIN(Filename);
-    if (std::error_code EC = FileOrErr.getError()) {
-        Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
-                           "Could not open input file: " + EC.message());
-        return nullptr;
-    }
+  ErrorOr<std::unique_ptr<MemoryBuffer>> FileOrErr =
+      MemoryBuffer::getFileOrSTDIN(Filename);
+  if (std::error_code EC = FileOrErr.getError()) {
+    Err = SMDiagnostic(Filename, SourceMgr::DK_Error,
+                       "Could not open input file: " + EC.message());
+    return nullptr;
+  }
 
-    return parseSummaryIndexAssembly(FileOrErr.get()->getMemBufferRef(), Err);
+  return parseSummaryIndexAssembly(FileOrErr.get()->getMemBufferRef(), Err);
 }
 
 Constant *llvm::parseConstantValue(StringRef Asm, SMDiagnostic &Err,
                                    const Module &M, const SlotMapping *Slots) {
-    SourceMgr SM;
-    std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
-    SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
-    Constant *C;
-    if (LLParser(Asm, SM, Err, const_cast<Module *>(&M), nullptr, M.getContext())
-            .parseStandaloneConstantValue(C, Slots))
-        return nullptr;
-    return C;
+  SourceMgr SM;
+  std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
+  SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
+  Constant *C;
+  if (LLParser(Asm, SM, Err, const_cast<Module *>(&M), nullptr, M.getContext())
+          .parseStandaloneConstantValue(C, Slots))
+    return nullptr;
+  return C;
 }
 
 Type *llvm::parseType(StringRef Asm, SMDiagnostic &Err, const Module &M,
                       const SlotMapping *Slots) {
-    unsigned Read;
-    Type *Ty = parseTypeAtBeginning(Asm, Read, Err, M, Slots);
-    if (!Ty)
-        return nullptr;
-    if (Read != Asm.size()) {
-        SourceMgr SM;
-        std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
-        SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
-        Err = SM.GetMessage(SMLoc::getFromPointer(Asm.begin() + Read),
-                            SourceMgr::DK_Error, "expected end of string");
-        return nullptr;
-    }
-    return Ty;
+  unsigned Read;
+  Type *Ty = parseTypeAtBeginning(Asm, Read, Err, M, Slots);
+  if (!Ty)
+    return nullptr;
+  if (Read != Asm.size()) {
+    SourceMgr SM;
+    std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
+    SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
+    Err = SM.GetMessage(SMLoc::getFromPointer(Asm.begin() + Read),
+                        SourceMgr::DK_Error, "expected end of string");
+    return nullptr;
+  }
+  return Ty;
 }
 Type *llvm::parseTypeAtBeginning(StringRef Asm, unsigned &Read,
                                  SMDiagnostic &Err, const Module &M,
                                  const SlotMapping *Slots) {
-    SourceMgr SM;
-    std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
-    SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
-    Type *Ty;
-    if (LLParser(Asm, SM, Err, const_cast<Module *>(&M), nullptr, M.getContext())
-            .parseTypeAtBeginning(Ty, Read, Slots))
-        return nullptr;
-    return Ty;
+  SourceMgr SM;
+  std::unique_ptr<MemoryBuffer> Buf = MemoryBuffer::getMemBuffer(Asm);
+  SM.AddNewSourceBuffer(std::move(Buf), SMLoc());
+  Type *Ty;
+  if (LLParser(Asm, SM, Err, const_cast<Module *>(&M), nullptr, M.getContext())
+          .parseTypeAtBeginning(Ty, Read, Slots))
+    return nullptr;
+  return Ty;
 }

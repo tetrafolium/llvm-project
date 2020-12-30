@@ -48,31 +48,31 @@ class StructType;
 /// overlap is invalid)."
 class VulkanLayoutUtils {
 public:
-    using Size = uint64_t;
+  using Size = uint64_t;
 
-    /// Returns a new StructType with layout decoration.
-    static spirv::StructType decorateType(spirv::StructType structType);
+  /// Returns a new StructType with layout decoration.
+  static spirv::StructType decorateType(spirv::StructType structType);
 
-    /// Checks whether a type is legal in terms of Vulkan layout info
-    /// decoration. A type is dynamically illegal if it's a composite type in the
-    /// StorageBuffer, PhysicalStorageBuffer, Uniform, and PushConstant Storage
-    /// Classes without layout information.
-    static bool isLegalType(Type type);
+  /// Checks whether a type is legal in terms of Vulkan layout info
+  /// decoration. A type is dynamically illegal if it's a composite type in the
+  /// StorageBuffer, PhysicalStorageBuffer, Uniform, and PushConstant Storage
+  /// Classes without layout information.
+  static bool isLegalType(Type type);
 
 private:
-    /// Returns a new type with layout decoration. Assigns the type size in bytes
-    /// to the `size`. Assigns the type alignment in bytes to the `alignment`.
-    static Type decorateType(Type type, Size &size, Size &alignment);
+  /// Returns a new type with layout decoration. Assigns the type size in bytes
+  /// to the `size`. Assigns the type alignment in bytes to the `alignment`.
+  static Type decorateType(Type type, Size &size, Size &alignment);
 
-    static Type decorateType(VectorType vectorType, Size &size, Size &alignment);
-    static Type decorateType(spirv::ArrayType arrayType, Size &size,
-                             Size &alignment);
-    static Type decorateType(spirv::RuntimeArrayType arrayType, Size &alignment);
-    static spirv::StructType decorateType(spirv::StructType structType,
-                                          Size &size, Size &alignment);
+  static Type decorateType(VectorType vectorType, Size &size, Size &alignment);
+  static Type decorateType(spirv::ArrayType arrayType, Size &size,
+                           Size &alignment);
+  static Type decorateType(spirv::RuntimeArrayType arrayType, Size &alignment);
+  static spirv::StructType decorateType(spirv::StructType structType,
+                                        Size &size, Size &alignment);
 
-    /// Calculates the alignment for the given scalar type.
-    static Size getScalarTypeAlignment(Type scalarType);
+  /// Calculates the alignment for the given scalar type.
+  static Size getScalarTypeAlignment(Type scalarType);
 };
 
 } // namespace mlir

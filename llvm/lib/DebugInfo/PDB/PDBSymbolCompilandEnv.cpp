@@ -18,12 +18,12 @@ using namespace llvm;
 using namespace llvm::pdb;
 
 std::string PDBSymbolCompilandEnv::getValue() const {
-    Variant Value = RawSymbol->getValue();
-    if (Value.Type != PDB_VariantType::String)
-        return std::string();
-    return std::string(Value.Value.String);
+  Variant Value = RawSymbol->getValue();
+  if (Value.Type != PDB_VariantType::String)
+    return std::string();
+  return std::string(Value.Value.String);
 }
 
 void PDBSymbolCompilandEnv::dump(PDBSymDumper &Dumper) const {
-    Dumper.dump(*this);
+  Dumper.dump(*this);
 }

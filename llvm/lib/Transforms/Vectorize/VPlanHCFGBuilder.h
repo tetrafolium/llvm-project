@@ -35,36 +35,36 @@ class VPlanTestBase;
 
 /// Main class to build the VPlan H-CFG for an incoming IR.
 class VPlanHCFGBuilder {
-    friend VPlanTestBase;
+  friend VPlanTestBase;
 
 private:
-    // The outermost loop of the input loop nest considered for vectorization.
-    Loop *TheLoop;
+  // The outermost loop of the input loop nest considered for vectorization.
+  Loop *TheLoop;
 
-    // Loop Info analysis.
-    LoopInfo *LI;
+  // Loop Info analysis.
+  LoopInfo *LI;
 
-    // The VPlan that will contain the H-CFG we are building.
-    VPlan &Plan;
+  // The VPlan that will contain the H-CFG we are building.
+  VPlan &Plan;
 
-    // VPlan verifier utility.
-    VPlanVerifier Verifier;
+  // VPlan verifier utility.
+  VPlanVerifier Verifier;
 
-    // Dominator analysis for VPlan plain CFG to be used in the
-    // construction of the H-CFG. This analysis is no longer valid once regions
-    // are introduced.
-    VPDominatorTree VPDomTree;
+  // Dominator analysis for VPlan plain CFG to be used in the
+  // construction of the H-CFG. This analysis is no longer valid once regions
+  // are introduced.
+  VPDominatorTree VPDomTree;
 
-    /// Build plain CFG for TheLoop. Return a new VPRegionBlock (TopRegion)
-    /// enclosing the plain CFG.
-    VPRegionBlock *buildPlainCFG();
+  /// Build plain CFG for TheLoop. Return a new VPRegionBlock (TopRegion)
+  /// enclosing the plain CFG.
+  VPRegionBlock *buildPlainCFG();
 
 public:
-    VPlanHCFGBuilder(Loop *Lp, LoopInfo *LI, VPlan &P)
-        : TheLoop(Lp), LI(LI), Plan(P) {}
+  VPlanHCFGBuilder(Loop *Lp, LoopInfo *LI, VPlan &P)
+      : TheLoop(Lp), LI(LI), Plan(P) {}
 
-    /// Build H-CFG for TheLoop and update Plan accordingly.
-    void buildHierarchicalCFG();
+  /// Build H-CFG for TheLoop and update Plan accordingly.
+  void buildHierarchicalCFG();
 };
 } // namespace llvm
 

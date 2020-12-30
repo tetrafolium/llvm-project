@@ -16,24 +16,24 @@ namespace lldb_private {
 
 class LockFileWindows : public LockFileBase {
 public:
-    explicit LockFileWindows(int fd);
-    ~LockFileWindows();
+  explicit LockFileWindows(int fd);
+  ~LockFileWindows();
 
 protected:
-    Status DoWriteLock(const uint64_t start, const uint64_t len) override;
+  Status DoWriteLock(const uint64_t start, const uint64_t len) override;
 
-    Status DoTryWriteLock(const uint64_t start, const uint64_t len) override;
+  Status DoTryWriteLock(const uint64_t start, const uint64_t len) override;
 
-    Status DoReadLock(const uint64_t start, const uint64_t len) override;
+  Status DoReadLock(const uint64_t start, const uint64_t len) override;
 
-    Status DoTryReadLock(const uint64_t start, const uint64_t len) override;
+  Status DoTryReadLock(const uint64_t start, const uint64_t len) override;
 
-    Status DoUnlock() override;
+  Status DoUnlock() override;
 
-    bool IsValidFile() const override;
+  bool IsValidFile() const override;
 
 private:
-    HANDLE m_file;
+  HANDLE m_file;
 };
 
 } // namespace lldb_private

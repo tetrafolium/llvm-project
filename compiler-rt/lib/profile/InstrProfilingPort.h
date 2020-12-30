@@ -20,7 +20,7 @@
 /* Need to include <windows.h> */
 #define COMPILER_RT_ALLOCA _alloca
 /* Need to include <stdio.h> and <io.h> */
-#define COMPILER_RT_FTRUNCATE(f,l) _chsize(_fileno(f),l)
+#define COMPILER_RT_FTRUNCATE(f, l) _chsize(_fileno(f), l)
 #define COMPILER_RT_ALWAYS_INLINE __forceinline
 #define COMPILER_RT_CLEANUP(x)
 #elif __GNUC__
@@ -110,9 +110,9 @@
 #if defined(_WIN32)
 #include <windows.h>
 static inline size_t getpagesize() {
-    SYSTEM_INFO S;
-    GetNativeSystemInfo(&S);
-    return S.dwPageSize;
+  SYSTEM_INFO S;
+  GetNativeSystemInfo(&S);
+  return S.dwPageSize;
 }
 #else /* defined(_WIN32) */
 #include <unistd.h>

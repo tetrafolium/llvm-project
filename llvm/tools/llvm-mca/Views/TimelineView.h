@@ -119,67 +119,65 @@ namespace mca {
 /// to print the timeline information, as well as the "average wait times"
 /// for every instruction in the input assembly sequence.
 class TimelineView : public InstructionView {
-    unsigned CurrentCycle;
-    unsigned MaxCycle;
-    unsigned LastCycle;
+  unsigned CurrentCycle;
+  unsigned MaxCycle;
+  unsigned LastCycle;
 
-    struct TimelineViewEntry {
-        int CycleDispatched;  // A negative value is an "invalid cycle".
-        unsigned CycleReady;
-        unsigned CycleIssued;
-        unsigned CycleExecuted;
-        unsigned CycleRetired;
-    };
-    std::vector<TimelineViewEntry> Timeline;
+  struct TimelineViewEntry {
+    int CycleDispatched; // A negative value is an "invalid cycle".
+    unsigned CycleReady;
+    unsigned CycleIssued;
+    unsigned CycleExecuted;
+    unsigned CycleRetired;
+  };
+  std::vector<TimelineViewEntry> Timeline;
 
-    struct WaitTimeEntry {
-        unsigned CyclesSpentInSchedulerQueue;
-        unsigned CyclesSpentInSQWhileReady;
-        unsigned CyclesSpentAfterWBAndBeforeRetire;
-    };
-    std::vector<WaitTimeEntry> WaitTime;
+  struct WaitTimeEntry {
+    unsigned CyclesSpentInSchedulerQueue;
+    unsigned CyclesSpentInSQWhileReady;
+    unsigned CyclesSpentAfterWBAndBeforeRetire;
+  };
+  std::vector<WaitTimeEntry> WaitTime;
 
-    // This field is used to map instructions to buffered resources.
-    // Elements of this vector are <resourceID, BufferSizer> pairs.
-    std::vector<std::pair<unsigned, int>> UsedBuffer;
+  // This field is used to map instructions to buffered resources.
+  // Elements of this vector are <resourceID, BufferSizer> pairs.
+  std::vector<std::pair<unsigned, int>> UsedBuffer;
 
-    void printTimelineViewEntry(llvm::formatted_raw_ostream &OS,
-                                const TimelineViewEntry &E, unsigned Iteration,
-                                unsigned SourceIndex) const;
-    void printWaitTimeEntry(llvm::formatted_raw_ostream &OS,
-                            const WaitTimeEntry &E, unsigned Index,
-                            unsigned Executions) const;
+  void printTimelineViewEntry(llvm::formatted_raw_ostream &OS,
+                              const TimelineViewEntry &E, unsigned Iteration,
+                              unsigned SourceIndex) const;
+  void printWaitTimeEntry(llvm::formatted_raw_ostream &OS,
+                          const WaitTimeEntry &E, unsigned Index,
+                          unsigned Executions) const;
 
-    // Display characters for the TimelineView report output.
-    struct DisplayChar {
-        static const char Dispatched = 'D';
-        static const char Executed = 'E';
-        static const char Retired = 'R';
-        static const char Waiting = '='; // Instruction is waiting in the scheduler.
-        static const char Executing = 'e';
-        static const char RetireLag = '-'; // The instruction is waiting to retire.
-    };
+  // Display characters for the TimelineView report output.
+  struct DisplayChar {
+    static const char Dispatched = 'D';
+    static const char Executed = 'E';
+    static const char Retired = 'R';
+    static const char Waiting = '='; // Instruction is waiting in the scheduler.
+    static const char Executing = 'e';
+    static const char RetireLag = '-'; // The instruction is waiting to retire.
+  };
 
 public:
-    TimelineView(const llvm::MCSubtargetInfo &sti, llvm::MCInstPrinter &Printer,
-                 llvm::ArrayRef<llvm::MCInst> S, unsigned Iterations,
-                 unsigned Cycles);
+  TimelineView(const llvm::MCSubtargetInfo &sti, llvm::MCInstPrinter &Printer,
+               llvm::ArrayRef<llvm::MCInst> S, unsigned Iterations,
+               unsigned Cycles);
 
-    // Event handlers.
-    void onCycleEnd() override {
-        ++CurrentCycle;
-    }
-    void onEvent(const HWInstructionEvent &Event) override;
-    void onReservedBuffers(const InstRef &IR,
-                           llvm::ArrayRef<unsigned> Buffers) override;
+  // Event handlers.
+  void onCycleEnd() override { ++CurrentCycle; }
+  void onEvent(const HWInstructionEvent &Event) override;
+  void onReservedBuffers(const InstRef &IR,
+                         llvm::ArrayRef<unsigned> Buffers) override;
 
-    // print functionalities.
-    void printTimeline(llvm::raw_ostream &OS) const;
-    void printAverageWaitTimes(llvm::raw_ostream &OS) const;
-    void printView(llvm::raw_ostream &OS) const override {
-        printTimeline(OS);
-        printAverageWaitTimes(OS);
-    }
+  // print functionalities.
+  void printTimeline(llvm::raw_ostream &OS) const;
+  void printAverageWaitTimes(llvm::raw_ostream &OS) const;
+  void printView(llvm::raw_ostream &OS) const override {
+    printTimeline(OS);
+    printAverageWaitTimes(OS);
+  }
 };
 } // namespace mca
 } // namespace llvm

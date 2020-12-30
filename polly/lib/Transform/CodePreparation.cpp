@@ -32,92 +32,86 @@ namespace {
 /// Prepare the IR for the scop detection.
 ///
 class CodePreparation : public FunctionPass {
-    CodePreparation(const CodePreparation &) = delete;
-    const CodePreparation &operator=(const CodePreparation &) = delete;
+  CodePreparation(const CodePreparation &) = delete;
+  const CodePreparation &operator=(const CodePreparation &) = delete;
 
-    LoopInfo *LI;
-    ScalarEvolution *SE;
+  LoopInfo *LI;
+  ScalarEvolution *SE;
 
-    void clear();
+  void clear();
 
 public:
-    static char ID;
+  static char ID;
 
-    explicit CodePreparation() : FunctionPass(ID) {}
-    ~CodePreparation();
+  explicit CodePreparation() : FunctionPass(ID) {}
+  ~CodePreparation();
 
-    /// @name FunctionPass interface.
-    //@{
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
-    void releaseMemory() override;
-    bool runOnFunction(Function &F) override;
-    void print(raw_ostream &OS, const Module *) const override;
-    //@}
+  /// @name FunctionPass interface.
+  //@{
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void releaseMemory() override;
+  bool runOnFunction(Function &F) override;
+  void print(raw_ostream &OS, const Module *) const override;
+  //@}
 };
 } // namespace
 
 PreservedAnalyses CodePreparationPass::run(Function &F,
-        FunctionAnalysisManager &FAM) {
+                                           FunctionAnalysisManager &FAM) {
 
-    // Find first non-alloca instruction. Every basic block has a non-alloca
-    // instruction, as every well formed basic block has a terminator.
-    auto &EntryBlock = F.getEntryBlock();
-    BasicBlock::iterator I = EntryBlock.begin();
-    while (isa<AllocaInst>(I))
-        ++I;
+  // Find first non-alloca instruction. Every basic block has a non-alloca
+  // instruction, as every well formed basic block has a terminator.
+  auto &EntryBlock = F.getEntryBlock();
+  BasicBlock::iterator I = EntryBlock.begin();
+  while (isa<AllocaInst>(I))
+    ++I;
 
-    auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
-    auto &LI = FAM.getResult<LoopAnalysis>(F);
+  auto &DT = FAM.getResult<DominatorTreeAnalysis>(F);
+  auto &LI = FAM.getResult<LoopAnalysis>(F);
 
-    // splitBlock updates DT, LI and RI.
-    splitEntryBlockForAlloca(&EntryBlock, &DT, &LI, nullptr);
+  // splitBlock updates DT, LI and RI.
+  splitEntryBlockForAlloca(&EntryBlock, &DT, &LI, nullptr);
 
-    PreservedAnalyses PA;
-    PA.preserve<DominatorTreeAnalysis>();
-    PA.preserve<LoopAnalysis>();
-    return PA;
+  PreservedAnalyses PA;
+  PA.preserve<DominatorTreeAnalysis>();
+  PA.preserve<LoopAnalysis>();
+  return PA;
 }
 
 void CodePreparation::clear() {}
 
-CodePreparation::~CodePreparation() {
-    clear();
-}
+CodePreparation::~CodePreparation() { clear(); }
 
 void CodePreparation::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.addRequired<LoopInfoWrapperPass>();
-    AU.addRequired<ScalarEvolutionWrapperPass>();
+  AU.addRequired<LoopInfoWrapperPass>();
+  AU.addRequired<ScalarEvolutionWrapperPass>();
 
-    AU.addPreserved<LoopInfoWrapperPass>();
-    AU.addPreserved<RegionInfoPass>();
-    AU.addPreserved<DominatorTreeWrapperPass>();
-    AU.addPreserved<DominanceFrontierWrapperPass>();
+  AU.addPreserved<LoopInfoWrapperPass>();
+  AU.addPreserved<RegionInfoPass>();
+  AU.addPreserved<DominatorTreeWrapperPass>();
+  AU.addPreserved<DominanceFrontierWrapperPass>();
 }
 
 bool CodePreparation::runOnFunction(Function &F) {
-    if (skipFunction(F))
-        return false;
+  if (skipFunction(F))
+    return false;
 
-    LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-    SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
+  LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
+  SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
 
-    splitEntryBlockForAlloca(&F.getEntryBlock(), this);
+  splitEntryBlockForAlloca(&F.getEntryBlock(), this);
 
-    return true;
+  return true;
 }
 
-void CodePreparation::releaseMemory() {
-    clear();
-}
+void CodePreparation::releaseMemory() { clear(); }
 
 void CodePreparation::print(raw_ostream &OS, const Module *) const {}
 
 char CodePreparation::ID = 0;
 char &polly::CodePreparationID = CodePreparation::ID;
 
-Pass *polly::createCodePreparationPass() {
-    return new CodePreparation();
-}
+Pass *polly::createCodePreparationPass() { return new CodePreparation(); }
 
 INITIALIZE_PASS_BEGIN(CodePreparation, "polly-prepare",
                       "Polly - Prepare code for polly", false, false)

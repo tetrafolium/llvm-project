@@ -28,37 +28,37 @@ using __sanitizer::uptr;
 extern "C" {
 // This function should be called at the very beginning of the process,
 // before any instrumented code is executed and before any call to malloc.
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_init();
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_preinit();
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_version_mismatch_check_v1();
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_init();
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_preinit();
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_version_mismatch_check_v1();
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void __memprof_record_access(void const volatile *addr);
+SANITIZER_INTERFACE_ATTRIBUTE
+void __memprof_record_access(void const volatile *addr);
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void __memprof_record_access_range(void const volatile *addr, uptr size);
+SANITIZER_INTERFACE_ATTRIBUTE
+void __memprof_record_access_range(void const volatile *addr, uptr size);
 
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_print_accumulated_stats();
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_print_accumulated_stats();
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    const char *__memprof_default_options();
+SANITIZER_INTERFACE_ATTRIBUTE
+const char *__memprof_default_options();
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    extern uptr __memprof_shadow_memory_dynamic_address;
+SANITIZER_INTERFACE_ATTRIBUTE
+extern uptr __memprof_shadow_memory_dynamic_address;
 
-    SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE extern char
+SANITIZER_INTERFACE_ATTRIBUTE SANITIZER_WEAK_ATTRIBUTE extern char
     __memprof_profile_filename[1];
-    SANITIZER_INTERFACE_ATTRIBUTE int __memprof_profile_dump();
+SANITIZER_INTERFACE_ATTRIBUTE int __memprof_profile_dump();
 
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_load(uptr p);
-    SANITIZER_INTERFACE_ATTRIBUTE void __memprof_store(uptr p);
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_load(uptr p);
+SANITIZER_INTERFACE_ATTRIBUTE void __memprof_store(uptr p);
 
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void *__memprof_memcpy(void *dst, const void *src, uptr size);
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void *__memprof_memset(void *s, int c, uptr n);
-    SANITIZER_INTERFACE_ATTRIBUTE
-    void *__memprof_memmove(void *dest, const void *src, uptr n);
+SANITIZER_INTERFACE_ATTRIBUTE
+void *__memprof_memcpy(void *dst, const void *src, uptr size);
+SANITIZER_INTERFACE_ATTRIBUTE
+void *__memprof_memset(void *s, int c, uptr n);
+SANITIZER_INTERFACE_ATTRIBUTE
+void *__memprof_memmove(void *dest, const void *src, uptr n);
 } // extern "C"
 
 #endif // MEMPROF_INTERFACE_INTERNAL_H

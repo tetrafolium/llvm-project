@@ -22,24 +22,23 @@ namespace ast_matchers {
 
 /// Gtest's comparison operations.
 enum class GtestCmp {
-    Eq,
-    Ne,
-    Ge,
-    Gt,
-    Le,
-    Lt,
+  Eq,
+  Ne,
+  Ge,
+  Gt,
+  Le,
+  Lt,
 };
 
 /// Matcher for gtest's ASSERT_... macros.
 internal::BindableMatcher<Stmt> gtestAssert(GtestCmp Cmp, StatementMatcher Left,
-        StatementMatcher Right);
+                                            StatementMatcher Right);
 
 /// Matcher for gtest's EXPECT_... macros.
 internal::BindableMatcher<Stmt> gtestExpect(GtestCmp Cmp, StatementMatcher Left,
-        StatementMatcher Right);
+                                            StatementMatcher Right);
 
 } // namespace ast_matchers
 } // namespace clang
 
 #endif // LLVM_CLANG_ASTMATCHERS_GTESTMATCHERS_H
-

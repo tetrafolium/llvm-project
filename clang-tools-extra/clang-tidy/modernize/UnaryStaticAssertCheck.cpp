@@ -17,23 +17,23 @@ namespace tidy {
 namespace modernize {
 
 void UnaryStaticAssertCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(staticAssertDecl().bind("static_assert"), this);
+  Finder->addMatcher(staticAssertDecl().bind("static_assert"), this);
 }
 
 void UnaryStaticAssertCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedDecl =
-        Result.Nodes.getNodeAs<StaticAssertDecl>("static_assert");
-    const StringLiteral *AssertMessage = MatchedDecl->getMessage();
+  const auto *MatchedDecl =
+      Result.Nodes.getNodeAs<StaticAssertDecl>("static_assert");
+  const StringLiteral *AssertMessage = MatchedDecl->getMessage();
 
-    SourceLocation Loc = MatchedDecl->getLocation();
+  SourceLocation Loc = MatchedDecl->getLocation();
 
-    if (!AssertMessage || AssertMessage->getLength() ||
-            AssertMessage->getBeginLoc().isMacroID() || Loc.isMacroID())
-        return;
+  if (!AssertMessage || AssertMessage->getLength() ||
+      AssertMessage->getBeginLoc().isMacroID() || Loc.isMacroID())
+    return;
 
-    diag(Loc,
-         "use unary 'static_assert' when the string literal is an empty string")
-            << FixItHint::CreateRemoval(AssertMessage->getSourceRange());
+  diag(Loc,
+       "use unary 'static_assert' when the string literal is an empty string")
+      << FixItHint::CreateRemoval(AssertMessage->getSourceRange());
 }
 
 } // namespace modernize

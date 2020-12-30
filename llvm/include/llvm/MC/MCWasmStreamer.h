@@ -22,56 +22,56 @@ class MCInst;
 
 class MCWasmStreamer : public MCObjectStreamer {
 public:
-    MCWasmStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
-                   std::unique_ptr<MCObjectWriter> OW,
-                   std::unique_ptr<MCCodeEmitter> Emitter)
-        : MCObjectStreamer(Context, std::move(TAB), std::move(OW),
-                           std::move(Emitter)),
-          SeenIdent(false) {}
+  MCWasmStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
+                 std::unique_ptr<MCObjectWriter> OW,
+                 std::unique_ptr<MCCodeEmitter> Emitter)
+      : MCObjectStreamer(Context, std::move(TAB), std::move(OW),
+                         std::move(Emitter)),
+        SeenIdent(false) {}
 
-    ~MCWasmStreamer() override;
+  ~MCWasmStreamer() override;
 
-    /// state management
-    void reset() override {
-        SeenIdent = false;
-        MCObjectStreamer::reset();
-    }
+  /// state management
+  void reset() override {
+    SeenIdent = false;
+    MCObjectStreamer::reset();
+  }
 
-    /// \name MCStreamer Interface
-    /// @{
+  /// \name MCStreamer Interface
+  /// @{
 
-    void changeSection(MCSection *Section, const MCExpr *Subsection) override;
-    void emitAssemblerFlag(MCAssemblerFlag Flag) override;
-    void emitThumbFunc(MCSymbol *Func) override;
-    void emitWeakReference(MCSymbol *Alias, const MCSymbol *Symbol) override;
-    bool emitSymbolAttribute(MCSymbol *Symbol, MCSymbolAttr Attribute) override;
-    void emitSymbolDesc(MCSymbol *Symbol, unsigned DescValue) override;
-    void emitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                          unsigned ByteAlignment) override;
+  void changeSection(MCSection *Section, const MCExpr *Subsection) override;
+  void emitAssemblerFlag(MCAssemblerFlag Flag) override;
+  void emitThumbFunc(MCSymbol *Func) override;
+  void emitWeakReference(MCSymbol *Alias, const MCSymbol *Symbol) override;
+  bool emitSymbolAttribute(MCSymbol *Symbol, MCSymbolAttr Attribute) override;
+  void emitSymbolDesc(MCSymbol *Symbol, unsigned DescValue) override;
+  void emitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
+                        unsigned ByteAlignment) override;
 
-    void emitELFSize(MCSymbol *Symbol, const MCExpr *Value) override;
+  void emitELFSize(MCSymbol *Symbol, const MCExpr *Value) override;
 
-    void emitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                               unsigned ByteAlignment) override;
+  void emitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
+                             unsigned ByteAlignment) override;
 
-    void emitZerofill(MCSection *Section, MCSymbol *Symbol = nullptr,
-                      uint64_t Size = 0, unsigned ByteAlignment = 0,
-                      SMLoc Loc = SMLoc()) override;
-    void emitTBSSSymbol(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
-                        unsigned ByteAlignment = 0) override;
+  void emitZerofill(MCSection *Section, MCSymbol *Symbol = nullptr,
+                    uint64_t Size = 0, unsigned ByteAlignment = 0,
+                    SMLoc Loc = SMLoc()) override;
+  void emitTBSSSymbol(MCSection *Section, MCSymbol *Symbol, uint64_t Size,
+                      unsigned ByteAlignment = 0) override;
 
-    void emitIdent(StringRef IdentString) override;
+  void emitIdent(StringRef IdentString) override;
 
-    void finishImpl() override;
+  void finishImpl() override;
 
 private:
-    void emitInstToFragment(const MCInst &Inst, const MCSubtargetInfo &) override;
-    void emitInstToData(const MCInst &Inst, const MCSubtargetInfo &) override;
+  void emitInstToFragment(const MCInst &Inst, const MCSubtargetInfo &) override;
+  void emitInstToData(const MCInst &Inst, const MCSubtargetInfo &) override;
 
-    /// Merge the content of the fragment \p EF into the fragment \p DF.
-    void mergeFragment(MCDataFragment *, MCDataFragment *);
+  /// Merge the content of the fragment \p EF into the fragment \p DF.
+  void mergeFragment(MCDataFragment *, MCDataFragment *);
 
-    bool SeenIdent;
+  bool SeenIdent;
 };
 
 } // end namespace llvm

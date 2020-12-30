@@ -14,17 +14,17 @@
 namespace lldb_private {
 
 class HostInfoAndroid : public HostInfoLinux {
-    friend class HostInfoBase;
+  friend class HostInfoBase;
 
 public:
-    static FileSpec GetDefaultShell();
-    static FileSpec ResolveLibraryPath(const std::string &path,
-                                       const ArchSpec &arch);
+  static FileSpec GetDefaultShell();
+  static FileSpec ResolveLibraryPath(const std::string &path,
+                                     const ArchSpec &arch);
 
 protected:
-    static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
-            ArchSpec &arch_64);
-    static bool ComputeTempFileBaseDirectory(FileSpec &file_spec);
+  static void ComputeHostArchitectureSupport(ArchSpec &arch_32,
+                                             ArchSpec &arch_64);
+  static bool ComputeTempFileBaseDirectory(FileSpec &file_spec);
 };
 
 } // end of namespace lldb_private

@@ -12,20 +12,20 @@
 #include <stdlib.h>
 
 static void aborting_fatal_error_handler(void *, const std::string &reason,
-        bool) {
-    // Write the result out to stderr avoiding errs() because raw_ostreams can
-    // call report_fatal_error.
-    fprintf(stderr, "LIBCLANG FATAL ERROR: %s\n", reason.c_str());
-    ::abort();
+                                         bool) {
+  // Write the result out to stderr avoiding errs() because raw_ostreams can
+  // call report_fatal_error.
+  fprintf(stderr, "LIBCLANG FATAL ERROR: %s\n", reason.c_str());
+  ::abort();
 }
 
 extern "C" {
-    void clang_install_aborting_llvm_fatal_error_handler(void) {
-        llvm::remove_fatal_error_handler();
-        llvm::install_fatal_error_handler(aborting_fatal_error_handler, nullptr);
-    }
+void clang_install_aborting_llvm_fatal_error_handler(void) {
+  llvm::remove_fatal_error_handler();
+  llvm::install_fatal_error_handler(aborting_fatal_error_handler, nullptr);
+}
 
-    void clang_uninstall_llvm_fatal_error_handler(void) {
-        llvm::remove_fatal_error_handler();
-    }
+void clang_uninstall_llvm_fatal_error_handler(void) {
+  llvm::remove_fatal_error_handler();
+}
 }

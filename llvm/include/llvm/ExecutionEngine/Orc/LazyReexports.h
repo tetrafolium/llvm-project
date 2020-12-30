@@ -37,103 +37,101 @@ namespace orc {
 /// function.
 class LazyCallThroughManager {
 public:
-    using NotifyResolvedFunction =
-        unique_function<Error(JITTargetAddress ResolvedAddr)>;
+  using NotifyResolvedFunction =
+      unique_function<Error(JITTargetAddress ResolvedAddr)>;
 
-    LazyCallThroughManager(ExecutionSession &ES,
-                           JITTargetAddress ErrorHandlerAddr, TrampolinePool *TP);
+  LazyCallThroughManager(ExecutionSession &ES,
+                         JITTargetAddress ErrorHandlerAddr, TrampolinePool *TP);
 
-    // Return a free call-through trampoline and bind it to look up and call
-    // through to the given symbol.
-    Expected<JITTargetAddress>
-    getCallThroughTrampoline(JITDylib &SourceJD, SymbolStringPtr SymbolName,
-                             NotifyResolvedFunction NotifyResolved);
+  // Return a free call-through trampoline and bind it to look up and call
+  // through to the given symbol.
+  Expected<JITTargetAddress>
+  getCallThroughTrampoline(JITDylib &SourceJD, SymbolStringPtr SymbolName,
+                           NotifyResolvedFunction NotifyResolved);
 
-    void resolveTrampolineLandingAddress(
-        JITTargetAddress TrampolineAddr,
-        TrampolinePool::NotifyLandingResolvedFunction NotifyLandingResolved);
+  void resolveTrampolineLandingAddress(
+      JITTargetAddress TrampolineAddr,
+      TrampolinePool::NotifyLandingResolvedFunction NotifyLandingResolved);
 
-    virtual ~LazyCallThroughManager() = default;
+  virtual ~LazyCallThroughManager() = default;
 
 protected:
-    using NotifyLandingResolvedFunction =
-        TrampolinePool::NotifyLandingResolvedFunction;
+  using NotifyLandingResolvedFunction =
+      TrampolinePool::NotifyLandingResolvedFunction;
 
-    struct ReexportsEntry {
-        JITDylib *SourceJD;
-        SymbolStringPtr SymbolName;
-    };
+  struct ReexportsEntry {
+    JITDylib *SourceJD;
+    SymbolStringPtr SymbolName;
+  };
 
-    JITTargetAddress reportCallThroughError(Error Err);
-    Expected<ReexportsEntry> findReexport(JITTargetAddress TrampolineAddr);
-    Error notifyResolved(JITTargetAddress TrampolineAddr,
-                         JITTargetAddress ResolvedAddr);
-    void setTrampolinePool(TrampolinePool &TP) {
-        this->TP = &TP;
-    }
+  JITTargetAddress reportCallThroughError(Error Err);
+  Expected<ReexportsEntry> findReexport(JITTargetAddress TrampolineAddr);
+  Error notifyResolved(JITTargetAddress TrampolineAddr,
+                       JITTargetAddress ResolvedAddr);
+  void setTrampolinePool(TrampolinePool &TP) { this->TP = &TP; }
 
 private:
-    using ReexportsMap = std::map<JITTargetAddress, ReexportsEntry>;
+  using ReexportsMap = std::map<JITTargetAddress, ReexportsEntry>;
 
-    using NotifiersMap = std::map<JITTargetAddress, NotifyResolvedFunction>;
+  using NotifiersMap = std::map<JITTargetAddress, NotifyResolvedFunction>;
 
-    std::mutex LCTMMutex;
-    ExecutionSession &ES;
-    JITTargetAddress ErrorHandlerAddr;
-    TrampolinePool *TP = nullptr;
-    ReexportsMap Reexports;
-    NotifiersMap Notifiers;
+  std::mutex LCTMMutex;
+  ExecutionSession &ES;
+  JITTargetAddress ErrorHandlerAddr;
+  TrampolinePool *TP = nullptr;
+  ReexportsMap Reexports;
+  NotifiersMap Notifiers;
 };
 
 /// A lazy call-through manager that builds trampolines in the current process.
 class LocalLazyCallThroughManager : public LazyCallThroughManager {
 private:
-    using NotifyTargetResolved = unique_function<void(JITTargetAddress)>;
+  using NotifyTargetResolved = unique_function<void(JITTargetAddress)>;
 
-    LocalLazyCallThroughManager(ExecutionSession &ES,
-                                JITTargetAddress ErrorHandlerAddr)
-        : LazyCallThroughManager(ES, ErrorHandlerAddr, nullptr) {}
+  LocalLazyCallThroughManager(ExecutionSession &ES,
+                              JITTargetAddress ErrorHandlerAddr)
+      : LazyCallThroughManager(ES, ErrorHandlerAddr, nullptr) {}
 
-    template <typename ORCABI> Error init() {
-        auto TP = LocalTrampolinePool<ORCABI>::Create(
-                      [this](JITTargetAddress TrampolineAddr,
-                             TrampolinePool::NotifyLandingResolvedFunction
-        NotifyLandingResolved) {
-            resolveTrampolineLandingAddress(TrampolineAddr,
-                                            std::move(NotifyLandingResolved));
+  template <typename ORCABI> Error init() {
+    auto TP = LocalTrampolinePool<ORCABI>::Create(
+        [this](JITTargetAddress TrampolineAddr,
+               TrampolinePool::NotifyLandingResolvedFunction
+                   NotifyLandingResolved) {
+          resolveTrampolineLandingAddress(TrampolineAddr,
+                                          std::move(NotifyLandingResolved));
         });
 
-        if (!TP)
-            return TP.takeError();
+    if (!TP)
+      return TP.takeError();
 
-        this->TP = std::move(*TP);
-        setTrampolinePool(*this->TP);
-        return Error::success();
-    }
+    this->TP = std::move(*TP);
+    setTrampolinePool(*this->TP);
+    return Error::success();
+  }
 
-    std::unique_ptr<TrampolinePool> TP;
+  std::unique_ptr<TrampolinePool> TP;
 
 public:
-    /// Create a LocalLazyCallThroughManager using the given ABI. See
-    /// createLocalLazyCallThroughManager.
-    template <typename ORCABI>
-    static Expected<std::unique_ptr<LocalLazyCallThroughManager>>
-    Create(ExecutionSession &ES, JITTargetAddress ErrorHandlerAddr) {
-        auto LLCTM = std::unique_ptr<LocalLazyCallThroughManager>(
-                         new LocalLazyCallThroughManager(ES, ErrorHandlerAddr));
+  /// Create a LocalLazyCallThroughManager using the given ABI. See
+  /// createLocalLazyCallThroughManager.
+  template <typename ORCABI>
+  static Expected<std::unique_ptr<LocalLazyCallThroughManager>>
+  Create(ExecutionSession &ES, JITTargetAddress ErrorHandlerAddr) {
+    auto LLCTM = std::unique_ptr<LocalLazyCallThroughManager>(
+        new LocalLazyCallThroughManager(ES, ErrorHandlerAddr));
 
-        if (auto Err = LLCTM->init<ORCABI>())
-            return std::move(Err);
+    if (auto Err = LLCTM->init<ORCABI>())
+      return std::move(Err);
 
-        return std::move(LLCTM);
-    }
+    return std::move(LLCTM);
+  }
 };
 
 /// Create a LocalLazyCallThroughManager from the given triple and execution
 /// session.
 Expected<std::unique_ptr<LazyCallThroughManager>>
-        createLocalLazyCallThroughManager(const Triple &T, ExecutionSession &ES,
-                JITTargetAddress ErrorHandlerAddr);
+createLocalLazyCallThroughManager(const Triple &T, ExecutionSession &ES,
+                                  JITTargetAddress ErrorHandlerAddr);
 
 /// A materialization unit that builds lazy re-exports. These are callable
 /// entry points that call through to the given symbols.
@@ -142,24 +140,24 @@ Expected<std::unique_ptr<LazyCallThroughManager>>
 /// the same as calling the re-exported symbol.
 class LazyReexportsMaterializationUnit : public MaterializationUnit {
 public:
-    LazyReexportsMaterializationUnit(LazyCallThroughManager &LCTManager,
-                                     IndirectStubsManager &ISManager,
-                                     JITDylib &SourceJD,
-                                     SymbolAliasMap CallableAliases,
-                                     ImplSymbolMap *SrcJDLoc);
+  LazyReexportsMaterializationUnit(LazyCallThroughManager &LCTManager,
+                                   IndirectStubsManager &ISManager,
+                                   JITDylib &SourceJD,
+                                   SymbolAliasMap CallableAliases,
+                                   ImplSymbolMap *SrcJDLoc);
 
-    StringRef getName() const override;
+  StringRef getName() const override;
 
 private:
-    void materialize(std::unique_ptr<MaterializationResponsibility> R) override;
-    void discard(const JITDylib &JD, const SymbolStringPtr &Name) override;
-    static SymbolFlagsMap extractFlags(const SymbolAliasMap &Aliases);
+  void materialize(std::unique_ptr<MaterializationResponsibility> R) override;
+  void discard(const JITDylib &JD, const SymbolStringPtr &Name) override;
+  static SymbolFlagsMap extractFlags(const SymbolAliasMap &Aliases);
 
-    LazyCallThroughManager &LCTManager;
-    IndirectStubsManager &ISManager;
-    JITDylib &SourceJD;
-    SymbolAliasMap CallableAliases;
-    ImplSymbolMap *AliaseeTable;
+  LazyCallThroughManager &LCTManager;
+  IndirectStubsManager &ISManager;
+  JITDylib &SourceJD;
+  SymbolAliasMap CallableAliases;
+  ImplSymbolMap *AliaseeTable;
 };
 
 /// Define lazy-reexports based on the given SymbolAliasMap. Each lazy re-export
@@ -170,8 +168,8 @@ lazyReexports(LazyCallThroughManager &LCTManager,
               IndirectStubsManager &ISManager, JITDylib &SourceJD,
               SymbolAliasMap CallableAliases,
               ImplSymbolMap *SrcJDLoc = nullptr) {
-    return std::make_unique<LazyReexportsMaterializationUnit>(
-               LCTManager, ISManager, SourceJD, std::move(CallableAliases), SrcJDLoc);
+  return std::make_unique<LazyReexportsMaterializationUnit>(
+      LCTManager, ISManager, SourceJD, std::move(CallableAliases), SrcJDLoc);
 }
 
 } // End namespace orc

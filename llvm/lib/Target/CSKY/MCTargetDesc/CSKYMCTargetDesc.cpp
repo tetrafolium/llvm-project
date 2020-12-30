@@ -31,32 +31,32 @@ using namespace llvm;
 static MCAsmInfo *createCSKYMCAsmInfo(const MCRegisterInfo &MRI,
                                       const Triple &TT,
                                       const MCTargetOptions &Options) {
-    MCAsmInfo *MAI = new CSKYMCAsmInfo(TT);
+  MCAsmInfo *MAI = new CSKYMCAsmInfo(TT);
 
-    // Initial state of the frame pointer is SP.
-    unsigned Reg = MRI.getDwarfRegNum(CSKY::R14, true);
-    MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, Reg, 0);
-    MAI->addInitialFrameState(Inst);
-    return MAI;
+  // Initial state of the frame pointer is SP.
+  unsigned Reg = MRI.getDwarfRegNum(CSKY::R14, true);
+  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, Reg, 0);
+  MAI->addInitialFrameState(Inst);
+  return MAI;
 }
 
 static MCInstrInfo *createCSKYMCInstrInfo() {
-    MCInstrInfo *Info = new MCInstrInfo();
-    InitCSKYMCInstrInfo(Info);
-    return Info;
+  MCInstrInfo *Info = new MCInstrInfo();
+  InitCSKYMCInstrInfo(Info);
+  return Info;
 }
 
 static MCRegisterInfo *createCSKYMCRegisterInfo(const Triple &TT) {
-    MCRegisterInfo *Info = new MCRegisterInfo();
-    InitCSKYMCRegisterInfo(Info, CSKY::R15);
-    return Info;
+  MCRegisterInfo *Info = new MCRegisterInfo();
+  InitCSKYMCRegisterInfo(Info, CSKY::R15);
+  return Info;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeCSKYTargetMC() {
-    auto &CSKYTarget = getTheCSKYTarget();
-    TargetRegistry::RegisterMCAsmBackend(CSKYTarget, createCSKYAsmBackend);
-    TargetRegistry::RegisterMCAsmInfo(CSKYTarget, createCSKYMCAsmInfo);
-    TargetRegistry::RegisterMCInstrInfo(CSKYTarget, createCSKYMCInstrInfo);
-    TargetRegistry::RegisterMCRegInfo(CSKYTarget, createCSKYMCRegisterInfo);
-    TargetRegistry::RegisterMCCodeEmitter(CSKYTarget, createCSKYMCCodeEmitter);
+  auto &CSKYTarget = getTheCSKYTarget();
+  TargetRegistry::RegisterMCAsmBackend(CSKYTarget, createCSKYAsmBackend);
+  TargetRegistry::RegisterMCAsmInfo(CSKYTarget, createCSKYMCAsmInfo);
+  TargetRegistry::RegisterMCInstrInfo(CSKYTarget, createCSKYMCInstrInfo);
+  TargetRegistry::RegisterMCRegInfo(CSKYTarget, createCSKYMCRegisterInfo);
+  TargetRegistry::RegisterMCCodeEmitter(CSKYTarget, createCSKYMCCodeEmitter);
 }

@@ -9,16 +9,14 @@
 
 /* Return the (elementwise) minimum of "multi1" and "multi2".
  */
-__isl_give MULTI(BASE) *FN(MULTI(BASE),min)(__isl_take MULTI(BASE) *multi1,
-        __isl_take MULTI(BASE) *multi2)
-{
-    return FN(MULTI(BASE),bin_op)(multi1, multi2, &FN(EL,min));
+__isl_give MULTI(BASE) * FN(MULTI(BASE), min)(__isl_take MULTI(BASE) * multi1,
+                                              __isl_take MULTI(BASE) * multi2) {
+  return FN(MULTI(BASE), bin_op)(multi1, multi2, &FN(EL, min));
 }
 
 /* Return the (elementwise) maximum of "multi1" and "multi2".
  */
-__isl_give MULTI(BASE) *FN(MULTI(BASE),max)(__isl_take MULTI(BASE) *multi1,
-        __isl_take MULTI(BASE) *multi2)
-{
-    return FN(MULTI(BASE),bin_op)(multi1, multi2, &FN(EL,max));
+__isl_give MULTI(BASE) * FN(MULTI(BASE), max)(__isl_take MULTI(BASE) * multi1,
+                                              __isl_take MULTI(BASE) * multi2) {
+  return FN(MULTI(BASE), bin_op)(multi1, multi2, &FN(EL, max));
 }

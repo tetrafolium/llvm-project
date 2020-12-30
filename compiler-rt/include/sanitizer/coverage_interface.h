@@ -29,7 +29,7 @@ void __sanitizer_cov_reset(void);
 void __sanitizer_dump_coverage(const uintptr_t *pcs, uintptr_t len);
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
 
-#endif  // SANITIZER_COVERAG_INTERFACE_H
+#endif // SANITIZER_COVERAG_INTERFACE_H

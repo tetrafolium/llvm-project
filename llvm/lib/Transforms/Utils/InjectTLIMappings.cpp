@@ -42,112 +42,112 @@ STATISTIC(NumCompUsedAdded,
 /// lanes.
 static void addVariantDeclaration(CallInst &CI, const unsigned VF,
                                   const StringRef VFName) {
-    Module *M = CI.getModule();
+  Module *M = CI.getModule();
 
-    // Add function declaration.
-    Type *RetTy = ToVectorTy(CI.getType(), VF);
-    SmallVector<Type *, 4> Tys;
-    for (Value *ArgOperand : CI.arg_operands())
-        Tys.push_back(ToVectorTy(ArgOperand->getType(), VF));
-    assert(!CI.getFunctionType()->isVarArg() &&
-           "VarArg functions are not supported.");
-    FunctionType *FTy = FunctionType::get(RetTy, Tys, /*isVarArg=*/false);
-    Function *VectorF =
-        Function::Create(FTy, Function::ExternalLinkage, VFName, M);
-    VectorF->copyAttributesFrom(CI.getCalledFunction());
-    ++NumVFDeclAdded;
-    LLVM_DEBUG(dbgs() << DEBUG_TYPE << ": Added to the module: `" << VFName
-               << "` of type " << *(VectorF->getType()) << "\n");
+  // Add function declaration.
+  Type *RetTy = ToVectorTy(CI.getType(), VF);
+  SmallVector<Type *, 4> Tys;
+  for (Value *ArgOperand : CI.arg_operands())
+    Tys.push_back(ToVectorTy(ArgOperand->getType(), VF));
+  assert(!CI.getFunctionType()->isVarArg() &&
+         "VarArg functions are not supported.");
+  FunctionType *FTy = FunctionType::get(RetTy, Tys, /*isVarArg=*/false);
+  Function *VectorF =
+      Function::Create(FTy, Function::ExternalLinkage, VFName, M);
+  VectorF->copyAttributesFrom(CI.getCalledFunction());
+  ++NumVFDeclAdded;
+  LLVM_DEBUG(dbgs() << DEBUG_TYPE << ": Added to the module: `" << VFName
+                    << "` of type " << *(VectorF->getType()) << "\n");
 
-    // Make function declaration (without a body) "sticky" in the IR by
-    // listing it in the @llvm.compiler.used intrinsic.
-    assert(!VectorF->size() && "VFABI attribute requires `@llvm.compiler.used` "
-           "only on declarations.");
-    appendToCompilerUsed(*M, {VectorF});
-    LLVM_DEBUG(dbgs() << DEBUG_TYPE << ": Adding `" << VFName
-               << "` to `@llvm.compiler.used`.\n");
-    ++NumCompUsedAdded;
+  // Make function declaration (without a body) "sticky" in the IR by
+  // listing it in the @llvm.compiler.used intrinsic.
+  assert(!VectorF->size() && "VFABI attribute requires `@llvm.compiler.used` "
+                             "only on declarations.");
+  appendToCompilerUsed(*M, {VectorF});
+  LLVM_DEBUG(dbgs() << DEBUG_TYPE << ": Adding `" << VFName
+                    << "` to `@llvm.compiler.used`.\n");
+  ++NumCompUsedAdded;
 }
 
 static void addMappingsFromTLI(const TargetLibraryInfo &TLI, CallInst &CI) {
-    // This is needed to make sure we don't query the TLI for calls to
-    // bitcast of function pointers, like `%call = call i32 (i32*, ...)
-    // bitcast (i32 (...)* @goo to i32 (i32*, ...)*)(i32* nonnull %i)`,
-    // as such calls make the `isFunctionVectorizable` raise an
-    // exception.
-    if (CI.isNoBuiltin() || !CI.getCalledFunction())
-        return;
+  // This is needed to make sure we don't query the TLI for calls to
+  // bitcast of function pointers, like `%call = call i32 (i32*, ...)
+  // bitcast (i32 (...)* @goo to i32 (i32*, ...)*)(i32* nonnull %i)`,
+  // as such calls make the `isFunctionVectorizable` raise an
+  // exception.
+  if (CI.isNoBuiltin() || !CI.getCalledFunction())
+    return;
 
-    StringRef ScalarName = CI.getCalledFunction()->getName();
+  StringRef ScalarName = CI.getCalledFunction()->getName();
 
-    // Nothing to be done if the TLI thinks the function is not
-    // vectorizable.
-    if (!TLI.isFunctionVectorizable(ScalarName))
-        return;
-    SmallVector<std::string, 8> Mappings;
-    VFABI::getVectorVariantNames(CI, Mappings);
-    Module *M = CI.getModule();
-    const SetVector<StringRef> OriginalSetOfMappings(Mappings.begin(),
-            Mappings.end());
-    //  All VFs in the TLI are powers of 2.
-    for (unsigned VF = 2, WidestVF = TLI.getWidestVF(ScalarName); VF <= WidestVF;
-            VF *= 2) {
-        const std::string TLIName =
-            std::string(TLI.getVectorizedFunction(ScalarName, VF));
-        if (!TLIName.empty()) {
-            std::string MangledName = VFABI::mangleTLIVectorName(
-                                          TLIName, ScalarName, CI.getNumArgOperands(), VF);
-            if (!OriginalSetOfMappings.count(MangledName)) {
-                Mappings.push_back(MangledName);
-                ++NumCallInjected;
-            }
-            Function *VariantF = M->getFunction(TLIName);
-            if (!VariantF)
-                addVariantDeclaration(CI, VF, TLIName);
-        }
+  // Nothing to be done if the TLI thinks the function is not
+  // vectorizable.
+  if (!TLI.isFunctionVectorizable(ScalarName))
+    return;
+  SmallVector<std::string, 8> Mappings;
+  VFABI::getVectorVariantNames(CI, Mappings);
+  Module *M = CI.getModule();
+  const SetVector<StringRef> OriginalSetOfMappings(Mappings.begin(),
+                                                   Mappings.end());
+  //  All VFs in the TLI are powers of 2.
+  for (unsigned VF = 2, WidestVF = TLI.getWidestVF(ScalarName); VF <= WidestVF;
+       VF *= 2) {
+    const std::string TLIName =
+        std::string(TLI.getVectorizedFunction(ScalarName, VF));
+    if (!TLIName.empty()) {
+      std::string MangledName = VFABI::mangleTLIVectorName(
+          TLIName, ScalarName, CI.getNumArgOperands(), VF);
+      if (!OriginalSetOfMappings.count(MangledName)) {
+        Mappings.push_back(MangledName);
+        ++NumCallInjected;
+      }
+      Function *VariantF = M->getFunction(TLIName);
+      if (!VariantF)
+        addVariantDeclaration(CI, VF, TLIName);
     }
+  }
 
-    VFABI::setVectorVariantNames(&CI, Mappings);
+  VFABI::setVectorVariantNames(&CI, Mappings);
 }
 
 static bool runImpl(const TargetLibraryInfo &TLI, Function &F) {
-    for (auto &I : instructions(F))
-        if (auto CI = dyn_cast<CallInst>(&I))
-            addMappingsFromTLI(TLI, *CI);
-    // Even if the pass adds IR attributes, the analyses are preserved.
-    return false;
+  for (auto &I : instructions(F))
+    if (auto CI = dyn_cast<CallInst>(&I))
+      addMappingsFromTLI(TLI, *CI);
+  // Even if the pass adds IR attributes, the analyses are preserved.
+  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // New pass manager implementation.
 ////////////////////////////////////////////////////////////////////////////////
 PreservedAnalyses InjectTLIMappings::run(Function &F,
-        FunctionAnalysisManager &AM) {
-    const TargetLibraryInfo &TLI = AM.getResult<TargetLibraryAnalysis>(F);
-    runImpl(TLI, F);
-    // Even if the pass adds IR attributes, the analyses are preserved.
-    return PreservedAnalyses::all();
+                                         FunctionAnalysisManager &AM) {
+  const TargetLibraryInfo &TLI = AM.getResult<TargetLibraryAnalysis>(F);
+  runImpl(TLI, F);
+  // Even if the pass adds IR attributes, the analyses are preserved.
+  return PreservedAnalyses::all();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Legacy PM Implementation.
 ////////////////////////////////////////////////////////////////////////////////
 bool InjectTLIMappingsLegacy::runOnFunction(Function &F) {
-    const TargetLibraryInfo &TLI =
-        getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
-    return runImpl(TLI, F);
+  const TargetLibraryInfo &TLI =
+      getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(F);
+  return runImpl(TLI, F);
 }
 
 void InjectTLIMappingsLegacy::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.setPreservesCFG();
-    AU.addRequired<TargetLibraryInfoWrapperPass>();
-    AU.addPreserved<TargetLibraryInfoWrapperPass>();
-    AU.addPreserved<ScalarEvolutionWrapperPass>();
-    AU.addPreserved<AAResultsWrapperPass>();
-    AU.addPreserved<LoopAccessLegacyAnalysis>();
-    AU.addPreserved<DemandedBitsWrapperPass>();
-    AU.addPreserved<OptimizationRemarkEmitterWrapperPass>();
-    AU.addPreserved<GlobalsAAWrapperPass>();
+  AU.setPreservesCFG();
+  AU.addRequired<TargetLibraryInfoWrapperPass>();
+  AU.addPreserved<TargetLibraryInfoWrapperPass>();
+  AU.addPreserved<ScalarEvolutionWrapperPass>();
+  AU.addPreserved<AAResultsWrapperPass>();
+  AU.addPreserved<LoopAccessLegacyAnalysis>();
+  AU.addPreserved<DemandedBitsWrapperPass>();
+  AU.addPreserved<OptimizationRemarkEmitterWrapperPass>();
+  AU.addPreserved<GlobalsAAWrapperPass>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,5 +162,5 @@ INITIALIZE_PASS_END(InjectTLIMappingsLegacy, DEBUG_TYPE, "Inject TLI Mappings",
                     false, false)
 
 FunctionPass *llvm::createInjectTLIMappingsLegacyPass() {
-    return new InjectTLIMappingsLegacy();
+  return new InjectTLIMappingsLegacy();
 }

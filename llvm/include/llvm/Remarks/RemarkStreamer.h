@@ -40,36 +40,32 @@
 namespace llvm {
 namespace remarks {
 class RemarkStreamer final {
-    /// The regex used to filter remarks based on the passes that emit them.
-    Optional<Regex> PassFilter;
-    /// The object used to serialize the remarks to a specific format.
-    std::unique_ptr<remarks::RemarkSerializer> RemarkSerializer;
-    /// The filename that the remark diagnostics are emitted to.
-    const Optional<std::string> Filename;
+  /// The regex used to filter remarks based on the passes that emit them.
+  Optional<Regex> PassFilter;
+  /// The object used to serialize the remarks to a specific format.
+  std::unique_ptr<remarks::RemarkSerializer> RemarkSerializer;
+  /// The filename that the remark diagnostics are emitted to.
+  const Optional<std::string> Filename;
 
 public:
-    RemarkStreamer(std::unique_ptr<remarks::RemarkSerializer> RemarkSerializer,
-                   Optional<StringRef> Filename = None);
+  RemarkStreamer(std::unique_ptr<remarks::RemarkSerializer> RemarkSerializer,
+                 Optional<StringRef> Filename = None);
 
-    /// Return the filename that the remark diagnostics are emitted to.
-    Optional<StringRef> getFilename() const {
-        return Filename ? Optional<StringRef>(*Filename) : None;
-    }
-    /// Return stream that the remark diagnostics are emitted to.
-    raw_ostream &getStream() {
-        return RemarkSerializer->OS;
-    }
-    /// Return the serializer used for this stream.
-    remarks::RemarkSerializer &getSerializer() {
-        return *RemarkSerializer;
-    }
-    /// Set a pass filter based on a regex \p Filter.
-    /// Returns an error if the regex is invalid.
-    Error setFilter(StringRef Filter);
-    /// Check wether the string matches the filter.
-    bool matchesFilter(StringRef Str);
-    /// Check if the remarks also need to have associated metadata in a section.
-    bool needsSection() const;
+  /// Return the filename that the remark diagnostics are emitted to.
+  Optional<StringRef> getFilename() const {
+    return Filename ? Optional<StringRef>(*Filename) : None;
+  }
+  /// Return stream that the remark diagnostics are emitted to.
+  raw_ostream &getStream() { return RemarkSerializer->OS; }
+  /// Return the serializer used for this stream.
+  remarks::RemarkSerializer &getSerializer() { return *RemarkSerializer; }
+  /// Set a pass filter based on a regex \p Filter.
+  /// Returns an error if the regex is invalid.
+  Error setFilter(StringRef Filter);
+  /// Check wether the string matches the filter.
+  bool matchesFilter(StringRef Str);
+  /// Check if the remarks also need to have associated metadata in a section.
+  bool needsSection() const;
 };
 } // end namespace remarks
 } // end namespace llvm

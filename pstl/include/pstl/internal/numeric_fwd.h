@@ -84,13 +84,13 @@ __pattern_transform_reduce(_ExecutionPolicy&&, _ForwardIterator, _ForwardIterato
 
 template <class _ForwardIterator, class _OutputIterator, class _UnaryOperation, class _Tp, class _BinaryOperation>
 std::pair<_OutputIterator, _Tp> __brick_transform_scan(_ForwardIterator, _ForwardIterator, _OutputIterator,
-        _UnaryOperation, _Tp, _BinaryOperation,
-        /*Inclusive*/ std::false_type) noexcept;
+                                                       _UnaryOperation, _Tp, _BinaryOperation,
+                                                       /*Inclusive*/ std::false_type) noexcept;
 
 template <class _ForwardIterator, class _OutputIterator, class _UnaryOperation, class _Tp, class _BinaryOperation>
 std::pair<_OutputIterator, _Tp> __brick_transform_scan(_ForwardIterator, _ForwardIterator, _OutputIterator,
-        _UnaryOperation, _Tp, _BinaryOperation,
-        /*Inclusive*/ std::true_type) noexcept;
+                                                       _UnaryOperation, _Tp, _BinaryOperation,
+                                                       /*Inclusive*/ std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator, class _OutputIterator, class _UnaryOperation, class _Tp,
           class _BinaryOperation, class _Inclusive, class _IsVector>
@@ -117,11 +117,11 @@ __pattern_transform_scan(_ExecutionPolicy&&, _RandomAccessIterator, _RandomAcces
 
 template <class _ForwardIterator, class _OutputIterator, class _BinaryOperation>
 _OutputIterator __brick_adjacent_difference(_ForwardIterator, _ForwardIterator, _OutputIterator, _BinaryOperation,
-        /*is_vector*/ std::false_type) noexcept;
+                                            /*is_vector*/ std::false_type) noexcept;
 
 template <class _ForwardIterator, class _OutputIterator, class _BinaryOperation>
 _OutputIterator __brick_adjacent_difference(_ForwardIterator, _ForwardIterator, _OutputIterator, _BinaryOperation,
-        /*is_vector*/ std::true_type) noexcept;
+                                            /*is_vector*/ std::true_type) noexcept;
 
 template <class _ExecutionPolicy, class _ForwardIterator, class _OutputIterator, class _BinaryOperation,
           class _IsVector>

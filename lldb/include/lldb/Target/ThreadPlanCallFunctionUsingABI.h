@@ -21,33 +21,33 @@
 namespace lldb_private {
 
 class ThreadPlanCallFunctionUsingABI : public ThreadPlanCallFunction {
-    // Create a thread plan to call a function at the address passed in the
-    // "function" argument, this function is executed using register manipulation
-    // instead of JIT. Class derives from ThreadPlanCallFunction and differs by
-    // calling a alternative
-    // ABI interface ABI::PrepareTrivialCall() which provides more detailed
-    // information.
+  // Create a thread plan to call a function at the address passed in the
+  // "function" argument, this function is executed using register manipulation
+  // instead of JIT. Class derives from ThreadPlanCallFunction and differs by
+  // calling a alternative
+  // ABI interface ABI::PrepareTrivialCall() which provides more detailed
+  // information.
 public:
-    ThreadPlanCallFunctionUsingABI(Thread &thread,
-                                   const Address &function_address,
-                                   llvm::Type &function_prototype,
-                                   llvm::Type &return_type,
-                                   llvm::ArrayRef<ABI::CallArgument> args,
-                                   const EvaluateExpressionOptions &options);
+  ThreadPlanCallFunctionUsingABI(Thread &thread,
+                                 const Address &function_address,
+                                 llvm::Type &function_prototype,
+                                 llvm::Type &return_type,
+                                 llvm::ArrayRef<ABI::CallArgument> args,
+                                 const EvaluateExpressionOptions &options);
 
-    ~ThreadPlanCallFunctionUsingABI() override;
+  ~ThreadPlanCallFunctionUsingABI() override;
 
-    void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
+  void GetDescription(Stream *s, lldb::DescriptionLevel level) override;
 
 protected:
-    void SetReturnValue() override;
+  void SetReturnValue() override;
 
 private:
-    llvm::Type &m_return_type;
-    ThreadPlanCallFunctionUsingABI(const ThreadPlanCallFunctionUsingABI &) =
-        delete;
-    const ThreadPlanCallFunctionUsingABI &
-    operator=(const ThreadPlanCallFunctionUsingABI &) = delete;
+  llvm::Type &m_return_type;
+  ThreadPlanCallFunctionUsingABI(const ThreadPlanCallFunctionUsingABI &) =
+      delete;
+  const ThreadPlanCallFunctionUsingABI &
+  operator=(const ThreadPlanCallFunctionUsingABI &) = delete;
 };
 
 } // namespace lldb_private

@@ -37,7 +37,7 @@ int getLastArgIntValue(const llvm::opt::ArgList &Args,
 inline int getLastArgIntValue(const llvm::opt::ArgList &Args,
                               llvm::opt::OptSpecifier Id, int Default,
                               DiagnosticsEngine &Diags, unsigned Base = 0) {
-    return getLastArgIntValue(Args, Id, Default, &Diags, Base);
+  return getLastArgIntValue(Args, Id, Default, &Diags, Base);
 }
 
 uint64_t getLastArgUInt64Value(const llvm::opt::ArgList &Args,
@@ -50,7 +50,7 @@ inline uint64_t getLastArgUInt64Value(const llvm::opt::ArgList &Args,
                                       uint64_t Default,
                                       DiagnosticsEngine &Diags,
                                       unsigned Base = 0) {
-    return getLastArgUInt64Value(Args, Id, Default, &Diags, Base);
+  return getLastArgUInt64Value(Args, Id, Default, &Diags, Base);
 }
 
 } // namespace clang

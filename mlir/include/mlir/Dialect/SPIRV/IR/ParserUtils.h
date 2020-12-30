@@ -26,17 +26,17 @@ template <typename EnumClass, typename ParserType>
 static ParseResult
 parseEnumKeywordAttr(EnumClass &value, ParserType &parser,
                      StringRef attrName = spirv::attributeName<EnumClass>()) {
-    StringRef keyword;
-    SmallVector<NamedAttribute, 1> attr;
-    auto loc = parser.getCurrentLocation();
-    if (parser.parseKeyword(&keyword))
-        return failure();
-    if (Optional<EnumClass> attr = spirv::symbolizeEnum<EnumClass>(keyword)) {
-        value = attr.getValue();
-        return success();
-    }
-    return parser.emitError(loc, "invalid ")
-           << attrName << " attribute specification: " << keyword;
+  StringRef keyword;
+  SmallVector<NamedAttribute, 1> attr;
+  auto loc = parser.getCurrentLocation();
+  if (parser.parseKeyword(&keyword))
+    return failure();
+  if (Optional<EnumClass> attr = spirv::symbolizeEnum<EnumClass>(keyword)) {
+    value = attr.getValue();
+    return success();
+  }
+  return parser.emitError(loc, "invalid ")
+         << attrName << " attribute specification: " << keyword;
 }
 
 } // namespace mlir

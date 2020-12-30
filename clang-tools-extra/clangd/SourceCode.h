@@ -73,7 +73,7 @@ Position sourceLocToPosition(const SourceManager &SM, SourceLocation Loc);
 /// Return the file location, corresponding to \p P. Note that one should take
 /// care to avoid comparing the result with expansion locations.
 llvm::Expected<SourceLocation> sourceLocationInMainFile(const SourceManager &SM,
-        Position P);
+                                                        Position P);
 
 /// Returns true iff \p Loc is inside the main file. This function handles
 /// file & macro locations. For macro locations, returns iff the macro is being
@@ -110,8 +110,8 @@ bool isSpelledInSource(SourceLocation Loc, const SourceManager &SM);
 /// function can be viewed as a way to normalize the ranges used in the clang
 /// AST so that they are comparable with ranges coming from the user input.
 llvm::Optional<SourceRange> toHalfOpenFileRange(const SourceManager &Mgr,
-        const LangOptions &LangOpts,
-        SourceRange R);
+                                                const LangOptions &LangOpts,
+                                                SourceRange R);
 
 /// Returns true iff all of the following conditions hold:
 ///   - start and end locations are valid,
@@ -133,7 +133,7 @@ Range halfOpenToRange(const SourceManager &SM, CharSourceRange R);
 // The offset must be in range [0, Code.size()].
 // Prefer to use SourceManager if one is available.
 std::pair<size_t, size_t> offsetToClangLineColumn(llvm::StringRef Code,
-        size_t Offset);
+                                                  size_t Offset);
 
 /// From "a::b::c", return {"a::b::", "c"}. Scope is empty if there's no
 /// qualifier.
@@ -143,7 +143,7 @@ splitQualifiedName(llvm::StringRef QName);
 TextEdit replacementToEdit(StringRef Code, const tooling::Replacement &R);
 
 std::vector<TextEdit> replacementsToEdits(StringRef Code,
-        const tooling::Replacements &Repls);
+                                          const tooling::Replacements &Repls);
 
 TextEdit toTextEdit(const FixItHint &FixIt, const SourceManager &M,
                     const LangOptions &L);
@@ -159,7 +159,7 @@ TextEdit toTextEdit(const FixItHint &FixIt, const SourceManager &M,
 /// component that generate it, so that paths are normalized as much as
 /// possible.
 llvm::Optional<std::string> getCanonicalPath(const FileEntry *F,
-        const SourceManager &SourceMgr);
+                                             const SourceManager &SourceMgr);
 
 /// Choose the clang-format style we should apply to a certain file.
 /// This will usually use FS to look for .clang-format directories.
@@ -167,8 +167,8 @@ llvm::Optional<std::string> getCanonicalPath(const FileEntry *F,
 /// This uses format::DefaultFormatStyle and format::DefaultFallbackStyle,
 /// though the latter may have been overridden in main()!
 format::FormatStyle getFormatStyleForFile(llvm::StringRef File,
-        llvm::StringRef Content,
-        const ThreadsafeFS &TFS);
+                                          llvm::StringRef Content,
+                                          const ThreadsafeFS &TFS);
 
 /// Cleanup and format the given replacements.
 llvm::Expected<tooling::Replacements>
@@ -178,22 +178,22 @@ cleanupAndFormat(StringRef Code, const tooling::Replacements &Replaces,
 /// A set of edits generated for a single file. Can verify whether it is safe to
 /// apply these edits to a code block.
 struct Edit {
-    tooling::Replacements Replacements;
-    std::string InitialCode;
+  tooling::Replacements Replacements;
+  std::string InitialCode;
 
-    Edit() = default;
+  Edit() = default;
 
-    Edit(llvm::StringRef Code, tooling::Replacements Reps)
-        : Replacements(std::move(Reps)), InitialCode(Code) {}
+  Edit(llvm::StringRef Code, tooling::Replacements Reps)
+      : Replacements(std::move(Reps)), InitialCode(Code) {}
 
-    /// Returns the file contents after changes are applied.
-    llvm::Expected<std::string> apply() const;
+  /// Returns the file contents after changes are applied.
+  llvm::Expected<std::string> apply() const;
 
-    /// Represents Replacements as TextEdits that are available for use in LSP.
-    std::vector<TextEdit> asTextEdits() const;
+  /// Represents Replacements as TextEdits that are available for use in LSP.
+  std::vector<TextEdit> asTextEdits() const;
 
-    /// Checks whether the Replacements are applicable to given Code.
-    bool canApplyTo(llvm::StringRef Code) const;
+  /// Checks whether the Replacements are applicable to given Code.
+  bool canApplyTo(llvm::StringRef Code) const;
 };
 /// A mapping from absolute file path (the one used for accessing the underlying
 /// VFS) to edits.
@@ -205,12 +205,12 @@ llvm::Error reformatEdit(Edit &E, const format::FormatStyle &Style);
 
 /// Collects identifiers with counts in the source code.
 llvm::StringMap<unsigned> collectIdentifiers(llvm::StringRef Content,
-        const format::FormatStyle &Style);
+                                             const format::FormatStyle &Style);
 
 /// Collects all ranges of the given identifier in the source code.
 std::vector<Range> collectIdentifierRanges(llvm::StringRef Identifier,
-        llvm::StringRef Content,
-        const LangOptions &LangOpts);
+                                           llvm::StringRef Content,
+                                           const LangOptions &LangOpts);
 
 /// Collects words from the source code.
 /// Unlike collectIdentifiers:
@@ -223,29 +223,29 @@ llvm::StringSet<> collectWords(llvm::StringRef Content);
 // Could be a "real" token that's "live" in the AST, a spelled token consumed by
 // the preprocessor, or part of a spelled token (e.g. word in a comment).
 struct SpelledWord {
-    // (Spelling) location of the start of the word.
-    SourceLocation Location;
-    // The range of the word itself, excluding any quotes.
-    // This is a subrange of the file buffer.
-    llvm::StringRef Text;
-    // Whether this word is likely to refer to an identifier. True if:
-    // - the word is a spelled identifier token
-    // - Text is identifier-like (e.g. "foo_bar")
-    // - Text is surrounded by backticks (e.g. Foo in "// returns `Foo`")
-    bool LikelyIdentifier = false;
-    // Set if the word is contained in a token spelled in the file.
-    // (This should always be true, but comments aren't retained by TokenBuffer).
-    const syntax::Token *PartOfSpelledToken = nullptr;
-    // Set if the word is exactly a token spelled in the file.
-    const syntax::Token *SpelledToken = nullptr;
-    // Set if the word is a token spelled in the file, and that token survives
-    // preprocessing to emit an expanded token spelled the same way.
-    const syntax::Token *ExpandedToken = nullptr;
+  // (Spelling) location of the start of the word.
+  SourceLocation Location;
+  // The range of the word itself, excluding any quotes.
+  // This is a subrange of the file buffer.
+  llvm::StringRef Text;
+  // Whether this word is likely to refer to an identifier. True if:
+  // - the word is a spelled identifier token
+  // - Text is identifier-like (e.g. "foo_bar")
+  // - Text is surrounded by backticks (e.g. Foo in "// returns `Foo`")
+  bool LikelyIdentifier = false;
+  // Set if the word is contained in a token spelled in the file.
+  // (This should always be true, but comments aren't retained by TokenBuffer).
+  const syntax::Token *PartOfSpelledToken = nullptr;
+  // Set if the word is exactly a token spelled in the file.
+  const syntax::Token *SpelledToken = nullptr;
+  // Set if the word is a token spelled in the file, and that token survives
+  // preprocessing to emit an expanded token spelled the same way.
+  const syntax::Token *ExpandedToken = nullptr;
 
-    // Find the unique word that contains SpelledLoc or starts/ends there.
-    static llvm::Optional<SpelledWord> touching(SourceLocation SpelledLoc,
-            const syntax::TokenBuffer &TB,
-            const LangOptions &LangOpts);
+  // Find the unique word that contains SpelledLoc or starts/ends there.
+  static llvm::Optional<SpelledWord> touching(SourceLocation SpelledLoc,
+                                              const syntax::TokenBuffer &TB,
+                                              const LangOptions &LangOpts);
 };
 
 /// Return true if the \p TokenName is in the list of reversed keywords of the
@@ -273,17 +273,17 @@ bool isKeyword(llvm::StringRef TokenName, const LangOptions &LangOpts);
 ///
 /// visibleNamespaces are {"foo::", "", "a::", "b::", "foo::b::"}, not "a::b::".
 std::vector<std::string> visibleNamespaces(llvm::StringRef Code,
-        const LangOptions &LangOpts);
+                                           const LangOptions &LangOpts);
 
 /// Represents locations that can accept a definition.
 struct EligibleRegion {
-    /// Namespace that owns all of the EligiblePoints, e.g.
-    /// namespace a{ namespace b {^ void foo();^} }
-    /// It will be “a::b” for both carrot locations.
-    std::string EnclosingNamespace;
-    /// Offsets into the code marking eligible points to insert a function
-    /// definition.
-    std::vector<Position> EligiblePoints;
+  /// Namespace that owns all of the EligiblePoints, e.g.
+  /// namespace a{ namespace b {^ void foo();^} }
+  /// It will be “a::b” for both carrot locations.
+  std::string EnclosingNamespace;
+  /// Offsets into the code marking eligible points to insert a function
+  /// definition.
+  std::vector<Position> EligiblePoints;
 };
 
 /// Returns most eligible region to insert a definition for \p
@@ -297,17 +297,17 @@ EligibleRegion getEligiblePoints(llvm::StringRef Code,
                                  const LangOptions &LangOpts);
 
 struct DefinedMacro {
-    llvm::StringRef Name;
-    const MacroInfo *Info;
-    /// Location of the identifier that names the macro.
-    /// Unlike Info->Location, this translates preamble-patch locations to
-    /// main-file locations.
-    SourceLocation NameLoc;
+  llvm::StringRef Name;
+  const MacroInfo *Info;
+  /// Location of the identifier that names the macro.
+  /// Unlike Info->Location, this translates preamble-patch locations to
+  /// main-file locations.
+  SourceLocation NameLoc;
 };
 /// Gets the macro referenced by \p SpelledTok. It must be a spelled token
 /// aligned to the beginning of an identifier.
 llvm::Optional<DefinedMacro> locateMacroAt(const syntax::Token &SpelledTok,
-        Preprocessor &PP);
+                                           Preprocessor &PP);
 
 /// Infers whether this is a header from the FileName and LangOpts (if
 /// presents).

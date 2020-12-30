@@ -16,37 +16,37 @@
 #include <string>
 
 enum class CrashReason {
-    eInvalidCrashReason,
+  eInvalidCrashReason,
 
-    // SIGSEGV crash reasons.
-    eInvalidAddress,
-    ePrivilegedAddress,
-    eBoundViolation,
+  // SIGSEGV crash reasons.
+  eInvalidAddress,
+  ePrivilegedAddress,
+  eBoundViolation,
 
-    // SIGILL crash reasons.
-    eIllegalOpcode,
-    eIllegalOperand,
-    eIllegalAddressingMode,
-    eIllegalTrap,
-    ePrivilegedOpcode,
-    ePrivilegedRegister,
-    eCoprocessorError,
-    eInternalStackError,
+  // SIGILL crash reasons.
+  eIllegalOpcode,
+  eIllegalOperand,
+  eIllegalAddressingMode,
+  eIllegalTrap,
+  ePrivilegedOpcode,
+  ePrivilegedRegister,
+  eCoprocessorError,
+  eInternalStackError,
 
-    // SIGBUS crash reasons,
-    eIllegalAlignment,
-    eIllegalAddress,
-    eHardwareError,
+  // SIGBUS crash reasons,
+  eIllegalAlignment,
+  eIllegalAddress,
+  eHardwareError,
 
-    // SIGFPE crash reasons,
-    eIntegerDivideByZero,
-    eIntegerOverflow,
-    eFloatDivideByZero,
-    eFloatOverflow,
-    eFloatUnderflow,
-    eFloatInexactResult,
-    eFloatInvalidOperation,
-    eFloatSubscriptRange
+  // SIGFPE crash reasons,
+  eIntegerDivideByZero,
+  eIntegerOverflow,
+  eFloatDivideByZero,
+  eFloatOverflow,
+  eFloatUnderflow,
+  eFloatInexactResult,
+  eFloatInvalidOperation,
+  eFloatSubscriptRange
 };
 
 std::string GetCrashReasonString(CrashReason reason, lldb::addr_t fault_addr);

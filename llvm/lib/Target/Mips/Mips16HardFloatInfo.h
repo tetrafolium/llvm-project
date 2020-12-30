@@ -31,19 +31,19 @@ enum FPReturnVariant { FRet, DRet, CFRet, CDRet, NoFPRet };
 enum FPParamVariant { FSig, FFSig, FDSig, DSig, DDSig, DFSig, NoSig };
 
 struct FuncSignature {
-    FPParamVariant ParamSig;
-    FPReturnVariant RetSig;
+  FPParamVariant ParamSig;
+  FPReturnVariant RetSig;
 };
 
 struct FuncNameSignature {
-    const char *Name;
-    FuncSignature Signature;
+  const char *Name;
+  FuncSignature Signature;
 };
 
 extern const FuncNameSignature PredefinedFuncs[];
 
 extern FuncSignature const *findFuncSignature(const char *name);
-}
-}
+} // namespace Mips16HardFloatInfo
+} // namespace llvm
 
 #endif

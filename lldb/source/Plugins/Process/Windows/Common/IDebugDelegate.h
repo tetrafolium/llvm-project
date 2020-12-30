@@ -24,20 +24,20 @@ class HostThread;
 // notification of events that happen in a debugged process.
 class IDebugDelegate {
 public:
-    virtual ~IDebugDelegate() {}
+  virtual ~IDebugDelegate() {}
 
-    virtual void OnExitProcess(uint32_t exit_code) = 0;
-    virtual void OnDebuggerConnected(lldb::addr_t image_base) = 0;
-    virtual ExceptionResult OnDebugException(bool first_chance,
-            const ExceptionRecord &record) = 0;
-    virtual void OnCreateThread(const HostThread &thread) = 0;
-    virtual void OnExitThread(lldb::tid_t thread_id, uint32_t exit_code) = 0;
-    virtual void OnLoadDll(const ModuleSpec &module_spec,
-                           lldb::addr_t module_addr) = 0;
-    virtual void OnUnloadDll(lldb::addr_t module_addr) = 0;
-    virtual void OnDebugString(const std::string &string) = 0;
-    virtual void OnDebuggerError(const Status &error, uint32_t type) = 0;
+  virtual void OnExitProcess(uint32_t exit_code) = 0;
+  virtual void OnDebuggerConnected(lldb::addr_t image_base) = 0;
+  virtual ExceptionResult OnDebugException(bool first_chance,
+                                           const ExceptionRecord &record) = 0;
+  virtual void OnCreateThread(const HostThread &thread) = 0;
+  virtual void OnExitThread(lldb::tid_t thread_id, uint32_t exit_code) = 0;
+  virtual void OnLoadDll(const ModuleSpec &module_spec,
+                         lldb::addr_t module_addr) = 0;
+  virtual void OnUnloadDll(lldb::addr_t module_addr) = 0;
+  virtual void OnDebugString(const std::string &string) = 0;
+  virtual void OnDebuggerError(const Status &error, uint32_t type) = 0;
 };
-}
+} // namespace lldb_private
 
 #endif

@@ -27,7 +27,7 @@ bool LibStdcppWStringSummaryProvider(
 bool LibStdcppSmartPointerSummaryProvider(
     ValueObject &valobj, Stream &stream,
     const TypeSummaryOptions
-    &options); // libstdc++ std::shared_ptr<> and std::weak_ptr<>
+        &options); // libstdc++ std::shared_ptr<> and std::weak_ptr<>
 
 bool LibStdcppUniquePointerSummaryProvider(
     ValueObject &valobj, Stream &stream,
@@ -35,7 +35,7 @@ bool LibStdcppUniquePointerSummaryProvider(
 
 SyntheticChildrenFrontEnd *
 LibstdcppMapIteratorSyntheticFrontEndCreator(CXXSyntheticChildren *,
-        lldb::ValueObjectSP);
+                                             lldb::ValueObjectSP);
 
 SyntheticChildrenFrontEnd *
 LibStdcppTupleSyntheticFrontEndCreator(CXXSyntheticChildren *,
@@ -43,15 +43,15 @@ LibStdcppTupleSyntheticFrontEndCreator(CXXSyntheticChildren *,
 
 SyntheticChildrenFrontEnd *
 LibStdcppVectorIteratorSyntheticFrontEndCreator(CXXSyntheticChildren *,
-        lldb::ValueObjectSP);
+                                                lldb::ValueObjectSP);
 
 SyntheticChildrenFrontEnd *
 LibStdcppSharedPtrSyntheticFrontEndCreator(CXXSyntheticChildren *,
-        lldb::ValueObjectSP);
+                                           lldb::ValueObjectSP);
 
 SyntheticChildrenFrontEnd *
 LibStdcppUniquePtrSyntheticFrontEndCreator(CXXSyntheticChildren *,
-        lldb::ValueObjectSP);
+                                           lldb::ValueObjectSP);
 
 } // namespace formatters
 } // namespace lldb_private

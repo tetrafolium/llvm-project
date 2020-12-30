@@ -23,20 +23,20 @@ class MCExpr;
 /// Create MCExprs from relocations found in an object file.
 class MCRelocationInfo {
 protected:
-    MCContext &Ctx;
+  MCContext &Ctx;
 
 public:
-    MCRelocationInfo(MCContext &Ctx);
-    MCRelocationInfo(const MCRelocationInfo &) = delete;
-    MCRelocationInfo &operator=(const MCRelocationInfo &) = delete;
-    virtual ~MCRelocationInfo();
+  MCRelocationInfo(MCContext &Ctx);
+  MCRelocationInfo(const MCRelocationInfo &) = delete;
+  MCRelocationInfo &operator=(const MCRelocationInfo &) = delete;
+  virtual ~MCRelocationInfo();
 
-    /// Create an MCExpr for the target-specific \p VariantKind.
-    /// The VariantKinds are defined in llvm-c/Disassembler.h.
-    /// Used by MCExternalSymbolizer.
-    /// \returns If possible, an MCExpr corresponding to VariantKind, else 0.
-    virtual const MCExpr *createExprForCAPIVariantKind(const MCExpr *SubExpr,
-            unsigned VariantKind);
+  /// Create an MCExpr for the target-specific \p VariantKind.
+  /// The VariantKinds are defined in llvm-c/Disassembler.h.
+  /// Used by MCExternalSymbolizer.
+  /// \returns If possible, an MCExpr corresponding to VariantKind, else 0.
+  virtual const MCExpr *createExprForCAPIVariantKind(const MCExpr *SubExpr,
+                                                     unsigned VariantKind);
 };
 
 } // end namespace llvm

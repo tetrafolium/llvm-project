@@ -20,7 +20,7 @@ namespace mlir {
 std::unique_ptr<OperationPass<FuncOp>> createAsyncParallelForPass();
 
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createAsyncParallelForPass(int numWorkerThreads);
+createAsyncParallelForPass(int numWorkerThreads);
 
 std::unique_ptr<OperationPass<FuncOp>> createAsyncRefCountingPass();
 

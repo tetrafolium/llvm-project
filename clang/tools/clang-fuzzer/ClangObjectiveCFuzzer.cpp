@@ -16,13 +16,10 @@
 
 using namespace clang_fuzzer;
 
-extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) {
-    return 0;
-}
+extern "C" int LLVMFuzzerInitialize(int *argc, char ***argv) { return 0; }
 
 extern "C" int LLVMFuzzerTestOneInput(uint8_t *data, size_t size) {
-    std::string s(reinterpret_cast<const char *>(data), size);
-    HandleCXX(s, "./test.m", {"-O2"});
-    return 0;
+  std::string s(reinterpret_cast<const char *>(data), size);
+  HandleCXX(s, "./test.m", {"-O2"});
+  return 0;
 }
-

@@ -17,16 +17,16 @@ namespace tidy {
 namespace performance {
 
 void NoIntToPtrCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(castExpr(hasCastKind(CK_IntegralToPointer),
-                                unless(hasSourceExpression(integerLiteral())))
-                       .bind("x"),
-                       this);
+  Finder->addMatcher(castExpr(hasCastKind(CK_IntegralToPointer),
+                              unless(hasSourceExpression(integerLiteral())))
+                         .bind("x"),
+                     this);
 }
 
 void NoIntToPtrCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedCast = Result.Nodes.getNodeAs<CastExpr>("x");
-    diag(MatchedCast->getBeginLoc(),
-         "integer to pointer cast pessimizes optimization opportunities");
+  const auto *MatchedCast = Result.Nodes.getNodeAs<CastExpr>("x");
+  diag(MatchedCast->getBeginLoc(),
+       "integer to pointer cast pessimizes optimization opportunities");
 }
 
 } // namespace performance

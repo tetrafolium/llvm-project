@@ -28,23 +28,17 @@ struct DTLS;
 namespace __lsan {
 
 class ThreadContext final : public ThreadContextLsanBase {
-public:
-    explicit ThreadContext(int tid);
-    void OnStarted(void *arg) override;
-    uptr tls_begin() {
-        return tls_begin_;
-    }
-    uptr tls_end() {
-        return tls_end_;
-    }
-    DTLS *dtls() {
-        return dtls_;
-    }
+ public:
+  explicit ThreadContext(int tid);
+  void OnStarted(void *arg) override;
+  uptr tls_begin() { return tls_begin_; }
+  uptr tls_end() { return tls_end_; }
+  DTLS *dtls() { return dtls_; }
 
-private:
-    uptr tls_begin_ = 0;
-    uptr tls_end_ = 0;
-    DTLS *dtls_ = nullptr;
+ private:
+  uptr tls_begin_ = 0;
+  uptr tls_end_ = 0;
+  DTLS *dtls_ = nullptr;
 };
 
 void ThreadStart(u32 tid, tid_t os_id,

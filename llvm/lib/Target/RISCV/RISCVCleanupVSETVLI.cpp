@@ -23,111 +23,108 @@ namespace {
 
 class RISCVCleanupVSETVLI : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
-    RISCVCleanupVSETVLI() : MachineFunctionPass(ID) {
-        initializeRISCVCleanupVSETVLIPass(*PassRegistry::getPassRegistry());
-    }
-    bool runOnMachineFunction(MachineFunction &MF) override;
-    bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
+  RISCVCleanupVSETVLI() : MachineFunctionPass(ID) {
+    initializeRISCVCleanupVSETVLIPass(*PassRegistry::getPassRegistry());
+  }
+  bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
 
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::IsSSA);
-    }
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::IsSSA);
+  }
 
-    // This pass modifies the program, but does not modify the CFG
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  // This pass modifies the program, but does not modify the CFG
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    StringRef getPassName() const override {
-        return RISCV_CLEANUP_VSETVLI_NAME;
-    }
+  StringRef getPassName() const override { return RISCV_CLEANUP_VSETVLI_NAME; }
 };
 
 } // end anonymous namespace
 
 char RISCVCleanupVSETVLI::ID = 0;
 
-INITIALIZE_PASS(RISCVCleanupVSETVLI, DEBUG_TYPE,
-                RISCV_CLEANUP_VSETVLI_NAME, false, false)
+INITIALIZE_PASS(RISCVCleanupVSETVLI, DEBUG_TYPE, RISCV_CLEANUP_VSETVLI_NAME,
+                false, false)
 
 bool RISCVCleanupVSETVLI::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
-    bool Changed = false;
-    MachineInstr *PrevVSETVLI = nullptr;
+  bool Changed = false;
+  MachineInstr *PrevVSETVLI = nullptr;
 
-    for (auto MII = MBB.begin(), MIE = MBB.end(); MII != MIE;) {
-        MachineInstr &MI = *MII++;
+  for (auto MII = MBB.begin(), MIE = MBB.end(); MII != MIE;) {
+    MachineInstr &MI = *MII++;
 
-        if (MI.getOpcode() != RISCV::PseudoVSETVLI) {
-            if (PrevVSETVLI &&
-                    (MI.isCall() || MI.modifiesRegister(RISCV::VL) ||
-                     MI.modifiesRegister(RISCV::VTYPE))) {
-                // Old VL/VTYPE is overwritten.
-                PrevVSETVLI = nullptr;
-            }
-            continue;
-        }
-
-        // If we don't have a previous VSETVLI or the VL output isn't dead, we
-        // can't remove this VSETVLI.
-        if (!PrevVSETVLI || !MI.getOperand(0).isDead()) {
-            PrevVSETVLI = &MI;
-            continue;
-        }
-
-        Register PrevAVLReg = PrevVSETVLI->getOperand(1).getReg();
-        Register AVLReg = MI.getOperand(1).getReg();
-        int64_t PrevVTYPEImm = PrevVSETVLI->getOperand(2).getImm();
-        int64_t VTYPEImm = MI.getOperand(2).getImm();
-
-        // Does this VSETVLI use the same AVL register and VTYPE immediate?
-        if (PrevAVLReg != AVLReg || PrevVTYPEImm != VTYPEImm) {
-            PrevVSETVLI = &MI;
-            continue;
-        }
-
-        // If the AVLReg is X0 we need to look at the output VL of both VSETVLIs.
-        if (AVLReg == RISCV::X0) {
-            Register PrevOutVL = PrevVSETVLI->getOperand(0).getReg();
-            Register OutVL = MI.getOperand(0).getReg();
-            // We can't remove if the previous VSETVLI left VL unchanged and the
-            // current instruction is setting it to VLMAX. Without knowing the VL
-            // before the previous instruction we don't know if this is a change.
-            if (PrevOutVL == RISCV::X0 && OutVL != RISCV::X0) {
-                PrevVSETVLI = &MI;
-                continue;
-            }
-        }
-
-        // This VSETVLI is redundant, remove it.
-        MI.eraseFromParent();
-        Changed = true;
+    if (MI.getOpcode() != RISCV::PseudoVSETVLI) {
+      if (PrevVSETVLI && (MI.isCall() || MI.modifiesRegister(RISCV::VL) ||
+                          MI.modifiesRegister(RISCV::VTYPE))) {
+        // Old VL/VTYPE is overwritten.
+        PrevVSETVLI = nullptr;
+      }
+      continue;
     }
 
-    return Changed;
+    // If we don't have a previous VSETVLI or the VL output isn't dead, we
+    // can't remove this VSETVLI.
+    if (!PrevVSETVLI || !MI.getOperand(0).isDead()) {
+      PrevVSETVLI = &MI;
+      continue;
+    }
+
+    Register PrevAVLReg = PrevVSETVLI->getOperand(1).getReg();
+    Register AVLReg = MI.getOperand(1).getReg();
+    int64_t PrevVTYPEImm = PrevVSETVLI->getOperand(2).getImm();
+    int64_t VTYPEImm = MI.getOperand(2).getImm();
+
+    // Does this VSETVLI use the same AVL register and VTYPE immediate?
+    if (PrevAVLReg != AVLReg || PrevVTYPEImm != VTYPEImm) {
+      PrevVSETVLI = &MI;
+      continue;
+    }
+
+    // If the AVLReg is X0 we need to look at the output VL of both VSETVLIs.
+    if (AVLReg == RISCV::X0) {
+      Register PrevOutVL = PrevVSETVLI->getOperand(0).getReg();
+      Register OutVL = MI.getOperand(0).getReg();
+      // We can't remove if the previous VSETVLI left VL unchanged and the
+      // current instruction is setting it to VLMAX. Without knowing the VL
+      // before the previous instruction we don't know if this is a change.
+      if (PrevOutVL == RISCV::X0 && OutVL != RISCV::X0) {
+        PrevVSETVLI = &MI;
+        continue;
+      }
+    }
+
+    // This VSETVLI is redundant, remove it.
+    MI.eraseFromParent();
+    Changed = true;
+  }
+
+  return Changed;
 }
 
 bool RISCVCleanupVSETVLI::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    // Skip if the vector extension is not enabled.
-    const RISCVSubtarget &ST = MF.getSubtarget<RISCVSubtarget>();
-    if (!ST.hasStdExtV())
-        return false;
+  // Skip if the vector extension is not enabled.
+  const RISCVSubtarget &ST = MF.getSubtarget<RISCVSubtarget>();
+  if (!ST.hasStdExtV())
+    return false;
 
-    bool Changed = false;
+  bool Changed = false;
 
-    for (MachineBasicBlock &MBB : MF)
-        Changed |= runOnMachineBasicBlock(MBB);
+  for (MachineBasicBlock &MBB : MF)
+    Changed |= runOnMachineBasicBlock(MBB);
 
-    return Changed;
+  return Changed;
 }
 
 /// Returns an instance of the Cleanup VSETVLI pass.
 FunctionPass *llvm::createRISCVCleanupVSETVLIPass() {
-    return new RISCVCleanupVSETVLI();
+  return new RISCVCleanupVSETVLI();
 }

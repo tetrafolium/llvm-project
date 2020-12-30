@@ -30,112 +30,110 @@ namespace repro {
 /// record information for multiple instances of the same source of data.
 class AbstractRecorder {
 protected:
-    AbstractRecorder(const FileSpec &filename, std::error_code &ec)
-        : m_filename(filename.GetFilename().GetStringRef()),
-          m_os(filename.GetPath(), ec, llvm::sys::fs::OF_Text), m_record(true) {}
+  AbstractRecorder(const FileSpec &filename, std::error_code &ec)
+      : m_filename(filename.GetFilename().GetStringRef()),
+        m_os(filename.GetPath(), ec, llvm::sys::fs::OF_Text), m_record(true) {}
 
 public:
-    const FileSpec &GetFilename() {
-        return m_filename;
-    }
+  const FileSpec &GetFilename() { return m_filename; }
 
-    void Stop() {
-        assert(m_record);
-        m_record = false;
-    }
+  void Stop() {
+    assert(m_record);
+    m_record = false;
+  }
 
 private:
-    FileSpec m_filename;
+  FileSpec m_filename;
 
 protected:
-    llvm::raw_fd_ostream m_os;
-    bool m_record;
+  llvm::raw_fd_ostream m_os;
+  bool m_record;
 };
 
 /// Recorder that records its data as text to a file.
 class DataRecorder : public AbstractRecorder {
 public:
-    DataRecorder(const FileSpec &filename, std::error_code &ec)
-        : AbstractRecorder(filename, ec) {}
+  DataRecorder(const FileSpec &filename, std::error_code &ec)
+      : AbstractRecorder(filename, ec) {}
 
-    static llvm::Expected<std::unique_ptr<DataRecorder>>
-            Create(const FileSpec &filename);
+  static llvm::Expected<std::unique_ptr<DataRecorder>>
+  Create(const FileSpec &filename);
 
-    template <typename T> void Record(const T &t, bool newline = false) {
-        if (!m_record)
-            return;
-        m_os << t;
-        if (newline)
-            m_os << '\n';
-        m_os.flush();
-    }
+  template <typename T> void Record(const T &t, bool newline = false) {
+    if (!m_record)
+      return;
+    m_os << t;
+    if (newline)
+      m_os << '\n';
+    m_os.flush();
+  }
 };
 
 /// Recorder that records its data as YAML to a file.
 class YamlRecorder : public AbstractRecorder {
 public:
-    YamlRecorder(const FileSpec &filename, std::error_code &ec)
-        : AbstractRecorder(filename, ec) {}
+  YamlRecorder(const FileSpec &filename, std::error_code &ec)
+      : AbstractRecorder(filename, ec) {}
 
-    static llvm::Expected<std::unique_ptr<YamlRecorder>>
-            Create(const FileSpec &filename);
+  static llvm::Expected<std::unique_ptr<YamlRecorder>>
+  Create(const FileSpec &filename);
 
-    template <typename T> void Record(const T &t) {
-        if (!m_record)
-            return;
-        llvm::yaml::Output yout(m_os);
-        // The YAML traits are defined as non-const because they are used for
-        // serialization and deserialization. The cast is safe because
-        // serialization doesn't modify the object.
-        yout << const_cast<T &>(t);
-        m_os.flush();
-    }
+  template <typename T> void Record(const T &t) {
+    if (!m_record)
+      return;
+    llvm::yaml::Output yout(m_os);
+    // The YAML traits are defined as non-const because they are used for
+    // serialization and deserialization. The cast is safe because
+    // serialization doesn't modify the object.
+    yout << const_cast<T &>(t);
+    m_os.flush();
+  }
 };
 
 class FlushingFileCollector : public llvm::FileCollectorBase {
 public:
-    FlushingFileCollector(llvm::StringRef files_path, llvm::StringRef dirs_path,
-                          std::error_code &ec);
+  FlushingFileCollector(llvm::StringRef files_path, llvm::StringRef dirs_path,
+                        std::error_code &ec);
 
 protected:
-    void addFileImpl(llvm::StringRef file) override;
+  void addFileImpl(llvm::StringRef file) override;
 
-    llvm::vfs::directory_iterator
-    addDirectoryImpl(const llvm::Twine &dir,
-                     llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> vfs,
-                     std::error_code &dir_ec) override;
+  llvm::vfs::directory_iterator
+  addDirectoryImpl(const llvm::Twine &dir,
+                   llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem> vfs,
+                   std::error_code &dir_ec) override;
 
-    llvm::Optional<llvm::raw_fd_ostream> m_files_os;
-    llvm::Optional<llvm::raw_fd_ostream> m_dirs_os;
+  llvm::Optional<llvm::raw_fd_ostream> m_files_os;
+  llvm::Optional<llvm::raw_fd_ostream> m_dirs_os;
 };
 
 class FileProvider : public Provider<FileProvider> {
 public:
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
 
-    FileProvider(const FileSpec &directory) : Provider(directory) {
-        std::error_code ec;
-        m_collector = std::make_shared<FlushingFileCollector>(
-                          directory.CopyByAppendingPathComponent("files.txt").GetPath(),
-                          directory.CopyByAppendingPathComponent("dirs.txt").GetPath(), ec);
-        if (ec)
-            m_collector.reset();
-    }
+  FileProvider(const FileSpec &directory) : Provider(directory) {
+    std::error_code ec;
+    m_collector = std::make_shared<FlushingFileCollector>(
+        directory.CopyByAppendingPathComponent("files.txt").GetPath(),
+        directory.CopyByAppendingPathComponent("dirs.txt").GetPath(), ec);
+    if (ec)
+      m_collector.reset();
+  }
 
-    std::shared_ptr<llvm::FileCollectorBase> GetFileCollector() {
-        return m_collector;
-    }
+  std::shared_ptr<llvm::FileCollectorBase> GetFileCollector() {
+    return m_collector;
+  }
 
-    void RecordInterestingDirectory(const llvm::Twine &dir);
-    void RecordInterestingDirectoryRecursive(const llvm::Twine &dir);
+  void RecordInterestingDirectory(const llvm::Twine &dir);
+  void RecordInterestingDirectoryRecursive(const llvm::Twine &dir);
 
-    static char ID;
+  static char ID;
 
 private:
-    std::shared_ptr<FlushingFileCollector> m_collector;
+  std::shared_ptr<FlushingFileCollector> m_collector;
 };
 
 /// Provider for the LLDB version number.
@@ -144,42 +142,40 @@ private:
 /// version.txt in the reproducer root.
 class VersionProvider : public Provider<VersionProvider> {
 public:
-    VersionProvider(const FileSpec &directory) : Provider(directory) {}
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
-    void SetVersion(std::string version) {
-        assert(m_version.empty());
-        m_version = std::move(version);
-    }
-    void Keep() override;
-    std::string m_version;
-    static char ID;
+  VersionProvider(const FileSpec &directory) : Provider(directory) {}
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
+  void SetVersion(std::string version) {
+    assert(m_version.empty());
+    m_version = std::move(version);
+  }
+  void Keep() override;
+  std::string m_version;
+  static char ID;
 };
 
 /// Abstract provider to storing directory paths.
 template <typename T> class DirectoryProvider : public repro::Provider<T> {
 public:
-    DirectoryProvider(const FileSpec &root) : Provider<T>(root) {}
-    void SetDirectory(std::string directory) {
-        m_directory = std::move(directory);
-    }
-    llvm::StringRef GetDirectory() {
-        return m_directory;
-    }
+  DirectoryProvider(const FileSpec &root) : Provider<T>(root) {}
+  void SetDirectory(std::string directory) {
+    m_directory = std::move(directory);
+  }
+  llvm::StringRef GetDirectory() { return m_directory; }
 
-    void Keep() override {
-        FileSpec file = this->GetRoot().CopyByAppendingPathComponent(T::Info::file);
-        std::error_code ec;
-        llvm::raw_fd_ostream os(file.GetPath(), ec, llvm::sys::fs::OF_Text);
-        if (ec)
-            return;
-        os << m_directory << "\n";
-    }
+  void Keep() override {
+    FileSpec file = this->GetRoot().CopyByAppendingPathComponent(T::Info::file);
+    std::error_code ec;
+    llvm::raw_fd_ostream os(file.GetPath(), ec, llvm::sys::fs::OF_Text);
+    if (ec)
+      return;
+    os << m_directory << "\n";
+  }
 
 protected:
-    std::string m_directory;
+  std::string m_directory;
 };
 
 /// Provider for the current working directory.
@@ -189,18 +185,18 @@ protected:
 class WorkingDirectoryProvider
     : public DirectoryProvider<WorkingDirectoryProvider> {
 public:
-    WorkingDirectoryProvider(const FileSpec &directory)
-        : DirectoryProvider(directory) {
-        llvm::SmallString<128> cwd;
-        if (std::error_code EC = llvm::sys::fs::current_path(cwd))
-            return;
-        SetDirectory(std::string(cwd));
-    }
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
-    static char ID;
+  WorkingDirectoryProvider(const FileSpec &directory)
+      : DirectoryProvider(directory) {
+    llvm::SmallString<128> cwd;
+    if (std::error_code EC = llvm::sys::fs::current_path(cwd))
+      return;
+    SetDirectory(std::string(cwd));
+  }
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
+  static char ID;
 };
 
 /// Provider for the home directory.
@@ -209,56 +205,52 @@ public:
 /// a file named home.txt in the reproducer root.
 class HomeDirectoryProvider : public DirectoryProvider<HomeDirectoryProvider> {
 public:
-    HomeDirectoryProvider(const FileSpec &directory)
-        : DirectoryProvider(directory) {
-        llvm::SmallString<128> home_dir;
-        llvm::sys::path::home_directory(home_dir);
-        SetDirectory(std::string(home_dir));
-    }
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
-    static char ID;
+  HomeDirectoryProvider(const FileSpec &directory)
+      : DirectoryProvider(directory) {
+    llvm::SmallString<128> home_dir;
+    llvm::sys::path::home_directory(home_dir);
+    SetDirectory(std::string(home_dir));
+  }
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
+  static char ID;
 };
 
 /// Provider for mapping UUIDs to symbol and executable files.
 class SymbolFileProvider : public Provider<SymbolFileProvider> {
 public:
-    SymbolFileProvider(const FileSpec &directory)
-        : Provider(directory), m_symbol_files() {}
+  SymbolFileProvider(const FileSpec &directory)
+      : Provider(directory), m_symbol_files() {}
 
-    void AddSymbolFile(const UUID *uuid, const FileSpec &module_path,
-                       const FileSpec &symbol_path);
-    void Keep() override;
+  void AddSymbolFile(const UUID *uuid, const FileSpec &module_path,
+                     const FileSpec &symbol_path);
+  void Keep() override;
 
-    struct Entry {
-        Entry() = default;
-        Entry(std::string uuid) : uuid(std::move(uuid)) {}
-        Entry(std::string uuid, std::string module_path, std::string symbol_path)
-            : uuid(std::move(uuid)), module_path(std::move(module_path)),
-              symbol_path(std::move(symbol_path)) {}
+  struct Entry {
+    Entry() = default;
+    Entry(std::string uuid) : uuid(std::move(uuid)) {}
+    Entry(std::string uuid, std::string module_path, std::string symbol_path)
+        : uuid(std::move(uuid)), module_path(std::move(module_path)),
+          symbol_path(std::move(symbol_path)) {}
 
-        bool operator==(const Entry &rhs) const {
-            return uuid == rhs.uuid;
-        }
-        bool operator<(const Entry &rhs) const {
-            return uuid < rhs.uuid;
-        }
+    bool operator==(const Entry &rhs) const { return uuid == rhs.uuid; }
+    bool operator<(const Entry &rhs) const { return uuid < rhs.uuid; }
 
-        std::string uuid;
-        std::string module_path;
-        std::string symbol_path;
-    };
+    std::string uuid;
+    std::string module_path;
+    std::string symbol_path;
+  };
 
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
-    static char ID;
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
+  static char ID;
 
 private:
-    std::vector<Entry> m_symbol_files;
+  std::vector<Entry> m_symbol_files;
 };
 
 /// The MultiProvider is a provider that hands out recorder which can be used
@@ -271,155 +263,153 @@ private:
 template <typename T, typename V>
 class MultiProvider : public repro::Provider<V> {
 public:
-    MultiProvider(const FileSpec &directory) : Provider<V>(directory) {}
+  MultiProvider(const FileSpec &directory) : Provider<V>(directory) {}
 
-    T *GetNewRecorder() {
-        std::size_t i = m_recorders.size() + 1;
-        std::string filename = (llvm::Twine(V::Info::name) + llvm::Twine("-") +
-                                llvm::Twine(i) + llvm::Twine(".yaml"))
+  T *GetNewRecorder() {
+    std::size_t i = m_recorders.size() + 1;
+    std::string filename = (llvm::Twine(V::Info::name) + llvm::Twine("-") +
+                            llvm::Twine(i) + llvm::Twine(".yaml"))
                                .str();
-        auto recorder_or_error =
-            T::Create(this->GetRoot().CopyByAppendingPathComponent(filename));
-        if (!recorder_or_error) {
-            llvm::consumeError(recorder_or_error.takeError());
-            return nullptr;
-        }
-
-        m_recorders.push_back(std::move(*recorder_or_error));
-        return m_recorders.back().get();
+    auto recorder_or_error =
+        T::Create(this->GetRoot().CopyByAppendingPathComponent(filename));
+    if (!recorder_or_error) {
+      llvm::consumeError(recorder_or_error.takeError());
+      return nullptr;
     }
 
-    void Keep() override {
-        std::vector<std::string> files;
-        for (auto &recorder : m_recorders) {
-            recorder->Stop();
-            files.push_back(recorder->GetFilename().GetPath());
-        }
+    m_recorders.push_back(std::move(*recorder_or_error));
+    return m_recorders.back().get();
+  }
 
-        FileSpec file = this->GetRoot().CopyByAppendingPathComponent(V::Info::file);
-        std::error_code ec;
-        llvm::raw_fd_ostream os(file.GetPath(), ec, llvm::sys::fs::OF_Text);
-        if (ec)
-            return;
-        llvm::yaml::Output yout(os);
-        yout << files;
+  void Keep() override {
+    std::vector<std::string> files;
+    for (auto &recorder : m_recorders) {
+      recorder->Stop();
+      files.push_back(recorder->GetFilename().GetPath());
     }
 
-    void Discard() override {
-        m_recorders.clear();
-    }
+    FileSpec file = this->GetRoot().CopyByAppendingPathComponent(V::Info::file);
+    std::error_code ec;
+    llvm::raw_fd_ostream os(file.GetPath(), ec, llvm::sys::fs::OF_Text);
+    if (ec)
+      return;
+    llvm::yaml::Output yout(os);
+    yout << files;
+  }
+
+  void Discard() override { m_recorders.clear(); }
 
 private:
-    std::vector<std::unique_ptr<T>> m_recorders;
+  std::vector<std::unique_ptr<T>> m_recorders;
 };
 
 class CommandProvider : public MultiProvider<DataRecorder, CommandProvider> {
 public:
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
 
-    CommandProvider(const FileSpec &directory)
-        : MultiProvider<DataRecorder, CommandProvider>(directory) {}
+  CommandProvider(const FileSpec &directory)
+      : MultiProvider<DataRecorder, CommandProvider>(directory) {}
 
-    static char ID;
+  static char ID;
 };
 
 class ProcessInfoRecorder : public AbstractRecorder {
 public:
-    ProcessInfoRecorder(const FileSpec &filename, std::error_code &ec)
-        : AbstractRecorder(filename, ec) {}
+  ProcessInfoRecorder(const FileSpec &filename, std::error_code &ec)
+      : AbstractRecorder(filename, ec) {}
 
-    static llvm::Expected<std::unique_ptr<ProcessInfoRecorder>>
-            Create(const FileSpec &filename);
+  static llvm::Expected<std::unique_ptr<ProcessInfoRecorder>>
+  Create(const FileSpec &filename);
 
-    void Record(const ProcessInstanceInfoList &process_infos);
+  void Record(const ProcessInstanceInfoList &process_infos);
 };
 
 class ProcessInfoProvider : public repro::Provider<ProcessInfoProvider> {
 public:
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
 
-    ProcessInfoProvider(const FileSpec &directory) : Provider(directory) {}
+  ProcessInfoProvider(const FileSpec &directory) : Provider(directory) {}
 
-    ProcessInfoRecorder *GetNewProcessInfoRecorder();
+  ProcessInfoRecorder *GetNewProcessInfoRecorder();
 
-    void Keep() override;
-    void Discard() override;
+  void Keep() override;
+  void Discard() override;
 
-    static char ID;
+  static char ID;
 
 private:
-    std::unique_ptr<llvm::raw_fd_ostream> m_stream_up;
-    std::vector<std::unique_ptr<ProcessInfoRecorder>> m_process_info_recorders;
+  std::unique_ptr<llvm::raw_fd_ostream> m_stream_up;
+  std::vector<std::unique_ptr<ProcessInfoRecorder>> m_process_info_recorders;
 };
 
 /// Loader for data captured with the MultiProvider. It will read the index and
 /// return the path to the files in the index.
 template <typename T> class MultiLoader {
 public:
-    MultiLoader(std::vector<std::string> files) : m_files(std::move(files)) {}
+  MultiLoader(std::vector<std::string> files) : m_files(std::move(files)) {}
 
-    static std::unique_ptr<MultiLoader> Create(Loader *loader) {
-        if (!loader)
-            return {};
+  static std::unique_ptr<MultiLoader> Create(Loader *loader) {
+    if (!loader)
+      return {};
 
-        FileSpec file = loader->GetFile<typename T::Info>();
-        if (!file)
-            return {};
+    FileSpec file = loader->GetFile<typename T::Info>();
+    if (!file)
+      return {};
 
-        auto error_or_file = llvm::MemoryBuffer::getFile(file.GetPath());
-        if (auto err = error_or_file.getError())
-            return {};
+    auto error_or_file = llvm::MemoryBuffer::getFile(file.GetPath());
+    if (auto err = error_or_file.getError())
+      return {};
 
-        std::vector<std::string> files;
-        llvm::yaml::Input yin((*error_or_file)->getBuffer());
-        yin >> files;
+    std::vector<std::string> files;
+    llvm::yaml::Input yin((*error_or_file)->getBuffer());
+    yin >> files;
 
-        if (auto err = yin.error())
-            return {};
+    if (auto err = yin.error())
+      return {};
 
-        for (auto &file : files) {
-            FileSpec absolute_path =
-                loader->GetRoot().CopyByAppendingPathComponent(file);
-            file = absolute_path.GetPath();
-        }
-
-        return std::make_unique<MultiLoader<T>>(std::move(files));
+    for (auto &file : files) {
+      FileSpec absolute_path =
+          loader->GetRoot().CopyByAppendingPathComponent(file);
+      file = absolute_path.GetPath();
     }
 
-    llvm::Optional<std::string> GetNextFile() {
-        if (m_index >= m_files.size())
-            return {};
-        return m_files[m_index++];
-    }
+    return std::make_unique<MultiLoader<T>>(std::move(files));
+  }
+
+  llvm::Optional<std::string> GetNextFile() {
+    if (m_index >= m_files.size())
+      return {};
+    return m_files[m_index++];
+  }
 
 private:
-    std::vector<std::string> m_files;
-    unsigned m_index = 0;
+  std::vector<std::string> m_files;
+  unsigned m_index = 0;
 };
 
 class SymbolFileLoader {
 public:
-    SymbolFileLoader(Loader *loader);
-    std::pair<FileSpec, FileSpec> GetPaths(const UUID *uuid) const;
+  SymbolFileLoader(Loader *loader);
+  std::pair<FileSpec, FileSpec> GetPaths(const UUID *uuid) const;
 
 private:
-    // Sorted list of UUID to path mappings.
-    std::vector<SymbolFileProvider::Entry> m_symbol_files;
+  // Sorted list of UUID to path mappings.
+  std::vector<SymbolFileProvider::Entry> m_symbol_files;
 };
 
 /// Helper to read directories written by the DirectoryProvider.
 template <typename T>
 llvm::Expected<std::string> GetDirectoryFrom(repro::Loader *loader) {
-    llvm::Expected<std::string> dir = loader->LoadBuffer<T>();
-    if (!dir)
-        return dir.takeError();
-    return std::string(llvm::StringRef(*dir).rtrim());
+  llvm::Expected<std::string> dir = loader->LoadBuffer<T>();
+  if (!dir)
+    return dir.takeError();
+  return std::string(llvm::StringRef(*dir).rtrim());
 }
 
 } // namespace repro
@@ -431,12 +421,12 @@ namespace llvm {
 namespace yaml {
 template <>
 struct MappingTraits<lldb_private::repro::SymbolFileProvider::Entry> {
-    static void mapping(IO &io,
-                        lldb_private::repro::SymbolFileProvider::Entry &entry) {
-        io.mapRequired("uuid", entry.uuid);
-        io.mapRequired("module-path", entry.module_path);
-        io.mapRequired("symbol-path", entry.symbol_path);
-    }
+  static void mapping(IO &io,
+                      lldb_private::repro::SymbolFileProvider::Entry &entry) {
+    io.mapRequired("uuid", entry.uuid);
+    io.mapRequired("module-path", entry.module_path);
+    io.mapRequired("symbol-path", entry.symbol_path);
+  }
 };
 } // namespace yaml
 } // namespace llvm

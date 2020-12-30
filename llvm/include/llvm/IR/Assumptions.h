@@ -32,16 +32,14 @@ extern StringSet<> KnownAssumptionStrings;
 /// Helper that allows to insert a new assumption string in the known assumption
 /// set by creating a (static) object.
 struct KnownAssumptionString {
-    KnownAssumptionString(StringRef AssumptionStr)
-        : AssumptionStr(AssumptionStr) {
-        KnownAssumptionStrings.insert(AssumptionStr);
-    }
-    operator StringRef() const {
-        return AssumptionStr;
-    }
+  KnownAssumptionString(StringRef AssumptionStr)
+      : AssumptionStr(AssumptionStr) {
+    KnownAssumptionStrings.insert(AssumptionStr);
+  }
+  operator StringRef() const { return AssumptionStr; }
 
 private:
-    StringRef AssumptionStr;
+  StringRef AssumptionStr;
 };
 
 /// Return true if \p F has the assumption \p AssumptionStr attached.

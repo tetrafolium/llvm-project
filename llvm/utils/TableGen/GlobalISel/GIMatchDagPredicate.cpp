@@ -10,20 +10,18 @@
 
 #include "llvm/TableGen/Record.h"
 
-#include "GIMatchDagOperands.h"
 #include "../CodeGenInstruction.h"
+#include "GIMatchDagOperands.h"
 
 using namespace llvm;
 
 void GIMatchDagPredicate::print(raw_ostream &OS) const {
-    OS << "<<";
-    printDescription(OS);
-    OS << ">>:$" << Name;
+  OS << "<<";
+  printDescription(OS);
+  OS << ">>:$" << Name;
 }
 
-void GIMatchDagPredicate::printDescription(raw_ostream &OS) const {
-    OS << "";
-}
+void GIMatchDagPredicate::printDescription(raw_ostream &OS) const { OS << ""; }
 
 GIMatchDagOpcodePredicate::GIMatchDagOpcodePredicate(
     GIMatchDagContext &Ctx, StringRef Name, const CodeGenInstruction &Instr)
@@ -32,7 +30,7 @@ GIMatchDagOpcodePredicate::GIMatchDagOpcodePredicate(
       Instr(Instr) {}
 
 void GIMatchDagOpcodePredicate::printDescription(raw_ostream &OS) const {
-    OS << "$mi.getOpcode() == " << Instr.TheDef->getName();
+  OS << "$mi.getOpcode() == " << Instr.TheDef->getName();
 }
 
 GIMatchDagOneOfOpcodesPredicate::GIMatchDagOneOfOpcodesPredicate(
@@ -41,31 +39,31 @@ GIMatchDagOneOfOpcodesPredicate::GIMatchDagOneOfOpcodesPredicate(
                           Ctx.makeMIPredicateOperandList()) {}
 
 void GIMatchDagOneOfOpcodesPredicate::printDescription(raw_ostream &OS) const {
-    OS << "$mi.getOpcode() == oneof(";
-    StringRef Separator = "";
-    for (const CodeGenInstruction *Instr : Instrs) {
-        OS << Separator << Instr->TheDef->getName();
-        Separator = ",";
-    }
-    OS << ")";
+  OS << "$mi.getOpcode() == oneof(";
+  StringRef Separator = "";
+  for (const CodeGenInstruction *Instr : Instrs) {
+    OS << Separator << Instr->TheDef->getName();
+    Separator = ",";
+  }
+  OS << ")";
 }
 
 GIMatchDagSameMOPredicate::GIMatchDagSameMOPredicate(GIMatchDagContext &Ctx,
-        StringRef Name)
+                                                     StringRef Name)
     : GIMatchDagPredicate(GIMatchDagPredicateKind_SameMO, Name,
                           Ctx.makeTwoMOPredicateOperandList()) {}
 
 void GIMatchDagSameMOPredicate::printDescription(raw_ostream &OS) const {
-    OS << "$mi0 == $mi1";
+  OS << "$mi0 == $mi1";
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS, const GIMatchDagPredicate &N) {
-    N.print(OS);
-    return OS;
+  N.print(OS);
+  return OS;
 }
 
 raw_ostream &llvm::operator<<(raw_ostream &OS,
                               const GIMatchDagOpcodePredicate &N) {
-    N.print(OS);
-    return OS;
+  N.print(OS);
+  return OS;
 }

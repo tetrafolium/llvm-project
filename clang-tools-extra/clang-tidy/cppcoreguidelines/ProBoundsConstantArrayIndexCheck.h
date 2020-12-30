@@ -22,19 +22,19 @@ namespace cppcoreguidelines {
 /// For the user-facing documentation see:
 /// http://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines-pro-bounds-constant-array-index.html
 class ProBoundsConstantArrayIndexCheck : public ClangTidyCheck {
-    const std::string GslHeader;
-    utils::IncludeInserter Inserter;
+  const std::string GslHeader;
+  utils::IncludeInserter Inserter;
 
 public:
-    ProBoundsConstantArrayIndexCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
-    }
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  ProBoundsConstantArrayIndexCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace cppcoreguidelines

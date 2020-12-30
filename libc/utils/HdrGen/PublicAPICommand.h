@@ -27,17 +27,17 @@ namespace llvm_libc {
 
 class PublicAPICommand : public Command {
 private:
-    const std::vector<std::string> &EntrypointNameList;
+  const std::vector<std::string> &EntrypointNameList;
 
 public:
-    static const char Name[];
+  static const char Name[];
 
-    PublicAPICommand(const std::vector<std::string> &EntrypointNames)
-        : EntrypointNameList(EntrypointNames) {}
+  PublicAPICommand(const std::vector<std::string> &EntrypointNames)
+      : EntrypointNameList(EntrypointNames) {}
 
-    void run(llvm::raw_ostream &OS, const ArgVector &Args,
-             llvm::StringRef StdHeader, llvm::RecordKeeper &Records,
-             const Command::ErrorReporter &Reporter) const override;
+  void run(llvm::raw_ostream &OS, const ArgVector &Args,
+           llvm::StringRef StdHeader, llvm::RecordKeeper &Records,
+           const Command::ErrorReporter &Reporter) const override;
 };
 
 } // namespace llvm_libc

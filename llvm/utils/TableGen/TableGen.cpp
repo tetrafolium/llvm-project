@@ -20,43 +20,43 @@
 using namespace llvm;
 
 enum ActionType {
-    PrintRecords,
-    PrintDetailedRecords,
-    NullBackend,
-    DumpJSON,
-    GenEmitter,
-    GenRegisterInfo,
-    GenInstrInfo,
-    GenInstrDocs,
-    GenAsmWriter,
-    GenAsmMatcher,
-    GenDisassembler,
-    GenPseudoLowering,
-    GenCompressInst,
-    GenCallingConv,
-    GenDAGISel,
-    GenDFAPacketizer,
-    GenFastISel,
-    GenSubtarget,
-    GenIntrinsicEnums,
-    GenIntrinsicImpl,
-    PrintEnums,
-    PrintSets,
-    GenOptParserDefs,
-    GenOptRST,
-    GenCTags,
-    GenAttributes,
-    GenSearchableTables,
-    GenGlobalISel,
-    GenGICombiner,
-    GenX86EVEX2VEXTables,
-    GenX86FoldTables,
-    GenRegisterBank,
-    GenExegesis,
-    GenAutomata,
-    GenDirectivesEnumDecl,
-    GenDirectivesEnumImpl,
-    GenDirectivesEnumGen,
+  PrintRecords,
+  PrintDetailedRecords,
+  NullBackend,
+  DumpJSON,
+  GenEmitter,
+  GenRegisterInfo,
+  GenInstrInfo,
+  GenInstrDocs,
+  GenAsmWriter,
+  GenAsmMatcher,
+  GenDisassembler,
+  GenPseudoLowering,
+  GenCompressInst,
+  GenCallingConv,
+  GenDAGISel,
+  GenDFAPacketizer,
+  GenFastISel,
+  GenSubtarget,
+  GenIntrinsicEnums,
+  GenIntrinsicImpl,
+  PrintEnums,
+  PrintSets,
+  GenOptParserDefs,
+  GenOptRST,
+  GenCTags,
+  GenAttributes,
+  GenSearchableTables,
+  GenGlobalISel,
+  GenGICombiner,
+  GenX86EVEX2VEXTables,
+  GenX86FoldTables,
+  GenRegisterBank,
+  GenExegesis,
+  GenAutomata,
+  GenDirectivesEnumDecl,
+  GenDirectivesEnumImpl,
+  GenDirectivesEnumGen,
 };
 
 namespace llvm {
@@ -146,143 +146,141 @@ cl::opt<std::string> Class("class", cl::desc("Print Enum list for this class"),
                            cl::cat(PrintEnumsCat));
 
 bool LLVMTableGenMain(raw_ostream &OS, RecordKeeper &Records) {
-    switch (Action) {
-    case PrintRecords:
-        OS << Records;              // No argument, dump all contents
-        break;
-    case PrintDetailedRecords:
-        EmitDetailedRecords(Records, OS);
-        break;
-    case NullBackend:             // No backend at all.
-        break;
-    case DumpJSON:
-        EmitJSON(Records, OS);
-        break;
-    case GenEmitter:
-        EmitCodeEmitter(Records, OS);
-        break;
-    case GenRegisterInfo:
-        EmitRegisterInfo(Records, OS);
-        break;
-    case GenInstrInfo:
-        EmitInstrInfo(Records, OS);
-        break;
-    case GenInstrDocs:
-        EmitInstrDocs(Records, OS);
-        break;
-    case GenCallingConv:
-        EmitCallingConv(Records, OS);
-        break;
-    case GenAsmWriter:
-        EmitAsmWriter(Records, OS);
-        break;
-    case GenAsmMatcher:
-        EmitAsmMatcher(Records, OS);
-        break;
-    case GenDisassembler:
-        EmitDisassembler(Records, OS);
-        break;
-    case GenPseudoLowering:
-        EmitPseudoLowering(Records, OS);
-        break;
-    case GenCompressInst:
-        EmitCompressInst(Records, OS);
-        break;
-    case GenDAGISel:
-        EmitDAGISel(Records, OS);
-        break;
-    case GenDFAPacketizer:
-        EmitDFAPacketizer(Records, OS);
-        break;
-    case GenFastISel:
-        EmitFastISel(Records, OS);
-        break;
-    case GenSubtarget:
-        EmitSubtarget(Records, OS);
-        break;
-    case GenIntrinsicEnums:
-        EmitIntrinsicEnums(Records, OS);
-        break;
-    case GenIntrinsicImpl:
-        EmitIntrinsicImpl(Records, OS);
-        break;
-    case GenOptParserDefs:
-        EmitOptParser(Records, OS);
-        break;
-    case GenOptRST:
-        EmitOptRST(Records, OS);
-        break;
-    case PrintEnums:
-    {
-        for (Record *Rec : Records.getAllDerivedDefinitions(Class))
-            OS << Rec->getName() << ", ";
-        OS << "\n";
-        break;
+  switch (Action) {
+  case PrintRecords:
+    OS << Records; // No argument, dump all contents
+    break;
+  case PrintDetailedRecords:
+    EmitDetailedRecords(Records, OS);
+    break;
+  case NullBackend: // No backend at all.
+    break;
+  case DumpJSON:
+    EmitJSON(Records, OS);
+    break;
+  case GenEmitter:
+    EmitCodeEmitter(Records, OS);
+    break;
+  case GenRegisterInfo:
+    EmitRegisterInfo(Records, OS);
+    break;
+  case GenInstrInfo:
+    EmitInstrInfo(Records, OS);
+    break;
+  case GenInstrDocs:
+    EmitInstrDocs(Records, OS);
+    break;
+  case GenCallingConv:
+    EmitCallingConv(Records, OS);
+    break;
+  case GenAsmWriter:
+    EmitAsmWriter(Records, OS);
+    break;
+  case GenAsmMatcher:
+    EmitAsmMatcher(Records, OS);
+    break;
+  case GenDisassembler:
+    EmitDisassembler(Records, OS);
+    break;
+  case GenPseudoLowering:
+    EmitPseudoLowering(Records, OS);
+    break;
+  case GenCompressInst:
+    EmitCompressInst(Records, OS);
+    break;
+  case GenDAGISel:
+    EmitDAGISel(Records, OS);
+    break;
+  case GenDFAPacketizer:
+    EmitDFAPacketizer(Records, OS);
+    break;
+  case GenFastISel:
+    EmitFastISel(Records, OS);
+    break;
+  case GenSubtarget:
+    EmitSubtarget(Records, OS);
+    break;
+  case GenIntrinsicEnums:
+    EmitIntrinsicEnums(Records, OS);
+    break;
+  case GenIntrinsicImpl:
+    EmitIntrinsicImpl(Records, OS);
+    break;
+  case GenOptParserDefs:
+    EmitOptParser(Records, OS);
+    break;
+  case GenOptRST:
+    EmitOptRST(Records, OS);
+    break;
+  case PrintEnums: {
+    for (Record *Rec : Records.getAllDerivedDefinitions(Class))
+      OS << Rec->getName() << ", ";
+    OS << "\n";
+    break;
+  }
+  case PrintSets: {
+    SetTheory Sets;
+    Sets.addFieldExpander("Set", "Elements");
+    for (Record *Rec : Records.getAllDerivedDefinitions("Set")) {
+      OS << Rec->getName() << " = [";
+      const std::vector<Record *> *Elts = Sets.expand(Rec);
+      assert(Elts && "Couldn't expand Set instance");
+      for (Record *Elt : *Elts)
+        OS << ' ' << Elt->getName();
+      OS << " ]\n";
     }
-    case PrintSets:
-    {
-        SetTheory Sets;
-        Sets.addFieldExpander("Set", "Elements");
-        for (Record *Rec : Records.getAllDerivedDefinitions("Set")) {
-            OS << Rec->getName() << " = [";
-            const std::vector<Record*> *Elts = Sets.expand(Rec);
-            assert(Elts && "Couldn't expand Set instance");
-            for (Record *Elt : *Elts)
-                OS << ' ' << Elt->getName();
-            OS << " ]\n";
-        }
-        break;
-    }
-    case GenCTags:
-        EmitCTags(Records, OS);
-        break;
-    case GenAttributes:
-        EmitAttributes(Records, OS);
-        break;
-    case GenSearchableTables:
-        EmitSearchableTables(Records, OS);
-        break;
-    case GenGlobalISel:
-        EmitGlobalISel(Records, OS);
-        break;
-    case GenGICombiner:
-        EmitGICombiner(Records, OS);
-        break;
-    case GenRegisterBank:
-        EmitRegisterBank(Records, OS);
-        break;
-    case GenX86EVEX2VEXTables:
-        EmitX86EVEX2VEXTables(Records, OS);
-        break;
-    case GenX86FoldTables:
-        EmitX86FoldTables(Records, OS);
-        break;
-    case GenExegesis:
-        EmitExegesis(Records, OS);
-        break;
-    case GenAutomata:
-        EmitAutomata(Records, OS);
-        break;
-    case GenDirectivesEnumDecl:
-        EmitDirectivesDecl(Records, OS);
-        break;
-    case GenDirectivesEnumImpl:
-        EmitDirectivesImpl(Records, OS);
-        break;
-    case GenDirectivesEnumGen:
-        EmitDirectivesGen(Records, OS);
-        break;
-    }
+    break;
+  }
+  case GenCTags:
+    EmitCTags(Records, OS);
+    break;
+  case GenAttributes:
+    EmitAttributes(Records, OS);
+    break;
+  case GenSearchableTables:
+    EmitSearchableTables(Records, OS);
+    break;
+  case GenGlobalISel:
+    EmitGlobalISel(Records, OS);
+    break;
+  case GenGICombiner:
+    EmitGICombiner(Records, OS);
+    break;
+  case GenRegisterBank:
+    EmitRegisterBank(Records, OS);
+    break;
+  case GenX86EVEX2VEXTables:
+    EmitX86EVEX2VEXTables(Records, OS);
+    break;
+  case GenX86FoldTables:
+    EmitX86FoldTables(Records, OS);
+    break;
+  case GenExegesis:
+    EmitExegesis(Records, OS);
+    break;
+  case GenAutomata:
+    EmitAutomata(Records, OS);
+    break;
+  case GenDirectivesEnumDecl:
+    EmitDirectivesDecl(Records, OS);
+    break;
+  case GenDirectivesEnumImpl:
+    EmitDirectivesImpl(Records, OS);
+    break;
+  case GenDirectivesEnumGen:
+    EmitDirectivesGen(Records, OS);
+    break;
+  }
 
-    return false;
+  return false;
 }
-}
+} // namespace
 
 int main(int argc, char **argv) {
-    InitLLVM X(argc, argv);
-    cl::ParseCommandLineOptions(argc, argv);
+  InitLLVM X(argc, argv);
+  cl::ParseCommandLineOptions(argc, argv);
 
-    return TableGenMain(argv[0], &LLVMTableGenMain);
+  return TableGenMain(argv[0], &LLVMTableGenMain);
 }
 
 #ifndef __has_feature
@@ -295,8 +293,6 @@ int main(int argc, char **argv) {
 #include <sanitizer/lsan_interface.h>
 // Disable LeakSanitizer for this binary as it has too many leaks that are not
 // very interesting to fix. See compiler-rt/include/sanitizer/lsan_interface.h .
-LLVM_ATTRIBUTE_USED int __lsan_is_turned_off() {
-    return 1;
-}
+LLVM_ATTRIBUTE_USED int __lsan_is_turned_off() { return 1; }
 
 #endif

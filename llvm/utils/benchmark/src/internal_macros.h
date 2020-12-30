@@ -63,12 +63,12 @@
 #define BENCHMARK_OS_RTEMS 1
 #elif defined(__Fuchsia__)
 #define BENCHMARK_OS_FUCHSIA 1
-#elif defined (__SVR4) && defined (__sun)
+#elif defined(__SVR4) && defined(__sun)
 #define BENCHMARK_OS_SOLARIS 1
 #endif
 
-#if !__has_feature(cxx_exceptions) && !defined(__cpp_exceptions) \
-     && !defined(__EXCEPTIONS)
+#if !__has_feature(cxx_exceptions) && !defined(__cpp_exceptions) &&            \
+    !defined(__EXCEPTIONS)
 #define BENCHMARK_HAS_NO_EXCEPTIONS
 #endif
 
@@ -78,4 +78,4 @@
 #define BENCHMARK_MAYBE_UNUSED
 #endif
 
-#endif  // BENCHMARK_INTERNAL_MACROS_H_
+#endif // BENCHMARK_INTERNAL_MACROS_H_

@@ -26,100 +26,100 @@ namespace lldb_private {
 
 class StreamGDBRemote : public StreamString {
 public:
-    StreamGDBRemote();
+  StreamGDBRemote();
 
-    StreamGDBRemote(uint32_t flags, uint32_t addr_size,
-                    lldb::ByteOrder byte_order);
+  StreamGDBRemote(uint32_t flags, uint32_t addr_size,
+                  lldb::ByteOrder byte_order);
 
-    ~StreamGDBRemote() override;
+  ~StreamGDBRemote() override;
 
-    /// Output a block of data to the stream performing GDB-remote escaping.
-    ///
-    /// \param[in] s
-    ///     A block of data.
-    ///
-    /// \param[in] src_len
-    ///     The amount of data to write.
-    ///
-    /// \return
-    ///     Number of bytes written.
-    // TODO: Convert this function to take ArrayRef<uint8_t>
-    int PutEscapedBytes(const void *s, size_t src_len);
+  /// Output a block of data to the stream performing GDB-remote escaping.
+  ///
+  /// \param[in] s
+  ///     A block of data.
+  ///
+  /// \param[in] src_len
+  ///     The amount of data to write.
+  ///
+  /// \return
+  ///     Number of bytes written.
+  // TODO: Convert this function to take ArrayRef<uint8_t>
+  int PutEscapedBytes(const void *s, size_t src_len);
 };
 
 /// GDB remote packet as used by the reproducer and the GDB remote
 /// communication history. Packets can be serialized to file.
 struct GDBRemotePacket {
 
-    friend llvm::yaml::MappingTraits<GDBRemotePacket>;
+  friend llvm::yaml::MappingTraits<GDBRemotePacket>;
 
-    enum Type { ePacketTypeInvalid = 0, ePacketTypeSend, ePacketTypeRecv };
+  enum Type { ePacketTypeInvalid = 0, ePacketTypeSend, ePacketTypeRecv };
 
-    GDBRemotePacket()
-        : packet(), type(ePacketTypeInvalid), bytes_transmitted(0), packet_idx(0),
-          tid(LLDB_INVALID_THREAD_ID) {}
+  GDBRemotePacket()
+      : packet(), type(ePacketTypeInvalid), bytes_transmitted(0), packet_idx(0),
+        tid(LLDB_INVALID_THREAD_ID) {}
 
-    void Clear() {
-        packet.data.clear();
-        type = ePacketTypeInvalid;
-        bytes_transmitted = 0;
-        packet_idx = 0;
-        tid = LLDB_INVALID_THREAD_ID;
-    }
+  void Clear() {
+    packet.data.clear();
+    type = ePacketTypeInvalid;
+    bytes_transmitted = 0;
+    packet_idx = 0;
+    tid = LLDB_INVALID_THREAD_ID;
+  }
 
-    struct BinaryData {
-        std::string data;
-    };
+  struct BinaryData {
+    std::string data;
+  };
 
-    void Dump(Stream &strm) const;
+  void Dump(Stream &strm) const;
 
-    BinaryData packet;
-    Type type;
-    uint32_t bytes_transmitted;
-    uint32_t packet_idx;
-    lldb::tid_t tid;
+  BinaryData packet;
+  Type type;
+  uint32_t bytes_transmitted;
+  uint32_t packet_idx;
+  lldb::tid_t tid;
 
 private:
-    llvm::StringRef GetTypeStr() const;
+  llvm::StringRef GetTypeStr() const;
 };
 
 namespace repro {
 class PacketRecorder : public AbstractRecorder {
 public:
-    PacketRecorder(const FileSpec &filename, std::error_code &ec)
-        : AbstractRecorder(filename, ec) {}
+  PacketRecorder(const FileSpec &filename, std::error_code &ec)
+      : AbstractRecorder(filename, ec) {}
 
-    static llvm::Expected<std::unique_ptr<PacketRecorder>>
-            Create(const FileSpec &filename);
+  static llvm::Expected<std::unique_ptr<PacketRecorder>>
+  Create(const FileSpec &filename);
 
-    void Record(const GDBRemotePacket &packet);
+  void Record(const GDBRemotePacket &packet);
 };
 
 class GDBRemoteProvider : public repro::Provider<GDBRemoteProvider> {
 public:
-    struct Info {
-        static const char *name;
-        static const char *file;
-    };
+  struct Info {
+    static const char *name;
+    static const char *file;
+  };
 
-    GDBRemoteProvider(const FileSpec &directory) : Provider(directory) {}
+  GDBRemoteProvider(const FileSpec &directory) : Provider(directory) {}
 
-    llvm::raw_ostream *GetHistoryStream();
-    PacketRecorder *GetNewPacketRecorder();
+  llvm::raw_ostream *GetHistoryStream();
+  PacketRecorder *GetNewPacketRecorder();
 
-    void SetCallback(std::function<void()> callback) {
-        m_callback = std::move(callback);
-    }
+  void SetCallback(std::function<void()> callback) {
+    m_callback = std::move(callback);
+  }
 
-    void Keep() override;
-    void Discard() override;
+  void Keep() override;
+  void Discard() override;
 
-    static char ID;
+  static char ID;
 
 private:
-    std::function<void()> m_callback;
-    std::unique_ptr<llvm::raw_fd_ostream> m_stream_up;
-    std::vector<std::unique_ptr<PacketRecorder>> m_packet_recorders;
+  std::function<void()> m_callback;
+  std::unique_ptr<llvm::raw_fd_ostream> m_stream_up;
+  std::vector<std::unique_ptr<PacketRecorder>> m_packet_recorders;
 };
 
 } // namespace repro
@@ -133,25 +133,23 @@ namespace yaml {
 
 template <>
 struct ScalarEnumerationTraits<lldb_private::GDBRemotePacket::Type> {
-    static void enumeration(IO &io, lldb_private::GDBRemotePacket::Type &value);
+  static void enumeration(IO &io, lldb_private::GDBRemotePacket::Type &value);
 };
 
 template <> struct ScalarTraits<lldb_private::GDBRemotePacket::BinaryData> {
-    static void output(const lldb_private::GDBRemotePacket::BinaryData &, void *,
-                       raw_ostream &);
+  static void output(const lldb_private::GDBRemotePacket::BinaryData &, void *,
+                     raw_ostream &);
 
-    static StringRef input(StringRef, void *,
-                           lldb_private::GDBRemotePacket::BinaryData &);
+  static StringRef input(StringRef, void *,
+                         lldb_private::GDBRemotePacket::BinaryData &);
 
-    static QuotingType mustQuote(StringRef S) {
-        return QuotingType::None;
-    }
+  static QuotingType mustQuote(StringRef S) { return QuotingType::None; }
 };
 
 template <> struct MappingTraits<lldb_private::GDBRemotePacket> {
-    static void mapping(IO &io, lldb_private::GDBRemotePacket &Packet);
+  static void mapping(IO &io, lldb_private::GDBRemotePacket &Packet);
 
-    static StringRef validate(IO &io, lldb_private::GDBRemotePacket &);
+  static StringRef validate(IO &io, lldb_private::GDBRemotePacket &);
 };
 
 } // namespace yaml

@@ -68,13 +68,13 @@ LogicalResult hoistAffineIfOp(AffineIfOp ifOp, bool *folded = nullptr);
 ///  }
 // TODO: Hoist to a VectorizationStrategy.cpp when appropriate.
 struct VectorizationStrategy {
-    // Vectorization factors to apply to each target vector dimension.
-    // Each factor will be applied to a different loop.
-    SmallVector<int64_t, 8> vectorSizes;
-    // Maps each AffineForOp vectorization candidate with its vector dimension.
-    // The candidate will be vectorized using the vectorization factor in
-    // 'vectorSizes' for that dimension.
-    DenseMap<Operation *, unsigned> loopToVectorDim;
+  // Vectorization factors to apply to each target vector dimension.
+  // Each factor will be applied to a different loop.
+  SmallVector<int64_t, 8> vectorSizes;
+  // Maps each AffineForOp vectorization candidate with its vector dimension.
+  // The candidate will be vectorized using the vectorization factor in
+  // 'vectorSizes' for that dimension.
+  DenseMap<Operation *, unsigned> loopToVectorDim;
 };
 
 /// Vectorizes affine loops in 'loops' using the n-D vectorization factors in

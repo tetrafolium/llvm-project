@@ -16,40 +16,40 @@
 
 class DynamicLoaderStatic : public lldb_private::DynamicLoader {
 public:
-    DynamicLoaderStatic(lldb_private::Process *process);
+  DynamicLoaderStatic(lldb_private::Process *process);
 
-    // Static Functions
-    static void Initialize();
+  // Static Functions
+  static void Initialize();
 
-    static void Terminate();
+  static void Terminate();
 
-    static lldb_private::ConstString GetPluginNameStatic();
+  static lldb_private::ConstString GetPluginNameStatic();
 
-    static const char *GetPluginDescriptionStatic();
+  static const char *GetPluginDescriptionStatic();
 
-    static lldb_private::DynamicLoader *
-    CreateInstance(lldb_private::Process *process, bool force);
+  static lldb_private::DynamicLoader *
+  CreateInstance(lldb_private::Process *process, bool force);
 
-    /// Called after attaching a process.
-    ///
-    /// Allow DynamicLoader plug-ins to execute some code after
-    /// attaching to a process.
-    void DidAttach() override;
+  /// Called after attaching a process.
+  ///
+  /// Allow DynamicLoader plug-ins to execute some code after
+  /// attaching to a process.
+  void DidAttach() override;
 
-    void DidLaunch() override;
+  void DidLaunch() override;
 
-    lldb::ThreadPlanSP GetStepThroughTrampolinePlan(lldb_private::Thread &thread,
-            bool stop_others) override;
+  lldb::ThreadPlanSP GetStepThroughTrampolinePlan(lldb_private::Thread &thread,
+                                                  bool stop_others) override;
 
-    lldb_private::Status CanLoadImage() override;
+  lldb_private::Status CanLoadImage() override;
 
-    // PluginInterface protocol
-    lldb_private::ConstString GetPluginName() override;
+  // PluginInterface protocol
+  lldb_private::ConstString GetPluginName() override;
 
-    uint32_t GetPluginVersion() override;
+  uint32_t GetPluginVersion() override;
 
 private:
-    void LoadAllImagesAtFileAddresses();
+  void LoadAllImagesAtFileAddresses();
 };
 
 #endif // LLDB_SOURCE_PLUGINS_DYNAMICLOADER_STATIC_DYNAMICLOADERSTATIC_H

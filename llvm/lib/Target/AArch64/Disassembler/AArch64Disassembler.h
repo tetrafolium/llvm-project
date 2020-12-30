@@ -18,14 +18,14 @@ namespace llvm {
 
 class AArch64Disassembler : public MCDisassembler {
 public:
-    AArch64Disassembler(const MCSubtargetInfo &STI, MCContext &Ctx)
-        : MCDisassembler(STI, Ctx) {}
+  AArch64Disassembler(const MCSubtargetInfo &STI, MCContext &Ctx)
+      : MCDisassembler(STI, Ctx) {}
 
-    ~AArch64Disassembler() override = default;
+  ~AArch64Disassembler() override = default;
 
-    MCDisassembler::DecodeStatus
-    getInstruction(MCInst &Instr, uint64_t &Size, ArrayRef<uint8_t> Bytes,
-                   uint64_t Address, raw_ostream &CStream) const override;
+  MCDisassembler::DecodeStatus
+  getInstruction(MCInst &Instr, uint64_t &Size, ArrayRef<uint8_t> Bytes,
+                 uint64_t Address, raw_ostream &CStream) const override;
 };
 
 } // end namespace llvm

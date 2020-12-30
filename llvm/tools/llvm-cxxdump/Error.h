@@ -19,20 +19,19 @@ namespace llvm {
 const std::error_category &cxxdump_category();
 
 enum class cxxdump_error {
-    success = 0,
-    file_not_found,
-    unrecognized_file_format,
+  success = 0,
+  file_not_found,
+  unrecognized_file_format,
 };
 
 inline std::error_code make_error_code(cxxdump_error e) {
-    return std::error_code(static_cast<int>(e), cxxdump_category());
+  return std::error_code(static_cast<int>(e), cxxdump_category());
 }
 
 } // namespace llvm
 
 namespace std {
-template <>
-struct is_error_code_enum<llvm::cxxdump_error> : std::true_type {};
-}
+template <> struct is_error_code_enum<llvm::cxxdump_error> : std::true_type {};
+} // namespace std
 
 #endif

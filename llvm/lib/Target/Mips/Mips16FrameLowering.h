@@ -18,30 +18,30 @@
 namespace llvm {
 class Mips16FrameLowering : public MipsFrameLowering {
 public:
-    explicit Mips16FrameLowering(const MipsSubtarget &STI);
+  explicit Mips16FrameLowering(const MipsSubtarget &STI);
 
-    /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
-    /// the function.
-    void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
-    void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
+  /// the function.
+  void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+  void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
-    bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
-                                   MachineBasicBlock::iterator MI,
-                                   ArrayRef<CalleeSavedInfo> CSI,
-                                   const TargetRegisterInfo *TRI) const override;
+  bool spillCalleeSavedRegisters(MachineBasicBlock &MBB,
+                                 MachineBasicBlock::iterator MI,
+                                 ArrayRef<CalleeSavedInfo> CSI,
+                                 const TargetRegisterInfo *TRI) const override;
 
-    bool
-    restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
-                                MachineBasicBlock::iterator MI,
-                                MutableArrayRef<CalleeSavedInfo> CSI,
-                                const TargetRegisterInfo *TRI) const override;
+  bool
+  restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
+                              MachineBasicBlock::iterator MI,
+                              MutableArrayRef<CalleeSavedInfo> CSI,
+                              const TargetRegisterInfo *TRI) const override;
 
-    bool hasReservedCallFrame(const MachineFunction &MF) const override;
+  bool hasReservedCallFrame(const MachineFunction &MF) const override;
 
-    void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
-                              RegScavenger *RS) const override;
+  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                            RegScavenger *RS) const override;
 };
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

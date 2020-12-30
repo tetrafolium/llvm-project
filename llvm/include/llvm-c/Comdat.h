@@ -20,15 +20,15 @@
 LLVM_C_EXTERN_C_BEGIN
 
 typedef enum {
-    LLVMAnyComdatSelectionKind,        ///< The linker may choose any COMDAT.
-    LLVMExactMatchComdatSelectionKind, ///< The data referenced by the COMDAT must
-    ///< be the same.
-    LLVMLargestComdatSelectionKind,    ///< The linker will choose the largest
-    ///< COMDAT.
-    LLVMNoDuplicatesComdatSelectionKind, ///< No other Module may specify this
-    ///< COMDAT.
-    LLVMSameSizeComdatSelectionKind ///< The data referenced by the COMDAT must be
-    ///< the same size.
+  LLVMAnyComdatSelectionKind,        ///< The linker may choose any COMDAT.
+  LLVMExactMatchComdatSelectionKind, ///< The data referenced by the COMDAT must
+  ///< be the same.
+  LLVMLargestComdatSelectionKind, ///< The linker will choose the largest
+  ///< COMDAT.
+  LLVMNoDuplicatesComdatSelectionKind, ///< No other Module may specify this
+  ///< COMDAT.
+  LLVMSameSizeComdatSelectionKind ///< The data referenced by the COMDAT must be
+                                  ///< the same size.
 } LLVMComdatSelectionKind;
 
 /**

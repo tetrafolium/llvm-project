@@ -40,14 +40,14 @@ void runWithSufficientStackSpaceSlow(llvm::function_ref<void()> Diag,
 inline void runWithSufficientStackSpace(llvm::function_ref<void()> Diag,
                                         llvm::function_ref<void()> Fn) {
 #ifdef LLVM_ENABLE_THREADS
-    if (LLVM_UNLIKELY(isStackNearlyExhausted()))
-        runWithSufficientStackSpaceSlow(Diag, Fn);
-    else
-        Fn();
-#else
-    if (LLVM_UNLIKELY(isStackNearlyExhausted()))
-        Diag();
+  if (LLVM_UNLIKELY(isStackNearlyExhausted()))
+    runWithSufficientStackSpaceSlow(Diag, Fn);
+  else
     Fn();
+#else
+  if (LLVM_UNLIKELY(isStackNearlyExhausted()))
+    Diag();
+  Fn();
 #endif
 }
 } // end namespace clang

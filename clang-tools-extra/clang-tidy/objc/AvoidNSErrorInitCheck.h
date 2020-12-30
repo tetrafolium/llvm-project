@@ -22,17 +22,17 @@ namespace objc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/objc-avoid-nserror-init.html
 class AvoidNSErrorInitCheck : public ClangTidyCheck {
 public:
-    AvoidNSErrorInitCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.ObjC;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  AvoidNSErrorInitCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.ObjC;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
-}  // namespace objc
-}  // namespace tidy
-}  // namespace clang
+} // namespace objc
+} // namespace tidy
+} // namespace clang
 
-#endif  // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_OBJC_AVOIDNSERRORINITCHECK_H
+#endif // LLVM_CLANG_TOOLS_EXTRA_CLANG_TIDY_OBJC_AVOIDNSERRORINITCHECK_H

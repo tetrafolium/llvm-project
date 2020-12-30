@@ -18,12 +18,12 @@
 namespace __llvm_libc {
 
 struct Exp2fDataTable {
-    uint64_t tab[1 << EXP2F_TABLE_BITS];
-    double shift_scaled;
-    double poly[EXP2F_POLY_ORDER];
-    double shift;
-    double invln2_scaled;
-    double poly_scaled[EXP2F_POLY_ORDER];
+  uint64_t tab[1 << EXP2F_TABLE_BITS];
+  double shift_scaled;
+  double poly[EXP2F_POLY_ORDER];
+  double shift;
+  double invln2_scaled;
+  double poly_scaled[EXP2F_POLY_ORDER];
 };
 
 extern const Exp2fDataTable exp2f_data;

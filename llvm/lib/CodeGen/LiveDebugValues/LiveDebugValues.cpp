@@ -38,30 +38,30 @@ using namespace llvm;
 /// base class.
 class LiveDebugValues : public MachineFunctionPass {
 public:
-    static char ID;
+  static char ID;
 
-    LiveDebugValues();
-    ~LiveDebugValues() {
-        if (TheImpl)
-            delete TheImpl;
-    }
+  LiveDebugValues();
+  ~LiveDebugValues() {
+    if (TheImpl)
+      delete TheImpl;
+  }
 
-    /// Calculate the liveness information for the given machine function.
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  /// Calculate the liveness information for the given machine function.
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::NoVRegs);
-    }
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoVRegs);
+  }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
 private:
-    LDVImpl *TheImpl;
-    TargetPassConfig *TPC;
+  LDVImpl *TheImpl;
+  TargetPassConfig *TPC;
 };
 
 char LiveDebugValues::ID = 0;
@@ -73,25 +73,25 @@ INITIALIZE_PASS(LiveDebugValues, DEBUG_TYPE, "Live DEBUG_VALUE analysis", false,
 
 /// Default construct and initialize the pass.
 LiveDebugValues::LiveDebugValues() : MachineFunctionPass(ID) {
-    initializeLiveDebugValuesPass(*PassRegistry::getPassRegistry());
-    TheImpl = nullptr;
+  initializeLiveDebugValuesPass(*PassRegistry::getPassRegistry());
+  TheImpl = nullptr;
 }
 
 bool LiveDebugValues::runOnMachineFunction(MachineFunction &MF) {
-    if (!TheImpl) {
-        TPC = getAnalysisIfAvailable<TargetPassConfig>();
+  if (!TheImpl) {
+    TPC = getAnalysisIfAvailable<TargetPassConfig>();
 
-        bool InstrRefBased = false;
-        if (TPC) {
-            auto &TM = TPC->getTM<TargetMachine>();
-            InstrRefBased = TM.Options.ValueTrackingVariableLocations;
-        }
-
-        if (InstrRefBased)
-            TheImpl = llvm::makeInstrRefBasedLiveDebugValues();
-        else
-            TheImpl = llvm::makeVarLocBasedLiveDebugValues();
+    bool InstrRefBased = false;
+    if (TPC) {
+      auto &TM = TPC->getTM<TargetMachine>();
+      InstrRefBased = TM.Options.ValueTrackingVariableLocations;
     }
 
-    return TheImpl->ExtendRanges(MF, TPC);
+    if (InstrRefBased)
+      TheImpl = llvm::makeInstrRefBasedLiveDebugValues();
+    else
+      TheImpl = llvm::makeVarLocBasedLiveDebugValues();
+  }
+
+  return TheImpl->ExtendRanges(MF, TPC);
 }

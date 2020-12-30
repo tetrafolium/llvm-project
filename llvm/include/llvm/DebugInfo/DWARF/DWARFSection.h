@@ -14,12 +14,12 @@
 namespace llvm {
 
 struct DWARFSection {
-    StringRef Data;
+  StringRef Data;
 };
 
 struct SectionName {
-    StringRef Name;
-    bool IsNameUnique;
+  StringRef Name;
+  bool IsNameUnique;
 };
 
 } // end namespace llvm

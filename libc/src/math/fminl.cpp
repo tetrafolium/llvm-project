@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 long double LLVM_LIBC_ENTRYPOINT(fminl)(long double x, long double y) {
-    return fputil::fmin(x, y);
+  return fputil::fmin(x, y);
 }
 
 } // namespace __llvm_libc

@@ -23,30 +23,30 @@ void PreprocessorLexer::anchor() {}
 
 PreprocessorLexer::PreprocessorLexer(Preprocessor *pp, FileID fid)
     : PP(pp), FID(fid) {
-    if (pp)
-        InitialNumSLocEntries = pp->getSourceManager().local_sloc_entry_size();
+  if (pp)
+    InitialNumSLocEntries = pp->getSourceManager().local_sloc_entry_size();
 }
 
 /// After the preprocessor has parsed a \#include, lex and
 /// (potentially) macro expand the filename.
 void PreprocessorLexer::LexIncludeFilename(Token &FilenameTok) {
-    assert(ParsingFilename == false && "reentered LexIncludeFilename");
+  assert(ParsingFilename == false && "reentered LexIncludeFilename");
 
-    // We are now parsing a filename!
-    ParsingFilename = true;
+  // We are now parsing a filename!
+  ParsingFilename = true;
 
-    // Lex the filename.
-    if (LexingRawMode)
-        IndirectLex(FilenameTok);
-    else
-        PP->Lex(FilenameTok);
+  // Lex the filename.
+  if (LexingRawMode)
+    IndirectLex(FilenameTok);
+  else
+    PP->Lex(FilenameTok);
 
-    // We should have obtained the filename now.
-    ParsingFilename = false;
+  // We should have obtained the filename now.
+  ParsingFilename = false;
 }
 
 /// getFileEntry - Return the FileEntry corresponding to this FileID.  Like
 /// getFileID(), this only works for lexers with attached preprocessors.
 const FileEntry *PreprocessorLexer::getFileEntry() const {
-    return PP->getSourceManager().getFileEntryForID(getFileID());
+  return PP->getSourceManager().getFileEntryForID(getFileID());
 }

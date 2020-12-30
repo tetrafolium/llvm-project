@@ -88,10 +88,10 @@
 // cancel the addrspacecast pair this pass emits.
 //===----------------------------------------------------------------------===//
 
+#include "MCTargetDesc/NVPTXBaseInfo.h"
 #include "NVPTX.h"
 #include "NVPTXTargetMachine.h"
 #include "NVPTXUtilities.h"
-#include "MCTargetDesc/NVPTXBaseInfo.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -107,36 +107,36 @@ void initializeNVPTXLowerArgsPass(PassRegistry &);
 
 namespace {
 class NVPTXLowerArgs : public FunctionPass {
-    bool runOnFunction(Function &F) override;
+  bool runOnFunction(Function &F) override;
 
-    bool runOnKernelFunction(Function &F);
-    bool runOnDeviceFunction(Function &F);
+  bool runOnKernelFunction(Function &F);
+  bool runOnDeviceFunction(Function &F);
 
-    // handle byval parameters
-    void handleByValParam(Argument *Arg);
-    // Knowing Ptr must point to the global address space, this function
-    // addrspacecasts Ptr to global and then back to generic. This allows
-    // NVPTXInferAddressSpaces to fold the global-to-generic cast into
-    // loads/stores that appear later.
-    void markPointerAsGlobal(Value *Ptr);
+  // handle byval parameters
+  void handleByValParam(Argument *Arg);
+  // Knowing Ptr must point to the global address space, this function
+  // addrspacecasts Ptr to global and then back to generic. This allows
+  // NVPTXInferAddressSpaces to fold the global-to-generic cast into
+  // loads/stores that appear later.
+  void markPointerAsGlobal(Value *Ptr);
 
 public:
-    static char ID; // Pass identification, replacement for typeid
-    NVPTXLowerArgs(const NVPTXTargetMachine *TM = nullptr)
-        : FunctionPass(ID), TM(TM) {}
-    StringRef getPassName() const override {
-        return "Lower pointer arguments of CUDA kernels";
-    }
+  static char ID; // Pass identification, replacement for typeid
+  NVPTXLowerArgs(const NVPTXTargetMachine *TM = nullptr)
+      : FunctionPass(ID), TM(TM) {}
+  StringRef getPassName() const override {
+    return "Lower pointer arguments of CUDA kernels";
+  }
 
 private:
-    const NVPTXTargetMachine *TM;
+  const NVPTXTargetMachine *TM;
 };
 } // namespace
 
 char NVPTXLowerArgs::ID = 1;
 
-INITIALIZE_PASS(NVPTXLowerArgs, "nvptx-lower-args",
-                "Lower arguments (NVPTX)", false, false)
+INITIALIZE_PASS(NVPTXLowerArgs, "nvptx-lower-args", "Lower arguments (NVPTX)",
+                false, false)
 
 // =============================================================================
 // If the function had a byval struct ptr arg, say foo(%struct.x* byval %d),
@@ -152,109 +152,110 @@ INITIALIZE_PASS(NVPTXLowerArgs, "nvptx-lower-args",
 // Then replace all occurrences of %d by %temp.
 // =============================================================================
 void NVPTXLowerArgs::handleByValParam(Argument *Arg) {
-    Function *Func = Arg->getParent();
-    Instruction *FirstInst = &(Func->getEntryBlock().front());
-    PointerType *PType = dyn_cast<PointerType>(Arg->getType());
+  Function *Func = Arg->getParent();
+  Instruction *FirstInst = &(Func->getEntryBlock().front());
+  PointerType *PType = dyn_cast<PointerType>(Arg->getType());
 
-    assert(PType && "Expecting pointer type in handleByValParam");
+  assert(PType && "Expecting pointer type in handleByValParam");
 
-    Type *StructType = PType->getElementType();
-    const DataLayout &DL = Func->getParent()->getDataLayout();
-    unsigned AS = DL.getAllocaAddrSpace();
-    AllocaInst *AllocA = new AllocaInst(StructType, AS, Arg->getName(), FirstInst);
-    // Set the alignment to alignment of the byval parameter. This is because,
-    // later load/stores assume that alignment, and we are going to replace
-    // the use of the byval parameter with this alloca instruction.
-    AllocA->setAlignment(Func->getParamAlign(Arg->getArgNo())
-                         .getValueOr(DL.getPrefTypeAlign(StructType)));
-    Arg->replaceAllUsesWith(AllocA);
+  Type *StructType = PType->getElementType();
+  const DataLayout &DL = Func->getParent()->getDataLayout();
+  unsigned AS = DL.getAllocaAddrSpace();
+  AllocaInst *AllocA =
+      new AllocaInst(StructType, AS, Arg->getName(), FirstInst);
+  // Set the alignment to alignment of the byval parameter. This is because,
+  // later load/stores assume that alignment, and we are going to replace
+  // the use of the byval parameter with this alloca instruction.
+  AllocA->setAlignment(Func->getParamAlign(Arg->getArgNo())
+                           .getValueOr(DL.getPrefTypeAlign(StructType)));
+  Arg->replaceAllUsesWith(AllocA);
 
-    Value *ArgInParam = new AddrSpaceCastInst(
-        Arg, PointerType::get(StructType, ADDRESS_SPACE_PARAM), Arg->getName(),
-        FirstInst);
-    // Be sure to propagate alignment to this load; LLVM doesn't know that NVPTX
-    // addrspacecast preserves alignment.  Since params are constant, this load is
-    // definitely not volatile.
-    LoadInst *LI =
-        new LoadInst(StructType, ArgInParam, Arg->getName(),
-                     /*isVolatile=*/false, AllocA->getAlign(), FirstInst);
-    new StoreInst(LI, AllocA, FirstInst);
+  Value *ArgInParam = new AddrSpaceCastInst(
+      Arg, PointerType::get(StructType, ADDRESS_SPACE_PARAM), Arg->getName(),
+      FirstInst);
+  // Be sure to propagate alignment to this load; LLVM doesn't know that NVPTX
+  // addrspacecast preserves alignment.  Since params are constant, this load is
+  // definitely not volatile.
+  LoadInst *LI =
+      new LoadInst(StructType, ArgInParam, Arg->getName(),
+                   /*isVolatile=*/false, AllocA->getAlign(), FirstInst);
+  new StoreInst(LI, AllocA, FirstInst);
 }
 
 void NVPTXLowerArgs::markPointerAsGlobal(Value *Ptr) {
-    if (Ptr->getType()->getPointerAddressSpace() == ADDRESS_SPACE_GLOBAL)
-        return;
+  if (Ptr->getType()->getPointerAddressSpace() == ADDRESS_SPACE_GLOBAL)
+    return;
 
-    // Deciding where to emit the addrspacecast pair.
-    BasicBlock::iterator InsertPt;
-    if (Argument *Arg = dyn_cast<Argument>(Ptr)) {
-        // Insert at the functon entry if Ptr is an argument.
-        InsertPt = Arg->getParent()->getEntryBlock().begin();
-    } else {
-        // Insert right after Ptr if Ptr is an instruction.
-        InsertPt = ++cast<Instruction>(Ptr)->getIterator();
-        assert(InsertPt != InsertPt->getParent()->end() &&
-               "We don't call this function with Ptr being a terminator.");
-    }
+  // Deciding where to emit the addrspacecast pair.
+  BasicBlock::iterator InsertPt;
+  if (Argument *Arg = dyn_cast<Argument>(Ptr)) {
+    // Insert at the functon entry if Ptr is an argument.
+    InsertPt = Arg->getParent()->getEntryBlock().begin();
+  } else {
+    // Insert right after Ptr if Ptr is an instruction.
+    InsertPt = ++cast<Instruction>(Ptr)->getIterator();
+    assert(InsertPt != InsertPt->getParent()->end() &&
+           "We don't call this function with Ptr being a terminator.");
+  }
 
-    Instruction *PtrInGlobal = new AddrSpaceCastInst(
-        Ptr, PointerType::get(Ptr->getType()->getPointerElementType(),
-                              ADDRESS_SPACE_GLOBAL),
-        Ptr->getName(), &*InsertPt);
-    Value *PtrInGeneric = new AddrSpaceCastInst(PtrInGlobal, Ptr->getType(),
-            Ptr->getName(), &*InsertPt);
-    // Replace with PtrInGeneric all uses of Ptr except PtrInGlobal.
-    Ptr->replaceAllUsesWith(PtrInGeneric);
-    PtrInGlobal->setOperand(0, Ptr);
+  Instruction *PtrInGlobal = new AddrSpaceCastInst(
+      Ptr,
+      PointerType::get(Ptr->getType()->getPointerElementType(),
+                       ADDRESS_SPACE_GLOBAL),
+      Ptr->getName(), &*InsertPt);
+  Value *PtrInGeneric = new AddrSpaceCastInst(PtrInGlobal, Ptr->getType(),
+                                              Ptr->getName(), &*InsertPt);
+  // Replace with PtrInGeneric all uses of Ptr except PtrInGlobal.
+  Ptr->replaceAllUsesWith(PtrInGeneric);
+  PtrInGlobal->setOperand(0, Ptr);
 }
 
 // =============================================================================
 // Main function for this pass.
 // =============================================================================
 bool NVPTXLowerArgs::runOnKernelFunction(Function &F) {
-    if (TM && TM->getDrvInterface() == NVPTX::CUDA) {
-        // Mark pointers in byval structs as global.
-        for (auto &B : F) {
-            for (auto &I : B) {
-                if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
-                    if (LI->getType()->isPointerTy()) {
-                        Value *UO = getUnderlyingObject(LI->getPointerOperand());
-                        if (Argument *Arg = dyn_cast<Argument>(UO)) {
-                            if (Arg->hasByValAttr()) {
-                                // LI is a load from a pointer within a byval kernel parameter.
-                                markPointerAsGlobal(LI);
-                            }
-                        }
-                    }
-                }
+  if (TM && TM->getDrvInterface() == NVPTX::CUDA) {
+    // Mark pointers in byval structs as global.
+    for (auto &B : F) {
+      for (auto &I : B) {
+        if (LoadInst *LI = dyn_cast<LoadInst>(&I)) {
+          if (LI->getType()->isPointerTy()) {
+            Value *UO = getUnderlyingObject(LI->getPointerOperand());
+            if (Argument *Arg = dyn_cast<Argument>(UO)) {
+              if (Arg->hasByValAttr()) {
+                // LI is a load from a pointer within a byval kernel parameter.
+                markPointerAsGlobal(LI);
+              }
             }
+          }
         }
+      }
     }
+  }
 
-    for (Argument &Arg : F.args()) {
-        if (Arg.getType()->isPointerTy()) {
-            if (Arg.hasByValAttr())
-                handleByValParam(&Arg);
-            else if (TM && TM->getDrvInterface() == NVPTX::CUDA)
-                markPointerAsGlobal(&Arg);
-        }
+  for (Argument &Arg : F.args()) {
+    if (Arg.getType()->isPointerTy()) {
+      if (Arg.hasByValAttr())
+        handleByValParam(&Arg);
+      else if (TM && TM->getDrvInterface() == NVPTX::CUDA)
+        markPointerAsGlobal(&Arg);
     }
-    return true;
+  }
+  return true;
 }
 
 // Device functions only need to copy byval args into local memory.
 bool NVPTXLowerArgs::runOnDeviceFunction(Function &F) {
-    for (Argument &Arg : F.args())
-        if (Arg.getType()->isPointerTy() && Arg.hasByValAttr())
-            handleByValParam(&Arg);
-    return true;
+  for (Argument &Arg : F.args())
+    if (Arg.getType()->isPointerTy() && Arg.hasByValAttr())
+      handleByValParam(&Arg);
+  return true;
 }
 
 bool NVPTXLowerArgs::runOnFunction(Function &F) {
-    return isKernelFunction(F) ? runOnKernelFunction(F) : runOnDeviceFunction(F);
+  return isKernelFunction(F) ? runOnKernelFunction(F) : runOnDeviceFunction(F);
 }
 
-FunctionPass *
-llvm::createNVPTXLowerArgsPass(const NVPTXTargetMachine *TM) {
-    return new NVPTXLowerArgs(TM);
+FunctionPass *llvm::createNVPTXLowerArgsPass(const NVPTXTargetMachine *TM) {
+  return new NVPTXLowerArgs(TM);
 }

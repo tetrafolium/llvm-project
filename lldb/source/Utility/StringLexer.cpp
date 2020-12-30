@@ -16,74 +16,70 @@ using namespace lldb_private;
 
 StringLexer::StringLexer(std::string s) : m_data(std::move(s)), m_position(0) {}
 
-StringLexer::Character StringLexer::Peek() {
-    return m_data[m_position];
-}
+StringLexer::Character StringLexer::Peek() { return m_data[m_position]; }
 
 bool StringLexer::NextIf(Character c) {
-    auto val = Peek();
-    if (val == c) {
-        Next();
-        return true;
-    }
-    return false;
+  auto val = Peek();
+  if (val == c) {
+    Next();
+    return true;
+  }
+  return false;
 }
 
 std::pair<bool, StringLexer::Character>
 StringLexer::NextIf(std::initializer_list<Character> cs) {
-    auto val = Peek();
-    for (auto c : cs) {
-        if (val == c) {
-            Next();
-            return {true, c};
-        }
+  auto val = Peek();
+  for (auto c : cs) {
+    if (val == c) {
+      Next();
+      return {true, c};
     }
-    return {false, 0};
+  }
+  return {false, 0};
 }
 
 bool StringLexer::AdvanceIf(const std::string &token) {
-    auto pos = m_position;
-    bool matches = true;
-    for (auto c : token) {
-        if (!NextIf(c)) {
-            matches = false;
-            break;
-        }
+  auto pos = m_position;
+  bool matches = true;
+  for (auto c : token) {
+    if (!NextIf(c)) {
+      matches = false;
+      break;
     }
-    if (!matches) {
-        m_position = pos;
-        return false;
-    }
-    return true;
+  }
+  if (!matches) {
+    m_position = pos;
+    return false;
+  }
+  return true;
 }
 
 StringLexer::Character StringLexer::Next() {
-    auto val = Peek();
-    Consume();
-    return val;
+  auto val = Peek();
+  Consume();
+  return val;
 }
 
 bool StringLexer::HasAtLeast(Size s) {
-    return (m_data.size() - m_position) >= s;
+  return (m_data.size() - m_position) >= s;
 }
 
 void StringLexer::PutBack(Size s) {
-    assert(m_position >= s);
-    m_position -= s;
+  assert(m_position >= s);
+  m_position -= s;
 }
 
 std::string StringLexer::GetUnlexed() {
-    return std::string(m_data, m_position);
+  return std::string(m_data, m_position);
 }
 
-void StringLexer::Consume() {
-    m_position++;
-}
+void StringLexer::Consume() { m_position++; }
 
 StringLexer &StringLexer::operator=(const StringLexer &rhs) {
-    if (this != &rhs) {
-        m_data = rhs.m_data;
-        m_position = rhs.m_position;
-    }
-    return *this;
+  if (this != &rhs) {
+    m_data = rhs.m_data;
+    m_position = rhs.m_position;
+  }
+  return *this;
 }

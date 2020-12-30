@@ -46,140 +46,132 @@ class raw_ostream;
 /// A set of physical registers with utility functions to track liveness
 /// when walking backward/forward through a basic block.
 class LivePhysRegs {
-    const TargetRegisterInfo *TRI = nullptr;
-    using RegisterSet = SparseSet<MCPhysReg, identity<MCPhysReg>>;
-    RegisterSet LiveRegs;
+  const TargetRegisterInfo *TRI = nullptr;
+  using RegisterSet = SparseSet<MCPhysReg, identity<MCPhysReg>>;
+  RegisterSet LiveRegs;
 
 public:
-    /// Constructs an unitialized set. init() needs to be called to initialize it.
-    LivePhysRegs() = default;
+  /// Constructs an unitialized set. init() needs to be called to initialize it.
+  LivePhysRegs() = default;
 
-    /// Constructs and initializes an empty set.
-    LivePhysRegs(const TargetRegisterInfo &TRI) : TRI(&TRI) {
-        LiveRegs.setUniverse(TRI.getNumRegs());
-    }
+  /// Constructs and initializes an empty set.
+  LivePhysRegs(const TargetRegisterInfo &TRI) : TRI(&TRI) {
+    LiveRegs.setUniverse(TRI.getNumRegs());
+  }
 
-    LivePhysRegs(const LivePhysRegs&) = delete;
-    LivePhysRegs &operator=(const LivePhysRegs&) = delete;
+  LivePhysRegs(const LivePhysRegs &) = delete;
+  LivePhysRegs &operator=(const LivePhysRegs &) = delete;
 
-    /// (re-)initializes and clears the set.
-    void init(const TargetRegisterInfo &TRI) {
-        this->TRI = &TRI;
-        LiveRegs.clear();
-        LiveRegs.setUniverse(TRI.getNumRegs());
-    }
+  /// (re-)initializes and clears the set.
+  void init(const TargetRegisterInfo &TRI) {
+    this->TRI = &TRI;
+    LiveRegs.clear();
+    LiveRegs.setUniverse(TRI.getNumRegs());
+  }
 
-    /// Clears the set.
-    void clear() {
-        LiveRegs.clear();
-    }
+  /// Clears the set.
+  void clear() { LiveRegs.clear(); }
 
-    /// Returns true if the set is empty.
-    bool empty() const {
-        return LiveRegs.empty();
-    }
+  /// Returns true if the set is empty.
+  bool empty() const { return LiveRegs.empty(); }
 
-    /// Adds a physical register and all its sub-registers to the set.
-    void addReg(MCPhysReg Reg) {
-        assert(TRI && "LivePhysRegs is not initialized.");
-        assert(Reg <= TRI->getNumRegs() && "Expected a physical register.");
-        for (MCSubRegIterator SubRegs(Reg, TRI, /*IncludeSelf=*/true);
-                SubRegs.isValid(); ++SubRegs)
-            LiveRegs.insert(*SubRegs);
-    }
+  /// Adds a physical register and all its sub-registers to the set.
+  void addReg(MCPhysReg Reg) {
+    assert(TRI && "LivePhysRegs is not initialized.");
+    assert(Reg <= TRI->getNumRegs() && "Expected a physical register.");
+    for (MCSubRegIterator SubRegs(Reg, TRI, /*IncludeSelf=*/true);
+         SubRegs.isValid(); ++SubRegs)
+      LiveRegs.insert(*SubRegs);
+  }
 
-    /// Removes a physical register, all its sub-registers, and all its
-    /// super-registers from the set.
-    void removeReg(MCPhysReg Reg) {
-        assert(TRI && "LivePhysRegs is not initialized.");
-        assert(Reg <= TRI->getNumRegs() && "Expected a physical register.");
-        for (MCRegAliasIterator R(Reg, TRI, true); R.isValid(); ++R)
-            LiveRegs.erase(*R);
-    }
+  /// Removes a physical register, all its sub-registers, and all its
+  /// super-registers from the set.
+  void removeReg(MCPhysReg Reg) {
+    assert(TRI && "LivePhysRegs is not initialized.");
+    assert(Reg <= TRI->getNumRegs() && "Expected a physical register.");
+    for (MCRegAliasIterator R(Reg, TRI, true); R.isValid(); ++R)
+      LiveRegs.erase(*R);
+  }
 
-    /// Removes physical registers clobbered by the regmask operand \p MO.
-    void removeRegsInMask(const MachineOperand &MO,
-                          SmallVectorImpl<std::pair<MCPhysReg, const MachineOperand*>> *Clobbers =
-                              nullptr);
+  /// Removes physical registers clobbered by the regmask operand \p MO.
+  void removeRegsInMask(
+      const MachineOperand &MO,
+      SmallVectorImpl<std::pair<MCPhysReg, const MachineOperand *>> *Clobbers =
+          nullptr);
 
-    /// Returns true if register \p Reg is contained in the set. This also
-    /// works if only the super register of \p Reg has been defined, because
-    /// addReg() always adds all sub-registers to the set as well.
-    /// Note: Returns false if just some sub registers are live, use available()
-    /// when searching a free register.
-    bool contains(MCPhysReg Reg) const {
-        return LiveRegs.count(Reg);
-    }
+  /// Returns true if register \p Reg is contained in the set. This also
+  /// works if only the super register of \p Reg has been defined, because
+  /// addReg() always adds all sub-registers to the set as well.
+  /// Note: Returns false if just some sub registers are live, use available()
+  /// when searching a free register.
+  bool contains(MCPhysReg Reg) const { return LiveRegs.count(Reg); }
 
-    /// Returns true if register \p Reg and no aliasing register is in the set.
-    bool available(const MachineRegisterInfo &MRI, MCPhysReg Reg) const;
+  /// Returns true if register \p Reg and no aliasing register is in the set.
+  bool available(const MachineRegisterInfo &MRI, MCPhysReg Reg) const;
 
-    /// Remove defined registers and regmask kills from the set.
-    void removeDefs(const MachineInstr &MI);
+  /// Remove defined registers and regmask kills from the set.
+  void removeDefs(const MachineInstr &MI);
 
-    /// Add uses to the set.
-    void addUses(const MachineInstr &MI);
+  /// Add uses to the set.
+  void addUses(const MachineInstr &MI);
 
-    /// Simulates liveness when stepping backwards over an instruction(bundle).
-    /// Remove Defs, add uses. This is the recommended way of calculating
-    /// liveness.
-    void stepBackward(const MachineInstr &MI);
+  /// Simulates liveness when stepping backwards over an instruction(bundle).
+  /// Remove Defs, add uses. This is the recommended way of calculating
+  /// liveness.
+  void stepBackward(const MachineInstr &MI);
 
-    /// Simulates liveness when stepping forward over an instruction(bundle).
-    /// Remove killed-uses, add defs. This is the not recommended way, because it
-    /// depends on accurate kill flags. If possible use stepBackward() instead of
-    /// this function. The clobbers set will be the list of registers either
-    /// defined or clobbered by a regmask.  The operand will identify whether this
-    /// is a regmask or register operand.
-    void stepForward(const MachineInstr &MI,
-                     SmallVectorImpl<std::pair<MCPhysReg, const MachineOperand*>> &Clobbers);
+  /// Simulates liveness when stepping forward over an instruction(bundle).
+  /// Remove killed-uses, add defs. This is the not recommended way, because it
+  /// depends on accurate kill flags. If possible use stepBackward() instead of
+  /// this function. The clobbers set will be the list of registers either
+  /// defined or clobbered by a regmask.  The operand will identify whether this
+  /// is a regmask or register operand.
+  void stepForward(
+      const MachineInstr &MI,
+      SmallVectorImpl<std::pair<MCPhysReg, const MachineOperand *>> &Clobbers);
 
-    /// Adds all live-in registers of basic block \p MBB.
-    /// Live in registers are the registers in the blocks live-in list and the
-    /// pristine registers.
-    void addLiveIns(const MachineBasicBlock &MBB);
+  /// Adds all live-in registers of basic block \p MBB.
+  /// Live in registers are the registers in the blocks live-in list and the
+  /// pristine registers.
+  void addLiveIns(const MachineBasicBlock &MBB);
 
-    /// Adds all live-out registers of basic block \p MBB.
-    /// Live out registers are the union of the live-in registers of the successor
-    /// blocks and pristine registers. Live out registers of the end block are the
-    /// callee saved registers.
-    /// If a register is not added by this method, it is guaranteed to not be
-    /// live out from MBB, although a sub-register may be. This is true
-    /// both before and after regalloc.
-    void addLiveOuts(const MachineBasicBlock &MBB);
+  /// Adds all live-out registers of basic block \p MBB.
+  /// Live out registers are the union of the live-in registers of the successor
+  /// blocks and pristine registers. Live out registers of the end block are the
+  /// callee saved registers.
+  /// If a register is not added by this method, it is guaranteed to not be
+  /// live out from MBB, although a sub-register may be. This is true
+  /// both before and after regalloc.
+  void addLiveOuts(const MachineBasicBlock &MBB);
 
-    /// Adds all live-out registers of basic block \p MBB but skips pristine
-    /// registers.
-    void addLiveOutsNoPristines(const MachineBasicBlock &MBB);
+  /// Adds all live-out registers of basic block \p MBB but skips pristine
+  /// registers.
+  void addLiveOutsNoPristines(const MachineBasicBlock &MBB);
 
-    using const_iterator = RegisterSet::const_iterator;
+  using const_iterator = RegisterSet::const_iterator;
 
-    const_iterator begin() const {
-        return LiveRegs.begin();
-    }
-    const_iterator end() const {
-        return LiveRegs.end();
-    }
+  const_iterator begin() const { return LiveRegs.begin(); }
+  const_iterator end() const { return LiveRegs.end(); }
 
-    /// Prints the currently live registers to \p OS.
-    void print(raw_ostream &OS) const;
+  /// Prints the currently live registers to \p OS.
+  void print(raw_ostream &OS) const;
 
-    /// Dumps the currently live registers to the debug output.
-    void dump() const;
+  /// Dumps the currently live registers to the debug output.
+  void dump() const;
 
 private:
-    /// Adds live-in registers from basic block \p MBB, taking associated
-    /// lane masks into consideration.
-    void addBlockLiveIns(const MachineBasicBlock &MBB);
+  /// Adds live-in registers from basic block \p MBB, taking associated
+  /// lane masks into consideration.
+  void addBlockLiveIns(const MachineBasicBlock &MBB);
 
-    /// Adds pristine registers. Pristine registers are callee saved registers
-    /// that are unused in the function.
-    void addPristines(const MachineFunction &MF);
+  /// Adds pristine registers. Pristine registers are callee saved registers
+  /// that are unused in the function.
+  void addPristines(const MachineFunction &MF);
 };
 
-inline raw_ostream &operator<<(raw_ostream &OS, const LivePhysRegs& LR) {
-    LR.print(OS);
-    return OS;
+inline raw_ostream &operator<<(raw_ostream &OS, const LivePhysRegs &LR) {
+  LR.print(OS);
+  return OS;
 }
 
 /// Computes registers live-in to \p MBB assuming all of its successors
@@ -195,14 +187,13 @@ void recomputeLivenessFlags(MachineBasicBlock &MBB);
 void addLiveIns(MachineBasicBlock &MBB, const LivePhysRegs &LiveRegs);
 
 /// Convenience function combining computeLiveIns() and addLiveIns().
-void computeAndAddLiveIns(LivePhysRegs &LiveRegs,
-                          MachineBasicBlock &MBB);
+void computeAndAddLiveIns(LivePhysRegs &LiveRegs, MachineBasicBlock &MBB);
 
 /// Convenience function for recomputing live-in's for \p MBB.
 static inline void recomputeLiveIns(MachineBasicBlock &MBB) {
-    LivePhysRegs LPR;
-    MBB.clearLiveIns();
-    computeAndAddLiveIns(LPR, MBB);
+  LivePhysRegs LPR;
+  MBB.clearLiveIns();
+  computeAndAddLiveIns(LPR, MBB);
 }
 
 } // end namespace llvm

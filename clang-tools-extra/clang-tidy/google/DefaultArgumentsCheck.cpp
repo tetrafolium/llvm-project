@@ -17,17 +17,17 @@ namespace tidy {
 namespace google {
 
 void DefaultArgumentsCheck::registerMatchers(MatchFinder *Finder) {
-    Finder->addMatcher(
-        cxxMethodDecl(anyOf(isOverride(), isVirtual()),
-                      hasAnyParameter(parmVarDecl(hasInitializer(expr()))))
-        .bind("Decl"),
-        this);
+  Finder->addMatcher(
+      cxxMethodDecl(anyOf(isOverride(), isVirtual()),
+                    hasAnyParameter(parmVarDecl(hasInitializer(expr()))))
+          .bind("Decl"),
+      this);
 }
 
 void DefaultArgumentsCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *MatchedDecl = Result.Nodes.getNodeAs<CXXMethodDecl>("Decl");
-    diag(MatchedDecl->getLocation(),
-         "default arguments on virtual or override methods are prohibited");
+  const auto *MatchedDecl = Result.Nodes.getNodeAs<CXXMethodDecl>("Decl");
+  diag(MatchedDecl->getLocation(),
+       "default arguments on virtual or override methods are prohibited");
 }
 
 } // namespace google

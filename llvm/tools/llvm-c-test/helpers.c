@@ -18,22 +18,22 @@
 #define MAX_LINE_LEN 1024
 
 void llvm_tokenize_stdin(void (*cb)(char **tokens, int ntokens)) {
-    char line[MAX_LINE_LEN];
-    char *tokbuf[MAX_TOKENS];
+  char line[MAX_LINE_LEN];
+  char *tokbuf[MAX_TOKENS];
 
-    while (fgets(line, sizeof(line), stdin)) {
-        int c = 0;
+  while (fgets(line, sizeof(line), stdin)) {
+    int c = 0;
 
-        if (line[0] == ';' || line[0] == '\n')
-            continue;
+    if (line[0] == ';' || line[0] == '\n')
+      continue;
 
-        while (c < MAX_TOKENS) {
-            tokbuf[c] = strtok(c ? NULL : line, " \n");
-            if (!tokbuf[c])
-                break;
-            c++;
-        }
-        if (c)
-            cb(tokbuf, c);
+    while (c < MAX_TOKENS) {
+      tokbuf[c] = strtok(c ? NULL : line, " \n");
+      if (!tokbuf[c])
+        break;
+      c++;
     }
+    if (c)
+      cb(tokbuf, c);
+  }
 }

@@ -24,15 +24,13 @@ struct FDRFlags {
 #include "xray_fdr_flags.inc"
 #undef XRAY_FLAG
 
-    void setDefaults();
+  void setDefaults();
 };
 
 extern FDRFlags xray_fdr_flags_dont_use_directly;
 extern void registerXRayFDRFlags(FlagParser *P, FDRFlags *F);
 const char *useCompilerDefinedFDRFlags();
-inline FDRFlags *fdrFlags() {
-    return &xray_fdr_flags_dont_use_directly;
-}
+inline FDRFlags *fdrFlags() { return &xray_fdr_flags_dont_use_directly; }
 
 } // namespace __xray
 

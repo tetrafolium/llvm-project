@@ -15,18 +15,18 @@
 |*                                                                            *|
 \*===----------------------------------------------------------------------===*/
 
-#include "llvm-c/Target.h"
 #include "caml/alloc.h"
+#include "caml/custom.h"
 #include "caml/fail.h"
 #include "caml/memory.h"
-#include "caml/custom.h"
+#include "llvm-c/Target.h"
 
 /* unit -> unit */
 CAMLprim value llvm_initialize_all(value Unit) {
-    LLVMInitializeAllTargetInfos();
-    LLVMInitializeAllTargets();
-    LLVMInitializeAllTargetMCs();
-    LLVMInitializeAllAsmPrinters();
-    LLVMInitializeAllAsmParsers();
-    return Val_unit;
+  LLVMInitializeAllTargetInfos();
+  LLVMInitializeAllTargets();
+  LLVMInitializeAllTargetMCs();
+  LLVMInitializeAllAsmPrinters();
+  LLVMInitializeAllAsmParsers();
+  return Val_unit;
 }

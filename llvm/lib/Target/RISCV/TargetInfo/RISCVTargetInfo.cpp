@@ -11,18 +11,18 @@
 using namespace llvm;
 
 Target &llvm::getTheRISCV32Target() {
-    static Target TheRISCV32Target;
-    return TheRISCV32Target;
+  static Target TheRISCV32Target;
+  return TheRISCV32Target;
 }
 
 Target &llvm::getTheRISCV64Target() {
-    static Target TheRISCV64Target;
-    return TheRISCV64Target;
+  static Target TheRISCV64Target;
+  return TheRISCV64Target;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTargetInfo() {
-    RegisterTarget<Triple::riscv32> X(getTheRISCV32Target(), "riscv32",
-                                      "32-bit RISC-V", "RISCV");
-    RegisterTarget<Triple::riscv64> Y(getTheRISCV64Target(), "riscv64",
-                                      "64-bit RISC-V", "RISCV");
+  RegisterTarget<Triple::riscv32> X(getTheRISCV32Target(), "riscv32",
+                                    "32-bit RISC-V", "RISCV");
+  RegisterTarget<Triple::riscv64> Y(getTheRISCV64Target(), "riscv64",
+                                    "64-bit RISC-V", "RISCV");
 }

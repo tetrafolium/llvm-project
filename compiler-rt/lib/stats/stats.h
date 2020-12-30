@@ -23,20 +23,20 @@ namespace __sanitizer {
 enum { kKindBits = 3 };
 
 struct StatInfo {
-    uptr addr;
-    uptr data;
+  uptr addr;
+  uptr data;
 };
 
 struct StatModule {
-    StatModule *next;
-    u32 size;
-    StatInfo infos[1];
+  StatModule *next;
+  u32 size;
+  StatInfo infos[1];
 };
 
 inline uptr CountFromData(uptr data) {
-    return data & ((1ull << (sizeof(uptr) * 8 - kKindBits)) - 1);
+  return data & ((1ull << (sizeof(uptr) * 8 - kKindBits)) - 1);
 }
 
-}
+} // namespace __sanitizer
 
 #endif

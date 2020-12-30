@@ -30,7 +30,7 @@ void populateGpuAllReducePatterns(MLIRContext *context,
 /// Collect all patterns to rewrite ops within the GPU dialect.
 inline void populateGpuRewritePatterns(MLIRContext *context,
                                        OwningRewritePatternList &patterns) {
-    populateGpuAllReducePatterns(context, patterns);
+  populateGpuAllReducePatterns(context, patterns);
 }
 
 //===----------------------------------------------------------------------===//

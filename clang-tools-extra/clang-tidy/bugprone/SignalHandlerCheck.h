@@ -22,17 +22,17 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-signal-handler-check.html
 class SignalHandlerCheck : public ClangTidyCheck {
 public:
-    SignalHandlerCheck(StringRef Name, ClangTidyContext *Context);
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override;
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  SignalHandlerCheck(StringRef Name, ClangTidyContext *Context);
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override;
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void reportBug(const FunctionDecl *CalledFunction, const Expr *CallOrRef,
-                   const CallExpr *SignalCall, const FunctionDecl *HandlerDecl);
-    bool isSystemCallAllowed(const FunctionDecl *FD) const;
+  void reportBug(const FunctionDecl *CalledFunction, const Expr *CallOrRef,
+                 const CallExpr *SignalCall, const FunctionDecl *HandlerDecl);
+  bool isSystemCallAllowed(const FunctionDecl *FD) const;
 
-    static llvm::StringSet<> StrictConformingFunctions;
+  static llvm::StringSet<> StrictConformingFunctions;
 };
 
 } // namespace bugprone

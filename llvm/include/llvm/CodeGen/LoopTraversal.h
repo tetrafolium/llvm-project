@@ -64,50 +64,50 @@ class MachineFunction;
 /// can entirely process the predecessors before getting to D.
 class LoopTraversal {
 private:
-    struct MBBInfo {
-        /// Whether we have gotten to this block in primary processing yet.
-        bool PrimaryCompleted = false;
+  struct MBBInfo {
+    /// Whether we have gotten to this block in primary processing yet.
+    bool PrimaryCompleted = false;
 
-        /// The number of predecessors for which primary processing has completed
-        unsigned IncomingProcessed = 0;
+    /// The number of predecessors for which primary processing has completed
+    unsigned IncomingProcessed = 0;
 
-        /// The value of `IncomingProcessed` at the start of primary processing
-        unsigned PrimaryIncoming = 0;
+    /// The value of `IncomingProcessed` at the start of primary processing
+    unsigned PrimaryIncoming = 0;
 
-        /// The number of predecessors for which all processing steps are done.
-        unsigned IncomingCompleted = 0;
+    /// The number of predecessors for which all processing steps are done.
+    unsigned IncomingCompleted = 0;
 
-        MBBInfo() = default;
-    };
-    using MBBInfoMap = SmallVector<MBBInfo, 4>;
-    /// Helps keep track if we proccessed this block and all its predecessors.
-    MBBInfoMap MBBInfos;
+    MBBInfo() = default;
+  };
+  using MBBInfoMap = SmallVector<MBBInfo, 4>;
+  /// Helps keep track if we proccessed this block and all its predecessors.
+  MBBInfoMap MBBInfos;
 
 public:
-    struct TraversedMBBInfo {
-        /// The basic block.
-        MachineBasicBlock *MBB = nullptr;
+  struct TraversedMBBInfo {
+    /// The basic block.
+    MachineBasicBlock *MBB = nullptr;
 
-        /// True if this is the first time we process the basic block.
-        bool PrimaryPass = true;
+    /// True if this is the first time we process the basic block.
+    bool PrimaryPass = true;
 
-        /// True if the block that is ready for its final round of processing.
-        bool IsDone = true;
+    /// True if the block that is ready for its final round of processing.
+    bool IsDone = true;
 
-        TraversedMBBInfo(MachineBasicBlock *BB = nullptr, bool Primary = true,
-                         bool Done = true)
-            : MBB(BB), PrimaryPass(Primary), IsDone(Done) {}
-    };
-    LoopTraversal() {}
+    TraversedMBBInfo(MachineBasicBlock *BB = nullptr, bool Primary = true,
+                     bool Done = true)
+        : MBB(BB), PrimaryPass(Primary), IsDone(Done) {}
+  };
+  LoopTraversal() {}
 
-    /// Identifies basic blocks that are part of loops and should to be
-    ///  visited twice and returns efficient traversal order for all the blocks.
-    typedef SmallVector<TraversedMBBInfo, 4> TraversalOrder;
-    TraversalOrder traverse(MachineFunction &MF);
+  /// Identifies basic blocks that are part of loops and should to be
+  ///  visited twice and returns efficient traversal order for all the blocks.
+  typedef SmallVector<TraversedMBBInfo, 4> TraversalOrder;
+  TraversalOrder traverse(MachineFunction &MF);
 
 private:
-    /// Returens true if the block is ready for its final round of processing.
-    bool isBlockDone(MachineBasicBlock *MBB);
+  /// Returens true if the block is ready for its final round of processing.
+  bool isBlockDone(MachineBasicBlock *MBB);
 };
 
 } // namespace llvm

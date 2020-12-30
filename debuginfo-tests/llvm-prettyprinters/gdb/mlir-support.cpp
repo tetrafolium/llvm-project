@@ -10,7 +10,7 @@ mlir::MLIRContext Context;
 auto Identifier = mlir::Identifier::get("foo", &Context);
 mlir::OperationName OperationName("FooOp", &Context);
 mlir::Value Value({reinterpret_cast<void *>(0x8),
-         mlir::Value::Kind::TrailingOpResult});
+                   mlir::Value::Kind::TrailingOpResult});
 
 mlir::Type Type(nullptr);
 mlir::Type IndexType = mlir::IndexType::get(&Context);
@@ -28,9 +28,7 @@ auto FileLineColLoc = mlir::FileLineColLoc::get("file", 7, 8, &Context);
 auto OpaqueLoc = mlir::OpaqueLoc::get<uintptr_t>(9, &Context);
 auto NameLoc = mlir::NameLoc::get(Identifier, &Context);
 auto CallSiteLoc = mlir::CallSiteLoc::get(FileLineColLoc, OpaqueLoc);
-auto FusedLoc = mlir::FusedLoc::get( {
-    FileLineColLoc, NameLoc
-}, &Context);
+auto FusedLoc = mlir::FusedLoc::get({FileLineColLoc, NameLoc}, &Context);
 
 mlir::Attribute UnitAttr = mlir::UnitAttr::get(&Context);
 mlir::Attribute FloatAttr = mlir::FloatAttr::get(FloatType, 1.0);
@@ -39,8 +37,6 @@ mlir::Attribute TypeAttr = mlir::TypeAttr::get(IndexType);
 mlir::Attribute ArrayAttr = mlir::ArrayAttr::get({UnitAttr}, &Context);
 mlir::Attribute StringAttr = mlir::StringAttr::get("foo", &Context);
 mlir::Attribute ElementsAttr = mlir::DenseElementsAttr::get(
-                                   VectorType.cast<mlir::ShapedType>(), llvm::ArrayRef<float> {2.0f, 3.0f});
+    VectorType.cast<mlir::ShapedType>(), llvm::ArrayRef<float>{2.0f, 3.0f});
 
-int main() {
-    return 0;
-}
+int main() { return 0; }

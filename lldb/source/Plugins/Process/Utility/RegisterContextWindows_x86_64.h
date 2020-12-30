@@ -14,15 +14,15 @@
 class RegisterContextWindows_x86_64
     : public lldb_private::RegisterInfoInterface {
 public:
-    RegisterContextWindows_x86_64(const lldb_private::ArchSpec &target_arch);
+  RegisterContextWindows_x86_64(const lldb_private::ArchSpec &target_arch);
 
-    size_t GetGPRSize() const override;
+  size_t GetGPRSize() const override;
 
-    const lldb_private::RegisterInfo *GetRegisterInfo() const override;
+  const lldb_private::RegisterInfo *GetRegisterInfo() const override;
 
-    uint32_t GetRegisterCount() const override;
+  uint32_t GetRegisterCount() const override;
 
-    uint32_t GetUserRegisterCount() const override;
+  uint32_t GetUserRegisterCount() const override;
 };
 
 #endif

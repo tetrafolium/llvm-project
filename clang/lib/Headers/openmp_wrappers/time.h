@@ -23,11 +23,9 @@
 #include_next <time.h>
 
 #pragma omp begin declare variant match(                                       \
-device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
+    device = {arch(nvptx, nvptx64)}, implementation = {extension(match_any)})
 
-__DEVICE__ clock_t clock() {
-    return __nvvm_read_ptx_sreg_clock();
-}
+__DEVICE__ clock_t clock() { return __nvvm_read_ptx_sreg_clock(); }
 
 #pragma omp end declare variant
 

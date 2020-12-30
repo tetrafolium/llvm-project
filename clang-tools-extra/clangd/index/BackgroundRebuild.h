@@ -47,53 +47,53 @@ namespace clangd {
 // This class is exposed in the header so it can be tested.
 class BackgroundIndexRebuilder {
 public:
-    BackgroundIndexRebuilder(SwapIndex *Target, FileSymbols *Source,
-                             unsigned Threads)
-        : TUsBeforeFirstBuild(Threads), Target(Target), Source(Source) {}
+  BackgroundIndexRebuilder(SwapIndex *Target, FileSymbols *Source,
+                           unsigned Threads)
+      : TUsBeforeFirstBuild(Threads), Target(Target), Source(Source) {}
 
-    // Called to indicate a TU has been indexed.
-    // May rebuild, if enough TUs have been indexed.
-    void indexedTU();
-    // Called to indicate that all worker threads are idle.
-    // May reindex, if the index is not up to date.
-    void idle();
-    // Called to indicate we're going to load a batch of shards from disk.
-    // startLoading() and doneLoading() must be paired, but multiple loading
-    // sessions may happen concurrently.
-    void startLoading();
-    // Called to indicate some shards were actually loaded from disk.
-    void loadedShard(size_t ShardCount);
-    // Called to indicate we're finished loading shards from disk.
-    // May rebuild (if any were loaded).
-    void doneLoading();
+  // Called to indicate a TU has been indexed.
+  // May rebuild, if enough TUs have been indexed.
+  void indexedTU();
+  // Called to indicate that all worker threads are idle.
+  // May reindex, if the index is not up to date.
+  void idle();
+  // Called to indicate we're going to load a batch of shards from disk.
+  // startLoading() and doneLoading() must be paired, but multiple loading
+  // sessions may happen concurrently.
+  void startLoading();
+  // Called to indicate some shards were actually loaded from disk.
+  void loadedShard(size_t ShardCount);
+  // Called to indicate we're finished loading shards from disk.
+  // May rebuild (if any were loaded).
+  void doneLoading();
 
-    // Ensures we won't start any more rebuilds.
-    void shutdown();
+  // Ensures we won't start any more rebuilds.
+  void shutdown();
 
-    // Thresholds for rebuilding as TUs get indexed. Exposed for testing.
-    const unsigned TUsBeforeFirstBuild; // Typically one per worker thread.
-    const unsigned TUsBeforeRebuild = 100;
+  // Thresholds for rebuilding as TUs get indexed. Exposed for testing.
+  const unsigned TUsBeforeFirstBuild; // Typically one per worker thread.
+  const unsigned TUsBeforeRebuild = 100;
 
 private:
-    // Run Check under the lock, and rebuild if it returns true.
-    void maybeRebuild(const char *Reason, std::function<bool()> Check);
-    bool enoughTUsToRebuild() const;
+  // Run Check under the lock, and rebuild if it returns true.
+  void maybeRebuild(const char *Reason, std::function<bool()> Check);
+  bool enoughTUsToRebuild() const;
 
-    // All transient state is guarded by the mutex.
-    std::mutex Mu;
-    bool ShouldStop = false;
-    // Index builds are versioned. ActiveVersion chases StartedVersion.
-    unsigned StartedVersion = 0;
-    unsigned ActiveVersion = 0;
-    // How many TUs have we indexed so far since startup?
-    unsigned IndexedTUs = 0;
-    unsigned IndexedTUsAtLastRebuild = 0;
-    // Are we loading shards? May be multiple concurrent sessions.
-    unsigned Loading = 0;
-    unsigned LoadedShards; // In the current loading session.
+  // All transient state is guarded by the mutex.
+  std::mutex Mu;
+  bool ShouldStop = false;
+  // Index builds are versioned. ActiveVersion chases StartedVersion.
+  unsigned StartedVersion = 0;
+  unsigned ActiveVersion = 0;
+  // How many TUs have we indexed so far since startup?
+  unsigned IndexedTUs = 0;
+  unsigned IndexedTUsAtLastRebuild = 0;
+  // Are we loading shards? May be multiple concurrent sessions.
+  unsigned Loading = 0;
+  unsigned LoadedShards; // In the current loading session.
 
-    SwapIndex *Target;
-    FileSymbols *Source;
+  SwapIndex *Target;
+  FileSymbols *Source;
 };
 
 } // namespace clangd

@@ -23,13 +23,13 @@ namespace llvm {
 /// A pass which infers function attributes from the names and signatures of
 /// function declarations in a module.
 struct InferFunctionAttrsPass : PassInfoMixin<InferFunctionAttrsPass> {
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 /// Create a legacy pass manager instance of a pass to infer function
 /// attributes.
 Pass *createInferFunctionAttrsLegacyPass();
 
-}
+} // namespace llvm
 
 #endif // LLVM_TRANSFORMS_IPO_INFERFUNCTIONATTRS_H

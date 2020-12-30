@@ -20,25 +20,25 @@ class Thread;
 
 class RegisterContextWindows_arm : public RegisterContextWindows {
 public:
-    // Constructors and Destructors
-    RegisterContextWindows_arm(Thread &thread, uint32_t concrete_frame_idx);
+  // Constructors and Destructors
+  RegisterContextWindows_arm(Thread &thread, uint32_t concrete_frame_idx);
 
-    virtual ~RegisterContextWindows_arm();
+  virtual ~RegisterContextWindows_arm();
 
-    // Subclasses must override these functions
-    size_t GetRegisterCount() override;
+  // Subclasses must override these functions
+  size_t GetRegisterCount() override;
 
-    const RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
+  const RegisterInfo *GetRegisterInfoAtIndex(size_t reg) override;
 
-    size_t GetRegisterSetCount() override;
+  size_t GetRegisterSetCount() override;
 
-    const RegisterSet *GetRegisterSet(size_t reg_set) override;
+  const RegisterSet *GetRegisterSet(size_t reg_set) override;
 
-    bool ReadRegister(const RegisterInfo *reg_info,
-                      RegisterValue &reg_value) override;
+  bool ReadRegister(const RegisterInfo *reg_info,
+                    RegisterValue &reg_value) override;
 
-    bool WriteRegister(const RegisterInfo *reg_info,
-                       const RegisterValue &reg_value) override;
+  bool WriteRegister(const RegisterInfo *reg_info,
+                     const RegisterValue &reg_value) override;
 };
 } // namespace lldb_private
 

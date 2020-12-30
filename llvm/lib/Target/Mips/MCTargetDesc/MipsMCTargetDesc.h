@@ -31,11 +31,11 @@ class Target;
 class Triple;
 
 MCCodeEmitter *createMipsMCCodeEmitterEB(const MCInstrInfo &MCII,
-        const MCRegisterInfo &MRI,
-        MCContext &Ctx);
+                                         const MCRegisterInfo &MRI,
+                                         MCContext &Ctx);
 MCCodeEmitter *createMipsMCCodeEmitterEL(const MCInstrInfo &MCII,
-        const MCRegisterInfo &MRI,
-        MCContext &Ctx);
+                                         const MCRegisterInfo &MRI,
+                                         MCContext &Ctx);
 
 MCAsmBackend *createMipsAsmBackend(const Target &T, const MCSubtargetInfo &STI,
                                    const MCRegisterInfo &MRI,
@@ -48,7 +48,7 @@ namespace MIPS_MC {
 StringRef selectMipsCPU(const Triple &TT, StringRef CPU);
 }
 
-} // End llvm namespace
+} // namespace llvm
 
 // Defines symbolic names for Mips registers.  This defines a mapping from
 // register name to register number.

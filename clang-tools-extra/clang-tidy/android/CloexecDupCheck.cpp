@@ -17,19 +17,19 @@ namespace tidy {
 namespace android {
 
 void CloexecDupCheck::registerMatchers(MatchFinder *Finder) {
-    registerMatchersImpl(Finder,
-                         functionDecl(returns(isInteger()), hasName("dup"),
-                                      hasParameter(0, hasType(isInteger()))));
+  registerMatchersImpl(Finder,
+                       functionDecl(returns(isInteger()), hasName("dup"),
+                                    hasParameter(0, hasType(isInteger()))));
 }
 
 void CloexecDupCheck::check(const MatchFinder::MatchResult &Result) {
-    std::string ReplacementText =
-        (Twine("fcntl(") + getSpellingArg(Result, 0) + ", F_DUPFD_CLOEXEC)")
-        .str();
+  std::string ReplacementText =
+      (Twine("fcntl(") + getSpellingArg(Result, 0) + ", F_DUPFD_CLOEXEC)")
+          .str();
 
-    replaceFunc(Result,
-                "prefer fcntl() to dup() because fcntl() allows F_DUPFD_CLOEXEC",
-                ReplacementText);
+  replaceFunc(Result,
+              "prefer fcntl() to dup() because fcntl() allows F_DUPFD_CLOEXEC",
+              ReplacementText);
 }
 
 } // namespace android

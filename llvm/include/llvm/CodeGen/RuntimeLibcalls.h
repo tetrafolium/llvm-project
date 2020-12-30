@@ -80,7 +80,7 @@ Libcall getMEMMOVE_ELEMENT_UNORDERED_ATOMIC(uint64_t ElementSize);
 /// UNKNOW_LIBCALL if there is none.
 Libcall getMEMSET_ELEMENT_UNORDERED_ATOMIC(uint64_t ElementSize);
 
-}
-}
+} // namespace RTLIB
+} // namespace llvm
 
 #endif

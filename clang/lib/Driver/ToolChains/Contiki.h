@@ -18,18 +18,18 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY Contiki : public Generic_ELF {
 public:
-    Contiki(const Driver &D, const llvm::Triple &Triple,
-            const llvm::opt::ArgList &Args);
+  Contiki(const Driver &D, const llvm::Triple &Triple,
+          const llvm::opt::ArgList &Args);
 
-    // No support for finding a C++ standard library yet.
-    void addLibCxxIncludePaths(
-        const llvm::opt::ArgList &DriverArgs,
-        llvm::opt::ArgStringList &CC1Args) const override {}
-    void addLibStdCxxIncludePaths(
-        const llvm::opt::ArgList &DriverArgs,
-        llvm::opt::ArgStringList &CC1Args) const override {}
+  // No support for finding a C++ standard library yet.
+  void addLibCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
+                             llvm::opt::ArgStringList &CC1Args) const override {
+  }
+  void
+  addLibStdCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
+                           llvm::opt::ArgStringList &CC1Args) const override {}
 
-    SanitizerMask getSupportedSanitizers() const override;
+  SanitizerMask getSupportedSanitizers() const override;
 };
 
 } // end namespace toolchains

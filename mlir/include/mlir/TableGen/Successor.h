@@ -19,25 +19,23 @@ namespace tblgen {
 // TableGen.
 class Successor : public Constraint {
 public:
-    using Constraint::Constraint;
+  using Constraint::Constraint;
 
-    static bool classof(const Constraint *c) {
-        return c->getKind() == CK_Successor;
-    }
+  static bool classof(const Constraint *c) {
+    return c->getKind() == CK_Successor;
+  }
 
-    // Returns true if this successor is variadic.
-    bool isVariadic() const;
+  // Returns true if this successor is variadic.
+  bool isVariadic() const;
 };
 
 // A struct bundling a successor's constraint and its name.
 struct NamedSuccessor {
-    // Returns true if this successor is variadic.
-    bool isVariadic() const {
-        return constraint.isVariadic();
-    }
+  // Returns true if this successor is variadic.
+  bool isVariadic() const { return constraint.isVariadic(); }
 
-    StringRef name;
-    Successor constraint;
+  StringRef name;
+  Successor constraint;
 };
 
 } // end namespace tblgen

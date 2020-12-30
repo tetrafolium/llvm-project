@@ -19,39 +19,39 @@ void NVPTXMCAsmInfo::anchor() {}
 
 NVPTXMCAsmInfo::NVPTXMCAsmInfo(const Triple &TheTriple,
                                const MCTargetOptions &Options) {
-    if (TheTriple.getArch() == Triple::nvptx64) {
-        CodePointerSize = CalleeSaveStackSlotSize = 8;
-    }
+  if (TheTriple.getArch() == Triple::nvptx64) {
+    CodePointerSize = CalleeSaveStackSlotSize = 8;
+  }
 
-    CommentString = "//";
+  CommentString = "//";
 
-    HasSingleParameterDotFile = false;
+  HasSingleParameterDotFile = false;
 
-    InlineAsmStart = " begin inline asm";
-    InlineAsmEnd = " end inline asm";
+  InlineAsmStart = " begin inline asm";
+  InlineAsmEnd = " end inline asm";
 
-    SupportsDebugInformation = true;
-    // PTX does not allow .align on functions.
-    HasFunctionAlignment = false;
-    HasDotTypeDotSizeDirective = false;
-    // PTX does not allow .hidden or .protected
-    HiddenDeclarationVisibilityAttr = HiddenVisibilityAttr = MCSA_Invalid;
-    ProtectedVisibilityAttr = MCSA_Invalid;
+  SupportsDebugInformation = true;
+  // PTX does not allow .align on functions.
+  HasFunctionAlignment = false;
+  HasDotTypeDotSizeDirective = false;
+  // PTX does not allow .hidden or .protected
+  HiddenDeclarationVisibilityAttr = HiddenVisibilityAttr = MCSA_Invalid;
+  ProtectedVisibilityAttr = MCSA_Invalid;
 
-    Data8bitsDirective = ".b8 ";
-    Data16bitsDirective = nullptr; // not supported
-    Data32bitsDirective = ".b32 ";
-    Data64bitsDirective = ".b64 ";
-    ZeroDirective = ".b8";
-    AsciiDirective = nullptr; // not supported
-    AscizDirective = nullptr; // not supported
-    SupportsQuotedNames = false;
-    SupportsExtendedDwarfLocDirective = false;
-    SupportsSignedData = false;
+  Data8bitsDirective = ".b8 ";
+  Data16bitsDirective = nullptr; // not supported
+  Data32bitsDirective = ".b32 ";
+  Data64bitsDirective = ".b64 ";
+  ZeroDirective = ".b8";
+  AsciiDirective = nullptr; // not supported
+  AscizDirective = nullptr; // not supported
+  SupportsQuotedNames = false;
+  SupportsExtendedDwarfLocDirective = false;
+  SupportsSignedData = false;
 
-    // @TODO: Can we just disable this?
-    WeakDirective = "\t// .weak\t";
-    GlobalDirective = "\t// .globl\t";
+  // @TODO: Can we just disable this?
+  WeakDirective = "\t// .weak\t";
+  GlobalDirective = "\t// .globl\t";
 
-    UseIntegratedAssembler = false;
+  UseIntegratedAssembler = false;
 }

@@ -21,11 +21,9 @@ namespace llvm {
 /// A pass that lowers atomic intrinsic into non-atomic intrinsics.
 class LowerAtomicPass : public PassInfoMixin<LowerAtomicPass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
-    static bool isRequired() {
-        return true;
-    }
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+  static bool isRequired() { return true; }
 };
-}
+} // namespace llvm
 
 #endif // LLVM_TRANSFORMS_SCALAR_LOWERATOMIC_H

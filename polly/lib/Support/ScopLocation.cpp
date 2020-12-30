@@ -20,24 +20,24 @@ namespace polly {
 
 void getDebugLocation(const Region *R, unsigned &LineBegin, unsigned &LineEnd,
                       std::string &FileName) {
-    LineBegin = -1;
-    LineEnd = 0;
+  LineBegin = -1;
+  LineEnd = 0;
 
-    for (const BasicBlock *BB : R->blocks())
-        for (const Instruction &Inst : *BB) {
-            DebugLoc DL = Inst.getDebugLoc();
-            if (!DL)
-                continue;
+  for (const BasicBlock *BB : R->blocks())
+    for (const Instruction &Inst : *BB) {
+      DebugLoc DL = Inst.getDebugLoc();
+      if (!DL)
+        continue;
 
-            auto *Scope = cast<DIScope>(DL.getScope());
+      auto *Scope = cast<DIScope>(DL.getScope());
 
-            if (FileName.empty())
-                FileName = Scope->getFilename().str();
+      if (FileName.empty())
+        FileName = Scope->getFilename().str();
 
-            unsigned NewLine = DL.getLine();
+      unsigned NewLine = DL.getLine();
 
-            LineBegin = std::min(LineBegin, NewLine);
-            LineEnd = std::max(LineEnd, NewLine);
-        }
+      LineBegin = std::min(LineBegin, NewLine);
+      LineEnd = std::max(LineEnd, NewLine);
+    }
 }
 } // namespace polly

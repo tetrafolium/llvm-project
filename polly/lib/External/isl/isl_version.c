@@ -1,17 +1,16 @@
-#include "isl_config.h"
 #include "gitversion.h"
+#include "isl_config.h"
 
-const char *isl_version(void)
-{
-    return GIT_HEAD_ID
+const char *isl_version(void) {
+  return GIT_HEAD_ID
 #ifdef USE_GMP_FOR_MP
-           "-GMP"
+      "-GMP"
 #endif
 #ifdef USE_IMATH_FOR_MP
-           "-IMath"
+      "-IMath"
 #ifdef USE_SMALL_INT_OPT
-           "-32"
+      "-32"
 #endif
 #endif
-           "\n";
+      "\n";
 }

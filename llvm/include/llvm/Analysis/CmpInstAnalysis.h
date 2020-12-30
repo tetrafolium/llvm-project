@@ -62,8 +62,7 @@ bool predicatesFoldable(CmpInst::Predicate P1, CmpInst::Predicate P2);
 /// returned predicate is either == or !=. Returns false if decomposition
 /// fails.
 bool decomposeBitTestICmp(Value *LHS, Value *RHS, CmpInst::Predicate &Pred,
-                          Value *&X, APInt &Mask,
-                          bool LookThroughTrunc = true);
+                          Value *&X, APInt &Mask, bool LookThroughTrunc = true);
 
 } // end namespace llvm
 

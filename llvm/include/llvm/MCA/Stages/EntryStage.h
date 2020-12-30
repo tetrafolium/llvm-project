@@ -24,25 +24,25 @@ namespace llvm {
 namespace mca {
 
 class EntryStage final : public Stage {
-    InstRef CurrentInstruction;
-    SmallVector<std::unique_ptr<Instruction>, 16> Instructions;
-    SourceMgr &SM;
-    unsigned NumRetired;
+  InstRef CurrentInstruction;
+  SmallVector<std::unique_ptr<Instruction>, 16> Instructions;
+  SourceMgr &SM;
+  unsigned NumRetired;
 
-    // Updates the program counter, and sets 'CurrentInstruction'.
-    void getNextInstruction();
+  // Updates the program counter, and sets 'CurrentInstruction'.
+  void getNextInstruction();
 
-    EntryStage(const EntryStage &Other) = delete;
-    EntryStage &operator=(const EntryStage &Other) = delete;
+  EntryStage(const EntryStage &Other) = delete;
+  EntryStage &operator=(const EntryStage &Other) = delete;
 
 public:
-    EntryStage(SourceMgr &SM) : CurrentInstruction(), SM(SM), NumRetired(0) { }
+  EntryStage(SourceMgr &SM) : CurrentInstruction(), SM(SM), NumRetired(0) {}
 
-    bool isAvailable(const InstRef &IR) const override;
-    bool hasWorkToComplete() const override;
-    Error execute(InstRef &IR) override;
-    Error cycleStart() override;
-    Error cycleEnd() override;
+  bool isAvailable(const InstRef &IR) const override;
+  bool hasWorkToComplete() const override;
+  Error execute(InstRef &IR) override;
+  Error cycleStart() override;
+  Error cycleEnd() override;
 };
 
 } // namespace mca

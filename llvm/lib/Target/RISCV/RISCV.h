@@ -33,7 +33,7 @@ class PassRegistry;
 void LowerRISCVMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
                                     const AsmPrinter &AP);
 bool LowerRISCVMachineOperandToMCOperand(const MachineOperand &MO,
-        MCOperand &MCOp, const AsmPrinter &AP);
+                                         MCOperand &MCOp, const AsmPrinter &AP);
 
 FunctionPass *createRISCVISelDag(RISCVTargetMachine &TM);
 
@@ -50,8 +50,8 @@ FunctionPass *createRISCVCleanupVSETVLIPass();
 void initializeRISCVCleanupVSETVLIPass(PassRegistry &);
 
 InstructionSelector *createRISCVInstructionSelector(const RISCVTargetMachine &,
-        RISCVSubtarget &,
-        RISCVRegisterBankInfo &);
-}
+                                                    RISCVSubtarget &,
+                                                    RISCVRegisterBankInfo &);
+} // namespace llvm
 
 #endif

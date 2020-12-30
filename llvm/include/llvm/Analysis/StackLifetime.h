@@ -35,174 +35,168 @@ class Instruction;
 /// Interesting instructions are numbered in the depth-first walk of the CFG,
 /// and in the program order inside each basic block.
 class StackLifetime {
-    /// A class representing liveness information for a single basic block.
-    /// Each bit in the BitVector represents the liveness property
-    /// for a different stack slot.
-    struct BlockLifetimeInfo {
-        explicit BlockLifetimeInfo(unsigned Size)
-            : Begin(Size), End(Size), LiveIn(Size), LiveOut(Size) {}
+  /// A class representing liveness information for a single basic block.
+  /// Each bit in the BitVector represents the liveness property
+  /// for a different stack slot.
+  struct BlockLifetimeInfo {
+    explicit BlockLifetimeInfo(unsigned Size)
+        : Begin(Size), End(Size), LiveIn(Size), LiveOut(Size) {}
 
-        /// Which slots BEGINs in each basic block.
-        BitVector Begin;
+    /// Which slots BEGINs in each basic block.
+    BitVector Begin;
 
-        /// Which slots ENDs in each basic block.
-        BitVector End;
+    /// Which slots ENDs in each basic block.
+    BitVector End;
 
-        /// Which slots are marked as LIVE_IN, coming into each basic block.
-        BitVector LiveIn;
+    /// Which slots are marked as LIVE_IN, coming into each basic block.
+    BitVector LiveIn;
 
-        /// Which slots are marked as LIVE_OUT, coming out of each basic block.
-        BitVector LiveOut;
-    };
+    /// Which slots are marked as LIVE_OUT, coming out of each basic block.
+    BitVector LiveOut;
+  };
 
 public:
-    class LifetimeAnnotationWriter;
+  class LifetimeAnnotationWriter;
 
-    /// This class represents a set of interesting instructions where an alloca is
-    /// live.
-    class LiveRange {
-        BitVector Bits;
-        friend raw_ostream &operator<<(raw_ostream &OS,
-                                       const StackLifetime::LiveRange &R);
+  /// This class represents a set of interesting instructions where an alloca is
+  /// live.
+  class LiveRange {
+    BitVector Bits;
+    friend raw_ostream &operator<<(raw_ostream &OS,
+                                   const StackLifetime::LiveRange &R);
 
-    public:
-        LiveRange(unsigned Size, bool Set = false) : Bits(Size, Set) {}
-        void addRange(unsigned Start, unsigned End) {
-            Bits.set(Start, End);
-        }
+  public:
+    LiveRange(unsigned Size, bool Set = false) : Bits(Size, Set) {}
+    void addRange(unsigned Start, unsigned End) { Bits.set(Start, End); }
 
-        bool overlaps(const LiveRange &Other) const {
-            return Bits.anyCommon(Other.Bits);
-        }
+    bool overlaps(const LiveRange &Other) const {
+      return Bits.anyCommon(Other.Bits);
+    }
 
-        void join(const LiveRange &Other) {
-            Bits |= Other.Bits;
-        }
+    void join(const LiveRange &Other) { Bits |= Other.Bits; }
 
-        bool test(unsigned Idx) const {
-            return Bits.test(Idx);
-        }
-    };
+    bool test(unsigned Idx) const { return Bits.test(Idx); }
+  };
 
-    // Controls what is "alive" if control flow may reach the instruction
-    // with a different liveness of the alloca.
-    enum class LivenessType {
-        May,  // May be alive on some path.
-        Must, // Must be alive on every path.
-    };
+  // Controls what is "alive" if control flow may reach the instruction
+  // with a different liveness of the alloca.
+  enum class LivenessType {
+    May,  // May be alive on some path.
+    Must, // Must be alive on every path.
+  };
 
 private:
-    const Function &F;
-    LivenessType Type;
+  const Function &F;
+  LivenessType Type;
 
-    /// Maps active slots (per bit) for each basic block.
-    using LivenessMap = DenseMap<const BasicBlock *, BlockLifetimeInfo>;
-    LivenessMap BlockLiveness;
+  /// Maps active slots (per bit) for each basic block.
+  using LivenessMap = DenseMap<const BasicBlock *, BlockLifetimeInfo>;
+  LivenessMap BlockLiveness;
 
-    /// Interesting instructions. Instructions of the same block are adjustent
-    /// preserve in-block order.
-    SmallVector<const IntrinsicInst *, 64> Instructions;
+  /// Interesting instructions. Instructions of the same block are adjustent
+  /// preserve in-block order.
+  SmallVector<const IntrinsicInst *, 64> Instructions;
 
-    /// A range [Start, End) of instruction ids for each basic block.
-    /// Instructions inside each BB have monotonic and consecutive ids.
-    DenseMap<const BasicBlock *, std::pair<unsigned, unsigned>> BlockInstRange;
+  /// A range [Start, End) of instruction ids for each basic block.
+  /// Instructions inside each BB have monotonic and consecutive ids.
+  DenseMap<const BasicBlock *, std::pair<unsigned, unsigned>> BlockInstRange;
 
-    ArrayRef<const AllocaInst *> Allocas;
-    unsigned NumAllocas;
-    DenseMap<const AllocaInst *, unsigned> AllocaNumbering;
+  ArrayRef<const AllocaInst *> Allocas;
+  unsigned NumAllocas;
+  DenseMap<const AllocaInst *, unsigned> AllocaNumbering;
 
-    /// LiveRange for allocas.
-    SmallVector<LiveRange, 8> LiveRanges;
+  /// LiveRange for allocas.
+  SmallVector<LiveRange, 8> LiveRanges;
 
-    /// The set of allocas that have at least one lifetime.start. All other
-    /// allocas get LiveRange that corresponds to the entire function.
-    BitVector InterestingAllocas;
+  /// The set of allocas that have at least one lifetime.start. All other
+  /// allocas get LiveRange that corresponds to the entire function.
+  BitVector InterestingAllocas;
 
-    struct Marker {
-        unsigned AllocaNo;
-        bool IsStart;
-    };
+  struct Marker {
+    unsigned AllocaNo;
+    bool IsStart;
+  };
 
-    /// List of {InstNo, {AllocaNo, IsStart}} for each BB, ordered by InstNo.
-    DenseMap<const BasicBlock *, SmallVector<std::pair<unsigned, Marker>, 4>>
-            BBMarkers;
+  /// List of {InstNo, {AllocaNo, IsStart}} for each BB, ordered by InstNo.
+  DenseMap<const BasicBlock *, SmallVector<std::pair<unsigned, Marker>, 4>>
+      BBMarkers;
 
-    bool HasUnknownLifetimeStartOrEnd = false;
+  bool HasUnknownLifetimeStartOrEnd = false;
 
-    void dumpAllocas() const;
-    void dumpBlockLiveness() const;
-    void dumpLiveRanges() const;
+  void dumpAllocas() const;
+  void dumpBlockLiveness() const;
+  void dumpLiveRanges() const;
 
-    void collectMarkers();
-    void calculateLocalLiveness();
-    void calculateLiveIntervals();
+  void collectMarkers();
+  void calculateLocalLiveness();
+  void calculateLiveIntervals();
 
 public:
-    StackLifetime(const Function &F, ArrayRef<const AllocaInst *> Allocas,
-                  LivenessType Type);
+  StackLifetime(const Function &F, ArrayRef<const AllocaInst *> Allocas,
+                LivenessType Type);
 
-    void run();
+  void run();
 
-    iterator_range<
-    filter_iterator<ArrayRef<const IntrinsicInst *>::const_iterator,
-                    std::function<bool(const IntrinsicInst *)>>>
-    getMarkers() const {
-        std::function<bool(const IntrinsicInst *)> NotNull(
-            [](const IntrinsicInst *I) -> bool { return I; });
-        return make_filter_range(Instructions, NotNull);
-    }
+  iterator_range<
+      filter_iterator<ArrayRef<const IntrinsicInst *>::const_iterator,
+                      std::function<bool(const IntrinsicInst *)>>>
+  getMarkers() const {
+    std::function<bool(const IntrinsicInst *)> NotNull(
+        [](const IntrinsicInst *I) -> bool { return I; });
+    return make_filter_range(Instructions, NotNull);
+  }
 
-    /// Returns a set of "interesting" instructions where the given alloca is
-    /// live. Not all instructions in a function are interesting: we pick a set
-    /// that is large enough for LiveRange::Overlaps to be correct.
-    const LiveRange &getLiveRange(const AllocaInst *AI) const;
+  /// Returns a set of "interesting" instructions where the given alloca is
+  /// live. Not all instructions in a function are interesting: we pick a set
+  /// that is large enough for LiveRange::Overlaps to be correct.
+  const LiveRange &getLiveRange(const AllocaInst *AI) const;
 
-    /// Returns true if instruction is reachable from entry.
-    bool isReachable(const Instruction *I) const;
+  /// Returns true if instruction is reachable from entry.
+  bool isReachable(const Instruction *I) const;
 
-    /// Returns true if the alloca is alive after the instruction.
-    bool isAliveAfter(const AllocaInst *AI, const Instruction *I) const;
+  /// Returns true if the alloca is alive after the instruction.
+  bool isAliveAfter(const AllocaInst *AI, const Instruction *I) const;
 
-    /// Returns a live range that represents an alloca that is live throughout the
-    /// entire function.
-    LiveRange getFullLiveRange() const {
-        return LiveRange(Instructions.size(), true);
-    }
+  /// Returns a live range that represents an alloca that is live throughout the
+  /// entire function.
+  LiveRange getFullLiveRange() const {
+    return LiveRange(Instructions.size(), true);
+  }
 
-    void print(raw_ostream &O);
+  void print(raw_ostream &O);
 };
 
 static inline raw_ostream &operator<<(raw_ostream &OS, const BitVector &V) {
-    OS << "{";
-    int Idx = V.find_first();
-    bool First = true;
-    while (Idx >= 0) {
-        if (!First) {
-            OS << ", ";
-        }
-        First = false;
-        OS << Idx;
-        Idx = V.find_next(Idx);
+  OS << "{";
+  int Idx = V.find_first();
+  bool First = true;
+  while (Idx >= 0) {
+    if (!First) {
+      OS << ", ";
     }
-    OS << "}";
-    return OS;
+    First = false;
+    OS << Idx;
+    Idx = V.find_next(Idx);
+  }
+  OS << "}";
+  return OS;
 }
 
 inline raw_ostream &operator<<(raw_ostream &OS,
                                const StackLifetime::LiveRange &R) {
-    return OS << R.Bits;
+  return OS << R.Bits;
 }
 
 /// Printer pass for testing.
 class StackLifetimePrinterPass
     : public PassInfoMixin<StackLifetimePrinterPass> {
-    StackLifetime::LivenessType Type;
-    raw_ostream &OS;
+  StackLifetime::LivenessType Type;
+  raw_ostream &OS;
 
 public:
-    StackLifetimePrinterPass(raw_ostream &OS, StackLifetime::LivenessType Type)
-        : Type(Type), OS(OS) {}
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  StackLifetimePrinterPass(raw_ostream &OS, StackLifetime::LivenessType Type)
+      : Type(Type), OS(OS) {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 } // end namespace llvm

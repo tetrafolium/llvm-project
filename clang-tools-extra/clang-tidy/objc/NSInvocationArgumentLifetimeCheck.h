@@ -23,13 +23,13 @@ namespace objc {
 /// http://clang.llvm.org/extra/clang-tidy/checks/objc-nsinvocation-argument-lifetime.html
 class NSInvocationArgumentLifetimeCheck : public ClangTidyCheck {
 public:
-    NSInvocationArgumentLifetimeCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.ObjC && LangOpts.ObjCAutoRefCount;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  NSInvocationArgumentLifetimeCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.ObjC && LangOpts.ObjCAutoRefCount;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace objc

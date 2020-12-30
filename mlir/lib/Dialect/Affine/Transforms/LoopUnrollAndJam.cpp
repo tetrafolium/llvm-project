@@ -53,26 +53,26 @@ namespace {
 /// Loop unroll jam pass. Currently, this just unroll jams the first
 /// outer loop in a Function.
 struct LoopUnrollAndJam : public AffineLoopUnrollAndJamBase<LoopUnrollAndJam> {
-    explicit LoopUnrollAndJam(Optional<unsigned> unrollJamFactor = None) {
-        if (unrollJamFactor)
-            this->unrollJamFactor = *unrollJamFactor;
-    }
+  explicit LoopUnrollAndJam(Optional<unsigned> unrollJamFactor = None) {
+    if (unrollJamFactor)
+      this->unrollJamFactor = *unrollJamFactor;
+  }
 
-    void runOnFunction() override;
+  void runOnFunction() override;
 };
 } // end anonymous namespace
 
 std::unique_ptr<OperationPass<FuncOp>>
 mlir::createLoopUnrollAndJamPass(int unrollJamFactor) {
-    return std::make_unique<LoopUnrollAndJam>(
-               unrollJamFactor == -1 ? None : Optional<unsigned>(unrollJamFactor));
+  return std::make_unique<LoopUnrollAndJam>(
+      unrollJamFactor == -1 ? None : Optional<unsigned>(unrollJamFactor));
 }
 
 void LoopUnrollAndJam::runOnFunction() {
-    // Currently, just the outermost loop from the first loop nest is
-    // unroll-and-jammed by this pass. However, runOnAffineForOp can be called on
-    // any for operation.
-    auto &entryBlock = getFunction().front();
-    if (auto forOp = dyn_cast<AffineForOp>(entryBlock.front()))
-        loopUnrollJamByFactor(forOp, unrollJamFactor);
+  // Currently, just the outermost loop from the first loop nest is
+  // unroll-and-jammed by this pass. However, runOnAffineForOp can be called on
+  // any for operation.
+  auto &entryBlock = getFunction().front();
+  if (auto forOp = dyn_cast<AffineForOp>(entryBlock.front()))
+    loopUnrollJamByFactor(forOp, unrollJamFactor);
 }

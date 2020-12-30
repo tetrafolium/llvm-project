@@ -17,16 +17,16 @@ namespace lldb_private {
 
 class CommandObjectRegister : public CommandObjectMultiword {
 public:
-    // Constructors and Destructors
-    CommandObjectRegister(CommandInterpreter &interpreter);
+  // Constructors and Destructors
+  CommandObjectRegister(CommandInterpreter &interpreter);
 
-    ~CommandObjectRegister() override;
+  ~CommandObjectRegister() override;
 
 private:
-    // For CommandObjectRegister only
-    CommandObjectRegister(const CommandObjectRegister &) = delete;
-    const CommandObjectRegister &
-    operator=(const CommandObjectRegister &) = delete;
+  // For CommandObjectRegister only
+  CommandObjectRegister(const CommandObjectRegister &) = delete;
+  const CommandObjectRegister &
+  operator=(const CommandObjectRegister &) = delete;
 };
 
 } // namespace lldb_private

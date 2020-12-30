@@ -19,65 +19,65 @@ namespace tidy {
 namespace abseil {
 
 void DurationConversionCastCheck::registerMatchers(MatchFinder *Finder) {
-    auto CallMatcher = ignoringImpCasts(callExpr(
-                                            callee(functionDecl(DurationConversionFunction()).bind("func_decl")),
-                                            hasArgument(0, expr().bind("arg"))));
+  auto CallMatcher = ignoringImpCasts(callExpr(
+      callee(functionDecl(DurationConversionFunction()).bind("func_decl")),
+      hasArgument(0, expr().bind("arg"))));
 
-    Finder->addMatcher(
-        expr(anyOf(
-                 cxxStaticCastExpr(hasSourceExpression(CallMatcher)).bind("cast_expr"),
-                 cStyleCastExpr(hasSourceExpression(CallMatcher)).bind("cast_expr"),
-                 cxxFunctionalCastExpr(hasSourceExpression(CallMatcher))
-                 .bind("cast_expr"))),
-        this);
+  Finder->addMatcher(
+      expr(anyOf(
+          cxxStaticCastExpr(hasSourceExpression(CallMatcher)).bind("cast_expr"),
+          cStyleCastExpr(hasSourceExpression(CallMatcher)).bind("cast_expr"),
+          cxxFunctionalCastExpr(hasSourceExpression(CallMatcher))
+              .bind("cast_expr"))),
+      this);
 }
 
 void DurationConversionCastCheck::check(
     const MatchFinder::MatchResult &Result) {
-    const auto *MatchedCast =
-        Result.Nodes.getNodeAs<ExplicitCastExpr>("cast_expr");
+  const auto *MatchedCast =
+      Result.Nodes.getNodeAs<ExplicitCastExpr>("cast_expr");
 
-    if (isInMacro(Result, MatchedCast))
-        return;
+  if (isInMacro(Result, MatchedCast))
+    return;
 
-    const auto *FuncDecl = Result.Nodes.getNodeAs<FunctionDecl>("func_decl");
-    const auto *Arg = Result.Nodes.getNodeAs<Expr>("arg");
-    StringRef ConversionFuncName = FuncDecl->getName();
+  const auto *FuncDecl = Result.Nodes.getNodeAs<FunctionDecl>("func_decl");
+  const auto *Arg = Result.Nodes.getNodeAs<Expr>("arg");
+  StringRef ConversionFuncName = FuncDecl->getName();
 
-    llvm::Optional<DurationScale> Scale =
-        getScaleForDurationInverse(ConversionFuncName);
-    if (!Scale)
-        return;
+  llvm::Optional<DurationScale> Scale =
+      getScaleForDurationInverse(ConversionFuncName);
+  if (!Scale)
+    return;
 
-    // Casting a double to an integer.
-    if (MatchedCast->getTypeAsWritten()->isIntegerType() &&
-            ConversionFuncName.contains("Double")) {
-        llvm::StringRef NewFuncName = getDurationInverseForScale(*Scale).second;
+  // Casting a double to an integer.
+  if (MatchedCast->getTypeAsWritten()->isIntegerType() &&
+      ConversionFuncName.contains("Double")) {
+    llvm::StringRef NewFuncName = getDurationInverseForScale(*Scale).second;
 
-        diag(MatchedCast->getBeginLoc(),
-             "duration should be converted directly to an integer rather than "
-             "through a type cast")
-                << FixItHint::CreateReplacement(
-                    MatchedCast->getSourceRange(),
-                    (llvm::Twine(NewFuncName.substr(2)) + "(" +
-                     tooling::fixit::getText(*Arg, *Result.Context) + ")")
-                    .str());
-    }
+    diag(MatchedCast->getBeginLoc(),
+         "duration should be converted directly to an integer rather than "
+         "through a type cast")
+        << FixItHint::CreateReplacement(
+               MatchedCast->getSourceRange(),
+               (llvm::Twine(NewFuncName.substr(2)) + "(" +
+                tooling::fixit::getText(*Arg, *Result.Context) + ")")
+                   .str());
+  }
 
-    // Casting an integer to a double.
-    if (MatchedCast->getTypeAsWritten()->isRealFloatingType() &&
-            ConversionFuncName.contains("Int64")) {
-        llvm::StringRef NewFuncName = getDurationInverseForScale(*Scale).first;
+  // Casting an integer to a double.
+  if (MatchedCast->getTypeAsWritten()->isRealFloatingType() &&
+      ConversionFuncName.contains("Int64")) {
+    llvm::StringRef NewFuncName = getDurationInverseForScale(*Scale).first;
 
-        diag(MatchedCast->getBeginLoc(), "duration should be converted directly to "
-             "a floating-point number rather than "
-             "through a type cast")
-                << FixItHint::CreateReplacement(
-                    MatchedCast->getSourceRange(),
-                    (llvm::Twine(NewFuncName.substr(2)) + "(" +
-                     tooling::fixit::getText(*Arg, *Result.Context) + ")")
-                    .str());
-    }
+    diag(MatchedCast->getBeginLoc(), "duration should be converted directly to "
+                                     "a floating-point number rather than "
+                                     "through a type cast")
+        << FixItHint::CreateReplacement(
+               MatchedCast->getSourceRange(),
+               (llvm::Twine(NewFuncName.substr(2)) + "(" +
+                tooling::fixit::getText(*Arg, *Result.Context) + ")")
+                   .str());
+  }
 }
 
 } // namespace abseil

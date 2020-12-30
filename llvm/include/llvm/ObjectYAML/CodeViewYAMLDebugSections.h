@@ -43,76 +43,76 @@ struct YAMLSubsectionBase;
 } // end namespace detail
 
 struct YAMLFrameData {
-    uint32_t RvaStart;
-    uint32_t CodeSize;
-    uint32_t LocalSize;
-    uint32_t ParamsSize;
-    uint32_t MaxStackSize;
-    StringRef FrameFunc;
-    uint32_t PrologSize;
-    uint32_t SavedRegsSize;
-    uint32_t Flags;
+  uint32_t RvaStart;
+  uint32_t CodeSize;
+  uint32_t LocalSize;
+  uint32_t ParamsSize;
+  uint32_t MaxStackSize;
+  StringRef FrameFunc;
+  uint32_t PrologSize;
+  uint32_t SavedRegsSize;
+  uint32_t Flags;
 };
 
 struct YAMLCrossModuleImport {
-    StringRef ModuleName;
-    std::vector<uint32_t> ImportIds;
+  StringRef ModuleName;
+  std::vector<uint32_t> ImportIds;
 };
 
 struct SourceLineEntry {
-    uint32_t Offset;
-    uint32_t LineStart;
-    uint32_t EndDelta;
-    bool IsStatement;
+  uint32_t Offset;
+  uint32_t LineStart;
+  uint32_t EndDelta;
+  bool IsStatement;
 };
 
 struct SourceColumnEntry {
-    uint16_t StartColumn;
-    uint16_t EndColumn;
+  uint16_t StartColumn;
+  uint16_t EndColumn;
 };
 
 struct SourceLineBlock {
-    StringRef FileName;
-    std::vector<SourceLineEntry> Lines;
-    std::vector<SourceColumnEntry> Columns;
+  StringRef FileName;
+  std::vector<SourceLineEntry> Lines;
+  std::vector<SourceColumnEntry> Columns;
 };
 
 struct HexFormattedString {
-    std::vector<uint8_t> Bytes;
+  std::vector<uint8_t> Bytes;
 };
 
 struct SourceFileChecksumEntry {
-    StringRef FileName;
-    codeview::FileChecksumKind Kind;
-    HexFormattedString ChecksumBytes;
+  StringRef FileName;
+  codeview::FileChecksumKind Kind;
+  HexFormattedString ChecksumBytes;
 };
 
 struct SourceLineInfo {
-    uint32_t RelocOffset;
-    uint32_t RelocSegment;
-    codeview::LineFlags Flags;
-    uint32_t CodeSize;
-    std::vector<SourceLineBlock> Blocks;
+  uint32_t RelocOffset;
+  uint32_t RelocSegment;
+  codeview::LineFlags Flags;
+  uint32_t CodeSize;
+  std::vector<SourceLineBlock> Blocks;
 };
 
 struct InlineeSite {
-    uint32_t Inlinee;
-    StringRef FileName;
-    uint32_t SourceLineNum;
-    std::vector<StringRef> ExtraFiles;
+  uint32_t Inlinee;
+  StringRef FileName;
+  uint32_t SourceLineNum;
+  std::vector<StringRef> ExtraFiles;
 };
 
 struct InlineeInfo {
-    bool HasExtraFiles;
-    std::vector<InlineeSite> Sites;
+  bool HasExtraFiles;
+  std::vector<InlineeSite> Sites;
 };
 
 struct YAMLDebugSubsection {
-    static Expected<YAMLDebugSubsection>
-    fromCodeViewSubection(const codeview::StringsAndChecksumsRef &SC,
-                          const codeview::DebugSubsectionRecord &SS);
+  static Expected<YAMLDebugSubsection>
+  fromCodeViewSubection(const codeview::StringsAndChecksumsRef &SC,
+                        const codeview::DebugSubsectionRecord &SS);
 
-    std::shared_ptr<detail::YAMLSubsectionBase> Subsection;
+  std::shared_ptr<detail::YAMLSubsectionBase> Subsection;
 };
 
 struct DebugSubsectionState {};

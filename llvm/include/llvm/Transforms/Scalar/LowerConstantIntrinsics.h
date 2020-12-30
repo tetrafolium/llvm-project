@@ -1,4 +1,5 @@
-//===- LowerConstantIntrinsics.h - Lower constant int. pass -*- C++ -*-========//
+//===- LowerConstantIntrinsics.h - Lower constant int. pass -*- C++
+//-*-========//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -20,22 +21,22 @@
 
 namespace llvm {
 
-struct LowerConstantIntrinsicsPass :
-    PassInfoMixin<LowerConstantIntrinsicsPass> {
+struct LowerConstantIntrinsicsPass
+    : PassInfoMixin<LowerConstantIntrinsicsPass> {
 public:
-    explicit LowerConstantIntrinsicsPass() {}
+  explicit LowerConstantIntrinsicsPass() {}
 
-    /// Run the pass over the function.
-    ///
-    /// This will lower all remaining 'objectsize' and 'is.constant'`
-    /// intrinsic calls in this function, even when the argument has no known
-    /// size or is not a constant respectively. The resulting constant is
-    /// propagated and conditional branches are resolved where possible.
-    /// This complements the Instruction Simplification and
-    /// Instruction Combination passes of the optimized pass chain.
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+  /// Run the pass over the function.
+  ///
+  /// This will lower all remaining 'objectsize' and 'is.constant'`
+  /// intrinsic calls in this function, even when the argument has no known
+  /// size or is not a constant respectively. The resulting constant is
+  /// propagated and conditional branches are resolved where possible.
+  /// This complements the Instruction Simplification and
+  /// Instruction Combination passes of the optimized pass chain.
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
-}
+} // namespace llvm
 
 #endif

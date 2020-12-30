@@ -19,7 +19,8 @@ class HexagonTargetMachine;
 class ImmutablePass;
 
 /// Creates a Hexagon-specific Target Transformation Info pass.
-ImmutablePass *createHexagonTargetTransformInfoPass(const HexagonTargetMachine *TM);
-} // end namespace llvm;
+ImmutablePass *
+createHexagonTargetTransformInfoPass(const HexagonTargetMachine *TM);
+} // namespace llvm
 
 #endif

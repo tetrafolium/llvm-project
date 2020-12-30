@@ -44,36 +44,36 @@ using HostObjectFile = ObjectFileELF;
 using namespace lldb_private;
 
 llvm::Error SystemInitializerLLGS::Initialize() {
-    if (auto e = SystemInitializerCommon::Initialize())
-        return e;
+  if (auto e = SystemInitializerCommon::Initialize())
+    return e;
 
-    HostObjectFile::Initialize();
+  HostObjectFile::Initialize();
 
 #if defined(LLDB_TARGET_ARM) || defined(LLDB_TARGET_ARM64)
-    EmulateInstructionARM::Initialize();
+  EmulateInstructionARM::Initialize();
 #endif
 #if defined(LLDB_TARGET_MIPS) || defined(LLDB_TARGET_MIPS64)
-    EmulateInstructionMIPS::Initialize();
+  EmulateInstructionMIPS::Initialize();
 #endif
 #if defined(LLDB_TARGET_MIPS64)
-    EmulateInstructionMIPS64::Initialize();
+  EmulateInstructionMIPS64::Initialize();
 #endif
 
-    return llvm::Error::success();
+  return llvm::Error::success();
 }
 
 void SystemInitializerLLGS::Terminate() {
-    HostObjectFile::Terminate();
+  HostObjectFile::Terminate();
 
 #if defined(LLDB_TARGET_ARM) || defined(LLDB_TARGET_ARM64)
-    EmulateInstructionARM::Terminate();
+  EmulateInstructionARM::Terminate();
 #endif
 #if defined(LLDB_TARGET_MIPS) || defined(LLDB_TARGET_MIPS64)
-    EmulateInstructionMIPS::Terminate();
+  EmulateInstructionMIPS::Terminate();
 #endif
 #if defined(LLDB_TARGET_MIPS64)
-    EmulateInstructionMIPS64::Terminate();
+  EmulateInstructionMIPS64::Terminate();
 #endif
 
-    SystemInitializerCommon::Terminate();
+  SystemInitializerCommon::Terminate();
 }

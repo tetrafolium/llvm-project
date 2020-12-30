@@ -32,22 +32,20 @@ namespace {
 
 class PPCInstructionSelector : public InstructionSelector {
 public:
-    PPCInstructionSelector(const PPCTargetMachine &TM, const PPCSubtarget &STI,
-                           const PPCRegisterBankInfo &RBI);
+  PPCInstructionSelector(const PPCTargetMachine &TM, const PPCSubtarget &STI,
+                         const PPCRegisterBankInfo &RBI);
 
-    bool select(MachineInstr &I) override;
-    static const char *getName() {
-        return DEBUG_TYPE;
-    }
+  bool select(MachineInstr &I) override;
+  static const char *getName() { return DEBUG_TYPE; }
 
 private:
-    /// tblgen generated 'select' implementation that is used as the initial
-    /// selector for the patterns that do not require complex C++.
-    bool selectImpl(MachineInstr &I, CodeGenCoverage &CoverageInfo) const;
+  /// tblgen generated 'select' implementation that is used as the initial
+  /// selector for the patterns that do not require complex C++.
+  bool selectImpl(MachineInstr &I, CodeGenCoverage &CoverageInfo) const;
 
-    const PPCInstrInfo &TII;
-    const PPCRegisterInfo &TRI;
-    const PPCRegisterBankInfo &RBI;
+  const PPCInstrInfo &TII;
+  const PPCRegisterInfo &TRI;
+  const PPCRegisterBankInfo &RBI;
 
 #define GET_GLOBALISEL_PREDICATES_DECL
 #include "PPCGenGlobalISel.inc"
@@ -65,8 +63,8 @@ private:
 #undef GET_GLOBALISEL_IMPL
 
 PPCInstructionSelector::PPCInstructionSelector(const PPCTargetMachine &TM,
-        const PPCSubtarget &STI,
-        const PPCRegisterBankInfo &RBI)
+                                               const PPCSubtarget &STI,
+                                               const PPCRegisterBankInfo &RBI)
     : InstructionSelector(), TII(*STI.getInstrInfo()),
       TRI(*STI.getRegisterInfo()), RBI(RBI),
 #define GET_GLOBALISEL_PREDICATES_INIT
@@ -79,9 +77,9 @@ PPCInstructionSelector::PPCInstructionSelector(const PPCTargetMachine &TM,
 }
 
 bool PPCInstructionSelector::select(MachineInstr &I) {
-    if (selectImpl(I, *CoverageInfo))
-        return true;
-    return false;
+  if (selectImpl(I, *CoverageInfo))
+    return true;
+  return false;
 }
 
 namespace llvm {
@@ -89,6 +87,6 @@ InstructionSelector *
 createPPCInstructionSelector(const PPCTargetMachine &TM,
                              const PPCSubtarget &Subtarget,
                              const PPCRegisterBankInfo &RBI) {
-    return new PPCInstructionSelector(TM, Subtarget, RBI);
+  return new PPCInstructionSelector(TM, Subtarget, RBI);
 }
 } // end namespace llvm

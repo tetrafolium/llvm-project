@@ -16,9 +16,9 @@ namespace llvm {
 /// SrcReg when following the CFG edge to SuccMBB. This needs to be after
 /// any def of SrcReg, but before any subsequent point where control flow
 /// might jump out of the basic block.
-MachineBasicBlock::iterator
-findPHICopyInsertPoint(MachineBasicBlock* MBB, MachineBasicBlock* SuccMBB,
-                       unsigned SrcReg);
-}
+MachineBasicBlock::iterator findPHICopyInsertPoint(MachineBasicBlock *MBB,
+                                                   MachineBasicBlock *SuccMBB,
+                                                   unsigned SrcReg);
+} // namespace llvm
 
 #endif

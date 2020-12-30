@@ -15,4 +15,4 @@ namespace llvm {
 /// to AMDGPUPassConfig::createMachineScheduler() to have an effect.
 std::unique_ptr<ScheduleDAGMutation> createAMDGPUMacroFusionDAGMutation();
 
-} // llvm
+} // namespace llvm

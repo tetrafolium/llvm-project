@@ -17,38 +17,33 @@
 #include <memory>
 #include <vector>
 
-
 namespace llvm {
 
 class WindowsResourceProcessor {
 public:
-    using PathType = SmallVector<char, 64>;
+  using PathType = SmallVector<char, 64>;
 
-    WindowsResourceProcessor() {}
+  WindowsResourceProcessor() {}
 
-    void addDefine(StringRef Key, StringRef Value = StringRef()) {
-        PreprocessorDefines.emplace_back(Key, Value);
-    }
-    void addInclude(const PathType &IncludePath) {
-        IncludeList.push_back(IncludePath);
-    }
-    void setVerbose(bool Verbose) {
-        IsVerbose = Verbose;
-    }
-    void setNullAtEnd(bool NullAtEnd) {
-        AppendNull = NullAtEnd;
-    }
+  void addDefine(StringRef Key, StringRef Value = StringRef()) {
+    PreprocessorDefines.emplace_back(Key, Value);
+  }
+  void addInclude(const PathType &IncludePath) {
+    IncludeList.push_back(IncludePath);
+  }
+  void setVerbose(bool Verbose) { IsVerbose = Verbose; }
+  void setNullAtEnd(bool NullAtEnd) { AppendNull = NullAtEnd; }
 
-    Error process(StringRef InputData,
-                  std::unique_ptr<raw_fd_ostream> OutputStream);
+  Error process(StringRef InputData,
+                std::unique_ptr<raw_fd_ostream> OutputStream);
 
 private:
-    StringRef InputData;
-    std::vector<PathType> IncludeList;
-    std::vector<std::pair<StringRef, StringRef>> PreprocessorDefines;
-    bool IsVerbose, AppendNull;
+  StringRef InputData;
+  std::vector<PathType> IncludeList;
+  std::vector<std::pair<StringRef, StringRef>> PreprocessorDefines;
+  bool IsVerbose, AppendNull;
 };
 
-}
+} // namespace llvm
 
 #endif

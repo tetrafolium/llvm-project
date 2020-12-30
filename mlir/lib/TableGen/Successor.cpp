@@ -20,5 +20,5 @@ using namespace mlir::tblgen;
 
 // Returns true if this successor is variadic.
 bool Successor::isVariadic() const {
-    return def->isSubClassOf("VariadicSuccessor");
+  return def->isSubClassOf("VariadicSuccessor");
 }

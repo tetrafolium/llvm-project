@@ -26,12 +26,12 @@ namespace __xray {
 inline bool probeRequiredCPUFeatures() XRAY_NEVER_INSTRUMENT { return true; }
 
 ALWAYS_INLINE uint64_t readTSC(uint8_t &CPU) XRAY_NEVER_INSTRUMENT {
-    CPU = 0;
-    return _zx_ticks_get();
+  CPU = 0;
+  return _zx_ticks_get();
 }
 
 inline uint64_t getTSCFrequency() XRAY_NEVER_INSTRUMENT {
-    return _zx_ticks_per_second();
+  return _zx_ticks_per_second();
 }
 
 } // namespace __xray
@@ -65,19 +65,19 @@ namespace __xray {
 inline bool probeRequiredCPUFeatures() XRAY_NEVER_INSTRUMENT { return true; }
 
 ALWAYS_INLINE uint64_t readTSC(uint8_t &CPU) XRAY_NEVER_INSTRUMENT {
-    timespec TS;
-    int result = clock_gettime(CLOCK_REALTIME, &TS);
-    if (result != 0) {
-        Report("clock_gettime(2) returned %d, errno=%d.", result, int(errno));
-        TS.tv_sec = 0;
-        TS.tv_nsec = 0;
-    }
-    CPU = 0;
-    return TS.tv_sec * NanosecondsPerSecond + TS.tv_nsec;
+  timespec TS;
+  int result = clock_gettime(CLOCK_REALTIME, &TS);
+  if (result != 0) {
+    Report("clock_gettime(2) returned %d, errno=%d.", result, int(errno));
+    TS.tv_sec = 0;
+    TS.tv_nsec = 0;
+  }
+  CPU = 0;
+  return TS.tv_sec * NanosecondsPerSecond + TS.tv_nsec;
 }
 
 inline uint64_t getTSCFrequency() XRAY_NEVER_INSTRUMENT {
-    return NanosecondsPerSecond;
+  return NanosecondsPerSecond;
 }
 
 } // namespace __xray

@@ -15,11 +15,11 @@
 namespace __llvm_libc {
 
 struct FILE {
-    mtx_t lock;
+  mtx_t lock;
 
-    using write_function_t = size_t(FILE *, const char *, size_t);
+  using write_function_t = size_t(FILE *, const char *, size_t);
 
-    write_function_t *write;
+  write_function_t *write;
 };
 
 } // namespace __llvm_libc

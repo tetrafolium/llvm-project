@@ -16,7 +16,7 @@ namespace __llvm_libc {
 // TODO: investigate the performance of this function.
 // There might be potential for compiler optimization.
 size_t LLVM_LIBC_ENTRYPOINT(strlen)(const char *src) {
-    return internal::string_length(src);
+  return internal::string_length(src);
 }
 
 } // namespace __llvm_libc

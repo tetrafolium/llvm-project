@@ -1,5 +1,5 @@
-#include <clc/clc.h>
 #include "../clcmacro.h"
+#include <clc/clc.h>
 
 // Map the llvm intrinsic to an OpenCL function.
 #define __CLC_FUNCTION __clc_floor

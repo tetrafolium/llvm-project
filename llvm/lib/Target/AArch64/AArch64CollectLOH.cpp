@@ -127,29 +127,28 @@ STATISTIC(NumLDRToLDR, "Number of simplifiable LDR reachable by LDR");
 STATISTIC(NumADRPToLDR, "Number of simplifiable LDR reachable by ADRP");
 STATISTIC(NumADRSimpleCandidate, "Number of simplifiable ADRP + ADD");
 
-#define AARCH64_COLLECT_LOH_NAME "AArch64 Collect Linker Optimization Hint (LOH)"
+#define AARCH64_COLLECT_LOH_NAME                                               \
+  "AArch64 Collect Linker Optimization Hint (LOH)"
 
 namespace {
 
 struct AArch64CollectLOH : public MachineFunctionPass {
-    static char ID;
-    AArch64CollectLOH() : MachineFunctionPass(ID) {}
+  static char ID;
+  AArch64CollectLOH() : MachineFunctionPass(ID) {}
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::NoVRegs);
-    }
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoVRegs);
+  }
 
-    StringRef getPassName() const override {
-        return AARCH64_COLLECT_LOH_NAME;
-    }
+  StringRef getPassName() const override { return AARCH64_COLLECT_LOH_NAME; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        MachineFunctionPass::getAnalysisUsage(AU);
-        AU.setPreservesAll();
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    MachineFunctionPass::getAnalysisUsage(AU);
+    AU.setPreservesAll();
+  }
 };
 
 char AArch64CollectLOH::ID = 0;
@@ -160,418 +159,418 @@ INITIALIZE_PASS(AArch64CollectLOH, "aarch64-collect-loh",
                 AARCH64_COLLECT_LOH_NAME, false, false)
 
 static bool canAddBePartOfLOH(const MachineInstr &MI) {
-    // Check immediate to see if the immediate is an address.
-    switch (MI.getOperand(2).getType()) {
-    default:
-        return false;
-    case MachineOperand::MO_GlobalAddress:
-    case MachineOperand::MO_JumpTableIndex:
-    case MachineOperand::MO_ConstantPoolIndex:
-    case MachineOperand::MO_BlockAddress:
-        return true;
-    }
+  // Check immediate to see if the immediate is an address.
+  switch (MI.getOperand(2).getType()) {
+  default:
+    return false;
+  case MachineOperand::MO_GlobalAddress:
+  case MachineOperand::MO_JumpTableIndex:
+  case MachineOperand::MO_ConstantPoolIndex:
+  case MachineOperand::MO_BlockAddress:
+    return true;
+  }
 }
 
 /// Answer the following question: Can Def be one of the definition
 /// involved in a part of a LOH?
 static bool canDefBePartOfLOH(const MachineInstr &MI) {
-    // Accept ADRP, ADDLow and LOADGot.
-    switch (MI.getOpcode()) {
+  // Accept ADRP, ADDLow and LOADGot.
+  switch (MI.getOpcode()) {
+  default:
+    return false;
+  case AArch64::ADRP:
+    return true;
+  case AArch64::ADDXri:
+    return canAddBePartOfLOH(MI);
+  case AArch64::LDRXui:
+  case AArch64::LDRWui:
+    // Check immediate to see if the immediate is an address.
+    switch (MI.getOperand(2).getType()) {
     default:
-        return false;
-    case AArch64::ADRP:
-        return true;
-    case AArch64::ADDXri:
-        return canAddBePartOfLOH(MI);
-    case AArch64::LDRXui:
-    case AArch64::LDRWui:
-        // Check immediate to see if the immediate is an address.
-        switch (MI.getOperand(2).getType()) {
-        default:
-            return false;
-        case MachineOperand::MO_GlobalAddress:
-            return MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT;
-        }
+      return false;
+    case MachineOperand::MO_GlobalAddress:
+      return MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT;
     }
+  }
 }
 
 /// Check whether the given instruction can the end of a LOH chain involving a
 /// store.
 static bool isCandidateStore(const MachineInstr &MI, const MachineOperand &MO) {
-    switch (MI.getOpcode()) {
-    default:
-        return false;
-    case AArch64::STRBBui:
-    case AArch64::STRHHui:
-    case AArch64::STRBui:
-    case AArch64::STRHui:
-    case AArch64::STRWui:
-    case AArch64::STRXui:
-    case AArch64::STRSui:
-    case AArch64::STRDui:
-    case AArch64::STRQui:
-        // We can only optimize the index operand.
-        // In case we have str xA, [xA, #imm], this is two different uses
-        // of xA and we cannot fold, otherwise the xA stored may be wrong,
-        // even if #imm == 0.
-        return MI.getOperandNo(&MO) == 1 &&
-               MI.getOperand(0).getReg() != MI.getOperand(1).getReg();
-    }
+  switch (MI.getOpcode()) {
+  default:
+    return false;
+  case AArch64::STRBBui:
+  case AArch64::STRHHui:
+  case AArch64::STRBui:
+  case AArch64::STRHui:
+  case AArch64::STRWui:
+  case AArch64::STRXui:
+  case AArch64::STRSui:
+  case AArch64::STRDui:
+  case AArch64::STRQui:
+    // We can only optimize the index operand.
+    // In case we have str xA, [xA, #imm], this is two different uses
+    // of xA and we cannot fold, otherwise the xA stored may be wrong,
+    // even if #imm == 0.
+    return MI.getOperandNo(&MO) == 1 &&
+           MI.getOperand(0).getReg() != MI.getOperand(1).getReg();
+  }
 }
 
 /// Check whether the given instruction can be the end of a LOH chain
 /// involving a load.
 static bool isCandidateLoad(const MachineInstr &MI) {
-    switch (MI.getOpcode()) {
-    default:
-        return false;
-    case AArch64::LDRSBWui:
-    case AArch64::LDRSBXui:
-    case AArch64::LDRSHWui:
-    case AArch64::LDRSHXui:
-    case AArch64::LDRSWui:
-    case AArch64::LDRBui:
-    case AArch64::LDRHui:
-    case AArch64::LDRWui:
-    case AArch64::LDRXui:
-    case AArch64::LDRSui:
-    case AArch64::LDRDui:
-    case AArch64::LDRQui:
-        return !(MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT);
-    }
+  switch (MI.getOpcode()) {
+  default:
+    return false;
+  case AArch64::LDRSBWui:
+  case AArch64::LDRSBXui:
+  case AArch64::LDRSHWui:
+  case AArch64::LDRSHXui:
+  case AArch64::LDRSWui:
+  case AArch64::LDRBui:
+  case AArch64::LDRHui:
+  case AArch64::LDRWui:
+  case AArch64::LDRXui:
+  case AArch64::LDRSui:
+  case AArch64::LDRDui:
+  case AArch64::LDRQui:
+    return !(MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT);
+  }
 }
 
 /// Check whether the given instruction can load a litteral.
 static bool supportLoadFromLiteral(const MachineInstr &MI) {
-    switch (MI.getOpcode()) {
-    default:
-        return false;
-    case AArch64::LDRSWui:
-    case AArch64::LDRWui:
-    case AArch64::LDRXui:
-    case AArch64::LDRSui:
-    case AArch64::LDRDui:
-    case AArch64::LDRQui:
-        return true;
-    }
+  switch (MI.getOpcode()) {
+  default:
+    return false;
+  case AArch64::LDRSWui:
+  case AArch64::LDRWui:
+  case AArch64::LDRXui:
+  case AArch64::LDRSui:
+  case AArch64::LDRDui:
+  case AArch64::LDRQui:
+    return true;
+  }
 }
 
 /// Number of GPR registers traked by mapRegToGPRIndex()
 static const unsigned N_GPR_REGS = 31;
 /// Map register number to index from 0-30.
 static int mapRegToGPRIndex(MCPhysReg Reg) {
-    static_assert(AArch64::X28 - AArch64::X0 + 3 == N_GPR_REGS, "Number of GPRs");
-    static_assert(AArch64::W30 - AArch64::W0 + 1 == N_GPR_REGS, "Number of GPRs");
-    if (AArch64::X0 <= Reg && Reg <= AArch64::X28)
-        return Reg - AArch64::X0;
-    if (AArch64::W0 <= Reg && Reg <= AArch64::W30)
-        return Reg - AArch64::W0;
-    // TableGen gives "FP" and "LR" an index not adjacent to X28 so we have to
-    // handle them as special cases.
-    if (Reg == AArch64::FP)
-        return 29;
-    if (Reg == AArch64::LR)
-        return 30;
-    return -1;
+  static_assert(AArch64::X28 - AArch64::X0 + 3 == N_GPR_REGS, "Number of GPRs");
+  static_assert(AArch64::W30 - AArch64::W0 + 1 == N_GPR_REGS, "Number of GPRs");
+  if (AArch64::X0 <= Reg && Reg <= AArch64::X28)
+    return Reg - AArch64::X0;
+  if (AArch64::W0 <= Reg && Reg <= AArch64::W30)
+    return Reg - AArch64::W0;
+  // TableGen gives "FP" and "LR" an index not adjacent to X28 so we have to
+  // handle them as special cases.
+  if (Reg == AArch64::FP)
+    return 29;
+  if (Reg == AArch64::LR)
+    return 30;
+  return -1;
 }
 
 /// State tracked per register.
 /// The main algorithm walks backwards over a basic block maintaining this
 /// datastructure for each tracked general purpose register.
 struct LOHInfo {
-    MCLOHType Type : 8;           ///< "Best" type of LOH possible.
-    bool IsCandidate : 1;         ///< Possible LOH candidate.
-    bool OneUser : 1;             ///< Found exactly one user (yet).
-    bool MultiUsers : 1;          ///< Found multiple users.
-    const MachineInstr *MI0;      ///< First instruction involved in the LOH.
-    const MachineInstr *MI1;      ///< Second instruction involved in the LOH
-    ///  (if any).
-    const MachineInstr *LastADRP; ///< Last ADRP in same register.
+  MCLOHType Type : 8;      ///< "Best" type of LOH possible.
+  bool IsCandidate : 1;    ///< Possible LOH candidate.
+  bool OneUser : 1;        ///< Found exactly one user (yet).
+  bool MultiUsers : 1;     ///< Found multiple users.
+  const MachineInstr *MI0; ///< First instruction involved in the LOH.
+  const MachineInstr *MI1; ///< Second instruction involved in the LOH
+  ///  (if any).
+  const MachineInstr *LastADRP; ///< Last ADRP in same register.
 };
 
 /// Update state \p Info given \p MI uses the tracked register.
 static void handleUse(const MachineInstr &MI, const MachineOperand &MO,
                       LOHInfo &Info) {
-    // We have multiple uses if we already found one before.
-    if (Info.MultiUsers || Info.OneUser) {
-        Info.IsCandidate = false;
-        Info.MultiUsers = true;
-        return;
-    }
-    Info.OneUser = true;
+  // We have multiple uses if we already found one before.
+  if (Info.MultiUsers || Info.OneUser) {
+    Info.IsCandidate = false;
+    Info.MultiUsers = true;
+    return;
+  }
+  Info.OneUser = true;
 
-    // Start new LOHInfo if applicable.
-    if (isCandidateLoad(MI)) {
-        Info.Type = MCLOH_AdrpLdr;
-        Info.IsCandidate = true;
-        Info.MI0 = &MI;
-        // Note that even this is AdrpLdr now, we can switch to a Ldr variant
-        // later.
-    } else if (isCandidateStore(MI, MO)) {
-        Info.Type = MCLOH_AdrpAddStr;
-        Info.IsCandidate = true;
-        Info.MI0 = &MI;
-        Info.MI1 = nullptr;
-    } else if (MI.getOpcode() == AArch64::ADDXri) {
-        Info.Type = MCLOH_AdrpAdd;
-        Info.IsCandidate = true;
-        Info.MI0 = &MI;
-    } else if ((MI.getOpcode() == AArch64::LDRXui ||
-                MI.getOpcode() == AArch64::LDRWui) &&
-               MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT) {
-        Info.Type = MCLOH_AdrpLdrGot;
-        Info.IsCandidate = true;
-        Info.MI0 = &MI;
-    }
+  // Start new LOHInfo if applicable.
+  if (isCandidateLoad(MI)) {
+    Info.Type = MCLOH_AdrpLdr;
+    Info.IsCandidate = true;
+    Info.MI0 = &MI;
+    // Note that even this is AdrpLdr now, we can switch to a Ldr variant
+    // later.
+  } else if (isCandidateStore(MI, MO)) {
+    Info.Type = MCLOH_AdrpAddStr;
+    Info.IsCandidate = true;
+    Info.MI0 = &MI;
+    Info.MI1 = nullptr;
+  } else if (MI.getOpcode() == AArch64::ADDXri) {
+    Info.Type = MCLOH_AdrpAdd;
+    Info.IsCandidate = true;
+    Info.MI0 = &MI;
+  } else if ((MI.getOpcode() == AArch64::LDRXui ||
+              MI.getOpcode() == AArch64::LDRWui) &&
+             MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT) {
+    Info.Type = MCLOH_AdrpLdrGot;
+    Info.IsCandidate = true;
+    Info.MI0 = &MI;
+  }
 }
 
 /// Update state \p Info given the tracked register is clobbered.
 static void handleClobber(LOHInfo &Info) {
-    Info.IsCandidate = false;
-    Info.OneUser = false;
-    Info.MultiUsers = false;
-    Info.LastADRP = nullptr;
+  Info.IsCandidate = false;
+  Info.OneUser = false;
+  Info.MultiUsers = false;
+  Info.LastADRP = nullptr;
 }
 
 /// Update state \p Info given that \p MI is possibly the middle instruction
 /// of an LOH involving 3 instructions.
 static bool handleMiddleInst(const MachineInstr &MI, LOHInfo &DefInfo,
                              LOHInfo &OpInfo) {
-    if (!DefInfo.IsCandidate || (&DefInfo != &OpInfo && OpInfo.OneUser))
-        return false;
-    // Copy LOHInfo for dest register to LOHInfo for source register.
-    if (&DefInfo != &OpInfo) {
-        OpInfo = DefInfo;
-        // Invalidate \p DefInfo because we track it in \p OpInfo now.
-        handleClobber(DefInfo);
-    } else
-        DefInfo.LastADRP = nullptr;
-
-    // Advance state machine.
-    assert(OpInfo.IsCandidate && "Expect valid state");
-    if (MI.getOpcode() == AArch64::ADDXri && canAddBePartOfLOH(MI)) {
-        if (OpInfo.Type == MCLOH_AdrpLdr) {
-            OpInfo.Type = MCLOH_AdrpAddLdr;
-            OpInfo.IsCandidate = true;
-            OpInfo.MI1 = &MI;
-            return true;
-        } else if (OpInfo.Type == MCLOH_AdrpAddStr && OpInfo.MI1 == nullptr) {
-            OpInfo.Type = MCLOH_AdrpAddStr;
-            OpInfo.IsCandidate = true;
-            OpInfo.MI1 = &MI;
-            return true;
-        }
-    } else {
-        assert((MI.getOpcode() == AArch64::LDRXui ||
-                MI.getOpcode() == AArch64::LDRWui) &&
-               "Expect LDRXui or LDRWui");
-        assert((MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT) &&
-               "Expected GOT relocation");
-        if (OpInfo.Type == MCLOH_AdrpAddStr && OpInfo.MI1 == nullptr) {
-            OpInfo.Type = MCLOH_AdrpLdrGotStr;
-            OpInfo.IsCandidate = true;
-            OpInfo.MI1 = &MI;
-            return true;
-        } else if (OpInfo.Type == MCLOH_AdrpLdr) {
-            OpInfo.Type = MCLOH_AdrpLdrGotLdr;
-            OpInfo.IsCandidate = true;
-            OpInfo.MI1 = &MI;
-            return true;
-        }
-    }
+  if (!DefInfo.IsCandidate || (&DefInfo != &OpInfo && OpInfo.OneUser))
     return false;
+  // Copy LOHInfo for dest register to LOHInfo for source register.
+  if (&DefInfo != &OpInfo) {
+    OpInfo = DefInfo;
+    // Invalidate \p DefInfo because we track it in \p OpInfo now.
+    handleClobber(DefInfo);
+  } else
+    DefInfo.LastADRP = nullptr;
+
+  // Advance state machine.
+  assert(OpInfo.IsCandidate && "Expect valid state");
+  if (MI.getOpcode() == AArch64::ADDXri && canAddBePartOfLOH(MI)) {
+    if (OpInfo.Type == MCLOH_AdrpLdr) {
+      OpInfo.Type = MCLOH_AdrpAddLdr;
+      OpInfo.IsCandidate = true;
+      OpInfo.MI1 = &MI;
+      return true;
+    } else if (OpInfo.Type == MCLOH_AdrpAddStr && OpInfo.MI1 == nullptr) {
+      OpInfo.Type = MCLOH_AdrpAddStr;
+      OpInfo.IsCandidate = true;
+      OpInfo.MI1 = &MI;
+      return true;
+    }
+  } else {
+    assert((MI.getOpcode() == AArch64::LDRXui ||
+            MI.getOpcode() == AArch64::LDRWui) &&
+           "Expect LDRXui or LDRWui");
+    assert((MI.getOperand(2).getTargetFlags() & AArch64II::MO_GOT) &&
+           "Expected GOT relocation");
+    if (OpInfo.Type == MCLOH_AdrpAddStr && OpInfo.MI1 == nullptr) {
+      OpInfo.Type = MCLOH_AdrpLdrGotStr;
+      OpInfo.IsCandidate = true;
+      OpInfo.MI1 = &MI;
+      return true;
+    } else if (OpInfo.Type == MCLOH_AdrpLdr) {
+      OpInfo.Type = MCLOH_AdrpLdrGotLdr;
+      OpInfo.IsCandidate = true;
+      OpInfo.MI1 = &MI;
+      return true;
+    }
+  }
+  return false;
 }
 
 /// Update state when seeing and ADRP instruction.
 static void handleADRP(const MachineInstr &MI, AArch64FunctionInfo &AFI,
                        LOHInfo &Info, LOHInfo *LOHInfos) {
-    if (Info.LastADRP != nullptr) {
-        LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAdrp:\n"
-                   << '\t' << MI << '\t' << *Info.LastADRP);
-        AFI.addLOHDirective(MCLOH_AdrpAdrp, {&MI, Info.LastADRP});
-        ++NumADRPSimpleCandidate;
-    }
+  if (Info.LastADRP != nullptr) {
+    LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAdrp:\n"
+                      << '\t' << MI << '\t' << *Info.LastADRP);
+    AFI.addLOHDirective(MCLOH_AdrpAdrp, {&MI, Info.LastADRP});
+    ++NumADRPSimpleCandidate;
+  }
 
-    // Produce LOH directive if possible.
-    if (Info.IsCandidate) {
-        switch (Info.Type) {
-        case MCLOH_AdrpAdd: {
-            // ADRPs and ADDs for this candidate may be split apart if using
-            // GlobalISel instead of pseudo-expanded. If that happens, the
-            // def register of the ADD may have a use in between. Adding an LOH in
-            // this case can cause the linker to rewrite the ADRP to write to that
-            // register, clobbering the use.
-            const MachineInstr *AddMI = Info.MI0;
-            int DefIdx = mapRegToGPRIndex(MI.getOperand(0).getReg());
-            int OpIdx = mapRegToGPRIndex(AddMI->getOperand(0).getReg());
-            LOHInfo DefInfo = LOHInfos[OpIdx];
-            if (DefIdx != OpIdx && (DefInfo.OneUser || DefInfo.MultiUsers))
-                break;
-            LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAdd:\n"
-                       << '\t' << MI << '\t' << *Info.MI0);
-            AFI.addLOHDirective(MCLOH_AdrpAdd, {&MI, Info.MI0});
-            ++NumADRSimpleCandidate;
-            break;
-        }
-        case MCLOH_AdrpLdr:
-            if (supportLoadFromLiteral(*Info.MI0)) {
-                LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdr:\n"
-                           << '\t' << MI << '\t' << *Info.MI0);
-                AFI.addLOHDirective(MCLOH_AdrpLdr, {&MI, Info.MI0});
-                ++NumADRPToLDR;
-            }
-            break;
-        case MCLOH_AdrpAddLdr:
-            LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAddLdr:\n"
-                       << '\t' << MI << '\t' << *Info.MI1 << '\t'
-                       << *Info.MI0);
-            AFI.addLOHDirective(MCLOH_AdrpAddLdr, {&MI, Info.MI1, Info.MI0});
-            ++NumADDToLDR;
-            break;
-        case MCLOH_AdrpAddStr:
-            if (Info.MI1 != nullptr) {
-                LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAddStr:\n"
-                           << '\t' << MI << '\t' << *Info.MI1 << '\t'
-                           << *Info.MI0);
-                AFI.addLOHDirective(MCLOH_AdrpAddStr, {&MI, Info.MI1, Info.MI0});
-                ++NumADDToSTR;
-            }
-            break;
-        case MCLOH_AdrpLdrGotLdr:
-            LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGotLdr:\n"
-                       << '\t' << MI << '\t' << *Info.MI1 << '\t'
-                       << *Info.MI0);
-            AFI.addLOHDirective(MCLOH_AdrpLdrGotLdr, {&MI, Info.MI1, Info.MI0});
-            ++NumLDRToLDR;
-            break;
-        case MCLOH_AdrpLdrGotStr:
-            LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGotStr:\n"
-                       << '\t' << MI << '\t' << *Info.MI1 << '\t'
-                       << *Info.MI0);
-            AFI.addLOHDirective(MCLOH_AdrpLdrGotStr, {&MI, Info.MI1, Info.MI0});
-            ++NumLDRToSTR;
-            break;
-        case MCLOH_AdrpLdrGot:
-            LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGot:\n"
-                       << '\t' << MI << '\t' << *Info.MI0);
-            AFI.addLOHDirective(MCLOH_AdrpLdrGot, {&MI, Info.MI0});
-            break;
-        case MCLOH_AdrpAdrp:
-            llvm_unreachable("MCLOH_AdrpAdrp not used in state machine");
-        }
+  // Produce LOH directive if possible.
+  if (Info.IsCandidate) {
+    switch (Info.Type) {
+    case MCLOH_AdrpAdd: {
+      // ADRPs and ADDs for this candidate may be split apart if using
+      // GlobalISel instead of pseudo-expanded. If that happens, the
+      // def register of the ADD may have a use in between. Adding an LOH in
+      // this case can cause the linker to rewrite the ADRP to write to that
+      // register, clobbering the use.
+      const MachineInstr *AddMI = Info.MI0;
+      int DefIdx = mapRegToGPRIndex(MI.getOperand(0).getReg());
+      int OpIdx = mapRegToGPRIndex(AddMI->getOperand(0).getReg());
+      LOHInfo DefInfo = LOHInfos[OpIdx];
+      if (DefIdx != OpIdx && (DefInfo.OneUser || DefInfo.MultiUsers))
+        break;
+      LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAdd:\n"
+                        << '\t' << MI << '\t' << *Info.MI0);
+      AFI.addLOHDirective(MCLOH_AdrpAdd, {&MI, Info.MI0});
+      ++NumADRSimpleCandidate;
+      break;
     }
+    case MCLOH_AdrpLdr:
+      if (supportLoadFromLiteral(*Info.MI0)) {
+        LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdr:\n"
+                          << '\t' << MI << '\t' << *Info.MI0);
+        AFI.addLOHDirective(MCLOH_AdrpLdr, {&MI, Info.MI0});
+        ++NumADRPToLDR;
+      }
+      break;
+    case MCLOH_AdrpAddLdr:
+      LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAddLdr:\n"
+                        << '\t' << MI << '\t' << *Info.MI1 << '\t'
+                        << *Info.MI0);
+      AFI.addLOHDirective(MCLOH_AdrpAddLdr, {&MI, Info.MI1, Info.MI0});
+      ++NumADDToLDR;
+      break;
+    case MCLOH_AdrpAddStr:
+      if (Info.MI1 != nullptr) {
+        LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpAddStr:\n"
+                          << '\t' << MI << '\t' << *Info.MI1 << '\t'
+                          << *Info.MI0);
+        AFI.addLOHDirective(MCLOH_AdrpAddStr, {&MI, Info.MI1, Info.MI0});
+        ++NumADDToSTR;
+      }
+      break;
+    case MCLOH_AdrpLdrGotLdr:
+      LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGotLdr:\n"
+                        << '\t' << MI << '\t' << *Info.MI1 << '\t'
+                        << *Info.MI0);
+      AFI.addLOHDirective(MCLOH_AdrpLdrGotLdr, {&MI, Info.MI1, Info.MI0});
+      ++NumLDRToLDR;
+      break;
+    case MCLOH_AdrpLdrGotStr:
+      LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGotStr:\n"
+                        << '\t' << MI << '\t' << *Info.MI1 << '\t'
+                        << *Info.MI0);
+      AFI.addLOHDirective(MCLOH_AdrpLdrGotStr, {&MI, Info.MI1, Info.MI0});
+      ++NumLDRToSTR;
+      break;
+    case MCLOH_AdrpLdrGot:
+      LLVM_DEBUG(dbgs() << "Adding MCLOH_AdrpLdrGot:\n"
+                        << '\t' << MI << '\t' << *Info.MI0);
+      AFI.addLOHDirective(MCLOH_AdrpLdrGot, {&MI, Info.MI0});
+      break;
+    case MCLOH_AdrpAdrp:
+      llvm_unreachable("MCLOH_AdrpAdrp not used in state machine");
+    }
+  }
 
-    handleClobber(Info);
-    Info.LastADRP = &MI;
+  handleClobber(Info);
+  Info.LastADRP = &MI;
 }
 
 static void handleRegMaskClobber(const uint32_t *RegMask, MCPhysReg Reg,
                                  LOHInfo *LOHInfos) {
-    if (!MachineOperand::clobbersPhysReg(RegMask, Reg))
-        return;
-    int Idx = mapRegToGPRIndex(Reg);
-    if (Idx >= 0)
-        handleClobber(LOHInfos[Idx]);
+  if (!MachineOperand::clobbersPhysReg(RegMask, Reg))
+    return;
+  int Idx = mapRegToGPRIndex(Reg);
+  if (Idx >= 0)
+    handleClobber(LOHInfos[Idx]);
 }
 
 static void handleNormalInst(const MachineInstr &MI, LOHInfo *LOHInfos) {
-    // Handle defs and regmasks.
-    for (const MachineOperand &MO : MI.operands()) {
-        if (MO.isRegMask()) {
-            const uint32_t *RegMask = MO.getRegMask();
-            for (MCPhysReg Reg : AArch64::GPR32RegClass)
-                handleRegMaskClobber(RegMask, Reg, LOHInfos);
-            for (MCPhysReg Reg : AArch64::GPR64RegClass)
-                handleRegMaskClobber(RegMask, Reg, LOHInfos);
-            continue;
-        }
-        if (!MO.isReg() || !MO.isDef())
-            continue;
-        int Idx = mapRegToGPRIndex(MO.getReg());
-        if (Idx < 0)
-            continue;
-        handleClobber(LOHInfos[Idx]);
+  // Handle defs and regmasks.
+  for (const MachineOperand &MO : MI.operands()) {
+    if (MO.isRegMask()) {
+      const uint32_t *RegMask = MO.getRegMask();
+      for (MCPhysReg Reg : AArch64::GPR32RegClass)
+        handleRegMaskClobber(RegMask, Reg, LOHInfos);
+      for (MCPhysReg Reg : AArch64::GPR64RegClass)
+        handleRegMaskClobber(RegMask, Reg, LOHInfos);
+      continue;
     }
-    // Handle uses.
+    if (!MO.isReg() || !MO.isDef())
+      continue;
+    int Idx = mapRegToGPRIndex(MO.getReg());
+    if (Idx < 0)
+      continue;
+    handleClobber(LOHInfos[Idx]);
+  }
+  // Handle uses.
 
-    SmallSet<int, 4> UsesSeen;
-    for (const MachineOperand &MO : MI.uses()) {
-        if (!MO.isReg() || !MO.readsReg())
-            continue;
-        int Idx = mapRegToGPRIndex(MO.getReg());
-        if (Idx < 0)
-            continue;
+  SmallSet<int, 4> UsesSeen;
+  for (const MachineOperand &MO : MI.uses()) {
+    if (!MO.isReg() || !MO.readsReg())
+      continue;
+    int Idx = mapRegToGPRIndex(MO.getReg());
+    if (Idx < 0)
+      continue;
 
-        // Multiple uses of the same register within a single instruction don't
-        // count as MultiUser or block optimization. This is especially important on
-        // arm64_32, where any memory operation is likely to be an explicit use of
-        // xN and an implicit use of wN (the base address register).
-        if (!UsesSeen.count(Idx)) {
-            handleUse(MI, MO, LOHInfos[Idx]);
-            UsesSeen.insert(Idx);
-        }
+    // Multiple uses of the same register within a single instruction don't
+    // count as MultiUser or block optimization. This is especially important on
+    // arm64_32, where any memory operation is likely to be an explicit use of
+    // xN and an implicit use of wN (the base address register).
+    if (!UsesSeen.count(Idx)) {
+      handleUse(MI, MO, LOHInfos[Idx]);
+      UsesSeen.insert(Idx);
     }
+  }
 }
 
 bool AArch64CollectLOH::runOnMachineFunction(MachineFunction &MF) {
-    if (skipFunction(MF.getFunction()))
-        return false;
+  if (skipFunction(MF.getFunction()))
+    return false;
 
-    LLVM_DEBUG(dbgs() << "********** AArch64 Collect LOH **********\n"
-               << "Looking in function " << MF.getName() << '\n');
+  LLVM_DEBUG(dbgs() << "********** AArch64 Collect LOH **********\n"
+                    << "Looking in function " << MF.getName() << '\n');
 
-    LOHInfo LOHInfos[N_GPR_REGS];
-    AArch64FunctionInfo &AFI = *MF.getInfo<AArch64FunctionInfo>();
-    for (const MachineBasicBlock &MBB : MF) {
-        // Reset register tracking state.
-        memset(LOHInfos, 0, sizeof(LOHInfos));
-        // Live-out registers are used.
-        for (const MachineBasicBlock *Succ : MBB.successors()) {
-            for (const auto &LI : Succ->liveins()) {
-                int RegIdx = mapRegToGPRIndex(LI.PhysReg);
-                if (RegIdx >= 0)
-                    LOHInfos[RegIdx].OneUser = true;
-            }
-        }
-
-        // Walk the basic block backwards and update the per register state machine
-        // in the process.
-        for (const MachineInstr &MI :
-                instructionsWithoutDebug(MBB.rbegin(), MBB.rend())) {
-            unsigned Opcode = MI.getOpcode();
-            switch (Opcode) {
-            case AArch64::ADDXri:
-            case AArch64::LDRXui:
-            case AArch64::LDRWui:
-                if (canDefBePartOfLOH(MI)) {
-                    const MachineOperand &Def = MI.getOperand(0);
-                    const MachineOperand &Op = MI.getOperand(1);
-                    assert(Def.isReg() && Def.isDef() && "Expected reg def");
-                    assert(Op.isReg() && Op.isUse() && "Expected reg use");
-                    int DefIdx = mapRegToGPRIndex(Def.getReg());
-                    int OpIdx = mapRegToGPRIndex(Op.getReg());
-                    if (DefIdx >= 0 && OpIdx >= 0 &&
-                            handleMiddleInst(MI, LOHInfos[DefIdx], LOHInfos[OpIdx]))
-                        continue;
-                }
-                break;
-            case AArch64::ADRP:
-                const MachineOperand &Op0 = MI.getOperand(0);
-                int Idx = mapRegToGPRIndex(Op0.getReg());
-                if (Idx >= 0) {
-                    handleADRP(MI, AFI, LOHInfos[Idx], LOHInfos);
-                    continue;
-                }
-                break;
-            }
-            handleNormalInst(MI, LOHInfos);
-        }
+  LOHInfo LOHInfos[N_GPR_REGS];
+  AArch64FunctionInfo &AFI = *MF.getInfo<AArch64FunctionInfo>();
+  for (const MachineBasicBlock &MBB : MF) {
+    // Reset register tracking state.
+    memset(LOHInfos, 0, sizeof(LOHInfos));
+    // Live-out registers are used.
+    for (const MachineBasicBlock *Succ : MBB.successors()) {
+      for (const auto &LI : Succ->liveins()) {
+        int RegIdx = mapRegToGPRIndex(LI.PhysReg);
+        if (RegIdx >= 0)
+          LOHInfos[RegIdx].OneUser = true;
+      }
     }
 
-    // Return "no change": The pass only collects information.
-    return false;
+    // Walk the basic block backwards and update the per register state machine
+    // in the process.
+    for (const MachineInstr &MI :
+         instructionsWithoutDebug(MBB.rbegin(), MBB.rend())) {
+      unsigned Opcode = MI.getOpcode();
+      switch (Opcode) {
+      case AArch64::ADDXri:
+      case AArch64::LDRXui:
+      case AArch64::LDRWui:
+        if (canDefBePartOfLOH(MI)) {
+          const MachineOperand &Def = MI.getOperand(0);
+          const MachineOperand &Op = MI.getOperand(1);
+          assert(Def.isReg() && Def.isDef() && "Expected reg def");
+          assert(Op.isReg() && Op.isUse() && "Expected reg use");
+          int DefIdx = mapRegToGPRIndex(Def.getReg());
+          int OpIdx = mapRegToGPRIndex(Op.getReg());
+          if (DefIdx >= 0 && OpIdx >= 0 &&
+              handleMiddleInst(MI, LOHInfos[DefIdx], LOHInfos[OpIdx]))
+            continue;
+        }
+        break;
+      case AArch64::ADRP:
+        const MachineOperand &Op0 = MI.getOperand(0);
+        int Idx = mapRegToGPRIndex(Op0.getReg());
+        if (Idx >= 0) {
+          handleADRP(MI, AFI, LOHInfos[Idx], LOHInfos);
+          continue;
+        }
+        break;
+      }
+      handleNormalInst(MI, LOHInfos);
+    }
+  }
+
+  // Return "no change": The pass only collects information.
+  return false;
 }
 
 FunctionPass *llvm::createAArch64CollectLOHPass() {
-    return new AArch64CollectLOH();
+  return new AArch64CollectLOH();
 }

@@ -48,9 +48,9 @@ LLVMDisasmContextRef LLVMCreateDisasm(const char *TripleName, void *DisInfo,
  * to calling LLVMCreateDisasmCPUFeatures() with an empty feature set.
  */
 LLVMDisasmContextRef LLVMCreateDisasmCPU(const char *Triple, const char *CPU,
-        void *DisInfo, int TagType,
-        LLVMOpInfoCallback GetOpInfo,
-        LLVMSymbolLookupCallback SymbolLookUp);
+                                         void *DisInfo, int TagType,
+                                         LLVMOpInfoCallback GetOpInfo,
+                                         LLVMSymbolLookupCallback SymbolLookUp);
 
 /**
  * Create a disassembler for the TripleName, a specific CPU and specific feature
@@ -98,8 +98,8 @@ void LLVMDisasmDispose(LLVMDisasmContextRef DC);
  * no valid instruction.
  */
 size_t LLVMDisasmInstruction(LLVMDisasmContextRef DC, uint8_t *Bytes,
-                             uint64_t BytesSize, uint64_t PC,
-                             char *OutString, size_t OutStringSize);
+                             uint64_t BytesSize, uint64_t PC, char *OutString,
+                             size_t OutStringSize);
 
 /**
  * @}

@@ -24,84 +24,76 @@ class Function;
 /// Pointer into the code segment.
 class CodePtr {
 public:
-    CodePtr() : Ptr(nullptr) {}
+  CodePtr() : Ptr(nullptr) {}
 
-    CodePtr &operator+=(int32_t Offset) {
-        Ptr += Offset;
-        return *this;
-    }
+  CodePtr &operator+=(int32_t Offset) {
+    Ptr += Offset;
+    return *this;
+  }
 
-    int32_t operator-(const CodePtr &RHS) const {
-        assert(Ptr != nullptr && RHS.Ptr != nullptr && "Invalid code pointer");
-        return Ptr - RHS.Ptr;
-    }
+  int32_t operator-(const CodePtr &RHS) const {
+    assert(Ptr != nullptr && RHS.Ptr != nullptr && "Invalid code pointer");
+    return Ptr - RHS.Ptr;
+  }
 
-    CodePtr operator-(size_t RHS) const {
-        assert(Ptr != nullptr && "Invalid code pointer");
-        return CodePtr(Ptr - RHS);
-    }
+  CodePtr operator-(size_t RHS) const {
+    assert(Ptr != nullptr && "Invalid code pointer");
+    return CodePtr(Ptr - RHS);
+  }
 
-    bool operator!=(const CodePtr &RHS) const {
-        return Ptr != RHS.Ptr;
-    }
+  bool operator!=(const CodePtr &RHS) const { return Ptr != RHS.Ptr; }
 
-    /// Reads data and advances the pointer.
-    template <typename T> T read() {
-        T Value = ReadHelper<T>(Ptr);
-        Ptr += sizeof(T);
-        return Value;
-    }
+  /// Reads data and advances the pointer.
+  template <typename T> T read() {
+    T Value = ReadHelper<T>(Ptr);
+    Ptr += sizeof(T);
+    return Value;
+  }
 
 private:
-    /// Constructor used by Function to generate pointers.
-    CodePtr(const char *Ptr) : Ptr(Ptr) {}
+  /// Constructor used by Function to generate pointers.
+  CodePtr(const char *Ptr) : Ptr(Ptr) {}
 
-    /// Helper to decode a value or a pointer.
-    template <typename T>
-    static std::enable_if_t<!std::is_pointer<T>::value, T>
-    ReadHelper(const char *Ptr) {
-        using namespace llvm::support;
-        return endian::read<T, endianness::native, 1>(Ptr);
-    }
+  /// Helper to decode a value or a pointer.
+  template <typename T>
+  static std::enable_if_t<!std::is_pointer<T>::value, T>
+  ReadHelper(const char *Ptr) {
+    using namespace llvm::support;
+    return endian::read<T, endianness::native, 1>(Ptr);
+  }
 
-    template <typename T>
-    static std::enable_if_t<std::is_pointer<T>::value, T>
-    ReadHelper(const char *Ptr) {
-        using namespace llvm::support;
-        auto Punned = endian::read<uintptr_t, endianness::native, 1>(Ptr);
-        return reinterpret_cast<T>(Punned);
-    }
+  template <typename T>
+  static std::enable_if_t<std::is_pointer<T>::value, T>
+  ReadHelper(const char *Ptr) {
+    using namespace llvm::support;
+    auto Punned = endian::read<uintptr_t, endianness::native, 1>(Ptr);
+    return reinterpret_cast<T>(Punned);
+  }
 
 private:
-    friend class Function;
+  friend class Function;
 
-    /// Pointer into the code owned by a function.
-    const char *Ptr;
+  /// Pointer into the code owned by a function.
+  const char *Ptr;
 };
 
 /// Describes the statement/declaration an opcode was generated from.
 class SourceInfo {
 public:
-    SourceInfo() {}
-    SourceInfo(const Stmt *E) : Source(E) {}
-    SourceInfo(const Decl *D) : Source(D) {}
+  SourceInfo() {}
+  SourceInfo(const Stmt *E) : Source(E) {}
+  SourceInfo(const Decl *D) : Source(D) {}
 
-    SourceLocation getLoc() const;
+  SourceLocation getLoc() const;
 
-    const Stmt *asStmt() const {
-        return Source.dyn_cast<const Stmt *>();
-    }
-    const Decl *asDecl() const {
-        return Source.dyn_cast<const Decl *>();
-    }
-    const Expr *asExpr() const;
+  const Stmt *asStmt() const { return Source.dyn_cast<const Stmt *>(); }
+  const Decl *asDecl() const { return Source.dyn_cast<const Decl *>(); }
+  const Expr *asExpr() const;
 
-    operator bool() const {
-        return !Source.isNull();
-    }
+  operator bool() const { return !Source.isNull(); }
 
 private:
-    llvm::PointerUnion<const Decl *, const Stmt *> Source;
+  llvm::PointerUnion<const Decl *, const Stmt *> Source;
 };
 
 using SourceMap = std::vector<std::pair<unsigned, SourceInfo>>;
@@ -109,15 +101,15 @@ using SourceMap = std::vector<std::pair<unsigned, SourceInfo>>;
 /// Interface for classes which map locations to sources.
 class SourceMapper {
 public:
-    virtual ~SourceMapper() {}
+  virtual ~SourceMapper() {}
 
-    /// Returns source information for a given PC in a function.
-    virtual SourceInfo getSource(Function *F, CodePtr PC) const = 0;
+  /// Returns source information for a given PC in a function.
+  virtual SourceInfo getSource(Function *F, CodePtr PC) const = 0;
 
-    /// Returns the expression if an opcode belongs to one, null otherwise.
-    const Expr *getExpr(Function *F, CodePtr PC) const;
-    /// Returns the location from which an opcode originates.
-    SourceLocation getLocation(Function *F, CodePtr PC) const;
+  /// Returns the expression if an opcode belongs to one, null otherwise.
+  const Expr *getExpr(Function *F, CodePtr PC) const;
+  /// Returns the location from which an opcode originates.
+  SourceLocation getLocation(Function *F, CodePtr PC) const;
 };
 
 } // namespace interp

@@ -17,8 +17,7 @@
 
 #include "internal_macros.h"
 
-#if !defined(HAVE_STD_REGEX) && \
-    !defined(HAVE_GNU_POSIX_REGEX) && \
+#if !defined(HAVE_STD_REGEX) && !defined(HAVE_GNU_POSIX_REGEX) &&              \
     !defined(HAVE_POSIX_REGEX)
 // No explicit regex selection; detect based on builtin hints.
 #if defined(BENCHMARK_OS_LINUX) || defined(BENCHMARK_OS_APPLE)
@@ -30,8 +29,8 @@
 
 // Prefer C regex libraries when compiling w/o exceptions so that we can
 // correctly report errors.
-#if defined(BENCHMARK_HAS_NO_EXCEPTIONS) && \
-    defined(BENCHMARK_HAVE_STD_REGEX) && \
+#if defined(BENCHMARK_HAS_NO_EXCEPTIONS) &&                                    \
+    defined(BENCHMARK_HAVE_STD_REGEX) &&                                       \
     (defined(HAVE_GNU_POSIX_REGEX) || defined(HAVE_POSIX_REGEX))
 #undef HAVE_STD_REGEX
 #endif
@@ -55,26 +54,26 @@ namespace benchmark {
 // cleanup
 class Regex {
 public:
-    Regex() : init_(false) {}
+  Regex() : init_(false) {}
 
-    ~Regex();
+  ~Regex();
 
-    // Compile a regular expression matcher from spec.  Returns true on success.
-    //
-    // On failure (and if error is not nullptr), error is populated with a human
-    // readable error message if an error occurs.
-    bool Init(const std::string& spec, std::string* error);
+  // Compile a regular expression matcher from spec.  Returns true on success.
+  //
+  // On failure (and if error is not nullptr), error is populated with a human
+  // readable error message if an error occurs.
+  bool Init(const std::string &spec, std::string *error);
 
-    // Returns whether str matches the compiled regular expression.
-    bool Match(const std::string& str);
+  // Returns whether str matches the compiled regular expression.
+  bool Match(const std::string &str);
 
 private:
-    bool init_;
+  bool init_;
 // Underlying regular expression object
 #if defined(HAVE_STD_REGEX)
-    std::regex re_;
+  std::regex re_;
 #elif defined(HAVE_POSIX_REGEX) || defined(HAVE_GNU_POSIX_REGEX)
-    regex_t re_;
+  regex_t re_;
 #else
 #error No regular expression backend implementation available
 #endif
@@ -82,19 +81,20 @@ private:
 
 #if defined(HAVE_STD_REGEX)
 
-inline bool Regex::Init(const std::string& spec, std::string* error) {
+inline bool Regex::Init(const std::string &spec, std::string *error) {
 #ifdef BENCHMARK_HAS_NO_EXCEPTIONS
-    ((void)error); // suppress unused warning
+  ((void)error); // suppress unused warning
 #else
-    try {
+  try {
 #endif
-    re_ = std::regex(spec, std::regex_constants::extended);
-    init_ = true;
+  re_ = std::regex(spec, std::regex_constants::extended);
+  init_ = true;
 #ifndef BENCHMARK_HAS_NO_EXCEPTIONS
-} catch (const std::regex_error& e) {
-    if (error) {
-        *error = e.what();
-    }
+}
+catch (const std::regex_error &e) {
+  if (error) {
+    *error = e.what();
+  }
 }
 #endif
 return init_;
@@ -102,51 +102,51 @@ return init_;
 
 inline Regex::~Regex() {}
 
-inline bool Regex::Match(const std::string& str) {
-    if (!init_) {
-        return false;
-    }
-    return std::regex_search(str, re_);
+inline bool Regex::Match(const std::string &str) {
+  if (!init_) {
+    return false;
+  }
+  return std::regex_search(str, re_);
 }
 
 #else
-inline bool Regex::Init(const std::string& spec, std::string* error) {
-    int ec = regcomp(&re_, spec.c_str(), REG_EXTENDED | REG_NOSUB);
-    if (ec != 0) {
-        if (error) {
-            size_t needed = regerror(ec, &re_, nullptr, 0);
-            char* errbuf = new char[needed];
-            regerror(ec, &re_, errbuf, needed);
+inline bool Regex::Init(const std::string &spec, std::string *error) {
+  int ec = regcomp(&re_, spec.c_str(), REG_EXTENDED | REG_NOSUB);
+  if (ec != 0) {
+    if (error) {
+      size_t needed = regerror(ec, &re_, nullptr, 0);
+      char *errbuf = new char[needed];
+      regerror(ec, &re_, errbuf, needed);
 
-            // regerror returns the number of bytes necessary to null terminate
-            // the string, so we move that when assigning to error.
-            CHECK_NE(needed, 0);
-            error->assign(errbuf, needed - 1);
+      // regerror returns the number of bytes necessary to null terminate
+      // the string, so we move that when assigning to error.
+      CHECK_NE(needed, 0);
+      error->assign(errbuf, needed - 1);
 
-            delete[] errbuf;
-        }
-
-        return false;
+      delete[] errbuf;
     }
 
-    init_ = true;
-    return true;
+    return false;
+  }
+
+  init_ = true;
+  return true;
 }
 
 inline Regex::~Regex() {
-    if (init_) {
-        regfree(&re_);
-    }
+  if (init_) {
+    regfree(&re_);
+  }
 }
 
-inline bool Regex::Match(const std::string& str) {
-    if (!init_) {
-        return false;
-    }
-    return regexec(&re_, str.c_str(), 0, nullptr, 0) == 0;
+inline bool Regex::Match(const std::string &str) {
+  if (!init_) {
+    return false;
+  }
+  return regexec(&re_, str.c_str(), 0, nullptr, 0) == 0;
 }
 #endif
 
-}  // end namespace benchmark
+} // end namespace benchmark
 
-#endif  // BENCHMARK_RE_H_
+#endif // BENCHMARK_RE_H_

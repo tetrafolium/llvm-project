@@ -21,34 +21,28 @@ namespace tools {
 namespace freebsd {
 class LLVM_LIBRARY_VISIBILITY Assembler : public Tool {
 public:
-    Assembler(const ToolChain &TC)
-        : Tool("freebsd::Assembler", "assembler", TC) {}
+  Assembler(const ToolChain &TC)
+      : Tool("freebsd::Assembler", "assembler", TC) {}
 
-    bool hasIntegratedCPP() const override {
-        return false;
-    }
+  bool hasIntegratedCPP() const override { return false; }
 
-    void ConstructJob(Compilation &C, const JobAction &JA,
-                      const InputInfo &Output, const InputInfoList &Inputs,
-                      const llvm::opt::ArgList &TCArgs,
-                      const char *LinkingOutput) const override;
+  void ConstructJob(Compilation &C, const JobAction &JA,
+                    const InputInfo &Output, const InputInfoList &Inputs,
+                    const llvm::opt::ArgList &TCArgs,
+                    const char *LinkingOutput) const override;
 };
 
 class LLVM_LIBRARY_VISIBILITY Linker : public Tool {
 public:
-    Linker(const ToolChain &TC) : Tool("freebsd::Linker", "linker", TC) {}
+  Linker(const ToolChain &TC) : Tool("freebsd::Linker", "linker", TC) {}
 
-    bool hasIntegratedCPP() const override {
-        return false;
-    }
-    bool isLinkJob() const override {
-        return true;
-    }
+  bool hasIntegratedCPP() const override { return false; }
+  bool isLinkJob() const override { return true; }
 
-    void ConstructJob(Compilation &C, const JobAction &JA,
-                      const InputInfo &Output, const InputInfoList &Inputs,
-                      const llvm::opt::ArgList &TCArgs,
-                      const char *LinkingOutput) const override;
+  void ConstructJob(Compilation &C, const JobAction &JA,
+                    const InputInfo &Output, const InputInfoList &Inputs,
+                    const llvm::opt::ArgList &TCArgs,
+                    const char *LinkingOutput) const override;
 };
 } // end namespace freebsd
 } // end namespace tools
@@ -57,49 +51,43 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY FreeBSD : public Generic_ELF {
 public:
-    FreeBSD(const Driver &D, const llvm::Triple &Triple,
-            const llvm::opt::ArgList &Args);
-    bool HasNativeLLVMSupport() const override;
+  FreeBSD(const Driver &D, const llvm::Triple &Triple,
+          const llvm::opt::ArgList &Args);
+  bool HasNativeLLVMSupport() const override;
 
-    bool IsMathErrnoDefault() const override {
-        return false;
-    }
-    bool IsObjCNonFragileABIDefault() const override {
-        return true;
-    }
+  bool IsMathErrnoDefault() const override { return false; }
+  bool IsObjCNonFragileABIDefault() const override { return true; }
 
-    CXXStdlibType GetDefaultCXXStdlibType() const override;
-    void addLibCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
-                               llvm::opt::ArgStringList &CC1Args) const override;
-    void
-    addLibStdCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
+  CXXStdlibType GetDefaultCXXStdlibType() const override;
+  void addLibCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
                              llvm::opt::ArgStringList &CC1Args) const override;
-    void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
-                             llvm::opt::ArgStringList &CmdArgs) const override;
-    void AddCudaIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                            llvm::opt::ArgStringList &CC1Args) const override;
-    void AddHIPIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+  void
+  addLibStdCxxIncludePaths(const llvm::opt::ArgList &DriverArgs,
                            llvm::opt::ArgStringList &CC1Args) const override;
+  void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
+                           llvm::opt::ArgStringList &CmdArgs) const override;
+  void AddCudaIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                          llvm::opt::ArgStringList &CC1Args) const override;
+  void AddHIPIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                         llvm::opt::ArgStringList &CC1Args) const override;
 
-    llvm::ExceptionHandling
-    GetExceptionModel(const llvm::opt::ArgList &Args) const override;
-    bool IsUnwindTablesDefault(const llvm::opt::ArgList &Args) const override;
-    bool isPIEDefault() const override;
-    SanitizerMask getSupportedSanitizers() const override;
-    unsigned GetDefaultDwarfVersion() const override;
-    // Until dtrace (via CTF) and LLDB can deal with distributed debug info,
-    // FreeBSD defaults to standalone/full debug info.
-    bool GetDefaultStandaloneDebug() const override {
-        return true;
-    }
-    void
-    addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
-                          llvm::opt::ArgStringList &CC1Args,
-                          Action::OffloadKind DeviceOffloadKind) const override;
+  llvm::ExceptionHandling
+  GetExceptionModel(const llvm::opt::ArgList &Args) const override;
+  bool IsUnwindTablesDefault(const llvm::opt::ArgList &Args) const override;
+  bool isPIEDefault() const override;
+  SanitizerMask getSupportedSanitizers() const override;
+  unsigned GetDefaultDwarfVersion() const override;
+  // Until dtrace (via CTF) and LLDB can deal with distributed debug info,
+  // FreeBSD defaults to standalone/full debug info.
+  bool GetDefaultStandaloneDebug() const override { return true; }
+  void
+  addClangTargetOptions(const llvm::opt::ArgList &DriverArgs,
+                        llvm::opt::ArgStringList &CC1Args,
+                        Action::OffloadKind DeviceOffloadKind) const override;
 
 protected:
-    Tool *buildAssembler() const override;
-    Tool *buildLinker() const override;
+  Tool *buildAssembler() const override;
+  Tool *buildLinker() const override;
 };
 
 } // end namespace toolchains

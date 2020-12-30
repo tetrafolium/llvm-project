@@ -21,30 +21,30 @@
 namespace llvm {
 
 struct LanaiRegisterInfo : public LanaiGenRegisterInfo {
-    LanaiRegisterInfo();
+  LanaiRegisterInfo();
 
-    const uint32_t *getCallPreservedMask(const MachineFunction &MF,
-                                         CallingConv::ID) const override;
+  const uint32_t *getCallPreservedMask(const MachineFunction &MF,
+                                       CallingConv::ID) const override;
 
-    // Code Generation virtual methods.
-    const uint16_t *
-    getCalleeSavedRegs(const MachineFunction *MF = nullptr) const override;
+  // Code Generation virtual methods.
+  const uint16_t *
+  getCalleeSavedRegs(const MachineFunction *MF = nullptr) const override;
 
-    BitVector getReservedRegs(const MachineFunction &MF) const override;
+  BitVector getReservedRegs(const MachineFunction &MF) const override;
 
-    bool requiresRegisterScavenging(const MachineFunction &MF) const override;
+  bool requiresRegisterScavenging(const MachineFunction &MF) const override;
 
-    void eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
-                             unsigned FIOperandNum,
-                             RegScavenger *RS = nullptr) const override;
+  void eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
-    // Debug information queries.
-    unsigned getRARegister() const;
-    Register getFrameRegister(const MachineFunction &MF) const override;
-    Register getBaseRegister() const;
-    bool hasBasePointer(const MachineFunction &MF) const;
+  // Debug information queries.
+  unsigned getRARegister() const;
+  Register getFrameRegister(const MachineFunction &MF) const override;
+  Register getBaseRegister() const;
+  bool hasBasePointer(const MachineFunction &MF) const;
 
-    int getDwarfRegNum(unsigned RegNum, bool IsEH) const;
+  int getDwarfRegNum(unsigned RegNum, bool IsEH) const;
 };
 
 } // end namespace llvm

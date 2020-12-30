@@ -28,94 +28,94 @@ MipsELFStreamer::MipsELFStreamer(MCContext &Context,
                                  std::unique_ptr<MCCodeEmitter> Emitter)
     : MCELFStreamer(Context, std::move(MAB), std::move(OW),
                     std::move(Emitter)) {
-    RegInfoRecord = new MipsRegInfoRecord(this, Context);
-    MipsOptionRecords.push_back(
-        std::unique_ptr<MipsRegInfoRecord>(RegInfoRecord));
+  RegInfoRecord = new MipsRegInfoRecord(this, Context);
+  MipsOptionRecords.push_back(
+      std::unique_ptr<MipsRegInfoRecord>(RegInfoRecord));
 }
 
 void MipsELFStreamer::emitInstruction(const MCInst &Inst,
                                       const MCSubtargetInfo &STI) {
-    MCELFStreamer::emitInstruction(Inst, STI);
+  MCELFStreamer::emitInstruction(Inst, STI);
 
-    MCContext &Context = getContext();
-    const MCRegisterInfo *MCRegInfo = Context.getRegisterInfo();
+  MCContext &Context = getContext();
+  const MCRegisterInfo *MCRegInfo = Context.getRegisterInfo();
 
-    for (unsigned OpIndex = 0; OpIndex < Inst.getNumOperands(); ++OpIndex) {
-        const MCOperand &Op = Inst.getOperand(OpIndex);
+  for (unsigned OpIndex = 0; OpIndex < Inst.getNumOperands(); ++OpIndex) {
+    const MCOperand &Op = Inst.getOperand(OpIndex);
 
-        if (!Op.isReg())
-            continue;
+    if (!Op.isReg())
+      continue;
 
-        unsigned Reg = Op.getReg();
-        RegInfoRecord->SetPhysRegUsed(Reg, MCRegInfo);
-    }
+    unsigned Reg = Op.getReg();
+    RegInfoRecord->SetPhysRegUsed(Reg, MCRegInfo);
+  }
 
-    createPendingLabelRelocs();
+  createPendingLabelRelocs();
 }
 
 void MipsELFStreamer::emitCFIStartProcImpl(MCDwarfFrameInfo &Frame) {
-    Frame.Begin = getContext().createTempSymbol();
-    MCELFStreamer::emitLabel(Frame.Begin);
+  Frame.Begin = getContext().createTempSymbol();
+  MCELFStreamer::emitLabel(Frame.Begin);
 }
 
 MCSymbol *MipsELFStreamer::emitCFILabel() {
-    MCSymbol *Label = getContext().createTempSymbol("cfi", true);
-    MCELFStreamer::emitLabel(Label);
-    return Label;
+  MCSymbol *Label = getContext().createTempSymbol("cfi", true);
+  MCELFStreamer::emitLabel(Label);
+  return Label;
 }
 
 void MipsELFStreamer::emitCFIEndProcImpl(MCDwarfFrameInfo &Frame) {
-    Frame.End = getContext().createTempSymbol();
-    MCELFStreamer::emitLabel(Frame.End);
+  Frame.End = getContext().createTempSymbol();
+  MCELFStreamer::emitLabel(Frame.End);
 }
 
 void MipsELFStreamer::createPendingLabelRelocs() {
-    MipsTargetELFStreamer *ELFTargetStreamer =
-        static_cast<MipsTargetELFStreamer *>(getTargetStreamer());
+  MipsTargetELFStreamer *ELFTargetStreamer =
+      static_cast<MipsTargetELFStreamer *>(getTargetStreamer());
 
-    // FIXME: Also mark labels when in MIPS16 mode.
-    if (ELFTargetStreamer->isMicroMipsEnabled()) {
-        for (auto *L : Labels) {
-            auto *Label = cast<MCSymbolELF>(L);
-            getAssembler().registerSymbol(*Label);
-            Label->setOther(ELF::STO_MIPS_MICROMIPS);
-        }
+  // FIXME: Also mark labels when in MIPS16 mode.
+  if (ELFTargetStreamer->isMicroMipsEnabled()) {
+    for (auto *L : Labels) {
+      auto *Label = cast<MCSymbolELF>(L);
+      getAssembler().registerSymbol(*Label);
+      Label->setOther(ELF::STO_MIPS_MICROMIPS);
     }
+  }
 
-    Labels.clear();
+  Labels.clear();
 }
 
 void MipsELFStreamer::emitLabel(MCSymbol *Symbol, SMLoc Loc) {
-    MCELFStreamer::emitLabel(Symbol);
-    Labels.push_back(Symbol);
+  MCELFStreamer::emitLabel(Symbol);
+  Labels.push_back(Symbol);
 }
 
 void MipsELFStreamer::SwitchSection(MCSection *Section,
                                     const MCExpr *Subsection) {
-    MCELFStreamer::SwitchSection(Section, Subsection);
-    Labels.clear();
+  MCELFStreamer::SwitchSection(Section, Subsection);
+  Labels.clear();
 }
 
 void MipsELFStreamer::emitValueImpl(const MCExpr *Value, unsigned Size,
                                     SMLoc Loc) {
-    MCELFStreamer::emitValueImpl(Value, Size, Loc);
-    Labels.clear();
+  MCELFStreamer::emitValueImpl(Value, Size, Loc);
+  Labels.clear();
 }
 
 void MipsELFStreamer::emitIntValue(uint64_t Value, unsigned Size) {
-    MCELFStreamer::emitIntValue(Value, Size);
-    Labels.clear();
+  MCELFStreamer::emitIntValue(Value, Size);
+  Labels.clear();
 }
 
 void MipsELFStreamer::EmitMipsOptionRecords() {
-    for (const auto &I : MipsOptionRecords)
-        I->EmitMipsOptionRecord();
+  for (const auto &I : MipsOptionRecords)
+    I->EmitMipsOptionRecord();
 }
 
 MCELFStreamer *llvm::createMipsELFStreamer(
     MCContext &Context, std::unique_ptr<MCAsmBackend> MAB,
     std::unique_ptr<MCObjectWriter> OW, std::unique_ptr<MCCodeEmitter> Emitter,
     bool RelaxAll) {
-    return new MipsELFStreamer(Context, std::move(MAB), std::move(OW),
-                               std::move(Emitter));
+  return new MipsELFStreamer(Context, std::move(MAB), std::move(OW),
+                             std::move(Emitter));
 }

@@ -47,66 +47,66 @@ namespace codeview {
 /// into M chunks of roughly equal size, this yields a worst case lookup time
 /// of O(N/M) and an amortized time of O(1).
 class LazyRandomTypeCollection : public TypeCollection {
-    using PartialOffsetArray = FixedStreamArray<TypeIndexOffset>;
+  using PartialOffsetArray = FixedStreamArray<TypeIndexOffset>;
 
-    struct CacheEntry {
-        CVType Type;
-        uint32_t Offset;
-        StringRef Name;
-    };
+  struct CacheEntry {
+    CVType Type;
+    uint32_t Offset;
+    StringRef Name;
+  };
 
 public:
-    explicit LazyRandomTypeCollection(uint32_t RecordCountHint);
-    LazyRandomTypeCollection(StringRef Data, uint32_t RecordCountHint);
-    LazyRandomTypeCollection(ArrayRef<uint8_t> Data, uint32_t RecordCountHint);
-    LazyRandomTypeCollection(const CVTypeArray &Types, uint32_t RecordCountHint,
-                             PartialOffsetArray PartialOffsets);
-    LazyRandomTypeCollection(const CVTypeArray &Types, uint32_t RecordCountHint);
+  explicit LazyRandomTypeCollection(uint32_t RecordCountHint);
+  LazyRandomTypeCollection(StringRef Data, uint32_t RecordCountHint);
+  LazyRandomTypeCollection(ArrayRef<uint8_t> Data, uint32_t RecordCountHint);
+  LazyRandomTypeCollection(const CVTypeArray &Types, uint32_t RecordCountHint,
+                           PartialOffsetArray PartialOffsets);
+  LazyRandomTypeCollection(const CVTypeArray &Types, uint32_t RecordCountHint);
 
-    void reset(ArrayRef<uint8_t> Data, uint32_t RecordCountHint);
-    void reset(StringRef Data, uint32_t RecordCountHint);
-    void reset(BinaryStreamReader &Reader, uint32_t RecordCountHint);
+  void reset(ArrayRef<uint8_t> Data, uint32_t RecordCountHint);
+  void reset(StringRef Data, uint32_t RecordCountHint);
+  void reset(BinaryStreamReader &Reader, uint32_t RecordCountHint);
 
-    uint32_t getOffsetOfType(TypeIndex Index);
+  uint32_t getOffsetOfType(TypeIndex Index);
 
-    Optional<CVType> tryGetType(TypeIndex Index);
+  Optional<CVType> tryGetType(TypeIndex Index);
 
-    CVType getType(TypeIndex Index) override;
-    StringRef getTypeName(TypeIndex Index) override;
-    bool contains(TypeIndex Index) override;
-    uint32_t size() override;
-    uint32_t capacity() override;
-    Optional<TypeIndex> getFirst() override;
-    Optional<TypeIndex> getNext(TypeIndex Prev) override;
-    bool replaceType(TypeIndex &Index, CVType Data, bool Stabilize) override;
+  CVType getType(TypeIndex Index) override;
+  StringRef getTypeName(TypeIndex Index) override;
+  bool contains(TypeIndex Index) override;
+  uint32_t size() override;
+  uint32_t capacity() override;
+  Optional<TypeIndex> getFirst() override;
+  Optional<TypeIndex> getNext(TypeIndex Prev) override;
+  bool replaceType(TypeIndex &Index, CVType Data, bool Stabilize) override;
 
 private:
-    Error ensureTypeExists(TypeIndex Index);
-    void ensureCapacityFor(TypeIndex Index);
+  Error ensureTypeExists(TypeIndex Index);
+  void ensureCapacityFor(TypeIndex Index);
 
-    Error visitRangeForType(TypeIndex TI);
-    Error fullScanForType(TypeIndex TI);
-    void visitRange(TypeIndex Begin, uint32_t BeginOffset, TypeIndex End);
+  Error visitRangeForType(TypeIndex TI);
+  Error fullScanForType(TypeIndex TI);
+  void visitRange(TypeIndex Begin, uint32_t BeginOffset, TypeIndex End);
 
-    /// Number of actual records.
-    uint32_t Count = 0;
+  /// Number of actual records.
+  uint32_t Count = 0;
 
-    /// The largest type index which we've visited.
-    TypeIndex LargestTypeIndex = TypeIndex::None();
+  /// The largest type index which we've visited.
+  TypeIndex LargestTypeIndex = TypeIndex::None();
 
-    BumpPtrAllocator Allocator;
-    StringSaver NameStorage;
+  BumpPtrAllocator Allocator;
+  StringSaver NameStorage;
 
-    /// The type array to allow random access visitation of.
-    CVTypeArray Types;
+  /// The type array to allow random access visitation of.
+  CVTypeArray Types;
 
-    std::vector<CacheEntry> Records;
+  std::vector<CacheEntry> Records;
 
-    /// An array of index offsets for the given type stream, allowing log(N)
-    /// lookups of a type record by index.  Similar to KnownOffsets but only
-    /// contains offsets for some type indices, some of which may not have
-    /// ever been visited.
-    PartialOffsetArray PartialOffsets;
+  /// An array of index offsets for the given type stream, allowing log(N)
+  /// lookups of a type record by index.  Similar to KnownOffsets but only
+  /// contains offsets for some type indices, some of which may not have
+  /// ever been visited.
+  PartialOffsetArray PartialOffsets;
 };
 
 } // end namespace codeview

@@ -4,7 +4,6 @@
  * Internally, isl_set is defined to isl_map, so in practice,
  * this function performs a redundant cast.
  */
-static __isl_give isl_map *set_to_map(__isl_take isl_set *set)
-{
-    return (isl_map *) set;
+static __isl_give isl_map *set_to_map(__isl_take isl_set *set) {
+  return (isl_map *)set;
 }

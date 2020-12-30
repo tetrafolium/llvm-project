@@ -18,28 +18,24 @@
 
 namespace __sanitizer {
 
-bool AddDieCallback(DieCallbackType Callback) {
-    return true;
-}
+bool AddDieCallback(DieCallbackType Callback) { return true; }
 
-bool RemoveDieCallback(DieCallbackType Callback) {
-    return true;
-}
+bool RemoveDieCallback(DieCallbackType Callback) { return true; }
 
 void SetUserDieCallback(DieCallbackType Callback) {}
 
 void NORETURN Die() {
-    if (common_flags()->abort_on_error)
-        Abort();
-    internal__exit(common_flags()->exitcode);
+  if (common_flags()->abort_on_error)
+    Abort();
+  internal__exit(common_flags()->exitcode);
 }
 
 void SetCheckFailedCallback(CheckFailedCallbackType callback) {}
 
 void NORETURN CheckFailed(const char *File, int Line, const char *Condition,
                           u64 Value1, u64 Value2) {
-    __scudo::dieWithMessage("CHECK failed at %s:%d %s (%lld, %lld)\n",
-                            File, Line, Condition, Value1, Value2);
+  __scudo::dieWithMessage("CHECK failed at %s:%d %s (%lld, %lld)\n", File, Line,
+                          Condition, Value1, Value2);
 }
 
-}  // namespace __sanitizer
+} // namespace __sanitizer

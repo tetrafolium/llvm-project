@@ -15,17 +15,17 @@
 
 class RegisterInfoPOSIX_ppc64le : public lldb_private::RegisterInfoInterface {
 public:
-    RegisterInfoPOSIX_ppc64le(const lldb_private::ArchSpec &target_arch);
+  RegisterInfoPOSIX_ppc64le(const lldb_private::ArchSpec &target_arch);
 
-    size_t GetGPRSize() const override;
+  size_t GetGPRSize() const override;
 
-    const lldb_private::RegisterInfo *GetRegisterInfo() const override;
+  const lldb_private::RegisterInfo *GetRegisterInfo() const override;
 
-    uint32_t GetRegisterCount() const override;
+  uint32_t GetRegisterCount() const override;
 
 private:
-    const lldb_private::RegisterInfo *m_register_info_p;
-    uint32_t m_register_info_count;
+  const lldb_private::RegisterInfo *m_register_info_p;
+  uint32_t m_register_info_count;
 };
 
 #endif

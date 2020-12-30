@@ -17,13 +17,13 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY PPCLinuxToolChain : public Linux {
 public:
-    PPCLinuxToolChain(const Driver &D, const llvm::Triple &Triple,
-                      const llvm::opt::ArgList &Args)
-        : Linux(D, Triple, Args) {}
+  PPCLinuxToolChain(const Driver &D, const llvm::Triple &Triple,
+                    const llvm::opt::ArgList &Args)
+      : Linux(D, Triple, Args) {}
 
-    void
-    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                              llvm::opt::ArgStringList &CC1Args) const override;
+  void
+  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                            llvm::opt::ArgStringList &CC1Args) const override;
 };
 
 } // end namespace toolchains

@@ -62,20 +62,20 @@ CloneModule(const Module &M, ValueToValueMapTy &VMap,
 /// This struct can be used to capture information about code
 /// being cloned, while it is being cloned.
 struct ClonedCodeInfo {
-    /// This is set to true if the cloned code contains a normal call instruction.
-    bool ContainsCalls = false;
+  /// This is set to true if the cloned code contains a normal call instruction.
+  bool ContainsCalls = false;
 
-    /// This is set to true if the cloned code contains a 'dynamic' alloca.
-    /// Dynamic allocas are allocas that are either not in the entry block or they
-    /// are in the entry block but are not a constant size.
-    bool ContainsDynamicAllocas = false;
+  /// This is set to true if the cloned code contains a 'dynamic' alloca.
+  /// Dynamic allocas are allocas that are either not in the entry block or they
+  /// are in the entry block but are not a constant size.
+  bool ContainsDynamicAllocas = false;
 
-    /// All cloned call sites that have operand bundles attached are appended to
-    /// this vector.  This vector may contain nulls or undefs if some of the
-    /// originally inserted callsites were DCE'ed after they were cloned.
-    std::vector<WeakTrackingVH> OperandBundleCallSites;
+  /// All cloned call sites that have operand bundles attached are appended to
+  /// this vector.  This vector may contain nulls or undefs if some of the
+  /// originally inserted callsites were DCE'ed after they were cloned.
+  std::vector<WeakTrackingVH> OperandBundleCallSites;
 
-    ClonedCodeInfo() = default;
+  ClonedCodeInfo() = default;
 };
 
 /// Return a copy of the specified basic block, but without
@@ -136,7 +136,7 @@ Function *CloneFunction(Function *F, ValueToValueMapTy &VMap,
 ///
 void CloneFunctionInto(Function *NewFunc, const Function *OldFunc,
                        ValueToValueMapTy &VMap, bool ModuleLevelChanges,
-                       SmallVectorImpl<ReturnInst*> &Returns,
+                       SmallVectorImpl<ReturnInst *> &Returns,
                        const char *NameSuffix = "",
                        ClonedCodeInfo *CodeInfo = nullptr,
                        ValueMapTypeRemapper *TypeMapper = nullptr,
@@ -162,7 +162,7 @@ void CloneAndPruneIntoFromInst(Function *NewFunc, const Function *OldFunc,
 ///
 void CloneAndPruneFunctionInto(Function *NewFunc, const Function *OldFunc,
                                ValueToValueMapTy &VMap, bool ModuleLevelChanges,
-                               SmallVectorImpl<ReturnInst*> &Returns,
+                               SmallVectorImpl<ReturnInst *> &Returns,
                                const char *NameSuffix = "",
                                ClonedCodeInfo *CodeInfo = nullptr,
                                Instruction *TheCall = nullptr);
@@ -171,42 +171,42 @@ void CloneAndPruneFunctionInto(Function *NewFunc, const Function *OldFunc,
 /// the auxiliary results produced by it.
 class InlineFunctionInfo {
 public:
-    explicit InlineFunctionInfo(
-        CallGraph *cg = nullptr,
-        function_ref<AssumptionCache &(Function &)> GetAssumptionCache = nullptr,
-        ProfileSummaryInfo *PSI = nullptr,
-        BlockFrequencyInfo *CallerBFI = nullptr,
-        BlockFrequencyInfo *CalleeBFI = nullptr)
-        : CG(cg), GetAssumptionCache(GetAssumptionCache), PSI(PSI),
-          CallerBFI(CallerBFI), CalleeBFI(CalleeBFI) {}
+  explicit InlineFunctionInfo(
+      CallGraph *cg = nullptr,
+      function_ref<AssumptionCache &(Function &)> GetAssumptionCache = nullptr,
+      ProfileSummaryInfo *PSI = nullptr,
+      BlockFrequencyInfo *CallerBFI = nullptr,
+      BlockFrequencyInfo *CalleeBFI = nullptr)
+      : CG(cg), GetAssumptionCache(GetAssumptionCache), PSI(PSI),
+        CallerBFI(CallerBFI), CalleeBFI(CalleeBFI) {}
 
-    /// If non-null, InlineFunction will update the callgraph to reflect the
-    /// changes it makes.
-    CallGraph *CG;
-    function_ref<AssumptionCache &(Function &)> GetAssumptionCache;
-    ProfileSummaryInfo *PSI;
-    BlockFrequencyInfo *CallerBFI, *CalleeBFI;
+  /// If non-null, InlineFunction will update the callgraph to reflect the
+  /// changes it makes.
+  CallGraph *CG;
+  function_ref<AssumptionCache &(Function &)> GetAssumptionCache;
+  ProfileSummaryInfo *PSI;
+  BlockFrequencyInfo *CallerBFI, *CalleeBFI;
 
-    /// InlineFunction fills this in with all static allocas that get copied into
-    /// the caller.
-    SmallVector<AllocaInst *, 4> StaticAllocas;
+  /// InlineFunction fills this in with all static allocas that get copied into
+  /// the caller.
+  SmallVector<AllocaInst *, 4> StaticAllocas;
 
-    /// InlineFunction fills this in with callsites that were inlined from the
-    /// callee. This is only filled in if CG is non-null.
-    SmallVector<WeakTrackingVH, 8> InlinedCalls;
+  /// InlineFunction fills this in with callsites that were inlined from the
+  /// callee. This is only filled in if CG is non-null.
+  SmallVector<WeakTrackingVH, 8> InlinedCalls;
 
-    /// All of the new call sites inlined into the caller.
-    ///
-    /// 'InlineFunction' fills this in by scanning the inlined instructions, and
-    /// only if CG is null. If CG is non-null, instead the value handle
-    /// `InlinedCalls` above is used.
-    SmallVector<CallBase *, 8> InlinedCallSites;
+  /// All of the new call sites inlined into the caller.
+  ///
+  /// 'InlineFunction' fills this in by scanning the inlined instructions, and
+  /// only if CG is null. If CG is non-null, instead the value handle
+  /// `InlinedCalls` above is used.
+  SmallVector<CallBase *, 8> InlinedCallSites;
 
-    void reset() {
-        StaticAllocas.clear();
-        InlinedCalls.clear();
-        InlinedCallSites.clear();
-    }
+  void reset() {
+    StaticAllocas.clear();
+    InlinedCalls.clear();
+    InlinedCallSites.clear();
+  }
 };
 
 /// This function inlines the called function into the basic
@@ -256,10 +256,10 @@ void remapInstructionsInBlocks(const SmallVectorImpl<BasicBlock *> &Blocks,
 /// is used to map the original instructions from BB to their newly-created
 /// copies. Returns the split block.
 BasicBlock *DuplicateInstructionsInSplitBetween(BasicBlock *BB,
-        BasicBlock *PredBB,
-        Instruction *StopAt,
-        ValueToValueMapTy &ValueMapping,
-        DomTreeUpdater &DTU);
+                                                BasicBlock *PredBB,
+                                                Instruction *StopAt,
+                                                ValueToValueMapTy &ValueMapping,
+                                                DomTreeUpdater &DTU);
 
 /// Updates profile information by adjusting the entry count by adding
 /// entryDelta then scaling callsite information by the new count divided by the

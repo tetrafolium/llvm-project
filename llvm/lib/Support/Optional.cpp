@@ -10,5 +10,5 @@
 #include "llvm/Support/raw_ostream.h"
 
 llvm::raw_ostream &llvm::operator<<(raw_ostream &OS, NoneType) {
-    return OS << "None";
+  return OS << "None";
 }

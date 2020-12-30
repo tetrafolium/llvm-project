@@ -15,31 +15,27 @@
 namespace gwp_asan {
 class Mutex final : PlatformMutex {
 public:
-    constexpr Mutex() = default;
-    ~Mutex() = default;
-    Mutex(const Mutex &) = delete;
-    Mutex &operator=(const Mutex &) = delete;
-    // Lock the mutex.
-    void lock();
-    // Nonblocking trylock of the mutex. Returns true if the lock was acquired.
-    bool tryLock();
-    // Unlock the mutex.
-    void unlock();
+  constexpr Mutex() = default;
+  ~Mutex() = default;
+  Mutex(const Mutex &) = delete;
+  Mutex &operator=(const Mutex &) = delete;
+  // Lock the mutex.
+  void lock();
+  // Nonblocking trylock of the mutex. Returns true if the lock was acquired.
+  bool tryLock();
+  // Unlock the mutex.
+  void unlock();
 };
 
 class ScopedLock {
 public:
-    explicit ScopedLock(Mutex &Mx) : Mu(Mx) {
-        Mu.lock();
-    }
-    ~ScopedLock() {
-        Mu.unlock();
-    }
-    ScopedLock(const ScopedLock &) = delete;
-    ScopedLock &operator=(const ScopedLock &) = delete;
+  explicit ScopedLock(Mutex &Mx) : Mu(Mx) { Mu.lock(); }
+  ~ScopedLock() { Mu.unlock(); }
+  ScopedLock(const ScopedLock &) = delete;
+  ScopedLock &operator=(const ScopedLock &) = delete;
 
 private:
-    Mutex &Mu;
+  Mutex &Mu;
 };
 } // namespace gwp_asan
 

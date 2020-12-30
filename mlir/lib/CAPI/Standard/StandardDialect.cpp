@@ -13,13 +13,13 @@
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 
 void mlirContextRegisterStandardDialect(MlirContext context) {
-    unwrap(context)->getDialectRegistry().insert<mlir::StandardOpsDialect>();
+  unwrap(context)->getDialectRegistry().insert<mlir::StandardOpsDialect>();
 }
 
 MlirDialect mlirContextLoadStandardDialect(MlirContext context) {
-    return wrap(unwrap(context)->getOrLoadDialect<mlir::StandardOpsDialect>());
+  return wrap(unwrap(context)->getOrLoadDialect<mlir::StandardOpsDialect>());
 }
 
 MlirStringRef mlirStandardDialectGetNamespace() {
-    return wrap(mlir::StandardOpsDialect::getDialectNamespace());
+  return wrap(mlir::StandardOpsDialect::getDialectNamespace());
 }

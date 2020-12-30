@@ -1,4 +1,5 @@
-//===-- tools/extra/clang-reorder-fields/tool/ClangReorderFields.cpp -*- C++ -*-===//
+//===-- tools/extra/clang-reorder-fields/tool/ClangReorderFields.cpp -*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -35,14 +36,14 @@ using namespace clang;
 cl::OptionCategory ClangReorderFieldsCategory("clang-reorder-fields options");
 
 static cl::opt<std::string>
-RecordName("record-name", cl::Required,
-           cl::desc("The name of the struct/class."),
-           cl::cat(ClangReorderFieldsCategory));
+    RecordName("record-name", cl::Required,
+               cl::desc("The name of the struct/class."),
+               cl::cat(ClangReorderFieldsCategory));
 
 static cl::list<std::string> FieldsOrder("fields-order", cl::CommaSeparated,
-        cl::OneOrMore,
-        cl::desc("The desired fields order."),
-        cl::cat(ClangReorderFieldsCategory));
+                                         cl::OneOrMore,
+                                         cl::desc("The desired fields order."),
+                                         cl::cat(ClangReorderFieldsCategory));
 
 static cl::opt<bool> Inplace("i", cl::desc("Overwrite edited files."),
                              cl::cat(ClangReorderFieldsCategory));
@@ -50,38 +51,38 @@ static cl::opt<bool> Inplace("i", cl::desc("Overwrite edited files."),
 const char Usage[] = "A tool to reorder fields in C/C++ structs/classes.\n";
 
 int main(int argc, const char **argv) {
-    tooling::CommonOptionsParser OP(argc, argv, ClangReorderFieldsCategory,
-                                    Usage);
+  tooling::CommonOptionsParser OP(argc, argv, ClangReorderFieldsCategory,
+                                  Usage);
 
-    auto Files = OP.getSourcePathList();
-    tooling::RefactoringTool Tool(OP.getCompilations(), Files);
+  auto Files = OP.getSourcePathList();
+  tooling::RefactoringTool Tool(OP.getCompilations(), Files);
 
-    reorder_fields::ReorderFieldsAction Action(RecordName, FieldsOrder,
-            Tool.getReplacements());
+  reorder_fields::ReorderFieldsAction Action(RecordName, FieldsOrder,
+                                             Tool.getReplacements());
 
-    auto Factory = tooling::newFrontendActionFactory(&Action);
+  auto Factory = tooling::newFrontendActionFactory(&Action);
 
-    if (Inplace)
-        return Tool.runAndSave(Factory.get());
+  if (Inplace)
+    return Tool.runAndSave(Factory.get());
 
-    int ExitCode = Tool.run(Factory.get());
-    LangOptions DefaultLangOptions;
-    IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts(new DiagnosticOptions());
-    TextDiagnosticPrinter DiagnosticPrinter(errs(), &*DiagOpts);
-    DiagnosticsEngine Diagnostics(
-        IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()), &*DiagOpts,
-        &DiagnosticPrinter, false);
+  int ExitCode = Tool.run(Factory.get());
+  LangOptions DefaultLangOptions;
+  IntrusiveRefCntPtr<DiagnosticOptions> DiagOpts(new DiagnosticOptions());
+  TextDiagnosticPrinter DiagnosticPrinter(errs(), &*DiagOpts);
+  DiagnosticsEngine Diagnostics(
+      IntrusiveRefCntPtr<DiagnosticIDs>(new DiagnosticIDs()), &*DiagOpts,
+      &DiagnosticPrinter, false);
 
-    auto &FileMgr = Tool.getFiles();
-    SourceManager Sources(Diagnostics, FileMgr);
-    Rewriter Rewrite(Sources, DefaultLangOptions);
-    Tool.applyAllReplacements(Rewrite);
+  auto &FileMgr = Tool.getFiles();
+  SourceManager Sources(Diagnostics, FileMgr);
+  Rewriter Rewrite(Sources, DefaultLangOptions);
+  Tool.applyAllReplacements(Rewrite);
 
-    for (const auto &File : Files) {
-        auto Entry = FileMgr.getFile(File);
-        const auto ID = Sources.getOrCreateFileID(*Entry, SrcMgr::C_User);
-        Rewrite.getEditBuffer(ID).write(outs());
-    }
+  for (const auto &File : Files) {
+    auto Entry = FileMgr.getFile(File);
+    const auto ID = Sources.getOrCreateFileID(*Entry, SrcMgr::C_User);
+    Rewrite.getEditBuffer(ID).write(outs());
+  }
 
-    return ExitCode;
+  return ExitCode;
 }

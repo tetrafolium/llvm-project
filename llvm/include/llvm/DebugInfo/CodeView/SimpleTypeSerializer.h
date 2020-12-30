@@ -17,19 +17,19 @@ namespace codeview {
 class FieldListRecord;
 
 class SimpleTypeSerializer {
-    std::vector<uint8_t> ScratchBuffer;
+  std::vector<uint8_t> ScratchBuffer;
 
 public:
-    SimpleTypeSerializer();
-    ~SimpleTypeSerializer();
+  SimpleTypeSerializer();
+  ~SimpleTypeSerializer();
 
-    // This template is explicitly instantiated in the implementation file for all
-    // supported types.  The method itself is ugly, so inlining it into the header
-    // file clutters an otherwise straightforward interface.
-    template <typename T> ArrayRef<uint8_t> serialize(T &Record);
+  // This template is explicitly instantiated in the implementation file for all
+  // supported types.  The method itself is ugly, so inlining it into the header
+  // file clutters an otherwise straightforward interface.
+  template <typename T> ArrayRef<uint8_t> serialize(T &Record);
 
-    // Don't allow serialization of field list records using this interface.
-    ArrayRef<uint8_t> serialize(const FieldListRecord &Record) = delete;
+  // Don't allow serialization of field list records using this interface.
+  ArrayRef<uint8_t> serialize(const FieldListRecord &Record) = delete;
 };
 
 } // end namespace codeview

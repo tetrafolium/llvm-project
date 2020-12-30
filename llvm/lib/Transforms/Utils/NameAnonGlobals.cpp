@@ -24,60 +24,60 @@ namespace {
 // Compute a "unique" hash for the module based on the name of the public
 // globals.
 class ModuleHasher {
-    Module &TheModule;
-    std::string TheHash;
+  Module &TheModule;
+  std::string TheHash;
 
 public:
-    ModuleHasher(Module &M) : TheModule(M) {}
+  ModuleHasher(Module &M) : TheModule(M) {}
 
-    /// Return the lazily computed hash.
-    std::string &get() {
-        if (!TheHash.empty())
-            // Cache hit :)
-            return TheHash;
+  /// Return the lazily computed hash.
+  std::string &get() {
+    if (!TheHash.empty())
+      // Cache hit :)
+      return TheHash;
 
-        MD5 Hasher;
-        for (auto &F : TheModule) {
-            if (F.isDeclaration() || F.hasLocalLinkage() || !F.hasName())
-                continue;
-            auto Name = F.getName();
-            Hasher.update(Name);
-        }
-        for (auto &GV : TheModule.globals()) {
-            if (GV.isDeclaration() || GV.hasLocalLinkage() || !GV.hasName())
-                continue;
-            auto Name = GV.getName();
-            Hasher.update(Name);
-        }
-
-        // Now return the result.
-        MD5::MD5Result Hash;
-        Hasher.final(Hash);
-        SmallString<32> Result;
-        MD5::stringifyResult(Hash, Result);
-        TheHash = std::string(Result.str());
-        return TheHash;
+    MD5 Hasher;
+    for (auto &F : TheModule) {
+      if (F.isDeclaration() || F.hasLocalLinkage() || !F.hasName())
+        continue;
+      auto Name = F.getName();
+      Hasher.update(Name);
     }
+    for (auto &GV : TheModule.globals()) {
+      if (GV.isDeclaration() || GV.hasLocalLinkage() || !GV.hasName())
+        continue;
+      auto Name = GV.getName();
+      Hasher.update(Name);
+    }
+
+    // Now return the result.
+    MD5::MD5Result Hash;
+    Hasher.final(Hash);
+    SmallString<32> Result;
+    MD5::stringifyResult(Hash, Result);
+    TheHash = std::string(Result.str());
+    return TheHash;
+  }
 };
 } // end anonymous namespace
 
 // Rename all the anon globals in the module
 bool llvm::nameUnamedGlobals(Module &M) {
-    bool Changed = false;
-    ModuleHasher ModuleHash(M);
-    int count = 0;
-    auto RenameIfNeed = [&](GlobalValue &GV) {
-        if (GV.hasName())
-            return;
-        GV.setName(Twine("anon.") + ModuleHash.get() + "." + Twine(count++));
-        Changed = true;
-    };
-    for (auto &GO : M.global_objects())
-        RenameIfNeed(GO);
-    for (auto &GA : M.aliases())
-        RenameIfNeed(GA);
+  bool Changed = false;
+  ModuleHasher ModuleHash(M);
+  int count = 0;
+  auto RenameIfNeed = [&](GlobalValue &GV) {
+    if (GV.hasName())
+      return;
+    GV.setName(Twine("anon.") + ModuleHash.get() + "." + Twine(count++));
+    Changed = true;
+  };
+  for (auto &GO : M.global_objects())
+    RenameIfNeed(GO);
+  for (auto &GA : M.aliases())
+    RenameIfNeed(GA);
 
-    return Changed;
+  return Changed;
 }
 
 namespace {
@@ -86,30 +86,26 @@ namespace {
 class NameAnonGlobalLegacyPass : public ModulePass {
 
 public:
-    /// Pass identification, replacement for typeid
-    static char ID;
+  /// Pass identification, replacement for typeid
+  static char ID;
 
-    /// Specify pass name for debug output
-    StringRef getPassName() const override {
-        return "Name Anon Globals";
-    }
+  /// Specify pass name for debug output
+  StringRef getPassName() const override { return "Name Anon Globals"; }
 
-    explicit NameAnonGlobalLegacyPass() : ModulePass(ID) {}
+  explicit NameAnonGlobalLegacyPass() : ModulePass(ID) {}
 
-    bool runOnModule(Module &M) override {
-        return nameUnamedGlobals(M);
-    }
+  bool runOnModule(Module &M) override { return nameUnamedGlobals(M); }
 };
 char NameAnonGlobalLegacyPass::ID = 0;
 
 } // anonymous namespace
 
 PreservedAnalyses NameAnonGlobalPass::run(Module &M,
-        ModuleAnalysisManager &AM) {
-    if (!nameUnamedGlobals(M))
-        return PreservedAnalyses::all();
+                                          ModuleAnalysisManager &AM) {
+  if (!nameUnamedGlobals(M))
+    return PreservedAnalyses::all();
 
-    return PreservedAnalyses::none();
+  return PreservedAnalyses::none();
 }
 
 INITIALIZE_PASS_BEGIN(NameAnonGlobalLegacyPass, "name-anon-globals",
@@ -119,6 +115,6 @@ INITIALIZE_PASS_END(NameAnonGlobalLegacyPass, "name-anon-globals",
 
 namespace llvm {
 ModulePass *createNameAnonGlobalPass() {
-    return new NameAnonGlobalLegacyPass();
+  return new NameAnonGlobalLegacyPass();
 }
-}
+} // namespace llvm

@@ -26,14 +26,14 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-fold-init-type.html
 class FoldInitTypeCheck : public ClangTidyCheck {
 public:
-    FoldInitTypeCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  FoldInitTypeCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void doCheck(const BuiltinType &IterValueType, const BuiltinType &InitType,
-                 const ASTContext &Context, const CallExpr &CallNode);
+  void doCheck(const BuiltinType &IterValueType, const BuiltinType &InitType,
+               const ASTContext &Context, const CallExpr &CallNode);
 };
 
 } // namespace bugprone

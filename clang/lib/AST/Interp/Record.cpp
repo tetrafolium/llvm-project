@@ -16,31 +16,31 @@ Record::Record(const RecordDecl *Decl, BaseList &&SrcBases,
                unsigned VirtualSize, unsigned BaseSize)
     : Decl(Decl), Bases(std::move(SrcBases)), Fields(std::move(SrcFields)),
       BaseSize(BaseSize), VirtualSize(VirtualSize) {
-    for (Base &V : SrcVirtualBases)
-        VirtualBases.push_back({ V.Decl, V.Offset + BaseSize, V.Desc, V.R });
+  for (Base &V : SrcVirtualBases)
+    VirtualBases.push_back({V.Decl, V.Offset + BaseSize, V.Desc, V.R});
 
-    for (Base &B : Bases)
-        BaseMap[B.Decl] = &B;
-    for (Field &F : Fields)
-        FieldMap[F.Decl] = &F;
-    for (Base &V : VirtualBases)
-        VirtualBaseMap[V.Decl] = &V;
+  for (Base &B : Bases)
+    BaseMap[B.Decl] = &B;
+  for (Field &F : Fields)
+    FieldMap[F.Decl] = &F;
+  for (Base &V : VirtualBases)
+    VirtualBaseMap[V.Decl] = &V;
 }
 
 const Record::Field *Record::getField(const FieldDecl *FD) const {
-    auto It = FieldMap.find(FD);
-    assert(It != FieldMap.end() && "Missing field");
-    return It->second;
+  auto It = FieldMap.find(FD);
+  assert(It != FieldMap.end() && "Missing field");
+  return It->second;
 }
 
 const Record::Base *Record::getBase(const RecordDecl *FD) const {
-    auto It = BaseMap.find(FD);
-    assert(It != BaseMap.end() && "Missing base");
-    return It->second;
+  auto It = BaseMap.find(FD);
+  assert(It != BaseMap.end() && "Missing base");
+  return It->second;
 }
 
 const Record::Base *Record::getVirtualBase(const RecordDecl *FD) const {
-    auto It = VirtualBaseMap.find(FD);
-    assert(It != VirtualBaseMap.end() && "Missing virtual base");
-    return It->second;
+  auto It = VirtualBaseMap.find(FD);
+  assert(It != VirtualBaseMap.end() && "Missing virtual base");
+  return It->second;
 }

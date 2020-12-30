@@ -22,51 +22,51 @@ using namespace mlir;
 using namespace mlir::tblgen;
 
 OpTrait OpTrait::create(const llvm::Init *init) {
-    auto def = cast<llvm::DefInit>(init)->getDef();
-    if (def->isSubClassOf("PredOpTrait"))
-        return OpTrait(Kind::Pred, def);
-    if (def->isSubClassOf("GenInternalOpTrait"))
-        return OpTrait(Kind::Internal, def);
-    if (def->isSubClassOf("OpInterfaceTrait"))
-        return OpTrait(Kind::Interface, def);
-    assert(def->isSubClassOf("NativeOpTrait"));
-    return OpTrait(Kind::Native, def);
+  auto def = cast<llvm::DefInit>(init)->getDef();
+  if (def->isSubClassOf("PredOpTrait"))
+    return OpTrait(Kind::Pred, def);
+  if (def->isSubClassOf("GenInternalOpTrait"))
+    return OpTrait(Kind::Internal, def);
+  if (def->isSubClassOf("OpInterfaceTrait"))
+    return OpTrait(Kind::Interface, def);
+  assert(def->isSubClassOf("NativeOpTrait"));
+  return OpTrait(Kind::Native, def);
 }
 
 OpTrait::OpTrait(Kind kind, const llvm::Record *def) : def(def), kind(kind) {}
 
 llvm::StringRef NativeOpTrait::getTrait() const {
-    return def->getValueAsString("trait");
+  return def->getValueAsString("trait");
 }
 
 llvm::StringRef InternalOpTrait::getTrait() const {
-    return def->getValueAsString("trait");
+  return def->getValueAsString("trait");
 }
 
 std::string PredOpTrait::getPredTemplate() const {
-    auto pred = Pred(def->getValueInit("predicate"));
-    return pred.getCondition();
+  auto pred = Pred(def->getValueInit("predicate"));
+  return pred.getCondition();
 }
 
 llvm::StringRef PredOpTrait::getDescription() const {
-    return def->getValueAsString("description");
+  return def->getValueAsString("description");
 }
 
 OpInterface InterfaceOpTrait::getOpInterface() const {
-    return OpInterface(def);
+  return OpInterface(def);
 }
 
 std::string InterfaceOpTrait::getTrait() const {
-    llvm::StringRef trait = def->getValueAsString("trait");
-    llvm::StringRef cppNamespace = def->getValueAsString("cppNamespace");
-    return cppNamespace.empty() ? trait.str()
-           : (cppNamespace + "::" + trait).str();
+  llvm::StringRef trait = def->getValueAsString("trait");
+  llvm::StringRef cppNamespace = def->getValueAsString("cppNamespace");
+  return cppNamespace.empty() ? trait.str()
+                              : (cppNamespace + "::" + trait).str();
 }
 
 bool InterfaceOpTrait::shouldDeclareMethods() const {
-    return def->isSubClassOf("DeclareOpInterfaceMethods");
+  return def->isSubClassOf("DeclareOpInterfaceMethods");
 }
 
 std::vector<StringRef> InterfaceOpTrait::getAlwaysDeclaredMethods() const {
-    return def->getValueAsListOfStrings("alwaysOverriddenMethods");
+  return def->getValueAsListOfStrings("alwaysOverriddenMethods");
 }

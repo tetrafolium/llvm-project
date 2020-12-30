@@ -22,36 +22,36 @@ using namespace llvm;
 static void
 extractFunctionBodiesFromModule(const std::vector<Chunk> &ChunksToKeep,
                                 Module *Program) {
-    Oracle O(ChunksToKeep);
+  Oracle O(ChunksToKeep);
 
-    // Delete out-of-chunk function bodies
-    std::vector<Function *> FuncDefsToReduce;
-    for (auto &F : *Program)
-        if (!F.isDeclaration() && !O.shouldKeep()) {
-            F.deleteBody();
-            F.setComdat(nullptr);
-        }
+  // Delete out-of-chunk function bodies
+  std::vector<Function *> FuncDefsToReduce;
+  for (auto &F : *Program)
+    if (!F.isDeclaration() && !O.shouldKeep()) {
+      F.deleteBody();
+      F.setComdat(nullptr);
+    }
 }
 
 /// Counts the amount of non-declaration functions and prints their
 /// respective name & index
 static int countFunctionDefinitions(Module *Program) {
-    // TODO: Silence index with --quiet flag
-    errs() << "----------------------------\n";
-    errs() << "Function Definition Index Reference:\n";
-    int FunctionDefinitionCount = 0;
-    for (auto &F : *Program)
-        if (!F.isDeclaration())
-            errs() << "\t" << ++FunctionDefinitionCount << ": " << F.getName()
-                   << "\n";
+  // TODO: Silence index with --quiet flag
+  errs() << "----------------------------\n";
+  errs() << "Function Definition Index Reference:\n";
+  int FunctionDefinitionCount = 0;
+  for (auto &F : *Program)
+    if (!F.isDeclaration())
+      errs() << "\t" << ++FunctionDefinitionCount << ": " << F.getName()
+             << "\n";
 
-    errs() << "----------------------------\n";
-    return FunctionDefinitionCount;
+  errs() << "----------------------------\n";
+  return FunctionDefinitionCount;
 }
 
 void llvm::reduceFunctionBodiesDeltaPass(TestRunner &Test) {
-    errs() << "*** Reducing Function Bodies...\n";
-    int Functions = countFunctionDefinitions(Test.getProgram());
-    runDeltaPass(Test, Functions, extractFunctionBodiesFromModule);
-    errs() << "----------------------------\n";
+  errs() << "*** Reducing Function Bodies...\n";
+  int Functions = countFunctionDefinitions(Test.getProgram());
+  runDeltaPass(Test, Functions, extractFunctionBodiesFromModule);
+  errs() << "----------------------------\n";
 }

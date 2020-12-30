@@ -27,99 +27,85 @@ class GIMatchDag;
 /// instances.
 class GIMatchDagInstr {
 public:
-    using const_user_assigned_operand_names_iterator =
-        DenseMap<unsigned, StringRef>::const_iterator;
+  using const_user_assigned_operand_names_iterator =
+      DenseMap<unsigned, StringRef>::const_iterator;
 
 protected:
-    /// The match DAG this instruction belongs to.
-    GIMatchDag &Dag;
+  /// The match DAG this instruction belongs to.
+  GIMatchDag &Dag;
 
-    /// The name of the instruction in the pattern. For example:
-    ///     (FOO $a, $b, $c):$name
-    /// will cause name to be assigned to this member. Anonymous instructions will
-    /// have a name assigned for debugging purposes.
-    StringRef Name;
+  /// The name of the instruction in the pattern. For example:
+  ///     (FOO $a, $b, $c):$name
+  /// will cause name to be assigned to this member. Anonymous instructions will
+  /// have a name assigned for debugging purposes.
+  StringRef Name;
 
-    /// The name of the instruction in the pattern as assigned by the user. For
-    /// example:
-    ///     (FOO $a, $b, $c):$name
-    /// will cause name to be assigned to this member. If a name is not provided,
-    /// this will be empty. This name is used to bind variables from rules to the
-    /// matched instruction.
-    StringRef UserAssignedName;
+  /// The name of the instruction in the pattern as assigned by the user. For
+  /// example:
+  ///     (FOO $a, $b, $c):$name
+  /// will cause name to be assigned to this member. If a name is not provided,
+  /// this will be empty. This name is used to bind variables from rules to the
+  /// matched instruction.
+  StringRef UserAssignedName;
 
-    /// The name of each operand (if any) that was assigned by the user. For
-    /// example:
-    ///     (FOO $a, $b, $c):$name
-    /// will cause {0, "a"}, {1, "b"}, {2, "c} to be inserted into this map.
-    DenseMap<unsigned, StringRef> UserAssignedNamesForOperands;
+  /// The name of each operand (if any) that was assigned by the user. For
+  /// example:
+  ///     (FOO $a, $b, $c):$name
+  /// will cause {0, "a"}, {1, "b"}, {2, "c} to be inserted into this map.
+  DenseMap<unsigned, StringRef> UserAssignedNamesForOperands;
 
-    /// The operand list for this instruction. This object may be shared with
-    /// other instructions of a similar 'shape'.
-    const GIMatchDagOperandList &OperandInfo;
+  /// The operand list for this instruction. This object may be shared with
+  /// other instructions of a similar 'shape'.
+  const GIMatchDagOperandList &OperandInfo;
 
-    /// For debugging purposes, it's helpful to have access to a description of
-    /// the Opcode. However, this object shouldn't use it for more than debugging
-    /// output since predicates are expected to be handled outside the DAG.
-    CodeGenInstruction *OpcodeAnnotation = 0;
+  /// For debugging purposes, it's helpful to have access to a description of
+  /// the Opcode. However, this object shouldn't use it for more than debugging
+  /// output since predicates are expected to be handled outside the DAG.
+  CodeGenInstruction *OpcodeAnnotation = 0;
 
-    /// When true, this instruction will be a starting point for a match attempt.
-    bool IsMatchRoot = false;
+  /// When true, this instruction will be a starting point for a match attempt.
+  bool IsMatchRoot = false;
 
 public:
-    GIMatchDagInstr(GIMatchDag &Dag, StringRef Name, StringRef UserAssignedName,
-                    const GIMatchDagOperandList &OperandInfo)
-        : Dag(Dag), Name(Name), UserAssignedName(UserAssignedName),
-          OperandInfo(OperandInfo) {}
+  GIMatchDagInstr(GIMatchDag &Dag, StringRef Name, StringRef UserAssignedName,
+                  const GIMatchDagOperandList &OperandInfo)
+      : Dag(Dag), Name(Name), UserAssignedName(UserAssignedName),
+        OperandInfo(OperandInfo) {}
 
-    const GIMatchDagOperandList &getOperandInfo() const {
-        return OperandInfo;
-    }
-    StringRef getName() const {
-        return Name;
-    }
-    StringRef getUserAssignedName() const {
-        return UserAssignedName;
-    }
-    void assignNameToOperand(unsigned Idx, StringRef Name) {
-        assert(UserAssignedNamesForOperands[Idx].empty() && "Cannot assign twice");
-        UserAssignedNamesForOperands[Idx] = Name;
-    }
+  const GIMatchDagOperandList &getOperandInfo() const { return OperandInfo; }
+  StringRef getName() const { return Name; }
+  StringRef getUserAssignedName() const { return UserAssignedName; }
+  void assignNameToOperand(unsigned Idx, StringRef Name) {
+    assert(UserAssignedNamesForOperands[Idx].empty() && "Cannot assign twice");
+    UserAssignedNamesForOperands[Idx] = Name;
+  }
 
-    const_user_assigned_operand_names_iterator
-    user_assigned_operand_names_begin() const {
-        return UserAssignedNamesForOperands.begin();
-    }
-    const_user_assigned_operand_names_iterator
-    user_assigned_operand_names_end() const {
-        return UserAssignedNamesForOperands.end();
-    }
-    iterator_range<const_user_assigned_operand_names_iterator>
-    user_assigned_operand_names() const {
-        return make_range(user_assigned_operand_names_begin(),
-                          user_assigned_operand_names_end());
-    }
+  const_user_assigned_operand_names_iterator
+  user_assigned_operand_names_begin() const {
+    return UserAssignedNamesForOperands.begin();
+  }
+  const_user_assigned_operand_names_iterator
+  user_assigned_operand_names_end() const {
+    return UserAssignedNamesForOperands.end();
+  }
+  iterator_range<const_user_assigned_operand_names_iterator>
+  user_assigned_operand_names() const {
+    return make_range(user_assigned_operand_names_begin(),
+                      user_assigned_operand_names_end());
+  }
 
-    /// Mark this instruction as being a root of the match. This means that the
-    /// matcher will start from this node when attempting to match MIR.
-    void setMatchRoot();
-    bool isMatchRoot() const {
-        return IsMatchRoot;
-    }
+  /// Mark this instruction as being a root of the match. This means that the
+  /// matcher will start from this node when attempting to match MIR.
+  void setMatchRoot();
+  bool isMatchRoot() const { return IsMatchRoot; }
 
-    void setOpcodeAnnotation(CodeGenInstruction *I) {
-        OpcodeAnnotation = I;
-    }
-    CodeGenInstruction *getOpcodeAnnotation() const {
-        return OpcodeAnnotation;
-    }
+  void setOpcodeAnnotation(CodeGenInstruction *I) { OpcodeAnnotation = I; }
+  CodeGenInstruction *getOpcodeAnnotation() const { return OpcodeAnnotation; }
 
-    void print(raw_ostream &OS) const;
+  void print(raw_ostream &OS) const;
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-    LLVM_DUMP_METHOD void dump() const {
-        print(errs());
-    }
+  LLVM_DUMP_METHOD void dump() const { print(errs()); }
 #endif // if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 };
 

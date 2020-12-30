@@ -1,4 +1,5 @@
-//===-- ArchitectureMips.h ---------------------------------------*- C++ -*-===//
+//===-- ArchitectureMips.h ---------------------------------------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -16,33 +17,33 @@ namespace lldb_private {
 
 class ArchitectureMips : public Architecture {
 public:
-    static ConstString GetPluginNameStatic();
-    static void Initialize();
-    static void Terminate();
+  static ConstString GetPluginNameStatic();
+  static void Initialize();
+  static void Terminate();
 
-    ConstString GetPluginName() override;
-    uint32_t GetPluginVersion() override;
+  ConstString GetPluginName() override;
+  uint32_t GetPluginVersion() override;
 
-    void OverrideStopInfo(Thread &thread) const override {}
+  void OverrideStopInfo(Thread &thread) const override {}
 
-    lldb::addr_t GetBreakableLoadAddress(lldb::addr_t addr,
-                                         Target &) const override;
+  lldb::addr_t GetBreakableLoadAddress(lldb::addr_t addr,
+                                       Target &) const override;
 
-    lldb::addr_t GetCallableLoadAddress(lldb::addr_t load_addr,
-                                        AddressClass addr_class) const override;
-
-    lldb::addr_t GetOpcodeLoadAddress(lldb::addr_t load_addr,
+  lldb::addr_t GetCallableLoadAddress(lldb::addr_t load_addr,
                                       AddressClass addr_class) const override;
 
+  lldb::addr_t GetOpcodeLoadAddress(lldb::addr_t load_addr,
+                                    AddressClass addr_class) const override;
+
 private:
-    Instruction *GetInstructionAtAddress(Target &target,
-                                         const Address &resolved_addr,
-                                         lldb::addr_t symbol_offset) const;
+  Instruction *GetInstructionAtAddress(Target &target,
+                                       const Address &resolved_addr,
+                                       lldb::addr_t symbol_offset) const;
 
-    static std::unique_ptr<Architecture> Create(const ArchSpec &arch);
-    ArchitectureMips(const ArchSpec &arch) : m_arch(arch) {}
+  static std::unique_ptr<Architecture> Create(const ArchSpec &arch);
+  ArchitectureMips(const ArchSpec &arch) : m_arch(arch) {}
 
-    ArchSpec m_arch;
+  ArchSpec m_arch;
 };
 
 } // namespace lldb_private

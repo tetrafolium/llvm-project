@@ -10,18 +10,16 @@
 /* isl_union_*_every_* callback that checks whether "pw"
  * is free of local variables.
  */
-static isl_bool FN(UNION,no_locals_el)(__isl_keep PW *pw, void *user)
-{
-    return isl_bool_not(FN(PW,involves_locals)(pw));
+static isl_bool FN(UNION, no_locals_el)(__isl_keep PW *pw, void *user) {
+  return isl_bool_not(FN(PW, involves_locals)(pw));
 }
 
 /* Does "u" involve any local variables, i.e., integer divisions?
  */
-isl_bool FN(UNION,involves_locals)(__isl_keep UNION *u)
-{
-    isl_bool no_locals;
+isl_bool FN(UNION, involves_locals)(__isl_keep UNION *u) {
+  isl_bool no_locals;
 
-    no_locals = FN(FN(UNION,every),BASE)(u, &FN(UNION,no_locals_el), NULL);
+  no_locals = FN(FN(UNION, every), BASE)(u, &FN(UNION, no_locals_el), NULL);
 
-    return isl_bool_not(no_locals);
+  return isl_bool_not(no_locals);
 }

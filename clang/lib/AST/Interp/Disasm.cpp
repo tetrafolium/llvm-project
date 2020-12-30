@@ -21,54 +21,50 @@
 using namespace clang;
 using namespace clang::interp;
 
-LLVM_DUMP_METHOD void Function::dump() const {
-    dump(llvm::errs());
-}
+LLVM_DUMP_METHOD void Function::dump() const { dump(llvm::errs()); }
 
 LLVM_DUMP_METHOD void Function::dump(llvm::raw_ostream &OS) const {
-    if (F) {
-        if (auto *Cons = dyn_cast<CXXConstructorDecl>(F)) {
-            DeclarationName Name = Cons->getParent()->getDeclName();
-            OS << Name << "::" << Name << ":\n";
-        } else {
-            OS << F->getDeclName() << ":\n";
-        }
+  if (F) {
+    if (auto *Cons = dyn_cast<CXXConstructorDecl>(F)) {
+      DeclarationName Name = Cons->getParent()->getDeclName();
+      OS << Name << "::" << Name << ":\n";
     } else {
-        OS << "<<expr>>\n";
+      OS << F->getDeclName() << ":\n";
     }
+  } else {
+    OS << "<<expr>>\n";
+  }
 
-    OS << "frame size: " << getFrameSize() << "\n";
-    OS << "arg size:   " << getArgSize() << "\n";
-    OS << "rvo:        " << hasRVO() << "\n";
+  OS << "frame size: " << getFrameSize() << "\n";
+  OS << "arg size:   " << getArgSize() << "\n";
+  OS << "rvo:        " << hasRVO() << "\n";
 
-    auto PrintName = [&OS](const char *Name) {
-        OS << Name;
-        for (long I = 0, N = strlen(Name); I < 30 - N; ++I) {
-            OS << ' ';
-        }
-    };
+  auto PrintName = [&OS](const char *Name) {
+    OS << Name;
+    for (long I = 0, N = strlen(Name); I < 30 - N; ++I) {
+      OS << ' ';
+    }
+  };
 
-    for (CodePtr Start = getCodeBegin(), PC = Start; PC != getCodeEnd();) {
-        size_t Addr = PC - Start;
-        auto Op = PC.read<Opcode>();
-        OS << llvm::format("%8d", Addr) << " ";
-        switch (Op) {
+  for (CodePtr Start = getCodeBegin(), PC = Start; PC != getCodeEnd();) {
+    size_t Addr = PC - Start;
+    auto Op = PC.read<Opcode>();
+    OS << llvm::format("%8d", Addr) << " ";
+    switch (Op) {
 #define GET_DISASM
 #include "Opcodes.inc"
 #undef GET_DISASM
-        }
     }
+  }
 }
 
-LLVM_DUMP_METHOD void Program::dump() const {
-    dump(llvm::errs());
-}
+LLVM_DUMP_METHOD void Program::dump() const { dump(llvm::errs()); }
 
 LLVM_DUMP_METHOD void Program::dump(llvm::raw_ostream &OS) const {
-    for (auto &Func : Funcs) {
-        Func.second->dump();
-    }
-    for (auto &Anon : AnonFuncs) {
-        Anon->dump();
-    }
+  for (auto &Func : Funcs) {
+    Func.second->dump();
+  }
+  for (auto &Anon : AnonFuncs) {
+    Anon->dump();
+  }
 }

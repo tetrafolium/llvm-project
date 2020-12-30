@@ -14,13 +14,13 @@
 
 class ABIX86_64 : public lldb_private::MCBasedABI {
 protected:
-    std::string GetMCName(std::string name) override {
-        MapRegisterName(name, "stmm", "st");
-        return name;
-    }
+  std::string GetMCName(std::string name) override {
+    MapRegisterName(name, "stmm", "st");
+    return name;
+  }
 
 private:
-    using lldb_private::MCBasedABI::MCBasedABI;
+  using lldb_private::MCBasedABI::MCBasedABI;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_ABI_X86_ABIX86_64_H

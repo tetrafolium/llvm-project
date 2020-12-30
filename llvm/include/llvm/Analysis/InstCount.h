@@ -20,7 +20,7 @@ namespace llvm {
 class Function;
 
 struct InstCountPass : PassInfoMixin<InstCountPass> {
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &);
 };
 
 } // end namespace llvm

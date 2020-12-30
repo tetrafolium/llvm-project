@@ -6,8 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "lldb/API/SBBreakpointName.h"
 #include "lldb/API/SBBreakpointLocation.h"
+#include "lldb/API/SBBreakpointName.h"
 #include "lldb/API/SBDebugger.h"
 #include "lldb/API/SBEvent.h"
 #include "lldb/API/SBProcess.h"
@@ -38,43 +38,40 @@
 using namespace lldb;
 using namespace lldb_private;
 
-SBBreakpointCallbackBaton::SBBreakpointCallbackBaton(SBBreakpointHitCallback
-        callback,
-        void *baton)
+SBBreakpointCallbackBaton::SBBreakpointCallbackBaton(
+    SBBreakpointHitCallback callback, void *baton)
     : TypedBaton(std::make_unique<CallbackData>()) {
-    getItem()->callback = callback;
-    getItem()->callback_baton = baton;
+  getItem()->callback = callback;
+  getItem()->callback_baton = baton;
 }
 
-bool SBBreakpointCallbackBaton::PrivateBreakpointHitCallback(void *baton,
-        StoppointCallbackContext *ctx,
-        lldb::user_id_t break_id,
-        lldb::user_id_t break_loc_id)
-{
-    ExecutionContext exe_ctx(ctx->exe_ctx_ref);
-    BreakpointSP bp_sp(
-        exe_ctx.GetTargetRef().GetBreakpointList().FindBreakpointByID(break_id));
-    if (baton && bp_sp) {
-        CallbackData *data = (CallbackData *)baton;
-        lldb_private::Breakpoint *bp = bp_sp.get();
-        if (bp && data->callback) {
-            Process *process = exe_ctx.GetProcessPtr();
-            if (process) {
-                SBProcess sb_process(process->shared_from_this());
-                SBThread sb_thread;
-                SBBreakpointLocation sb_location;
-                assert(bp_sp);
-                sb_location.SetLocation(bp_sp->FindLocationByID(break_loc_id));
-                Thread *thread = exe_ctx.GetThreadPtr();
-                if (thread)
-                    sb_thread.SetThread(thread->shared_from_this());
+bool SBBreakpointCallbackBaton::PrivateBreakpointHitCallback(
+    void *baton, StoppointCallbackContext *ctx, lldb::user_id_t break_id,
+    lldb::user_id_t break_loc_id) {
+  ExecutionContext exe_ctx(ctx->exe_ctx_ref);
+  BreakpointSP bp_sp(
+      exe_ctx.GetTargetRef().GetBreakpointList().FindBreakpointByID(break_id));
+  if (baton && bp_sp) {
+    CallbackData *data = (CallbackData *)baton;
+    lldb_private::Breakpoint *bp = bp_sp.get();
+    if (bp && data->callback) {
+      Process *process = exe_ctx.GetProcessPtr();
+      if (process) {
+        SBProcess sb_process(process->shared_from_this());
+        SBThread sb_thread;
+        SBBreakpointLocation sb_location;
+        assert(bp_sp);
+        sb_location.SetLocation(bp_sp->FindLocationByID(break_loc_id));
+        Thread *thread = exe_ctx.GetThreadPtr();
+        if (thread)
+          sb_thread.SetThread(thread->shared_from_this());
 
-                return data->callback(data->callback_baton, sb_process, sb_thread,
-                                      sb_location);
-            }
-        }
+        return data->callback(data->callback_baton, sb_process, sb_thread,
+                              sb_location);
+      }
     }
-    return true; // Return true if we should stop at this breakpoint
+  }
+  return true; // Return true if we should stop at this breakpoint
 }
 
 SBBreakpointCallbackBaton::~SBBreakpointCallbackBaton() = default;

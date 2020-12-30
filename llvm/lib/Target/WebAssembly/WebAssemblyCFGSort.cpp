@@ -48,26 +48,24 @@ static cl::opt<bool> WasmDisableEHPadSort(
 namespace {
 
 class WebAssemblyCFGSort final : public MachineFunctionPass {
-    StringRef getPassName() const override {
-        return "WebAssembly CFG Sort";
-    }
+  StringRef getPassName() const override { return "WebAssembly CFG Sort"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addRequired<MachineDominatorTree>();
-        AU.addPreserved<MachineDominatorTree>();
-        AU.addRequired<MachineLoopInfo>();
-        AU.addPreserved<MachineLoopInfo>();
-        AU.addRequired<WebAssemblyExceptionInfo>();
-        AU.addPreserved<WebAssemblyExceptionInfo>();
-        MachineFunctionPass::getAnalysisUsage(AU);
-    }
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addRequired<MachineDominatorTree>();
+    AU.addPreserved<MachineDominatorTree>();
+    AU.addRequired<MachineLoopInfo>();
+    AU.addPreserved<MachineLoopInfo>();
+    AU.addRequired<WebAssemblyExceptionInfo>();
+    AU.addPreserved<WebAssemblyExceptionInfo>();
+    MachineFunctionPass::getAnalysisUsage(AU);
+  }
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 
 public:
-    static char ID; // Pass identification, replacement for typeid
-    WebAssemblyCFGSort() : MachineFunctionPass(ID) {}
+  static char ID; // Pass identification, replacement for typeid
+  WebAssemblyCFGSort() : MachineFunctionPass(ID) {}
 };
 } // end anonymous namespace
 
@@ -76,32 +74,32 @@ INITIALIZE_PASS(WebAssemblyCFGSort, DEBUG_TYPE,
                 "Reorders blocks in topological order", false, false)
 
 FunctionPass *llvm::createWebAssemblyCFGSort() {
-    return new WebAssemblyCFGSort();
+  return new WebAssemblyCFGSort();
 }
 
 static void maybeUpdateTerminator(MachineBasicBlock *MBB) {
 #ifndef NDEBUG
-    bool AnyBarrier = false;
+  bool AnyBarrier = false;
 #endif
-    bool AllAnalyzable = true;
-    for (const MachineInstr &Term : MBB->terminators()) {
+  bool AllAnalyzable = true;
+  for (const MachineInstr &Term : MBB->terminators()) {
 #ifndef NDEBUG
-        AnyBarrier |= Term.isBarrier();
+    AnyBarrier |= Term.isBarrier();
 #endif
-        AllAnalyzable &= Term.isBranch() && !Term.isIndirectBranch();
-    }
-    assert((AnyBarrier || AllAnalyzable) &&
-           "analyzeBranch needs to analyze any block with a fallthrough");
+    AllAnalyzable &= Term.isBranch() && !Term.isIndirectBranch();
+  }
+  assert((AnyBarrier || AllAnalyzable) &&
+         "analyzeBranch needs to analyze any block with a fallthrough");
 
-    // Find the layout successor from the original block order.
-    MachineFunction *MF = MBB->getParent();
-    MachineBasicBlock *OriginalSuccessor =
-        unsigned(MBB->getNumber() + 1) < MF->getNumBlockIDs()
-        ? MF->getBlockNumbered(MBB->getNumber() + 1)
-        : nullptr;
+  // Find the layout successor from the original block order.
+  MachineFunction *MF = MBB->getParent();
+  MachineBasicBlock *OriginalSuccessor =
+      unsigned(MBB->getNumber() + 1) < MF->getNumBlockIDs()
+          ? MF->getBlockNumbered(MBB->getNumber() + 1)
+          : nullptr;
 
-    if (AllAnalyzable)
-        MBB->updateTerminator(OriginalSuccessor);
+  if (AllAnalyzable)
+    MBB->updateTerminator(OriginalSuccessor);
 }
 
 namespace {
@@ -140,44 +138,44 @@ namespace {
 
 /// Sort blocks by their number.
 struct CompareBlockNumbers {
-    bool operator()(const MachineBasicBlock *A,
-                    const MachineBasicBlock *B) const {
-        if (!WasmDisableEHPadSort) {
-            if (A->isEHPad() && !B->isEHPad())
-                return false;
-            if (!A->isEHPad() && B->isEHPad())
-                return true;
-        }
-
-        return A->getNumber() > B->getNumber();
+  bool operator()(const MachineBasicBlock *A,
+                  const MachineBasicBlock *B) const {
+    if (!WasmDisableEHPadSort) {
+      if (A->isEHPad() && !B->isEHPad())
+        return false;
+      if (!A->isEHPad() && B->isEHPad())
+        return true;
     }
+
+    return A->getNumber() > B->getNumber();
+  }
 };
 /// Sort blocks by their number in the opposite order..
 struct CompareBlockNumbersBackwards {
-    bool operator()(const MachineBasicBlock *A,
-                    const MachineBasicBlock *B) const {
-        if (!WasmDisableEHPadSort) {
-            if (A->isEHPad() && !B->isEHPad())
-                return false;
-            if (!A->isEHPad() && B->isEHPad())
-                return true;
-        }
-
-        return A->getNumber() < B->getNumber();
+  bool operator()(const MachineBasicBlock *A,
+                  const MachineBasicBlock *B) const {
+    if (!WasmDisableEHPadSort) {
+      if (A->isEHPad() && !B->isEHPad())
+        return false;
+      if (!A->isEHPad() && B->isEHPad())
+        return true;
     }
+
+    return A->getNumber() < B->getNumber();
+  }
 };
 /// Bookkeeping for a region to help ensure that we don't mix blocks not
 /// dominated by the its header among its blocks.
 struct Entry {
-    const SortRegion *TheRegion;
-    unsigned NumBlocksLeft;
+  const SortRegion *TheRegion;
+  unsigned NumBlocksLeft;
 
-    /// List of blocks not dominated by Loop's header that are deferred until
-    /// after all of Loop's blocks have been seen.
-    std::vector<MachineBasicBlock *> Deferred;
+  /// List of blocks not dominated by Loop's header that are deferred until
+  /// after all of Loop's blocks have been seen.
+  std::vector<MachineBasicBlock *> Deferred;
 
-    explicit Entry(const SortRegion *R)
-        : TheRegion(R), NumBlocksLeft(R->getNumBlocks()) {}
+  explicit Entry(const SortRegion *R)
+      : TheRegion(R), NumBlocksLeft(R->getNumBlocks()) {}
 };
 } // end anonymous namespace
 
@@ -188,185 +186,185 @@ struct Entry {
 static void sortBlocks(MachineFunction &MF, const MachineLoopInfo &MLI,
                        const WebAssemblyExceptionInfo &WEI,
                        const MachineDominatorTree &MDT) {
-    // Remember original layout ordering, so we can update terminators after
-    // reordering to point to the original layout successor.
-    MF.RenumberBlocks();
+  // Remember original layout ordering, so we can update terminators after
+  // reordering to point to the original layout successor.
+  MF.RenumberBlocks();
 
-    // Prepare for a topological sort: Record the number of predecessors each
-    // block has, ignoring loop backedges.
-    SmallVector<unsigned, 16> NumPredsLeft(MF.getNumBlockIDs(), 0);
-    for (MachineBasicBlock &MBB : MF) {
-        unsigned N = MBB.pred_size();
-        if (MachineLoop *L = MLI.getLoopFor(&MBB))
-            if (L->getHeader() == &MBB)
-                for (const MachineBasicBlock *Pred : MBB.predecessors())
-                    if (L->contains(Pred))
-                        --N;
-        NumPredsLeft[MBB.getNumber()] = N;
+  // Prepare for a topological sort: Record the number of predecessors each
+  // block has, ignoring loop backedges.
+  SmallVector<unsigned, 16> NumPredsLeft(MF.getNumBlockIDs(), 0);
+  for (MachineBasicBlock &MBB : MF) {
+    unsigned N = MBB.pred_size();
+    if (MachineLoop *L = MLI.getLoopFor(&MBB))
+      if (L->getHeader() == &MBB)
+        for (const MachineBasicBlock *Pred : MBB.predecessors())
+          if (L->contains(Pred))
+            --N;
+    NumPredsLeft[MBB.getNumber()] = N;
+  }
+
+  // Topological sort the CFG, with additional constraints:
+  //  - Between a region header and the last block in the region, there can be
+  //    no blocks not dominated by its header.
+  //  - It's desirable to preserve the original block order when possible.
+  // We use two ready lists; Preferred and Ready. Preferred has recently
+  // processed successors, to help preserve block sequences from the original
+  // order. Ready has the remaining ready blocks. EH blocks are picked first
+  // from both queues.
+  PriorityQueue<MachineBasicBlock *, std::vector<MachineBasicBlock *>,
+                CompareBlockNumbers>
+      Preferred;
+  PriorityQueue<MachineBasicBlock *, std::vector<MachineBasicBlock *>,
+                CompareBlockNumbersBackwards>
+      Ready;
+
+  SortRegionInfo SRI(MLI, WEI);
+  SmallVector<Entry, 4> Entries;
+  for (MachineBasicBlock *MBB = &MF.front();;) {
+    const SortRegion *R = SRI.getRegionFor(MBB);
+    if (R) {
+      // If MBB is a region header, add it to the active region list. We can't
+      // put any blocks that it doesn't dominate until we see the end of the
+      // region.
+      if (R->getHeader() == MBB)
+        Entries.push_back(Entry(R));
+      // For each active region the block is in, decrement the count. If MBB is
+      // the last block in an active region, take it off the list and pick up
+      // any blocks deferred because the header didn't dominate them.
+      for (Entry &E : Entries)
+        if (E.TheRegion->contains(MBB) && --E.NumBlocksLeft == 0)
+          for (auto DeferredBlock : E.Deferred)
+            Ready.push(DeferredBlock);
+      while (!Entries.empty() && Entries.back().NumBlocksLeft == 0)
+        Entries.pop_back();
     }
-
-    // Topological sort the CFG, with additional constraints:
-    //  - Between a region header and the last block in the region, there can be
-    //    no blocks not dominated by its header.
-    //  - It's desirable to preserve the original block order when possible.
-    // We use two ready lists; Preferred and Ready. Preferred has recently
-    // processed successors, to help preserve block sequences from the original
-    // order. Ready has the remaining ready blocks. EH blocks are picked first
-    // from both queues.
-    PriorityQueue<MachineBasicBlock *, std::vector<MachineBasicBlock *>,
-                  CompareBlockNumbers>
-                  Preferred;
-    PriorityQueue<MachineBasicBlock *, std::vector<MachineBasicBlock *>,
-                  CompareBlockNumbersBackwards>
-                  Ready;
-
-    SortRegionInfo SRI(MLI, WEI);
-    SmallVector<Entry, 4> Entries;
-    for (MachineBasicBlock *MBB = &MF.front();;) {
-        const SortRegion *R = SRI.getRegionFor(MBB);
-        if (R) {
-            // If MBB is a region header, add it to the active region list. We can't
-            // put any blocks that it doesn't dominate until we see the end of the
-            // region.
-            if (R->getHeader() == MBB)
-                Entries.push_back(Entry(R));
-            // For each active region the block is in, decrement the count. If MBB is
-            // the last block in an active region, take it off the list and pick up
-            // any blocks deferred because the header didn't dominate them.
-            for (Entry &E : Entries)
-                if (E.TheRegion->contains(MBB) && --E.NumBlocksLeft == 0)
-                    for (auto DeferredBlock : E.Deferred)
-                        Ready.push(DeferredBlock);
-            while (!Entries.empty() && Entries.back().NumBlocksLeft == 0)
-                Entries.pop_back();
-        }
-        // The main topological sort logic.
-        for (MachineBasicBlock *Succ : MBB->successors()) {
-            // Ignore backedges.
-            if (MachineLoop *SuccL = MLI.getLoopFor(Succ))
-                if (SuccL->getHeader() == Succ && SuccL->contains(MBB))
-                    continue;
-            // Decrement the predecessor count. If it's now zero, it's ready.
-            if (--NumPredsLeft[Succ->getNumber()] == 0)
-                Preferred.push(Succ);
-        }
-        // Determine the block to follow MBB. First try to find a preferred block,
-        // to preserve the original block order when possible.
-        MachineBasicBlock *Next = nullptr;
-        while (!Preferred.empty()) {
-            Next = Preferred.top();
-            Preferred.pop();
-            // If X isn't dominated by the top active region header, defer it until
-            // that region is done.
-            if (!Entries.empty() &&
-                    !MDT.dominates(Entries.back().TheRegion->getHeader(), Next)) {
-                Entries.back().Deferred.push_back(Next);
-                Next = nullptr;
-                continue;
-            }
-            // If Next was originally ordered before MBB, and it isn't because it was
-            // loop-rotated above the header, it's not preferred.
-            if (Next->getNumber() < MBB->getNumber() &&
-                    (WasmDisableEHPadSort || !Next->isEHPad()) &&
-                    (!R || !R->contains(Next) ||
-                     R->getHeader()->getNumber() < Next->getNumber())) {
-                Ready.push(Next);
-                Next = nullptr;
-                continue;
-            }
-            break;
-        }
-        // If we didn't find a suitable block in the Preferred list, check the
-        // general Ready list.
-        if (!Next) {
-            // If there are no more blocks to process, we're done.
-            if (Ready.empty()) {
-                maybeUpdateTerminator(MBB);
-                break;
-            }
-            for (;;) {
-                Next = Ready.top();
-                Ready.pop();
-                // If Next isn't dominated by the top active region header, defer it
-                // until that region is done.
-                if (!Entries.empty() &&
-                        !MDT.dominates(Entries.back().TheRegion->getHeader(), Next)) {
-                    Entries.back().Deferred.push_back(Next);
-                    continue;
-                }
-                break;
-            }
-        }
-        // Move the next block into place and iterate.
-        Next->moveAfter(MBB);
+    // The main topological sort logic.
+    for (MachineBasicBlock *Succ : MBB->successors()) {
+      // Ignore backedges.
+      if (MachineLoop *SuccL = MLI.getLoopFor(Succ))
+        if (SuccL->getHeader() == Succ && SuccL->contains(MBB))
+          continue;
+      // Decrement the predecessor count. If it's now zero, it's ready.
+      if (--NumPredsLeft[Succ->getNumber()] == 0)
+        Preferred.push(Succ);
+    }
+    // Determine the block to follow MBB. First try to find a preferred block,
+    // to preserve the original block order when possible.
+    MachineBasicBlock *Next = nullptr;
+    while (!Preferred.empty()) {
+      Next = Preferred.top();
+      Preferred.pop();
+      // If X isn't dominated by the top active region header, defer it until
+      // that region is done.
+      if (!Entries.empty() &&
+          !MDT.dominates(Entries.back().TheRegion->getHeader(), Next)) {
+        Entries.back().Deferred.push_back(Next);
+        Next = nullptr;
+        continue;
+      }
+      // If Next was originally ordered before MBB, and it isn't because it was
+      // loop-rotated above the header, it's not preferred.
+      if (Next->getNumber() < MBB->getNumber() &&
+          (WasmDisableEHPadSort || !Next->isEHPad()) &&
+          (!R || !R->contains(Next) ||
+           R->getHeader()->getNumber() < Next->getNumber())) {
+        Ready.push(Next);
+        Next = nullptr;
+        continue;
+      }
+      break;
+    }
+    // If we didn't find a suitable block in the Preferred list, check the
+    // general Ready list.
+    if (!Next) {
+      // If there are no more blocks to process, we're done.
+      if (Ready.empty()) {
         maybeUpdateTerminator(MBB);
-        MBB = Next;
+        break;
+      }
+      for (;;) {
+        Next = Ready.top();
+        Ready.pop();
+        // If Next isn't dominated by the top active region header, defer it
+        // until that region is done.
+        if (!Entries.empty() &&
+            !MDT.dominates(Entries.back().TheRegion->getHeader(), Next)) {
+          Entries.back().Deferred.push_back(Next);
+          continue;
+        }
+        break;
+      }
     }
-    assert(Entries.empty() && "Active sort region list not finished");
-    MF.RenumberBlocks();
+    // Move the next block into place and iterate.
+    Next->moveAfter(MBB);
+    maybeUpdateTerminator(MBB);
+    MBB = Next;
+  }
+  assert(Entries.empty() && "Active sort region list not finished");
+  MF.RenumberBlocks();
 
 #ifndef NDEBUG
-    SmallSetVector<const SortRegion *, 8> OnStack;
+  SmallSetVector<const SortRegion *, 8> OnStack;
 
-    // Insert a sentinel representing the degenerate loop that starts at the
-    // function entry block and includes the entire function as a "loop" that
-    // executes once.
-    OnStack.insert(nullptr);
+  // Insert a sentinel representing the degenerate loop that starts at the
+  // function entry block and includes the entire function as a "loop" that
+  // executes once.
+  OnStack.insert(nullptr);
 
-    for (auto &MBB : MF) {
-        assert(MBB.getNumber() >= 0 && "Renumbered blocks should be non-negative.");
-        const SortRegion *Region = SRI.getRegionFor(&MBB);
+  for (auto &MBB : MF) {
+    assert(MBB.getNumber() >= 0 && "Renumbered blocks should be non-negative.");
+    const SortRegion *Region = SRI.getRegionFor(&MBB);
 
-        if (Region && &MBB == Region->getHeader()) {
-            // Region header.
-            if (Region->isLoop()) {
-                // Loop header. The loop predecessor should be sorted above, and the
-                // other predecessors should be backedges below.
-                for (auto Pred : MBB.predecessors())
-                    assert(
-                        (Pred->getNumber() < MBB.getNumber() || Region->contains(Pred)) &&
-                        "Loop header predecessors must be loop predecessors or "
-                        "backedges");
-            } else {
-                // Exception header. All predecessors should be sorted above.
-                for (auto Pred : MBB.predecessors())
-                    assert(Pred->getNumber() < MBB.getNumber() &&
-                           "Non-loop-header predecessors should be topologically sorted");
-            }
-            assert(OnStack.insert(Region) &&
-                   "Regions should be declared at most once.");
+    if (Region && &MBB == Region->getHeader()) {
+      // Region header.
+      if (Region->isLoop()) {
+        // Loop header. The loop predecessor should be sorted above, and the
+        // other predecessors should be backedges below.
+        for (auto Pred : MBB.predecessors())
+          assert(
+              (Pred->getNumber() < MBB.getNumber() || Region->contains(Pred)) &&
+              "Loop header predecessors must be loop predecessors or "
+              "backedges");
+      } else {
+        // Exception header. All predecessors should be sorted above.
+        for (auto Pred : MBB.predecessors())
+          assert(Pred->getNumber() < MBB.getNumber() &&
+                 "Non-loop-header predecessors should be topologically sorted");
+      }
+      assert(OnStack.insert(Region) &&
+             "Regions should be declared at most once.");
 
-        } else {
-            // Not a region header. All predecessors should be sorted above.
-            for (auto Pred : MBB.predecessors())
-                assert(Pred->getNumber() < MBB.getNumber() &&
-                       "Non-loop-header predecessors should be topologically sorted");
-            assert(OnStack.count(SRI.getRegionFor(&MBB)) &&
-                   "Blocks must be nested in their regions");
-        }
-        while (OnStack.size() > 1 && &MBB == SRI.getBottom(OnStack.back()))
-            OnStack.pop_back();
+    } else {
+      // Not a region header. All predecessors should be sorted above.
+      for (auto Pred : MBB.predecessors())
+        assert(Pred->getNumber() < MBB.getNumber() &&
+               "Non-loop-header predecessors should be topologically sorted");
+      assert(OnStack.count(SRI.getRegionFor(&MBB)) &&
+             "Blocks must be nested in their regions");
     }
-    assert(OnStack.pop_back_val() == nullptr &&
-           "The function entry block shouldn't actually be a region header");
-    assert(OnStack.empty() &&
-           "Control flow stack pushes and pops should be balanced.");
+    while (OnStack.size() > 1 && &MBB == SRI.getBottom(OnStack.back()))
+      OnStack.pop_back();
+  }
+  assert(OnStack.pop_back_val() == nullptr &&
+         "The function entry block shouldn't actually be a region header");
+  assert(OnStack.empty() &&
+         "Control flow stack pushes and pops should be balanced.");
 #endif
 }
 
 bool WebAssemblyCFGSort::runOnMachineFunction(MachineFunction &MF) {
-    LLVM_DEBUG(dbgs() << "********** CFG Sorting **********\n"
-               "********** Function: "
-               << MF.getName() << '\n');
+  LLVM_DEBUG(dbgs() << "********** CFG Sorting **********\n"
+                       "********** Function: "
+                    << MF.getName() << '\n');
 
-    const auto &MLI = getAnalysis<MachineLoopInfo>();
-    const auto &WEI = getAnalysis<WebAssemblyExceptionInfo>();
-    auto &MDT = getAnalysis<MachineDominatorTree>();
-    // Liveness is not tracked for VALUE_STACK physreg.
-    MF.getRegInfo().invalidateLiveness();
+  const auto &MLI = getAnalysis<MachineLoopInfo>();
+  const auto &WEI = getAnalysis<WebAssemblyExceptionInfo>();
+  auto &MDT = getAnalysis<MachineDominatorTree>();
+  // Liveness is not tracked for VALUE_STACK physreg.
+  MF.getRegInfo().invalidateLiveness();
 
-    // Sort the blocks, with contiguous sort regions.
-    sortBlocks(MF, MLI, WEI, MDT);
+  // Sort the blocks, with contiguous sort regions.
+  sortBlocks(MF, MLI, WEI, MDT);
 
-    return true;
+  return true;
 }

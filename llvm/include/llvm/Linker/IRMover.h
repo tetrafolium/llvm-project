@@ -23,68 +23,66 @@ class TrackingMDRef;
 class Type;
 
 class IRMover {
-    struct StructTypeKeyInfo {
-        struct KeyTy {
-            ArrayRef<Type *> ETypes;
-            bool IsPacked;
-            KeyTy(ArrayRef<Type *> E, bool P);
-            KeyTy(const StructType *ST);
-            bool operator==(const KeyTy &that) const;
-            bool operator!=(const KeyTy &that) const;
-        };
-        static StructType *getEmptyKey();
-        static StructType *getTombstoneKey();
-        static unsigned getHashValue(const KeyTy &Key);
-        static unsigned getHashValue(const StructType *ST);
-        static bool isEqual(const KeyTy &LHS, const StructType *RHS);
-        static bool isEqual(const StructType *LHS, const StructType *RHS);
+  struct StructTypeKeyInfo {
+    struct KeyTy {
+      ArrayRef<Type *> ETypes;
+      bool IsPacked;
+      KeyTy(ArrayRef<Type *> E, bool P);
+      KeyTy(const StructType *ST);
+      bool operator==(const KeyTy &that) const;
+      bool operator!=(const KeyTy &that) const;
     };
+    static StructType *getEmptyKey();
+    static StructType *getTombstoneKey();
+    static unsigned getHashValue(const KeyTy &Key);
+    static unsigned getHashValue(const StructType *ST);
+    static bool isEqual(const KeyTy &LHS, const StructType *RHS);
+    static bool isEqual(const StructType *LHS, const StructType *RHS);
+  };
 
-    /// Type of the Metadata map in \a ValueToValueMapTy.
-    typedef DenseMap<const Metadata *, TrackingMDRef> MDMapT;
+  /// Type of the Metadata map in \a ValueToValueMapTy.
+  typedef DenseMap<const Metadata *, TrackingMDRef> MDMapT;
 
 public:
-    class IdentifiedStructTypeSet {
-        // The set of opaque types is the composite module.
-        DenseSet<StructType *> OpaqueStructTypes;
+  class IdentifiedStructTypeSet {
+    // The set of opaque types is the composite module.
+    DenseSet<StructType *> OpaqueStructTypes;
 
-        // The set of identified but non opaque structures in the composite module.
-        DenseSet<StructType *, StructTypeKeyInfo> NonOpaqueStructTypes;
+    // The set of identified but non opaque structures in the composite module.
+    DenseSet<StructType *, StructTypeKeyInfo> NonOpaqueStructTypes;
 
-    public:
-        void addNonOpaque(StructType *Ty);
-        void switchToNonOpaque(StructType *Ty);
-        void addOpaque(StructType *Ty);
-        StructType *findNonOpaque(ArrayRef<Type *> ETypes, bool IsPacked);
-        bool hasType(StructType *Ty);
-    };
+  public:
+    void addNonOpaque(StructType *Ty);
+    void switchToNonOpaque(StructType *Ty);
+    void addOpaque(StructType *Ty);
+    StructType *findNonOpaque(ArrayRef<Type *> ETypes, bool IsPacked);
+    bool hasType(StructType *Ty);
+  };
 
-    IRMover(Module &M);
+  IRMover(Module &M);
 
-    typedef std::function<void(GlobalValue &)> ValueAdder;
+  typedef std::function<void(GlobalValue &)> ValueAdder;
 
-    /// Move in the provide values in \p ValuesToLink from \p Src.
-    ///
-    /// - \p AddLazyFor is a call back that the IRMover will call when a global
-    ///   value is referenced by one of the ValuesToLink (transitively) but was
-    ///   not present in ValuesToLink. The GlobalValue and a ValueAdder callback
-    ///   are passed as an argument, and the callback is expected to be called
-    ///   if the GlobalValue needs to be added to the \p ValuesToLink and linked.
-    /// - \p IsPerformingImport is true when this IR link is to perform ThinLTO
-    ///   function importing from Src.
-    Error move(std::unique_ptr<Module> Src, ArrayRef<GlobalValue *> ValuesToLink,
-               std::function<void(GlobalValue &GV, ValueAdder Add)> AddLazyFor,
-               bool IsPerformingImport);
-    Module &getModule() {
-        return Composite;
-    }
+  /// Move in the provide values in \p ValuesToLink from \p Src.
+  ///
+  /// - \p AddLazyFor is a call back that the IRMover will call when a global
+  ///   value is referenced by one of the ValuesToLink (transitively) but was
+  ///   not present in ValuesToLink. The GlobalValue and a ValueAdder callback
+  ///   are passed as an argument, and the callback is expected to be called
+  ///   if the GlobalValue needs to be added to the \p ValuesToLink and linked.
+  /// - \p IsPerformingImport is true when this IR link is to perform ThinLTO
+  ///   function importing from Src.
+  Error move(std::unique_ptr<Module> Src, ArrayRef<GlobalValue *> ValuesToLink,
+             std::function<void(GlobalValue &GV, ValueAdder Add)> AddLazyFor,
+             bool IsPerformingImport);
+  Module &getModule() { return Composite; }
 
 private:
-    Module &Composite;
-    IdentifiedStructTypeSet IdentifiedStructTypes;
-    MDMapT SharedMDs; ///< A Metadata map to use for all calls to \a move().
+  Module &Composite;
+  IdentifiedStructTypeSet IdentifiedStructTypes;
+  MDMapT SharedMDs; ///< A Metadata map to use for all calls to \a move().
 };
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

@@ -24,56 +24,56 @@ extern bool VerifyMachineDomInfo;
 
 char MachinePostDominatorTree::ID = 0;
 
-//declare initializeMachinePostDominatorTreePass
+// declare initializeMachinePostDominatorTreePass
 INITIALIZE_PASS(MachinePostDominatorTree, "machinepostdomtree",
                 "MachinePostDominator Tree Construction", true, true)
 
 MachinePostDominatorTree::MachinePostDominatorTree()
     : MachineFunctionPass(ID), PDT(nullptr) {
-    initializeMachinePostDominatorTreePass(*PassRegistry::getPassRegistry());
+  initializeMachinePostDominatorTreePass(*PassRegistry::getPassRegistry());
 }
 
 FunctionPass *MachinePostDominatorTree::createMachinePostDominatorTreePass() {
-    return new MachinePostDominatorTree();
+  return new MachinePostDominatorTree();
 }
 
 bool MachinePostDominatorTree::runOnMachineFunction(MachineFunction &F) {
-    PDT = std::make_unique<PostDomTreeT>();
-    PDT->recalculate(F);
-    return false;
+  PDT = std::make_unique<PostDomTreeT>();
+  PDT->recalculate(F);
+  return false;
 }
 
 void MachinePostDominatorTree::getAnalysisUsage(AnalysisUsage &AU) const {
-    AU.setPreservesAll();
-    MachineFunctionPass::getAnalysisUsage(AU);
+  AU.setPreservesAll();
+  MachineFunctionPass::getAnalysisUsage(AU);
 }
 
 MachineBasicBlock *MachinePostDominatorTree::findNearestCommonDominator(
     ArrayRef<MachineBasicBlock *> Blocks) const {
-    assert(!Blocks.empty());
+  assert(!Blocks.empty());
 
-    MachineBasicBlock *NCD = Blocks.front();
-    for (MachineBasicBlock *BB : Blocks.drop_front()) {
-        NCD = PDT->findNearestCommonDominator(NCD, BB);
+  MachineBasicBlock *NCD = Blocks.front();
+  for (MachineBasicBlock *BB : Blocks.drop_front()) {
+    NCD = PDT->findNearestCommonDominator(NCD, BB);
 
-        // Stop when the root is reached.
-        if (PDT->isVirtualRoot(PDT->getNode(NCD)))
-            return nullptr;
-    }
+    // Stop when the root is reached.
+    if (PDT->isVirtualRoot(PDT->getNode(NCD)))
+      return nullptr;
+  }
 
-    return NCD;
+  return NCD;
 }
 
 void MachinePostDominatorTree::verifyAnalysis() const {
-    if (PDT && VerifyMachineDomInfo)
-        if (!PDT->verify(PostDomTreeT::VerificationLevel::Basic)) {
-            errs() << "MachinePostDominatorTree verification failed\n";
+  if (PDT && VerifyMachineDomInfo)
+    if (!PDT->verify(PostDomTreeT::VerificationLevel::Basic)) {
+      errs() << "MachinePostDominatorTree verification failed\n";
 
-            abort();
-        }
+      abort();
+    }
 }
 
 void MachinePostDominatorTree::print(llvm::raw_ostream &OS,
                                      const Module *M) const {
-    PDT->print(OS);
+  PDT->print(OS);
 }

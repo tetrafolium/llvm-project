@@ -22,15 +22,13 @@ namespace __sanitizer {
 // StackDepot efficiently stores huge amounts of stack traces.
 struct StackDepotNode;
 struct StackDepotHandle {
-    StackDepotNode *node_;
-    StackDepotHandle() : node_(nullptr) {}
-    explicit StackDepotHandle(StackDepotNode *node) : node_(node) {}
-    bool valid() {
-        return node_;
-    }
-    u32 id();
-    int use_count();
-    void inc_use_count_unsafe();
+  StackDepotNode *node_;
+  StackDepotHandle() : node_(nullptr) {}
+  explicit StackDepotHandle(StackDepotNode *node) : node_(node) {}
+  bool valid() { return node_; }
+  u32 id();
+  int use_count();
+  void inc_use_count_unsafe();
 };
 
 const int kStackDepotMaxUseCount = 1U << (SANITIZER_ANDROID ? 16 : 20);
@@ -50,25 +48,25 @@ void StackDepotPrintAll();
 // StackDepot, but the snapshot is only guaranteed to contain those stack traces
 // which were stored before it was instantiated.
 class StackDepotReverseMap {
-public:
-    StackDepotReverseMap();
-    StackTrace Get(u32 id);
+ public:
+  StackDepotReverseMap();
+  StackTrace Get(u32 id);
 
-private:
-    struct IdDescPair {
-        u32 id;
-        StackDepotNode *desc;
+ private:
+  struct IdDescPair {
+    u32 id;
+    StackDepotNode *desc;
 
-        static bool IdComparator(const IdDescPair &a, const IdDescPair &b);
-    };
+    static bool IdComparator(const IdDescPair &a, const IdDescPair &b);
+  };
 
-    InternalMmapVector<IdDescPair> map_;
+  InternalMmapVector<IdDescPair> map_;
 
-    // Disallow evil constructors.
-    StackDepotReverseMap(const StackDepotReverseMap&);
-    void operator=(const StackDepotReverseMap&);
+  // Disallow evil constructors.
+  StackDepotReverseMap(const StackDepotReverseMap &);
+  void operator=(const StackDepotReverseMap &);
 };
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
-#endif // SANITIZER_STACKDEPOT_H
+#endif  // SANITIZER_STACKDEPOT_H

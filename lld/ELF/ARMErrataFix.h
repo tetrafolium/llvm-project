@@ -25,24 +25,24 @@ class Patch657417Section;
 
 class ARMErr657417Patcher {
 public:
-    // Return true if Patches have been added to the OutputSections.
-    bool createFixes();
+  // Return true if Patches have been added to the OutputSections.
+  bool createFixes();
 
 private:
-    std::vector<Patch657417Section *>
-    patchInputSectionDescription(InputSectionDescription &isd);
+  std::vector<Patch657417Section *>
+  patchInputSectionDescription(InputSectionDescription &isd);
 
-    void insertPatches(InputSectionDescription &isd,
-                       std::vector<Patch657417Section *> &patches);
+  void insertPatches(InputSectionDescription &isd,
+                     std::vector<Patch657417Section *> &patches);
 
-    void init();
+  void init();
 
-    // A cache of the mapping symbols defined by the InputSection sorted in order
-    // of ascending value with redundant symbols removed. These describe
-    // the ranges of code and data in an executable InputSection.
-    llvm::DenseMap<InputSection *, std::vector<const Defined *>> sectionMap;
+  // A cache of the mapping symbols defined by the InputSection sorted in order
+  // of ascending value with redundant symbols removed. These describe
+  // the ranges of code and data in an executable InputSection.
+  llvm::DenseMap<InputSection *, std::vector<const Defined *>> sectionMap;
 
-    bool initialized = false;
+  bool initialized = false;
 };
 
 } // namespace elf

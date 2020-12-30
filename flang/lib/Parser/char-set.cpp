@@ -11,14 +11,14 @@
 namespace Fortran::parser {
 
 std::string SetOfChars::ToString() const {
-    std::string result;
-    SetOfChars set{*this};
-    for (char ch{' '}; !set.empty(); ++ch) {
-        if (set.Has(ch)) {
-            set = set.Difference(ch);
-            result += ch;
-        }
+  std::string result;
+  SetOfChars set{*this};
+  for (char ch{' '}; !set.empty(); ++ch) {
+    if (set.Has(ch)) {
+      set = set.Difference(ch);
+      result += ch;
     }
-    return result;
+  }
+  return result;
 }
 } // namespace Fortran::parser

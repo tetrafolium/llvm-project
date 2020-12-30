@@ -47,173 +47,157 @@ namespace clang {
 /// copied for re-use.
 class ExternalASTMerger : public ExternalASTSource {
 public:
-    /// A single origin for a DeclContext.  Unlike Decls, DeclContexts do
-    /// not allow their containing ASTContext to be determined in all cases.
-    struct DCOrigin {
-        DeclContext *DC;
-        ASTContext *AST;
-    };
+  /// A single origin for a DeclContext.  Unlike Decls, DeclContexts do
+  /// not allow their containing ASTContext to be determined in all cases.
+  struct DCOrigin {
+    DeclContext *DC;
+    ASTContext *AST;
+  };
 
-    typedef std::map<const DeclContext *, DCOrigin> OriginMap;
-    typedef std::vector<std::unique_ptr<ASTImporter>> ImporterVector;
-private:
-    /// One importer exists for each source.
-    ImporterVector Importers;
-    /// Overrides in case name lookup would return nothing or would return
-    /// the wrong thing.
-    OriginMap Origins;
-    /// The installed log stream.
-    llvm::raw_ostream *LogStream;
-
-public:
-    /// The target for an ExternalASTMerger.
-    ///
-    /// ASTImporters require both ASTContext and FileManager to be able to
-    /// import SourceLocations properly.
-    struct ImporterTarget {
-        ASTContext &AST;
-        FileManager &FM;
-    };
-    /// A source for an ExternalASTMerger.
-    ///
-    /// ASTImporters require both ASTContext and FileManager to be able to
-    /// import SourceLocations properly.  Additionally, when import occurs for
-    /// a DeclContext whose origin has been overridden, then this
-    /// ExternalASTMerger must be able to determine that.
-    class ImporterSource {
-        ASTContext &AST;
-        FileManager &FM;
-        const OriginMap &OM;
-        /// True iff the source only exists temporary, i.e., it will be removed from
-        /// the ExternalASTMerger during the life time of the ExternalASTMerger.
-        bool Temporary;
-        /// If the ASTContext of this source has an ExternalASTMerger that imports
-        /// into this source, then this will point to that other ExternalASTMerger.
-        ExternalASTMerger *Merger;
-
-    public:
-        ImporterSource(ASTContext &AST, FileManager &FM, const OriginMap &OM,
-                       bool Temporary = false, ExternalASTMerger *Merger = nullptr)
-            : AST(AST), FM(FM), OM(OM), Temporary(Temporary), Merger(Merger) {}
-        ASTContext &getASTContext() const {
-            return AST;
-        }
-        FileManager &getFileManager() const {
-            return FM;
-        }
-        const OriginMap &getOriginMap() const {
-            return OM;
-        }
-        bool isTemporary() const {
-            return Temporary;
-        }
-        ExternalASTMerger *getMerger() const {
-            return Merger;
-        }
-    };
+  typedef std::map<const DeclContext *, DCOrigin> OriginMap;
+  typedef std::vector<std::unique_ptr<ASTImporter>> ImporterVector;
 
 private:
-    /// The target for this ExternalASTMerger.
-    ImporterTarget Target;
-    /// ExternalASTMerger has multiple ASTImporters that import into the same
-    /// TU. This is the shared state for all ASTImporters of this
-    /// ExternalASTMerger.
-    /// See also the CrossTranslationUnitContext that has a similar setup.
-    std::shared_ptr<ASTImporterSharedState> SharedState;
+  /// One importer exists for each source.
+  ImporterVector Importers;
+  /// Overrides in case name lookup would return nothing or would return
+  /// the wrong thing.
+  OriginMap Origins;
+  /// The installed log stream.
+  llvm::raw_ostream *LogStream;
 
 public:
-    ExternalASTMerger(const ImporterTarget &Target,
-                      llvm::ArrayRef<ImporterSource> Sources);
+  /// The target for an ExternalASTMerger.
+  ///
+  /// ASTImporters require both ASTContext and FileManager to be able to
+  /// import SourceLocations properly.
+  struct ImporterTarget {
+    ASTContext &AST;
+    FileManager &FM;
+  };
+  /// A source for an ExternalASTMerger.
+  ///
+  /// ASTImporters require both ASTContext and FileManager to be able to
+  /// import SourceLocations properly.  Additionally, when import occurs for
+  /// a DeclContext whose origin has been overridden, then this
+  /// ExternalASTMerger must be able to determine that.
+  class ImporterSource {
+    ASTContext &AST;
+    FileManager &FM;
+    const OriginMap &OM;
+    /// True iff the source only exists temporary, i.e., it will be removed from
+    /// the ExternalASTMerger during the life time of the ExternalASTMerger.
+    bool Temporary;
+    /// If the ASTContext of this source has an ExternalASTMerger that imports
+    /// into this source, then this will point to that other ExternalASTMerger.
+    ExternalASTMerger *Merger;
 
-    /// Asks all connected ASTImporters if any of them imported the given
-    /// declaration. If any ASTImporter did import the given declaration,
-    /// then this function returns the declaration that D was imported from.
-    /// Returns nullptr if no ASTImporter did import import D.
-    Decl *FindOriginalDecl(Decl *D);
+  public:
+    ImporterSource(ASTContext &AST, FileManager &FM, const OriginMap &OM,
+                   bool Temporary = false, ExternalASTMerger *Merger = nullptr)
+        : AST(AST), FM(FM), OM(OM), Temporary(Temporary), Merger(Merger) {}
+    ASTContext &getASTContext() const { return AST; }
+    FileManager &getFileManager() const { return FM; }
+    const OriginMap &getOriginMap() const { return OM; }
+    bool isTemporary() const { return Temporary; }
+    ExternalASTMerger *getMerger() const { return Merger; }
+  };
 
-    /// Add a set of ASTContexts as possible origins.
-    ///
-    /// Usually the set will be initialized in the constructor, but long-lived
-    /// ExternalASTMergers may need to import from new sources (for example,
-    /// newly-parsed source files).
-    ///
-    /// Ensures that Importers does not gain duplicate entries as a result.
-    void AddSources(llvm::ArrayRef<ImporterSource> Sources);
-
-    /// Remove a set of ASTContexts as possible origins.
-    ///
-    /// Sometimes an origin goes away (for example, if a source file gets
-    /// superseded by a newer version).
-    ///
-    /// The caller is responsible for ensuring that this doesn't leave
-    /// DeclContexts that can't be completed.
-    void RemoveSources(llvm::ArrayRef<ImporterSource> Sources);
-
-    /// Implementation of the ExternalASTSource API.
-    bool FindExternalVisibleDeclsByName(const DeclContext *DC,
-                                        DeclarationName Name) override;
-
-    /// Implementation of the ExternalASTSource API.
-    void
-    FindExternalLexicalDecls(const DeclContext *DC,
-                             llvm::function_ref<bool(Decl::Kind)> IsKindWeWant,
-                             SmallVectorImpl<Decl *> &Result) override;
-
-    /// Implementation of the ExternalASTSource API.
-    void CompleteType(TagDecl *Tag) override;
-
-    /// Implementation of the ExternalASTSource API.
-    void CompleteType(ObjCInterfaceDecl *Interface) override;
-
-    /// Returns true if DC can be found in any source AST context.
-    bool CanComplete(DeclContext *DC);
-
-    /// Records an origin in Origins only if name lookup would find
-    /// something different or nothing at all.
-    void MaybeRecordOrigin(const DeclContext *ToDC, DCOrigin Origin);
-
-    /// Regardless of any checks, override the Origin for a DeclContext.
-    void ForceRecordOrigin(const DeclContext *ToDC, DCOrigin Origin);
-
-    /// Get a read-only view of the Origins map, for use in constructing
-    /// an ImporterSource for another ExternalASTMerger.
-    const OriginMap &GetOrigins() {
-        return Origins;
-    }
-
-    /// Returns true if Importers contains an ASTImporter whose source is
-    /// OriginContext.
-    bool HasImporterForOrigin(ASTContext &OriginContext);
-
-    /// Returns a reference to the ASTImporter from Importers whose origin
-    /// is OriginContext.  This allows manual import of ASTs while preserving the
-    /// OriginMap correctly.
-    ASTImporter &ImporterForOrigin(ASTContext &OriginContext);
-
-    /// Sets the current log stream.
-    void SetLogStream(llvm::raw_string_ostream &Stream) {
-        LogStream = &Stream;
-    }
 private:
-    /// Records and origin in Origins.
-    void RecordOriginImpl(const DeclContext *ToDC, DCOrigin Origin,
-                          ASTImporter &importer);
-
-    /// Performs an action for every DeclContext that is identified as
-    /// corresponding (either by forced origin or by name lookup) to DC.
-    template <typename CallbackType>
-    void ForEachMatchingDC(const DeclContext *DC, CallbackType Callback);
+  /// The target for this ExternalASTMerger.
+  ImporterTarget Target;
+  /// ExternalASTMerger has multiple ASTImporters that import into the same
+  /// TU. This is the shared state for all ASTImporters of this
+  /// ExternalASTMerger.
+  /// See also the CrossTranslationUnitContext that has a similar setup.
+  std::shared_ptr<ASTImporterSharedState> SharedState;
 
 public:
-    /// Log something if there is a logging callback installed.
-    llvm::raw_ostream &logs() {
-        return *LogStream;
-    }
+  ExternalASTMerger(const ImporterTarget &Target,
+                    llvm::ArrayRef<ImporterSource> Sources);
 
-    /// True if the log stream is not llvm::nulls();
-    bool LoggingEnabled() {
-        return LogStream != &llvm::nulls();
-    }
+  /// Asks all connected ASTImporters if any of them imported the given
+  /// declaration. If any ASTImporter did import the given declaration,
+  /// then this function returns the declaration that D was imported from.
+  /// Returns nullptr if no ASTImporter did import import D.
+  Decl *FindOriginalDecl(Decl *D);
+
+  /// Add a set of ASTContexts as possible origins.
+  ///
+  /// Usually the set will be initialized in the constructor, but long-lived
+  /// ExternalASTMergers may need to import from new sources (for example,
+  /// newly-parsed source files).
+  ///
+  /// Ensures that Importers does not gain duplicate entries as a result.
+  void AddSources(llvm::ArrayRef<ImporterSource> Sources);
+
+  /// Remove a set of ASTContexts as possible origins.
+  ///
+  /// Sometimes an origin goes away (for example, if a source file gets
+  /// superseded by a newer version).
+  ///
+  /// The caller is responsible for ensuring that this doesn't leave
+  /// DeclContexts that can't be completed.
+  void RemoveSources(llvm::ArrayRef<ImporterSource> Sources);
+
+  /// Implementation of the ExternalASTSource API.
+  bool FindExternalVisibleDeclsByName(const DeclContext *DC,
+                                      DeclarationName Name) override;
+
+  /// Implementation of the ExternalASTSource API.
+  void
+  FindExternalLexicalDecls(const DeclContext *DC,
+                           llvm::function_ref<bool(Decl::Kind)> IsKindWeWant,
+                           SmallVectorImpl<Decl *> &Result) override;
+
+  /// Implementation of the ExternalASTSource API.
+  void CompleteType(TagDecl *Tag) override;
+
+  /// Implementation of the ExternalASTSource API.
+  void CompleteType(ObjCInterfaceDecl *Interface) override;
+
+  /// Returns true if DC can be found in any source AST context.
+  bool CanComplete(DeclContext *DC);
+
+  /// Records an origin in Origins only if name lookup would find
+  /// something different or nothing at all.
+  void MaybeRecordOrigin(const DeclContext *ToDC, DCOrigin Origin);
+
+  /// Regardless of any checks, override the Origin for a DeclContext.
+  void ForceRecordOrigin(const DeclContext *ToDC, DCOrigin Origin);
+
+  /// Get a read-only view of the Origins map, for use in constructing
+  /// an ImporterSource for another ExternalASTMerger.
+  const OriginMap &GetOrigins() { return Origins; }
+
+  /// Returns true if Importers contains an ASTImporter whose source is
+  /// OriginContext.
+  bool HasImporterForOrigin(ASTContext &OriginContext);
+
+  /// Returns a reference to the ASTImporter from Importers whose origin
+  /// is OriginContext.  This allows manual import of ASTs while preserving the
+  /// OriginMap correctly.
+  ASTImporter &ImporterForOrigin(ASTContext &OriginContext);
+
+  /// Sets the current log stream.
+  void SetLogStream(llvm::raw_string_ostream &Stream) { LogStream = &Stream; }
+
+private:
+  /// Records and origin in Origins.
+  void RecordOriginImpl(const DeclContext *ToDC, DCOrigin Origin,
+                        ASTImporter &importer);
+
+  /// Performs an action for every DeclContext that is identified as
+  /// corresponding (either by forced origin or by name lookup) to DC.
+  template <typename CallbackType>
+  void ForEachMatchingDC(const DeclContext *DC, CallbackType Callback);
+
+public:
+  /// Log something if there is a logging callback installed.
+  llvm::raw_ostream &logs() { return *LogStream; }
+
+  /// True if the log stream is not llvm::nulls();
+  bool LoggingEnabled() { return LogStream != &llvm::nulls(); }
 };
 
 } // end namespace clang

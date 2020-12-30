@@ -22,11 +22,11 @@ namespace lldb_private {
 /// the constructor.
 class SystemInitializerCommon : public SystemInitializer {
 public:
-    SystemInitializerCommon();
-    ~SystemInitializerCommon() override;
+  SystemInitializerCommon();
+  ~SystemInitializerCommon() override;
 
-    llvm::Error Initialize() override;
-    void Terminate() override;
+  llvm::Error Initialize() override;
+  void Terminate() override;
 };
 
 } // namespace lldb_private

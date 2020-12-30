@@ -58,50 +58,42 @@ std::forward_list<std::string> GetAllNames(
 
 template <typename T>
 MaybeIntExpr EvaluateIntExpr(SemanticsContext &context, const T &expr) {
-    if (MaybeExpr maybeExpr{
-    Fold(context.foldingContext(), AnalyzeExpr(context, expr))}) {
-        if (auto *intExpr{evaluate::UnwrapExpr<SomeIntExpr>(*maybeExpr)}) {
-            return std::move(*intExpr);
-        }
+  if (MaybeExpr maybeExpr{
+          Fold(context.foldingContext(), AnalyzeExpr(context, expr))}) {
+    if (auto *intExpr{evaluate::UnwrapExpr<SomeIntExpr>(*maybeExpr)}) {
+      return std::move(*intExpr);
     }
-    return std::nullopt;
+  }
+  return std::nullopt;
 }
 
 template <typename T>
 std::optional<std::int64_t> EvaluateInt64(
     SemanticsContext &context, const T &expr) {
-    return evaluate::ToInt64(EvaluateIntExpr(context, expr));
+  return evaluate::ToInt64(EvaluateIntExpr(context, expr));
 }
 
 // Analyze a generic-spec and generate a symbol name and GenericKind for it.
 class GenericSpecInfo {
 public:
-    GenericSpecInfo(const parser::DefinedOpName &x) {
-        Analyze(x);
-    }
-    GenericSpecInfo(const parser::GenericSpec &x) {
-        Analyze(x);
-    }
+  GenericSpecInfo(const parser::DefinedOpName &x) { Analyze(x); }
+  GenericSpecInfo(const parser::GenericSpec &x) { Analyze(x); }
 
-    GenericKind kind() const {
-        return kind_;
-    }
-    const SourceName &symbolName() const {
-        return symbolName_.value();
-    }
-    // Set the GenericKind in this symbol and resolve the corresponding
-    // name if there is one
-    void Resolve(Symbol *) const;
-    friend llvm::raw_ostream &operator<<(
-        llvm::raw_ostream &, const GenericSpecInfo &);
+  GenericKind kind() const { return kind_; }
+  const SourceName &symbolName() const { return symbolName_.value(); }
+  // Set the GenericKind in this symbol and resolve the corresponding
+  // name if there is one
+  void Resolve(Symbol *) const;
+  friend llvm::raw_ostream &operator<<(
+      llvm::raw_ostream &, const GenericSpecInfo &);
 
 private:
-    GenericKind kind_;
-    const parser::Name *parseName_{nullptr};
-    std::optional<SourceName> symbolName_;
+  GenericKind kind_;
+  const parser::Name *parseName_{nullptr};
+  std::optional<SourceName> symbolName_;
 
-    void Analyze(const parser::DefinedOpName &);
-    void Analyze(const parser::GenericSpec &);
+  void Analyze(const parser::DefinedOpName &);
+  void Analyze(const parser::GenericSpec &);
 };
 
 // Analyze a parser::ArraySpec or parser::CoarraySpec
@@ -114,42 +106,40 @@ ArraySpec AnalyzeCoarraySpec(
 // Perform consistency checks on equivalence sets
 class EquivalenceSets {
 public:
-    EquivalenceSets(SemanticsContext &context) : context_{context} {}
-    std::vector<EquivalenceSet> &sets() {
-        return sets_;
-    };
-    // Resolve this designator and add to the current equivalence set
-    void AddToSet(const parser::Designator &);
-    // Finish the current equivalence set: determine if it overlaps
-    // with any of the others and perform necessary merges if it does.
-    void FinishSet(const parser::CharBlock &);
+  EquivalenceSets(SemanticsContext &context) : context_{context} {}
+  std::vector<EquivalenceSet> &sets() { return sets_; };
+  // Resolve this designator and add to the current equivalence set
+  void AddToSet(const parser::Designator &);
+  // Finish the current equivalence set: determine if it overlaps
+  // with any of the others and perform necessary merges if it does.
+  void FinishSet(const parser::CharBlock &);
 
 private:
-    bool CheckCanEquivalence(
-        const parser::CharBlock &, const Symbol &, const Symbol &);
-    void MergeInto(const parser::CharBlock &, EquivalenceSet &, std::size_t);
-    const EquivalenceObject *Find(const EquivalenceSet &, const Symbol &);
-    bool CheckDesignator(const parser::Designator &);
-    bool CheckDataRef(const parser::CharBlock &, const parser::DataRef &);
-    bool CheckObject(const parser::Name &);
-    bool CheckArrayBound(const parser::Expr &);
-    bool CheckSubstringBound(const parser::Expr &, bool);
-    bool IsCharacterSequenceType(const DeclTypeSpec *);
-    bool IsDefaultKindNumericType(const IntrinsicTypeSpec &);
-    bool IsNumericSequenceType(const DeclTypeSpec *);
-    bool IsSequenceType(
-        const DeclTypeSpec *, std::function<bool(const IntrinsicTypeSpec &)>);
+  bool CheckCanEquivalence(
+      const parser::CharBlock &, const Symbol &, const Symbol &);
+  void MergeInto(const parser::CharBlock &, EquivalenceSet &, std::size_t);
+  const EquivalenceObject *Find(const EquivalenceSet &, const Symbol &);
+  bool CheckDesignator(const parser::Designator &);
+  bool CheckDataRef(const parser::CharBlock &, const parser::DataRef &);
+  bool CheckObject(const parser::Name &);
+  bool CheckArrayBound(const parser::Expr &);
+  bool CheckSubstringBound(const parser::Expr &, bool);
+  bool IsCharacterSequenceType(const DeclTypeSpec *);
+  bool IsDefaultKindNumericType(const IntrinsicTypeSpec &);
+  bool IsNumericSequenceType(const DeclTypeSpec *);
+  bool IsSequenceType(
+      const DeclTypeSpec *, std::function<bool(const IntrinsicTypeSpec &)>);
 
-    SemanticsContext &context_;
-    std::vector<EquivalenceSet> sets_; // all equivalence sets in this scope
-    // Map object to index of set it is in
-    std::map<EquivalenceObject, std::size_t> objectToSet_;
-    EquivalenceSet currSet_; // equivalence set currently being constructed
-    struct {
-        Symbol *symbol{nullptr};
-        std::vector<ConstantSubscript> subscripts;
-        std::optional<ConstantSubscript> substringStart;
-    } currObject_; // equivalence object currently being constructed
+  SemanticsContext &context_;
+  std::vector<EquivalenceSet> sets_; // all equivalence sets in this scope
+  // Map object to index of set it is in
+  std::map<EquivalenceObject, std::size_t> objectToSet_;
+  EquivalenceSet currSet_; // equivalence set currently being constructed
+  struct {
+    Symbol *symbol{nullptr};
+    std::vector<ConstantSubscript> subscripts;
+    std::optional<ConstantSubscript> substringStart;
+  } currObject_; // equivalence object currently being constructed
 };
 
 } // namespace Fortran::semantics

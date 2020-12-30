@@ -47,281 +47,280 @@ using namespace llvm;
 //===----------------------------------------------------------------------===//
 
 void MipsDAGToDAGISel::getAnalysisUsage(AnalysisUsage &AU) const {
-    // There are multiple MipsDAGToDAGISel instances added to the pass pipeline.
-    // We need to preserve StackProtector for the next one.
-    AU.addPreserved<StackProtector>();
-    SelectionDAGISel::getAnalysisUsage(AU);
+  // There are multiple MipsDAGToDAGISel instances added to the pass pipeline.
+  // We need to preserve StackProtector for the next one.
+  AU.addPreserved<StackProtector>();
+  SelectionDAGISel::getAnalysisUsage(AU);
 }
 
 bool MipsDAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
-    Subtarget = &static_cast<const MipsSubtarget &>(MF.getSubtarget());
-    bool Ret = SelectionDAGISel::runOnMachineFunction(MF);
+  Subtarget = &static_cast<const MipsSubtarget &>(MF.getSubtarget());
+  bool Ret = SelectionDAGISel::runOnMachineFunction(MF);
 
-    processFunctionAfterISel(MF);
+  processFunctionAfterISel(MF);
 
-    return Ret;
+  return Ret;
 }
 
 /// getGlobalBaseReg - Output the instructions required to put the
 /// GOT address into a register.
 SDNode *MipsDAGToDAGISel::getGlobalBaseReg() {
-    Register GlobalBaseReg = MF->getInfo<MipsFunctionInfo>()->getGlobalBaseReg(*MF);
-    return CurDAG->getRegister(GlobalBaseReg, getTargetLowering()->getPointerTy(
-                                   CurDAG->getDataLayout()))
-           .getNode();
+  Register GlobalBaseReg =
+      MF->getInfo<MipsFunctionInfo>()->getGlobalBaseReg(*MF);
+  return CurDAG
+      ->getRegister(GlobalBaseReg,
+                    getTargetLowering()->getPointerTy(CurDAG->getDataLayout()))
+      .getNode();
 }
 
 /// ComplexPattern used on MipsInstrInfo
 /// Used on Mips Load/Store instructions
 bool MipsDAGToDAGISel::selectAddrRegImm(SDValue Addr, SDValue &Base,
                                         SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectAddrDefault(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                         SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddr(SDValue Addr, SDValue &Base,
                                      SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddr11MM(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                         SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddr12MM(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                         SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddr16MM(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                         SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddrLSL2MM(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                           SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddrSImm10(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                           SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddrSImm10Lsl1(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                               SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddrSImm10Lsl2(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                               SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectIntAddrSImm10Lsl3(SDValue Addr, SDValue &Base,
-        SDValue &Offset) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+                                               SDValue &Offset) const {
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectAddr16(SDValue Addr, SDValue &Base,
                                     SDValue &Offset) {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectAddr16SP(SDValue Addr, SDValue &Base,
                                       SDValue &Offset) {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplat(SDNode *N, APInt &Imm,
                                     unsigned MinSizeInBits) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm1(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm2(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm3(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm4(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm5(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm6(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimm8(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatSimm5(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimmPow2(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatUimmInvPow2(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatMaskL(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 bool MipsDAGToDAGISel::selectVSplatMaskR(SDValue N, SDValue &Imm) const {
-    llvm_unreachable("Unimplemented function.");
-    return false;
+  llvm_unreachable("Unimplemented function.");
+  return false;
 }
 
 /// Convert vector addition with vector subtraction if that allows to encode
 /// constant as an immediate and thus avoid extra 'ldi' instruction.
 /// add X, <-1, -1...> --> sub X, <1, 1...>
 bool MipsDAGToDAGISel::selectVecAddAsVecSubIfProfitable(SDNode *Node) {
-    assert(Node->getOpcode() == ISD::ADD && "Should only get 'add' here.");
+  assert(Node->getOpcode() == ISD::ADD && "Should only get 'add' here.");
 
-    EVT VT = Node->getValueType(0);
-    assert(VT.isVector() && "Should only be called for vectors.");
+  EVT VT = Node->getValueType(0);
+  assert(VT.isVector() && "Should only be called for vectors.");
 
-    SDValue X = Node->getOperand(0);
-    SDValue C = Node->getOperand(1);
+  SDValue X = Node->getOperand(0);
+  SDValue C = Node->getOperand(1);
 
-    auto *BVN = dyn_cast<BuildVectorSDNode>(C);
-    if (!BVN)
-        return false;
+  auto *BVN = dyn_cast<BuildVectorSDNode>(C);
+  if (!BVN)
+    return false;
 
-    APInt SplatValue, SplatUndef;
-    unsigned SplatBitSize;
-    bool HasAnyUndefs;
+  APInt SplatValue, SplatUndef;
+  unsigned SplatBitSize;
+  bool HasAnyUndefs;
 
-    if (!BVN->isConstantSplat(SplatValue, SplatUndef, SplatBitSize, HasAnyUndefs,
-                              8, !Subtarget->isLittle()))
-        return false;
+  if (!BVN->isConstantSplat(SplatValue, SplatUndef, SplatBitSize, HasAnyUndefs,
+                            8, !Subtarget->isLittle()))
+    return false;
 
-    auto IsInlineConstant = [](const APInt &Imm) {
-        return Imm.isIntN(5);
-    };
+  auto IsInlineConstant = [](const APInt &Imm) { return Imm.isIntN(5); };
 
-    if (IsInlineConstant(SplatValue))
-        return false; // Can already be encoded as an immediate.
+  if (IsInlineConstant(SplatValue))
+    return false; // Can already be encoded as an immediate.
 
-    APInt NegSplatValue = 0 - SplatValue;
-    if (!IsInlineConstant(NegSplatValue))
-        return false; // Even if we negate it it won't help.
+  APInt NegSplatValue = 0 - SplatValue;
+  if (!IsInlineConstant(NegSplatValue))
+    return false; // Even if we negate it it won't help.
 
-    SDLoc DL(Node);
+  SDLoc DL(Node);
 
-    SDValue NegC = CurDAG->FoldConstantArithmetic(
-                       ISD::SUB, DL, VT, {CurDAG->getConstant(0, DL, VT), C});
-    assert(NegC && "Constant-folding failed!");
-    SDValue NewNode = CurDAG->getNode(ISD::SUB, DL, VT, X, NegC);
+  SDValue NegC = CurDAG->FoldConstantArithmetic(
+      ISD::SUB, DL, VT, {CurDAG->getConstant(0, DL, VT), C});
+  assert(NegC && "Constant-folding failed!");
+  SDValue NewNode = CurDAG->getNode(ISD::SUB, DL, VT, X, NegC);
 
-    ReplaceNode(Node, NewNode.getNode());
-    SelectCode(NewNode.getNode());
-    return true;
+  ReplaceNode(Node, NewNode.getNode());
+  SelectCode(NewNode.getNode());
+  return true;
 }
 
 /// Select instructions not customized! Used for
 /// expanded, promoted and normal instructions
 void MipsDAGToDAGISel::Select(SDNode *Node) {
-    unsigned Opcode = Node->getOpcode();
+  unsigned Opcode = Node->getOpcode();
 
-    // If we have a custom node, we already have selected!
-    if (Node->isMachineOpcode()) {
-        LLVM_DEBUG(errs() << "== "; Node->dump(CurDAG); errs() << "\n");
-        Node->setNodeId(-1);
-        return;
-    }
+  // If we have a custom node, we already have selected!
+  if (Node->isMachineOpcode()) {
+    LLVM_DEBUG(errs() << "== "; Node->dump(CurDAG); errs() << "\n");
+    Node->setNodeId(-1);
+    return;
+  }
 
-    // See if subclasses can handle this node.
-    if (trySelect(Node))
-        return;
+  // See if subclasses can handle this node.
+  if (trySelect(Node))
+    return;
 
-    switch(Opcode) {
-    default:
-        break;
+  switch (Opcode) {
+  default:
+    break;
 
-    case ISD::ADD:
-        if (Node->getSimpleValueType(0).isVector() &&
-                selectVecAddAsVecSubIfProfitable(Node))
-            return;
-        break;
+  case ISD::ADD:
+    if (Node->getSimpleValueType(0).isVector() &&
+        selectVecAddAsVecSubIfProfitable(Node))
+      return;
+    break;
 
-    // Get target GOT address.
-    case ISD::GLOBAL_OFFSET_TABLE:
-        ReplaceNode(Node, getGlobalBaseReg());
-        return;
+  // Get target GOT address.
+  case ISD::GLOBAL_OFFSET_TABLE:
+    ReplaceNode(Node, getGlobalBaseReg());
+    return;
 
 #ifndef NDEBUG
-    case ISD::LOAD:
-    case ISD::STORE:
-        assert((Subtarget->systemSupportsUnalignedAccess() ||
-                cast<MemSDNode>(Node)->getMemoryVT().getSizeInBits() / 8 <=
+  case ISD::LOAD:
+  case ISD::STORE:
+    assert((Subtarget->systemSupportsUnalignedAccess() ||
+            cast<MemSDNode>(Node)->getMemoryVT().getSizeInBits() / 8 <=
                 cast<MemSDNode>(Node)->getAlignment()) &&
-               "Unexpected unaligned loads/stores.");
-        break;
+           "Unexpected unaligned loads/stores.");
+    break;
 #endif
-    }
+  }
 
-    // Select the default instruction
-    SelectCode(Node);
+  // Select the default instruction
+  SelectCode(Node);
 }
 
-bool MipsDAGToDAGISel::
-SelectInlineAsmMemoryOperand(const SDValue &Op, unsigned ConstraintID,
-                             std::vector<SDValue> &OutOps) {
-    // All memory constraints can at least accept raw pointers.
-    switch(ConstraintID) {
-    default:
-        llvm_unreachable("Unexpected asm memory constraint");
-    case InlineAsm::Constraint_m:
-    case InlineAsm::Constraint_R:
-    case InlineAsm::Constraint_ZC:
-        OutOps.push_back(Op);
-        return false;
-    }
-    return true;
+bool MipsDAGToDAGISel::SelectInlineAsmMemoryOperand(
+    const SDValue &Op, unsigned ConstraintID, std::vector<SDValue> &OutOps) {
+  // All memory constraints can at least accept raw pointers.
+  switch (ConstraintID) {
+  default:
+    llvm_unreachable("Unexpected asm memory constraint");
+  case InlineAsm::Constraint_m:
+  case InlineAsm::Constraint_R:
+  case InlineAsm::Constraint_ZC:
+    OutOps.push_back(Op);
+    return false;
+  }
+  return true;
 }

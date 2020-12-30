@@ -84,18 +84,18 @@ void __msan_print_shadow(const volatile void *x, size_t size);
 void __msan_dump_shadow(const volatile void *x, size_t size);
 
 /* Returns true if running under a dynamic tool (DynamoRio-based). */
-int  __msan_has_dynamic_component(void);
+int __msan_has_dynamic_component(void);
 
 /* Tell MSan about newly allocated memory (ex.: custom allocator).
    Memory will be marked uninitialized, with origin at the call site. */
-void __msan_allocated_memory(const volatile void* data, size_t size);
+void __msan_allocated_memory(const volatile void *data, size_t size);
 
 /* Tell MSan about newly destroyed memory. Mark memory as uninitialized. */
-void __sanitizer_dtor_callback(const volatile void* data, size_t size);
+void __sanitizer_dtor_callback(const volatile void *data, size_t size);
 
 /* This function may be optionally provided by user and should return
    a string containing Msan runtime options. See msan_flags.h for details. */
-const char* __msan_default_options(void);
+const char *__msan_default_options(void);
 
 /* Deprecated. Call __sanitizer_set_death_callback instead. */
 void __msan_set_death_callback(void (*callback)(void));
@@ -118,7 +118,7 @@ void __msan_start_switch_fiber(const void *bottom, size_t size);
 void __msan_finish_switch_fiber(const void **bottom_old, size_t *size_old);
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
 
 #endif

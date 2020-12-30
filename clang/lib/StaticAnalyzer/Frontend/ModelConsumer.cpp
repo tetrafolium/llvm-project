@@ -29,13 +29,13 @@ ModelConsumer::ModelConsumer(llvm::StringMap<Stmt *> &Bodies)
     : Bodies(Bodies) {}
 
 bool ModelConsumer::HandleTopLevelDecl(DeclGroupRef D) {
-    for (DeclGroupRef::iterator I = D.begin(), E = D.end(); I != E; ++I) {
+  for (DeclGroupRef::iterator I = D.begin(), E = D.end(); I != E; ++I) {
 
-        // Only interested in definitions.
-        const FunctionDecl *func = llvm::dyn_cast<FunctionDecl>(*I);
-        if (func && func->hasBody()) {
-            Bodies.insert(std::make_pair(func->getName(), func->getBody()));
-        }
+    // Only interested in definitions.
+    const FunctionDecl *func = llvm::dyn_cast<FunctionDecl>(*I);
+    if (func && func->hasBody()) {
+      Bodies.insert(std::make_pair(func->getName(), func->getBody()));
     }
-    return true;
+  }
+  return true;
 }

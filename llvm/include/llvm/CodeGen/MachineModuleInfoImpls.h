@@ -25,86 +25,80 @@ class MCSymbol;
 /// MachineModuleInfoMachO - This is a MachineModuleInfoImpl implementation
 /// for MachO targets.
 class MachineModuleInfoMachO : public MachineModuleInfoImpl {
-    /// GVStubs - Darwin '$non_lazy_ptr' stubs.  The key is something like
-    /// "Lfoo$non_lazy_ptr", the value is something like "_foo". The extra bit
-    /// is true if this GV is external.
-    DenseMap<MCSymbol *, StubValueTy> GVStubs;
+  /// GVStubs - Darwin '$non_lazy_ptr' stubs.  The key is something like
+  /// "Lfoo$non_lazy_ptr", the value is something like "_foo". The extra bit
+  /// is true if this GV is external.
+  DenseMap<MCSymbol *, StubValueTy> GVStubs;
 
-    /// ThreadLocalGVStubs - Darwin '$non_lazy_ptr' stubs.  The key is something
-    /// like "Lfoo$non_lazy_ptr", the value is something like "_foo". The extra
-    /// bit is true if this GV is external.
-    DenseMap<MCSymbol *, StubValueTy> ThreadLocalGVStubs;
+  /// ThreadLocalGVStubs - Darwin '$non_lazy_ptr' stubs.  The key is something
+  /// like "Lfoo$non_lazy_ptr", the value is something like "_foo". The extra
+  /// bit is true if this GV is external.
+  DenseMap<MCSymbol *, StubValueTy> ThreadLocalGVStubs;
 
-    virtual void anchor(); // Out of line virtual method.
+  virtual void anchor(); // Out of line virtual method.
 
 public:
-    MachineModuleInfoMachO(const MachineModuleInfo &) {}
+  MachineModuleInfoMachO(const MachineModuleInfo &) {}
 
-    StubValueTy &getGVStubEntry(MCSymbol *Sym) {
-        assert(Sym && "Key cannot be null");
-        return GVStubs[Sym];
-    }
+  StubValueTy &getGVStubEntry(MCSymbol *Sym) {
+    assert(Sym && "Key cannot be null");
+    return GVStubs[Sym];
+  }
 
-    StubValueTy &getThreadLocalGVStubEntry(MCSymbol *Sym) {
-        assert(Sym && "Key cannot be null");
-        return ThreadLocalGVStubs[Sym];
-    }
+  StubValueTy &getThreadLocalGVStubEntry(MCSymbol *Sym) {
+    assert(Sym && "Key cannot be null");
+    return ThreadLocalGVStubs[Sym];
+  }
 
-    /// Accessor methods to return the set of stubs in sorted order.
-    SymbolListTy GetGVStubList() {
-        return getSortedStubs(GVStubs);
-    }
-    SymbolListTy GetThreadLocalGVStubList() {
-        return getSortedStubs(ThreadLocalGVStubs);
-    }
+  /// Accessor methods to return the set of stubs in sorted order.
+  SymbolListTy GetGVStubList() { return getSortedStubs(GVStubs); }
+  SymbolListTy GetThreadLocalGVStubList() {
+    return getSortedStubs(ThreadLocalGVStubs);
+  }
 };
 
 /// MachineModuleInfoELF - This is a MachineModuleInfoImpl implementation
 /// for ELF targets.
 class MachineModuleInfoELF : public MachineModuleInfoImpl {
-    /// GVStubs - These stubs are used to materialize global addresses in PIC
-    /// mode.
-    DenseMap<MCSymbol *, StubValueTy> GVStubs;
+  /// GVStubs - These stubs are used to materialize global addresses in PIC
+  /// mode.
+  DenseMap<MCSymbol *, StubValueTy> GVStubs;
 
-    virtual void anchor(); // Out of line virtual method.
+  virtual void anchor(); // Out of line virtual method.
 
 public:
-    MachineModuleInfoELF(const MachineModuleInfo &) {}
+  MachineModuleInfoELF(const MachineModuleInfo &) {}
 
-    StubValueTy &getGVStubEntry(MCSymbol *Sym) {
-        assert(Sym && "Key cannot be null");
-        return GVStubs[Sym];
-    }
+  StubValueTy &getGVStubEntry(MCSymbol *Sym) {
+    assert(Sym && "Key cannot be null");
+    return GVStubs[Sym];
+  }
 
-    /// Accessor methods to return the set of stubs in sorted order.
+  /// Accessor methods to return the set of stubs in sorted order.
 
-    SymbolListTy GetGVStubList() {
-        return getSortedStubs(GVStubs);
-    }
+  SymbolListTy GetGVStubList() { return getSortedStubs(GVStubs); }
 };
 
 /// MachineModuleInfoCOFF - This is a MachineModuleInfoImpl implementation
 /// for COFF targets.
 class MachineModuleInfoCOFF : public MachineModuleInfoImpl {
-    /// GVStubs - These stubs are used to materialize global addresses in PIC
-    /// mode.
-    DenseMap<MCSymbol *, StubValueTy> GVStubs;
+  /// GVStubs - These stubs are used to materialize global addresses in PIC
+  /// mode.
+  DenseMap<MCSymbol *, StubValueTy> GVStubs;
 
-    virtual void anchor(); // Out of line virtual method.
+  virtual void anchor(); // Out of line virtual method.
 
 public:
-    MachineModuleInfoCOFF(const MachineModuleInfo &) {}
+  MachineModuleInfoCOFF(const MachineModuleInfo &) {}
 
-    StubValueTy &getGVStubEntry(MCSymbol *Sym) {
-        assert(Sym && "Key cannot be null");
-        return GVStubs[Sym];
-    }
+  StubValueTy &getGVStubEntry(MCSymbol *Sym) {
+    assert(Sym && "Key cannot be null");
+    return GVStubs[Sym];
+  }
 
-    /// Accessor methods to return the set of stubs in sorted order.
+  /// Accessor methods to return the set of stubs in sorted order.
 
-    SymbolListTy GetGVStubList() {
-        return getSortedStubs(GVStubs);
-    }
+  SymbolListTy GetGVStubList() { return getSortedStubs(GVStubs); }
 };
 
 } // end namespace llvm

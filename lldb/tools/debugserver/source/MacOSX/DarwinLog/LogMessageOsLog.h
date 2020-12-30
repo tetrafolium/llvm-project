@@ -24,33 +24,33 @@ using ActivityStreamEntry = struct os_activity_stream_entry_s;
 
 class LogMessageOsLog : public LogMessage {
 public:
-    static void SetFormatterFunction(os_log_copy_formatted_message_t format_func);
+  static void SetFormatterFunction(os_log_copy_formatted_message_t format_func);
 
-    LogMessageOsLog(const ActivityStore &activity_store,
-                    ActivityStreamEntry &entry);
+  LogMessageOsLog(const ActivityStore &activity_store,
+                  ActivityStreamEntry &entry);
 
-    // API methods
+  // API methods
 
-    bool HasActivity() const override;
+  bool HasActivity() const override;
 
-    const char *GetActivity() const override;
+  const char *GetActivity() const override;
 
-    std::string GetActivityChain() const override;
+  std::string GetActivityChain() const override;
 
-    bool HasCategory() const override;
+  bool HasCategory() const override;
 
-    const char *GetCategory() const override;
+  const char *GetCategory() const override;
 
-    bool HasSubsystem() const override;
+  bool HasSubsystem() const override;
 
-    const char *GetSubsystem() const override;
+  const char *GetSubsystem() const override;
 
-    const char *GetMessage() const override;
+  const char *GetMessage() const override;
 
 private:
-    const ActivityStore &m_activity_store;
-    ActivityStreamEntry &m_entry;
-    mutable std::string m_message;
+  const ActivityStore &m_activity_store;
+  ActivityStreamEntry &m_entry;
+  mutable std::string m_message;
 };
 
 #endif // LLDB_TOOLS_DEBUGSERVER_SOURCE_MACOSX_DARWINLOG_LOGMESSAGEOSLOG_H

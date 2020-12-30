@@ -18,25 +18,25 @@
 namespace llvm {
 
 class HexagonMCELFStreamer : public MCELFStreamer {
-    std::unique_ptr<MCInstrInfo> MCII;
+  std::unique_ptr<MCInstrInfo> MCII;
 
 public:
-    HexagonMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
-                         std::unique_ptr<MCObjectWriter> OW,
-                         std::unique_ptr<MCCodeEmitter> Emitter);
+  HexagonMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
+                       std::unique_ptr<MCObjectWriter> OW,
+                       std::unique_ptr<MCCodeEmitter> Emitter);
 
-    HexagonMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
-                         std::unique_ptr<MCObjectWriter> OW,
-                         std::unique_ptr<MCCodeEmitter> Emitter,
-                         MCAssembler *Assembler);
+  HexagonMCELFStreamer(MCContext &Context, std::unique_ptr<MCAsmBackend> TAB,
+                       std::unique_ptr<MCObjectWriter> OW,
+                       std::unique_ptr<MCCodeEmitter> Emitter,
+                       MCAssembler *Assembler);
 
-    void emitInstruction(const MCInst &Inst, const MCSubtargetInfo &STI) override;
-    void EmitSymbol(const MCInst &Inst);
-    void HexagonMCEmitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                                        unsigned ByteAlignment,
-                                        unsigned AccessSize);
-    void HexagonMCEmitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
-                                   unsigned ByteAlignment, unsigned AccessSize);
+  void emitInstruction(const MCInst &Inst, const MCSubtargetInfo &STI) override;
+  void EmitSymbol(const MCInst &Inst);
+  void HexagonMCEmitLocalCommonSymbol(MCSymbol *Symbol, uint64_t Size,
+                                      unsigned ByteAlignment,
+                                      unsigned AccessSize);
+  void HexagonMCEmitCommonSymbol(MCSymbol *Symbol, uint64_t Size,
+                                 unsigned ByteAlignment, unsigned AccessSize);
 };
 
 MCStreamer *createHexagonELFStreamer(Triple const &TT, MCContext &Context,

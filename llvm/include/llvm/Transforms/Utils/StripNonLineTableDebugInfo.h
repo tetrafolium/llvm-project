@@ -18,7 +18,7 @@ class Module;
 class StripNonLineTableDebugInfoPass
     : public PassInfoMixin<StripNonLineTableDebugInfoPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

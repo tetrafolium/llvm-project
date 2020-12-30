@@ -22,44 +22,44 @@ using namespace llvm;
 
 namespace {
 struct XCoreFTAOElim : public MachineFunctionPass {
-    static char ID;
-    XCoreFTAOElim() : MachineFunctionPass(ID) {}
+  static char ID;
+  XCoreFTAOElim() : MachineFunctionPass(ID) {}
 
-    bool runOnMachineFunction(MachineFunction &Fn) override;
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::NoVRegs);
-    }
+  bool runOnMachineFunction(MachineFunction &Fn) override;
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::NoVRegs);
+  }
 
-    StringRef getPassName() const override {
-        return "XCore FRAME_TO_ARGS_OFFSET Elimination";
-    }
+  StringRef getPassName() const override {
+    return "XCore FRAME_TO_ARGS_OFFSET Elimination";
+  }
 };
 char XCoreFTAOElim::ID = 0;
-}
+} // namespace
 
 /// createXCoreFrameToArgsOffsetEliminationPass - returns an instance of the
 /// Frame to args offset elimination pass
 FunctionPass *llvm::createXCoreFrameToArgsOffsetEliminationPass() {
-    return new XCoreFTAOElim();
+  return new XCoreFTAOElim();
 }
 
 bool XCoreFTAOElim::runOnMachineFunction(MachineFunction &MF) {
-    const XCoreInstrInfo &TII =
-        *static_cast<const XCoreInstrInfo *>(MF.getSubtarget().getInstrInfo());
-    unsigned StackSize = MF.getFrameInfo().getStackSize();
-    for (MachineFunction::iterator MFI = MF.begin(), E = MF.end(); MFI != E;
-            ++MFI) {
-        MachineBasicBlock &MBB = *MFI;
-        for (MachineBasicBlock::iterator MBBI = MBB.begin(), EE = MBB.end();
-                MBBI != EE; ++MBBI) {
-            if (MBBI->getOpcode() == XCore::FRAME_TO_ARGS_OFFSET) {
-                MachineInstr &OldInst = *MBBI;
-                Register Reg = OldInst.getOperand(0).getReg();
-                MBBI = TII.loadImmediate(MBB, MBBI, Reg, StackSize);
-                OldInst.eraseFromParent();
-            }
-        }
+  const XCoreInstrInfo &TII =
+      *static_cast<const XCoreInstrInfo *>(MF.getSubtarget().getInstrInfo());
+  unsigned StackSize = MF.getFrameInfo().getStackSize();
+  for (MachineFunction::iterator MFI = MF.begin(), E = MF.end(); MFI != E;
+       ++MFI) {
+    MachineBasicBlock &MBB = *MFI;
+    for (MachineBasicBlock::iterator MBBI = MBB.begin(), EE = MBB.end();
+         MBBI != EE; ++MBBI) {
+      if (MBBI->getOpcode() == XCore::FRAME_TO_ARGS_OFFSET) {
+        MachineInstr &OldInst = *MBBI;
+        Register Reg = OldInst.getOperand(0).getReg();
+        MBBI = TII.loadImmediate(MBB, MBBI, Reg, StackSize);
+        OldInst.eraseFromParent();
+      }
     }
-    return true;
+  }
+  return true;
 }

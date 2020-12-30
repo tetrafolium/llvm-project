@@ -49,232 +49,227 @@ class Value;
 /// to preserve information from query to query. However it does retain handles
 /// to various other analyses and must be recomputed when those analyses are.
 class BasicAAResult : public AAResultBase<BasicAAResult> {
-    friend AAResultBase<BasicAAResult>;
+  friend AAResultBase<BasicAAResult>;
 
-    const DataLayout &DL;
-    const Function &F;
-    const TargetLibraryInfo &TLI;
-    AssumptionCache &AC;
-    DominatorTree *DT;
-    LoopInfo *LI;
-    PhiValues *PV;
+  const DataLayout &DL;
+  const Function &F;
+  const TargetLibraryInfo &TLI;
+  AssumptionCache &AC;
+  DominatorTree *DT;
+  LoopInfo *LI;
+  PhiValues *PV;
 
 public:
-    BasicAAResult(const DataLayout &DL, const Function &F,
-                  const TargetLibraryInfo &TLI, AssumptionCache &AC,
-                  DominatorTree *DT = nullptr, LoopInfo *LI = nullptr,
-                  PhiValues *PV = nullptr)
-        : AAResultBase(), DL(DL), F(F), TLI(TLI), AC(AC), DT(DT), LI(LI), PV(PV)
-    {}
+  BasicAAResult(const DataLayout &DL, const Function &F,
+                const TargetLibraryInfo &TLI, AssumptionCache &AC,
+                DominatorTree *DT = nullptr, LoopInfo *LI = nullptr,
+                PhiValues *PV = nullptr)
+      : AAResultBase(), DL(DL), F(F), TLI(TLI), AC(AC), DT(DT), LI(LI), PV(PV) {
+  }
 
-    BasicAAResult(const BasicAAResult &Arg)
-        : AAResultBase(Arg), DL(Arg.DL), F(Arg.F), TLI(Arg.TLI), AC(Arg.AC),
-          DT(Arg.DT),  LI(Arg.LI), PV(Arg.PV) {}
-    BasicAAResult(BasicAAResult &&Arg)
-        : AAResultBase(std::move(Arg)), DL(Arg.DL), F(Arg.F), TLI(Arg.TLI),
-          AC(Arg.AC), DT(Arg.DT), LI(Arg.LI), PV(Arg.PV) {}
+  BasicAAResult(const BasicAAResult &Arg)
+      : AAResultBase(Arg), DL(Arg.DL), F(Arg.F), TLI(Arg.TLI), AC(Arg.AC),
+        DT(Arg.DT), LI(Arg.LI), PV(Arg.PV) {}
+  BasicAAResult(BasicAAResult &&Arg)
+      : AAResultBase(std::move(Arg)), DL(Arg.DL), F(Arg.F), TLI(Arg.TLI),
+        AC(Arg.AC), DT(Arg.DT), LI(Arg.LI), PV(Arg.PV) {}
 
-    /// Handle invalidation events in the new pass manager.
-    bool invalidate(Function &Fn, const PreservedAnalyses &PA,
-                    FunctionAnalysisManager::Invalidator &Inv);
+  /// Handle invalidation events in the new pass manager.
+  bool invalidate(Function &Fn, const PreservedAnalyses &PA,
+                  FunctionAnalysisManager::Invalidator &Inv);
 
-    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                      AAQueryInfo &AAQI);
+  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                    AAQueryInfo &AAQI);
 
-    ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
-                             AAQueryInfo &AAQI);
+  ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
+                           AAQueryInfo &AAQI);
 
-    ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
-                             AAQueryInfo &AAQI);
+  ModRefInfo getModRefInfo(const CallBase *Call1, const CallBase *Call2,
+                           AAQueryInfo &AAQI);
 
-    /// Chases pointers until we find a (constant global) or not.
-    bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
-                                bool OrLocal);
+  /// Chases pointers until we find a (constant global) or not.
+  bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
+                              bool OrLocal);
 
-    /// Get the location associated with a pointer argument of a callsite.
-    ModRefInfo getArgModRefInfo(const CallBase *Call, unsigned ArgIdx);
+  /// Get the location associated with a pointer argument of a callsite.
+  ModRefInfo getArgModRefInfo(const CallBase *Call, unsigned ArgIdx);
 
-    /// Returns the behavior when calling the given call site.
-    FunctionModRefBehavior getModRefBehavior(const CallBase *Call);
+  /// Returns the behavior when calling the given call site.
+  FunctionModRefBehavior getModRefBehavior(const CallBase *Call);
 
-    /// Returns the behavior when calling the given function. For use when the
-    /// call site is not known.
-    FunctionModRefBehavior getModRefBehavior(const Function *Fn);
+  /// Returns the behavior when calling the given function. For use when the
+  /// call site is not known.
+  FunctionModRefBehavior getModRefBehavior(const Function *Fn);
 
 private:
-    // A linear transformation of a Value; this class represents ZExt(SExt(V,
-    // SExtBits), ZExtBits) * Scale + Offset.
-    struct VariableGEPIndex {
-        // An opaque Value - we can't decompose this further.
-        const Value *V;
+  // A linear transformation of a Value; this class represents ZExt(SExt(V,
+  // SExtBits), ZExtBits) * Scale + Offset.
+  struct VariableGEPIndex {
+    // An opaque Value - we can't decompose this further.
+    const Value *V;
 
-        // We need to track what extensions we've done as we consider the same Value
-        // with different extensions as different variables in a GEP's linear
-        // expression;
-        // e.g.: if V == -1, then sext(x) != zext(x).
-        unsigned ZExtBits;
-        unsigned SExtBits;
+    // We need to track what extensions we've done as we consider the same Value
+    // with different extensions as different variables in a GEP's linear
+    // expression;
+    // e.g.: if V == -1, then sext(x) != zext(x).
+    unsigned ZExtBits;
+    unsigned SExtBits;
 
-        APInt Scale;
+    APInt Scale;
 
-        bool operator==(const VariableGEPIndex &Other) const {
-            return V == Other.V && ZExtBits == Other.ZExtBits &&
-                   SExtBits == Other.SExtBits && Scale == Other.Scale;
-        }
+    bool operator==(const VariableGEPIndex &Other) const {
+      return V == Other.V && ZExtBits == Other.ZExtBits &&
+             SExtBits == Other.SExtBits && Scale == Other.Scale;
+    }
 
-        bool operator!=(const VariableGEPIndex &Other) const {
-            return !operator==(Other);
-        }
+    bool operator!=(const VariableGEPIndex &Other) const {
+      return !operator==(Other);
+    }
 
-        void dump() const {
-            print(dbgs());
-            dbgs() << "\n";
-        }
-        void print(raw_ostream &OS) const {
-            OS << "(V=" << V->getName()
-               << ", zextbits=" << ZExtBits
-               << ", sextbits=" << SExtBits
-               << ", scale=" << Scale << ")";
-        }
-    };
+    void dump() const {
+      print(dbgs());
+      dbgs() << "\n";
+    }
+    void print(raw_ostream &OS) const {
+      OS << "(V=" << V->getName() << ", zextbits=" << ZExtBits
+         << ", sextbits=" << SExtBits << ", scale=" << Scale << ")";
+    }
+  };
 
-    // Represents the internal structure of a GEP, decomposed into a base pointer,
-    // constant offsets, and variable scaled indices.
-    struct DecomposedGEP {
-        // Base pointer of the GEP
-        const Value *Base;
-        // Total constant offset from base.
-        APInt Offset;
-        // Scaled variable (non-constant) indices.
-        SmallVector<VariableGEPIndex, 4> VarIndices;
-        // Is GEP index scale compile-time constant.
-        bool HasCompileTimeConstantScale;
+  // Represents the internal structure of a GEP, decomposed into a base pointer,
+  // constant offsets, and variable scaled indices.
+  struct DecomposedGEP {
+    // Base pointer of the GEP
+    const Value *Base;
+    // Total constant offset from base.
+    APInt Offset;
+    // Scaled variable (non-constant) indices.
+    SmallVector<VariableGEPIndex, 4> VarIndices;
+    // Is GEP index scale compile-time constant.
+    bool HasCompileTimeConstantScale;
 
-        void dump() const {
-            print(dbgs());
-            dbgs() << "\n";
-        }
-        void print(raw_ostream &OS) const {
-            OS << "(DecomposedGEP Base=" << Base->getName()
-               << ", Offset=" << Offset
-               << ", VarIndices=[";
-            for (size_t i = 0; i < VarIndices.size(); i++) {
-                if (i != 0)
-                    OS << ", ";
-                VarIndices[i].print(OS);
-            }
-            OS << "], HasCompileTimeConstantScale=" << HasCompileTimeConstantScale
-               << ")";
-        }
-    };
+    void dump() const {
+      print(dbgs());
+      dbgs() << "\n";
+    }
+    void print(raw_ostream &OS) const {
+      OS << "(DecomposedGEP Base=" << Base->getName() << ", Offset=" << Offset
+         << ", VarIndices=[";
+      for (size_t i = 0; i < VarIndices.size(); i++) {
+        if (i != 0)
+          OS << ", ";
+        VarIndices[i].print(OS);
+      }
+      OS << "], HasCompileTimeConstantScale=" << HasCompileTimeConstantScale
+         << ")";
+    }
+  };
 
-    /// Tracks phi nodes we have visited.
-    ///
-    /// When interpret "Value" pointer equality as value equality we need to make
-    /// sure that the "Value" is not part of a cycle. Otherwise, two uses could
-    /// come from different "iterations" of a cycle and see different values for
-    /// the same "Value" pointer.
-    ///
-    /// The following example shows the problem:
-    ///   %p = phi(%alloca1, %addr2)
-    ///   %l = load %ptr
-    ///   %addr1 = gep, %alloca2, 0, %l
-    ///   %addr2 = gep  %alloca2, 0, (%l + 1)
-    ///      alias(%p, %addr1) -> MayAlias !
-    ///   store %l, ...
-    SmallPtrSet<const BasicBlock *, 8> VisitedPhiBBs;
+  /// Tracks phi nodes we have visited.
+  ///
+  /// When interpret "Value" pointer equality as value equality we need to make
+  /// sure that the "Value" is not part of a cycle. Otherwise, two uses could
+  /// come from different "iterations" of a cycle and see different values for
+  /// the same "Value" pointer.
+  ///
+  /// The following example shows the problem:
+  ///   %p = phi(%alloca1, %addr2)
+  ///   %l = load %ptr
+  ///   %addr1 = gep, %alloca2, 0, %l
+  ///   %addr2 = gep  %alloca2, 0, (%l + 1)
+  ///      alias(%p, %addr1) -> MayAlias !
+  ///   store %l, ...
+  SmallPtrSet<const BasicBlock *, 8> VisitedPhiBBs;
 
-    /// Tracks instructions visited by pointsToConstantMemory.
-    SmallPtrSet<const Value *, 16> Visited;
+  /// Tracks instructions visited by pointsToConstantMemory.
+  SmallPtrSet<const Value *, 16> Visited;
 
-    static const Value *
-    GetLinearExpression(const Value *V, APInt &Scale, APInt &Offset,
-                        unsigned &ZExtBits, unsigned &SExtBits,
-                        const DataLayout &DL, unsigned Depth, AssumptionCache *AC,
-                        DominatorTree *DT, bool &NSW, bool &NUW);
+  static const Value *
+  GetLinearExpression(const Value *V, APInt &Scale, APInt &Offset,
+                      unsigned &ZExtBits, unsigned &SExtBits,
+                      const DataLayout &DL, unsigned Depth, AssumptionCache *AC,
+                      DominatorTree *DT, bool &NSW, bool &NUW);
 
-    static DecomposedGEP
-    DecomposeGEPExpression(const Value *V, const DataLayout &DL,
-                           AssumptionCache *AC, DominatorTree *DT);
+  static DecomposedGEP DecomposeGEPExpression(const Value *V,
+                                              const DataLayout &DL,
+                                              AssumptionCache *AC,
+                                              DominatorTree *DT);
 
-    static bool isGEPBaseAtNegativeOffset(const GEPOperator *GEPOp,
-                                          const DecomposedGEP &DecompGEP, const DecomposedGEP &DecompObject,
-                                          LocationSize ObjectAccessSize);
+  static bool isGEPBaseAtNegativeOffset(const GEPOperator *GEPOp,
+                                        const DecomposedGEP &DecompGEP,
+                                        const DecomposedGEP &DecompObject,
+                                        LocationSize ObjectAccessSize);
 
-    /// A Heuristic for aliasGEP that searches for a constant offset
-    /// between the variables.
-    ///
-    /// GetLinearExpression has some limitations, as generally zext(%x + 1)
-    /// != zext(%x) + zext(1) if the arithmetic overflows. GetLinearExpression
-    /// will therefore conservatively refuse to decompose these expressions.
-    /// However, we know that, for all %x, zext(%x) != zext(%x + 1), even if
-    /// the addition overflows.
-    bool
-    constantOffsetHeuristic(const SmallVectorImpl<VariableGEPIndex> &VarIndices,
-                            LocationSize V1Size, LocationSize V2Size,
-                            const APInt &BaseOffset, AssumptionCache *AC,
-                            DominatorTree *DT);
+  /// A Heuristic for aliasGEP that searches for a constant offset
+  /// between the variables.
+  ///
+  /// GetLinearExpression has some limitations, as generally zext(%x + 1)
+  /// != zext(%x) + zext(1) if the arithmetic overflows. GetLinearExpression
+  /// will therefore conservatively refuse to decompose these expressions.
+  /// However, we know that, for all %x, zext(%x) != zext(%x + 1), even if
+  /// the addition overflows.
+  bool
+  constantOffsetHeuristic(const SmallVectorImpl<VariableGEPIndex> &VarIndices,
+                          LocationSize V1Size, LocationSize V2Size,
+                          const APInt &BaseOffset, AssumptionCache *AC,
+                          DominatorTree *DT);
 
-    bool isValueEqualInPotentialCycles(const Value *V1, const Value *V2);
+  bool isValueEqualInPotentialCycles(const Value *V1, const Value *V2);
 
-    void GetIndexDifference(SmallVectorImpl<VariableGEPIndex> &Dest,
-                            const SmallVectorImpl<VariableGEPIndex> &Src);
+  void GetIndexDifference(SmallVectorImpl<VariableGEPIndex> &Dest,
+                          const SmallVectorImpl<VariableGEPIndex> &Src);
 
-    AliasResult aliasGEP(const GEPOperator *V1, LocationSize V1Size,
-                         const AAMDNodes &V1AAInfo, const Value *V2,
-                         LocationSize V2Size, const AAMDNodes &V2AAInfo,
-                         const Value *UnderlyingV1, const Value *UnderlyingV2,
-                         AAQueryInfo &AAQI);
+  AliasResult aliasGEP(const GEPOperator *V1, LocationSize V1Size,
+                       const AAMDNodes &V1AAInfo, const Value *V2,
+                       LocationSize V2Size, const AAMDNodes &V2AAInfo,
+                       const Value *UnderlyingV1, const Value *UnderlyingV2,
+                       AAQueryInfo &AAQI);
 
-    AliasResult aliasPHI(const PHINode *PN, LocationSize PNSize,
-                         const AAMDNodes &PNAAInfo, const Value *V2,
-                         LocationSize V2Size, const AAMDNodes &V2AAInfo,
-                         const Value *UnderV2, AAQueryInfo &AAQI);
+  AliasResult aliasPHI(const PHINode *PN, LocationSize PNSize,
+                       const AAMDNodes &PNAAInfo, const Value *V2,
+                       LocationSize V2Size, const AAMDNodes &V2AAInfo,
+                       const Value *UnderV2, AAQueryInfo &AAQI);
 
-    AliasResult aliasSelect(const SelectInst *SI, LocationSize SISize,
-                            const AAMDNodes &SIAAInfo, const Value *V2,
-                            LocationSize V2Size, const AAMDNodes &V2AAInfo,
-                            const Value *UnderV2, AAQueryInfo &AAQI);
+  AliasResult aliasSelect(const SelectInst *SI, LocationSize SISize,
+                          const AAMDNodes &SIAAInfo, const Value *V2,
+                          LocationSize V2Size, const AAMDNodes &V2AAInfo,
+                          const Value *UnderV2, AAQueryInfo &AAQI);
 
-    AliasResult aliasCheck(const Value *V1, LocationSize V1Size,
-                           const AAMDNodes &V1AATag, const Value *V2,
-                           LocationSize V2Size, const AAMDNodes &V2AATag,
-                           AAQueryInfo &AAQI, const Value *O1 = nullptr,
-                           const Value *O2 = nullptr);
+  AliasResult aliasCheck(const Value *V1, LocationSize V1Size,
+                         const AAMDNodes &V1AATag, const Value *V2,
+                         LocationSize V2Size, const AAMDNodes &V2AATag,
+                         AAQueryInfo &AAQI, const Value *O1 = nullptr,
+                         const Value *O2 = nullptr);
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class BasicAA : public AnalysisInfoMixin<BasicAA> {
-    friend AnalysisInfoMixin<BasicAA>;
+  friend AnalysisInfoMixin<BasicAA>;
 
-    static AnalysisKey Key;
+  static AnalysisKey Key;
 
 public:
-    using Result = BasicAAResult;
+  using Result = BasicAAResult;
 
-    BasicAAResult run(Function &F, FunctionAnalysisManager &AM);
+  BasicAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the BasicAAResult object.
 class BasicAAWrapperPass : public FunctionPass {
-    std::unique_ptr<BasicAAResult> Result;
+  std::unique_ptr<BasicAAResult> Result;
 
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    static char ID;
+  static char ID;
 
-    BasicAAWrapperPass();
+  BasicAAWrapperPass();
 
-    BasicAAResult &getResult() {
-        return *Result;
-    }
-    const BasicAAResult &getResult() const {
-        return *Result;
-    }
+  BasicAAResult &getResult() { return *Result; }
+  const BasicAAResult &getResult() const { return *Result; }
 
-    bool runOnFunction(Function &F) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool runOnFunction(Function &F) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 FunctionPass *createBasicAAWrapperPass();
@@ -288,17 +283,17 @@ BasicAAResult createLegacyPMBasicAAResult(Pass &P, Function &F);
 /// computing AA results for a function. We store the results in fields so that
 /// they live long enough to be queried, but we re-use them each time.
 class LegacyAARGetter {
-    Pass &P;
-    Optional<BasicAAResult> BAR;
-    Optional<AAResults> AAR;
+  Pass &P;
+  Optional<BasicAAResult> BAR;
+  Optional<AAResults> AAR;
 
 public:
-    LegacyAARGetter(Pass &P) : P(P) {}
-    AAResults &operator()(Function &F) {
-        BAR.emplace(createLegacyPMBasicAAResult(P, F));
-        AAR.emplace(createLegacyPMAAResults(P, F, *BAR));
-        return *AAR;
-    }
+  LegacyAARGetter(Pass &P) : P(P) {}
+  AAResults &operator()(Function &F) {
+    BAR.emplace(createLegacyPMBasicAAResult(P, F));
+    AAR.emplace(createLegacyPMAAResults(P, F, *BAR));
+    return *AAR;
+  }
 };
 
 } // end namespace llvm

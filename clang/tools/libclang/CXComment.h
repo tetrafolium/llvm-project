@@ -29,35 +29,33 @@ namespace cxcomment {
 
 static inline CXComment createCXComment(const comments::Comment *C,
                                         CXTranslationUnit TU) {
-    CXComment Result;
-    Result.ASTNode = C;
-    Result.TranslationUnit = TU;
-    return Result;
+  CXComment Result;
+  Result.ASTNode = C;
+  Result.TranslationUnit = TU;
+  return Result;
 }
 
 static inline const comments::Comment *getASTNode(CXComment CXC) {
-    return static_cast<const comments::Comment *>(CXC.ASTNode);
+  return static_cast<const comments::Comment *>(CXC.ASTNode);
 }
 
-template<typename T>
-static inline const T *getASTNodeAs(CXComment CXC) {
-    const comments::Comment *C = getASTNode(CXC);
-    if (!C)
-        return nullptr;
+template <typename T> static inline const T *getASTNodeAs(CXComment CXC) {
+  const comments::Comment *C = getASTNode(CXC);
+  if (!C)
+    return nullptr;
 
-    return dyn_cast<T>(C);
+  return dyn_cast<T>(C);
 }
 
 static inline ASTContext &getASTContext(CXComment CXC) {
-    return cxtu::getASTUnit(CXC.TranslationUnit)->getASTContext();
+  return cxtu::getASTUnit(CXC.TranslationUnit)->getASTContext();
 }
 
 static inline comments::CommandTraits &getCommandTraits(CXComment CXC) {
-    return getASTContext(CXC).getCommentCommandTraits();
+  return getASTContext(CXC).getCommentCommandTraits();
 }
 
 } // end namespace cxcomment
 } // end namespace clang
 
 #endif
-

@@ -18,81 +18,80 @@
 using namespace llvm;
 
 void MCOperand::print(raw_ostream &OS) const {
-    OS << "<MCOperand ";
-    if (!isValid())
-        OS << "INVALID";
-    else if (isReg())
-        OS << "Reg:" << getReg();
-    else if (isImm())
-        OS << "Imm:" << getImm();
-    else if (isFPImm())
-        OS << "FPImm:" << getFPImm();
-    else if (isExpr()) {
-        OS << "Expr:(" << *getExpr() << ")";
-    } else if (isInst()) {
-        OS << "Inst:(" << *getInst() << ")";
-    } else
-        OS << "UNDEFINED";
-    OS << ">";
+  OS << "<MCOperand ";
+  if (!isValid())
+    OS << "INVALID";
+  else if (isReg())
+    OS << "Reg:" << getReg();
+  else if (isImm())
+    OS << "Imm:" << getImm();
+  else if (isFPImm())
+    OS << "FPImm:" << getFPImm();
+  else if (isExpr()) {
+    OS << "Expr:(" << *getExpr() << ")";
+  } else if (isInst()) {
+    OS << "Inst:(" << *getInst() << ")";
+  } else
+    OS << "UNDEFINED";
+  OS << ">";
 }
 
 bool MCOperand::evaluateAsConstantImm(int64_t &Imm) const {
-    if (isImm()) {
-        Imm = getImm();
-        return true;
-    }
-    return false;
+  if (isImm()) {
+    Imm = getImm();
+    return true;
+  }
+  return false;
 }
 
 bool MCOperand::isBareSymbolRef() const {
-    assert(isExpr() &&
-           "isBareSymbolRef expects only expressions");
-    const MCExpr *Expr = getExpr();
-    MCExpr::ExprKind Kind = getExpr()->getKind();
-    return Kind == MCExpr::SymbolRef &&
-           cast<MCSymbolRefExpr>(Expr)->getKind() == MCSymbolRefExpr::VK_None;
+  assert(isExpr() && "isBareSymbolRef expects only expressions");
+  const MCExpr *Expr = getExpr();
+  MCExpr::ExprKind Kind = getExpr()->getKind();
+  return Kind == MCExpr::SymbolRef &&
+         cast<MCSymbolRefExpr>(Expr)->getKind() == MCSymbolRefExpr::VK_None;
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void MCOperand::dump() const {
-    print(dbgs());
-    dbgs() << "\n";
+  print(dbgs());
+  dbgs() << "\n";
 }
 #endif
 
 void MCInst::print(raw_ostream &OS) const {
-    OS << "<MCInst " << getOpcode();
-    for (unsigned i = 0, e = getNumOperands(); i != e; ++i) {
-        OS << " ";
-        getOperand(i).print(OS);
-    }
-    OS << ">";
+  OS << "<MCInst " << getOpcode();
+  for (unsigned i = 0, e = getNumOperands(); i != e; ++i) {
+    OS << " ";
+    getOperand(i).print(OS);
+  }
+  OS << ">";
 }
 
 void MCInst::dump_pretty(raw_ostream &OS, const MCInstPrinter *Printer,
                          StringRef Separator) const {
-    StringRef InstName = Printer ? Printer->getOpcodeName(getOpcode()) : "";
-    dump_pretty(OS, InstName, Separator);
+  StringRef InstName = Printer ? Printer->getOpcodeName(getOpcode()) : "";
+  dump_pretty(OS, InstName, Separator);
 }
 
 void MCInst::dump_pretty(raw_ostream &OS, StringRef Name,
                          StringRef Separator) const {
-    OS << "<MCInst #" << getOpcode();
+  OS << "<MCInst #" << getOpcode();
 
-    // Show the instruction opcode name if we have it.
-    if (!Name.empty())
-        OS << ' ' << Name;
+  // Show the instruction opcode name if we have it.
+  if (!Name.empty())
+    OS << ' ' << Name;
 
-    for (unsigned i = 0, e = getNumOperands(); i != e; ++i) {
-        OS << Separator;
-        getOperand(i).print(OS);
-    }
-    OS << ">";
+  for (unsigned i = 0, e = getNumOperands(); i != e; ++i) {
+    OS << Separator;
+    getOperand(i).print(OS);
+  }
+  OS << ">";
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
 LLVM_DUMP_METHOD void MCInst::dump() const {
-    print(dbgs());
-    dbgs() << "\n";
+  print(dbgs());
+  dbgs() << "\n";
 }
 #endif

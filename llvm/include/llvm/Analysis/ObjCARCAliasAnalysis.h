@@ -35,66 +35,62 @@ namespace objcarc {
 /// tricks. Such as knowing that ivars in the non-fragile ABI are non-aliasing
 /// even though their offsets are dynamic.
 class ObjCARCAAResult : public AAResultBase<ObjCARCAAResult> {
-    friend AAResultBase<ObjCARCAAResult>;
+  friend AAResultBase<ObjCARCAAResult>;
 
-    const DataLayout &DL;
+  const DataLayout &DL;
 
 public:
-    explicit ObjCARCAAResult(const DataLayout &DL) : AAResultBase(), DL(DL) {}
-    ObjCARCAAResult(ObjCARCAAResult &&Arg)
-        : AAResultBase(std::move(Arg)), DL(Arg.DL) {}
+  explicit ObjCARCAAResult(const DataLayout &DL) : AAResultBase(), DL(DL) {}
+  ObjCARCAAResult(ObjCARCAAResult &&Arg)
+      : AAResultBase(std::move(Arg)), DL(Arg.DL) {}
 
-    /// Handle invalidation events from the new pass manager.
-    ///
-    /// By definition, this result is stateless and so remains valid.
-    bool invalidate(Function &, const PreservedAnalyses &,
-                    FunctionAnalysisManager::Invalidator &) {
-        return false;
-    }
+  /// Handle invalidation events from the new pass manager.
+  ///
+  /// By definition, this result is stateless and so remains valid.
+  bool invalidate(Function &, const PreservedAnalyses &,
+                  FunctionAnalysisManager::Invalidator &) {
+    return false;
+  }
 
-    AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
-                      AAQueryInfo &AAQI);
-    bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
-                                bool OrLocal);
+  AliasResult alias(const MemoryLocation &LocA, const MemoryLocation &LocB,
+                    AAQueryInfo &AAQI);
+  bool pointsToConstantMemory(const MemoryLocation &Loc, AAQueryInfo &AAQI,
+                              bool OrLocal);
 
-    using AAResultBase::getModRefBehavior;
-    FunctionModRefBehavior getModRefBehavior(const Function *F);
+  using AAResultBase::getModRefBehavior;
+  FunctionModRefBehavior getModRefBehavior(const Function *F);
 
-    using AAResultBase::getModRefInfo;
-    ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
-                             AAQueryInfo &AAQI);
+  using AAResultBase::getModRefInfo;
+  ModRefInfo getModRefInfo(const CallBase *Call, const MemoryLocation &Loc,
+                           AAQueryInfo &AAQI);
 };
 
 /// Analysis pass providing a never-invalidated alias analysis result.
 class ObjCARCAA : public AnalysisInfoMixin<ObjCARCAA> {
-    friend AnalysisInfoMixin<ObjCARCAA>;
-    static AnalysisKey Key;
+  friend AnalysisInfoMixin<ObjCARCAA>;
+  static AnalysisKey Key;
 
 public:
-    typedef ObjCARCAAResult Result;
+  typedef ObjCARCAAResult Result;
 
-    ObjCARCAAResult run(Function &F, FunctionAnalysisManager &AM);
+  ObjCARCAAResult run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Legacy wrapper pass to provide the ObjCARCAAResult object.
 class ObjCARCAAWrapperPass : public ImmutablePass {
-    std::unique_ptr<ObjCARCAAResult> Result;
+  std::unique_ptr<ObjCARCAAResult> Result;
 
 public:
-    static char ID;
+  static char ID;
 
-    ObjCARCAAWrapperPass();
+  ObjCARCAAWrapperPass();
 
-    ObjCARCAAResult &getResult() {
-        return *Result;
-    }
-    const ObjCARCAAResult &getResult() const {
-        return *Result;
-    }
+  ObjCARCAAResult &getResult() { return *Result; }
+  const ObjCARCAAResult &getResult() const { return *Result; }
 
-    bool doInitialization(Module &M) override;
-    bool doFinalization(Module &M) override;
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  bool doInitialization(Module &M) override;
+  bool doFinalization(Module &M) override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 };
 
 } // namespace objcarc

@@ -23,12 +23,12 @@ namespace llvm {
 
 class ScalarizerPass : public PassInfoMixin<ScalarizerPass> {
 public:
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 };
 
 /// Create a legacy pass manager instance of the Scalarizer pass
 FunctionPass *createScalarizerPass();
 
-}
+} // namespace llvm
 
 #endif /* LLVM_TRANSFORMS_SCALAR_SCALARIZER_H */

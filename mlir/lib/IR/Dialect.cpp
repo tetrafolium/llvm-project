@@ -23,21 +23,21 @@ using namespace detail;
 DialectAsmParser::~DialectAsmParser() {}
 
 Dialect *DialectRegistry::loadByName(StringRef name, MLIRContext *context) {
-    auto it = registry.find(name.str());
-    if (it == registry.end())
-        return nullptr;
-    return it->second.second(context);
+  auto it = registry.find(name.str());
+  if (it == registry.end())
+    return nullptr;
+  return it->second.second(context);
 }
 
 void DialectRegistry::insert(TypeID typeID, StringRef name,
                              DialectAllocatorFunction ctor) {
-    auto inserted = registry.insert(
-                        std::make_pair(std::string(name), std::make_pair(typeID, ctor)));
-    if (!inserted.second && inserted.first->second.first != typeID) {
-        llvm::report_fatal_error(
-            "Trying to register different dialects for the same namespace: " +
-            name);
-    }
+  auto inserted = registry.insert(
+      std::make_pair(std::string(name), std::make_pair(typeID, ctor)));
+  if (!inserted.second && inserted.first->second.first != typeID) {
+    llvm::report_fatal_error(
+        "Trying to register different dialects for the same namespace: " +
+        name);
+  }
 }
 
 //===----------------------------------------------------------------------===//
@@ -46,7 +46,7 @@ void DialectRegistry::insert(TypeID typeID, StringRef name,
 
 Dialect::Dialect(StringRef name, MLIRContext *context, TypeID id)
     : name(name), dialectID(id), context(context) {
-    assert(isValidNamespace(name) && "invalid dialect namespace");
+  assert(isValidNamespace(name) && "invalid dialect namespace");
 }
 
 Dialect::~Dialect() {}
@@ -56,8 +56,8 @@ Dialect::~Dialect() {}
 /// the verification failed, success otherwise. This hook may optionally be
 /// invoked from any operation containing a region.
 LogicalResult Dialect::verifyRegionArgAttribute(Operation *, unsigned, unsigned,
-        NamedAttribute) {
-    return success();
+                                                NamedAttribute) {
+  return success();
 }
 
 /// Verify an attribute from this dialect on the result at 'resultIndex' for
@@ -65,46 +65,46 @@ LogicalResult Dialect::verifyRegionArgAttribute(Operation *, unsigned, unsigned,
 /// the verification failed, success otherwise. This hook may optionally be
 /// invoked from any operation containing a region.
 LogicalResult Dialect::verifyRegionResultAttribute(Operation *, unsigned,
-        unsigned, NamedAttribute) {
-    return success();
+                                                   unsigned, NamedAttribute) {
+  return success();
 }
 
 /// Parse an attribute registered to this dialect.
 Attribute Dialect::parseAttribute(DialectAsmParser &parser, Type type) const {
-    parser.emitError(parser.getNameLoc())
-            << "dialect '" << getNamespace()
-            << "' provides no attribute parsing hook";
-    return Attribute();
+  parser.emitError(parser.getNameLoc())
+      << "dialect '" << getNamespace()
+      << "' provides no attribute parsing hook";
+  return Attribute();
 }
 
 /// Parse a type registered to this dialect.
 Type Dialect::parseType(DialectAsmParser &parser) const {
-    // If this dialect allows unknown types, then represent this with OpaqueType.
-    if (allowsUnknownTypes()) {
-        auto ns = Identifier::get(getNamespace(), getContext());
-        return OpaqueType::get(getContext(), ns, parser.getFullSymbolSpec());
-    }
+  // If this dialect allows unknown types, then represent this with OpaqueType.
+  if (allowsUnknownTypes()) {
+    auto ns = Identifier::get(getNamespace(), getContext());
+    return OpaqueType::get(getContext(), ns, parser.getFullSymbolSpec());
+  }
 
-    parser.emitError(parser.getNameLoc())
-            << "dialect '" << getNamespace() << "' provides no type parsing hook";
-    return Type();
+  parser.emitError(parser.getNameLoc())
+      << "dialect '" << getNamespace() << "' provides no type parsing hook";
+  return Type();
 }
 
 /// Utility function that returns if the given string is a valid dialect
 /// namespace.
 bool Dialect::isValidNamespace(StringRef str) {
-    if (str.empty())
-        return true;
-    llvm::Regex dialectNameRegex("^[a-zA-Z_][a-zA-Z_0-9\\$]*$");
-    return dialectNameRegex.match(str);
+  if (str.empty())
+    return true;
+  llvm::Regex dialectNameRegex("^[a-zA-Z_][a-zA-Z_0-9\\$]*$");
+  return dialectNameRegex.match(str);
 }
 
 /// Register a set of dialect interfaces with this dialect instance.
 void Dialect::addInterface(std::unique_ptr<DialectInterface> interface) {
-    auto it = registeredInterfaces.try_emplace(interface->getID(),
-              std::move(interface));
-    (void)it;
-    assert(it.second && "interface kind has already been registered");
+  auto it = registeredInterfaces.try_emplace(interface->getID(),
+                                             std::move(interface));
+  (void)it;
+  assert(it.second && "interface kind has already been registered");
 }
 
 //===----------------------------------------------------------------------===//
@@ -115,12 +115,12 @@ DialectInterface::~DialectInterface() {}
 
 DialectInterfaceCollectionBase::DialectInterfaceCollectionBase(
     MLIRContext *ctx, TypeID interfaceKind) {
-    for (auto *dialect : ctx->getLoadedDialects()) {
-        if (auto *interface = dialect->getRegisteredInterface(interfaceKind)) {
-            interfaces.insert(interface);
-            orderedInterfaces.push_back(interface);
-        }
+  for (auto *dialect : ctx->getLoadedDialects()) {
+    if (auto *interface = dialect->getRegisteredInterface(interfaceKind)) {
+      interfaces.insert(interface);
+      orderedInterfaces.push_back(interface);
     }
+  }
 }
 
 DialectInterfaceCollectionBase::~DialectInterfaceCollectionBase() {}
@@ -129,5 +129,5 @@ DialectInterfaceCollectionBase::~DialectInterfaceCollectionBase() {}
 /// is not registered.
 const DialectInterface *
 DialectInterfaceCollectionBase::getInterfaceFor(Operation *op) const {
-    return getInterfaceFor(op->getDialect());
+  return getInterfaceFor(op->getDialect());
 }

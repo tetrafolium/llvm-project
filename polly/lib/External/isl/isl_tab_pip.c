@@ -11,17 +11,17 @@
  * ZAC des vignes, 4 rue Jacques Monod, 91893 Orsay, France
  */
 
-#include <isl_ctx_private.h>
 #include "isl_map_private.h"
-#include <isl_seq.h>
-#include "isl_tab.h"
 #include "isl_sample.h"
-#include <isl_mat_private.h>
-#include <isl_vec_private.h>
+#include "isl_tab.h"
 #include <isl_aff_private.h>
-#include <isl_constraint_private.h>
-#include <isl_options_private.h>
 #include <isl_config.h>
+#include <isl_constraint_private.h>
+#include <isl_ctx_private.h>
+#include <isl_mat_private.h>
+#include <isl_options_private.h>
+#include <isl_seq.h>
+#include <isl_vec_private.h>
 
 #include <bset_to_bmap.c>
 
@@ -66,54 +66,53 @@
 
 struct isl_context;
 struct isl_context_op {
-    /* detect nonnegative parameters in context and mark them in tab */
-    struct isl_tab *(*detect_nonnegative_parameters)(
-        struct isl_context *context, struct isl_tab *tab);
-    /* return temporary reference to basic set representation of context */
-    struct isl_basic_set *(*peek_basic_set)(struct isl_context *context);
-    /* return temporary reference to tableau representation of context */
-    struct isl_tab *(*peek_tab)(struct isl_context *context);
-    /* add equality; check is 1 if eq may not be valid;
-     * update is 1 if we may want to call ineq_sign on context later.
-     */
-    void (*add_eq)(struct isl_context *context, isl_int *eq,
-                   int check, int update);
-    /* add inequality; check is 1 if ineq may not be valid;
-     * update is 1 if we may want to call ineq_sign on context later.
-     */
-    void (*add_ineq)(struct isl_context *context, isl_int *ineq,
-                     int check, int update);
-    /* check sign of ineq based on previous information.
-     * strict is 1 if saturation should be treated as a positive sign.
-     */
-    enum isl_tab_row_sign (*ineq_sign)(struct isl_context *context,
-                                       isl_int *ineq, int strict);
-    /* check if inequality maintains feasibility */
-    int (*test_ineq)(struct isl_context *context, isl_int *ineq);
-    /* return index of a div that corresponds to "div" */
-    int (*get_div)(struct isl_context *context, struct isl_tab *tab,
-                   struct isl_vec *div);
-    /* insert div "div" to context at "pos" and return non-negativity */
-    isl_bool (*insert_div)(struct isl_context *context, int pos,
-                           __isl_keep isl_vec *div);
-    int (*detect_equalities)(struct isl_context *context,
-                             struct isl_tab *tab);
-    /* return row index of "best" split */
-    int (*best_split)(struct isl_context *context, struct isl_tab *tab);
-    /* check if context has already been determined to be empty */
-    int (*is_empty)(struct isl_context *context);
-    /* check if context is still usable */
-    int (*is_ok)(struct isl_context *context);
-    /* save a copy/snapshot of context */
-    void *(*save)(struct isl_context *context);
-    /* restore saved context */
-    void (*restore)(struct isl_context *context, void *);
-    /* discard saved context */
-    void (*discard)(void *);
-    /* invalidate context */
-    void (*invalidate)(struct isl_context *context);
-    /* free context */
-    __isl_null struct isl_context *(*free)(struct isl_context *context);
+  /* detect nonnegative parameters in context and mark them in tab */
+  struct isl_tab *(*detect_nonnegative_parameters)(struct isl_context *context,
+                                                   struct isl_tab *tab);
+  /* return temporary reference to basic set representation of context */
+  struct isl_basic_set *(*peek_basic_set)(struct isl_context *context);
+  /* return temporary reference to tableau representation of context */
+  struct isl_tab *(*peek_tab)(struct isl_context *context);
+  /* add equality; check is 1 if eq may not be valid;
+   * update is 1 if we may want to call ineq_sign on context later.
+   */
+  void (*add_eq)(struct isl_context *context, isl_int *eq, int check,
+                 int update);
+  /* add inequality; check is 1 if ineq may not be valid;
+   * update is 1 if we may want to call ineq_sign on context later.
+   */
+  void (*add_ineq)(struct isl_context *context, isl_int *ineq, int check,
+                   int update);
+  /* check sign of ineq based on previous information.
+   * strict is 1 if saturation should be treated as a positive sign.
+   */
+  enum isl_tab_row_sign (*ineq_sign)(struct isl_context *context, isl_int *ineq,
+                                     int strict);
+  /* check if inequality maintains feasibility */
+  int (*test_ineq)(struct isl_context *context, isl_int *ineq);
+  /* return index of a div that corresponds to "div" */
+  int (*get_div)(struct isl_context *context, struct isl_tab *tab,
+                 struct isl_vec *div);
+  /* insert div "div" to context at "pos" and return non-negativity */
+  isl_bool (*insert_div)(struct isl_context *context, int pos,
+                         __isl_keep isl_vec *div);
+  int (*detect_equalities)(struct isl_context *context, struct isl_tab *tab);
+  /* return row index of "best" split */
+  int (*best_split)(struct isl_context *context, struct isl_tab *tab);
+  /* check if context has already been determined to be empty */
+  int (*is_empty)(struct isl_context *context);
+  /* check if context is still usable */
+  int (*is_ok)(struct isl_context *context);
+  /* save a copy/snapshot of context */
+  void *(*save)(struct isl_context *context);
+  /* restore saved context */
+  void (*restore)(struct isl_context *context, void *);
+  /* discard saved context */
+  void (*discard)(void *);
+  /* invalidate context */
+  void (*invalidate)(struct isl_context *context);
+  /* free context */
+  __isl_null struct isl_context *(*free)(struct isl_context *context);
 };
 
 /* Shared parts of context representation.
@@ -122,13 +121,13 @@ struct isl_context_op {
  * in the input domain.
  */
 struct isl_context {
-    struct isl_context_op *op;
-    int n_unknown;
+  struct isl_context_op *op;
+  int n_unknown;
 };
 
 struct isl_context_lex {
-    struct isl_context context;
-    struct isl_tab *tab;
+  struct isl_context context;
+  struct isl_tab *tab;
 };
 
 /* A stack (linked list) of solutions of subtrees of the search space.
@@ -139,17 +138,17 @@ struct isl_context_lex {
  * If "ma" is NULL, then there is no solution on "dom".
  */
 struct isl_partial_sol {
-    int level;
-    struct isl_basic_set *dom;
-    isl_multi_aff *ma;
+  int level;
+  struct isl_basic_set *dom;
+  isl_multi_aff *ma;
 
-    struct isl_partial_sol *next;
+  struct isl_partial_sol *next;
 };
 
 struct isl_sol;
 struct isl_sol_callback {
-    struct isl_tab_callback callback;
-    struct isl_sol *sol;
+  struct isl_tab_callback callback;
+  struct isl_sol *sol;
 };
 
 /* isl_sol is an interface for constructing a solution to
@@ -180,37 +179,36 @@ struct isl_sol_callback {
  * isl_sol_pma, which collects an isl_pw_multi_aff instead.
  */
 struct isl_sol {
-    int error;
-    int rational;
-    int level;
-    int max;
-    isl_size n_out;
-    isl_space *space;
-    struct isl_context *context;
-    struct isl_partial_sol *partial;
-    void (*add)(struct isl_sol *sol,
-                __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *ma);
-    void (*add_empty)(struct isl_sol *sol, struct isl_basic_set *bset);
-    void (*free)(struct isl_sol *sol);
-    struct isl_sol_callback	dec_level;
+  int error;
+  int rational;
+  int level;
+  int max;
+  isl_size n_out;
+  isl_space *space;
+  struct isl_context *context;
+  struct isl_partial_sol *partial;
+  void (*add)(struct isl_sol *sol, __isl_take isl_basic_set *dom,
+              __isl_take isl_multi_aff *ma);
+  void (*add_empty)(struct isl_sol *sol, struct isl_basic_set *bset);
+  void (*free)(struct isl_sol *sol);
+  struct isl_sol_callback dec_level;
 };
 
-static void sol_free(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial, *next;
-    if (!sol)
-        return;
-    for (partial = sol->partial; partial; partial = next) {
-        next = partial->next;
-        isl_basic_set_free(partial->dom);
-        isl_multi_aff_free(partial->ma);
-        free(partial);
-    }
-    isl_space_free(sol->space);
-    if (sol->context)
-        sol->context->op->free(sol->context);
-    sol->free(sol);
-    free(sol);
+static void sol_free(struct isl_sol *sol) {
+  struct isl_partial_sol *partial, *next;
+  if (!sol)
+    return;
+  for (partial = sol->partial; partial; partial = next) {
+    next = partial->next;
+    isl_basic_set_free(partial->dom);
+    isl_multi_aff_free(partial->ma);
+    free(partial);
+  }
+  isl_space_free(sol->space);
+  if (sol->context)
+    sol->context->op->free(sol->context);
+  sol->free(sol);
+  free(sol);
 }
 
 /* Push a partial solution represented by a domain and function "ma"
@@ -218,52 +216,49 @@ static void sol_free(struct isl_sol *sol)
  * If "ma" is NULL, then "dom" represents a part of the domain
  * with no solution.
  */
-static void sol_push_sol(struct isl_sol *sol,
-                         __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *ma)
-{
-    struct isl_partial_sol *partial;
+static void sol_push_sol(struct isl_sol *sol, __isl_take isl_basic_set *dom,
+                         __isl_take isl_multi_aff *ma) {
+  struct isl_partial_sol *partial;
 
-    if (sol->error || !dom)
-        goto error;
+  if (sol->error || !dom)
+    goto error;
 
-    partial = isl_alloc_type(dom->ctx, struct isl_partial_sol);
-    if (!partial)
-        goto error;
+  partial = isl_alloc_type(dom->ctx, struct isl_partial_sol);
+  if (!partial)
+    goto error;
 
-    partial->level = sol->level;
-    partial->dom = dom;
-    partial->ma = ma;
-    partial->next = sol->partial;
+  partial->level = sol->level;
+  partial->dom = dom;
+  partial->ma = ma;
+  partial->next = sol->partial;
 
-    sol->partial = partial;
+  sol->partial = partial;
 
-    return;
+  return;
 error:
-    isl_basic_set_free(dom);
-    isl_multi_aff_free(ma);
-    sol->error = 1;
+  isl_basic_set_free(dom);
+  isl_multi_aff_free(ma);
+  sol->error = 1;
 }
 
 /* Check that the final columns of "M", starting at "first", are zero.
  */
 static isl_stat check_final_columns_are_zero(__isl_keep isl_mat *M,
-        unsigned first)
-{
-    int i;
-    isl_size rows, cols;
-    unsigned n;
+                                             unsigned first) {
+  int i;
+  isl_size rows, cols;
+  unsigned n;
 
-    rows = isl_mat_rows(M);
-    cols = isl_mat_cols(M);
-    if (rows < 0 || cols < 0)
-        return isl_stat_error;
-    n = cols - first;
-    for (i = 0; i < rows; ++i)
-        if (isl_seq_first_non_zero(M->row[i] + first, n) != -1)
-            isl_die(isl_mat_get_ctx(M), isl_error_internal,
-                    "final columns should be zero",
-                    return isl_stat_error);
-    return isl_stat_ok;
+  rows = isl_mat_rows(M);
+  cols = isl_mat_cols(M);
+  if (rows < 0 || cols < 0)
+    return isl_stat_error;
+  n = cols - first;
+  for (i = 0; i < rows; ++i)
+    if (isl_seq_first_non_zero(M->row[i] + first, n) != -1)
+      isl_die(isl_mat_get_ctx(M), isl_error_internal,
+              "final columns should be zero", return isl_stat_error);
+  return isl_stat_ok;
 }
 
 /* Set the affine expressions in "ma" according to the rows in "M", which
@@ -271,38 +266,37 @@ static isl_stat check_final_columns_are_zero(__isl_keep isl_mat *M,
  * The matrix "M" may have extra (zero) columns beyond the number
  * of variables in "ls".
  */
-static __isl_give isl_multi_aff *set_from_affine_matrix(
-    __isl_take isl_multi_aff *ma, __isl_take isl_local_space *ls,
-    __isl_take isl_mat *M)
-{
-    int i;
-    isl_size dim;
-    isl_aff *aff;
+static __isl_give isl_multi_aff *
+set_from_affine_matrix(__isl_take isl_multi_aff *ma,
+                       __isl_take isl_local_space *ls, __isl_take isl_mat *M) {
+  int i;
+  isl_size dim;
+  isl_aff *aff;
 
-    dim = isl_local_space_dim(ls, isl_dim_all);
-    if (!ma || dim < 0 || !M)
-        goto error;
+  dim = isl_local_space_dim(ls, isl_dim_all);
+  if (!ma || dim < 0 || !M)
+    goto error;
 
-    if (check_final_columns_are_zero(M, 1 + dim) < 0)
-        goto error;
-    for (i = 1; i < M->n_row; ++i) {
-        aff = isl_aff_alloc(isl_local_space_copy(ls));
-        if (aff) {
-            isl_int_set(aff->v->el[0], M->row[0][0]);
-            isl_seq_cpy(aff->v->el + 1, M->row[i], 1 + dim);
-        }
-        aff = isl_aff_normalize(aff);
-        ma = isl_multi_aff_set_aff(ma, i - 1, aff);
+  if (check_final_columns_are_zero(M, 1 + dim) < 0)
+    goto error;
+  for (i = 1; i < M->n_row; ++i) {
+    aff = isl_aff_alloc(isl_local_space_copy(ls));
+    if (aff) {
+      isl_int_set(aff->v->el[0], M->row[0][0]);
+      isl_seq_cpy(aff->v->el + 1, M->row[i], 1 + dim);
     }
-    isl_local_space_free(ls);
-    isl_mat_free(M);
+    aff = isl_aff_normalize(aff);
+    ma = isl_multi_aff_set_aff(ma, i - 1, aff);
+  }
+  isl_local_space_free(ls);
+  isl_mat_free(M);
 
-    return ma;
+  return ma;
 error:
-    isl_local_space_free(ls);
-    isl_mat_free(M);
-    isl_multi_aff_free(ma);
-    return NULL;
+  isl_local_space_free(ls);
+  isl_mat_free(M);
+  isl_multi_aff_free(ma);
+  return NULL;
 }
 
 /* Push a partial solution represented by a domain and mapping M
@@ -325,79 +319,74 @@ error:
  * any equality constraints that are added later on can only serve
  * to eliminate these existentially quantified variables.
  */
-static void sol_push_sol_mat(struct isl_sol *sol,
-                             __isl_take isl_basic_set *dom, __isl_take isl_mat *M)
-{
-    isl_local_space *ls;
-    isl_multi_aff *ma;
-    isl_size n_div;
-    int n_known;
+static void sol_push_sol_mat(struct isl_sol *sol, __isl_take isl_basic_set *dom,
+                             __isl_take isl_mat *M) {
+  isl_local_space *ls;
+  isl_multi_aff *ma;
+  isl_size n_div;
+  int n_known;
 
-    n_div = isl_basic_set_dim(dom, isl_dim_div);
-    if (n_div < 0)
-        goto error;
-    n_known = n_div - sol->context->n_unknown;
+  n_div = isl_basic_set_dim(dom, isl_dim_div);
+  if (n_div < 0)
+    goto error;
+  n_known = n_div - sol->context->n_unknown;
 
-    ma = isl_multi_aff_alloc(isl_space_copy(sol->space));
-    ls = isl_basic_set_get_local_space(dom);
-    ls = isl_local_space_drop_dims(ls, isl_dim_div,
-                                   n_known, n_div - n_known);
-    ma = set_from_affine_matrix(ma, ls, M);
+  ma = isl_multi_aff_alloc(isl_space_copy(sol->space));
+  ls = isl_basic_set_get_local_space(dom);
+  ls = isl_local_space_drop_dims(ls, isl_dim_div, n_known, n_div - n_known);
+  ma = set_from_affine_matrix(ma, ls, M);
 
-    if (!ma)
-        dom = isl_basic_set_free(dom);
-    sol_push_sol(sol, dom, ma);
-    return;
+  if (!ma)
+    dom = isl_basic_set_free(dom);
+  sol_push_sol(sol, dom, ma);
+  return;
 error:
-    isl_basic_set_free(dom);
-    isl_mat_free(M);
-    sol_push_sol(sol, NULL, NULL);
+  isl_basic_set_free(dom);
+  isl_mat_free(M);
+  sol_push_sol(sol, NULL, NULL);
 }
 
 /* Pop one partial solution from the partial solution stack and
  * pass it on to sol->add or sol->add_empty.
  */
-static void sol_pop_one(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial;
+static void sol_pop_one(struct isl_sol *sol) {
+  struct isl_partial_sol *partial;
 
-    partial = sol->partial;
-    sol->partial = partial->next;
+  partial = sol->partial;
+  sol->partial = partial->next;
 
-    if (partial->ma)
-        sol->add(sol, partial->dom, partial->ma);
-    else
-        sol->add_empty(sol, partial->dom);
-    free(partial);
+  if (partial->ma)
+    sol->add(sol, partial->dom, partial->ma);
+  else
+    sol->add_empty(sol, partial->dom);
+  free(partial);
 }
 
 /* Return a fresh copy of the domain represented by the context tableau.
  */
-static struct isl_basic_set *sol_domain(struct isl_sol *sol)
-{
-    struct isl_basic_set *bset;
+static struct isl_basic_set *sol_domain(struct isl_sol *sol) {
+  struct isl_basic_set *bset;
 
-    if (sol->error)
-        return NULL;
+  if (sol->error)
+    return NULL;
 
-    bset = isl_basic_set_dup(sol->context->op->peek_basic_set(sol->context));
-    bset = isl_basic_set_update_from_tab(bset,
-                                         sol->context->op->peek_tab(sol->context));
+  bset = isl_basic_set_dup(sol->context->op->peek_basic_set(sol->context));
+  bset = isl_basic_set_update_from_tab(
+      bset, sol->context->op->peek_tab(sol->context));
 
-    return bset;
+  return bset;
 }
 
 /* Check whether two partial solutions have the same affine expressions.
  */
 static isl_bool same_solution(struct isl_partial_sol *s1,
-                              struct isl_partial_sol *s2)
-{
-    if (!s1->ma != !s2->ma)
-        return isl_bool_false;
-    if (!s1->ma)
-        return isl_bool_true;
+                              struct isl_partial_sol *s2) {
+  if (!s1->ma != !s2->ma)
+    return isl_bool_false;
+  if (!s1->ma)
+    return isl_bool_true;
 
-    return isl_multi_aff_plain_is_equal(s1->ma, s2->ma);
+  return isl_multi_aff_plain_is_equal(s1->ma, s2->ma);
 }
 
 /* Swap the initial two partial solutions in "sol".
@@ -410,14 +399,13 @@ static isl_bool same_solution(struct isl_partial_sol *s1,
  *
  *	sol->partial = p2; p2->next = p1; p1->next = p3
  */
-static void swap_initial(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial;
+static void swap_initial(struct isl_sol *sol) {
+  struct isl_partial_sol *partial;
 
-    partial = sol->partial;
-    sol->partial = partial->next;
-    partial->next = partial->next->next;
-    sol->partial->next = partial;
+  partial = sol->partial;
+  sol->partial = partial->next;
+  partial->next = partial->next->next;
+  sol->partial->next = partial;
 }
 
 /* Combine the initial two partial solution of "sol" into
@@ -430,27 +418,26 @@ static void swap_initial(struct isl_sol *sol)
  * to be the union of D1 and D2, while M1 is assumed to be equal to M2
  * (at least on D1).
  */
-static isl_stat combine_initial_into_second(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial;
-    isl_basic_set *bset;
+static isl_stat combine_initial_into_second(struct isl_sol *sol) {
+  struct isl_partial_sol *partial;
+  isl_basic_set *bset;
 
-    partial = sol->partial;
+  partial = sol->partial;
 
-    bset = sol_domain(sol);
-    isl_basic_set_free(partial->next->dom);
-    partial->next->dom = bset;
-    partial->next->level = sol->level;
+  bset = sol_domain(sol);
+  isl_basic_set_free(partial->next->dom);
+  partial->next->dom = bset;
+  partial->next->level = sol->level;
 
-    if (!bset)
-        return isl_stat_error;
+  if (!bset)
+    return isl_stat_error;
 
-    sol->partial = partial->next;
-    isl_basic_set_free(partial->dom);
-    isl_multi_aff_free(partial->ma);
-    free(partial);
+  sol->partial = partial->next;
+  isl_basic_set_free(partial->dom);
+  isl_multi_aff_free(partial->ma);
+  free(partial);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Are "ma1" and "ma2" equal to each other on "dom"?
@@ -461,21 +448,20 @@ static isl_stat combine_initial_into_second(struct isl_sol *sol)
  * context.
  */
 static isl_bool equal_on_domain(__isl_keep isl_multi_aff *ma1,
-                                __isl_keep isl_multi_aff *ma2, __isl_keep isl_basic_set *dom)
-{
-    isl_set *set;
-    isl_pw_multi_aff *pma1, *pma2;
-    isl_bool equal;
+                                __isl_keep isl_multi_aff *ma2,
+                                __isl_keep isl_basic_set *dom) {
+  isl_set *set;
+  isl_pw_multi_aff *pma1, *pma2;
+  isl_bool equal;
 
-    set = isl_basic_set_compute_divs(isl_basic_set_copy(dom));
-    pma1 = isl_pw_multi_aff_alloc(isl_set_copy(set),
-                                  isl_multi_aff_copy(ma1));
-    pma2 = isl_pw_multi_aff_alloc(set, isl_multi_aff_copy(ma2));
-    equal = isl_pw_multi_aff_is_equal(pma1, pma2);
-    isl_pw_multi_aff_free(pma1);
-    isl_pw_multi_aff_free(pma2);
+  set = isl_basic_set_compute_divs(isl_basic_set_copy(dom));
+  pma1 = isl_pw_multi_aff_alloc(isl_set_copy(set), isl_multi_aff_copy(ma1));
+  pma2 = isl_pw_multi_aff_alloc(set, isl_multi_aff_copy(ma2));
+  equal = isl_pw_multi_aff_is_equal(pma1, pma2);
+  isl_pw_multi_aff_free(pma1);
+  isl_pw_multi_aff_free(pma2);
 
-    return equal;
+  return equal;
 }
 
 /* The initial two partial solutions of "sol" are known to be at
@@ -493,37 +479,34 @@ static isl_bool equal_on_domain(__isl_keep isl_multi_aff *ma1,
  * if M1 = M2 on D1, then the pair of partial solutions can
  * be replaced by (D1+D2,M2) and similarly when M1 = M2 on D2.
  */
-static isl_stat combine_initial_if_equal(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial;
-    isl_bool same;
+static isl_stat combine_initial_if_equal(struct isl_sol *sol) {
+  struct isl_partial_sol *partial;
+  isl_bool same;
 
-    partial = sol->partial;
+  partial = sol->partial;
 
-    same = same_solution(partial, partial->next);
+  same = same_solution(partial, partial->next);
+  if (same < 0)
+    return isl_stat_error;
+  if (same)
+    return combine_initial_into_second(sol);
+  if (partial->ma && partial->next->ma) {
+    same = equal_on_domain(partial->ma, partial->next->ma, partial->dom);
     if (same < 0)
-        return isl_stat_error;
+      return isl_stat_error;
     if (same)
-        return combine_initial_into_second(sol);
-    if (partial->ma && partial->next->ma) {
-        same = equal_on_domain(partial->ma, partial->next->ma,
-                               partial->dom);
-        if (same < 0)
-            return isl_stat_error;
-        if (same)
-            return combine_initial_into_second(sol);
-        same = equal_on_domain(partial->ma, partial->next->ma,
-                               partial->next->dom);
-        if (same) {
-            swap_initial(sol);
-            return combine_initial_into_second(sol);
-        }
+      return combine_initial_into_second(sol);
+    same = equal_on_domain(partial->ma, partial->next->ma, partial->next->dom);
+    if (same) {
+      swap_initial(sol);
+      return combine_initial_into_second(sol);
     }
+  }
 
-    sol_pop_one(sol);
-    sol_pop_one(sol);
+  sol_pop_one(sol);
+  sol_pop_one(sol);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Pop all solutions from the partial solution stack that were pushed onto
@@ -535,60 +518,57 @@ static isl_stat combine_initial_if_equal(struct isl_sol *sol)
  * If the outer level (0) has been reached, then all partial solutions
  * at the current level are also popped off.
  */
-static void sol_pop(struct isl_sol *sol)
-{
-    struct isl_partial_sol *partial;
+static void sol_pop(struct isl_sol *sol) {
+  struct isl_partial_sol *partial;
 
-    if (sol->error)
-        return;
+  if (sol->error)
+    return;
 
-    partial = sol->partial;
-    if (!partial)
-        return;
+  partial = sol->partial;
+  if (!partial)
+    return;
 
-    if (partial->level == 0 && sol->level == 0) {
-        for (partial = sol->partial; partial; partial = sol->partial)
-            sol_pop_one(sol);
-        return;
-    }
+  if (partial->level == 0 && sol->level == 0) {
+    for (partial = sol->partial; partial; partial = sol->partial)
+      sol_pop_one(sol);
+    return;
+  }
 
-    if (partial->level <= sol->level)
-        return;
+  if (partial->level <= sol->level)
+    return;
 
-    if (partial->next && partial->next->level == partial->level) {
-        if (combine_initial_if_equal(sol) < 0)
-            goto error;
-    } else
-        sol_pop_one(sol);
+  if (partial->next && partial->next->level == partial->level) {
+    if (combine_initial_if_equal(sol) < 0)
+      goto error;
+  } else
+    sol_pop_one(sol);
 
-    if (sol->level == 0) {
-        for (partial = sol->partial; partial; partial = sol->partial)
-            sol_pop_one(sol);
-        return;
-    }
+  if (sol->level == 0) {
+    for (partial = sol->partial; partial; partial = sol->partial)
+      sol_pop_one(sol);
+    return;
+  }
 
-    if (0)
-error:
-        sol->error = 1;
+  if (0)
+  error:
+    sol->error = 1;
 }
 
-static void sol_dec_level(struct isl_sol *sol)
-{
-    if (sol->error)
-        return;
+static void sol_dec_level(struct isl_sol *sol) {
+  if (sol->error)
+    return;
 
-    sol->level--;
+  sol->level--;
 
-    sol_pop(sol);
+  sol_pop(sol);
 }
 
-static isl_stat sol_dec_level_wrap(struct isl_tab_callback *cb)
-{
-    struct isl_sol_callback *callback = (struct isl_sol_callback *)cb;
+static isl_stat sol_dec_level_wrap(struct isl_tab_callback *cb) {
+  struct isl_sol_callback *callback = (struct isl_sol_callback *)cb;
 
-    sol_dec_level(callback->sol);
+  sol_dec_level(callback->sol);
 
-    return callback->sol->error ? isl_stat_error : isl_stat_ok;
+  return callback->sol->error ? isl_stat_error : isl_stat_ok;
 }
 
 /* Move down to next level and push callback onto context tableau
@@ -597,28 +577,26 @@ static isl_stat sol_dec_level_wrap(struct isl_tab_callback *cb)
  * the context tableau in the same state as it is when inc_level
  * is called.
  */
-static void sol_inc_level(struct isl_sol *sol)
-{
-    struct isl_tab *tab;
+static void sol_inc_level(struct isl_sol *sol) {
+  struct isl_tab *tab;
 
-    if (sol->error)
-        return;
+  if (sol->error)
+    return;
 
-    sol->level++;
-    tab = sol->context->op->peek_tab(sol->context);
-    if (isl_tab_push_callback(tab, &sol->dec_level.callback) < 0)
-        sol->error = 1;
+  sol->level++;
+  tab = sol->context->op->peek_tab(sol->context);
+  if (isl_tab_push_callback(tab, &sol->dec_level.callback) < 0)
+    sol->error = 1;
 }
 
-static void scale_rows(struct isl_mat *mat, isl_int m, int n_row)
-{
-    int i;
+static void scale_rows(struct isl_mat *mat, isl_int m, int n_row) {
+  int i;
 
-    if (isl_int_is_one(m))
-        return;
+  if (isl_int_is_one(m))
+    return;
 
-    for (i = 0; i < n_row; ++i)
-        isl_seq_scale(mat->row[i], mat->row[i], m, mat->n_col);
+  for (i = 0; i < n_row; ++i)
+    isl_seq_scale(mat->row[i], mat->row[i], m, mat->n_col);
 }
 
 /* Add the solution identified by the tableau and the context tableau.
@@ -670,106 +648,99 @@ static void scale_rows(struct isl_mat *mat, isl_int m, int n_row)
  * In case of maximization, the row will be
  *	-a c - a e(y)
  */
-static void sol_add(struct isl_sol *sol, struct isl_tab *tab)
-{
-    struct isl_basic_set *bset = NULL;
-    struct isl_mat *mat = NULL;
-    unsigned off;
-    int row;
-    isl_int m;
+static void sol_add(struct isl_sol *sol, struct isl_tab *tab) {
+  struct isl_basic_set *bset = NULL;
+  struct isl_mat *mat = NULL;
+  unsigned off;
+  int row;
+  isl_int m;
 
-    if (sol->error || !tab)
-        goto error;
+  if (sol->error || !tab)
+    goto error;
 
-    if (tab->empty && !sol->add_empty)
-        return;
-    if (sol->context->op->is_empty(sol->context))
-        return;
-
-    bset = sol_domain(sol);
-
-    if (tab->empty) {
-        sol_push_sol(sol, bset, NULL);
-        return;
-    }
-
-    off = 2 + tab->M;
-
-    mat = isl_mat_alloc(tab->mat->ctx, 1 + sol->n_out,
-                        1 + tab->n_param + tab->n_div);
-    if (!mat)
-        goto error;
-
-    isl_int_init(m);
-
-    isl_seq_clr(mat->row[0] + 1, mat->n_col - 1);
-    isl_int_set_si(mat->row[0][0], 1);
-    for (row = 0; row < sol->n_out; ++row) {
-        int i = tab->n_param + row;
-        int r, j;
-
-        isl_seq_clr(mat->row[1 + row], mat->n_col);
-        if (!tab->var[i].is_row) {
-            if (tab->M)
-                isl_die(mat->ctx, isl_error_invalid,
-                        "unbounded optimum", goto error2);
-            continue;
-        }
-
-        r = tab->var[i].index;
-        if (tab->M &&
-                isl_int_ne(tab->mat->row[r][2], tab->mat->row[r][0]))
-            isl_die(mat->ctx, isl_error_invalid,
-                    "unbounded optimum", goto error2);
-        isl_int_gcd(m, mat->row[0][0], tab->mat->row[r][0]);
-        isl_int_divexact(m, tab->mat->row[r][0], m);
-        scale_rows(mat, m, 1 + row);
-        isl_int_divexact(m, mat->row[0][0], tab->mat->row[r][0]);
-        isl_int_mul(mat->row[1 + row][0], m, tab->mat->row[r][1]);
-        for (j = 0; j < tab->n_param; ++j) {
-            int col;
-            if (tab->var[j].is_row)
-                continue;
-            col = tab->var[j].index;
-            isl_int_mul(mat->row[1 + row][1 + j], m,
-                        tab->mat->row[r][off + col]);
-        }
-        for (j = 0; j < tab->n_div; ++j) {
-            int col;
-            if (tab->var[tab->n_var - tab->n_div+j].is_row)
-                continue;
-            col = tab->var[tab->n_var - tab->n_div+j].index;
-            isl_int_mul(mat->row[1 + row][1 + tab->n_param + j], m,
-                        tab->mat->row[r][off + col]);
-        }
-        if (sol->max)
-            isl_seq_neg(mat->row[1 + row], mat->row[1 + row],
-                        mat->n_col);
-    }
-
-    isl_int_clear(m);
-
-    sol_push_sol_mat(sol, bset, mat);
+  if (tab->empty && !sol->add_empty)
     return;
+  if (sol->context->op->is_empty(sol->context))
+    return;
+
+  bset = sol_domain(sol);
+
+  if (tab->empty) {
+    sol_push_sol(sol, bset, NULL);
+    return;
+  }
+
+  off = 2 + tab->M;
+
+  mat = isl_mat_alloc(tab->mat->ctx, 1 + sol->n_out,
+                      1 + tab->n_param + tab->n_div);
+  if (!mat)
+    goto error;
+
+  isl_int_init(m);
+
+  isl_seq_clr(mat->row[0] + 1, mat->n_col - 1);
+  isl_int_set_si(mat->row[0][0], 1);
+  for (row = 0; row < sol->n_out; ++row) {
+    int i = tab->n_param + row;
+    int r, j;
+
+    isl_seq_clr(mat->row[1 + row], mat->n_col);
+    if (!tab->var[i].is_row) {
+      if (tab->M)
+        isl_die(mat->ctx, isl_error_invalid, "unbounded optimum", goto error2);
+      continue;
+    }
+
+    r = tab->var[i].index;
+    if (tab->M && isl_int_ne(tab->mat->row[r][2], tab->mat->row[r][0]))
+      isl_die(mat->ctx, isl_error_invalid, "unbounded optimum", goto error2);
+    isl_int_gcd(m, mat->row[0][0], tab->mat->row[r][0]);
+    isl_int_divexact(m, tab->mat->row[r][0], m);
+    scale_rows(mat, m, 1 + row);
+    isl_int_divexact(m, mat->row[0][0], tab->mat->row[r][0]);
+    isl_int_mul(mat->row[1 + row][0], m, tab->mat->row[r][1]);
+    for (j = 0; j < tab->n_param; ++j) {
+      int col;
+      if (tab->var[j].is_row)
+        continue;
+      col = tab->var[j].index;
+      isl_int_mul(mat->row[1 + row][1 + j], m, tab->mat->row[r][off + col]);
+    }
+    for (j = 0; j < tab->n_div; ++j) {
+      int col;
+      if (tab->var[tab->n_var - tab->n_div + j].is_row)
+        continue;
+      col = tab->var[tab->n_var - tab->n_div + j].index;
+      isl_int_mul(mat->row[1 + row][1 + tab->n_param + j], m,
+                  tab->mat->row[r][off + col]);
+    }
+    if (sol->max)
+      isl_seq_neg(mat->row[1 + row], mat->row[1 + row], mat->n_col);
+  }
+
+  isl_int_clear(m);
+
+  sol_push_sol_mat(sol, bset, mat);
+  return;
 error2:
-    isl_int_clear(m);
+  isl_int_clear(m);
 error:
-    isl_basic_set_free(bset);
-    isl_mat_free(mat);
-    sol->error = 1;
+  isl_basic_set_free(bset);
+  isl_mat_free(mat);
+  sol->error = 1;
 }
 
 struct isl_sol_map {
-    struct isl_sol	sol;
-    struct isl_map	*map;
-    struct isl_set	*empty;
+  struct isl_sol sol;
+  struct isl_map *map;
+  struct isl_set *empty;
 };
 
-static void sol_map_free(struct isl_sol *sol)
-{
-    struct isl_sol_map *sol_map = (struct isl_sol_map *) sol;
-    isl_map_free(sol_map->map);
-    isl_set_free(sol_map->empty);
+static void sol_map_free(struct isl_sol *sol) {
+  struct isl_sol_map *sol_map = (struct isl_sol_map *)sol;
+  isl_map_free(sol_map->map);
+  isl_set_free(sol_map->empty);
 }
 
 /* This function is called for parts of the context where there is
@@ -777,61 +748,56 @@ static void sol_map_free(struct isl_sol *sol)
  * Simply add the basic set to the set "empty".
  */
 static void sol_map_add_empty(struct isl_sol_map *sol,
-                              struct isl_basic_set *bset)
-{
-    if (!bset || !sol->empty)
-        goto error;
+                              struct isl_basic_set *bset) {
+  if (!bset || !sol->empty)
+    goto error;
 
-    sol->empty = isl_set_grow(sol->empty, 1);
-    bset = isl_basic_set_simplify(bset);
-    bset = isl_basic_set_finalize(bset);
-    sol->empty = isl_set_add_basic_set(sol->empty, isl_basic_set_copy(bset));
-    if (!sol->empty)
-        goto error;
-    isl_basic_set_free(bset);
-    return;
+  sol->empty = isl_set_grow(sol->empty, 1);
+  bset = isl_basic_set_simplify(bset);
+  bset = isl_basic_set_finalize(bset);
+  sol->empty = isl_set_add_basic_set(sol->empty, isl_basic_set_copy(bset));
+  if (!sol->empty)
+    goto error;
+  isl_basic_set_free(bset);
+  return;
 error:
-    isl_basic_set_free(bset);
-    sol->sol.error = 1;
+  isl_basic_set_free(bset);
+  sol->sol.error = 1;
 }
 
 static void sol_map_add_empty_wrap(struct isl_sol *sol,
-                                   struct isl_basic_set *bset)
-{
-    sol_map_add_empty((struct isl_sol_map *)sol, bset);
+                                   struct isl_basic_set *bset) {
+  sol_map_add_empty((struct isl_sol_map *)sol, bset);
 }
 
 /* Given a basic set "dom" that represents the context and a tuple of
  * affine expressions "ma" defined over this domain, construct a basic map
  * that expresses this function on the domain.
  */
-static void sol_map_add(struct isl_sol_map *sol,
-                        __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *ma)
-{
-    isl_basic_map *bmap;
+static void sol_map_add(struct isl_sol_map *sol, __isl_take isl_basic_set *dom,
+                        __isl_take isl_multi_aff *ma) {
+  isl_basic_map *bmap;
 
-    if (sol->sol.error || !dom || !ma)
-        goto error;
+  if (sol->sol.error || !dom || !ma)
+    goto error;
 
-    bmap = isl_basic_map_from_multi_aff2(ma, sol->sol.rational);
-    bmap = isl_basic_map_intersect_domain(bmap, dom);
-    sol->map = isl_map_grow(sol->map, 1);
-    sol->map = isl_map_add_basic_map(sol->map, bmap);
-    if (!sol->map)
-        sol->sol.error = 1;
-    return;
-error:
-    isl_basic_set_free(dom);
-    isl_multi_aff_free(ma);
+  bmap = isl_basic_map_from_multi_aff2(ma, sol->sol.rational);
+  bmap = isl_basic_map_intersect_domain(bmap, dom);
+  sol->map = isl_map_grow(sol->map, 1);
+  sol->map = isl_map_add_basic_map(sol->map, bmap);
+  if (!sol->map)
     sol->sol.error = 1;
+  return;
+error:
+  isl_basic_set_free(dom);
+  isl_multi_aff_free(ma);
+  sol->sol.error = 1;
 }
 
-static void sol_map_add_wrap(struct isl_sol *sol,
-                             __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *ma)
-{
-    sol_map_add((struct isl_sol_map *)sol, dom, ma);
+static void sol_map_add_wrap(struct isl_sol *sol, __isl_take isl_basic_set *dom,
+                             __isl_take isl_multi_aff *ma) {
+  sol_map_add((struct isl_sol_map *)sol, dom, ma);
 }
-
 
 /* Store the "parametric constant" of row "row" of tableau "tab" in "line",
  * i.e., the constant term and the coefficients of all variables that
@@ -840,29 +806,28 @@ static void sol_map_add_wrap(struct isl_sol *sol,
  * The context tableau may not have a big parameter and even when it
  * does, it is a different big parameter.
  */
-static void get_row_parameter_line(struct isl_tab *tab, int row, isl_int *line)
-{
-    int i;
-    unsigned off = 2 + tab->M;
+static void get_row_parameter_line(struct isl_tab *tab, int row,
+                                   isl_int *line) {
+  int i;
+  unsigned off = 2 + tab->M;
 
-    isl_int_set(line[0], tab->mat->row[row][1]);
-    for (i = 0; i < tab->n_param; ++i) {
-        if (tab->var[i].is_row)
-            isl_int_set_si(line[1 + i], 0);
-        else {
-            int col = tab->var[i].index;
-            isl_int_set(line[1 + i], tab->mat->row[row][off + col]);
-        }
+  isl_int_set(line[0], tab->mat->row[row][1]);
+  for (i = 0; i < tab->n_param; ++i) {
+    if (tab->var[i].is_row)
+      isl_int_set_si(line[1 + i], 0);
+    else {
+      int col = tab->var[i].index;
+      isl_int_set(line[1 + i], tab->mat->row[row][off + col]);
     }
-    for (i = 0; i < tab->n_div; ++i) {
-        if (tab->var[tab->n_var - tab->n_div + i].is_row)
-            isl_int_set_si(line[1 + tab->n_param + i], 0);
-        else {
-            int col = tab->var[tab->n_var - tab->n_div + i].index;
-            isl_int_set(line[1 + tab->n_param + i],
-                        tab->mat->row[row][off + col]);
-        }
+  }
+  for (i = 0; i < tab->n_div; ++i) {
+    if (tab->var[tab->n_var - tab->n_div + i].is_row)
+      isl_int_set_si(line[1 + tab->n_param + i], 0);
+    else {
+      int col = tab->var[tab->n_var - tab->n_div + i].index;
+      isl_int_set(line[1 + tab->n_param + i], tab->mat->row[row][off + col]);
     }
+  }
 }
 
 /* Check if rows "row1" and "row2" have identical "parametric constants",
@@ -871,31 +836,28 @@ static void get_row_parameter_line(struct isl_tab *tab, int row, isl_int *line)
  * be the same as the values of the constants will only be the same
  * if these coefficients are also the same.
  */
-static int identical_parameter_line(struct isl_tab *tab, int row1, int row2)
-{
-    int i;
-    unsigned off = 2 + tab->M;
+static int identical_parameter_line(struct isl_tab *tab, int row1, int row2) {
+  int i;
+  unsigned off = 2 + tab->M;
 
-    if (isl_int_ne(tab->mat->row[row1][1], tab->mat->row[row2][1]))
-        return 0;
+  if (isl_int_ne(tab->mat->row[row1][1], tab->mat->row[row2][1]))
+    return 0;
 
-    if (tab->M && isl_int_ne(tab->mat->row[row1][2],
-                             tab->mat->row[row2][2]))
-        return 0;
+  if (tab->M && isl_int_ne(tab->mat->row[row1][2], tab->mat->row[row2][2]))
+    return 0;
 
-    for (i = 0; i < tab->n_param + tab->n_div; ++i) {
-        int pos = i < tab->n_param ? i :
-                  tab->n_var - tab->n_div + i - tab->n_param;
-        int col;
+  for (i = 0; i < tab->n_param + tab->n_div; ++i) {
+    int pos = i < tab->n_param ? i : tab->n_var - tab->n_div + i - tab->n_param;
+    int col;
 
-        if (tab->var[pos].is_row)
-            continue;
-        col = tab->var[pos].index;
-        if (isl_int_ne(tab->mat->row[row1][off + col],
-                       tab->mat->row[row2][off + col]))
-            return 0;
-    }
-    return 1;
+    if (tab->var[pos].is_row)
+      continue;
+    col = tab->var[pos].index;
+    if (isl_int_ne(tab->mat->row[row1][off + col],
+                   tab->mat->row[row2][off + col]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Return an inequality that expresses that the "parametric constant"
@@ -903,19 +865,18 @@ static int identical_parameter_line(struct isl_tab *tab, int row1, int row2)
  * This function is only called when the coefficient of the big parameter
  * is equal to zero.
  */
-static struct isl_vec *get_row_parameter_ineq(struct isl_tab *tab, int row)
-{
-    struct isl_vec *ineq;
+static struct isl_vec *get_row_parameter_ineq(struct isl_tab *tab, int row) {
+  struct isl_vec *ineq;
 
-    ineq = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_param + tab->n_div);
-    if (!ineq)
-        return NULL;
+  ineq = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_param + tab->n_div);
+  if (!ineq)
+    return NULL;
 
-    get_row_parameter_line(tab, row, ineq->el);
-    if (ineq)
-        ineq = isl_vec_normalize(ineq);
+  get_row_parameter_line(tab, row, ineq->el);
+  if (ineq)
+    ineq = isl_vec_normalize(ineq);
 
-    return ineq;
+  return ineq;
 }
 
 /* Normalize a div expression of the form
@@ -926,20 +887,19 @@ static struct isl_vec *get_row_parameter_ineq(struct isl_tab *tab, int row)
  *
  *	[(f(x) + [c/g])/m]
  */
-static void normalize_div(__isl_keep isl_vec *div)
-{
-    isl_ctx *ctx = isl_vec_get_ctx(div);
-    int len = div->size - 2;
+static void normalize_div(__isl_keep isl_vec *div) {
+  isl_ctx *ctx = isl_vec_get_ctx(div);
+  int len = div->size - 2;
 
-    isl_seq_gcd(div->el + 2, len, &ctx->normalize_gcd);
-    isl_int_gcd(ctx->normalize_gcd, ctx->normalize_gcd, div->el[0]);
+  isl_seq_gcd(div->el + 2, len, &ctx->normalize_gcd);
+  isl_int_gcd(ctx->normalize_gcd, ctx->normalize_gcd, div->el[0]);
 
-    if (isl_int_is_one(ctx->normalize_gcd))
-        return;
+  if (isl_int_is_one(ctx->normalize_gcd))
+    return;
 
-    isl_int_divexact(div->el[0], div->el[0], ctx->normalize_gcd);
-    isl_int_fdiv_q(div->el[1], div->el[1], ctx->normalize_gcd);
-    isl_seq_scale_down(div->el + 2, div->el + 2, ctx->normalize_gcd, len);
+  isl_int_divexact(div->el[0], div->el[0], ctx->normalize_gcd);
+  isl_int_fdiv_q(div->el[1], div->el[1], ctx->normalize_gcd);
+  isl_seq_scale_down(div->el + 2, div->el + 2, ctx->normalize_gcd, len);
 }
 
 /* Return an integer division for use in a parametric cut based
@@ -953,21 +913,20 @@ static void normalize_div(__isl_keep isl_vec *div)
  *
  *		floor(\sum_i {-a_i} y_i) = floor((\sum_i (-a_i mod d) y_i)/d)
  */
-static struct isl_vec *get_row_parameter_div(struct isl_tab *tab, int row)
-{
-    struct isl_vec *div;
+static struct isl_vec *get_row_parameter_div(struct isl_tab *tab, int row) {
+  struct isl_vec *div;
 
-    div = isl_vec_alloc(tab->mat->ctx, 1 + 1 + tab->n_param + tab->n_div);
-    if (!div)
-        return NULL;
+  div = isl_vec_alloc(tab->mat->ctx, 1 + 1 + tab->n_param + tab->n_div);
+  if (!div)
+    return NULL;
 
-    isl_int_set(div->el[0], tab->mat->row[row][0]);
-    get_row_parameter_line(tab, row, div->el + 1);
-    isl_seq_neg(div->el + 1, div->el + 1, div->size - 1);
-    normalize_div(div);
-    isl_seq_fdiv_r(div->el + 1, div->el + 1, div->el[0], div->size - 1);
+  isl_int_set(div->el[0], tab->mat->row[row][0]);
+  get_row_parameter_line(tab, row, div->el + 1);
+  isl_seq_neg(div->el + 1, div->el + 1, div->size - 1);
+  normalize_div(div);
+  isl_seq_fdiv_r(div->el + 1, div->el + 1, div->el[0], div->size - 1);
 
-    return div;
+  return div;
 }
 
 /* Return an integer division for use in transferring an integrality constraint
@@ -981,20 +940,19 @@ static struct isl_vec *get_row_parameter_div(struct isl_tab *tab, int row)
  *
  *		floor(\sum_i {a_i} y_i) = floor((\sum_i (a_i mod d) y_i)/d)
  */
-static struct isl_vec *get_row_split_div(struct isl_tab *tab, int row)
-{
-    struct isl_vec *div;
+static struct isl_vec *get_row_split_div(struct isl_tab *tab, int row) {
+  struct isl_vec *div;
 
-    div = isl_vec_alloc(tab->mat->ctx, 1 + 1 + tab->n_param + tab->n_div);
-    if (!div)
-        return NULL;
+  div = isl_vec_alloc(tab->mat->ctx, 1 + 1 + tab->n_param + tab->n_div);
+  if (!div)
+    return NULL;
 
-    isl_int_set(div->el[0], tab->mat->row[row][0]);
-    get_row_parameter_line(tab, row, div->el + 1);
-    normalize_div(div);
-    isl_seq_fdiv_r(div->el + 1, div->el + 1, div->el[0], div->size - 1);
+  isl_int_set(div->el[0], tab->mat->row[row][0]);
+  get_row_parameter_line(tab, row, div->el + 1);
+  normalize_div(div);
+  isl_seq_fdiv_r(div->el + 1, div->el + 1, div->el[0], div->size - 1);
 
-    return div;
+  return div;
 }
 
 /* Construct and return an inequality that expresses an upper bound
@@ -1008,25 +966,24 @@ static struct isl_vec *get_row_split_div(struct isl_tab *tab, int row)
  *	m d <= e
  */
 static __isl_give isl_vec *ineq_for_div(__isl_keep isl_basic_set *bset,
-                                        unsigned div)
-{
-    isl_size total;
-    unsigned div_pos;
-    struct isl_vec *ineq;
+                                        unsigned div) {
+  isl_size total;
+  unsigned div_pos;
+  struct isl_vec *ineq;
 
-    total = isl_basic_set_dim(bset, isl_dim_all);
-    if (total < 0)
-        return NULL;
+  total = isl_basic_set_dim(bset, isl_dim_all);
+  if (total < 0)
+    return NULL;
 
-    div_pos = 1 + total - bset->n_div + div;
+  div_pos = 1 + total - bset->n_div + div;
 
-    ineq = isl_vec_alloc(bset->ctx, 1 + total);
-    if (!ineq)
-        return NULL;
+  ineq = isl_vec_alloc(bset->ctx, 1 + total);
+  if (!ineq)
+    return NULL;
 
-    isl_seq_cpy(ineq->el, bset->div[div] + 1, 1 + total);
-    isl_int_neg(ineq->el[div_pos], bset->div[div][0]);
-    return ineq;
+  isl_seq_cpy(ineq->el, bset->div[div] + 1, 1 + total);
+  isl_int_neg(ineq->el[div_pos], bset->div[div][0]);
+  return ineq;
 }
 
 /* Given a row in the tableau and a div that was created
@@ -1042,33 +999,32 @@ static __isl_give isl_vec *ineq_for_div(__isl_keep isl_basic_set *bset,
  * floor(a_i) = a_i - {a_i}, while for the other coefficients, we have
  * floor(b) = b.
  */
-static struct isl_tab *set_row_cst_to_div(struct isl_tab *tab, int row, int div)
-{
-    isl_seq_fdiv_q(tab->mat->row[row] + 1, tab->mat->row[row] + 1,
-                   tab->mat->row[row][0], 1 + tab->M + tab->n_col);
+static struct isl_tab *set_row_cst_to_div(struct isl_tab *tab, int row,
+                                          int div) {
+  isl_seq_fdiv_q(tab->mat->row[row] + 1, tab->mat->row[row] + 1,
+                 tab->mat->row[row][0], 1 + tab->M + tab->n_col);
 
-    isl_int_set_si(tab->mat->row[row][0], 1);
+  isl_int_set_si(tab->mat->row[row][0], 1);
 
-    if (tab->var[tab->n_var - tab->n_div + div].is_row) {
-        int drow = tab->var[tab->n_var - tab->n_div + div].index;
+  if (tab->var[tab->n_var - tab->n_div + div].is_row) {
+    int drow = tab->var[tab->n_var - tab->n_div + div].index;
 
-        isl_assert(tab->mat->ctx,
-                   isl_int_is_one(tab->mat->row[drow][0]), goto error);
-        isl_seq_combine(tab->mat->row[row] + 1,
-                        tab->mat->ctx->one, tab->mat->row[row] + 1,
-                        tab->mat->ctx->one, tab->mat->row[drow] + 1,
-                        1 + tab->M + tab->n_col);
-    } else {
-        int dcol = tab->var[tab->n_var - tab->n_div + div].index;
+    isl_assert(tab->mat->ctx, isl_int_is_one(tab->mat->row[drow][0]),
+               goto error);
+    isl_seq_combine(tab->mat->row[row] + 1, tab->mat->ctx->one,
+                    tab->mat->row[row] + 1, tab->mat->ctx->one,
+                    tab->mat->row[drow] + 1, 1 + tab->M + tab->n_col);
+  } else {
+    int dcol = tab->var[tab->n_var - tab->n_div + div].index;
 
-        isl_int_add_ui(tab->mat->row[row][2 + tab->M + dcol],
-                       tab->mat->row[row][2 + tab->M + dcol], 1);
-    }
+    isl_int_add_ui(tab->mat->row[row][2 + tab->M + dcol],
+                   tab->mat->row[row][2 + tab->M + dcol], 1);
+  }
 
-    return tab;
+  return tab;
 error:
-    isl_tab_free(tab);
-    return NULL;
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check if the (parametric) constant of the given row is obviously
@@ -1079,45 +1035,44 @@ error:
  * all non-zero coefficients of parameters are negative and
  * belong to non-negative parameters.
  */
-static int is_obviously_neg(struct isl_tab *tab, int row)
-{
-    int i;
-    int col;
-    unsigned off = 2 + tab->M;
+static int is_obviously_neg(struct isl_tab *tab, int row) {
+  int i;
+  int col;
+  unsigned off = 2 + tab->M;
 
-    if (tab->M) {
-        if (isl_int_is_pos(tab->mat->row[row][2]))
-            return 0;
-        if (isl_int_is_neg(tab->mat->row[row][2]))
-            return 1;
-    }
+  if (tab->M) {
+    if (isl_int_is_pos(tab->mat->row[row][2]))
+      return 0;
+    if (isl_int_is_neg(tab->mat->row[row][2]))
+      return 1;
+  }
 
-    if (isl_int_is_nonneg(tab->mat->row[row][1]))
-        return 0;
-    for (i = 0; i < tab->n_param; ++i) {
-        /* Eliminated parameter */
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        if (isl_int_is_zero(tab->mat->row[row][off + col]))
-            continue;
-        if (!tab->var[i].is_nonneg)
-            return 0;
-        if (isl_int_is_pos(tab->mat->row[row][off + col]))
-            return 0;
-    }
-    for (i = 0; i < tab->n_div; ++i) {
-        if (tab->var[tab->n_var - tab->n_div + i].is_row)
-            continue;
-        col = tab->var[tab->n_var - tab->n_div + i].index;
-        if (isl_int_is_zero(tab->mat->row[row][off + col]))
-            continue;
-        if (!tab->var[tab->n_var - tab->n_div + i].is_nonneg)
-            return 0;
-        if (isl_int_is_pos(tab->mat->row[row][off + col]))
-            return 0;
-    }
-    return 1;
+  if (isl_int_is_nonneg(tab->mat->row[row][1]))
+    return 0;
+  for (i = 0; i < tab->n_param; ++i) {
+    /* Eliminated parameter */
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    if (isl_int_is_zero(tab->mat->row[row][off + col]))
+      continue;
+    if (!tab->var[i].is_nonneg)
+      return 0;
+    if (isl_int_is_pos(tab->mat->row[row][off + col]))
+      return 0;
+  }
+  for (i = 0; i < tab->n_div; ++i) {
+    if (tab->var[tab->n_var - tab->n_div + i].is_row)
+      continue;
+    col = tab->var[tab->n_var - tab->n_div + i].index;
+    if (isl_int_is_zero(tab->mat->row[row][off + col]))
+      continue;
+    if (!tab->var[tab->n_var - tab->n_div + i].is_nonneg)
+      return 0;
+    if (isl_int_is_pos(tab->mat->row[row][off + col]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Check if the (parametric) constant of the given row is obviously
@@ -1128,45 +1083,44 @@ static int is_obviously_neg(struct isl_tab *tab, int row)
  * all non-zero coefficients of parameters are positive and
  * belong to non-negative parameters.
  */
-static int is_obviously_nonneg(struct isl_tab *tab, int row)
-{
-    int i;
-    int col;
-    unsigned off = 2 + tab->M;
+static int is_obviously_nonneg(struct isl_tab *tab, int row) {
+  int i;
+  int col;
+  unsigned off = 2 + tab->M;
 
-    if (tab->M) {
-        if (isl_int_is_pos(tab->mat->row[row][2]))
-            return 1;
-        if (isl_int_is_neg(tab->mat->row[row][2]))
-            return 0;
-    }
+  if (tab->M) {
+    if (isl_int_is_pos(tab->mat->row[row][2]))
+      return 1;
+    if (isl_int_is_neg(tab->mat->row[row][2]))
+      return 0;
+  }
 
-    if (isl_int_is_neg(tab->mat->row[row][1]))
-        return 0;
-    for (i = 0; i < tab->n_param; ++i) {
-        /* Eliminated parameter */
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        if (isl_int_is_zero(tab->mat->row[row][off + col]))
-            continue;
-        if (!tab->var[i].is_nonneg)
-            return 0;
-        if (isl_int_is_neg(tab->mat->row[row][off + col]))
-            return 0;
-    }
-    for (i = 0; i < tab->n_div; ++i) {
-        if (tab->var[tab->n_var - tab->n_div + i].is_row)
-            continue;
-        col = tab->var[tab->n_var - tab->n_div + i].index;
-        if (isl_int_is_zero(tab->mat->row[row][off + col]))
-            continue;
-        if (!tab->var[tab->n_var - tab->n_div + i].is_nonneg)
-            return 0;
-        if (isl_int_is_neg(tab->mat->row[row][off + col]))
-            return 0;
-    }
-    return 1;
+  if (isl_int_is_neg(tab->mat->row[row][1]))
+    return 0;
+  for (i = 0; i < tab->n_param; ++i) {
+    /* Eliminated parameter */
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    if (isl_int_is_zero(tab->mat->row[row][off + col]))
+      continue;
+    if (!tab->var[i].is_nonneg)
+      return 0;
+    if (isl_int_is_neg(tab->mat->row[row][off + col]))
+      return 0;
+  }
+  for (i = 0; i < tab->n_div; ++i) {
+    if (tab->var[tab->n_var - tab->n_div + i].is_row)
+      continue;
+    col = tab->var[tab->n_var - tab->n_div + i].index;
+    if (isl_int_is_zero(tab->mat->row[row][off + col]))
+      continue;
+    if (!tab->var[tab->n_var - tab->n_div + i].is_nonneg)
+      return 0;
+    if (isl_int_is_neg(tab->mat->row[row][off + col]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Given a row r and two columns, return the column that would
@@ -1185,47 +1139,46 @@ static int is_obviously_nonneg(struct isl_tab *tab, int row)
  * a_{v,c2} a_{r,c1} - a_{v,c1} a_{r,c2} > 0, c1 results in the minimal
  * increment.  Otherwise, it's c2.
  */
-static int lexmin_col_pair(struct isl_tab *tab,
-                           int row, int col1, int col2, isl_int tmp)
-{
-    int i;
-    isl_int *tr;
+static int lexmin_col_pair(struct isl_tab *tab, int row, int col1, int col2,
+                           isl_int tmp) {
+  int i;
+  isl_int *tr;
 
-    tr = tab->mat->row[row] + 2 + tab->M;
+  tr = tab->mat->row[row] + 2 + tab->M;
 
-    for (i = tab->n_param; i < tab->n_var - tab->n_div; ++i) {
-        int s1, s2;
-        isl_int *r;
+  for (i = tab->n_param; i < tab->n_var - tab->n_div; ++i) {
+    int s1, s2;
+    isl_int *r;
 
-        if (!tab->var[i].is_row) {
-            if (tab->var[i].index == col1)
-                return col2;
-            if (tab->var[i].index == col2)
-                return col1;
-            continue;
-        }
-
-        if (tab->var[i].index == row)
-            continue;
-
-        r = tab->mat->row[tab->var[i].index] + 2 + tab->M;
-        s1 = isl_int_sgn(r[col1]);
-        s2 = isl_int_sgn(r[col2]);
-        if (s1 == 0 && s2 == 0)
-            continue;
-        if (s1 < s2)
-            return col1;
-        if (s2 < s1)
-            return col2;
-
-        isl_int_mul(tmp, r[col2], tr[col1]);
-        isl_int_submul(tmp, r[col1], tr[col2]);
-        if (isl_int_is_pos(tmp))
-            return col1;
-        if (isl_int_is_neg(tmp))
-            return col2;
+    if (!tab->var[i].is_row) {
+      if (tab->var[i].index == col1)
+        return col2;
+      if (tab->var[i].index == col2)
+        return col1;
+      continue;
     }
-    return -1;
+
+    if (tab->var[i].index == row)
+      continue;
+
+    r = tab->mat->row[tab->var[i].index] + 2 + tab->M;
+    s1 = isl_int_sgn(r[col1]);
+    s2 = isl_int_sgn(r[col2]);
+    if (s1 == 0 && s2 == 0)
+      continue;
+    if (s1 < s2)
+      return col1;
+    if (s2 < s1)
+      return col2;
+
+    isl_int_mul(tmp, r[col2], tr[col1]);
+    isl_int_submul(tmp, r[col1], tr[col2]);
+    if (isl_int_is_pos(tmp))
+      return col1;
+    if (isl_int_is_neg(tmp))
+      return col2;
+  }
+  return -1;
 }
 
 /* Does the index into the tab->var or tab->con array "index"
@@ -1234,29 +1187,26 @@ static int lexmin_col_pair(struct isl_tab *tab,
  * it needs to refer to either one of the first tab->n_param variables or
  * one of the last tab->n_div variables.
  */
-static int is_parameter_var(struct isl_tab *tab, int index)
-{
-    if (index < 0)
-        return 0;
-    if (index < tab->n_param)
-        return 1;
-    if (index >= tab->n_var - tab->n_div)
-        return 1;
+static int is_parameter_var(struct isl_tab *tab, int index) {
+  if (index < 0)
     return 0;
+  if (index < tab->n_param)
+    return 1;
+  if (index >= tab->n_var - tab->n_div)
+    return 1;
+  return 0;
 }
 
 /* Does column "col" of "tab" refer to a variable in the context tableau?
  */
-static int col_is_parameter_var(struct isl_tab *tab, int col)
-{
-    return is_parameter_var(tab, tab->col_var[col]);
+static int col_is_parameter_var(struct isl_tab *tab, int col) {
+  return is_parameter_var(tab, tab->col_var[col]);
 }
 
 /* Does row "row" of "tab" refer to a variable in the context tableau?
  */
-static int row_is_parameter_var(struct isl_tab *tab, int row)
-{
-    return is_parameter_var(tab, tab->row_var[row]);
+static int row_is_parameter_var(struct isl_tab *tab, int row) {
+  return is_parameter_var(tab, tab->row_var[row]);
 }
 
 /* Given a row in the tableau, find and return the column that would
@@ -1265,36 +1215,35 @@ static int row_is_parameter_var(struct isl_tab *tab, int row)
  * If there is no such column, then return tab->n_col.
  * If anything goes wrong, return -1.
  */
-static int lexmin_pivot_col(struct isl_tab *tab, int row)
-{
-    int j;
-    int col = tab->n_col;
-    isl_int *tr;
-    isl_int tmp;
+static int lexmin_pivot_col(struct isl_tab *tab, int row) {
+  int j;
+  int col = tab->n_col;
+  isl_int *tr;
+  isl_int tmp;
 
-    tr = tab->mat->row[row] + 2 + tab->M;
+  tr = tab->mat->row[row] + 2 + tab->M;
 
-    isl_int_init(tmp);
+  isl_int_init(tmp);
 
-    for (j = tab->n_dead; j < tab->n_col; ++j) {
-        if (col_is_parameter_var(tab, j))
-            continue;
+  for (j = tab->n_dead; j < tab->n_col; ++j) {
+    if (col_is_parameter_var(tab, j))
+      continue;
 
-        if (!isl_int_is_pos(tr[j]))
-            continue;
+    if (!isl_int_is_pos(tr[j]))
+      continue;
 
-        if (col == tab->n_col)
-            col = j;
-        else
-            col = lexmin_col_pair(tab, row, col, j, tmp);
-        isl_assert(tab->mat->ctx, col >= 0, goto error);
-    }
+    if (col == tab->n_col)
+      col = j;
+    else
+      col = lexmin_col_pair(tab, row, col, j, tmp);
+    isl_assert(tab->mat->ctx, col >= 0, goto error);
+  }
 
-    isl_int_clear(tmp);
-    return col;
+  isl_int_clear(tmp);
+  return col;
 error:
-    isl_int_clear(tmp);
-    return -1;
+  isl_int_clear(tmp);
+  return -1;
 }
 
 /* Return the first known violated constraint, i.e., a non-negative
@@ -1304,77 +1253,72 @@ error:
  * If any constraint has a negative coefficient for the big parameter,
  * if any, then we return one of these first.
  */
-static int first_neg(struct isl_tab *tab)
-{
-    int row;
+static int first_neg(struct isl_tab *tab) {
+  int row;
 
-    if (tab->M)
-        for (row = tab->n_redundant; row < tab->n_row; ++row) {
-            if (!isl_tab_var_from_row(tab, row)->is_nonneg)
-                continue;
-            if (!isl_int_is_neg(tab->mat->row[row][2]))
-                continue;
-            if (tab->row_sign)
-                tab->row_sign[row] = isl_tab_row_neg;
-            return row;
-        }
+  if (tab->M)
     for (row = tab->n_redundant; row < tab->n_row; ++row) {
-        if (!isl_tab_var_from_row(tab, row)->is_nonneg)
-            continue;
-        if (tab->row_sign) {
-            if (tab->row_sign[row] == 0 &&
-                    is_obviously_neg(tab, row))
-                tab->row_sign[row] = isl_tab_row_neg;
-            if (tab->row_sign[row] != isl_tab_row_neg)
-                continue;
-        } else if (!is_obviously_neg(tab, row))
-            continue;
-        return row;
+      if (!isl_tab_var_from_row(tab, row)->is_nonneg)
+        continue;
+      if (!isl_int_is_neg(tab->mat->row[row][2]))
+        continue;
+      if (tab->row_sign)
+        tab->row_sign[row] = isl_tab_row_neg;
+      return row;
     }
-    return -1;
+  for (row = tab->n_redundant; row < tab->n_row; ++row) {
+    if (!isl_tab_var_from_row(tab, row)->is_nonneg)
+      continue;
+    if (tab->row_sign) {
+      if (tab->row_sign[row] == 0 && is_obviously_neg(tab, row))
+        tab->row_sign[row] = isl_tab_row_neg;
+      if (tab->row_sign[row] != isl_tab_row_neg)
+        continue;
+    } else if (!is_obviously_neg(tab, row))
+      continue;
+    return row;
+  }
+  return -1;
 }
 
 /* Check whether the invariant that all columns are lexico-positive
  * is satisfied.  This function is not called from the current code
  * but is useful during debugging.
  */
-static void check_lexpos(struct isl_tab *tab) __attribute__ ((unused));
-static void check_lexpos(struct isl_tab *tab)
-{
-    unsigned off = 2 + tab->M;
-    int col;
-    int var;
-    int row;
+static void check_lexpos(struct isl_tab *tab) __attribute__((unused));
+static void check_lexpos(struct isl_tab *tab) {
+  unsigned off = 2 + tab->M;
+  int col;
+  int var;
+  int row;
 
-    for (col = tab->n_dead; col < tab->n_col; ++col) {
-        if (col_is_parameter_var(tab, col))
-            continue;
-        for (var = tab->n_param; var < tab->n_var - tab->n_div; ++var) {
-            if (!tab->var[var].is_row) {
-                if (tab->var[var].index == col)
-                    break;
-                else
-                    continue;
-            }
-            row = tab->var[var].index;
-            if (isl_int_is_zero(tab->mat->row[row][off + col]))
-                continue;
-            if (isl_int_is_pos(tab->mat->row[row][off + col]))
-                break;
-            fprintf(stderr, "lexneg column %d (row %d)\n",
-                    col, row);
-        }
-        if (var >= tab->n_var - tab->n_div)
-            fprintf(stderr, "zero column %d\n", col);
+  for (col = tab->n_dead; col < tab->n_col; ++col) {
+    if (col_is_parameter_var(tab, col))
+      continue;
+    for (var = tab->n_param; var < tab->n_var - tab->n_div; ++var) {
+      if (!tab->var[var].is_row) {
+        if (tab->var[var].index == col)
+          break;
+        else
+          continue;
+      }
+      row = tab->var[var].index;
+      if (isl_int_is_zero(tab->mat->row[row][off + col]))
+        continue;
+      if (isl_int_is_pos(tab->mat->row[row][off + col]))
+        break;
+      fprintf(stderr, "lexneg column %d (row %d)\n", col, row);
     }
+    if (var >= tab->n_var - tab->n_div)
+      fprintf(stderr, "zero column %d\n", col);
+  }
 }
 
 /* Report to the caller that the given constraint is part of an encountered
  * conflict.
  */
-static int report_conflicting_constraint(struct isl_tab *tab, int con)
-{
-    return tab->conflict(con, tab->conflict_user);
+static int report_conflicting_constraint(struct isl_tab *tab, int con) {
+  return tab->conflict(con, tab->conflict_user);
 }
 
 /* Given a conflicting row in the tableau, report all constraints
@@ -1382,33 +1326,32 @@ static int report_conflicting_constraint(struct isl_tab *tab, int con)
  * (if it represents a constraint) and all constraint columns with
  * non-zero (and therefore negative) coefficients.
  */
-static int report_conflict(struct isl_tab *tab, int row)
-{
-    int j;
-    isl_int *tr;
+static int report_conflict(struct isl_tab *tab, int row) {
+  int j;
+  isl_int *tr;
 
-    if (!tab->conflict)
-        return 0;
-
-    if (tab->row_var[row] < 0 &&
-            report_conflicting_constraint(tab, ~tab->row_var[row]) < 0)
-        return -1;
-
-    tr = tab->mat->row[row] + 2 + tab->M;
-
-    for (j = tab->n_dead; j < tab->n_col; ++j) {
-        if (col_is_parameter_var(tab, j))
-            continue;
-
-        if (!isl_int_is_neg(tr[j]))
-            continue;
-
-        if (tab->col_var[j] < 0 &&
-                report_conflicting_constraint(tab, ~tab->col_var[j]) < 0)
-            return -1;
-    }
-
+  if (!tab->conflict)
     return 0;
+
+  if (tab->row_var[row] < 0 &&
+      report_conflicting_constraint(tab, ~tab->row_var[row]) < 0)
+    return -1;
+
+  tr = tab->mat->row[row] + 2 + tab->M;
+
+  for (j = tab->n_dead; j < tab->n_col; ++j) {
+    if (col_is_parameter_var(tab, j))
+      continue;
+
+    if (!isl_int_is_neg(tr[j]))
+      continue;
+
+    if (tab->col_var[j] < 0 &&
+        report_conflicting_constraint(tab, ~tab->col_var[j]) < 0)
+      return -1;
+  }
+
+  return 0;
 }
 
 /* Resolve all known or obviously violated constraints through pivoting.
@@ -1418,29 +1361,28 @@ static int report_conflict(struct isl_tab *tab, int row)
  * then the tableau is infeasible.
  */
 static int restore_lexmin(struct isl_tab *tab) WARN_UNUSED;
-static int restore_lexmin(struct isl_tab *tab)
-{
-    int row, col;
+static int restore_lexmin(struct isl_tab *tab) {
+  int row, col;
 
-    if (!tab)
-        return -1;
-    if (tab->empty)
-        return 0;
-    while ((row = first_neg(tab)) != -1) {
-        col = lexmin_pivot_col(tab, row);
-        if (col >= tab->n_col) {
-            if (report_conflict(tab, row) < 0)
-                return -1;
-            if (isl_tab_mark_empty(tab) < 0)
-                return -1;
-            return 0;
-        }
-        if (col < 0)
-            return -1;
-        if (isl_tab_pivot(tab, row, col) < 0)
-            return -1;
-    }
+  if (!tab)
+    return -1;
+  if (tab->empty)
     return 0;
+  while ((row = first_neg(tab)) != -1) {
+    col = lexmin_pivot_col(tab, row);
+    if (col >= tab->n_col) {
+      if (report_conflict(tab, row) < 0)
+        return -1;
+      if (isl_tab_mark_empty(tab) < 0)
+        return -1;
+      return 0;
+    }
+    if (col < 0)
+      return -1;
+    if (isl_tab_pivot(tab, row, col) < 0)
+      return -1;
+  }
+  return 0;
 }
 
 /* Given a row that represents an equality, look for an appropriate
@@ -1464,28 +1406,27 @@ static int restore_lexmin(struct isl_tab *tab)
  * always has an integer value whenever all the other parameters are integral.
  * If there is no such parameter then we return -1.
  */
-static int last_var_col_or_int_par_col(struct isl_tab *tab, int row)
-{
-    unsigned off = 2 + tab->M;
-    int i;
+static int last_var_col_or_int_par_col(struct isl_tab *tab, int row) {
+  unsigned off = 2 + tab->M;
+  int i;
 
-    for (i = tab->n_var - tab->n_div - 1; i >= 0 && i >= tab->n_param; --i) {
-        int col;
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        if (col <= tab->n_dead)
-            continue;
-        if (!isl_int_is_zero(tab->mat->row[row][off + col]))
-            return col;
-    }
-    for (i = tab->n_dead; i < tab->n_col; ++i) {
-        if (isl_int_is_one(tab->mat->row[row][off + i]))
-            return i;
-        if (isl_int_is_negone(tab->mat->row[row][off + i]))
-            return i;
-    }
-    return -1;
+  for (i = tab->n_var - tab->n_div - 1; i >= 0 && i >= tab->n_param; --i) {
+    int col;
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    if (col <= tab->n_dead)
+      continue;
+    if (!isl_int_is_zero(tab->mat->row[row][off + col]))
+      return col;
+  }
+  for (i = tab->n_dead; i < tab->n_col; ++i) {
+    if (isl_int_is_one(tab->mat->row[row][off + i]))
+      return i;
+    if (isl_int_is_negone(tab->mat->row[row][off + i]))
+      return i;
+  }
+  return -1;
 }
 
 /* Add an equality that is known to be valid to the tableau.
@@ -1497,71 +1438,68 @@ static int last_var_col_or_int_par_col(struct isl_tab *tab, int row)
  * This function assumes that at least two more rows and at least
  * two more elements in the constraint array are available in the tableau.
  */
-static struct isl_tab *add_lexmin_valid_eq(struct isl_tab *tab, isl_int *eq)
-{
-    int i;
-    int r;
+static struct isl_tab *add_lexmin_valid_eq(struct isl_tab *tab, isl_int *eq) {
+  int i;
+  int r;
 
-    if (!tab)
-        return NULL;
+  if (!tab)
+    return NULL;
+  r = isl_tab_add_row(tab, eq);
+  if (r < 0)
+    goto error;
+
+  r = tab->con[r].index;
+  i = last_var_col_or_int_par_col(tab, r);
+  if (i < 0) {
+    tab->con[r].is_nonneg = 1;
+    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
+      goto error;
+    isl_seq_neg(eq, eq, 1 + tab->n_var);
     r = isl_tab_add_row(tab, eq);
     if (r < 0)
-        goto error;
+      goto error;
+    tab->con[r].is_nonneg = 1;
+    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
+      goto error;
+  } else {
+    if (isl_tab_pivot(tab, r, i) < 0)
+      goto error;
+    if (isl_tab_kill_col(tab, i) < 0)
+      goto error;
+    tab->n_eq++;
+  }
 
-    r = tab->con[r].index;
-    i = last_var_col_or_int_par_col(tab, r);
-    if (i < 0) {
-        tab->con[r].is_nonneg = 1;
-        if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
-            goto error;
-        isl_seq_neg(eq, eq, 1 + tab->n_var);
-        r = isl_tab_add_row(tab, eq);
-        if (r < 0)
-            goto error;
-        tab->con[r].is_nonneg = 1;
-        if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
-            goto error;
-    } else {
-        if (isl_tab_pivot(tab, r, i) < 0)
-            goto error;
-        if (isl_tab_kill_col(tab, i) < 0)
-            goto error;
-        tab->n_eq++;
-    }
-
-    return tab;
+  return tab;
 error:
-    isl_tab_free(tab);
-    return NULL;
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check if the given row is a pure constant.
  */
-static int is_constant(struct isl_tab *tab, int row)
-{
-    unsigned off = 2 + tab->M;
+static int is_constant(struct isl_tab *tab, int row) {
+  unsigned off = 2 + tab->M;
 
-    return isl_seq_first_non_zero(tab->mat->row[row] + off + tab->n_dead,
-                                  tab->n_col - tab->n_dead) == -1;
+  return isl_seq_first_non_zero(tab->mat->row[row] + off + tab->n_dead,
+                                tab->n_col - tab->n_dead) == -1;
 }
 
 /* Is the given row a parametric constant?
  * That is, does it only involve variables that also appear in the context?
  */
-static int is_parametric_constant(struct isl_tab *tab, int row)
-{
-    unsigned off = 2 + tab->M;
-    int col;
+static int is_parametric_constant(struct isl_tab *tab, int row) {
+  unsigned off = 2 + tab->M;
+  int col;
 
-    for (col = tab->n_dead; col < tab->n_col; ++col) {
-        if (col_is_parameter_var(tab, col))
-            continue;
-        if (isl_int_is_zero(tab->mat->row[row][off + col]))
-            continue;
-        return 0;
-    }
+  for (col = tab->n_dead; col < tab->n_col; ++col) {
+    if (col_is_parameter_var(tab, col))
+      continue;
+    if (isl_int_is_zero(tab->mat->row[row][off + col]))
+      continue;
+    return 0;
+  }
 
-    return 1;
+  return 1;
 }
 
 /* Add an equality that may or may not be valid to the tableau.
@@ -1577,76 +1515,75 @@ static int is_parametric_constant(struct isl_tab *tab, int row)
  * two more elements in the constraint array are available in the tableau.
  */
 static int add_lexmin_eq(struct isl_tab *tab, isl_int *eq) WARN_UNUSED;
-static int add_lexmin_eq(struct isl_tab *tab, isl_int *eq)
-{
-    int r1, r2;
-    int row;
-    struct isl_tab_undo *snap;
+static int add_lexmin_eq(struct isl_tab *tab, isl_int *eq) {
+  int r1, r2;
+  int row;
+  struct isl_tab_undo *snap;
 
-    if (!tab)
-        return -1;
-    snap = isl_tab_snap(tab);
-    r1 = isl_tab_add_row(tab, eq);
-    if (r1 < 0)
-        return -1;
-    tab->con[r1].is_nonneg = 1;
-    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r1]) < 0)
-        return -1;
+  if (!tab)
+    return -1;
+  snap = isl_tab_snap(tab);
+  r1 = isl_tab_add_row(tab, eq);
+  if (r1 < 0)
+    return -1;
+  tab->con[r1].is_nonneg = 1;
+  if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r1]) < 0)
+    return -1;
 
-    row = tab->con[r1].index;
-    if (is_constant(tab, row)) {
-        if (!isl_int_is_zero(tab->mat->row[row][1]) ||
-                (tab->M && !isl_int_is_zero(tab->mat->row[row][2]))) {
-            if (isl_tab_mark_empty(tab) < 0)
-                return -1;
-            return 0;
-        }
-        if (isl_tab_rollback(tab, snap) < 0)
-            return -1;
-        return 0;
+  row = tab->con[r1].index;
+  if (is_constant(tab, row)) {
+    if (!isl_int_is_zero(tab->mat->row[row][1]) ||
+        (tab->M && !isl_int_is_zero(tab->mat->row[row][2]))) {
+      if (isl_tab_mark_empty(tab) < 0)
+        return -1;
+      return 0;
     }
-
-    if (restore_lexmin(tab) < 0)
-        return -1;
-    if (tab->empty)
-        return 0;
-
-    isl_seq_neg(eq, eq, 1 + tab->n_var);
-
-    r2 = isl_tab_add_row(tab, eq);
-    if (r2 < 0)
-        return -1;
-    tab->con[r2].is_nonneg = 1;
-    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r2]) < 0)
-        return -1;
-
-    if (restore_lexmin(tab) < 0)
-        return -1;
-    if (tab->empty)
-        return 0;
-
-    if (!tab->con[r1].is_row) {
-        if (isl_tab_kill_col(tab, tab->con[r1].index) < 0)
-            return -1;
-    } else if (!tab->con[r2].is_row) {
-        if (isl_tab_kill_col(tab, tab->con[r2].index) < 0)
-            return -1;
-    }
-
-    if (tab->bmap) {
-        tab->bmap = isl_basic_map_add_ineq(tab->bmap, eq);
-        if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
-            return -1;
-        isl_seq_neg(eq, eq, 1 + tab->n_var);
-        tab->bmap = isl_basic_map_add_ineq(tab->bmap, eq);
-        isl_seq_neg(eq, eq, 1 + tab->n_var);
-        if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
-            return -1;
-        if (!tab->bmap)
-            return -1;
-    }
-
+    if (isl_tab_rollback(tab, snap) < 0)
+      return -1;
     return 0;
+  }
+
+  if (restore_lexmin(tab) < 0)
+    return -1;
+  if (tab->empty)
+    return 0;
+
+  isl_seq_neg(eq, eq, 1 + tab->n_var);
+
+  r2 = isl_tab_add_row(tab, eq);
+  if (r2 < 0)
+    return -1;
+  tab->con[r2].is_nonneg = 1;
+  if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r2]) < 0)
+    return -1;
+
+  if (restore_lexmin(tab) < 0)
+    return -1;
+  if (tab->empty)
+    return 0;
+
+  if (!tab->con[r1].is_row) {
+    if (isl_tab_kill_col(tab, tab->con[r1].index) < 0)
+      return -1;
+  } else if (!tab->con[r2].is_row) {
+    if (isl_tab_kill_col(tab, tab->con[r2].index) < 0)
+      return -1;
+  }
+
+  if (tab->bmap) {
+    tab->bmap = isl_basic_map_add_ineq(tab->bmap, eq);
+    if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
+      return -1;
+    isl_seq_neg(eq, eq, 1 + tab->n_var);
+    tab->bmap = isl_basic_map_add_ineq(tab->bmap, eq);
+    isl_seq_neg(eq, eq, 1 + tab->n_var);
+    if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
+      return -1;
+    if (!tab->bmap)
+      return -1;
+  }
+
+  return 0;
 }
 
 /* Add an inequality to the tableau, resolving violations using
@@ -1655,99 +1592,94 @@ static int add_lexmin_eq(struct isl_tab *tab, isl_int *eq)
  * This function assumes that at least one more row and at least
  * one more element in the constraint array are available in the tableau.
  */
-static struct isl_tab *add_lexmin_ineq(struct isl_tab *tab, isl_int *ineq)
-{
-    int r;
+static struct isl_tab *add_lexmin_ineq(struct isl_tab *tab, isl_int *ineq) {
+  int r;
 
-    if (!tab)
-        return NULL;
-    if (tab->bmap) {
-        tab->bmap = isl_basic_map_add_ineq(tab->bmap, ineq);
-        if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
-            goto error;
-        if (!tab->bmap)
-            goto error;
-    }
-    r = isl_tab_add_row(tab, ineq);
-    if (r < 0)
-        goto error;
-    tab->con[r].is_nonneg = 1;
-    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
-        goto error;
-    if (isl_tab_row_is_redundant(tab, tab->con[r].index)) {
-        if (isl_tab_mark_redundant(tab, tab->con[r].index) < 0)
-            goto error;
-        return tab;
-    }
-
-    if (restore_lexmin(tab) < 0)
-        goto error;
-    if (!tab->empty && tab->con[r].is_row &&
-            isl_tab_row_is_redundant(tab, tab->con[r].index))
-        if (isl_tab_mark_redundant(tab, tab->con[r].index) < 0)
-            goto error;
-    return tab;
-error:
-    isl_tab_free(tab);
+  if (!tab)
     return NULL;
+  if (tab->bmap) {
+    tab->bmap = isl_basic_map_add_ineq(tab->bmap, ineq);
+    if (isl_tab_push(tab, isl_tab_undo_bmap_ineq) < 0)
+      goto error;
+    if (!tab->bmap)
+      goto error;
+  }
+  r = isl_tab_add_row(tab, ineq);
+  if (r < 0)
+    goto error;
+  tab->con[r].is_nonneg = 1;
+  if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
+    goto error;
+  if (isl_tab_row_is_redundant(tab, tab->con[r].index)) {
+    if (isl_tab_mark_redundant(tab, tab->con[r].index) < 0)
+      goto error;
+    return tab;
+  }
+
+  if (restore_lexmin(tab) < 0)
+    goto error;
+  if (!tab->empty && tab->con[r].is_row &&
+      isl_tab_row_is_redundant(tab, tab->con[r].index))
+    if (isl_tab_mark_redundant(tab, tab->con[r].index) < 0)
+      goto error;
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check if the coefficients of the parameters are all integral.
  */
-static int integer_parameter(struct isl_tab *tab, int row)
-{
-    int i;
-    int col;
-    unsigned off = 2 + tab->M;
+static int integer_parameter(struct isl_tab *tab, int row) {
+  int i;
+  int col;
+  unsigned off = 2 + tab->M;
 
-    for (i = 0; i < tab->n_param; ++i) {
-        /* Eliminated parameter */
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        if (!isl_int_is_divisible_by(tab->mat->row[row][off + col],
-                                     tab->mat->row[row][0]))
-            return 0;
-    }
-    for (i = 0; i < tab->n_div; ++i) {
-        if (tab->var[tab->n_var - tab->n_div + i].is_row)
-            continue;
-        col = tab->var[tab->n_var - tab->n_div + i].index;
-        if (!isl_int_is_divisible_by(tab->mat->row[row][off + col],
-                                     tab->mat->row[row][0]))
-            return 0;
-    }
-    return 1;
+  for (i = 0; i < tab->n_param; ++i) {
+    /* Eliminated parameter */
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    if (!isl_int_is_divisible_by(tab->mat->row[row][off + col],
+                                 tab->mat->row[row][0]))
+      return 0;
+  }
+  for (i = 0; i < tab->n_div; ++i) {
+    if (tab->var[tab->n_var - tab->n_div + i].is_row)
+      continue;
+    col = tab->var[tab->n_var - tab->n_div + i].index;
+    if (!isl_int_is_divisible_by(tab->mat->row[row][off + col],
+                                 tab->mat->row[row][0]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Check if the coefficients of the non-parameter variables are all integral.
  */
-static int integer_variable(struct isl_tab *tab, int row)
-{
-    int i;
-    unsigned off = 2 + tab->M;
+static int integer_variable(struct isl_tab *tab, int row) {
+  int i;
+  unsigned off = 2 + tab->M;
 
-    for (i = tab->n_dead; i < tab->n_col; ++i) {
-        if (col_is_parameter_var(tab, i))
-            continue;
-        if (!isl_int_is_divisible_by(tab->mat->row[row][off + i],
-                                     tab->mat->row[row][0]))
-            return 0;
-    }
-    return 1;
+  for (i = tab->n_dead; i < tab->n_col; ++i) {
+    if (col_is_parameter_var(tab, i))
+      continue;
+    if (!isl_int_is_divisible_by(tab->mat->row[row][off + i],
+                                 tab->mat->row[row][0]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Check if the constant term is integral.
  */
-static int integer_constant(struct isl_tab *tab, int row)
-{
-    return isl_int_is_divisible_by(tab->mat->row[row][1],
-                                   tab->mat->row[row][0]);
+static int integer_constant(struct isl_tab *tab, int row) {
+  return isl_int_is_divisible_by(tab->mat->row[row][1], tab->mat->row[row][0]);
 }
 
-#define I_CST	1 << 0
-#define I_PAR	1 << 1
-#define I_VAR	1 << 2
+#define I_CST 1 << 0
+#define I_PAR 1 << 1
+#define I_VAR 1 << 2
 
 /* Check for next (non-parameter) variable after "var" (first if var == -1)
  * that is non-integer and therefore requires a cut and return
@@ -1760,28 +1692,27 @@ static int integer_constant(struct isl_tab *tab, int row)
  * current sample value is integral and no cut is required
  * (irrespective of whether the variable part is integral).
  */
-static int next_non_integer_var(struct isl_tab *tab, int var, int *f)
-{
-    var = var < 0 ? tab->n_param : var + 1;
+static int next_non_integer_var(struct isl_tab *tab, int var, int *f) {
+  var = var < 0 ? tab->n_param : var + 1;
 
-    for (; var < tab->n_var - tab->n_div; ++var) {
-        int flags = 0;
-        int row;
-        if (!tab->var[var].is_row)
-            continue;
-        row = tab->var[var].index;
-        if (integer_constant(tab, row))
-            ISL_FL_SET(flags, I_CST);
-        if (integer_parameter(tab, row))
-            ISL_FL_SET(flags, I_PAR);
-        if (ISL_FL_ISSET(flags, I_CST) && ISL_FL_ISSET(flags, I_PAR))
-            continue;
-        if (integer_variable(tab, row))
-            ISL_FL_SET(flags, I_VAR);
-        *f = flags;
-        return var;
-    }
-    return -1;
+  for (; var < tab->n_var - tab->n_div; ++var) {
+    int flags = 0;
+    int row;
+    if (!tab->var[var].is_row)
+      continue;
+    row = tab->var[var].index;
+    if (integer_constant(tab, row))
+      ISL_FL_SET(flags, I_CST);
+    if (integer_parameter(tab, row))
+      ISL_FL_SET(flags, I_PAR);
+    if (ISL_FL_ISSET(flags, I_CST) && ISL_FL_ISSET(flags, I_PAR))
+      continue;
+    if (integer_variable(tab, row))
+      ISL_FL_SET(flags, I_VAR);
+    *f = flags;
+    return var;
+  }
+  return -1;
 }
 
 /* Check for first (non-parameter) variable that is non-integer and
@@ -1794,11 +1725,10 @@ static int next_non_integer_var(struct isl_tab *tab, int var, int *f)
  * current sample value is integral and no cut is required
  * (irrespective of whether the variable part is integral).
  */
-static int first_non_integer_row(struct isl_tab *tab, int *f)
-{
-    int var = next_non_integer_var(tab, -1, f);
+static int first_non_integer_row(struct isl_tab *tab, int *f) {
+  int var = next_non_integer_var(tab, -1, f);
 
-    return var < 0 ? -1 : tab->var[var].index;
+  return var < 0 ? -1 : tab->var[var].index;
 }
 
 /* Add a (non-parametric) cut to cut away the non-integral sample
@@ -1823,37 +1753,36 @@ static int first_non_integer_row(struct isl_tab *tab, int *f)
  *
  * Return the row of the cut or -1.
  */
-static int add_cut(struct isl_tab *tab, int row)
-{
-    int i;
-    int r;
-    isl_int *r_row;
-    unsigned off = 2 + tab->M;
+static int add_cut(struct isl_tab *tab, int row) {
+  int i;
+  int r;
+  isl_int *r_row;
+  unsigned off = 2 + tab->M;
 
-    if (isl_tab_extend_cons(tab, 1) < 0)
-        return -1;
-    r = isl_tab_allocate_con(tab);
-    if (r < 0)
-        return -1;
+  if (isl_tab_extend_cons(tab, 1) < 0)
+    return -1;
+  r = isl_tab_allocate_con(tab);
+  if (r < 0)
+    return -1;
 
-    r_row = tab->mat->row[tab->con[r].index];
-    isl_int_set(r_row[0], tab->mat->row[row][0]);
-    isl_int_neg(r_row[1], tab->mat->row[row][1]);
-    isl_int_fdiv_r(r_row[1], r_row[1], tab->mat->row[row][0]);
-    isl_int_neg(r_row[1], r_row[1]);
-    if (tab->M)
-        isl_int_set_si(r_row[2], 0);
-    for (i = 0; i < tab->n_col; ++i)
-        isl_int_fdiv_r(r_row[off + i],
-                       tab->mat->row[row][off + i], tab->mat->row[row][0]);
+  r_row = tab->mat->row[tab->con[r].index];
+  isl_int_set(r_row[0], tab->mat->row[row][0]);
+  isl_int_neg(r_row[1], tab->mat->row[row][1]);
+  isl_int_fdiv_r(r_row[1], r_row[1], tab->mat->row[row][0]);
+  isl_int_neg(r_row[1], r_row[1]);
+  if (tab->M)
+    isl_int_set_si(r_row[2], 0);
+  for (i = 0; i < tab->n_col; ++i)
+    isl_int_fdiv_r(r_row[off + i], tab->mat->row[row][off + i],
+                   tab->mat->row[row][0]);
 
-    tab->con[r].is_nonneg = 1;
-    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
-        return -1;
-    if (tab->row_sign)
-        tab->row_sign[tab->con[r].index] = isl_tab_row_neg;
+  tab->con[r].is_nonneg = 1;
+  if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
+    return -1;
+  if (tab->row_sign)
+    tab->row_sign[tab->con[r].index] = isl_tab_row_neg;
 
-    return tab->con[r].index;
+  return tab->con[r].index;
 }
 
 #define CUT_ALL 1
@@ -1875,76 +1804,74 @@ static int add_cut(struct isl_tab *tab, int row)
  * before continuing the search. CUT_ONE adds only one cut at a time.
  */
 static struct isl_tab *cut_to_integer_lexmin(struct isl_tab *tab,
-        int cutting_strategy)
-{
-    int var;
-    int row;
-    int flags;
+                                             int cutting_strategy) {
+  int var;
+  int row;
+  int flags;
 
-    if (!tab)
-        return NULL;
-    if (tab->empty)
-        return tab;
-
-    while ((var = next_non_integer_var(tab, -1, &flags)) != -1) {
-        do {
-            if (ISL_FL_ISSET(flags, I_VAR)) {
-                if (isl_tab_mark_empty(tab) < 0)
-                    goto error;
-                return tab;
-            }
-            row = tab->var[var].index;
-            row = add_cut(tab, row);
-            if (row < 0)
-                goto error;
-            if (cutting_strategy == CUT_ONE)
-                break;
-        } while ((var = next_non_integer_var(tab, var, &flags)) != -1);
-        if (restore_lexmin(tab) < 0)
-            goto error;
-        if (tab->empty)
-            break;
-    }
-    return tab;
-error:
-    isl_tab_free(tab);
+  if (!tab)
     return NULL;
+  if (tab->empty)
+    return tab;
+
+  while ((var = next_non_integer_var(tab, -1, &flags)) != -1) {
+    do {
+      if (ISL_FL_ISSET(flags, I_VAR)) {
+        if (isl_tab_mark_empty(tab) < 0)
+          goto error;
+        return tab;
+      }
+      row = tab->var[var].index;
+      row = add_cut(tab, row);
+      if (row < 0)
+        goto error;
+      if (cutting_strategy == CUT_ONE)
+        break;
+    } while ((var = next_non_integer_var(tab, var, &flags)) != -1);
+    if (restore_lexmin(tab) < 0)
+      goto error;
+    if (tab->empty)
+      break;
+  }
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check whether all the currently active samples also satisfy the inequality
  * "ineq" (treated as an equality if eq is set).
  * Remove those samples that do not.
  */
-static struct isl_tab *check_samples(struct isl_tab *tab, isl_int *ineq, int eq)
-{
-    int i;
-    isl_int v;
+static struct isl_tab *check_samples(struct isl_tab *tab, isl_int *ineq,
+                                     int eq) {
+  int i;
+  isl_int v;
 
-    if (!tab)
-        return NULL;
-
-    isl_assert(tab->mat->ctx, tab->bmap, goto error);
-    isl_assert(tab->mat->ctx, tab->samples, goto error);
-    isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, goto error);
-
-    isl_int_init(v);
-    for (i = tab->n_outside; i < tab->n_sample; ++i) {
-        int sgn;
-        isl_seq_inner_product(ineq, tab->samples->row[i],
-                              1 + tab->n_var, &v);
-        sgn = isl_int_sgn(v);
-        if (eq ? (sgn == 0) : (sgn >= 0))
-            continue;
-        tab = isl_tab_drop_sample(tab, i);
-        if (!tab)
-            break;
-    }
-    isl_int_clear(v);
-
-    return tab;
-error:
-    isl_tab_free(tab);
+  if (!tab)
     return NULL;
+
+  isl_assert(tab->mat->ctx, tab->bmap, goto error);
+  isl_assert(tab->mat->ctx, tab->samples, goto error);
+  isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, goto error);
+
+  isl_int_init(v);
+  for (i = tab->n_outside; i < tab->n_sample; ++i) {
+    int sgn;
+    isl_seq_inner_product(ineq, tab->samples->row[i], 1 + tab->n_var, &v);
+    sgn = isl_int_sgn(v);
+    if (eq ? (sgn == 0) : (sgn >= 0))
+      continue;
+    tab = isl_tab_drop_sample(tab, i);
+    if (!tab)
+      break;
+  }
+  isl_int_clear(v);
+
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check whether the sample value of the tableau is finite,
@@ -1952,22 +1879,21 @@ error:
  * all values of the variables are equal to the big parameter plus
  * some constant.  This constant is the actual sample value.
  */
-static int sample_is_finite(struct isl_tab *tab)
-{
-    int i;
+static int sample_is_finite(struct isl_tab *tab) {
+  int i;
 
-    if (!tab->M)
-        return 1;
-
-    for (i = 0; i < tab->n_var; ++i) {
-        int row;
-        if (!tab->var[i].is_row)
-            return 0;
-        row = tab->var[i].index;
-        if (isl_int_ne(tab->mat->row[row][0], tab->mat->row[row][2]))
-            return 0;
-    }
+  if (!tab->M)
     return 1;
+
+  for (i = 0; i < tab->n_var; ++i) {
+    int row;
+    if (!tab->var[i].is_row)
+      return 0;
+    row = tab->var[i].index;
+    if (isl_int_ne(tab->mat->row[row][0], tab->mat->row[row][2]))
+      return 0;
+  }
+  return 1;
 }
 
 /* Check if the context tableau of sol has any integer points.
@@ -1978,103 +1904,99 @@ static int sample_is_finite(struct isl_tab *tab)
  * This function is only called when none of the currently active sample
  * values satisfies the most recently added constraint.
  */
-static struct isl_tab *check_integer_feasible(struct isl_tab *tab)
-{
-    struct isl_tab_undo *snap;
+static struct isl_tab *check_integer_feasible(struct isl_tab *tab) {
+  struct isl_tab_undo *snap;
 
-    if (!tab)
-        return NULL;
-
-    snap = isl_tab_snap(tab);
-    if (isl_tab_push_basis(tab) < 0)
-        goto error;
-
-    tab = cut_to_integer_lexmin(tab, CUT_ALL);
-    if (!tab)
-        goto error;
-
-    if (!tab->empty && sample_is_finite(tab)) {
-        struct isl_vec *sample;
-
-        sample = isl_tab_get_sample_value(tab);
-
-        if (isl_tab_add_sample(tab, sample) < 0)
-            goto error;
-    }
-
-    if (!tab->empty && isl_tab_rollback(tab, snap) < 0)
-        goto error;
-
-    return tab;
-error:
-    isl_tab_free(tab);
+  if (!tab)
     return NULL;
+
+  snap = isl_tab_snap(tab);
+  if (isl_tab_push_basis(tab) < 0)
+    goto error;
+
+  tab = cut_to_integer_lexmin(tab, CUT_ALL);
+  if (!tab)
+    goto error;
+
+  if (!tab->empty && sample_is_finite(tab)) {
+    struct isl_vec *sample;
+
+    sample = isl_tab_get_sample_value(tab);
+
+    if (isl_tab_add_sample(tab, sample) < 0)
+      goto error;
+  }
+
+  if (!tab->empty && isl_tab_rollback(tab, snap) < 0)
+    goto error;
+
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Check if any of the currently active sample values satisfies
  * the inequality "ineq" (an equality if eq is set).
  */
-static int tab_has_valid_sample(struct isl_tab *tab, isl_int *ineq, int eq)
-{
-    int i;
-    isl_int v;
+static int tab_has_valid_sample(struct isl_tab *tab, isl_int *ineq, int eq) {
+  int i;
+  isl_int v;
 
-    if (!tab)
-        return -1;
+  if (!tab)
+    return -1;
 
-    isl_assert(tab->mat->ctx, tab->bmap, return -1);
-    isl_assert(tab->mat->ctx, tab->samples, return -1);
-    isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, return -1);
+  isl_assert(tab->mat->ctx, tab->bmap, return -1);
+  isl_assert(tab->mat->ctx, tab->samples, return -1);
+  isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var, return -1);
 
-    isl_int_init(v);
-    for (i = tab->n_outside; i < tab->n_sample; ++i) {
-        int sgn;
-        isl_seq_inner_product(ineq, tab->samples->row[i],
-                              1 + tab->n_var, &v);
-        sgn = isl_int_sgn(v);
-        if (eq ? (sgn == 0) : (sgn >= 0))
-            break;
-    }
-    isl_int_clear(v);
+  isl_int_init(v);
+  for (i = tab->n_outside; i < tab->n_sample; ++i) {
+    int sgn;
+    isl_seq_inner_product(ineq, tab->samples->row[i], 1 + tab->n_var, &v);
+    sgn = isl_int_sgn(v);
+    if (eq ? (sgn == 0) : (sgn >= 0))
+      break;
+  }
+  isl_int_clear(v);
 
-    return i < tab->n_sample;
+  return i < tab->n_sample;
 }
 
 /* Insert a div specified by "div" to the tableau "tab" at position "pos" and
  * return isl_bool_true if the div is obviously non-negative.
  */
-static isl_bool context_tab_insert_div(struct isl_tab *tab, int pos,
-                                       __isl_keep isl_vec *div,
-                                       isl_stat (*add_ineq)(void *user, isl_int *), void *user)
-{
-    int i;
-    int r;
-    struct isl_mat *samples;
-    int nonneg;
+static isl_bool
+context_tab_insert_div(struct isl_tab *tab, int pos, __isl_keep isl_vec *div,
+                       isl_stat (*add_ineq)(void *user, isl_int *),
+                       void *user) {
+  int i;
+  int r;
+  struct isl_mat *samples;
+  int nonneg;
 
-    r = isl_tab_insert_div(tab, pos, div, add_ineq, user);
-    if (r < 0)
-        return isl_bool_error;
-    nonneg = tab->var[r].is_nonneg;
-    tab->var[r].frozen = 1;
+  r = isl_tab_insert_div(tab, pos, div, add_ineq, user);
+  if (r < 0)
+    return isl_bool_error;
+  nonneg = tab->var[r].is_nonneg;
+  tab->var[r].frozen = 1;
 
-    samples = isl_mat_extend(tab->samples,
-                             tab->n_sample, 1 + tab->n_var);
-    tab->samples = samples;
-    if (!samples)
-        return isl_bool_error;
-    for (i = tab->n_outside; i < samples->n_row; ++i) {
-        isl_seq_inner_product(div->el + 1, samples->row[i],
-                              div->size - 1, &samples->row[i][samples->n_col - 1]);
-        isl_int_fdiv_q(samples->row[i][samples->n_col - 1],
-                       samples->row[i][samples->n_col - 1], div->el[0]);
-    }
-    tab->samples = isl_mat_move_cols(tab->samples, 1 + pos,
-                                     1 + tab->n_var - 1, 1);
-    if (!tab->samples)
-        return isl_bool_error;
+  samples = isl_mat_extend(tab->samples, tab->n_sample, 1 + tab->n_var);
+  tab->samples = samples;
+  if (!samples)
+    return isl_bool_error;
+  for (i = tab->n_outside; i < samples->n_row; ++i) {
+    isl_seq_inner_product(div->el + 1, samples->row[i], div->size - 1,
+                          &samples->row[i][samples->n_col - 1]);
+    isl_int_fdiv_q(samples->row[i][samples->n_col - 1],
+                   samples->row[i][samples->n_col - 1], div->el[0]);
+  }
+  tab->samples =
+      isl_mat_move_cols(tab->samples, 1 + pos, 1 + tab->n_var - 1, 1);
+  if (!tab->samples)
+    return isl_bool_error;
 
-    return isl_bool_ok(nonneg);
+  return isl_bool_ok(nonneg);
 }
 
 /* Add a div specified by "div" to both the main tableau and
@@ -2089,83 +2011,80 @@ static isl_bool context_tab_insert_div(struct isl_tab *tab, int pos,
  * divisions.
  */
 static int add_div(struct isl_tab *tab, struct isl_context *context,
-                   __isl_keep isl_vec *div)
-{
-    int r;
-    int pos;
-    isl_bool nonneg;
-    struct isl_tab *context_tab = context->op->peek_tab(context);
+                   __isl_keep isl_vec *div) {
+  int r;
+  int pos;
+  isl_bool nonneg;
+  struct isl_tab *context_tab = context->op->peek_tab(context);
 
-    if (!tab || !context_tab)
-        goto error;
+  if (!tab || !context_tab)
+    goto error;
 
-    pos = context_tab->n_var - context->n_unknown;
-    if ((nonneg = context->op->insert_div(context, pos, div)) < 0)
-        goto error;
+  pos = context_tab->n_var - context->n_unknown;
+  if ((nonneg = context->op->insert_div(context, pos, div)) < 0)
+    goto error;
 
-    if (!context->op->is_ok(context))
-        goto error;
+  if (!context->op->is_ok(context))
+    goto error;
 
-    pos = tab->n_var - context->n_unknown;
-    if (isl_tab_extend_vars(tab, 1) < 0)
-        goto error;
-    r = isl_tab_insert_var(tab, pos);
-    if (r < 0)
-        goto error;
-    if (nonneg)
-        tab->var[r].is_nonneg = 1;
-    tab->var[r].frozen = 1;
-    tab->n_div++;
+  pos = tab->n_var - context->n_unknown;
+  if (isl_tab_extend_vars(tab, 1) < 0)
+    goto error;
+  r = isl_tab_insert_var(tab, pos);
+  if (r < 0)
+    goto error;
+  if (nonneg)
+    tab->var[r].is_nonneg = 1;
+  tab->var[r].frozen = 1;
+  tab->n_div++;
 
-    return tab->n_div - 1 - context->n_unknown;
+  return tab->n_div - 1 - context->n_unknown;
 error:
-    context->op->invalidate(context);
-    return -1;
+  context->op->invalidate(context);
+  return -1;
 }
 
 /* Return the position of the integer division that is equal to div/denom
  * if there is one.  Otherwise, return a position beyond the integer divisions.
  */
-static int find_div(struct isl_tab *tab, isl_int *div, isl_int denom)
-{
-    int i;
-    isl_size total = isl_basic_map_dim(tab->bmap, isl_dim_all);
-    isl_size n_div;
+static int find_div(struct isl_tab *tab, isl_int *div, isl_int denom) {
+  int i;
+  isl_size total = isl_basic_map_dim(tab->bmap, isl_dim_all);
+  isl_size n_div;
 
-    n_div = isl_basic_map_dim(tab->bmap, isl_dim_div);
-    if (total < 0 || n_div < 0)
-        return -1;
-    for (i = 0; i < n_div; ++i) {
-        if (isl_int_ne(tab->bmap->div[i][0], denom))
-            continue;
-        if (!isl_seq_eq(tab->bmap->div[i] + 1, div, 1 + total))
-            continue;
-        return i;
-    }
-    return n_div;
+  n_div = isl_basic_map_dim(tab->bmap, isl_dim_div);
+  if (total < 0 || n_div < 0)
+    return -1;
+  for (i = 0; i < n_div; ++i) {
+    if (isl_int_ne(tab->bmap->div[i][0], denom))
+      continue;
+    if (!isl_seq_eq(tab->bmap->div[i] + 1, div, 1 + total))
+      continue;
+    return i;
+  }
+  return n_div;
 }
 
 /* Return the index of a div that corresponds to "div".
  * We first check if we already have such a div and if not, we create one.
  */
 static int get_div(struct isl_tab *tab, struct isl_context *context,
-                   struct isl_vec *div)
-{
-    int d;
-    struct isl_tab *context_tab = context->op->peek_tab(context);
-    unsigned n_div;
+                   struct isl_vec *div) {
+  int d;
+  struct isl_tab *context_tab = context->op->peek_tab(context);
+  unsigned n_div;
 
-    if (!context_tab)
-        return -1;
+  if (!context_tab)
+    return -1;
 
-    n_div = isl_basic_map_dim(context_tab->bmap, isl_dim_div);
-    d = find_div(context_tab, div->el + 1, div->el[0]);
-    if (d < 0)
-        return -1;
-    if (d < n_div)
-        return d;
+  n_div = isl_basic_map_dim(context_tab->bmap, isl_dim_div);
+  d = find_div(context_tab, div->el + 1, div->el[0]);
+  if (d < 0)
+    return -1;
+  if (d < n_div)
+    return d;
 
-    return add_div(tab, context, div);
+  return add_div(tab, context, div);
 }
 
 /* Add a parametric cut to cut away the non-integral sample value
@@ -2192,98 +2111,93 @@ static int get_div(struct isl_tab *tab, struct isl_context *context,
  * Return the row of the cut or -1.
  */
 static int add_parametric_cut(struct isl_tab *tab, int row,
-                              struct isl_context *context)
-{
-    struct isl_vec *div;
-    int d;
-    int i;
-    int r;
-    isl_int *r_row;
-    int col;
-    int n;
-    unsigned off = 2 + tab->M;
+                              struct isl_context *context) {
+  struct isl_vec *div;
+  int d;
+  int i;
+  int r;
+  isl_int *r_row;
+  int col;
+  int n;
+  unsigned off = 2 + tab->M;
 
-    if (!context)
-        return -1;
+  if (!context)
+    return -1;
 
-    div = get_row_parameter_div(tab, row);
-    if (!div)
-        return -1;
+  div = get_row_parameter_div(tab, row);
+  if (!div)
+    return -1;
 
-    n = tab->n_div - context->n_unknown;
-    d = context->op->get_div(context, tab, div);
-    isl_vec_free(div);
-    if (d < 0)
-        return -1;
+  n = tab->n_div - context->n_unknown;
+  d = context->op->get_div(context, tab, div);
+  isl_vec_free(div);
+  if (d < 0)
+    return -1;
 
-    if (isl_tab_extend_cons(tab, 1) < 0)
-        return -1;
-    r = isl_tab_allocate_con(tab);
-    if (r < 0)
-        return -1;
+  if (isl_tab_extend_cons(tab, 1) < 0)
+    return -1;
+  r = isl_tab_allocate_con(tab);
+  if (r < 0)
+    return -1;
 
-    r_row = tab->mat->row[tab->con[r].index];
-    isl_int_set(r_row[0], tab->mat->row[row][0]);
-    isl_int_neg(r_row[1], tab->mat->row[row][1]);
-    isl_int_fdiv_r(r_row[1], r_row[1], tab->mat->row[row][0]);
-    isl_int_neg(r_row[1], r_row[1]);
-    if (tab->M)
-        isl_int_set_si(r_row[2], 0);
-    for (i = 0; i < tab->n_param; ++i) {
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        isl_int_neg(r_row[off + col], tab->mat->row[row][off + col]);
-        isl_int_fdiv_r(r_row[off + col], r_row[off + col],
-                       tab->mat->row[row][0]);
-        isl_int_neg(r_row[off + col], r_row[off + col]);
-    }
-    for (i = 0; i < tab->n_div; ++i) {
-        if (tab->var[tab->n_var - tab->n_div + i].is_row)
-            continue;
-        col = tab->var[tab->n_var - tab->n_div + i].index;
-        isl_int_neg(r_row[off + col], tab->mat->row[row][off + col]);
-        isl_int_fdiv_r(r_row[off + col], r_row[off + col],
-                       tab->mat->row[row][0]);
-        isl_int_neg(r_row[off + col], r_row[off + col]);
-    }
-    for (i = 0; i < tab->n_col; ++i) {
-        if (tab->col_var[i] >= 0 &&
-                (tab->col_var[i] < tab->n_param ||
-                 tab->col_var[i] >= tab->n_var - tab->n_div))
-            continue;
-        isl_int_fdiv_r(r_row[off + i],
-                       tab->mat->row[row][off + i], tab->mat->row[row][0]);
-    }
-    if (tab->var[tab->n_var - tab->n_div + d].is_row) {
-        isl_int gcd;
-        int d_row = tab->var[tab->n_var - tab->n_div + d].index;
-        isl_int_init(gcd);
-        isl_int_gcd(gcd, tab->mat->row[d_row][0], r_row[0]);
-        isl_int_divexact(r_row[0], r_row[0], gcd);
-        isl_int_divexact(gcd, tab->mat->row[d_row][0], gcd);
-        isl_seq_combine(r_row + 1, gcd, r_row + 1,
-                        r_row[0], tab->mat->row[d_row] + 1,
-                        off - 1 + tab->n_col);
-        isl_int_mul(r_row[0], r_row[0], tab->mat->row[d_row][0]);
-        isl_int_clear(gcd);
-    } else {
-        col = tab->var[tab->n_var - tab->n_div + d].index;
-        isl_int_set(r_row[off + col], tab->mat->row[row][0]);
-    }
+  r_row = tab->mat->row[tab->con[r].index];
+  isl_int_set(r_row[0], tab->mat->row[row][0]);
+  isl_int_neg(r_row[1], tab->mat->row[row][1]);
+  isl_int_fdiv_r(r_row[1], r_row[1], tab->mat->row[row][0]);
+  isl_int_neg(r_row[1], r_row[1]);
+  if (tab->M)
+    isl_int_set_si(r_row[2], 0);
+  for (i = 0; i < tab->n_param; ++i) {
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    isl_int_neg(r_row[off + col], tab->mat->row[row][off + col]);
+    isl_int_fdiv_r(r_row[off + col], r_row[off + col], tab->mat->row[row][0]);
+    isl_int_neg(r_row[off + col], r_row[off + col]);
+  }
+  for (i = 0; i < tab->n_div; ++i) {
+    if (tab->var[tab->n_var - tab->n_div + i].is_row)
+      continue;
+    col = tab->var[tab->n_var - tab->n_div + i].index;
+    isl_int_neg(r_row[off + col], tab->mat->row[row][off + col]);
+    isl_int_fdiv_r(r_row[off + col], r_row[off + col], tab->mat->row[row][0]);
+    isl_int_neg(r_row[off + col], r_row[off + col]);
+  }
+  for (i = 0; i < tab->n_col; ++i) {
+    if (tab->col_var[i] >= 0 && (tab->col_var[i] < tab->n_param ||
+                                 tab->col_var[i] >= tab->n_var - tab->n_div))
+      continue;
+    isl_int_fdiv_r(r_row[off + i], tab->mat->row[row][off + i],
+                   tab->mat->row[row][0]);
+  }
+  if (tab->var[tab->n_var - tab->n_div + d].is_row) {
+    isl_int gcd;
+    int d_row = tab->var[tab->n_var - tab->n_div + d].index;
+    isl_int_init(gcd);
+    isl_int_gcd(gcd, tab->mat->row[d_row][0], r_row[0]);
+    isl_int_divexact(r_row[0], r_row[0], gcd);
+    isl_int_divexact(gcd, tab->mat->row[d_row][0], gcd);
+    isl_seq_combine(r_row + 1, gcd, r_row + 1, r_row[0],
+                    tab->mat->row[d_row] + 1, off - 1 + tab->n_col);
+    isl_int_mul(r_row[0], r_row[0], tab->mat->row[d_row][0]);
+    isl_int_clear(gcd);
+  } else {
+    col = tab->var[tab->n_var - tab->n_div + d].index;
+    isl_int_set(r_row[off + col], tab->mat->row[row][0]);
+  }
 
-    tab->con[r].is_nonneg = 1;
-    if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
-        return -1;
-    if (tab->row_sign)
-        tab->row_sign[tab->con[r].index] = isl_tab_row_neg;
+  tab->con[r].is_nonneg = 1;
+  if (isl_tab_push_var(tab, isl_tab_undo_nonneg, &tab->con[r]) < 0)
+    return -1;
+  if (tab->row_sign)
+    tab->row_sign[tab->con[r].index] = isl_tab_row_neg;
 
-    row = tab->con[r].index;
+  row = tab->con[r].index;
 
-    if (d >= n && context->op->detect_equalities(context, tab) < 0)
-        return -1;
+  if (d >= n && context->op->detect_equalities(context, tab) < 0)
+    return -1;
 
-    return row;
+  return row;
 }
 
 /* Construct a tableau for bmap that can be used for computing
@@ -2299,75 +2213,70 @@ static int add_parametric_cut(struct isl_tab *tab, int row,
  * to the tableau.
  */
 static __isl_give struct isl_tab *tab_for_lexmin(__isl_keep isl_basic_map *bmap,
-        __isl_keep isl_basic_set *dom, unsigned M, int max)
-{
-    int i;
-    struct isl_tab *tab;
-    unsigned n_var;
-    unsigned o_var;
-    isl_size total;
+                                                 __isl_keep isl_basic_set *dom,
+                                                 unsigned M, int max) {
+  int i;
+  struct isl_tab *tab;
+  unsigned n_var;
+  unsigned o_var;
+  isl_size total;
 
-    total = isl_basic_map_dim(bmap, isl_dim_all);
-    if (total < 0)
-        return NULL;
-    tab = isl_tab_alloc(bmap->ctx, 2 * bmap->n_eq + bmap->n_ineq + 1,
-                        total, M);
-    if (!tab)
-        return NULL;
-
-    tab->rational = ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL);
-    if (dom) {
-        isl_size dom_total;
-        dom_total = isl_basic_set_dim(dom, isl_dim_all);
-        if (dom_total < 0)
-            goto error;
-        tab->n_param = dom_total - dom->n_div;
-        tab->n_div = dom->n_div;
-        tab->row_sign = isl_calloc_array(bmap->ctx,
-                                         enum isl_tab_row_sign, tab->mat->n_row);
-        if (tab->mat->n_row && !tab->row_sign)
-            goto error;
-    }
-    if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY)) {
-        if (isl_tab_mark_empty(tab) < 0)
-            goto error;
-        return tab;
-    }
-
-    for (i = tab->n_param; i < tab->n_var - tab->n_div; ++i) {
-        tab->var[i].is_nonneg = 1;
-        tab->var[i].frozen = 1;
-    }
-    o_var = 1 + tab->n_param;
-    n_var = tab->n_var - tab->n_param - tab->n_div;
-    for (i = 0; i < bmap->n_eq; ++i) {
-        if (max)
-            isl_seq_neg(bmap->eq[i] + o_var,
-                        bmap->eq[i] + o_var, n_var);
-        tab = add_lexmin_valid_eq(tab, bmap->eq[i]);
-        if (max)
-            isl_seq_neg(bmap->eq[i] + o_var,
-                        bmap->eq[i] + o_var, n_var);
-        if (!tab || tab->empty)
-            return tab;
-    }
-    if (bmap->n_eq && restore_lexmin(tab) < 0)
-        goto error;
-    for (i = 0; i < bmap->n_ineq; ++i) {
-        if (max)
-            isl_seq_neg(bmap->ineq[i] + o_var,
-                        bmap->ineq[i] + o_var, n_var);
-        tab = add_lexmin_ineq(tab, bmap->ineq[i]);
-        if (max)
-            isl_seq_neg(bmap->ineq[i] + o_var,
-                        bmap->ineq[i] + o_var, n_var);
-        if (!tab || tab->empty)
-            return tab;
-    }
-    return tab;
-error:
-    isl_tab_free(tab);
+  total = isl_basic_map_dim(bmap, isl_dim_all);
+  if (total < 0)
     return NULL;
+  tab = isl_tab_alloc(bmap->ctx, 2 * bmap->n_eq + bmap->n_ineq + 1, total, M);
+  if (!tab)
+    return NULL;
+
+  tab->rational = ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL);
+  if (dom) {
+    isl_size dom_total;
+    dom_total = isl_basic_set_dim(dom, isl_dim_all);
+    if (dom_total < 0)
+      goto error;
+    tab->n_param = dom_total - dom->n_div;
+    tab->n_div = dom->n_div;
+    tab->row_sign =
+        isl_calloc_array(bmap->ctx, enum isl_tab_row_sign, tab->mat->n_row);
+    if (tab->mat->n_row && !tab->row_sign)
+      goto error;
+  }
+  if (ISL_F_ISSET(bmap, ISL_BASIC_MAP_EMPTY)) {
+    if (isl_tab_mark_empty(tab) < 0)
+      goto error;
+    return tab;
+  }
+
+  for (i = tab->n_param; i < tab->n_var - tab->n_div; ++i) {
+    tab->var[i].is_nonneg = 1;
+    tab->var[i].frozen = 1;
+  }
+  o_var = 1 + tab->n_param;
+  n_var = tab->n_var - tab->n_param - tab->n_div;
+  for (i = 0; i < bmap->n_eq; ++i) {
+    if (max)
+      isl_seq_neg(bmap->eq[i] + o_var, bmap->eq[i] + o_var, n_var);
+    tab = add_lexmin_valid_eq(tab, bmap->eq[i]);
+    if (max)
+      isl_seq_neg(bmap->eq[i] + o_var, bmap->eq[i] + o_var, n_var);
+    if (!tab || tab->empty)
+      return tab;
+  }
+  if (bmap->n_eq && restore_lexmin(tab) < 0)
+    goto error;
+  for (i = 0; i < bmap->n_ineq; ++i) {
+    if (max)
+      isl_seq_neg(bmap->ineq[i] + o_var, bmap->ineq[i] + o_var, n_var);
+    tab = add_lexmin_ineq(tab, bmap->ineq[i]);
+    if (max)
+      isl_seq_neg(bmap->ineq[i] + o_var, bmap->ineq[i] + o_var, n_var);
+    if (!tab || tab->empty)
+      return tab;
+  }
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Given a main tableau where more than one row requires a split,
@@ -2399,225 +2308,213 @@ error:
  * valgrind may warn about uninitialized memory accesses when isl
  * is compiled with some versions of gcc.
  */
-static int best_split(struct isl_tab *tab, struct isl_tab *context_tab)
-{
-    struct isl_tab_undo *snap;
-    int split;
-    int row;
-    int best = -1;
-    int best_r = 0;
+static int best_split(struct isl_tab *tab, struct isl_tab *context_tab) {
+  struct isl_tab_undo *snap;
+  int split;
+  int row;
+  int best = -1;
+  int best_r = 0;
 
-    if (isl_tab_extend_cons(context_tab, 2) < 0)
+  if (isl_tab_extend_cons(context_tab, 2) < 0)
+    return -1;
+
+  snap = isl_tab_snap(context_tab);
+
+  for (split = tab->n_redundant; split < tab->n_row; ++split) {
+    struct isl_tab_undo *snap2;
+    struct isl_vec *ineq = NULL;
+    int r = 0;
+    int ok;
+
+    if (!isl_tab_var_from_row(tab, split)->is_nonneg)
+      continue;
+    if (tab->row_sign[split] != isl_tab_row_any)
+      continue;
+
+    if (is_parametric_constant(tab, split))
+      return split;
+
+    ineq = get_row_parameter_ineq(tab, split);
+    if (!ineq)
+      return -1;
+    ok = isl_tab_add_ineq(context_tab, ineq->el) >= 0;
+    isl_vec_free(ineq);
+    if (!ok)
+      return -1;
+
+    snap2 = isl_tab_snap(context_tab);
+
+    for (row = tab->n_redundant; row < tab->n_row; ++row) {
+      struct isl_tab_var *var;
+
+      if (row == split)
+        continue;
+      if (!isl_tab_var_from_row(tab, row)->is_nonneg)
+        continue;
+      if (tab->row_sign[row] != isl_tab_row_any)
+        continue;
+
+      ineq = get_row_parameter_ineq(tab, row);
+      if (!ineq)
         return -1;
-
-    snap = isl_tab_snap(context_tab);
-
-    for (split = tab->n_redundant; split < tab->n_row; ++split) {
-        struct isl_tab_undo *snap2;
-        struct isl_vec *ineq = NULL;
-        int r = 0;
-        int ok;
-
-        if (!isl_tab_var_from_row(tab, split)->is_nonneg)
-            continue;
-        if (tab->row_sign[split] != isl_tab_row_any)
-            continue;
-
-        if (is_parametric_constant(tab, split))
-            return split;
-
-        ineq = get_row_parameter_ineq(tab, split);
-        if (!ineq)
-            return -1;
-        ok = isl_tab_add_ineq(context_tab, ineq->el) >= 0;
-        isl_vec_free(ineq);
-        if (!ok)
-            return -1;
-
-        snap2 = isl_tab_snap(context_tab);
-
-        for (row = tab->n_redundant; row < tab->n_row; ++row) {
-            struct isl_tab_var *var;
-
-            if (row == split)
-                continue;
-            if (!isl_tab_var_from_row(tab, row)->is_nonneg)
-                continue;
-            if (tab->row_sign[row] != isl_tab_row_any)
-                continue;
-
-            ineq = get_row_parameter_ineq(tab, row);
-            if (!ineq)
-                return -1;
-            ok = isl_tab_add_ineq(context_tab, ineq->el) >= 0;
-            isl_vec_free(ineq);
-            if (!ok)
-                return -1;
-            var = &context_tab->con[context_tab->n_con - 1];
-            if (!context_tab->empty &&
-                    !isl_tab_min_at_most_neg_one(context_tab, var))
-                r++;
-            if (isl_tab_rollback(context_tab, snap2) < 0)
-                return -1;
-        }
-        if (best == -1 || r > best_r) {
-            best = split;
-            best_r = r;
-        }
-        if (isl_tab_rollback(context_tab, snap) < 0)
-            return -1;
+      ok = isl_tab_add_ineq(context_tab, ineq->el) >= 0;
+      isl_vec_free(ineq);
+      if (!ok)
+        return -1;
+      var = &context_tab->con[context_tab->n_con - 1];
+      if (!context_tab->empty && !isl_tab_min_at_most_neg_one(context_tab, var))
+        r++;
+      if (isl_tab_rollback(context_tab, snap2) < 0)
+        return -1;
     }
+    if (best == -1 || r > best_r) {
+      best = split;
+      best_r = r;
+    }
+    if (isl_tab_rollback(context_tab, snap) < 0)
+      return -1;
+  }
 
-    return best;
+  return best;
 }
 
-static struct isl_basic_set *context_lex_peek_basic_set(
-    struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    if (!clex->tab)
-        return NULL;
-    return isl_tab_peek_bset(clex->tab);
+static struct isl_basic_set *
+context_lex_peek_basic_set(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  if (!clex->tab)
+    return NULL;
+  return isl_tab_peek_bset(clex->tab);
 }
 
-static struct isl_tab *context_lex_peek_tab(struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    return clex->tab;
+static struct isl_tab *context_lex_peek_tab(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  return clex->tab;
 }
 
 static void context_lex_add_eq(struct isl_context *context, isl_int *eq,
-                               int check, int update)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    if (isl_tab_extend_cons(clex->tab, 2) < 0)
-        goto error;
-    if (add_lexmin_eq(clex->tab, eq) < 0)
-        goto error;
-    if (check) {
-        int v = tab_has_valid_sample(clex->tab, eq, 1);
-        if (v < 0)
-            goto error;
-        if (!v)
-            clex->tab = check_integer_feasible(clex->tab);
-    }
-    if (update)
-        clex->tab = check_samples(clex->tab, eq, 1);
-    return;
+                               int check, int update) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  if (isl_tab_extend_cons(clex->tab, 2) < 0)
+    goto error;
+  if (add_lexmin_eq(clex->tab, eq) < 0)
+    goto error;
+  if (check) {
+    int v = tab_has_valid_sample(clex->tab, eq, 1);
+    if (v < 0)
+      goto error;
+    if (!v)
+      clex->tab = check_integer_feasible(clex->tab);
+  }
+  if (update)
+    clex->tab = check_samples(clex->tab, eq, 1);
+  return;
 error:
-    isl_tab_free(clex->tab);
-    clex->tab = NULL;
+  isl_tab_free(clex->tab);
+  clex->tab = NULL;
 }
 
 static void context_lex_add_ineq(struct isl_context *context, isl_int *ineq,
-                                 int check, int update)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    if (isl_tab_extend_cons(clex->tab, 1) < 0)
-        goto error;
-    clex->tab = add_lexmin_ineq(clex->tab, ineq);
-    if (check) {
-        int v = tab_has_valid_sample(clex->tab, ineq, 0);
-        if (v < 0)
-            goto error;
-        if (!v)
-            clex->tab = check_integer_feasible(clex->tab);
-    }
-    if (update)
-        clex->tab = check_samples(clex->tab, ineq, 0);
-    return;
+                                 int check, int update) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  if (isl_tab_extend_cons(clex->tab, 1) < 0)
+    goto error;
+  clex->tab = add_lexmin_ineq(clex->tab, ineq);
+  if (check) {
+    int v = tab_has_valid_sample(clex->tab, ineq, 0);
+    if (v < 0)
+      goto error;
+    if (!v)
+      clex->tab = check_integer_feasible(clex->tab);
+  }
+  if (update)
+    clex->tab = check_samples(clex->tab, ineq, 0);
+  return;
 error:
-    isl_tab_free(clex->tab);
-    clex->tab = NULL;
+  isl_tab_free(clex->tab);
+  clex->tab = NULL;
 }
 
-static isl_stat context_lex_add_ineq_wrap(void *user, isl_int *ineq)
-{
-    struct isl_context *context = (struct isl_context *)user;
-    context_lex_add_ineq(context, ineq, 0, 0);
-    return context->op->is_ok(context) ? isl_stat_ok : isl_stat_error;
+static isl_stat context_lex_add_ineq_wrap(void *user, isl_int *ineq) {
+  struct isl_context *context = (struct isl_context *)user;
+  context_lex_add_ineq(context, ineq, 0, 0);
+  return context->op->is_ok(context) ? isl_stat_ok : isl_stat_error;
 }
 
 /* Check which signs can be obtained by "ineq" on all the currently
  * active sample values.  See row_sign for more information.
  */
 static enum isl_tab_row_sign tab_ineq_sign(struct isl_tab *tab, isl_int *ineq,
-        int strict)
-{
-    int i;
-    int sgn;
-    isl_int tmp;
-    enum isl_tab_row_sign res = isl_tab_row_unknown;
+                                           int strict) {
+  int i;
+  int sgn;
+  isl_int tmp;
+  enum isl_tab_row_sign res = isl_tab_row_unknown;
 
-    isl_assert(tab->mat->ctx, tab->samples, return isl_tab_row_unknown);
-    isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var,
-               return isl_tab_row_unknown);
+  isl_assert(tab->mat->ctx, tab->samples, return isl_tab_row_unknown);
+  isl_assert(tab->mat->ctx, tab->samples->n_col == 1 + tab->n_var,
+             return isl_tab_row_unknown);
 
-    isl_int_init(tmp);
-    for (i = tab->n_outside; i < tab->n_sample; ++i) {
-        isl_seq_inner_product(tab->samples->row[i], ineq,
-                              1 + tab->n_var, &tmp);
-        sgn = isl_int_sgn(tmp);
-        if (sgn > 0 || (sgn == 0 && strict)) {
-            if (res == isl_tab_row_unknown)
-                res = isl_tab_row_pos;
-            if (res == isl_tab_row_neg)
-                res = isl_tab_row_any;
-        }
-        if (sgn < 0) {
-            if (res == isl_tab_row_unknown)
-                res = isl_tab_row_neg;
-            if (res == isl_tab_row_pos)
-                res = isl_tab_row_any;
-        }
-        if (res == isl_tab_row_any)
-            break;
+  isl_int_init(tmp);
+  for (i = tab->n_outside; i < tab->n_sample; ++i) {
+    isl_seq_inner_product(tab->samples->row[i], ineq, 1 + tab->n_var, &tmp);
+    sgn = isl_int_sgn(tmp);
+    if (sgn > 0 || (sgn == 0 && strict)) {
+      if (res == isl_tab_row_unknown)
+        res = isl_tab_row_pos;
+      if (res == isl_tab_row_neg)
+        res = isl_tab_row_any;
     }
-    isl_int_clear(tmp);
+    if (sgn < 0) {
+      if (res == isl_tab_row_unknown)
+        res = isl_tab_row_neg;
+      if (res == isl_tab_row_pos)
+        res = isl_tab_row_any;
+    }
+    if (res == isl_tab_row_any)
+      break;
+  }
+  isl_int_clear(tmp);
 
-    return res;
+  return res;
 }
 
 static enum isl_tab_row_sign context_lex_ineq_sign(struct isl_context *context,
-        isl_int *ineq, int strict)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    return tab_ineq_sign(clex->tab, ineq, strict);
+                                                   isl_int *ineq, int strict) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  return tab_ineq_sign(clex->tab, ineq, strict);
 }
 
 /* Check whether "ineq" can be added to the tableau without rendering
  * it infeasible.
  */
-static int context_lex_test_ineq(struct isl_context *context, isl_int *ineq)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    struct isl_tab_undo *snap;
-    int feasible;
+static int context_lex_test_ineq(struct isl_context *context, isl_int *ineq) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  struct isl_tab_undo *snap;
+  int feasible;
 
-    if (!clex->tab)
-        return -1;
+  if (!clex->tab)
+    return -1;
 
-    if (isl_tab_extend_cons(clex->tab, 1) < 0)
-        return -1;
+  if (isl_tab_extend_cons(clex->tab, 1) < 0)
+    return -1;
 
-    snap = isl_tab_snap(clex->tab);
-    if (isl_tab_push_basis(clex->tab) < 0)
-        return -1;
-    clex->tab = add_lexmin_ineq(clex->tab, ineq);
-    clex->tab = check_integer_feasible(clex->tab);
-    if (!clex->tab)
-        return -1;
-    feasible = !clex->tab->empty;
-    if (isl_tab_rollback(clex->tab, snap) < 0)
-        return -1;
+  snap = isl_tab_snap(clex->tab);
+  if (isl_tab_push_basis(clex->tab) < 0)
+    return -1;
+  clex->tab = add_lexmin_ineq(clex->tab, ineq);
+  clex->tab = check_integer_feasible(clex->tab);
+  if (!clex->tab)
+    return -1;
+  feasible = !clex->tab->empty;
+  if (isl_tab_rollback(clex->tab, snap) < 0)
+    return -1;
 
-    return feasible;
+  return feasible;
 }
 
 static int context_lex_get_div(struct isl_context *context, struct isl_tab *tab,
-                               struct isl_vec *div)
-{
-    return get_div(tab, context, div);
+                               struct isl_vec *div) {
+  return get_div(tab, context, div);
 }
 
 /* Insert a div specified by "div" to the context tableau at position "pos" and
@@ -2629,82 +2526,73 @@ static int context_lex_get_div(struct isl_context *context, struct isl_tab *tab,
  * div, i.e., div' = M + div, so we can't draw any conclusions.
  */
 static isl_bool context_lex_insert_div(struct isl_context *context, int pos,
-                                       __isl_keep isl_vec *div)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    isl_bool nonneg;
-    nonneg = context_tab_insert_div(clex->tab, pos, div,
-                                    context_lex_add_ineq_wrap, context);
-    if (nonneg < 0)
-        return isl_bool_error;
-    if (clex->tab->M)
-        return isl_bool_false;
-    return nonneg;
+                                       __isl_keep isl_vec *div) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  isl_bool nonneg;
+  nonneg = context_tab_insert_div(clex->tab, pos, div,
+                                  context_lex_add_ineq_wrap, context);
+  if (nonneg < 0)
+    return isl_bool_error;
+  if (clex->tab->M)
+    return isl_bool_false;
+  return nonneg;
 }
 
 static int context_lex_detect_equalities(struct isl_context *context,
-        struct isl_tab *tab)
-{
-    return 0;
+                                         struct isl_tab *tab) {
+  return 0;
 }
 
 static int context_lex_best_split(struct isl_context *context,
-                                  struct isl_tab *tab)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    struct isl_tab_undo *snap;
-    int r;
+                                  struct isl_tab *tab) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  struct isl_tab_undo *snap;
+  int r;
 
-    snap = isl_tab_snap(clex->tab);
-    if (isl_tab_push_basis(clex->tab) < 0)
-        return -1;
-    r = best_split(tab, clex->tab);
+  snap = isl_tab_snap(clex->tab);
+  if (isl_tab_push_basis(clex->tab) < 0)
+    return -1;
+  r = best_split(tab, clex->tab);
 
-    if (r >= 0 && isl_tab_rollback(clex->tab, snap) < 0)
-        return -1;
+  if (r >= 0 && isl_tab_rollback(clex->tab, snap) < 0)
+    return -1;
 
-    return r;
+  return r;
 }
 
-static int context_lex_is_empty(struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    if (!clex->tab)
-        return -1;
-    return clex->tab->empty;
+static int context_lex_is_empty(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  if (!clex->tab)
+    return -1;
+  return clex->tab->empty;
 }
 
-static void *context_lex_save(struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    struct isl_tab_undo *snap;
+static void *context_lex_save(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  struct isl_tab_undo *snap;
 
-    snap = isl_tab_snap(clex->tab);
-    if (isl_tab_push_basis(clex->tab) < 0)
-        return NULL;
-    if (isl_tab_save_samples(clex->tab) < 0)
-        return NULL;
+  snap = isl_tab_snap(clex->tab);
+  if (isl_tab_push_basis(clex->tab) < 0)
+    return NULL;
+  if (isl_tab_save_samples(clex->tab) < 0)
+    return NULL;
 
-    return snap;
+  return snap;
 }
 
-static void context_lex_restore(struct isl_context *context, void *save)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    if (isl_tab_rollback(clex->tab, (struct isl_tab_undo *)save) < 0) {
-        isl_tab_free(clex->tab);
-        clex->tab = NULL;
-    }
+static void context_lex_restore(struct isl_context *context, void *save) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  if (isl_tab_rollback(clex->tab, (struct isl_tab_undo *)save) < 0) {
+    isl_tab_free(clex->tab);
+    clex->tab = NULL;
+  }
 }
 
-static void context_lex_discard(void *save)
-{
-}
+static void context_lex_discard(void *save) {}
 
-static int context_lex_is_ok(struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    return !!clex->tab;
+static int context_lex_is_ok(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  return !!clex->tab;
 }
 
 /* For each variable in the context tableau, check if the variable can
@@ -2712,99 +2600,96 @@ static int context_lex_is_ok(struct isl_context *context)
  * in the main tableau.  This allows for a more direct identification of some
  * cases of violated constraints.
  */
-static struct isl_tab *tab_detect_nonnegative_parameters(struct isl_tab *tab,
-        struct isl_tab *context_tab)
-{
-    int i;
-    struct isl_tab_undo *snap;
-    struct isl_vec *ineq = NULL;
-    struct isl_tab_var *var;
-    int n;
+static struct isl_tab *
+tab_detect_nonnegative_parameters(struct isl_tab *tab,
+                                  struct isl_tab *context_tab) {
+  int i;
+  struct isl_tab_undo *snap;
+  struct isl_vec *ineq = NULL;
+  struct isl_tab_var *var;
+  int n;
 
-    if (context_tab->n_var == 0)
-        return tab;
-
-    ineq = isl_vec_alloc(tab->mat->ctx, 1 + context_tab->n_var);
-    if (!ineq)
-        goto error;
-
-    if (isl_tab_extend_cons(context_tab, 1) < 0)
-        goto error;
-
-    snap = isl_tab_snap(context_tab);
-
-    n = 0;
-    isl_seq_clr(ineq->el, ineq->size);
-    for (i = 0; i < context_tab->n_var; ++i) {
-        isl_int_set_si(ineq->el[1 + i], 1);
-        if (isl_tab_add_ineq(context_tab, ineq->el) < 0)
-            goto error;
-        var = &context_tab->con[context_tab->n_con - 1];
-        if (!context_tab->empty &&
-                !isl_tab_min_at_most_neg_one(context_tab, var)) {
-            int j = i;
-            if (i >= tab->n_param)
-                j = i - tab->n_param + tab->n_var - tab->n_div;
-            tab->var[j].is_nonneg = 1;
-            n++;
-        }
-        isl_int_set_si(ineq->el[1 + i], 0);
-        if (isl_tab_rollback(context_tab, snap) < 0)
-            goto error;
-    }
-
-    if (context_tab->M && n == context_tab->n_var) {
-        context_tab->mat = isl_mat_drop_cols(context_tab->mat, 2, 1);
-        context_tab->M = 0;
-    }
-
-    isl_vec_free(ineq);
+  if (context_tab->n_var == 0)
     return tab;
+
+  ineq = isl_vec_alloc(tab->mat->ctx, 1 + context_tab->n_var);
+  if (!ineq)
+    goto error;
+
+  if (isl_tab_extend_cons(context_tab, 1) < 0)
+    goto error;
+
+  snap = isl_tab_snap(context_tab);
+
+  n = 0;
+  isl_seq_clr(ineq->el, ineq->size);
+  for (i = 0; i < context_tab->n_var; ++i) {
+    isl_int_set_si(ineq->el[1 + i], 1);
+    if (isl_tab_add_ineq(context_tab, ineq->el) < 0)
+      goto error;
+    var = &context_tab->con[context_tab->n_con - 1];
+    if (!context_tab->empty && !isl_tab_min_at_most_neg_one(context_tab, var)) {
+      int j = i;
+      if (i >= tab->n_param)
+        j = i - tab->n_param + tab->n_var - tab->n_div;
+      tab->var[j].is_nonneg = 1;
+      n++;
+    }
+    isl_int_set_si(ineq->el[1 + i], 0);
+    if (isl_tab_rollback(context_tab, snap) < 0)
+      goto error;
+  }
+
+  if (context_tab->M && n == context_tab->n_var) {
+    context_tab->mat = isl_mat_drop_cols(context_tab->mat, 2, 1);
+    context_tab->M = 0;
+  }
+
+  isl_vec_free(ineq);
+  return tab;
 error:
-    isl_vec_free(ineq);
-    isl_tab_free(tab);
-    return NULL;
+  isl_vec_free(ineq);
+  isl_tab_free(tab);
+  return NULL;
 }
 
-static struct isl_tab *context_lex_detect_nonnegative_parameters(
-    struct isl_context *context, struct isl_tab *tab)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    struct isl_tab_undo *snap;
+static struct isl_tab *
+context_lex_detect_nonnegative_parameters(struct isl_context *context,
+                                          struct isl_tab *tab) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  struct isl_tab_undo *snap;
 
-    if (!tab)
-        return NULL;
+  if (!tab)
+    return NULL;
 
-    snap = isl_tab_snap(clex->tab);
-    if (isl_tab_push_basis(clex->tab) < 0)
-        goto error;
+  snap = isl_tab_snap(clex->tab);
+  if (isl_tab_push_basis(clex->tab) < 0)
+    goto error;
 
-    tab = tab_detect_nonnegative_parameters(tab, clex->tab);
+  tab = tab_detect_nonnegative_parameters(tab, clex->tab);
 
-    if (isl_tab_rollback(clex->tab, snap) < 0)
-        goto error;
+  if (isl_tab_rollback(clex->tab, snap) < 0)
+    goto error;
 
-    return tab;
+  return tab;
 error:
-    isl_tab_free(tab);
-    return NULL;
+  isl_tab_free(tab);
+  return NULL;
 }
 
-static void context_lex_invalidate(struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    isl_tab_free(clex->tab);
-    clex->tab = NULL;
+static void context_lex_invalidate(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  isl_tab_free(clex->tab);
+  clex->tab = NULL;
 }
 
-static __isl_null struct isl_context *context_lex_free(
-    struct isl_context *context)
-{
-    struct isl_context_lex *clex = (struct isl_context_lex *)context;
-    isl_tab_free(clex->tab);
-    free(clex);
+static __isl_null struct isl_context *
+context_lex_free(struct isl_context *context) {
+  struct isl_context_lex *clex = (struct isl_context_lex *)context;
+  isl_tab_free(clex->tab);
+  free(clex);
 
-    return NULL;
+  return NULL;
 }
 
 struct isl_context_op isl_context_lex_op = {
@@ -2828,46 +2713,44 @@ struct isl_context_op isl_context_lex_op = {
     context_lex_free,
 };
 
-static struct isl_tab *context_tab_for_lexmin(__isl_take isl_basic_set *bset)
-{
-    struct isl_tab *tab;
+static struct isl_tab *context_tab_for_lexmin(__isl_take isl_basic_set *bset) {
+  struct isl_tab *tab;
 
-    if (!bset)
-        return NULL;
-    tab = tab_for_lexmin(bset_to_bmap(bset), NULL, 1, 0);
-    if (isl_tab_track_bset(tab, bset) < 0)
-        goto error;
-    tab = isl_tab_init_samples(tab);
-    return tab;
-error:
-    isl_tab_free(tab);
+  if (!bset)
     return NULL;
+  tab = tab_for_lexmin(bset_to_bmap(bset), NULL, 1, 0);
+  if (isl_tab_track_bset(tab, bset) < 0)
+    goto error;
+  tab = isl_tab_init_samples(tab);
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
-static struct isl_context *isl_context_lex_alloc(struct isl_basic_set *dom)
-{
-    struct isl_context_lex *clex;
+static struct isl_context *isl_context_lex_alloc(struct isl_basic_set *dom) {
+  struct isl_context_lex *clex;
 
-    if (!dom)
-        return NULL;
-
-    clex = isl_alloc_type(dom->ctx, struct isl_context_lex);
-    if (!clex)
-        return NULL;
-
-    clex->context.op = &isl_context_lex_op;
-
-    clex->tab = context_tab_for_lexmin(isl_basic_set_copy(dom));
-    if (restore_lexmin(clex->tab) < 0)
-        goto error;
-    clex->tab = check_integer_feasible(clex->tab);
-    if (!clex->tab)
-        goto error;
-
-    return &clex->context;
-error:
-    clex->context.op->free(&clex->context);
+  if (!dom)
     return NULL;
+
+  clex = isl_alloc_type(dom->ctx, struct isl_context_lex);
+  if (!clex)
+    return NULL;
+
+  clex->context.op = &isl_context_lex_op;
+
+  clex->tab = context_tab_for_lexmin(isl_basic_set_copy(dom));
+  if (restore_lexmin(clex->tab) < 0)
+    goto error;
+  clex->tab = check_integer_feasible(clex->tab);
+  if (!clex->tab)
+    goto error;
+
+  return &clex->context;
+error:
+  clex->context.op->free(&clex->context);
+  return NULL;
 }
 
 /* Representation of the context when using generalized basis reduction.
@@ -2879,34 +2762,32 @@ error:
  * as it would be empty.
  */
 struct isl_context_gbr {
-    struct isl_context context;
-    struct isl_tab *tab;
-    struct isl_tab *shifted;
-    struct isl_tab *cone;
+  struct isl_context context;
+  struct isl_tab *tab;
+  struct isl_tab *shifted;
+  struct isl_tab *cone;
 };
 
-static struct isl_tab *context_gbr_detect_nonnegative_parameters(
-    struct isl_context *context, struct isl_tab *tab)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    if (!tab)
-        return NULL;
-    return tab_detect_nonnegative_parameters(tab, cgbr->tab);
+static struct isl_tab *
+context_gbr_detect_nonnegative_parameters(struct isl_context *context,
+                                          struct isl_tab *tab) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  if (!tab)
+    return NULL;
+  return tab_detect_nonnegative_parameters(tab, cgbr->tab);
 }
 
-static struct isl_basic_set *context_gbr_peek_basic_set(
-    struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    if (!cgbr->tab)
-        return NULL;
-    return isl_tab_peek_bset(cgbr->tab);
+static struct isl_basic_set *
+context_gbr_peek_basic_set(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  if (!cgbr->tab)
+    return NULL;
+  return isl_tab_peek_bset(cgbr->tab);
 }
 
-static struct isl_tab *context_gbr_peek_tab(struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    return cgbr->tab;
+static struct isl_tab *context_gbr_peek_tab(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  return cgbr->tab;
 }
 
 /* Initialize the "shifted" tableau of the context, which
@@ -2915,196 +2796,187 @@ static struct isl_tab *context_gbr_peek_tab(struct isl_context *context)
  * that any rational point in the shifted tableau can
  * be rounded up to yield an integer point in the original tableau.
  */
-static void gbr_init_shifted(struct isl_context_gbr *cgbr)
-{
-    int i, j;
-    struct isl_vec *cst;
-    struct isl_basic_set *bset = isl_tab_peek_bset(cgbr->tab);
-    isl_size dim = isl_basic_set_dim(bset, isl_dim_all);
+static void gbr_init_shifted(struct isl_context_gbr *cgbr) {
+  int i, j;
+  struct isl_vec *cst;
+  struct isl_basic_set *bset = isl_tab_peek_bset(cgbr->tab);
+  isl_size dim = isl_basic_set_dim(bset, isl_dim_all);
 
-    if (dim < 0)
-        return;
-    cst = isl_vec_alloc(cgbr->tab->mat->ctx, bset->n_ineq);
-    if (!cst)
-        return;
+  if (dim < 0)
+    return;
+  cst = isl_vec_alloc(cgbr->tab->mat->ctx, bset->n_ineq);
+  if (!cst)
+    return;
 
-    for (i = 0; i < bset->n_ineq; ++i) {
-        isl_int_set(cst->el[i], bset->ineq[i][0]);
-        for (j = 0; j < dim; ++j) {
-            if (!isl_int_is_neg(bset->ineq[i][1 + j]))
-                continue;
-            isl_int_add(bset->ineq[i][0], bset->ineq[i][0],
-                        bset->ineq[i][1 + j]);
-        }
+  for (i = 0; i < bset->n_ineq; ++i) {
+    isl_int_set(cst->el[i], bset->ineq[i][0]);
+    for (j = 0; j < dim; ++j) {
+      if (!isl_int_is_neg(bset->ineq[i][1 + j]))
+        continue;
+      isl_int_add(bset->ineq[i][0], bset->ineq[i][0], bset->ineq[i][1 + j]);
     }
+  }
 
-    cgbr->shifted = isl_tab_from_basic_set(bset, 0);
+  cgbr->shifted = isl_tab_from_basic_set(bset, 0);
 
-    for (i = 0; i < bset->n_ineq; ++i)
-        isl_int_set(bset->ineq[i][0], cst->el[i]);
+  for (i = 0; i < bset->n_ineq; ++i)
+    isl_int_set(bset->ineq[i][0], cst->el[i]);
 
-    isl_vec_free(cst);
+  isl_vec_free(cst);
 }
 
 /* Check if the shifted tableau is non-empty, and if so
  * use the sample point to construct an integer point
  * of the context tableau.
  */
-static struct isl_vec *gbr_get_shifted_sample(struct isl_context_gbr *cgbr)
-{
+static struct isl_vec *gbr_get_shifted_sample(struct isl_context_gbr *cgbr) {
+  struct isl_vec *sample;
+
+  if (!cgbr->shifted)
+    gbr_init_shifted(cgbr);
+  if (!cgbr->shifted)
+    return NULL;
+  if (cgbr->shifted->empty)
+    return isl_vec_alloc(cgbr->tab->mat->ctx, 0);
+
+  sample = isl_tab_get_sample_value(cgbr->shifted);
+  sample = isl_vec_ceil(sample);
+
+  return sample;
+}
+
+static __isl_give isl_basic_set *
+drop_constant_terms(__isl_take isl_basic_set *bset) {
+  int i;
+
+  if (!bset)
+    return NULL;
+
+  for (i = 0; i < bset->n_eq; ++i)
+    isl_int_set_si(bset->eq[i][0], 0);
+
+  for (i = 0; i < bset->n_ineq; ++i)
+    isl_int_set_si(bset->ineq[i][0], 0);
+
+  return bset;
+}
+
+static int use_shifted(struct isl_context_gbr *cgbr) {
+  if (!cgbr->tab)
+    return 0;
+  return cgbr->tab->bmap->n_eq == 0 && cgbr->tab->bmap->n_div == 0;
+}
+
+static struct isl_vec *gbr_get_sample(struct isl_context_gbr *cgbr) {
+  struct isl_basic_set *bset;
+  struct isl_basic_set *cone;
+
+  if (isl_tab_sample_is_integer(cgbr->tab))
+    return isl_tab_get_sample_value(cgbr->tab);
+
+  if (use_shifted(cgbr)) {
     struct isl_vec *sample;
 
-    if (!cgbr->shifted)
-        gbr_init_shifted(cgbr);
-    if (!cgbr->shifted)
-        return NULL;
-    if (cgbr->shifted->empty)
-        return isl_vec_alloc(cgbr->tab->mat->ctx, 0);
+    sample = gbr_get_shifted_sample(cgbr);
+    if (!sample || sample->size > 0)
+      return sample;
 
-    sample = isl_tab_get_sample_value(cgbr->shifted);
-    sample = isl_vec_ceil(sample);
+    isl_vec_free(sample);
+  }
+
+  if (!cgbr->cone) {
+    bset = isl_tab_peek_bset(cgbr->tab);
+    cgbr->cone = isl_tab_from_recession_cone(bset, 0);
+    if (!cgbr->cone)
+      return NULL;
+    if (isl_tab_track_bset(cgbr->cone, isl_basic_set_copy(bset)) < 0)
+      return NULL;
+  }
+  if (isl_tab_detect_implicit_equalities(cgbr->cone) < 0)
+    return NULL;
+
+  if (cgbr->cone->n_dead == cgbr->cone->n_col) {
+    struct isl_vec *sample;
+    struct isl_tab_undo *snap;
+
+    if (cgbr->tab->basis) {
+      if (cgbr->tab->basis->n_col != 1 + cgbr->tab->n_var) {
+        isl_mat_free(cgbr->tab->basis);
+        cgbr->tab->basis = NULL;
+      }
+      cgbr->tab->n_zero = 0;
+      cgbr->tab->n_unbounded = 0;
+    }
+
+    snap = isl_tab_snap(cgbr->tab);
+
+    sample = isl_tab_sample(cgbr->tab);
+
+    if (!sample || isl_tab_rollback(cgbr->tab, snap) < 0) {
+      isl_vec_free(sample);
+      return NULL;
+    }
 
     return sample;
+  }
+
+  cone = isl_basic_set_dup(isl_tab_peek_bset(cgbr->cone));
+  cone = drop_constant_terms(cone);
+  cone = isl_basic_set_update_from_tab(cone, cgbr->cone);
+  cone = isl_basic_set_underlying_set(cone);
+  cone = isl_basic_set_gauss(cone, NULL);
+
+  bset = isl_basic_set_dup(isl_tab_peek_bset(cgbr->tab));
+  bset = isl_basic_set_update_from_tab(bset, cgbr->tab);
+  bset = isl_basic_set_underlying_set(bset);
+  bset = isl_basic_set_gauss(bset, NULL);
+
+  return isl_basic_set_sample_with_cone(bset, cone);
 }
 
-static __isl_give isl_basic_set *drop_constant_terms(
-    __isl_take isl_basic_set *bset)
-{
-    int i;
+static void check_gbr_integer_feasible(struct isl_context_gbr *cgbr) {
+  struct isl_vec *sample;
 
-    if (!bset)
-        return NULL;
-
-    for (i = 0; i < bset->n_eq; ++i)
-        isl_int_set_si(bset->eq[i][0], 0);
-
-    for (i = 0; i < bset->n_ineq; ++i)
-        isl_int_set_si(bset->ineq[i][0], 0);
-
-    return bset;
-}
-
-static int use_shifted(struct isl_context_gbr *cgbr)
-{
-    if (!cgbr->tab)
-        return 0;
-    return cgbr->tab->bmap->n_eq == 0 && cgbr->tab->bmap->n_div == 0;
-}
-
-static struct isl_vec *gbr_get_sample(struct isl_context_gbr *cgbr)
-{
-    struct isl_basic_set *bset;
-    struct isl_basic_set *cone;
-
-    if (isl_tab_sample_is_integer(cgbr->tab))
-        return isl_tab_get_sample_value(cgbr->tab);
-
-    if (use_shifted(cgbr)) {
-        struct isl_vec *sample;
-
-        sample = gbr_get_shifted_sample(cgbr);
-        if (!sample || sample->size > 0)
-            return sample;
-
-        isl_vec_free(sample);
-    }
-
-    if (!cgbr->cone) {
-        bset = isl_tab_peek_bset(cgbr->tab);
-        cgbr->cone = isl_tab_from_recession_cone(bset, 0);
-        if (!cgbr->cone)
-            return NULL;
-        if (isl_tab_track_bset(cgbr->cone,
-                               isl_basic_set_copy(bset)) < 0)
-            return NULL;
-    }
-    if (isl_tab_detect_implicit_equalities(cgbr->cone) < 0)
-        return NULL;
-
-    if (cgbr->cone->n_dead == cgbr->cone->n_col) {
-        struct isl_vec *sample;
-        struct isl_tab_undo *snap;
-
-        if (cgbr->tab->basis) {
-            if (cgbr->tab->basis->n_col != 1 + cgbr->tab->n_var) {
-                isl_mat_free(cgbr->tab->basis);
-                cgbr->tab->basis = NULL;
-            }
-            cgbr->tab->n_zero = 0;
-            cgbr->tab->n_unbounded = 0;
-        }
-
-        snap = isl_tab_snap(cgbr->tab);
-
-        sample = isl_tab_sample(cgbr->tab);
-
-        if (!sample || isl_tab_rollback(cgbr->tab, snap) < 0) {
-            isl_vec_free(sample);
-            return NULL;
-        }
-
-        return sample;
-    }
-
-    cone = isl_basic_set_dup(isl_tab_peek_bset(cgbr->cone));
-    cone = drop_constant_terms(cone);
-    cone = isl_basic_set_update_from_tab(cone, cgbr->cone);
-    cone = isl_basic_set_underlying_set(cone);
-    cone = isl_basic_set_gauss(cone, NULL);
-
-    bset = isl_basic_set_dup(isl_tab_peek_bset(cgbr->tab));
-    bset = isl_basic_set_update_from_tab(bset, cgbr->tab);
-    bset = isl_basic_set_underlying_set(bset);
-    bset = isl_basic_set_gauss(bset, NULL);
-
-    return isl_basic_set_sample_with_cone(bset, cone);
-}
-
-static void check_gbr_integer_feasible(struct isl_context_gbr *cgbr)
-{
-    struct isl_vec *sample;
-
-    if (!cgbr->tab)
-        return;
-
-    if (cgbr->tab->empty)
-        return;
-
-    sample = gbr_get_sample(cgbr);
-    if (!sample)
-        goto error;
-
-    if (sample->size == 0) {
-        isl_vec_free(sample);
-        if (isl_tab_mark_empty(cgbr->tab) < 0)
-            goto error;
-        return;
-    }
-
-    if (isl_tab_add_sample(cgbr->tab, sample) < 0)
-        goto error;
-
+  if (!cgbr->tab)
     return;
+
+  if (cgbr->tab->empty)
+    return;
+
+  sample = gbr_get_sample(cgbr);
+  if (!sample)
+    goto error;
+
+  if (sample->size == 0) {
+    isl_vec_free(sample);
+    if (isl_tab_mark_empty(cgbr->tab) < 0)
+      goto error;
+    return;
+  }
+
+  if (isl_tab_add_sample(cgbr->tab, sample) < 0)
+    goto error;
+
+  return;
 error:
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
 }
 
-static struct isl_tab *add_gbr_eq(struct isl_tab *tab, isl_int *eq)
-{
-    if (!tab)
-        return NULL;
-
-    if (isl_tab_extend_cons(tab, 2) < 0)
-        goto error;
-
-    if (isl_tab_add_eq(tab, eq) < 0)
-        goto error;
-
-    return tab;
-error:
-    isl_tab_free(tab);
+static struct isl_tab *add_gbr_eq(struct isl_tab *tab, isl_int *eq) {
+  if (!tab)
     return NULL;
+
+  if (isl_tab_extend_cons(tab, 2) < 0)
+    goto error;
+
+  if (isl_tab_add_eq(tab, eq) < 0)
+    goto error;
+
+  return tab;
+error:
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Add the equality described by "eq" to the context.
@@ -3117,172 +2989,166 @@ error:
  * Instead, we directly mark cgbr->shifted empty.
  */
 static void context_gbr_add_eq(struct isl_context *context, isl_int *eq,
-                               int check, int update)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+                               int check, int update) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
 
-    cgbr->tab = add_gbr_eq(cgbr->tab, eq);
+  cgbr->tab = add_gbr_eq(cgbr->tab, eq);
 
-    if (cgbr->shifted && !cgbr->shifted->empty && use_shifted(cgbr)) {
-        if (isl_tab_mark_empty(cgbr->shifted) < 0)
-            goto error;
-    }
+  if (cgbr->shifted && !cgbr->shifted->empty && use_shifted(cgbr)) {
+    if (isl_tab_mark_empty(cgbr->shifted) < 0)
+      goto error;
+  }
 
-    if (cgbr->cone && cgbr->cone->n_col != cgbr->cone->n_dead) {
-        if (isl_tab_extend_cons(cgbr->cone, 2) < 0)
-            goto error;
-        if (isl_tab_add_eq(cgbr->cone, eq) < 0)
-            goto error;
-    }
+  if (cgbr->cone && cgbr->cone->n_col != cgbr->cone->n_dead) {
+    if (isl_tab_extend_cons(cgbr->cone, 2) < 0)
+      goto error;
+    if (isl_tab_add_eq(cgbr->cone, eq) < 0)
+      goto error;
+  }
 
-    if (check) {
-        int v = tab_has_valid_sample(cgbr->tab, eq, 1);
-        if (v < 0)
-            goto error;
-        if (!v)
-            check_gbr_integer_feasible(cgbr);
-    }
-    if (update)
-        cgbr->tab = check_samples(cgbr->tab, eq, 1);
-    return;
+  if (check) {
+    int v = tab_has_valid_sample(cgbr->tab, eq, 1);
+    if (v < 0)
+      goto error;
+    if (!v)
+      check_gbr_integer_feasible(cgbr);
+  }
+  if (update)
+    cgbr->tab = check_samples(cgbr->tab, eq, 1);
+  return;
 error:
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
 }
 
-static void add_gbr_ineq(struct isl_context_gbr *cgbr, isl_int *ineq)
-{
-    if (!cgbr->tab)
-        return;
-
-    if (isl_tab_extend_cons(cgbr->tab, 1) < 0)
-        goto error;
-
-    if (isl_tab_add_ineq(cgbr->tab, ineq) < 0)
-        goto error;
-
-    if (cgbr->shifted && !cgbr->shifted->empty && use_shifted(cgbr)) {
-        int i;
-        isl_size dim;
-        dim = isl_basic_map_dim(cgbr->tab->bmap, isl_dim_all);
-        if (dim < 0)
-            goto error;
-
-        if (isl_tab_extend_cons(cgbr->shifted, 1) < 0)
-            goto error;
-
-        for (i = 0; i < dim; ++i) {
-            if (!isl_int_is_neg(ineq[1 + i]))
-                continue;
-            isl_int_add(ineq[0], ineq[0], ineq[1 + i]);
-        }
-
-        if (isl_tab_add_ineq(cgbr->shifted, ineq) < 0)
-            goto error;
-
-        for (i = 0; i < dim; ++i) {
-            if (!isl_int_is_neg(ineq[1 + i]))
-                continue;
-            isl_int_sub(ineq[0], ineq[0], ineq[1 + i]);
-        }
-    }
-
-    if (cgbr->cone && cgbr->cone->n_col != cgbr->cone->n_dead) {
-        if (isl_tab_extend_cons(cgbr->cone, 1) < 0)
-            goto error;
-        if (isl_tab_add_ineq(cgbr->cone, ineq) < 0)
-            goto error;
-    }
-
+static void add_gbr_ineq(struct isl_context_gbr *cgbr, isl_int *ineq) {
+  if (!cgbr->tab)
     return;
+
+  if (isl_tab_extend_cons(cgbr->tab, 1) < 0)
+    goto error;
+
+  if (isl_tab_add_ineq(cgbr->tab, ineq) < 0)
+    goto error;
+
+  if (cgbr->shifted && !cgbr->shifted->empty && use_shifted(cgbr)) {
+    int i;
+    isl_size dim;
+    dim = isl_basic_map_dim(cgbr->tab->bmap, isl_dim_all);
+    if (dim < 0)
+      goto error;
+
+    if (isl_tab_extend_cons(cgbr->shifted, 1) < 0)
+      goto error;
+
+    for (i = 0; i < dim; ++i) {
+      if (!isl_int_is_neg(ineq[1 + i]))
+        continue;
+      isl_int_add(ineq[0], ineq[0], ineq[1 + i]);
+    }
+
+    if (isl_tab_add_ineq(cgbr->shifted, ineq) < 0)
+      goto error;
+
+    for (i = 0; i < dim; ++i) {
+      if (!isl_int_is_neg(ineq[1 + i]))
+        continue;
+      isl_int_sub(ineq[0], ineq[0], ineq[1 + i]);
+    }
+  }
+
+  if (cgbr->cone && cgbr->cone->n_col != cgbr->cone->n_dead) {
+    if (isl_tab_extend_cons(cgbr->cone, 1) < 0)
+      goto error;
+    if (isl_tab_add_ineq(cgbr->cone, ineq) < 0)
+      goto error;
+  }
+
+  return;
 error:
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
 }
 
 static void context_gbr_add_ineq(struct isl_context *context, isl_int *ineq,
-                                 int check, int update)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+                                 int check, int update) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
 
-    add_gbr_ineq(cgbr, ineq);
-    if (!cgbr->tab)
-        return;
-
-    if (check) {
-        int v = tab_has_valid_sample(cgbr->tab, ineq, 0);
-        if (v < 0)
-            goto error;
-        if (!v)
-            check_gbr_integer_feasible(cgbr);
-    }
-    if (update)
-        cgbr->tab = check_samples(cgbr->tab, ineq, 0);
+  add_gbr_ineq(cgbr, ineq);
+  if (!cgbr->tab)
     return;
+
+  if (check) {
+    int v = tab_has_valid_sample(cgbr->tab, ineq, 0);
+    if (v < 0)
+      goto error;
+    if (!v)
+      check_gbr_integer_feasible(cgbr);
+  }
+  if (update)
+    cgbr->tab = check_samples(cgbr->tab, ineq, 0);
+  return;
 error:
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
 }
 
-static isl_stat context_gbr_add_ineq_wrap(void *user, isl_int *ineq)
-{
-    struct isl_context *context = (struct isl_context *)user;
-    context_gbr_add_ineq(context, ineq, 0, 0);
-    return context->op->is_ok(context) ? isl_stat_ok : isl_stat_error;
+static isl_stat context_gbr_add_ineq_wrap(void *user, isl_int *ineq) {
+  struct isl_context *context = (struct isl_context *)user;
+  context_gbr_add_ineq(context, ineq, 0, 0);
+  return context->op->is_ok(context) ? isl_stat_ok : isl_stat_error;
 }
 
 static enum isl_tab_row_sign context_gbr_ineq_sign(struct isl_context *context,
-        isl_int *ineq, int strict)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    return tab_ineq_sign(cgbr->tab, ineq, strict);
+                                                   isl_int *ineq, int strict) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  return tab_ineq_sign(cgbr->tab, ineq, strict);
 }
 
 /* Check whether "ineq" can be added to the tableau without rendering
  * it infeasible.
  */
-static int context_gbr_test_ineq(struct isl_context *context, isl_int *ineq)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    struct isl_tab_undo *snap;
-    struct isl_tab_undo *shifted_snap = NULL;
-    struct isl_tab_undo *cone_snap = NULL;
-    int feasible;
+static int context_gbr_test_ineq(struct isl_context *context, isl_int *ineq) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  struct isl_tab_undo *snap;
+  struct isl_tab_undo *shifted_snap = NULL;
+  struct isl_tab_undo *cone_snap = NULL;
+  int feasible;
 
-    if (!cgbr->tab)
-        return -1;
+  if (!cgbr->tab)
+    return -1;
 
-    if (isl_tab_extend_cons(cgbr->tab, 1) < 0)
-        return -1;
+  if (isl_tab_extend_cons(cgbr->tab, 1) < 0)
+    return -1;
 
-    snap = isl_tab_snap(cgbr->tab);
-    if (cgbr->shifted)
-        shifted_snap = isl_tab_snap(cgbr->shifted);
-    if (cgbr->cone)
-        cone_snap = isl_tab_snap(cgbr->cone);
-    add_gbr_ineq(cgbr, ineq);
-    check_gbr_integer_feasible(cgbr);
-    if (!cgbr->tab)
-        return -1;
-    feasible = !cgbr->tab->empty;
-    if (isl_tab_rollback(cgbr->tab, snap) < 0)
-        return -1;
-    if (shifted_snap) {
-        if (isl_tab_rollback(cgbr->shifted, shifted_snap))
-            return -1;
-    } else if (cgbr->shifted) {
-        isl_tab_free(cgbr->shifted);
-        cgbr->shifted = NULL;
-    }
-    if (cone_snap) {
-        if (isl_tab_rollback(cgbr->cone, cone_snap))
-            return -1;
-    } else if (cgbr->cone) {
-        isl_tab_free(cgbr->cone);
-        cgbr->cone = NULL;
-    }
+  snap = isl_tab_snap(cgbr->tab);
+  if (cgbr->shifted)
+    shifted_snap = isl_tab_snap(cgbr->shifted);
+  if (cgbr->cone)
+    cone_snap = isl_tab_snap(cgbr->cone);
+  add_gbr_ineq(cgbr, ineq);
+  check_gbr_integer_feasible(cgbr);
+  if (!cgbr->tab)
+    return -1;
+  feasible = !cgbr->tab->empty;
+  if (isl_tab_rollback(cgbr->tab, snap) < 0)
+    return -1;
+  if (shifted_snap) {
+    if (isl_tab_rollback(cgbr->shifted, shifted_snap))
+      return -1;
+  } else if (cgbr->shifted) {
+    isl_tab_free(cgbr->shifted);
+    cgbr->shifted = NULL;
+  }
+  if (cone_snap) {
+    if (isl_tab_rollback(cgbr->cone, cone_snap))
+      return -1;
+  } else if (cgbr->cone) {
+    isl_tab_free(cgbr->cone);
+    cgbr->cone = NULL;
+  }
 
-    return feasible;
+  return feasible;
 }
 
 /* Return the column of the last of the variables associated to
@@ -3290,25 +3156,24 @@ static int context_gbr_test_ineq(struct isl_context *context, isl_int *ineq)
  * This function is called in a context where only coefficients
  * of parameters or divs can be non-zero.
  */
-static int last_non_zero_var_col(struct isl_tab *tab, isl_int *p)
-{
-    int i;
-    int col;
+static int last_non_zero_var_col(struct isl_tab *tab, isl_int *p) {
+  int i;
+  int col;
 
-    if (tab->n_var == 0)
-        return -1;
-
-    for (i = tab->n_var - 1; i >= 0; --i) {
-        if (i >= tab->n_param && i < tab->n_var - tab->n_div)
-            continue;
-        if (tab->var[i].is_row)
-            continue;
-        col = tab->var[i].index;
-        if (!isl_int_is_zero(p[col]))
-            return col;
-    }
-
+  if (tab->n_var == 0)
     return -1;
+
+  for (i = tab->n_var - 1; i >= 0; --i) {
+    if (i >= tab->n_param && i < tab->n_var - tab->n_div)
+      continue;
+    if (tab->var[i].is_row)
+      continue;
+    col = tab->var[i].index;
+    if (!isl_int_is_zero(p[col]))
+      return col;
+  }
+
+  return -1;
 }
 
 /* Look through all the recently added equalities in the context
@@ -3329,265 +3194,250 @@ static int last_non_zero_var_col(struct isl_tab *tab, isl_int *p)
  * Return 0 on success and -1 on failure.
  */
 static int propagate_equalities(struct isl_context_gbr *cgbr,
-                                struct isl_tab *tab, unsigned first)
-{
-    int i;
-    struct isl_vec *eq = NULL;
-    isl_bool needs_undo;
+                                struct isl_tab *tab, unsigned first) {
+  int i;
+  struct isl_vec *eq = NULL;
+  isl_bool needs_undo;
 
-    needs_undo = isl_tab_need_undo(tab);
-    if (needs_undo < 0)
+  needs_undo = isl_tab_need_undo(tab);
+  if (needs_undo < 0)
+    goto error;
+  eq = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_var);
+  if (!eq)
+    goto error;
+
+  if (isl_tab_extend_cons(tab, (cgbr->tab->bmap->n_ineq - first) / 2) < 0)
+    goto error;
+
+  isl_seq_clr(eq->el + 1 + tab->n_param,
+              tab->n_var - tab->n_param - tab->n_div);
+  for (i = first; i < cgbr->tab->bmap->n_ineq; i += 2) {
+    int j;
+    int r;
+    struct isl_tab_undo *snap;
+    snap = isl_tab_snap(tab);
+
+    isl_seq_cpy(eq->el, cgbr->tab->bmap->ineq[i], 1 + tab->n_param);
+    isl_seq_cpy(eq->el + 1 + tab->n_var - tab->n_div,
+                cgbr->tab->bmap->ineq[i] + 1 + tab->n_param, tab->n_div);
+
+    r = isl_tab_add_row(tab, eq->el);
+    if (r < 0)
+      goto error;
+    r = tab->con[r].index;
+    j = last_non_zero_var_col(tab, tab->mat->row[r] + 2 + tab->M);
+    if (j < 0 || j < tab->n_dead || !isl_int_is_one(tab->mat->row[r][0]) ||
+        (!isl_int_is_one(tab->mat->row[r][2 + tab->M + j]) &&
+         !isl_int_is_negone(tab->mat->row[r][2 + tab->M + j]))) {
+      if (isl_tab_rollback(tab, snap) < 0)
         goto error;
-    eq = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_var);
-    if (!eq)
-        goto error;
-
-    if (isl_tab_extend_cons(tab, (cgbr->tab->bmap->n_ineq - first)/2) < 0)
-        goto error;
-
-    isl_seq_clr(eq->el + 1 + tab->n_param,
-                tab->n_var - tab->n_param - tab->n_div);
-    for (i = first; i < cgbr->tab->bmap->n_ineq; i += 2) {
-        int j;
-        int r;
-        struct isl_tab_undo *snap;
-        snap = isl_tab_snap(tab);
-
-        isl_seq_cpy(eq->el, cgbr->tab->bmap->ineq[i], 1 + tab->n_param);
-        isl_seq_cpy(eq->el + 1 + tab->n_var - tab->n_div,
-                    cgbr->tab->bmap->ineq[i] + 1 + tab->n_param,
-                    tab->n_div);
-
-        r = isl_tab_add_row(tab, eq->el);
-        if (r < 0)
-            goto error;
-        r = tab->con[r].index;
-        j = last_non_zero_var_col(tab, tab->mat->row[r] + 2 + tab->M);
-        if (j < 0 || j < tab->n_dead ||
-                !isl_int_is_one(tab->mat->row[r][0]) ||
-                (!isl_int_is_one(tab->mat->row[r][2 + tab->M + j]) &&
-                 !isl_int_is_negone(tab->mat->row[r][2 + tab->M + j]))) {
-            if (isl_tab_rollback(tab, snap) < 0)
-                goto error;
-            continue;
-        }
-        if (isl_tab_pivot(tab, r, j) < 0)
-            goto error;
-        if (isl_tab_kill_col(tab, j) < 0)
-            goto error;
-
-        if (restore_lexmin(tab) < 0)
-            goto error;
+      continue;
     }
+    if (isl_tab_pivot(tab, r, j) < 0)
+      goto error;
+    if (isl_tab_kill_col(tab, j) < 0)
+      goto error;
 
-    if (!needs_undo)
-        isl_tab_clear_undo(tab);
-    isl_vec_free(eq);
+    if (restore_lexmin(tab) < 0)
+      goto error;
+  }
 
-    return 0;
+  if (!needs_undo)
+    isl_tab_clear_undo(tab);
+  isl_vec_free(eq);
+
+  return 0;
 error:
-    isl_vec_free(eq);
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
-    return -1;
+  isl_vec_free(eq);
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
+  return -1;
 }
 
 static int context_gbr_detect_equalities(struct isl_context *context,
-        struct isl_tab *tab)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    unsigned n_ineq;
+                                         struct isl_tab *tab) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  unsigned n_ineq;
 
-    if (!cgbr->cone) {
-        struct isl_basic_set *bset = isl_tab_peek_bset(cgbr->tab);
-        cgbr->cone = isl_tab_from_recession_cone(bset, 0);
-        if (!cgbr->cone)
-            goto error;
-        if (isl_tab_track_bset(cgbr->cone,
-                               isl_basic_set_copy(bset)) < 0)
-            goto error;
-    }
-    if (isl_tab_detect_implicit_equalities(cgbr->cone) < 0)
-        goto error;
+  if (!cgbr->cone) {
+    struct isl_basic_set *bset = isl_tab_peek_bset(cgbr->tab);
+    cgbr->cone = isl_tab_from_recession_cone(bset, 0);
+    if (!cgbr->cone)
+      goto error;
+    if (isl_tab_track_bset(cgbr->cone, isl_basic_set_copy(bset)) < 0)
+      goto error;
+  }
+  if (isl_tab_detect_implicit_equalities(cgbr->cone) < 0)
+    goto error;
 
-    n_ineq = cgbr->tab->bmap->n_ineq;
-    cgbr->tab = isl_tab_detect_equalities(cgbr->tab, cgbr->cone);
-    if (!cgbr->tab)
-        return -1;
-    if (cgbr->tab->bmap->n_ineq > n_ineq &&
-            propagate_equalities(cgbr, tab, n_ineq) < 0)
-        return -1;
-
-    return 0;
-error:
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  n_ineq = cgbr->tab->bmap->n_ineq;
+  cgbr->tab = isl_tab_detect_equalities(cgbr->tab, cgbr->cone);
+  if (!cgbr->tab)
     return -1;
+  if (cgbr->tab->bmap->n_ineq > n_ineq &&
+      propagate_equalities(cgbr, tab, n_ineq) < 0)
+    return -1;
+
+  return 0;
+error:
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
+  return -1;
 }
 
 static int context_gbr_get_div(struct isl_context *context, struct isl_tab *tab,
-                               struct isl_vec *div)
-{
-    return get_div(tab, context, div);
+                               struct isl_vec *div) {
+  return get_div(tab, context, div);
 }
 
 static isl_bool context_gbr_insert_div(struct isl_context *context, int pos,
-                                       __isl_keep isl_vec *div)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    if (cgbr->cone) {
-        int r, o_div;
-        isl_size n_div;
+                                       __isl_keep isl_vec *div) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  if (cgbr->cone) {
+    int r, o_div;
+    isl_size n_div;
 
-        n_div = isl_basic_map_dim(cgbr->cone->bmap, isl_dim_div);
-        if (n_div < 0)
-            return isl_bool_error;
-        o_div = cgbr->cone->n_var - n_div;
+    n_div = isl_basic_map_dim(cgbr->cone->bmap, isl_dim_div);
+    if (n_div < 0)
+      return isl_bool_error;
+    o_div = cgbr->cone->n_var - n_div;
 
-        if (isl_tab_extend_cons(cgbr->cone, 3) < 0)
-            return isl_bool_error;
-        if (isl_tab_extend_vars(cgbr->cone, 1) < 0)
-            return isl_bool_error;
-        if ((r = isl_tab_insert_var(cgbr->cone, pos)) <0)
-            return isl_bool_error;
+    if (isl_tab_extend_cons(cgbr->cone, 3) < 0)
+      return isl_bool_error;
+    if (isl_tab_extend_vars(cgbr->cone, 1) < 0)
+      return isl_bool_error;
+    if ((r = isl_tab_insert_var(cgbr->cone, pos)) < 0)
+      return isl_bool_error;
 
-        cgbr->cone->bmap = isl_basic_map_insert_div(cgbr->cone->bmap,
-                           r - o_div, div);
-        if (!cgbr->cone->bmap)
-            return isl_bool_error;
-        if (isl_tab_push_var(cgbr->cone, isl_tab_undo_bmap_div,
-                             &cgbr->cone->var[r]) < 0)
-            return isl_bool_error;
-    }
-    return context_tab_insert_div(cgbr->tab, pos, div,
-                                  context_gbr_add_ineq_wrap, context);
+    cgbr->cone->bmap =
+        isl_basic_map_insert_div(cgbr->cone->bmap, r - o_div, div);
+    if (!cgbr->cone->bmap)
+      return isl_bool_error;
+    if (isl_tab_push_var(cgbr->cone, isl_tab_undo_bmap_div,
+                         &cgbr->cone->var[r]) < 0)
+      return isl_bool_error;
+  }
+  return context_tab_insert_div(cgbr->tab, pos, div, context_gbr_add_ineq_wrap,
+                                context);
 }
 
 static int context_gbr_best_split(struct isl_context *context,
-                                  struct isl_tab *tab)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    struct isl_tab_undo *snap;
-    int r;
+                                  struct isl_tab *tab) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  struct isl_tab_undo *snap;
+  int r;
 
-    snap = isl_tab_snap(cgbr->tab);
-    r = best_split(tab, cgbr->tab);
+  snap = isl_tab_snap(cgbr->tab);
+  r = best_split(tab, cgbr->tab);
 
-    if (r >= 0 && isl_tab_rollback(cgbr->tab, snap) < 0)
-        return -1;
+  if (r >= 0 && isl_tab_rollback(cgbr->tab, snap) < 0)
+    return -1;
 
-    return r;
+  return r;
 }
 
-static int context_gbr_is_empty(struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    if (!cgbr->tab)
-        return -1;
-    return cgbr->tab->empty;
+static int context_gbr_is_empty(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  if (!cgbr->tab)
+    return -1;
+  return cgbr->tab->empty;
 }
 
 struct isl_gbr_tab_undo {
-    struct isl_tab_undo *tab_snap;
-    struct isl_tab_undo *shifted_snap;
-    struct isl_tab_undo *cone_snap;
+  struct isl_tab_undo *tab_snap;
+  struct isl_tab_undo *shifted_snap;
+  struct isl_tab_undo *cone_snap;
 };
 
-static void *context_gbr_save(struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    struct isl_gbr_tab_undo *snap;
+static void *context_gbr_save(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  struct isl_gbr_tab_undo *snap;
 
-    if (!cgbr->tab)
-        return NULL;
-
-    snap = isl_alloc_type(cgbr->tab->mat->ctx, struct isl_gbr_tab_undo);
-    if (!snap)
-        return NULL;
-
-    snap->tab_snap = isl_tab_snap(cgbr->tab);
-    if (isl_tab_save_samples(cgbr->tab) < 0)
-        goto error;
-
-    if (cgbr->shifted)
-        snap->shifted_snap = isl_tab_snap(cgbr->shifted);
-    else
-        snap->shifted_snap = NULL;
-
-    if (cgbr->cone)
-        snap->cone_snap = isl_tab_snap(cgbr->cone);
-    else
-        snap->cone_snap = NULL;
-
-    return snap;
-error:
-    free(snap);
+  if (!cgbr->tab)
     return NULL;
-}
 
-static void context_gbr_restore(struct isl_context *context, void *save)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    struct isl_gbr_tab_undo *snap = (struct isl_gbr_tab_undo *)save;
-    if (!snap)
-        goto error;
-    if (isl_tab_rollback(cgbr->tab, snap->tab_snap) < 0)
-        goto error;
+  snap = isl_alloc_type(cgbr->tab->mat->ctx, struct isl_gbr_tab_undo);
+  if (!snap)
+    return NULL;
 
-    if (snap->shifted_snap) {
-        if (isl_tab_rollback(cgbr->shifted, snap->shifted_snap) < 0)
-            goto error;
-    } else if (cgbr->shifted) {
-        isl_tab_free(cgbr->shifted);
-        cgbr->shifted = NULL;
-    }
+  snap->tab_snap = isl_tab_snap(cgbr->tab);
+  if (isl_tab_save_samples(cgbr->tab) < 0)
+    goto error;
 
-    if (snap->cone_snap) {
-        if (isl_tab_rollback(cgbr->cone, snap->cone_snap) < 0)
-            goto error;
-    } else if (cgbr->cone) {
-        isl_tab_free(cgbr->cone);
-        cgbr->cone = NULL;
-    }
+  if (cgbr->shifted)
+    snap->shifted_snap = isl_tab_snap(cgbr->shifted);
+  else
+    snap->shifted_snap = NULL;
 
-    free(snap);
+  if (cgbr->cone)
+    snap->cone_snap = isl_tab_snap(cgbr->cone);
+  else
+    snap->cone_snap = NULL;
 
-    return;
+  return snap;
 error:
-    free(snap);
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
+  free(snap);
+  return NULL;
 }
 
-static void context_gbr_discard(void *save)
-{
-    struct isl_gbr_tab_undo *snap = (struct isl_gbr_tab_undo *)save;
-    free(snap);
-}
+static void context_gbr_restore(struct isl_context *context, void *save) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  struct isl_gbr_tab_undo *snap = (struct isl_gbr_tab_undo *)save;
+  if (!snap)
+    goto error;
+  if (isl_tab_rollback(cgbr->tab, snap->tab_snap) < 0)
+    goto error;
 
-static int context_gbr_is_ok(struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    return !!cgbr->tab;
-}
-
-static void context_gbr_invalidate(struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    isl_tab_free(cgbr->tab);
-    cgbr->tab = NULL;
-}
-
-static __isl_null struct isl_context *context_gbr_free(
-    struct isl_context *context)
-{
-    struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
-    isl_tab_free(cgbr->tab);
+  if (snap->shifted_snap) {
+    if (isl_tab_rollback(cgbr->shifted, snap->shifted_snap) < 0)
+      goto error;
+  } else if (cgbr->shifted) {
     isl_tab_free(cgbr->shifted);
-    isl_tab_free(cgbr->cone);
-    free(cgbr);
+    cgbr->shifted = NULL;
+  }
 
-    return NULL;
+  if (snap->cone_snap) {
+    if (isl_tab_rollback(cgbr->cone, snap->cone_snap) < 0)
+      goto error;
+  } else if (cgbr->cone) {
+    isl_tab_free(cgbr->cone);
+    cgbr->cone = NULL;
+  }
+
+  free(snap);
+
+  return;
+error:
+  free(snap);
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
+}
+
+static void context_gbr_discard(void *save) {
+  struct isl_gbr_tab_undo *snap = (struct isl_gbr_tab_undo *)save;
+  free(snap);
+}
+
+static int context_gbr_is_ok(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  return !!cgbr->tab;
+}
+
+static void context_gbr_invalidate(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  isl_tab_free(cgbr->tab);
+  cgbr->tab = NULL;
+}
+
+static __isl_null struct isl_context *
+context_gbr_free(struct isl_context *context) {
+  struct isl_context_gbr *cgbr = (struct isl_context_gbr *)context;
+  isl_tab_free(cgbr->tab);
+  isl_tab_free(cgbr->shifted);
+  isl_tab_free(cgbr->cone);
+  free(cgbr);
+
+  return NULL;
 }
 
 struct isl_context_op isl_context_gbr_op = {
@@ -3611,31 +3461,31 @@ struct isl_context_op isl_context_gbr_op = {
     context_gbr_free,
 };
 
-static struct isl_context *isl_context_gbr_alloc(__isl_keep isl_basic_set *dom)
-{
-    struct isl_context_gbr *cgbr;
+static struct isl_context *
+isl_context_gbr_alloc(__isl_keep isl_basic_set *dom) {
+  struct isl_context_gbr *cgbr;
 
-    if (!dom)
-        return NULL;
-
-    cgbr = isl_calloc_type(dom->ctx, struct isl_context_gbr);
-    if (!cgbr)
-        return NULL;
-
-    cgbr->context.op = &isl_context_gbr_op;
-
-    cgbr->shifted = NULL;
-    cgbr->cone = NULL;
-    cgbr->tab = isl_tab_from_basic_set(dom, 1);
-    cgbr->tab = isl_tab_init_samples(cgbr->tab);
-    if (!cgbr->tab)
-        goto error;
-    check_gbr_integer_feasible(cgbr);
-
-    return &cgbr->context;
-error:
-    cgbr->context.op->free(&cgbr->context);
+  if (!dom)
     return NULL;
+
+  cgbr = isl_calloc_type(dom->ctx, struct isl_context_gbr);
+  if (!cgbr)
+    return NULL;
+
+  cgbr->context.op = &isl_context_gbr_op;
+
+  cgbr->shifted = NULL;
+  cgbr->cone = NULL;
+  cgbr->tab = isl_tab_from_basic_set(dom, 1);
+  cgbr->tab = isl_tab_init_samples(cgbr->tab);
+  if (!cgbr->tab)
+    goto error;
+  check_gbr_integer_feasible(cgbr);
+
+  return &cgbr->context;
+error:
+  cgbr->context.op->free(&cgbr->context);
+  return NULL;
 }
 
 /* Allocate a context corresponding to "dom".
@@ -3644,30 +3494,29 @@ error:
  * The shared "n_unknown" field is initialized to the number
  * of final unknown integer divisions in "dom".
  */
-static struct isl_context *isl_context_alloc(__isl_keep isl_basic_set *dom)
-{
-    struct isl_context *context;
-    int first;
-    isl_size n_div;
+static struct isl_context *isl_context_alloc(__isl_keep isl_basic_set *dom) {
+  struct isl_context *context;
+  int first;
+  isl_size n_div;
 
-    if (!dom)
-        return NULL;
+  if (!dom)
+    return NULL;
 
-    if (dom->ctx->opt->context == ISL_CONTEXT_LEXMIN)
-        context = isl_context_lex_alloc(dom);
-    else
-        context = isl_context_gbr_alloc(dom);
+  if (dom->ctx->opt->context == ISL_CONTEXT_LEXMIN)
+    context = isl_context_lex_alloc(dom);
+  else
+    context = isl_context_gbr_alloc(dom);
 
-    if (!context)
-        return NULL;
+  if (!context)
+    return NULL;
 
-    first = isl_basic_set_first_unknown_div(dom);
-    n_div = isl_basic_set_dim(dom, isl_dim_div);
-    if (first < 0 || n_div < 0)
-        return context->op->free(context);
-    context->n_unknown = n_div - first;
+  first = isl_basic_set_first_unknown_div(dom);
+  n_div = isl_basic_set_dim(dom, isl_dim_div);
+  if (first < 0 || n_div < 0)
+    return context->op->free(context);
+  context->n_unknown = n_div - first;
 
-    return context;
+  return context;
 }
 
 /* Initialize some common fields of "sol", which keeps track
@@ -3678,20 +3527,19 @@ static struct isl_context *isl_context_alloc(__isl_keep isl_basic_set *dom)
  * tableau have value "M - x" rather than "M + x".
  */
 static isl_stat sol_init(struct isl_sol *sol, __isl_keep isl_basic_map *bmap,
-                         __isl_keep isl_basic_set *dom, int max)
-{
-    sol->rational = ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL);
-    sol->dec_level.callback.run = &sol_dec_level_wrap;
-    sol->dec_level.sol = sol;
-    sol->max = max;
-    sol->n_out = isl_basic_map_dim(bmap, isl_dim_out);
-    sol->space = isl_basic_map_get_space(bmap);
+                         __isl_keep isl_basic_set *dom, int max) {
+  sol->rational = ISL_F_ISSET(bmap, ISL_BASIC_MAP_RATIONAL);
+  sol->dec_level.callback.run = &sol_dec_level_wrap;
+  sol->dec_level.sol = sol;
+  sol->max = max;
+  sol->n_out = isl_basic_map_dim(bmap, isl_dim_out);
+  sol->space = isl_basic_map_get_space(bmap);
 
-    sol->context = isl_context_alloc(dom);
-    if (sol->n_out < 0 || !sol->space || !sol->context)
-        return isl_stat_error;
+  sol->context = isl_context_alloc(dom);
+  if (sol->n_out < 0 || !sol->space || !sol->context)
+    return isl_stat_error;
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Construct an isl_sol_map structure for accumulating the solution.
@@ -3702,60 +3550,59 @@ static isl_stat sol_init(struct isl_sol *sol, __isl_keep isl_basic_map *bmap,
  * tableau have value "M - x" rather than "M + x".
  */
 static struct isl_sol *sol_map_init(__isl_keep isl_basic_map *bmap,
-                                    __isl_take isl_basic_set *dom, int track_empty, int max)
-{
-    struct isl_sol_map *sol_map = NULL;
-    isl_space *space;
+                                    __isl_take isl_basic_set *dom,
+                                    int track_empty, int max) {
+  struct isl_sol_map *sol_map = NULL;
+  isl_space *space;
 
-    if (!bmap)
-        goto error;
+  if (!bmap)
+    goto error;
 
-    sol_map = isl_calloc_type(bmap->ctx, struct isl_sol_map);
-    if (!sol_map)
-        goto error;
+  sol_map = isl_calloc_type(bmap->ctx, struct isl_sol_map);
+  if (!sol_map)
+    goto error;
 
-    sol_map->sol.free = &sol_map_free;
-    if (sol_init(&sol_map->sol, bmap, dom, max) < 0)
-        goto error;
-    sol_map->sol.add = &sol_map_add_wrap;
-    sol_map->sol.add_empty = track_empty ? &sol_map_add_empty_wrap : NULL;
-    space = isl_space_copy(sol_map->sol.space);
-    sol_map->map = isl_map_alloc_space(space, 1, ISL_MAP_DISJOINT);
-    if (!sol_map->map)
-        goto error;
+  sol_map->sol.free = &sol_map_free;
+  if (sol_init(&sol_map->sol, bmap, dom, max) < 0)
+    goto error;
+  sol_map->sol.add = &sol_map_add_wrap;
+  sol_map->sol.add_empty = track_empty ? &sol_map_add_empty_wrap : NULL;
+  space = isl_space_copy(sol_map->sol.space);
+  sol_map->map = isl_map_alloc_space(space, 1, ISL_MAP_DISJOINT);
+  if (!sol_map->map)
+    goto error;
 
-    if (track_empty) {
-        sol_map->empty = isl_set_alloc_space(isl_basic_set_get_space(dom),
-                                             1, ISL_SET_DISJOINT);
-        if (!sol_map->empty)
-            goto error;
-    }
+  if (track_empty) {
+    sol_map->empty =
+        isl_set_alloc_space(isl_basic_set_get_space(dom), 1, ISL_SET_DISJOINT);
+    if (!sol_map->empty)
+      goto error;
+  }
 
-    isl_basic_set_free(dom);
-    return &sol_map->sol;
+  isl_basic_set_free(dom);
+  return &sol_map->sol;
 error:
-    isl_basic_set_free(dom);
-    sol_free(&sol_map->sol);
-    return NULL;
+  isl_basic_set_free(dom);
+  sol_free(&sol_map->sol);
+  return NULL;
 }
 
 /* Check whether all coefficients of (non-parameter) variables
  * are non-positive, meaning that no pivots can be performed on the row.
  */
-static int is_critical(struct isl_tab *tab, int row)
-{
-    int j;
-    unsigned off = 2 + tab->M;
+static int is_critical(struct isl_tab *tab, int row) {
+  int j;
+  unsigned off = 2 + tab->M;
 
-    for (j = tab->n_dead; j < tab->n_col; ++j) {
-        if (col_is_parameter_var(tab, j))
-            continue;
+  for (j = tab->n_dead; j < tab->n_col; ++j) {
+    if (col_is_parameter_var(tab, j))
+      continue;
 
-        if (isl_int_is_pos(tab->mat->row[row][off + j]))
-            return 0;
-    }
+    if (isl_int_is_pos(tab->mat->row[row][off + j]))
+      return 0;
+  }
 
-    return 1;
+  return 1;
 }
 
 /* Check whether the inequality represented by vec is strict over the integers,
@@ -3764,21 +3611,20 @@ static int is_critical(struct isl_tab *tab, int row)
  * of the constant term.  If so, scale the constraint down by the gcd
  * of the coefficients.
  */
-static int is_strict(struct isl_vec *vec)
-{
-    isl_int gcd;
-    int strict = 0;
+static int is_strict(struct isl_vec *vec) {
+  isl_int gcd;
+  int strict = 0;
 
-    isl_int_init(gcd);
-    isl_seq_gcd(vec->el + 1, vec->size - 1, &gcd);
-    if (!isl_int_is_one(gcd)) {
-        strict = !isl_int_is_divisible_by(vec->el[0], gcd);
-        isl_int_fdiv_q(vec->el[0], vec->el[0], gcd);
-        isl_seq_scale_down(vec->el + 1, vec->el + 1, gcd, vec->size-1);
-    }
-    isl_int_clear(gcd);
+  isl_int_init(gcd);
+  isl_seq_gcd(vec->el + 1, vec->size - 1, &gcd);
+  if (!isl_int_is_one(gcd)) {
+    strict = !isl_int_is_divisible_by(vec->el[0], gcd);
+    isl_int_fdiv_q(vec->el[0], vec->el[0], gcd);
+    isl_seq_scale_down(vec->el + 1, vec->el + 1, gcd, vec->size - 1);
+  }
+  isl_int_clear(gcd);
 
-    return strict;
+  return strict;
 }
 
 /* Determine the sign of the given row of the main tableau.
@@ -3837,75 +3683,72 @@ static int is_strict(struct isl_vec *vec)
  *	>=0 ?	     Y      N
  *		    any    neg
  */
-static enum isl_tab_row_sign row_sign(struct isl_tab *tab,
-                                      struct isl_sol *sol, int row)
-{
-    struct isl_vec *ineq = NULL;
-    enum isl_tab_row_sign res = isl_tab_row_unknown;
-    int critical;
-    int strict;
-    int row2;
+static enum isl_tab_row_sign row_sign(struct isl_tab *tab, struct isl_sol *sol,
+                                      int row) {
+  struct isl_vec *ineq = NULL;
+  enum isl_tab_row_sign res = isl_tab_row_unknown;
+  int critical;
+  int strict;
+  int row2;
 
-    if (tab->row_sign[row] != isl_tab_row_unknown)
-        return tab->row_sign[row];
-    if (is_obviously_nonneg(tab, row))
-        return isl_tab_row_pos;
-    for (row2 = tab->n_redundant; row2 < tab->n_row; ++row2) {
-        if (tab->row_sign[row2] == isl_tab_row_unknown)
-            continue;
-        if (identical_parameter_line(tab, row, row2))
-            return tab->row_sign[row2];
-    }
+  if (tab->row_sign[row] != isl_tab_row_unknown)
+    return tab->row_sign[row];
+  if (is_obviously_nonneg(tab, row))
+    return isl_tab_row_pos;
+  for (row2 = tab->n_redundant; row2 < tab->n_row; ++row2) {
+    if (tab->row_sign[row2] == isl_tab_row_unknown)
+      continue;
+    if (identical_parameter_line(tab, row, row2))
+      return tab->row_sign[row2];
+  }
 
-    critical = is_critical(tab, row);
+  critical = is_critical(tab, row);
 
-    ineq = get_row_parameter_ineq(tab, row);
-    if (!ineq)
-        goto error;
+  ineq = get_row_parameter_ineq(tab, row);
+  if (!ineq)
+    goto error;
 
-    strict = is_strict(ineq);
+  strict = is_strict(ineq);
 
-    res = sol->context->op->ineq_sign(sol->context, ineq->el,
-                                      critical || strict);
+  res = sol->context->op->ineq_sign(sol->context, ineq->el, critical || strict);
 
-    if (res == isl_tab_row_unknown || res == isl_tab_row_pos) {
-        /* test for negative values */
-        int feasible;
-        isl_seq_neg(ineq->el, ineq->el, ineq->size);
-        isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
+  if (res == isl_tab_row_unknown || res == isl_tab_row_pos) {
+    /* test for negative values */
+    int feasible;
+    isl_seq_neg(ineq->el, ineq->el, ineq->size);
+    isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
 
-        feasible = sol->context->op->test_ineq(sol->context, ineq->el);
-        if (feasible < 0)
-            goto error;
-        if (!feasible)
-            res = isl_tab_row_pos;
-        else
-            res = (res == isl_tab_row_unknown) ? isl_tab_row_neg
-                  : isl_tab_row_any;
-        if (res == isl_tab_row_neg) {
-            isl_seq_neg(ineq->el, ineq->el, ineq->size);
-            isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
-        }
-    }
-
+    feasible = sol->context->op->test_ineq(sol->context, ineq->el);
+    if (feasible < 0)
+      goto error;
+    if (!feasible)
+      res = isl_tab_row_pos;
+    else
+      res = (res == isl_tab_row_unknown) ? isl_tab_row_neg : isl_tab_row_any;
     if (res == isl_tab_row_neg) {
-        /* test for positive values */
-        int feasible;
-        if (!critical && !strict)
-            isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
-
-        feasible = sol->context->op->test_ineq(sol->context, ineq->el);
-        if (feasible < 0)
-            goto error;
-        if (feasible)
-            res = isl_tab_row_any;
+      isl_seq_neg(ineq->el, ineq->el, ineq->size);
+      isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
     }
+  }
 
-    isl_vec_free(ineq);
-    return res;
+  if (res == isl_tab_row_neg) {
+    /* test for positive values */
+    int feasible;
+    if (!critical && !strict)
+      isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
+
+    feasible = sol->context->op->test_ineq(sol->context, ineq->el);
+    if (feasible < 0)
+      goto error;
+    if (feasible)
+      res = isl_tab_row_any;
+  }
+
+  isl_vec_free(ineq);
+  return res;
 error:
-    isl_vec_free(ineq);
-    return isl_tab_row_unknown;
+  isl_vec_free(ineq);
+  return isl_tab_row_unknown;
 }
 
 static void find_solutions(struct isl_sol *sol, struct isl_tab *tab);
@@ -3924,76 +3767,74 @@ static void find_solutions(struct isl_sol *sol, struct isl_tab *tab);
  * and that we need to do this before saving the current basis
  * such that the basis has been restore before we restore the row signs.
  */
-static void find_in_pos(struct isl_sol *sol, struct isl_tab *tab, isl_int *ineq)
-{
-    void *saved;
+static void find_in_pos(struct isl_sol *sol, struct isl_tab *tab,
+                        isl_int *ineq) {
+  void *saved;
 
-    if (!sol->context)
-        goto error;
-    saved = sol->context->op->save(sol->context);
+  if (!sol->context)
+    goto error;
+  saved = sol->context->op->save(sol->context);
 
-    tab = isl_tab_dup(tab);
-    if (!tab)
-        goto error;
+  tab = isl_tab_dup(tab);
+  if (!tab)
+    goto error;
 
-    sol->context->op->add_ineq(sol->context, ineq, 0, 1);
+  sol->context->op->add_ineq(sol->context, ineq, 0, 1);
 
-    find_solutions(sol, tab);
+  find_solutions(sol, tab);
 
-    if (!sol->error)
-        sol->context->op->restore(sol->context, saved);
-    else
-        sol->context->op->discard(saved);
-    return;
+  if (!sol->error)
+    sol->context->op->restore(sol->context, saved);
+  else
+    sol->context->op->discard(saved);
+  return;
 error:
-    sol->error = 1;
+  sol->error = 1;
 }
 
 /* Record the absence of solutions for those values of the parameters
  * that do not satisfy the given inequality with equality.
  */
-static void no_sol_in_strict(struct isl_sol *sol,
-                             struct isl_tab *tab, struct isl_vec *ineq)
-{
-    int empty;
-    void *saved;
+static void no_sol_in_strict(struct isl_sol *sol, struct isl_tab *tab,
+                             struct isl_vec *ineq) {
+  int empty;
+  void *saved;
 
-    if (!sol->context || sol->error)
-        goto error;
-    saved = sol->context->op->save(sol->context);
+  if (!sol->context || sol->error)
+    goto error;
+  saved = sol->context->op->save(sol->context);
 
-    isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
+  isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
 
-    sol->context->op->add_ineq(sol->context, ineq->el, 1, 0);
-    if (!sol->context)
-        goto error;
+  sol->context->op->add_ineq(sol->context, ineq->el, 1, 0);
+  if (!sol->context)
+    goto error;
 
-    empty = tab->empty;
-    tab->empty = 1;
-    sol_add(sol, tab);
-    tab->empty = empty;
+  empty = tab->empty;
+  tab->empty = 1;
+  sol_add(sol, tab);
+  tab->empty = empty;
 
-    isl_int_add_ui(ineq->el[0], ineq->el[0], 1);
+  isl_int_add_ui(ineq->el[0], ineq->el[0], 1);
 
-    sol->context->op->restore(sol->context, saved);
-    return;
+  sol->context->op->restore(sol->context, saved);
+  return;
 error:
-    sol->error = 1;
+  sol->error = 1;
 }
 
 /* Reset all row variables that are marked to have a sign that may
  * be both positive and negative to have an unknown sign.
  */
-static void reset_any_to_unknown(struct isl_tab *tab)
-{
-    int row;
+static void reset_any_to_unknown(struct isl_tab *tab) {
+  int row;
 
-    for (row = tab->n_redundant; row < tab->n_row; ++row) {
-        if (!isl_tab_var_from_row(tab, row)->is_nonneg)
-            continue;
-        if (tab->row_sign[row] == isl_tab_row_any)
-            tab->row_sign[row] = isl_tab_row_unknown;
-    }
+  for (row = tab->n_redundant; row < tab->n_row; ++row) {
+    if (!isl_tab_var_from_row(tab, row)->is_nonneg)
+      continue;
+    if (tab->row_sign[row] == isl_tab_row_any)
+      tab->row_sign[row] = isl_tab_row_unknown;
+  }
 }
 
 /* Compute the lexicographic minimum of the set represented by the main
@@ -4090,118 +3931,117 @@ static void reset_any_to_unknown(struct isl_tab *tab)
  * In the part of the context where this inequality does not hold, the
  * main tableau is marked as being empty.
  */
-static void find_solutions(struct isl_sol *sol, struct isl_tab *tab)
-{
-    struct isl_context *context;
-    int r;
+static void find_solutions(struct isl_sol *sol, struct isl_tab *tab) {
+  struct isl_context *context;
+  int r;
 
-    if (!tab || sol->error)
+  if (!tab || sol->error)
+    goto error;
+
+  context = sol->context;
+
+  if (tab->empty)
+    goto done;
+  if (context->op->is_empty(context))
+    goto done;
+
+  for (r = 0; r >= 0 && tab && !tab->empty; r = restore_lexmin(tab)) {
+    int flags;
+    int row;
+    enum isl_tab_row_sign sgn;
+    int split = -1;
+    int n_split = 0;
+
+    for (row = tab->n_redundant; row < tab->n_row; ++row) {
+      if (!isl_tab_var_from_row(tab, row)->is_nonneg)
+        continue;
+      sgn = row_sign(tab, sol, row);
+      if (!sgn)
         goto error;
-
-    context = sol->context;
-
-    if (tab->empty)
-        goto done;
-    if (context->op->is_empty(context))
-        goto done;
-
-    for (r = 0; r >= 0 && tab && !tab->empty; r = restore_lexmin(tab)) {
-        int flags;
-        int row;
-        enum isl_tab_row_sign sgn;
-        int split = -1;
-        int n_split = 0;
-
-        for (row = tab->n_redundant; row < tab->n_row; ++row) {
-            if (!isl_tab_var_from_row(tab, row)->is_nonneg)
-                continue;
-            sgn = row_sign(tab, sol, row);
-            if (!sgn)
-                goto error;
-            tab->row_sign[row] = sgn;
-            if (sgn == isl_tab_row_any)
-                n_split++;
-            if (sgn == isl_tab_row_any && split == -1)
-                split = row;
-            if (sgn == isl_tab_row_neg)
-                break;
-        }
-        if (row < tab->n_row)
-            continue;
-        if (split != -1) {
-            struct isl_vec *ineq;
-            if (n_split != 1)
-                split = context->op->best_split(context, tab);
-            if (split < 0)
-                goto error;
-            ineq = get_row_parameter_ineq(tab, split);
-            if (!ineq)
-                goto error;
-            is_strict(ineq);
-            reset_any_to_unknown(tab);
-            tab->row_sign[split] = isl_tab_row_pos;
-            sol_inc_level(sol);
-            find_in_pos(sol, tab, ineq->el);
-            tab->row_sign[split] = isl_tab_row_neg;
-            isl_seq_neg(ineq->el, ineq->el, ineq->size);
-            isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
-            if (!sol->error)
-                context->op->add_ineq(context, ineq->el, 0, 1);
-            isl_vec_free(ineq);
-            if (sol->error)
-                goto error;
-            continue;
-        }
-        if (tab->rational)
-            break;
-        row = first_non_integer_row(tab, &flags);
-        if (row < 0)
-            break;
-        if (ISL_FL_ISSET(flags, I_PAR)) {
-            if (ISL_FL_ISSET(flags, I_VAR)) {
-                if (isl_tab_mark_empty(tab) < 0)
-                    goto error;
-                break;
-            }
-            row = add_cut(tab, row);
-        } else if (ISL_FL_ISSET(flags, I_VAR)) {
-            struct isl_vec *div;
-            struct isl_vec *ineq;
-            int d;
-            div = get_row_split_div(tab, row);
-            if (!div)
-                goto error;
-            d = context->op->get_div(context, tab, div);
-            isl_vec_free(div);
-            if (d < 0)
-                goto error;
-            ineq = ineq_for_div(context->op->peek_basic_set(context), d);
-            if (!ineq)
-                goto error;
-            sol_inc_level(sol);
-            no_sol_in_strict(sol, tab, ineq);
-            isl_seq_neg(ineq->el, ineq->el, ineq->size);
-            context->op->add_ineq(context, ineq->el, 1, 1);
-            isl_vec_free(ineq);
-            if (sol->error || !context->op->is_ok(context))
-                goto error;
-            tab = set_row_cst_to_div(tab, row, d);
-            if (context->op->is_empty(context))
-                break;
-        } else
-            row = add_parametric_cut(tab, row, context);
-        if (row < 0)
-            goto error;
+      tab->row_sign[row] = sgn;
+      if (sgn == isl_tab_row_any)
+        n_split++;
+      if (sgn == isl_tab_row_any && split == -1)
+        split = row;
+      if (sgn == isl_tab_row_neg)
+        break;
     }
-    if (r < 0)
+    if (row < tab->n_row)
+      continue;
+    if (split != -1) {
+      struct isl_vec *ineq;
+      if (n_split != 1)
+        split = context->op->best_split(context, tab);
+      if (split < 0)
         goto error;
+      ineq = get_row_parameter_ineq(tab, split);
+      if (!ineq)
+        goto error;
+      is_strict(ineq);
+      reset_any_to_unknown(tab);
+      tab->row_sign[split] = isl_tab_row_pos;
+      sol_inc_level(sol);
+      find_in_pos(sol, tab, ineq->el);
+      tab->row_sign[split] = isl_tab_row_neg;
+      isl_seq_neg(ineq->el, ineq->el, ineq->size);
+      isl_int_sub_ui(ineq->el[0], ineq->el[0], 1);
+      if (!sol->error)
+        context->op->add_ineq(context, ineq->el, 0, 1);
+      isl_vec_free(ineq);
+      if (sol->error)
+        goto error;
+      continue;
+    }
+    if (tab->rational)
+      break;
+    row = first_non_integer_row(tab, &flags);
+    if (row < 0)
+      break;
+    if (ISL_FL_ISSET(flags, I_PAR)) {
+      if (ISL_FL_ISSET(flags, I_VAR)) {
+        if (isl_tab_mark_empty(tab) < 0)
+          goto error;
+        break;
+      }
+      row = add_cut(tab, row);
+    } else if (ISL_FL_ISSET(flags, I_VAR)) {
+      struct isl_vec *div;
+      struct isl_vec *ineq;
+      int d;
+      div = get_row_split_div(tab, row);
+      if (!div)
+        goto error;
+      d = context->op->get_div(context, tab, div);
+      isl_vec_free(div);
+      if (d < 0)
+        goto error;
+      ineq = ineq_for_div(context->op->peek_basic_set(context), d);
+      if (!ineq)
+        goto error;
+      sol_inc_level(sol);
+      no_sol_in_strict(sol, tab, ineq);
+      isl_seq_neg(ineq->el, ineq->el, ineq->size);
+      context->op->add_ineq(context, ineq->el, 1, 1);
+      isl_vec_free(ineq);
+      if (sol->error || !context->op->is_ok(context))
+        goto error;
+      tab = set_row_cst_to_div(tab, row, d);
+      if (context->op->is_empty(context))
+        break;
+    } else
+      row = add_parametric_cut(tab, row, context);
+    if (row < 0)
+      goto error;
+  }
+  if (r < 0)
+    goto error;
 done:
-    sol_add(sol, tab);
-    isl_tab_free(tab);
-    return;
+  sol_add(sol, tab);
+  isl_tab_free(tab);
+  return;
 error:
-    isl_tab_free(tab);
-    sol->error = 1;
+  isl_tab_free(tab);
+  sol->error = 1;
 }
 
 /* Does "sol" contain a pair of partial solutions that could potentially
@@ -4211,15 +4051,14 @@ error:
  * and that there are at least two partial solutions of which the final two
  * are defined at the same level.
  */
-static int sol_has_mergeable_solutions(struct isl_sol *sol)
-{
-    if (sol->error)
-        return 0;
-    if (!sol->partial)
-        return 0;
-    if (!sol->partial->next)
-        return 0;
-    return sol->partial->level == sol->partial->next->level;
+static int sol_has_mergeable_solutions(struct isl_sol *sol) {
+  if (sol->error)
+    return 0;
+  if (!sol->partial)
+    return 0;
+  if (!sol->partial->next)
+    return 0;
+  return sol->partial->level == sol->partial->next->level;
 }
 
 /* Compute the lexicographic minimum of the set represented by the main
@@ -4242,72 +4081,70 @@ static int sol_has_mergeable_solutions(struct isl_sol *sol)
  * If there are no partial solutions that can potentially be merged
  * then the rollback is skipped as it would just be wasted effort.
  */
-static void find_solutions_main(struct isl_sol *sol, struct isl_tab *tab)
-{
-    int row;
-    void *saved;
+static void find_solutions_main(struct isl_sol *sol, struct isl_tab *tab) {
+  int row;
+  void *saved;
 
-    if (!tab)
-        goto error;
+  if (!tab)
+    goto error;
 
-    sol->level = 0;
+  sol->level = 0;
 
-    for (row = tab->n_redundant; row < tab->n_row; ++row) {
-        int p;
-        struct isl_vec *eq;
+  for (row = tab->n_redundant; row < tab->n_row; ++row) {
+    int p;
+    struct isl_vec *eq;
 
-        if (!row_is_parameter_var(tab, row))
-            continue;
-        if (tab->row_var[row] < tab->n_param)
-            p = tab->row_var[row];
-        else
-            p = tab->row_var[row]
-                + tab->n_param - (tab->n_var - tab->n_div);
-
-        eq = isl_vec_alloc(tab->mat->ctx, 1+tab->n_param+tab->n_div);
-        if (!eq)
-            goto error;
-        get_row_parameter_line(tab, row, eq->el);
-        isl_int_neg(eq->el[1 + p], tab->mat->row[row][0]);
-        eq = isl_vec_normalize(eq);
-
-        sol_inc_level(sol);
-        no_sol_in_strict(sol, tab, eq);
-
-        isl_seq_neg(eq->el, eq->el, eq->size);
-        sol_inc_level(sol);
-        no_sol_in_strict(sol, tab, eq);
-        isl_seq_neg(eq->el, eq->el, eq->size);
-
-        sol->context->op->add_eq(sol->context, eq->el, 1, 1);
-
-        isl_vec_free(eq);
-
-        if (isl_tab_mark_redundant(tab, row) < 0)
-            goto error;
-
-        if (sol->context->op->is_empty(sol->context))
-            break;
-
-        row = tab->n_redundant - 1;
-    }
-
-    saved = sol->context->op->save(sol->context);
-
-    find_solutions(sol, tab);
-
-    if (sol_has_mergeable_solutions(sol))
-        sol->context->op->restore(sol->context, saved);
+    if (!row_is_parameter_var(tab, row))
+      continue;
+    if (tab->row_var[row] < tab->n_param)
+      p = tab->row_var[row];
     else
-        sol->context->op->discard(saved);
+      p = tab->row_var[row] + tab->n_param - (tab->n_var - tab->n_div);
 
-    sol->level = 0;
-    sol_pop(sol);
+    eq = isl_vec_alloc(tab->mat->ctx, 1 + tab->n_param + tab->n_div);
+    if (!eq)
+      goto error;
+    get_row_parameter_line(tab, row, eq->el);
+    isl_int_neg(eq->el[1 + p], tab->mat->row[row][0]);
+    eq = isl_vec_normalize(eq);
 
-    return;
+    sol_inc_level(sol);
+    no_sol_in_strict(sol, tab, eq);
+
+    isl_seq_neg(eq->el, eq->el, eq->size);
+    sol_inc_level(sol);
+    no_sol_in_strict(sol, tab, eq);
+    isl_seq_neg(eq->el, eq->el, eq->size);
+
+    sol->context->op->add_eq(sol->context, eq->el, 1, 1);
+
+    isl_vec_free(eq);
+
+    if (isl_tab_mark_redundant(tab, row) < 0)
+      goto error;
+
+    if (sol->context->op->is_empty(sol->context))
+      break;
+
+    row = tab->n_redundant - 1;
+  }
+
+  saved = sol->context->op->save(sol->context);
+
+  find_solutions(sol, tab);
+
+  if (sol_has_mergeable_solutions(sol))
+    sol->context->op->restore(sol->context, saved);
+  else
+    sol->context->op->discard(saved);
+
+  sol->level = 0;
+  sol_pop(sol);
+
+  return;
 error:
-    isl_tab_free(tab);
-    sol->error = 1;
+  isl_tab_free(tab);
+  sol->error = 1;
 }
 
 /* Check if integer division "div" of "dom" also occurs in "bmap".
@@ -4315,34 +4152,32 @@ error:
  * Otherwise, return a position beyond the integer divisions.
  */
 static int find_context_div(__isl_keep isl_basic_map *bmap,
-                            __isl_keep isl_basic_set *dom, unsigned div)
-{
-    int i;
-    isl_size b_v_div, d_v_div;
-    isl_size n_div;
+                            __isl_keep isl_basic_set *dom, unsigned div) {
+  int i;
+  isl_size b_v_div, d_v_div;
+  isl_size n_div;
 
-    b_v_div = isl_basic_map_var_offset(bmap, isl_dim_div);
-    d_v_div = isl_basic_set_var_offset(dom, isl_dim_div);
-    n_div = isl_basic_map_dim(bmap, isl_dim_div);
-    if (b_v_div < 0 || d_v_div < 0 || n_div < 0)
-        return -1;
+  b_v_div = isl_basic_map_var_offset(bmap, isl_dim_div);
+  d_v_div = isl_basic_set_var_offset(dom, isl_dim_div);
+  n_div = isl_basic_map_dim(bmap, isl_dim_div);
+  if (b_v_div < 0 || d_v_div < 0 || n_div < 0)
+    return -1;
 
-    if (isl_int_is_zero(dom->div[div][0]))
-        return n_div;
-    if (isl_seq_first_non_zero(dom->div[div] + 2 + d_v_div,
-                               dom->n_div) != -1)
-        return n_div;
-
-    for (i = 0; i < n_div; ++i) {
-        if (isl_int_is_zero(bmap->div[i][0]))
-            continue;
-        if (isl_seq_first_non_zero(bmap->div[i] + 2 + d_v_div,
-                                   (b_v_div - d_v_div) + n_div) != -1)
-            continue;
-        if (isl_seq_eq(bmap->div[i], dom->div[div], 2 + d_v_div))
-            return i;
-    }
+  if (isl_int_is_zero(dom->div[div][0]))
     return n_div;
+  if (isl_seq_first_non_zero(dom->div[div] + 2 + d_v_div, dom->n_div) != -1)
+    return n_div;
+
+  for (i = 0; i < n_div; ++i) {
+    if (isl_int_is_zero(bmap->div[i][0]))
+      continue;
+    if (isl_seq_first_non_zero(bmap->div[i] + 2 + d_v_div,
+                               (b_v_div - d_v_div) + n_div) != -1)
+      continue;
+    if (isl_seq_eq(bmap->div[i], dom->div[div], 2 + d_v_div))
+      return i;
+  }
+  return n_div;
 }
 
 /* The correspondence between the variables in the main tableau,
@@ -4359,49 +4194,49 @@ static int find_context_div(__isl_keep isl_basic_map *bmap,
  * after any other integer divisions that the map may have.
  * This function performs the required reordering.
  */
-static __isl_give isl_basic_map *align_context_divs(
-    __isl_take isl_basic_map *bmap, __isl_keep isl_basic_set *dom)
-{
-    int i;
-    int common = 0;
-    int other;
-    unsigned bmap_n_div;
+static __isl_give isl_basic_map *
+align_context_divs(__isl_take isl_basic_map *bmap,
+                   __isl_keep isl_basic_set *dom) {
+  int i;
+  int common = 0;
+  int other;
+  unsigned bmap_n_div;
 
-    bmap_n_div = isl_basic_map_dim(bmap, isl_dim_div);
+  bmap_n_div = isl_basic_map_dim(bmap, isl_dim_div);
 
-    for (i = 0; i < dom->n_div; ++i) {
-        int pos;
+  for (i = 0; i < dom->n_div; ++i) {
+    int pos;
 
-        pos = find_context_div(bmap, dom, i);
-        if (pos < 0)
-            return isl_basic_map_free(bmap);
-        if (pos < bmap_n_div)
-            common++;
+    pos = find_context_div(bmap, dom, i);
+    if (pos < 0)
+      return isl_basic_map_free(bmap);
+    if (pos < bmap_n_div)
+      common++;
+  }
+  other = bmap_n_div - common;
+  if (dom->n_div - common > 0) {
+    bmap = isl_basic_map_extend(bmap, dom->n_div - common, 0, 0);
+    if (!bmap)
+      return NULL;
+  }
+  for (i = 0; i < dom->n_div; ++i) {
+    int pos = find_context_div(bmap, dom, i);
+    if (pos < 0)
+      bmap = isl_basic_map_free(bmap);
+    if (pos >= bmap_n_div) {
+      pos = isl_basic_map_alloc_div(bmap);
+      if (pos < 0)
+        goto error;
+      isl_int_set_si(bmap->div[pos][0], 0);
+      bmap_n_div++;
     }
-    other = bmap_n_div - common;
-    if (dom->n_div - common > 0) {
-        bmap = isl_basic_map_extend(bmap, dom->n_div - common, 0, 0);
-        if (!bmap)
-            return NULL;
-    }
-    for (i = 0; i < dom->n_div; ++i) {
-        int pos = find_context_div(bmap, dom, i);
-        if (pos < 0)
-            bmap = isl_basic_map_free(bmap);
-        if (pos >= bmap_n_div) {
-            pos = isl_basic_map_alloc_div(bmap);
-            if (pos < 0)
-                goto error;
-            isl_int_set_si(bmap->div[pos][0], 0);
-            bmap_n_div++;
-        }
-        if (pos != other + i)
-            bmap = isl_basic_map_swap_div(bmap, pos, other + i);
-    }
-    return bmap;
+    if (pos != other + i)
+      bmap = isl_basic_map_swap_div(bmap, pos, other + i);
+  }
+  return bmap;
 error:
-    isl_basic_map_free(bmap);
-    return NULL;
+  isl_basic_map_free(bmap);
+  return NULL;
 }
 
 /* Base case of isl_tab_basic_map_partial_lexopt, after removing
@@ -4420,42 +4255,41 @@ static struct isl_sol *basic_map_partial_lexopt_base_sol(
     __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
     __isl_give isl_set **empty, int max,
     struct isl_sol *(*init)(__isl_keep isl_basic_map *bmap,
-                            __isl_take isl_basic_set *dom, int track_empty, int max))
-{
-    struct isl_tab *tab;
-    struct isl_sol *sol = NULL;
-    struct isl_context *context;
+                            __isl_take isl_basic_set *dom, int track_empty,
+                            int max)) {
+  struct isl_tab *tab;
+  struct isl_sol *sol = NULL;
+  struct isl_context *context;
 
-    if (dom->n_div) {
-        dom = isl_basic_set_sort_divs(dom);
-        bmap = align_context_divs(bmap, dom);
-    }
-    sol = init(bmap, dom, !!empty, max);
-    if (!sol)
-        goto error;
+  if (dom->n_div) {
+    dom = isl_basic_set_sort_divs(dom);
+    bmap = align_context_divs(bmap, dom);
+  }
+  sol = init(bmap, dom, !!empty, max);
+  if (!sol)
+    goto error;
 
-    context = sol->context;
-    if (isl_basic_set_plain_is_empty(context->op->peek_basic_set(context)))
-        /* nothing */;
-    else if (isl_basic_map_plain_is_empty(bmap)) {
-        if (sol->add_empty)
-            sol->add_empty(sol,
-                           isl_basic_set_copy(context->op->peek_basic_set(context)));
-    } else {
-        tab = tab_for_lexmin(bmap,
-                             context->op->peek_basic_set(context), 1, max);
-        tab = context->op->detect_nonnegative_parameters(context, tab);
-        find_solutions_main(sol, tab);
-    }
-    if (sol->error)
-        goto error;
+  context = sol->context;
+  if (isl_basic_set_plain_is_empty(context->op->peek_basic_set(context)))
+    /* nothing */;
+  else if (isl_basic_map_plain_is_empty(bmap)) {
+    if (sol->add_empty)
+      sol->add_empty(sol,
+                     isl_basic_set_copy(context->op->peek_basic_set(context)));
+  } else {
+    tab = tab_for_lexmin(bmap, context->op->peek_basic_set(context), 1, max);
+    tab = context->op->detect_nonnegative_parameters(context, tab);
+    find_solutions_main(sol, tab);
+  }
+  if (sol->error)
+    goto error;
 
-    isl_basic_map_free(bmap);
-    return sol;
+  isl_basic_map_free(bmap);
+  return sol;
 error:
-    sol_free(sol);
-    isl_basic_map_free(bmap);
-    return NULL;
+  sol_free(sol);
+  isl_basic_map_free(bmap);
+  return NULL;
 }
 
 /* Base case of isl_tab_basic_map_partial_lexopt, after removing
@@ -4463,52 +4297,50 @@ error:
  *
  * We call basic_map_partial_lexopt_base_sol and extract the results.
  */
-static __isl_give isl_map *basic_map_partial_lexopt_base(
-    __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
-    __isl_give isl_set **empty, int max)
-{
-    isl_map *result = NULL;
-    struct isl_sol *sol;
-    struct isl_sol_map *sol_map;
+static __isl_give isl_map *
+basic_map_partial_lexopt_base(__isl_take isl_basic_map *bmap,
+                              __isl_take isl_basic_set *dom,
+                              __isl_give isl_set **empty, int max) {
+  isl_map *result = NULL;
+  struct isl_sol *sol;
+  struct isl_sol_map *sol_map;
 
-    sol = basic_map_partial_lexopt_base_sol(bmap, dom, empty, max,
-                                            &sol_map_init);
-    if (!sol)
-        return NULL;
-    sol_map = (struct isl_sol_map *) sol;
+  sol = basic_map_partial_lexopt_base_sol(bmap, dom, empty, max, &sol_map_init);
+  if (!sol)
+    return NULL;
+  sol_map = (struct isl_sol_map *)sol;
 
-    result = isl_map_copy(sol_map->map);
-    if (empty)
-        *empty = isl_set_copy(sol_map->empty);
-    sol_free(&sol_map->sol);
-    return result;
+  result = isl_map_copy(sol_map->map);
+  if (empty)
+    *empty = isl_set_copy(sol_map->empty);
+  sol_free(&sol_map->sol);
+  return result;
 }
 
 /* Return a count of the number of occurrences of the "n" first
  * variables in the inequality constraints of "bmap".
  */
 static __isl_give int *count_occurrences(__isl_keep isl_basic_map *bmap,
-        int n)
-{
-    int i, j;
-    isl_ctx *ctx;
-    int *occurrences;
+                                         int n) {
+  int i, j;
+  isl_ctx *ctx;
+  int *occurrences;
 
-    if (!bmap)
-        return NULL;
-    ctx = isl_basic_map_get_ctx(bmap);
-    occurrences = isl_calloc_array(ctx, int, n);
-    if (!occurrences)
-        return NULL;
+  if (!bmap)
+    return NULL;
+  ctx = isl_basic_map_get_ctx(bmap);
+  occurrences = isl_calloc_array(ctx, int, n);
+  if (!occurrences)
+    return NULL;
 
-    for (i = 0; i < bmap->n_ineq; ++i) {
-        for (j = 0; j < n; ++j) {
-            if (!isl_int_is_zero(bmap->ineq[i][1 + j]))
-                occurrences[j]++;
-        }
+  for (i = 0; i < bmap->n_ineq; ++i) {
+    for (j = 0; j < n; ++j) {
+      if (!isl_int_is_zero(bmap->ineq[i][1 + j]))
+        occurrences[j]++;
     }
+  }
 
-    return occurrences;
+  return occurrences;
 }
 
 /* Do all of the "n" variables with non-zero coefficients in "c"
@@ -4516,40 +4348,38 @@ static __isl_give int *count_occurrences(__isl_keep isl_basic_map *bmap,
  * "occurrences" is an array of length "n" containing the number
  * of occurrences of each of the variables in the inequality constraints.
  */
-static int single_occurrence(int n, isl_int *c, int *occurrences)
-{
-    int i;
+static int single_occurrence(int n, isl_int *c, int *occurrences) {
+  int i;
 
-    for (i = 0; i < n; ++i) {
-        if (isl_int_is_zero(c[i]))
-            continue;
-        if (occurrences[i] != 1)
-            return 0;
-    }
+  for (i = 0; i < n; ++i) {
+    if (isl_int_is_zero(c[i]))
+      continue;
+    if (occurrences[i] != 1)
+      return 0;
+  }
 
-    return 1;
+  return 1;
 }
 
 /* Do all of the "n" initial variables that occur in inequality constraint
  * "ineq" of "bmap" only occur in that constraint?
  */
 static int all_single_occurrence(__isl_keep isl_basic_map *bmap, int ineq,
-                                 int n)
-{
-    int i, j;
+                                 int n) {
+  int i, j;
 
-    for (i = 0; i < n; ++i) {
-        if (isl_int_is_zero(bmap->ineq[ineq][1 + i]))
-            continue;
-        for (j = 0; j < bmap->n_ineq; ++j) {
-            if (j == ineq)
-                continue;
-            if (!isl_int_is_zero(bmap->ineq[j][1 + i]))
-                return 0;
-        }
+  for (i = 0; i < n; ++i) {
+    if (isl_int_is_zero(bmap->ineq[ineq][1 + i]))
+      continue;
+    for (j = 0; j < bmap->n_ineq; ++j) {
+      if (j == ineq)
+        continue;
+      if (!isl_int_is_zero(bmap->ineq[j][1 + i]))
+        return 0;
     }
+  }
 
-    return 1;
+  return 1;
 }
 
 /* Structure used during detection of parallel constraints.
@@ -4558,22 +4388,21 @@ static int all_single_occurrence(__isl_keep isl_basic_map *bmap, int ineq,
  * val: the coefficients of the output variables
  */
 struct isl_constraint_equal_info {
-    unsigned n_in;
-    unsigned n_out;
-    isl_int *val;
+  unsigned n_in;
+  unsigned n_out;
+  isl_int *val;
 };
 
 /* Check whether the coefficients of the output variables
  * of the constraint in "entry" are equal to info->val.
  */
-static isl_bool constraint_equal(const void *entry, const void *val)
-{
-    isl_int **row = (isl_int **)entry;
-    const struct isl_constraint_equal_info *info = val;
-    int eq;
+static isl_bool constraint_equal(const void *entry, const void *val) {
+  isl_int **row = (isl_int **)entry;
+  const struct isl_constraint_equal_info *info = val;
+  int eq;
 
-    eq = isl_seq_eq((*row) + 1 + info->n_in, info->val, info->n_out);
-    return isl_bool_ok(eq);
+  eq = isl_seq_eq((*row) + 1 + info->n_in, info->val, info->n_out);
+  return isl_bool_ok(eq);
 }
 
 /* Check whether "bmap" has a pair of constraints that have
@@ -4586,67 +4415,64 @@ static isl_bool constraint_equal(const void *entry, const void *val)
  * If so, return true and return the row indices of the two constraints
  * in *first and *second.
  */
-static isl_bool parallel_constraints(__isl_keep isl_basic_map *bmap,
-                                     int *first, int *second)
-{
-    int i;
-    isl_ctx *ctx;
-    int *occurrences = NULL;
-    struct isl_hash_table *table = NULL;
-    struct isl_hash_table_entry *entry;
-    struct isl_constraint_equal_info info;
-    isl_size nparam, n_in, n_out, n_div;
+static isl_bool parallel_constraints(__isl_keep isl_basic_map *bmap, int *first,
+                                     int *second) {
+  int i;
+  isl_ctx *ctx;
+  int *occurrences = NULL;
+  struct isl_hash_table *table = NULL;
+  struct isl_hash_table_entry *entry;
+  struct isl_constraint_equal_info info;
+  isl_size nparam, n_in, n_out, n_div;
 
-    ctx = isl_basic_map_get_ctx(bmap);
-    table = isl_hash_table_alloc(ctx, bmap->n_ineq);
-    if (!table)
-        goto error;
+  ctx = isl_basic_map_get_ctx(bmap);
+  table = isl_hash_table_alloc(ctx, bmap->n_ineq);
+  if (!table)
+    goto error;
 
-    nparam = isl_basic_map_dim(bmap, isl_dim_param);
-    n_in = isl_basic_map_dim(bmap, isl_dim_in);
-    n_out = isl_basic_map_dim(bmap, isl_dim_out);
-    n_div = isl_basic_map_dim(bmap, isl_dim_div);
-    if (nparam < 0 || n_in < 0 || n_out < 0 || n_div < 0)
-        goto error;
-    info.n_in = nparam + n_in;
-    occurrences = count_occurrences(bmap, info.n_in);
-    if (info.n_in && !occurrences)
-        goto error;
-    info.n_out = n_out + n_div;
-    for (i = 0; i < bmap->n_ineq; ++i) {
-        uint32_t hash;
+  nparam = isl_basic_map_dim(bmap, isl_dim_param);
+  n_in = isl_basic_map_dim(bmap, isl_dim_in);
+  n_out = isl_basic_map_dim(bmap, isl_dim_out);
+  n_div = isl_basic_map_dim(bmap, isl_dim_div);
+  if (nparam < 0 || n_in < 0 || n_out < 0 || n_div < 0)
+    goto error;
+  info.n_in = nparam + n_in;
+  occurrences = count_occurrences(bmap, info.n_in);
+  if (info.n_in && !occurrences)
+    goto error;
+  info.n_out = n_out + n_div;
+  for (i = 0; i < bmap->n_ineq; ++i) {
+    uint32_t hash;
 
-        info.val = bmap->ineq[i] + 1 + info.n_in;
-        if (isl_seq_first_non_zero(info.val, n_out) < 0)
-            continue;
-        if (isl_seq_first_non_zero(info.val + n_out, n_div) >= 0)
-            continue;
-        if (!single_occurrence(info.n_in, bmap->ineq[i] + 1,
-                               occurrences))
-            continue;
-        hash = isl_seq_get_hash(info.val, info.n_out);
-        entry = isl_hash_table_find(ctx, table, hash,
-                                    constraint_equal, &info, 1);
-        if (!entry)
-            goto error;
-        if (entry->data)
-            break;
-        entry->data = &bmap->ineq[i];
-    }
+    info.val = bmap->ineq[i] + 1 + info.n_in;
+    if (isl_seq_first_non_zero(info.val, n_out) < 0)
+      continue;
+    if (isl_seq_first_non_zero(info.val + n_out, n_div) >= 0)
+      continue;
+    if (!single_occurrence(info.n_in, bmap->ineq[i] + 1, occurrences))
+      continue;
+    hash = isl_seq_get_hash(info.val, info.n_out);
+    entry = isl_hash_table_find(ctx, table, hash, constraint_equal, &info, 1);
+    if (!entry)
+      goto error;
+    if (entry->data)
+      break;
+    entry->data = &bmap->ineq[i];
+  }
 
-    if (i < bmap->n_ineq) {
-        *first = ((isl_int **)entry->data) - bmap->ineq;
-        *second = i;
-    }
+  if (i < bmap->n_ineq) {
+    *first = ((isl_int **)entry->data) - bmap->ineq;
+    *second = i;
+  }
 
-    isl_hash_table_free(ctx, table);
-    free(occurrences);
+  isl_hash_table_free(ctx, table);
+  free(occurrences);
 
-    return isl_bool_ok(i < bmap->n_ineq);
+  return isl_bool_ok(i < bmap->n_ineq);
 error:
-    isl_hash_table_free(ctx, table);
-    free(occurrences);
-    return isl_bool_error;
+  isl_hash_table_free(ctx, table);
+  free(occurrences);
+  return isl_bool_error;
 }
 
 /* Given a set of upper bounds in "var", add constraints to "bset"
@@ -4657,33 +4483,32 @@ error:
  *	b_i <= b_j	for j > i
  *	b_i <  b_j	for j < i
  */
-static __isl_give isl_basic_set *select_minimum(__isl_take isl_basic_set *bset,
-        __isl_keep isl_mat *var, int i)
-{
-    isl_ctx *ctx;
-    int j, k;
+static __isl_give isl_basic_set *
+select_minimum(__isl_take isl_basic_set *bset, __isl_keep isl_mat *var, int i) {
+  isl_ctx *ctx;
+  int j, k;
 
-    ctx = isl_mat_get_ctx(var);
+  ctx = isl_mat_get_ctx(var);
 
-    for (j = 0; j < var->n_row; ++j) {
-        if (j == i)
-            continue;
-        k = isl_basic_set_alloc_inequality(bset);
-        if (k < 0)
-            goto error;
-        isl_seq_combine(bset->ineq[k], ctx->one, var->row[j],
-                        ctx->negone, var->row[i], var->n_col);
-        isl_int_set_si(bset->ineq[k][var->n_col], 0);
-        if (j < i)
-            isl_int_sub_ui(bset->ineq[k][0], bset->ineq[k][0], 1);
-    }
+  for (j = 0; j < var->n_row; ++j) {
+    if (j == i)
+      continue;
+    k = isl_basic_set_alloc_inequality(bset);
+    if (k < 0)
+      goto error;
+    isl_seq_combine(bset->ineq[k], ctx->one, var->row[j], ctx->negone,
+                    var->row[i], var->n_col);
+    isl_int_set_si(bset->ineq[k][var->n_col], 0);
+    if (j < i)
+      isl_int_sub_ui(bset->ineq[k][0], bset->ineq[k][0], 1);
+  }
 
-    bset = isl_basic_set_finalize(bset);
+  bset = isl_basic_set_finalize(bset);
 
-    return bset;
+  return bset;
 error:
-    isl_basic_set_free(bset);
-    return NULL;
+  isl_basic_set_free(bset);
+  return NULL;
 }
 
 /* Given a set of upper bounds on the last "input" variable m,
@@ -4700,39 +4525,38 @@ error:
  *	b_i <  b_j	for j < i
  */
 static __isl_give isl_set *set_minimum(__isl_take isl_space *space,
-                                       __isl_take isl_mat *var)
-{
-    int i, k;
-    isl_basic_set *bset = NULL;
-    isl_set *set = NULL;
+                                       __isl_take isl_mat *var) {
+  int i, k;
+  isl_basic_set *bset = NULL;
+  isl_set *set = NULL;
 
-    if (!space || !var)
-        goto error;
+  if (!space || !var)
+    goto error;
 
-    set = isl_set_alloc_space(isl_space_copy(space),
-                              var->n_row, ISL_SET_DISJOINT);
+  set =
+      isl_set_alloc_space(isl_space_copy(space), var->n_row, ISL_SET_DISJOINT);
 
-    for (i = 0; i < var->n_row; ++i) {
-        bset = isl_basic_set_alloc_space(isl_space_copy(space), 0,
-                                         1, var->n_row - 1);
-        k = isl_basic_set_alloc_equality(bset);
-        if (k < 0)
-            goto error;
-        isl_seq_cpy(bset->eq[k], var->row[i], var->n_col);
-        isl_int_set_si(bset->eq[k][var->n_col], -1);
-        bset = select_minimum(bset, var, i);
-        set = isl_set_add_basic_set(set, bset);
-    }
+  for (i = 0; i < var->n_row; ++i) {
+    bset =
+        isl_basic_set_alloc_space(isl_space_copy(space), 0, 1, var->n_row - 1);
+    k = isl_basic_set_alloc_equality(bset);
+    if (k < 0)
+      goto error;
+    isl_seq_cpy(bset->eq[k], var->row[i], var->n_col);
+    isl_int_set_si(bset->eq[k][var->n_col], -1);
+    bset = select_minimum(bset, var, i);
+    set = isl_set_add_basic_set(set, bset);
+  }
 
-    isl_space_free(space);
-    isl_mat_free(var);
-    return set;
+  isl_space_free(space);
+  isl_mat_free(var);
+  return set;
 error:
-    isl_basic_set_free(bset);
-    isl_set_free(set);
-    isl_space_free(space);
-    isl_mat_free(var);
-    return NULL;
+  isl_basic_set_free(bset);
+  isl_set_free(set);
+  isl_space_free(space);
+  isl_mat_free(var);
+  return NULL;
 }
 
 /* Given that the last input variable of "bmap" represents the minimum
@@ -4745,42 +4569,41 @@ error:
  * is defined.
  */
 static isl_bool need_split_basic_map(__isl_keep isl_basic_map *bmap,
-                                     __isl_keep isl_mat *cst)
-{
-    int i, j;
-    isl_size total;
-    unsigned pos;
+                                     __isl_keep isl_mat *cst) {
+  int i, j;
+  isl_size total;
+  unsigned pos;
 
-    pos = cst->n_col - 1;
-    total = isl_basic_map_dim(bmap, isl_dim_all);
-    if (total < 0)
-        return isl_bool_error;
+  pos = cst->n_col - 1;
+  total = isl_basic_map_dim(bmap, isl_dim_all);
+  if (total < 0)
+    return isl_bool_error;
 
-    for (i = 0; i < bmap->n_div; ++i)
-        if (!isl_int_is_zero(bmap->div[i][2 + pos]))
-            return isl_bool_true;
+  for (i = 0; i < bmap->n_div; ++i)
+    if (!isl_int_is_zero(bmap->div[i][2 + pos]))
+      return isl_bool_true;
 
-    for (i = 0; i < bmap->n_eq; ++i)
-        if (!isl_int_is_zero(bmap->eq[i][1 + pos]))
-            return isl_bool_true;
+  for (i = 0; i < bmap->n_eq; ++i)
+    if (!isl_int_is_zero(bmap->eq[i][1 + pos]))
+      return isl_bool_true;
 
-    for (i = 0; i < bmap->n_ineq; ++i) {
-        if (isl_int_is_nonneg(bmap->ineq[i][1 + pos]))
-            continue;
-        if (!isl_int_is_negone(bmap->ineq[i][1 + pos]))
-            return isl_bool_true;
-        if (isl_seq_first_non_zero(bmap->ineq[i] + 1 + pos + 1,
-                                   total - pos - 1) >= 0)
-            return isl_bool_true;
+  for (i = 0; i < bmap->n_ineq; ++i) {
+    if (isl_int_is_nonneg(bmap->ineq[i][1 + pos]))
+      continue;
+    if (!isl_int_is_negone(bmap->ineq[i][1 + pos]))
+      return isl_bool_true;
+    if (isl_seq_first_non_zero(bmap->ineq[i] + 1 + pos + 1, total - pos - 1) >=
+        0)
+      return isl_bool_true;
 
-        for (j = 0; j < cst->n_row; ++j)
-            if (isl_seq_eq(bmap->ineq[i], cst->row[j], cst->n_col))
-                break;
-        if (j >= cst->n_row)
-            return isl_bool_true;
-    }
+    for (j = 0; j < cst->n_row; ++j)
+      if (isl_seq_eq(bmap->ineq[i], cst->row[j], cst->n_col))
+        break;
+    if (j >= cst->n_row)
+      return isl_bool_true;
+  }
 
-    return isl_bool_false;
+  return isl_bool_false;
 }
 
 /* Given that the last set variable of "bset" represents the minimum
@@ -4792,28 +4615,27 @@ static isl_bool need_split_basic_map(__isl_keep isl_basic_map *bmap,
  * from "bmap".
  */
 static isl_bool need_split_basic_set(__isl_keep isl_basic_set *bset,
-                                     __isl_keep isl_mat *cst)
-{
-    return need_split_basic_map(bset_to_bmap(bset), cst);
+                                     __isl_keep isl_mat *cst) {
+  return need_split_basic_map(bset_to_bmap(bset), cst);
 }
 
 /* Given that the last set variable of "set" represents the minimum
  * of the bounds in "cst", check whether we need to split the domain
  * based on which bound attains the minimum.
  */
-static isl_bool need_split_set(__isl_keep isl_set *set, __isl_keep isl_mat *cst)
-{
-    int i;
+static isl_bool need_split_set(__isl_keep isl_set *set,
+                               __isl_keep isl_mat *cst) {
+  int i;
 
-    for (i = 0; i < set->n; ++i) {
-        isl_bool split;
+  for (i = 0; i < set->n; ++i) {
+    isl_bool split;
 
-        split = need_split_basic_set(set->p[i], cst);
-        if (split < 0 || split)
-            return split;
-    }
+    split = need_split_basic_set(set->p[i], cst);
+    if (split < 0 || split)
+      return split;
+  }
 
-    return isl_bool_false;
+  return isl_bool_false;
 }
 
 /* Given a map of which the last input variable is the minimum
@@ -4830,46 +4652,45 @@ static isl_bool need_split_set(__isl_keep isl_set *set, __isl_keep isl_mat *cst)
  * m is equal to a or b.
  */
 static __isl_give isl_map *split_domain(__isl_take isl_map *opt,
-                                        __isl_take isl_set *min_expr, __isl_take isl_mat *cst)
-{
-    isl_size n_in;
-    int i;
-    isl_space *space;
-    isl_map *res;
+                                        __isl_take isl_set *min_expr,
+                                        __isl_take isl_mat *cst) {
+  isl_size n_in;
+  int i;
+  isl_space *space;
+  isl_map *res;
 
-    n_in = isl_map_dim(opt, isl_dim_in);
-    if (n_in < 0 || !min_expr || !cst)
-        goto error;
+  n_in = isl_map_dim(opt, isl_dim_in);
+  if (n_in < 0 || !min_expr || !cst)
+    goto error;
 
-    space = isl_map_get_space(opt);
-    space = isl_space_drop_dims(space, isl_dim_in, n_in - 1, 1);
-    res = isl_map_empty(space);
+  space = isl_map_get_space(opt);
+  space = isl_space_drop_dims(space, isl_dim_in, n_in - 1, 1);
+  res = isl_map_empty(space);
 
-    for (i = 0; i < opt->n; ++i) {
-        isl_map *map;
-        isl_bool split;
+  for (i = 0; i < opt->n; ++i) {
+    isl_map *map;
+    isl_bool split;
 
-        map = isl_map_from_basic_map(isl_basic_map_copy(opt->p[i]));
-        split = need_split_basic_map(opt->p[i], cst);
-        if (split < 0)
-            map = isl_map_free(map);
-        else if (split)
-            map = isl_map_intersect_domain(map,
-                                           isl_set_copy(min_expr));
-        map = isl_map_remove_dims(map, isl_dim_in, n_in - 1, 1);
+    map = isl_map_from_basic_map(isl_basic_map_copy(opt->p[i]));
+    split = need_split_basic_map(opt->p[i], cst);
+    if (split < 0)
+      map = isl_map_free(map);
+    else if (split)
+      map = isl_map_intersect_domain(map, isl_set_copy(min_expr));
+    map = isl_map_remove_dims(map, isl_dim_in, n_in - 1, 1);
 
-        res = isl_map_union_disjoint(res, map);
-    }
+    res = isl_map_union_disjoint(res, map);
+  }
 
-    isl_map_free(opt);
-    isl_set_free(min_expr);
-    isl_mat_free(cst);
-    return res;
+  isl_map_free(opt);
+  isl_set_free(min_expr);
+  isl_mat_free(cst);
+  return res;
 error:
-    isl_map_free(opt);
-    isl_set_free(min_expr);
-    isl_mat_free(cst);
-    return NULL;
+  isl_map_free(opt);
+  isl_set_free(min_expr);
+  isl_mat_free(cst);
+  return NULL;
 }
 
 /* Given a set of which the last set variable is the minimum
@@ -4879,20 +4700,21 @@ error:
  * The variable is subsequently projected out.
  */
 static __isl_give isl_set *split(__isl_take isl_set *empty,
-                                 __isl_take isl_set *min_expr, __isl_take isl_mat *cst)
-{
-    isl_map *map;
+                                 __isl_take isl_set *min_expr,
+                                 __isl_take isl_mat *cst) {
+  isl_map *map;
 
-    map = isl_map_from_domain(empty);
-    map = split_domain(map, min_expr, cst);
-    empty = isl_map_domain(map);
+  map = isl_map_from_domain(empty);
+  map = split_domain(map, min_expr, cst);
+  empty = isl_map_domain(map);
 
-    return empty;
+  return empty;
 }
 
-static __isl_give isl_map *basic_map_partial_lexopt(
-    __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
-    __isl_give isl_set **empty, int max);
+static __isl_give isl_map *
+basic_map_partial_lexopt(__isl_take isl_basic_map *bmap,
+                         __isl_take isl_basic_set *dom,
+                         __isl_give isl_set **empty, int max);
 
 /* This function is called from basic_map_partial_lexopt_symm.
  * The last variable of "bmap" and "dom" corresponds to the minimum
@@ -4906,25 +4728,23 @@ static __isl_give isl_map *basic_map_partial_lexopt(
 static __isl_give isl_map *basic_map_partial_lexopt_symm_core(
     __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
     __isl_give isl_set **empty, int max, __isl_take isl_mat *cst,
-    __isl_take isl_space *map_space, __isl_take isl_space *set_space)
-{
-    isl_map *opt;
-    isl_set *min_expr;
+    __isl_take isl_space *map_space, __isl_take isl_space *set_space) {
+  isl_map *opt;
+  isl_set *min_expr;
 
-    min_expr = set_minimum(isl_basic_set_get_space(dom), isl_mat_copy(cst));
+  min_expr = set_minimum(isl_basic_set_get_space(dom), isl_mat_copy(cst));
 
-    opt = basic_map_partial_lexopt(bmap, dom, empty, max);
+  opt = basic_map_partial_lexopt(bmap, dom, empty, max);
 
-    if (empty) {
-        *empty = split(*empty,
-                       isl_set_copy(min_expr), isl_mat_copy(cst));
-        *empty = isl_set_reset_space(*empty, set_space);
-    }
+  if (empty) {
+    *empty = split(*empty, isl_set_copy(min_expr), isl_mat_copy(cst));
+    *empty = isl_set_reset_space(*empty, set_space);
+  }
 
-    opt = split_domain(opt, min_expr, cst);
-    opt = isl_map_reset_space(opt, map_space);
+  opt = split_domain(opt, min_expr, cst);
+  opt = isl_map_reset_space(opt, map_space);
 
-    return opt;
+  return opt;
 }
 
 /* Extract a domain from "bmap" for the purpose of computing
@@ -4950,27 +4770,26 @@ static __isl_give isl_map *basic_map_partial_lexopt_symm_core(
  * appear in the solution.
  */
 static __isl_give isl_basic_set *extract_domain(__isl_keep isl_basic_map *bmap,
-        unsigned flags)
-{
-    isl_size n_div;
-    isl_size n_out;
+                                                unsigned flags) {
+  isl_size n_div;
+  isl_size n_out;
 
-    n_div = isl_basic_map_dim(bmap, isl_dim_div);
-    n_out = isl_basic_map_dim(bmap, isl_dim_out);
-    if (n_div < 0 || n_out < 0)
-        return NULL;
-    bmap = isl_basic_map_copy(bmap);
-    if (ISL_FL_ISSET(flags, ISL_OPT_QE)) {
-        bmap = isl_basic_map_drop_constraints_involving_dims(bmap,
-                isl_dim_div, 0, n_div);
-        bmap = isl_basic_map_drop_constraints_involving_dims(bmap,
-                isl_dim_out, 0, n_out);
-    }
-    return isl_basic_map_domain(bmap);
+  n_div = isl_basic_map_dim(bmap, isl_dim_div);
+  n_out = isl_basic_map_dim(bmap, isl_dim_out);
+  if (n_div < 0 || n_out < 0)
+    return NULL;
+  bmap = isl_basic_map_copy(bmap);
+  if (ISL_FL_ISSET(flags, ISL_OPT_QE)) {
+    bmap = isl_basic_map_drop_constraints_involving_dims(bmap, isl_dim_div, 0,
+                                                         n_div);
+    bmap = isl_basic_map_drop_constraints_involving_dims(bmap, isl_dim_out, 0,
+                                                         n_out);
+  }
+  return isl_basic_map_domain(bmap);
 }
 
 #undef TYPE
-#define TYPE	isl_map
+#define TYPE isl_map
 #undef SUFFIX
 #define SUFFIX
 #include "isl_tab_lexopt_templ.c"
@@ -4978,30 +4797,28 @@ static __isl_give isl_basic_set *extract_domain(__isl_keep isl_basic_map *bmap,
 /* Extract the subsequence of the sample value of "tab"
  * starting at "pos" and of length "len".
  */
-static __isl_give isl_vec *extract_sample_sequence(struct isl_tab *tab,
-        int pos, int len)
-{
-    int i;
-    isl_ctx *ctx;
-    isl_vec *v;
+static __isl_give isl_vec *extract_sample_sequence(struct isl_tab *tab, int pos,
+                                                   int len) {
+  int i;
+  isl_ctx *ctx;
+  isl_vec *v;
 
-    ctx = isl_tab_get_ctx(tab);
-    v = isl_vec_alloc(ctx, len);
-    if (!v)
-        return NULL;
-    for (i = 0; i < len; ++i) {
-        if (!tab->var[pos + i].is_row) {
-            isl_int_set_si(v->el[i], 0);
-        } else {
-            int row;
+  ctx = isl_tab_get_ctx(tab);
+  v = isl_vec_alloc(ctx, len);
+  if (!v)
+    return NULL;
+  for (i = 0; i < len; ++i) {
+    if (!tab->var[pos + i].is_row) {
+      isl_int_set_si(v->el[i], 0);
+    } else {
+      int row;
 
-            row = tab->var[pos + i].index;
-            isl_int_divexact(v->el[i], tab->mat->row[row][1],
-                             tab->mat->row[row][0]);
-        }
+      row = tab->var[pos + i].index;
+      isl_int_divexact(v->el[i], tab->mat->row[row][1], tab->mat->row[row][0]);
     }
+  }
 
-    return v;
+  return v;
 }
 
 /* Check if the sequence of variables starting at "pos"
@@ -5010,28 +4827,27 @@ static __isl_give isl_vec *extract_sample_sequence(struct isl_tab *tab,
  * equal to the zero vector?
  */
 static isl_bool region_is_trivial(struct isl_tab *tab, int pos,
-                                  __isl_keep isl_mat *trivial)
-{
-    isl_size n, len;
-    isl_vec *v;
-    isl_bool is_trivial;
+                                  __isl_keep isl_mat *trivial) {
+  isl_size n, len;
+  isl_vec *v;
+  isl_bool is_trivial;
 
-    n = isl_mat_rows(trivial);
-    if (n < 0)
-        return isl_bool_error;
+  n = isl_mat_rows(trivial);
+  if (n < 0)
+    return isl_bool_error;
 
-    if (n == 0)
-        return isl_bool_false;
+  if (n == 0)
+    return isl_bool_false;
 
-    len = isl_mat_cols(trivial);
-    if (len < 0)
-        return isl_bool_error;
-    v = extract_sample_sequence(tab, pos, len);
-    v = isl_mat_vec_product(isl_mat_copy(trivial), v);
-    is_trivial = isl_vec_is_zero(v);
-    isl_vec_free(v);
+  len = isl_mat_cols(trivial);
+  if (len < 0)
+    return isl_bool_error;
+  v = extract_sample_sequence(tab, pos, len);
+  v = isl_mat_vec_product(isl_mat_copy(trivial), v);
+  is_trivial = isl_vec_is_zero(v);
+  isl_vec_free(v);
 
-    return is_trivial;
+  return is_trivial;
 }
 
 /* Global internal data for isl_tab_basic_set_non_trivial_lexmin.
@@ -5052,48 +4868,46 @@ static isl_bool region_is_trivial(struct isl_tab *tab, int pos,
  * It is initialized to a vector of size zero.
  */
 struct isl_lexmin_data {
-    int n_op;
-    int n_region;
-    struct isl_trivial_region *region;
+  int n_op;
+  int n_region;
+  struct isl_trivial_region *region;
 
-    struct isl_tab *tab;
-    struct isl_local_region *local;
-    isl_vec *v;
+  struct isl_tab *tab;
+  struct isl_local_region *local;
+  isl_vec *v;
 
-    isl_vec *sol;
+  isl_vec *sol;
 };
 
 /* Return the index of the first trivial region, "n_region" if all regions
  * are non-trivial or -1 in case of error.
  */
-static int first_trivial_region(struct isl_lexmin_data *data)
-{
-    int i;
+static int first_trivial_region(struct isl_lexmin_data *data) {
+  int i;
 
-    for (i = 0; i < data->n_region; ++i) {
-        isl_bool trivial;
-        trivial = region_is_trivial(data->tab, data->region[i].pos,
-                                    data->region[i].trivial);
-        if (trivial < 0)
-            return -1;
-        if (trivial)
-            return i;
-    }
+  for (i = 0; i < data->n_region; ++i) {
+    isl_bool trivial;
+    trivial = region_is_trivial(data->tab, data->region[i].pos,
+                                data->region[i].trivial);
+    if (trivial < 0)
+      return -1;
+    if (trivial)
+      return i;
+  }
 
-    return data->n_region;
+  return data->n_region;
 }
 
 /* Check if the solution is optimal, i.e., whether the first
  * n_op entries are zero.
  */
-static int is_optimal(__isl_keep isl_vec *sol, int n_op)
-{
-    int i;
+static int is_optimal(__isl_keep isl_vec *sol, int n_op) {
+  int i;
 
-    for (i = 0; i < n_op; ++i)
-        if (!isl_int_is_zero(sol->el[1 + i]))
-            return 0;
-    return 1;
+  for (i = 0; i < n_op; ++i)
+    if (!isl_int_is_zero(sol->el[1 + i]))
+      return 0;
+  return 1;
 }
 
 /* Add constraints to "tab" that ensure that any solution is significantly
@@ -5110,44 +4924,43 @@ static int is_optimal(__isl_keep isl_vec *sol, int n_op)
  * at least 2 * (n_op - n_zero) more elements in the constraint array
  * are available in the tableau.
  */
-static int force_better_solution(struct isl_tab *tab,
-                                 __isl_keep isl_vec *sol, int n_op, int n_zero)
-{
-    int i, n;
-    isl_ctx *ctx;
-    isl_vec *v = NULL;
+static int force_better_solution(struct isl_tab *tab, __isl_keep isl_vec *sol,
+                                 int n_op, int n_zero) {
+  int i, n;
+  isl_ctx *ctx;
+  isl_vec *v = NULL;
 
-    if (!sol)
-        return -1;
-
-    for (i = n_zero; i < n_op; ++i)
-        if (!isl_int_is_zero(sol->el[1 + i]))
-            break;
-
-    if (i == n_op) {
-        if (isl_tab_mark_empty(tab) < 0)
-            return -1;
-        return n_op;
-    }
-
-    ctx = isl_vec_get_ctx(sol);
-    v = isl_vec_alloc(ctx, 1 + tab->n_var);
-    if (!v)
-        return -1;
-
-    n = i + 1;
-    for (; i >= n_zero; --i) {
-        v = isl_vec_clr(v);
-        isl_int_set_si(v->el[1 + i], -1);
-        if (add_lexmin_eq(tab, v->el) < 0)
-            goto error;
-    }
-
-    isl_vec_free(v);
-    return n;
-error:
-    isl_vec_free(v);
+  if (!sol)
     return -1;
+
+  for (i = n_zero; i < n_op; ++i)
+    if (!isl_int_is_zero(sol->el[1 + i]))
+      break;
+
+  if (i == n_op) {
+    if (isl_tab_mark_empty(tab) < 0)
+      return -1;
+    return n_op;
+  }
+
+  ctx = isl_vec_get_ctx(sol);
+  v = isl_vec_alloc(ctx, 1 + tab->n_var);
+  if (!v)
+    return -1;
+
+  n = i + 1;
+  for (; i >= n_zero; --i) {
+    v = isl_vec_clr(v);
+    isl_int_set_si(v->el[1 + i], -1);
+    if (add_lexmin_eq(tab, v->el) < 0)
+      goto error;
+  }
+
+  isl_vec_free(v);
+  return n;
+error:
+  isl_vec_free(v);
+  return -1;
 }
 
 /* Fix triviality direction "dir" of the given region to zero.
@@ -5156,22 +4969,20 @@ error:
  * two more elements in the constraint array are available in the tableau.
  */
 static isl_stat fix_zero(struct isl_tab *tab, struct isl_trivial_region *region,
-                         int dir, struct isl_lexmin_data *data)
-{
-    isl_size len;
+                         int dir, struct isl_lexmin_data *data) {
+  isl_size len;
 
-    data->v = isl_vec_clr(data->v);
-    if (!data->v)
-        return isl_stat_error;
-    len = isl_mat_cols(region->trivial);
-    if (len < 0)
-        return isl_stat_error;
-    isl_seq_cpy(data->v->el + 1 + region->pos, region->trivial->row[dir],
-                len);
-    if (add_lexmin_eq(tab, data->v->el) < 0)
-        return isl_stat_error;
+  data->v = isl_vec_clr(data->v);
+  if (!data->v)
+    return isl_stat_error;
+  len = isl_mat_cols(region->trivial);
+  if (len < 0)
+    return isl_stat_error;
+  isl_seq_cpy(data->v->el + 1 + region->pos, region->trivial->row[dir], len);
+  if (add_lexmin_eq(tab, data->v->el) < 0)
+    return isl_stat_error;
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* This function selects case "side" for non-triviality region "region",
@@ -5183,28 +4994,27 @@ static isl_stat fix_zero(struct isl_tab *tab, struct isl_trivial_region *region,
  * one more element in the constraint array are available in the tableau.
  */
 static struct isl_tab *pos_neg(struct isl_tab *tab,
-                               struct isl_trivial_region *region,
-                               int side, struct isl_lexmin_data *data)
-{
-    isl_size len;
+                               struct isl_trivial_region *region, int side,
+                               struct isl_lexmin_data *data) {
+  isl_size len;
 
-    data->v = isl_vec_clr(data->v);
-    if (!data->v)
-        goto error;
-    isl_int_set_si(data->v->el[0], -1);
-    len = isl_mat_cols(region->trivial);
-    if (len < 0)
-        goto error;
-    if (side % 2 == 0)
-        isl_seq_cpy(data->v->el + 1 + region->pos,
-                    region->trivial->row[side / 2], len);
-    else
-        isl_seq_neg(data->v->el + 1 + region->pos,
-                    region->trivial->row[side / 2], len);
-    return add_lexmin_ineq(tab, data->v->el);
+  data->v = isl_vec_clr(data->v);
+  if (!data->v)
+    goto error;
+  isl_int_set_si(data->v->el[0], -1);
+  len = isl_mat_cols(region->trivial);
+  if (len < 0)
+    goto error;
+  if (side % 2 == 0)
+    isl_seq_cpy(data->v->el + 1 + region->pos, region->trivial->row[side / 2],
+                len);
+  else
+    isl_seq_neg(data->v->el + 1 + region->pos, region->trivial->row[side / 2],
+                len);
+  return add_lexmin_ineq(tab, data->v->el);
 error:
-    isl_tab_free(tab);
-    return NULL;
+  isl_tab_free(tab);
+  return NULL;
 }
 
 /* Local data at each level of the backtracking procedure of
@@ -5222,69 +5032,65 @@ error:
  * to be satisfied by all subsequent cases.
  */
 struct isl_local_region {
-    int update;
-    int n_zero;
-    int region;
-    int side;
-    int n;
-    struct isl_tab_undo *snap;
+  int update;
+  int n_zero;
+  int region;
+  int side;
+  int n;
+  struct isl_tab_undo *snap;
 };
 
 /* Initialize the global data structure "data" used while solving
  * the ILP problem "bset".
  */
 static isl_stat init_lexmin_data(struct isl_lexmin_data *data,
-                                 __isl_keep isl_basic_set *bset)
-{
-    isl_ctx *ctx;
+                                 __isl_keep isl_basic_set *bset) {
+  isl_ctx *ctx;
 
-    ctx = isl_basic_set_get_ctx(bset);
+  ctx = isl_basic_set_get_ctx(bset);
 
-    data->tab = tab_for_lexmin(bset, NULL, 0, 0);
-    if (!data->tab)
-        return isl_stat_error;
+  data->tab = tab_for_lexmin(bset, NULL, 0, 0);
+  if (!data->tab)
+    return isl_stat_error;
 
-    data->v = isl_vec_alloc(ctx, 1 + data->tab->n_var);
-    if (!data->v)
-        return isl_stat_error;
-    data->local = isl_calloc_array(ctx, struct isl_local_region,
-                                   data->n_region);
-    if (data->n_region && !data->local)
-        return isl_stat_error;
+  data->v = isl_vec_alloc(ctx, 1 + data->tab->n_var);
+  if (!data->v)
+    return isl_stat_error;
+  data->local = isl_calloc_array(ctx, struct isl_local_region, data->n_region);
+  if (data->n_region && !data->local)
+    return isl_stat_error;
 
-    data->sol = isl_vec_alloc(ctx, 0);
+  data->sol = isl_vec_alloc(ctx, 0);
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* Mark all outer levels as requiring a better solution
  * in the next cases.
  */
-static void update_outer_levels(struct isl_lexmin_data *data, int level)
-{
-    int i;
+static void update_outer_levels(struct isl_lexmin_data *data, int level) {
+  int i;
 
-    for (i = 0; i < level; ++i)
-        data->local[i].update = 1;
+  for (i = 0; i < level; ++i)
+    data->local[i].update = 1;
 }
 
 /* Initialize "local" to refer to region "region" and
  * to initiate processing at this level.
  */
 static isl_stat init_local_region(struct isl_local_region *local, int region,
-                                  struct isl_lexmin_data *data)
-{
-    isl_size n = isl_mat_rows(data->region[region].trivial);
+                                  struct isl_lexmin_data *data) {
+  isl_size n = isl_mat_rows(data->region[region].trivial);
 
-    if (n < 0)
-        return isl_stat_error;
-    local->n = n;
-    local->region = region;
-    local->side = 0;
-    local->update = 0;
-    local->n_zero = 0;
+  if (n < 0)
+    return isl_stat_error;
+  local->n = n;
+  local->region = region;
+  local->side = 0;
+  local->update = 0;
+  local->n_zero = 0;
 
-    return isl_stat_ok;
+  return isl_stat_ok;
 }
 
 /* What to do next after entering a level of the backtracking procedure.
@@ -5296,10 +5102,10 @@ static isl_stat init_local_region(struct isl_local_region *local, int region,
  * 	move to the next level
  */
 enum isl_next {
-    isl_next_error = -1,
-    isl_next_done,
-    isl_next_backtrack,
-    isl_next_handle,
+  isl_next_error = -1,
+  isl_next_done,
+  isl_next_backtrack,
+  isl_next_handle,
 };
 
 /* Have all cases of the current region been considered?
@@ -5311,11 +5117,10 @@ enum isl_next {
  * anymore and all cases have effectively been considered.
  */
 static int finished_all_cases(struct isl_local_region *local,
-                              struct isl_lexmin_data *data)
-{
-    if (data->tab->empty)
-        return 1;
-    return local->side >= 2 * local->n;
+                              struct isl_lexmin_data *data) {
+  if (data->tab->empty)
+    return 1;
+  return local->side >= 2 * local->n;
 }
 
 /* Enter level "level" of the backtracking search and figure out
@@ -5338,48 +5143,45 @@ static int finished_all_cases(struct isl_local_region *local,
  * have been considered, then the caller needs to backtrack as well.
  */
 static enum isl_next enter_level(int level, int init,
-                                 struct isl_lexmin_data *data)
-{
-    struct isl_local_region *local = &data->local[level];
+                                 struct isl_lexmin_data *data) {
+  struct isl_local_region *local = &data->local[level];
 
-    if (init) {
-        int r;
+  if (init) {
+    int r;
 
-        data->tab = cut_to_integer_lexmin(data->tab, CUT_ONE);
-        if (!data->tab)
-            return isl_next_error;
-        if (data->tab->empty)
-            return isl_next_backtrack;
-        r = first_trivial_region(data);
-        if (r < 0)
-            return isl_next_error;
-        if (r == data->n_region) {
-            update_outer_levels(data, level);
-            isl_vec_free(data->sol);
-            data->sol = isl_tab_get_sample_value(data->tab);
-            if (!data->sol)
-                return isl_next_error;
-            if (is_optimal(data->sol, data->n_op))
-                return isl_next_done;
-            return isl_next_backtrack;
-        }
-        if (level >= data->n_region)
-            isl_die(isl_vec_get_ctx(data->v), isl_error_internal,
-                    "nesting level too deep",
-                    return isl_next_error);
-        if (init_local_region(local, r, data) < 0)
-            return isl_next_error;
-        if (isl_tab_extend_cons(data->tab,
-                                2 * local->n + 2 * data->n_op) < 0)
-            return isl_next_error;
-    } else {
-        if (isl_tab_rollback(data->tab, local->snap) < 0)
-            return isl_next_error;
+    data->tab = cut_to_integer_lexmin(data->tab, CUT_ONE);
+    if (!data->tab)
+      return isl_next_error;
+    if (data->tab->empty)
+      return isl_next_backtrack;
+    r = first_trivial_region(data);
+    if (r < 0)
+      return isl_next_error;
+    if (r == data->n_region) {
+      update_outer_levels(data, level);
+      isl_vec_free(data->sol);
+      data->sol = isl_tab_get_sample_value(data->tab);
+      if (!data->sol)
+        return isl_next_error;
+      if (is_optimal(data->sol, data->n_op))
+        return isl_next_done;
+      return isl_next_backtrack;
     }
+    if (level >= data->n_region)
+      isl_die(isl_vec_get_ctx(data->v), isl_error_internal,
+              "nesting level too deep", return isl_next_error);
+    if (init_local_region(local, r, data) < 0)
+      return isl_next_error;
+    if (isl_tab_extend_cons(data->tab, 2 * local->n + 2 * data->n_op) < 0)
+      return isl_next_error;
+  } else {
+    if (isl_tab_rollback(data->tab, local->snap) < 0)
+      return isl_next_error;
+  }
 
-    if (finished_all_cases(local, data))
-        return isl_next_backtrack;
-    return isl_next_handle;
+  if (finished_all_cases(local, data))
+    return isl_next_backtrack;
+  return isl_next_handle;
 }
 
 /* If a solution has been found in the previous case at this level
@@ -5390,19 +5192,18 @@ static enum isl_next enter_level(int level, int init,
  * subsequent cases.
  */
 static isl_stat better_next_side(struct isl_local_region *local,
-                                 struct isl_lexmin_data *data)
-{
-    if (!local->update)
-        return isl_stat_ok;
-
-    local->n_zero = force_better_solution(data->tab,
-                                          data->sol, data->n_op, local->n_zero);
-    if (local->n_zero < 0)
-        return isl_stat_error;
-
-    local->update = 0;
-
+                                 struct isl_lexmin_data *data) {
+  if (!local->update)
     return isl_stat_ok;
+
+  local->n_zero =
+      force_better_solution(data->tab, data->sol, data->n_op, local->n_zero);
+  if (local->n_zero < 0)
+    return isl_stat_error;
+
+  local->update = 0;
+
+  return isl_stat_ok;
 }
 
 /* Add constraints to data->tab that select the current case (local->side)
@@ -5423,36 +5224,34 @@ static isl_stat better_next_side(struct isl_local_region *local,
  * The rollback to this position is performed in enter_level.
  */
 static isl_stat pick_side(struct isl_local_region *local,
-                          struct isl_lexmin_data *data)
-{
-    struct isl_trivial_region *region;
-    int side, base;
+                          struct isl_lexmin_data *data) {
+  struct isl_trivial_region *region;
+  int side, base;
 
-    region = &data->region[local->region];
-    side = local->side;
-    base = 2 * (side/2);
+  region = &data->region[local->region];
+  side = local->side;
+  base = 2 * (side / 2);
 
-    if (side == base && base >= 2 &&
-            fix_zero(data->tab, region, base / 2 - 1, data) < 0)
-        return isl_stat_error;
+  if (side == base && base >= 2 &&
+      fix_zero(data->tab, region, base / 2 - 1, data) < 0)
+    return isl_stat_error;
 
-    local->snap = isl_tab_snap(data->tab);
-    if (isl_tab_push_basis(data->tab) < 0)
-        return isl_stat_error;
+  local->snap = isl_tab_snap(data->tab);
+  if (isl_tab_push_basis(data->tab) < 0)
+    return isl_stat_error;
 
-    data->tab = pos_neg(data->tab, region, side, data);
-    if (!data->tab)
-        return isl_stat_error;
-    return isl_stat_ok;
+  data->tab = pos_neg(data->tab, region, side, data);
+  if (!data->tab)
+    return isl_stat_error;
+  return isl_stat_ok;
 }
 
 /* Free the memory associated to "data".
  */
-static void clear_lexmin_data(struct isl_lexmin_data *data)
-{
-    free(data->local);
-    isl_vec_free(data->v);
-    isl_tab_free(data->tab);
+static void clear_lexmin_data(struct isl_lexmin_data *data) {
+  free(data->local);
+  isl_vec_free(data->v);
+  isl_tab_free(data->tab);
 }
 
 /* Return the lexicographically smallest non-trivial solution of the
@@ -5493,57 +5292,56 @@ static void clear_lexmin_data(struct isl_lexmin_data *data)
  */
 __isl_give isl_vec *isl_tab_basic_set_non_trivial_lexmin(
     __isl_take isl_basic_set *bset, int n_op, int n_region,
-    struct isl_trivial_region *region,
-    int (*conflict)(int con, void *user), void *user)
-{
-    struct isl_lexmin_data data = { n_op, n_region, region };
-    int level, init;
+    struct isl_trivial_region *region, int (*conflict)(int con, void *user),
+    void *user) {
+  struct isl_lexmin_data data = {n_op, n_region, region};
+  int level, init;
 
-    if (!bset)
-        return NULL;
+  if (!bset)
+    return NULL;
 
-    if (init_lexmin_data(&data, bset) < 0)
-        goto error;
-    data.tab->conflict = conflict;
-    data.tab->conflict_user = user;
+  if (init_lexmin_data(&data, bset) < 0)
+    goto error;
+  data.tab->conflict = conflict;
+  data.tab->conflict_user = user;
 
-    level = 0;
-    init = 1;
+  level = 0;
+  init = 1;
 
-    while (level >= 0) {
-        enum isl_next next;
-        struct isl_local_region *local = &data.local[level];
+  while (level >= 0) {
+    enum isl_next next;
+    struct isl_local_region *local = &data.local[level];
 
-        next = enter_level(level, init, &data);
-        if (next < 0)
-            goto error;
-        if (next == isl_next_done)
-            break;
-        if (next == isl_next_backtrack) {
-            level--;
-            init = 0;
-            continue;
-        }
-
-        if (better_next_side(local, &data) < 0)
-            goto error;
-        if (pick_side(local, &data) < 0)
-            goto error;
-
-        local->side++;
-        level++;
-        init = 1;
+    next = enter_level(level, init, &data);
+    if (next < 0)
+      goto error;
+    if (next == isl_next_done)
+      break;
+    if (next == isl_next_backtrack) {
+      level--;
+      init = 0;
+      continue;
     }
 
-    clear_lexmin_data(&data);
-    isl_basic_set_free(bset);
+    if (better_next_side(local, &data) < 0)
+      goto error;
+    if (pick_side(local, &data) < 0)
+      goto error;
 
-    return data.sol;
+    local->side++;
+    level++;
+    init = 1;
+  }
+
+  clear_lexmin_data(&data);
+  isl_basic_set_free(bset);
+
+  return data.sol;
 error:
-    clear_lexmin_data(&data);
-    isl_basic_set_free(bset);
-    isl_vec_free(data.sol);
-    return NULL;
+  clear_lexmin_data(&data);
+  isl_basic_set_free(bset);
+  isl_vec_free(data.sol);
+  return NULL;
 }
 
 /* Wrapper for a tableau that is used for computing
@@ -5552,58 +5350,55 @@ error:
  * unless "tab" is empty.
  */
 struct isl_tab_lexmin {
-    isl_ctx *ctx;
-    struct isl_tab *tab;
+  isl_ctx *ctx;
+  struct isl_tab *tab;
 };
 
 /* Free "tl" and return NULL.
  */
-__isl_null isl_tab_lexmin *isl_tab_lexmin_free(__isl_take isl_tab_lexmin *tl)
-{
-    if (!tl)
-        return NULL;
-    isl_ctx_deref(tl->ctx);
-    isl_tab_free(tl->tab);
-    free(tl);
-
+__isl_null isl_tab_lexmin *isl_tab_lexmin_free(__isl_take isl_tab_lexmin *tl) {
+  if (!tl)
     return NULL;
+  isl_ctx_deref(tl->ctx);
+  isl_tab_free(tl->tab);
+  free(tl);
+
+  return NULL;
 }
 
 /* Construct an isl_tab_lexmin for computing
  * the lexicographically smallest rational point in "bset",
  * assuming that all variables are non-negative.
  */
-__isl_give isl_tab_lexmin *isl_tab_lexmin_from_basic_set(
-    __isl_take isl_basic_set *bset)
-{
-    isl_ctx *ctx;
-    isl_tab_lexmin *tl;
+__isl_give isl_tab_lexmin *
+isl_tab_lexmin_from_basic_set(__isl_take isl_basic_set *bset) {
+  isl_ctx *ctx;
+  isl_tab_lexmin *tl;
 
-    if (!bset)
-        return NULL;
-
-    ctx = isl_basic_set_get_ctx(bset);
-    tl = isl_calloc_type(ctx, struct isl_tab_lexmin);
-    if (!tl)
-        goto error;
-    tl->ctx = ctx;
-    isl_ctx_ref(ctx);
-    tl->tab = tab_for_lexmin(bset, NULL, 0, 0);
-    isl_basic_set_free(bset);
-    if (!tl->tab)
-        return isl_tab_lexmin_free(tl);
-    return tl;
-error:
-    isl_basic_set_free(bset);
-    isl_tab_lexmin_free(tl);
+  if (!bset)
     return NULL;
+
+  ctx = isl_basic_set_get_ctx(bset);
+  tl = isl_calloc_type(ctx, struct isl_tab_lexmin);
+  if (!tl)
+    goto error;
+  tl->ctx = ctx;
+  isl_ctx_ref(ctx);
+  tl->tab = tab_for_lexmin(bset, NULL, 0, 0);
+  isl_basic_set_free(bset);
+  if (!tl->tab)
+    return isl_tab_lexmin_free(tl);
+  return tl;
+error:
+  isl_basic_set_free(bset);
+  isl_tab_lexmin_free(tl);
+  return NULL;
 }
 
 /* Return the dimension of the set represented by "tl".
  */
-int isl_tab_lexmin_dim(__isl_keep isl_tab_lexmin *tl)
-{
-    return tl ? tl->tab->n_var : -1;
+int isl_tab_lexmin_dim(__isl_keep isl_tab_lexmin *tl) {
+  return tl ? tl->tab->n_var : -1;
 }
 
 /* Add the equality with coefficients "eq" to "tl", updating the optimal
@@ -5611,66 +5406,62 @@ int isl_tab_lexmin_dim(__isl_keep isl_tab_lexmin *tl)
  * The equality is added as two opposite inequality constraints.
  */
 __isl_give isl_tab_lexmin *isl_tab_lexmin_add_eq(__isl_take isl_tab_lexmin *tl,
-        isl_int *eq)
-{
-    unsigned n_var;
+                                                 isl_int *eq) {
+  unsigned n_var;
 
-    if (!tl || !eq)
-        return isl_tab_lexmin_free(tl);
+  if (!tl || !eq)
+    return isl_tab_lexmin_free(tl);
 
-    if (isl_tab_extend_cons(tl->tab, 2) < 0)
-        return isl_tab_lexmin_free(tl);
-    n_var = tl->tab->n_var;
-    isl_seq_neg(eq, eq, 1 + n_var);
-    tl->tab = add_lexmin_ineq(tl->tab, eq);
-    isl_seq_neg(eq, eq, 1 + n_var);
-    tl->tab = add_lexmin_ineq(tl->tab, eq);
+  if (isl_tab_extend_cons(tl->tab, 2) < 0)
+    return isl_tab_lexmin_free(tl);
+  n_var = tl->tab->n_var;
+  isl_seq_neg(eq, eq, 1 + n_var);
+  tl->tab = add_lexmin_ineq(tl->tab, eq);
+  isl_seq_neg(eq, eq, 1 + n_var);
+  tl->tab = add_lexmin_ineq(tl->tab, eq);
 
-    if (!tl->tab)
-        return isl_tab_lexmin_free(tl);
+  if (!tl->tab)
+    return isl_tab_lexmin_free(tl);
 
-    return tl;
+  return tl;
 }
 
 /* Add cuts to "tl" until the sample value reaches an integer value or
  * until the result becomes empty.
  */
-__isl_give isl_tab_lexmin *isl_tab_lexmin_cut_to_integer(
-    __isl_take isl_tab_lexmin *tl)
-{
-    if (!tl)
-        return NULL;
-    tl->tab = cut_to_integer_lexmin(tl->tab, CUT_ONE);
-    if (!tl->tab)
-        return isl_tab_lexmin_free(tl);
-    return tl;
+__isl_give isl_tab_lexmin *
+isl_tab_lexmin_cut_to_integer(__isl_take isl_tab_lexmin *tl) {
+  if (!tl)
+    return NULL;
+  tl->tab = cut_to_integer_lexmin(tl->tab, CUT_ONE);
+  if (!tl->tab)
+    return isl_tab_lexmin_free(tl);
+  return tl;
 }
 
 /* Return the lexicographically smallest rational point in the basic set
  * from which "tl" was constructed.
  * If the original input was empty, then return a zero-length vector.
  */
-__isl_give isl_vec *isl_tab_lexmin_get_solution(__isl_keep isl_tab_lexmin *tl)
-{
-    if (!tl)
-        return NULL;
-    if (tl->tab->empty)
-        return isl_vec_alloc(tl->ctx, 0);
-    else
-        return isl_tab_get_sample_value(tl->tab);
+__isl_give isl_vec *isl_tab_lexmin_get_solution(__isl_keep isl_tab_lexmin *tl) {
+  if (!tl)
+    return NULL;
+  if (tl->tab->empty)
+    return isl_vec_alloc(tl->ctx, 0);
+  else
+    return isl_tab_get_sample_value(tl->tab);
 }
 
 struct isl_sol_pma {
-    struct isl_sol	sol;
-    isl_pw_multi_aff *pma;
-    isl_set *empty;
+  struct isl_sol sol;
+  isl_pw_multi_aff *pma;
+  isl_set *empty;
 };
 
-static void sol_pma_free(struct isl_sol *sol)
-{
-    struct isl_sol_pma *sol_pma = (struct isl_sol_pma *) sol;
-    isl_pw_multi_aff_free(sol_pma->pma);
-    isl_set_free(sol_pma->empty);
+static void sol_pma_free(struct isl_sol *sol) {
+  struct isl_sol_pma *sol_pma = (struct isl_sol_pma *)sol;
+  isl_pw_multi_aff_free(sol_pma->pma);
+  isl_set_free(sol_pma->empty);
 }
 
 /* This function is called for parts of the context where there is
@@ -5678,21 +5469,20 @@ static void sol_pma_free(struct isl_sol *sol)
  * Simply add the basic set to the set "empty".
  */
 static void sol_pma_add_empty(struct isl_sol_pma *sol,
-                              __isl_take isl_basic_set *bset)
-{
-    if (!bset || !sol->empty)
-        goto error;
+                              __isl_take isl_basic_set *bset) {
+  if (!bset || !sol->empty)
+    goto error;
 
-    sol->empty = isl_set_grow(sol->empty, 1);
-    bset = isl_basic_set_simplify(bset);
-    bset = isl_basic_set_finalize(bset);
-    sol->empty = isl_set_add_basic_set(sol->empty, bset);
-    if (!sol->empty)
-        sol->sol.error = 1;
-    return;
-error:
-    isl_basic_set_free(bset);
+  sol->empty = isl_set_grow(sol->empty, 1);
+  bset = isl_basic_set_simplify(bset);
+  bset = isl_basic_set_finalize(bset);
+  sol->empty = isl_set_add_basic_set(sol->empty, bset);
+  if (!sol->empty)
     sol->sol.error = 1;
+  return;
+error:
+  isl_basic_set_free(bset);
+  sol->sol.error = 1;
 }
 
 /* Given a basic set "dom" that represents the context and a tuple of
@@ -5700,29 +5490,26 @@ error:
  * an isl_pw_multi_aff with a single cell corresponding to "dom" and
  * the affine expressions in "maff".
  */
-static void sol_pma_add(struct isl_sol_pma *sol,
-                        __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *maff)
-{
-    isl_pw_multi_aff *pma;
+static void sol_pma_add(struct isl_sol_pma *sol, __isl_take isl_basic_set *dom,
+                        __isl_take isl_multi_aff *maff) {
+  isl_pw_multi_aff *pma;
 
-    dom = isl_basic_set_simplify(dom);
-    dom = isl_basic_set_finalize(dom);
-    pma = isl_pw_multi_aff_alloc(isl_set_from_basic_set(dom), maff);
-    sol->pma = isl_pw_multi_aff_add_disjoint(sol->pma, pma);
-    if (!sol->pma)
-        sol->sol.error = 1;
+  dom = isl_basic_set_simplify(dom);
+  dom = isl_basic_set_finalize(dom);
+  pma = isl_pw_multi_aff_alloc(isl_set_from_basic_set(dom), maff);
+  sol->pma = isl_pw_multi_aff_add_disjoint(sol->pma, pma);
+  if (!sol->pma)
+    sol->sol.error = 1;
 }
 
 static void sol_pma_add_empty_wrap(struct isl_sol *sol,
-                                   __isl_take isl_basic_set *bset)
-{
-    sol_pma_add_empty((struct isl_sol_pma *)sol, bset);
+                                   __isl_take isl_basic_set *bset) {
+  sol_pma_add_empty((struct isl_sol_pma *)sol, bset);
 }
 
-static void sol_pma_add_wrap(struct isl_sol *sol,
-                             __isl_take isl_basic_set *dom, __isl_take isl_multi_aff *ma)
-{
-    sol_pma_add((struct isl_sol_pma *)sol, dom, ma);
+static void sol_pma_add_wrap(struct isl_sol *sol, __isl_take isl_basic_set *dom,
+                             __isl_take isl_multi_aff *ma) {
+  sol_pma_add((struct isl_sol_pma *)sol, dom, ma);
 }
 
 /* Construct an isl_sol_pma structure for accumulating the solution.
@@ -5733,41 +5520,41 @@ static void sol_pma_add_wrap(struct isl_sol *sol,
  * tableau have value "M - x" rather than "M + x".
  */
 static struct isl_sol *sol_pma_init(__isl_keep isl_basic_map *bmap,
-                                    __isl_take isl_basic_set *dom, int track_empty, int max)
-{
-    struct isl_sol_pma *sol_pma = NULL;
-    isl_space *space;
+                                    __isl_take isl_basic_set *dom,
+                                    int track_empty, int max) {
+  struct isl_sol_pma *sol_pma = NULL;
+  isl_space *space;
 
-    if (!bmap)
-        goto error;
+  if (!bmap)
+    goto error;
 
-    sol_pma = isl_calloc_type(bmap->ctx, struct isl_sol_pma);
-    if (!sol_pma)
-        goto error;
+  sol_pma = isl_calloc_type(bmap->ctx, struct isl_sol_pma);
+  if (!sol_pma)
+    goto error;
 
-    sol_pma->sol.free = &sol_pma_free;
-    if (sol_init(&sol_pma->sol, bmap, dom, max) < 0)
-        goto error;
-    sol_pma->sol.add = &sol_pma_add_wrap;
-    sol_pma->sol.add_empty = track_empty ? &sol_pma_add_empty_wrap : NULL;
-    space = isl_space_copy(sol_pma->sol.space);
-    sol_pma->pma = isl_pw_multi_aff_empty(space);
-    if (!sol_pma->pma)
-        goto error;
+  sol_pma->sol.free = &sol_pma_free;
+  if (sol_init(&sol_pma->sol, bmap, dom, max) < 0)
+    goto error;
+  sol_pma->sol.add = &sol_pma_add_wrap;
+  sol_pma->sol.add_empty = track_empty ? &sol_pma_add_empty_wrap : NULL;
+  space = isl_space_copy(sol_pma->sol.space);
+  sol_pma->pma = isl_pw_multi_aff_empty(space);
+  if (!sol_pma->pma)
+    goto error;
 
-    if (track_empty) {
-        sol_pma->empty = isl_set_alloc_space(isl_basic_set_get_space(dom),
-                                             1, ISL_SET_DISJOINT);
-        if (!sol_pma->empty)
-            goto error;
-    }
+  if (track_empty) {
+    sol_pma->empty =
+        isl_set_alloc_space(isl_basic_set_get_space(dom), 1, ISL_SET_DISJOINT);
+    if (!sol_pma->empty)
+      goto error;
+  }
 
-    isl_basic_set_free(dom);
-    return &sol_pma->sol;
+  isl_basic_set_free(dom);
+  return &sol_pma->sol;
 error:
-    isl_basic_set_free(dom);
-    sol_free(&sol_pma->sol);
-    return NULL;
+  isl_basic_set_free(dom);
+  sol_free(&sol_pma->sol);
+  return NULL;
 }
 
 /* Base case of isl_tab_basic_map_partial_lexopt, after removing
@@ -5777,23 +5564,21 @@ error:
  */
 static __isl_give isl_pw_multi_aff *basic_map_partial_lexopt_base_pw_multi_aff(
     __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
-    __isl_give isl_set **empty, int max)
-{
-    isl_pw_multi_aff *result = NULL;
-    struct isl_sol *sol;
-    struct isl_sol_pma *sol_pma;
+    __isl_give isl_set **empty, int max) {
+  isl_pw_multi_aff *result = NULL;
+  struct isl_sol *sol;
+  struct isl_sol_pma *sol_pma;
 
-    sol = basic_map_partial_lexopt_base_sol(bmap, dom, empty, max,
-                                            &sol_pma_init);
-    if (!sol)
-        return NULL;
-    sol_pma = (struct isl_sol_pma *) sol;
+  sol = basic_map_partial_lexopt_base_sol(bmap, dom, empty, max, &sol_pma_init);
+  if (!sol)
+    return NULL;
+  sol_pma = (struct isl_sol_pma *)sol;
 
-    result = isl_pw_multi_aff_copy(sol_pma->pma);
-    if (empty)
-        *empty = isl_set_copy(sol_pma->empty);
-    sol_free(&sol_pma->sol);
-    return result;
+  result = isl_pw_multi_aff_copy(sol_pma->pma);
+  if (empty)
+    *empty = isl_set_copy(sol_pma->empty);
+  sol_free(&sol_pma->sol);
+  return result;
 }
 
 /* Given that the last input variable of "maff" represents the minimum
@@ -5803,27 +5588,25 @@ static __isl_give isl_pw_multi_aff *basic_map_partial_lexopt_base_pw_multi_aff(
  * In particular, check if the last input variable appears in any
  * of the expressions in "maff".
  */
-static isl_bool need_substitution(__isl_keep isl_multi_aff *maff)
-{
-    int i;
-    isl_size n_in;
-    unsigned pos;
+static isl_bool need_substitution(__isl_keep isl_multi_aff *maff) {
+  int i;
+  isl_size n_in;
+  unsigned pos;
 
-    n_in = isl_multi_aff_dim(maff, isl_dim_in);
-    if (n_in < 0)
-        return isl_bool_error;
-    pos = n_in - 1;
+  n_in = isl_multi_aff_dim(maff, isl_dim_in);
+  if (n_in < 0)
+    return isl_bool_error;
+  pos = n_in - 1;
 
-    for (i = 0; i < maff->n; ++i) {
-        isl_bool involves;
+  for (i = 0; i < maff->n; ++i) {
+    isl_bool involves;
 
-        involves = isl_aff_involves_dims(maff->u.p[i],
-                                         isl_dim_in, pos, 1);
-        if (involves < 0 || involves)
-            return involves;
-    }
+    involves = isl_aff_involves_dims(maff->u.p[i], isl_dim_in, pos, 1);
+    if (involves < 0 || involves)
+      return involves;
+  }
 
-    return isl_bool_false;
+  return isl_bool_false;
 }
 
 /* Given a set of upper bounds on the last "input" variable m,
@@ -5844,52 +5627,51 @@ static isl_bool need_substitution(__isl_keep isl_multi_aff *maff)
  *	b_i
  */
 static __isl_give isl_pw_aff *set_minimum_pa(__isl_take isl_space *space,
-        __isl_take isl_mat *var)
-{
-    int i;
-    isl_aff *aff = NULL;
-    isl_basic_set *bset = NULL;
-    isl_pw_aff *paff = NULL;
-    isl_space *pw_space;
-    isl_local_space *ls = NULL;
+                                             __isl_take isl_mat *var) {
+  int i;
+  isl_aff *aff = NULL;
+  isl_basic_set *bset = NULL;
+  isl_pw_aff *paff = NULL;
+  isl_space *pw_space;
+  isl_local_space *ls = NULL;
 
-    if (!space || !var)
-        goto error;
+  if (!space || !var)
+    goto error;
 
-    ls = isl_local_space_from_space(isl_space_copy(space));
-    pw_space = isl_space_copy(space);
-    pw_space = isl_space_from_domain(pw_space);
-    pw_space = isl_space_add_dims(pw_space, isl_dim_out, 1);
-    paff = isl_pw_aff_alloc_size(pw_space, var->n_row);
+  ls = isl_local_space_from_space(isl_space_copy(space));
+  pw_space = isl_space_copy(space);
+  pw_space = isl_space_from_domain(pw_space);
+  pw_space = isl_space_add_dims(pw_space, isl_dim_out, 1);
+  paff = isl_pw_aff_alloc_size(pw_space, var->n_row);
 
-    for (i = 0; i < var->n_row; ++i) {
-        isl_pw_aff *paff_i;
+  for (i = 0; i < var->n_row; ++i) {
+    isl_pw_aff *paff_i;
 
-        aff = isl_aff_alloc(isl_local_space_copy(ls));
-        bset = isl_basic_set_alloc_space(isl_space_copy(space), 0,
-                                         0, var->n_row - 1);
-        if (!aff || !bset)
-            goto error;
-        isl_int_set_si(aff->v->el[0], 1);
-        isl_seq_cpy(aff->v->el + 1, var->row[i], var->n_col);
-        isl_int_set_si(aff->v->el[1 + var->n_col], 0);
-        bset = select_minimum(bset, var, i);
-        paff_i = isl_pw_aff_alloc(isl_set_from_basic_set(bset), aff);
-        paff = isl_pw_aff_add_disjoint(paff, paff_i);
-    }
+    aff = isl_aff_alloc(isl_local_space_copy(ls));
+    bset =
+        isl_basic_set_alloc_space(isl_space_copy(space), 0, 0, var->n_row - 1);
+    if (!aff || !bset)
+      goto error;
+    isl_int_set_si(aff->v->el[0], 1);
+    isl_seq_cpy(aff->v->el + 1, var->row[i], var->n_col);
+    isl_int_set_si(aff->v->el[1 + var->n_col], 0);
+    bset = select_minimum(bset, var, i);
+    paff_i = isl_pw_aff_alloc(isl_set_from_basic_set(bset), aff);
+    paff = isl_pw_aff_add_disjoint(paff, paff_i);
+  }
 
-    isl_local_space_free(ls);
-    isl_space_free(space);
-    isl_mat_free(var);
-    return paff;
+  isl_local_space_free(ls);
+  isl_space_free(space);
+  isl_mat_free(var);
+  return paff;
 error:
-    isl_aff_free(aff);
-    isl_basic_set_free(bset);
-    isl_pw_aff_free(paff);
-    isl_local_space_free(ls);
-    isl_space_free(space);
-    isl_mat_free(var);
-    return NULL;
+  isl_aff_free(aff);
+  isl_basic_set_free(bset);
+  isl_pw_aff_free(paff);
+  isl_local_space_free(ls);
+  isl_space_free(space);
+  isl_mat_free(var);
+  return NULL;
 }
 
 /* Given a piecewise multi-affine expression of which the last input variable
@@ -5904,68 +5686,66 @@ error:
  * and a split is required, then the domain is split.  Otherwise, no split
  * is performed.
  */
-static __isl_give isl_pw_multi_aff *split_domain_pma(
-    __isl_take isl_pw_multi_aff *opt, __isl_take isl_pw_aff *min_expr_pa,
-    __isl_take isl_set *min_expr, __isl_take isl_mat *cst)
-{
-    isl_size n_in;
-    int i;
-    isl_space *space;
-    isl_pw_multi_aff *res;
+static __isl_give isl_pw_multi_aff *
+split_domain_pma(__isl_take isl_pw_multi_aff *opt,
+                 __isl_take isl_pw_aff *min_expr_pa,
+                 __isl_take isl_set *min_expr, __isl_take isl_mat *cst) {
+  isl_size n_in;
+  int i;
+  isl_space *space;
+  isl_pw_multi_aff *res;
 
-    if (!opt || !min_expr || !cst)
-        goto error;
+  if (!opt || !min_expr || !cst)
+    goto error;
 
-    n_in = isl_pw_multi_aff_dim(opt, isl_dim_in);
-    if (n_in < 0)
-        goto error;
-    space = isl_pw_multi_aff_get_space(opt);
-    space = isl_space_drop_dims(space, isl_dim_in, n_in - 1, 1);
-    res = isl_pw_multi_aff_empty(space);
+  n_in = isl_pw_multi_aff_dim(opt, isl_dim_in);
+  if (n_in < 0)
+    goto error;
+  space = isl_pw_multi_aff_get_space(opt);
+  space = isl_space_drop_dims(space, isl_dim_in, n_in - 1, 1);
+  res = isl_pw_multi_aff_empty(space);
 
-    for (i = 0; i < opt->n; ++i) {
-        isl_bool subs;
-        isl_pw_multi_aff *pma;
+  for (i = 0; i < opt->n; ++i) {
+    isl_bool subs;
+    isl_pw_multi_aff *pma;
 
-        pma = isl_pw_multi_aff_alloc(isl_set_copy(opt->p[i].set),
-                                     isl_multi_aff_copy(opt->p[i].maff));
-        subs = need_substitution(opt->p[i].maff);
-        if (subs < 0) {
-            pma = isl_pw_multi_aff_free(pma);
-        } else if (subs) {
-            pma = isl_pw_multi_aff_substitute(pma,
-                                              isl_dim_in, n_in - 1, min_expr_pa);
-        } else {
-            isl_bool split;
-            split = need_split_set(opt->p[i].set, cst);
-            if (split < 0)
-                pma = isl_pw_multi_aff_free(pma);
-            else if (split)
-                pma = isl_pw_multi_aff_intersect_domain(pma,
-                                                        isl_set_copy(min_expr));
-        }
-        pma = isl_pw_multi_aff_project_out(pma,
-                                           isl_dim_in, n_in - 1, 1);
-
-        res = isl_pw_multi_aff_add_disjoint(res, pma);
+    pma = isl_pw_multi_aff_alloc(isl_set_copy(opt->p[i].set),
+                                 isl_multi_aff_copy(opt->p[i].maff));
+    subs = need_substitution(opt->p[i].maff);
+    if (subs < 0) {
+      pma = isl_pw_multi_aff_free(pma);
+    } else if (subs) {
+      pma = isl_pw_multi_aff_substitute(pma, isl_dim_in, n_in - 1, min_expr_pa);
+    } else {
+      isl_bool split;
+      split = need_split_set(opt->p[i].set, cst);
+      if (split < 0)
+        pma = isl_pw_multi_aff_free(pma);
+      else if (split)
+        pma = isl_pw_multi_aff_intersect_domain(pma, isl_set_copy(min_expr));
     }
+    pma = isl_pw_multi_aff_project_out(pma, isl_dim_in, n_in - 1, 1);
 
-    isl_pw_multi_aff_free(opt);
-    isl_pw_aff_free(min_expr_pa);
-    isl_set_free(min_expr);
-    isl_mat_free(cst);
-    return res;
+    res = isl_pw_multi_aff_add_disjoint(res, pma);
+  }
+
+  isl_pw_multi_aff_free(opt);
+  isl_pw_aff_free(min_expr_pa);
+  isl_set_free(min_expr);
+  isl_mat_free(cst);
+  return res;
 error:
-    isl_pw_multi_aff_free(opt);
-    isl_pw_aff_free(min_expr_pa);
-    isl_set_free(min_expr);
-    isl_mat_free(cst);
-    return NULL;
+  isl_pw_multi_aff_free(opt);
+  isl_pw_aff_free(min_expr_pa);
+  isl_set_free(min_expr);
+  isl_mat_free(cst);
+  return NULL;
 }
 
-static __isl_give isl_pw_multi_aff *basic_map_partial_lexopt_pw_multi_aff(
-    __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
-    __isl_give isl_set **empty, int max);
+static __isl_give isl_pw_multi_aff *
+basic_map_partial_lexopt_pw_multi_aff(__isl_take isl_basic_map *bmap,
+                                      __isl_take isl_basic_set *dom,
+                                      __isl_give isl_set **empty, int max);
 
 /* This function is called from basic_map_partial_lexopt_symm.
  * The last variable of "bmap" and "dom" corresponds to the minimum
@@ -5980,32 +5760,29 @@ static __isl_give isl_pw_multi_aff *
 basic_map_partial_lexopt_symm_core_pw_multi_aff(
     __isl_take isl_basic_map *bmap, __isl_take isl_basic_set *dom,
     __isl_give isl_set **empty, int max, __isl_take isl_mat *cst,
-    __isl_take isl_space *map_space, __isl_take isl_space *set_space)
-{
-    isl_pw_multi_aff *opt;
-    isl_pw_aff *min_expr_pa;
-    isl_set *min_expr;
+    __isl_take isl_space *map_space, __isl_take isl_space *set_space) {
+  isl_pw_multi_aff *opt;
+  isl_pw_aff *min_expr_pa;
+  isl_set *min_expr;
 
-    min_expr = set_minimum(isl_basic_set_get_space(dom), isl_mat_copy(cst));
-    min_expr_pa = set_minimum_pa(isl_basic_set_get_space(dom),
-                                 isl_mat_copy(cst));
+  min_expr = set_minimum(isl_basic_set_get_space(dom), isl_mat_copy(cst));
+  min_expr_pa = set_minimum_pa(isl_basic_set_get_space(dom), isl_mat_copy(cst));
 
-    opt = basic_map_partial_lexopt_pw_multi_aff(bmap, dom, empty, max);
+  opt = basic_map_partial_lexopt_pw_multi_aff(bmap, dom, empty, max);
 
-    if (empty) {
-        *empty = split(*empty,
-                       isl_set_copy(min_expr), isl_mat_copy(cst));
-        *empty = isl_set_reset_space(*empty, set_space);
-    }
+  if (empty) {
+    *empty = split(*empty, isl_set_copy(min_expr), isl_mat_copy(cst));
+    *empty = isl_set_reset_space(*empty, set_space);
+  }
 
-    opt = split_domain_pma(opt, min_expr_pa, min_expr, cst);
-    opt = isl_pw_multi_aff_reset_space(opt, map_space);
+  opt = split_domain_pma(opt, min_expr_pa, min_expr, cst);
+  opt = isl_pw_multi_aff_reset_space(opt, map_space);
 
-    return opt;
+  return opt;
 }
 
 #undef TYPE
-#define TYPE	isl_pw_multi_aff
+#define TYPE isl_pw_multi_aff
 #undef SUFFIX
-#define SUFFIX	_pw_multi_aff
+#define SUFFIX _pw_multi_aff
 #include "isl_tab_lexopt_templ.c"

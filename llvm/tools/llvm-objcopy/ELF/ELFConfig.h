@@ -22,17 +22,17 @@ struct CopyConfig;
 namespace elf {
 
 struct NewSymbolInfo {
-    StringRef SymbolName;
-    StringRef SectionName;
-    uint64_t Value = 0;
-    uint8_t Type = ELF::STT_NOTYPE;
-    uint8_t Bind = ELF::STB_GLOBAL;
-    uint8_t Visibility = ELF::STV_DEFAULT;
+  StringRef SymbolName;
+  StringRef SectionName;
+  uint64_t Value = 0;
+  uint8_t Type = ELF::STT_NOTYPE;
+  uint8_t Bind = ELF::STB_GLOBAL;
+  uint8_t Visibility = ELF::STV_DEFAULT;
 };
 
 struct ELFCopyConfig {
-    Optional<uint8_t> NewSymbolVisibility;
-    std::vector<NewSymbolInfo> SymbolsToAdd;
+  Optional<uint8_t> NewSymbolVisibility;
+  std::vector<NewSymbolInfo> SymbolsToAdd;
 };
 
 Expected<ELFCopyConfig> parseConfig(const CopyConfig &Config);

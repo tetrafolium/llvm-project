@@ -31,9 +31,9 @@ class Transport;
 /// remapped to file:///workarea/foo.cpp, and the same would happen for replies
 /// (in the opposite order).
 struct PathMapping {
-    std::string ClientPath;
-    std::string ServerPath;
-    enum class Direction { ClientToServer, ServerToClient };
+  std::string ClientPath;
+  std::string ServerPath;
+  enum class Direction { ClientToServer, ServerToClient };
 };
 using PathMappings = std::vector<PathMapping>;
 
@@ -47,8 +47,8 @@ llvm::Expected<PathMappings> parsePathMappings(llvm::StringRef RawPathMappings);
 /// Returns a modified \p S with the first matching path in \p Mappings
 /// substituted, if applicable
 llvm::Optional<std::string> doPathMapping(llvm::StringRef S,
-        PathMapping::Direction Dir,
-        const PathMappings &Mappings);
+                                          PathMapping::Direction Dir,
+                                          const PathMappings &Mappings);
 
 /// Applies the \p Mappings to all the file:// URIs in \p Params.
 /// NOTE: The first matching mapping will be applied, otherwise \p Params will

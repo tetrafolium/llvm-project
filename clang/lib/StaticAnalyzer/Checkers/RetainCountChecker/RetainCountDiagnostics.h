@@ -16,8 +16,8 @@
 
 #include "clang/Analysis/PathDiagnostic.h"
 #include "clang/Analysis/RetainSummaryManager.h"
-#include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugReporterVisitors.h"
+#include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/PathSensitive/CallEvent.h"
 
 namespace clang {
@@ -26,73 +26,69 @@ namespace retaincountchecker {
 
 class RefCountBug : public BugType {
 public:
-    enum RefCountBugKind {
-        UseAfterRelease,
-        ReleaseNotOwned,
-        DeallocNotOwned,
-        FreeNotOwned,
-        OverAutorelease,
-        ReturnNotOwnedForOwned,
-        LeakWithinFunction,
-        LeakAtReturn,
-    };
-    RefCountBug(CheckerNameRef Checker, RefCountBugKind BT);
-    StringRef getDescription() const;
+  enum RefCountBugKind {
+    UseAfterRelease,
+    ReleaseNotOwned,
+    DeallocNotOwned,
+    FreeNotOwned,
+    OverAutorelease,
+    ReturnNotOwnedForOwned,
+    LeakWithinFunction,
+    LeakAtReturn,
+  };
+  RefCountBug(CheckerNameRef Checker, RefCountBugKind BT);
+  StringRef getDescription() const;
 
-    RefCountBugKind getBugType() const {
-        return BT;
-    }
+  RefCountBugKind getBugType() const { return BT; }
 
 private:
-    RefCountBugKind BT;
-    static StringRef bugTypeToName(RefCountBugKind BT);
+  RefCountBugKind BT;
+  static StringRef bugTypeToName(RefCountBugKind BT);
 };
 
 class RefCountReport : public PathSensitiveBugReport {
 protected:
-    SymbolRef Sym;
-    bool isLeak = false;
+  SymbolRef Sym;
+  bool isLeak = false;
 
 public:
-    RefCountReport(const RefCountBug &D, const LangOptions &LOpts,
-                   ExplodedNode *n, SymbolRef sym,
-                   bool isLeak=false);
+  RefCountReport(const RefCountBug &D, const LangOptions &LOpts,
+                 ExplodedNode *n, SymbolRef sym, bool isLeak = false);
 
-    RefCountReport(const RefCountBug &D, const LangOptions &LOpts,
-                   ExplodedNode *n, SymbolRef sym,
-                   StringRef endText);
+  RefCountReport(const RefCountBug &D, const LangOptions &LOpts,
+                 ExplodedNode *n, SymbolRef sym, StringRef endText);
 
-    ArrayRef<SourceRange> getRanges() const override {
-        if (!isLeak)
-            return PathSensitiveBugReport::getRanges();
-        return {};
-    }
+  ArrayRef<SourceRange> getRanges() const override {
+    if (!isLeak)
+      return PathSensitiveBugReport::getRanges();
+    return {};
+  }
 };
 
 class RefLeakReport : public RefCountReport {
-    const MemRegion* AllocBinding;
-    const Stmt *AllocStmt;
-    PathDiagnosticLocation Location;
+  const MemRegion *AllocBinding;
+  const Stmt *AllocStmt;
+  PathDiagnosticLocation Location;
 
-    // Finds the function declaration where a leak warning for the parameter
-    // 'sym' should be raised.
-    void deriveParamLocation(CheckerContext &Ctx, SymbolRef sym);
-    // Finds the location where a leak warning for 'sym' should be raised.
-    void deriveAllocLocation(CheckerContext &Ctx, SymbolRef sym);
-    // Produces description of a leak warning which is printed on the console.
-    void createDescription(CheckerContext &Ctx);
+  // Finds the function declaration where a leak warning for the parameter
+  // 'sym' should be raised.
+  void deriveParamLocation(CheckerContext &Ctx, SymbolRef sym);
+  // Finds the location where a leak warning for 'sym' should be raised.
+  void deriveAllocLocation(CheckerContext &Ctx, SymbolRef sym);
+  // Produces description of a leak warning which is printed on the console.
+  void createDescription(CheckerContext &Ctx);
 
 public:
-    RefLeakReport(const RefCountBug &D, const LangOptions &LOpts, ExplodedNode *n,
-                  SymbolRef sym, CheckerContext &Ctx);
-    PathDiagnosticLocation getLocation() const override {
-        assert(Location.isValid());
-        return Location;
-    }
+  RefLeakReport(const RefCountBug &D, const LangOptions &LOpts, ExplodedNode *n,
+                SymbolRef sym, CheckerContext &Ctx);
+  PathDiagnosticLocation getLocation() const override {
+    assert(Location.isValid());
+    return Location;
+  }
 
-    PathDiagnosticLocation getEndOfPath() const {
-        return PathSensitiveBugReport::getLocation();
-    }
+  PathDiagnosticLocation getEndOfPath() const {
+    return PathSensitiveBugReport::getLocation();
+  }
 };
 
 } // end namespace retaincountchecker

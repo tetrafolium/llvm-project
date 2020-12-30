@@ -54,9 +54,9 @@ static cl::list<std::string> Commands("c", cl::desc("Specify command to run"),
                                       cl::cat(ClangQueryCategory));
 
 static cl::list<std::string> CommandFiles("f",
-        cl::desc("Read commands from file"),
-        cl::value_desc("file"),
-        cl::cat(ClangQueryCategory));
+                                          cl::desc("Read commands from file"),
+                                          cl::value_desc("file"),
+                                          cl::cat(ClangQueryCategory));
 
 static cl::opt<std::string> PreloadFile(
     "preload",
@@ -65,97 +65,97 @@ static cl::opt<std::string> PreloadFile(
 
 bool runCommandsInFile(const char *ExeName, std::string const &FileName,
                        QuerySession &QS) {
-    std::ifstream Input(FileName.c_str());
-    if (!Input.is_open()) {
-        llvm::errs() << ExeName << ": cannot open " << FileName << "\n";
-        return 1;
-    }
+  std::ifstream Input(FileName.c_str());
+  if (!Input.is_open()) {
+    llvm::errs() << ExeName << ": cannot open " << FileName << "\n";
+    return 1;
+  }
 
-    std::string FileContent((std::istreambuf_iterator<char>(Input)),
-                            std::istreambuf_iterator<char>());
+  std::string FileContent((std::istreambuf_iterator<char>(Input)),
+                          std::istreambuf_iterator<char>());
 
-    StringRef FileContentRef(FileContent);
-    while (!FileContentRef.empty()) {
-        QueryRef Q = QueryParser::parse(FileContentRef, QS);
-        if (!Q->run(llvm::outs(), QS))
-            return true;
-        FileContentRef = Q->RemainingContent;
-    }
-    return false;
+  StringRef FileContentRef(FileContent);
+  while (!FileContentRef.empty()) {
+    QueryRef Q = QueryParser::parse(FileContentRef, QS);
+    if (!Q->run(llvm::outs(), QS))
+      return true;
+    FileContentRef = Q->RemainingContent;
+  }
+  return false;
 }
 
 int main(int argc, const char **argv) {
-    llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
+  llvm::sys::PrintStackTraceOnErrorSignal(argv[0]);
 
-    llvm::Expected<CommonOptionsParser> OptionsParser =
-        CommonOptionsParser::create(argc, argv, ClangQueryCategory,
-                                    llvm::cl::OneOrMore);
+  llvm::Expected<CommonOptionsParser> OptionsParser =
+      CommonOptionsParser::create(argc, argv, ClangQueryCategory,
+                                  llvm::cl::OneOrMore);
 
-    if (!OptionsParser) {
-        llvm::WithColor::error() << llvm::toString(OptionsParser.takeError());
+  if (!OptionsParser) {
+    llvm::WithColor::error() << llvm::toString(OptionsParser.takeError());
+    return 1;
+  }
+
+  if (!Commands.empty() && !CommandFiles.empty()) {
+    llvm::errs() << argv[0] << ": cannot specify both -c and -f\n";
+    return 1;
+  }
+
+  if ((!Commands.empty() || !CommandFiles.empty()) && !PreloadFile.empty()) {
+    llvm::errs() << argv[0]
+                 << ": cannot specify both -c or -f with --preload\n";
+    return 1;
+  }
+
+  ClangTool Tool(OptionsParser->getCompilations(),
+                 OptionsParser->getSourcePathList());
+  std::vector<std::unique_ptr<ASTUnit>> ASTs;
+  int ASTStatus = 0;
+  switch (Tool.buildASTs(ASTs)) {
+  case 0:
+    break;
+  case 1: // Building ASTs failed.
+    return 1;
+  case 2:
+    ASTStatus |= 1;
+    llvm::errs() << "Failed to build AST for some of the files, "
+                 << "results may be incomplete."
+                 << "\n";
+    break;
+  default:
+    llvm_unreachable("Unexpected status returned");
+  }
+
+  QuerySession QS(ASTs);
+
+  if (!Commands.empty()) {
+    for (auto &Command : Commands) {
+      QueryRef Q = QueryParser::parse(Command, QS);
+      if (!Q->run(llvm::outs(), QS))
         return 1;
     }
-
-    if (!Commands.empty() && !CommandFiles.empty()) {
-        llvm::errs() << argv[0] << ": cannot specify both -c and -f\n";
+  } else if (!CommandFiles.empty()) {
+    for (auto &CommandFile : CommandFiles) {
+      if (runCommandsInFile(argv[0], CommandFile, QS))
         return 1;
     }
-
-    if ((!Commands.empty() || !CommandFiles.empty()) && !PreloadFile.empty()) {
-        llvm::errs() << argv[0]
-                     << ": cannot specify both -c or -f with --preload\n";
+  } else {
+    if (!PreloadFile.empty()) {
+      if (runCommandsInFile(argv[0], PreloadFile, QS))
         return 1;
     }
-
-    ClangTool Tool(OptionsParser->getCompilations(),
-                   OptionsParser->getSourcePathList());
-    std::vector<std::unique_ptr<ASTUnit>> ASTs;
-    int ASTStatus = 0;
-    switch (Tool.buildASTs(ASTs)) {
-    case 0:
+    LineEditor LE("clang-query");
+    LE.setListCompleter([&QS](StringRef Line, size_t Pos) {
+      return QueryParser::complete(Line, Pos, QS);
+    });
+    while (llvm::Optional<std::string> Line = LE.readLine()) {
+      QueryRef Q = QueryParser::parse(*Line, QS);
+      Q->run(llvm::outs(), QS);
+      llvm::outs().flush();
+      if (QS.Terminate)
         break;
-    case 1: // Building ASTs failed.
-        return 1;
-    case 2:
-        ASTStatus |= 1;
-        llvm::errs() << "Failed to build AST for some of the files, "
-                     << "results may be incomplete."
-                     << "\n";
-        break;
-    default:
-        llvm_unreachable("Unexpected status returned");
     }
+  }
 
-    QuerySession QS(ASTs);
-
-    if (!Commands.empty()) {
-        for (auto &Command : Commands) {
-            QueryRef Q = QueryParser::parse(Command, QS);
-            if (!Q->run(llvm::outs(), QS))
-                return 1;
-        }
-    } else if (!CommandFiles.empty()) {
-        for (auto &CommandFile : CommandFiles) {
-            if (runCommandsInFile(argv[0], CommandFile, QS))
-                return 1;
-        }
-    } else {
-        if (!PreloadFile.empty()) {
-            if (runCommandsInFile(argv[0], PreloadFile, QS))
-                return 1;
-        }
-        LineEditor LE("clang-query");
-        LE.setListCompleter([&QS](StringRef Line, size_t Pos) {
-            return QueryParser::complete(Line, Pos, QS);
-        });
-        while (llvm::Optional<std::string> Line = LE.readLine()) {
-            QueryRef Q = QueryParser::parse(*Line, QS);
-            Q->run(llvm::outs(), QS);
-            llvm::outs().flush();
-            if (QS.Terminate)
-                break;
-        }
-    }
-
-    return ASTStatus;
+  return ASTStatus;
 }

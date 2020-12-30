@@ -103,54 +103,53 @@ extern void EmitFixedLenDecoder(RecordKeeper &RK, raw_ostream &OS,
                                 const std::string &RFail, const std::string &L);
 
 void EmitDisassembler(RecordKeeper &Records, raw_ostream &OS) {
-    CodeGenTarget Target(Records);
-    emitSourceFileHeader(" * " + Target.getName().str() + " Disassembler", OS);
+  CodeGenTarget Target(Records);
+  emitSourceFileHeader(" * " + Target.getName().str() + " Disassembler", OS);
 
-    // X86 uses a custom disassembler.
-    if (Target.getName() == "X86") {
-        DisassemblerTables Tables;
+  // X86 uses a custom disassembler.
+  if (Target.getName() == "X86") {
+    DisassemblerTables Tables;
 
-        ArrayRef<const CodeGenInstruction*> numberedInstructions =
-            Target.getInstructionsByEnumValue();
+    ArrayRef<const CodeGenInstruction *> numberedInstructions =
+        Target.getInstructionsByEnumValue();
 
-        for (unsigned i = 0, e = numberedInstructions.size(); i != e; ++i)
-            RecognizableInstr::processInstr(Tables, *numberedInstructions[i], i);
+    for (unsigned i = 0, e = numberedInstructions.size(); i != e; ++i)
+      RecognizableInstr::processInstr(Tables, *numberedInstructions[i], i);
 
-        if (Tables.hasConflicts()) {
-            PrintError(Target.getTargetRecord()->getLoc(), "Primary decode conflict");
-            return;
-        }
-
-        Tables.emit(OS);
-        return;
+    if (Tables.hasConflicts()) {
+      PrintError(Target.getTargetRecord()->getLoc(), "Primary decode conflict");
+      return;
     }
 
-    // WebAssembly has variable length opcodes, so can't use EmitFixedLenDecoder
-    // below (which depends on a Size table-gen Record), and also uses a custom
-    // disassembler.
-    if (Target.getName() == "WebAssembly") {
-        emitWebAssemblyDisassemblerTables(OS, Target.getInstructionsByEnumValue());
-        return;
-    }
+    Tables.emit(OS);
+    return;
+  }
 
-    // ARM and Thumb have a CHECK() macro to deal with DecodeStatuses.
-    if (Target.getName() == "ARM" || Target.getName() == "Thumb" ||
-            Target.getName() == "AArch64" || Target.getName() == "ARM64") {
-        std::string PredicateNamespace = std::string(Target.getName());
-        if (PredicateNamespace == "Thumb")
-            PredicateNamespace = "ARM";
+  // WebAssembly has variable length opcodes, so can't use EmitFixedLenDecoder
+  // below (which depends on a Size table-gen Record), and also uses a custom
+  // disassembler.
+  if (Target.getName() == "WebAssembly") {
+    emitWebAssemblyDisassemblerTables(OS, Target.getInstructionsByEnumValue());
+    return;
+  }
 
-        EmitFixedLenDecoder(Records, OS, PredicateNamespace,
-                            "if (!Check(S, ", "))",
-                            "S", "MCDisassembler::Fail",
-                            "  MCDisassembler::DecodeStatus S = "
-                            "MCDisassembler::Success;\n(void)S;");
-        return;
-    }
+  // ARM and Thumb have a CHECK() macro to deal with DecodeStatuses.
+  if (Target.getName() == "ARM" || Target.getName() == "Thumb" ||
+      Target.getName() == "AArch64" || Target.getName() == "ARM64") {
+    std::string PredicateNamespace = std::string(Target.getName());
+    if (PredicateNamespace == "Thumb")
+      PredicateNamespace = "ARM";
 
-    EmitFixedLenDecoder(Records, OS, std::string(Target.getName()), "if (",
-                        " == MCDisassembler::Fail)", "MCDisassembler::Success",
-                        "MCDisassembler::Fail", "");
+    EmitFixedLenDecoder(Records, OS, PredicateNamespace, "if (!Check(S, ", "))",
+                        "S", "MCDisassembler::Fail",
+                        "  MCDisassembler::DecodeStatus S = "
+                        "MCDisassembler::Success;\n(void)S;");
+    return;
+  }
+
+  EmitFixedLenDecoder(Records, OS, std::string(Target.getName()), "if (",
+                      " == MCDisassembler::Fail)", "MCDisassembler::Success",
+                      "MCDisassembler::Fail", "");
 }
 
 } // end namespace llvm

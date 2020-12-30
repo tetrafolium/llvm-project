@@ -22,9 +22,9 @@ class Triple;
 
 class WebAssemblyMCAsmInfo final : public MCAsmInfoWasm {
 public:
-    explicit WebAssemblyMCAsmInfo(const Triple &T,
-                                  const MCTargetOptions &Options);
-    ~WebAssemblyMCAsmInfo() override;
+  explicit WebAssemblyMCAsmInfo(const Triple &T,
+                                const MCTargetOptions &Options);
+  ~WebAssemblyMCAsmInfo() override;
 };
 
 } // end namespace llvm

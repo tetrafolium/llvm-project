@@ -20,9 +20,9 @@ class InterfaceFile;
 
 class TextAPIWriter {
 public:
-    TextAPIWriter() = delete;
+  TextAPIWriter() = delete;
 
-    static Error writeToStream(raw_ostream &os, const InterfaceFile &);
+  static Error writeToStream(raw_ostream &os, const InterfaceFile &);
 };
 
 } // end namespace MachO.

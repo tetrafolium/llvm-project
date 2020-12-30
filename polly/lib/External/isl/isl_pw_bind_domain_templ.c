@@ -10,5 +10,5 @@
 #include <isl_pw_macro.h>
 
 #undef TYPE
-#define TYPE	PW
+#define TYPE PW
 #include <isl_bind_domain_templ.c>

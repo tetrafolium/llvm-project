@@ -24,10 +24,10 @@
 namespace __lsan {
 
 class ThreadContext final : public ThreadContextLsanBase {
-public:
-    explicit ThreadContext(int tid);
-    void OnCreated(void *arg) override;
-    void OnStarted(void *arg) override;
+ public:
+  explicit ThreadContext(int tid);
+  void OnCreated(void *arg) override;
+  void OnStarted(void *arg) override;
 };
 
 }  // namespace __lsan

@@ -27,9 +27,9 @@ extern int __clzsi2(si_int);
 // Precondition: a != 0
 
 COMPILER_RT_ABI int __clzdi2(di_int a) {
-    dwords x;
-    x.all = a;
-    const si_int f = -(x.s.high == 0);
-    return clzsi((x.s.high & ~f) | (x.s.low & f)) +
-           (f & ((si_int)(sizeof(si_int) * CHAR_BIT)));
+  dwords x;
+  x.all = a;
+  const si_int f = -(x.s.high == 0);
+  return clzsi((x.s.high & ~f) | (x.s.low & f)) +
+         (f & ((si_int)(sizeof(si_int) * CHAR_BIT)));
 }

@@ -17,15 +17,15 @@ namespace lldb_private {
 
 class CommandObjectLog : public CommandObjectMultiword {
 public:
-    // Constructors and Destructors
-    CommandObjectLog(CommandInterpreter &interpreter);
+  // Constructors and Destructors
+  CommandObjectLog(CommandInterpreter &interpreter);
 
-    ~CommandObjectLog() override;
+  ~CommandObjectLog() override;
 
 private:
-    // For CommandObjectLog only
-    CommandObjectLog(const CommandObjectLog &) = delete;
-    const CommandObjectLog &operator=(const CommandObjectLog &) = delete;
+  // For CommandObjectLog only
+  CommandObjectLog(const CommandObjectLog &) = delete;
+  const CommandObjectLog &operator=(const CommandObjectLog &) = delete;
 };
 
 } // namespace lldb_private

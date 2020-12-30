@@ -17,21 +17,19 @@
 namespace lldb_private {
 
 class ClangHighlighter : public Highlighter {
-    llvm::StringSet<> keywords;
+  llvm::StringSet<> keywords;
 
 public:
-    ClangHighlighter();
-    llvm::StringRef GetName() const override {
-        return "clang";
-    }
+  ClangHighlighter();
+  llvm::StringRef GetName() const override { return "clang"; }
 
-    void Highlight(const HighlightStyle &options, llvm::StringRef line,
-                   llvm::Optional<size_t> cursor_pos,
-                   llvm::StringRef previous_lines, Stream &s) const override;
+  void Highlight(const HighlightStyle &options, llvm::StringRef line,
+                 llvm::Optional<size_t> cursor_pos,
+                 llvm::StringRef previous_lines, Stream &s) const override;
 
-    /// Returns true if the given string represents a keywords in any Clang
-    /// supported language.
-    bool isKeyword(llvm::StringRef token) const;
+  /// Returns true if the given string represents a keywords in any Clang
+  /// supported language.
+  bool isKeyword(llvm::StringRef token) const;
 };
 
 } // namespace lldb_private

@@ -21,26 +21,26 @@ class NativeSession;
 
 class NativeTypeArray : public NativeRawSymbol {
 public:
-    NativeTypeArray(NativeSession &Session, SymIndexId Id, codeview::TypeIndex TI,
-                    codeview::ArrayRecord Record);
-    ~NativeTypeArray() override;
+  NativeTypeArray(NativeSession &Session, SymIndexId Id, codeview::TypeIndex TI,
+                  codeview::ArrayRecord Record);
+  ~NativeTypeArray() override;
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    SymIndexId getArrayIndexTypeId() const override;
+  SymIndexId getArrayIndexTypeId() const override;
 
-    bool isConstType() const override;
-    bool isUnalignedType() const override;
-    bool isVolatileType() const override;
+  bool isConstType() const override;
+  bool isUnalignedType() const override;
+  bool isVolatileType() const override;
 
-    uint32_t getCount() const override;
-    SymIndexId getTypeId() const override;
-    uint64_t getLength() const override;
+  uint32_t getCount() const override;
+  SymIndexId getTypeId() const override;
+  uint64_t getLength() const override;
 
 protected:
-    codeview::ArrayRecord Record;
-    codeview::TypeIndex Index;
+  codeview::ArrayRecord Record;
+  codeview::TypeIndex Index;
 };
 
 } // namespace pdb

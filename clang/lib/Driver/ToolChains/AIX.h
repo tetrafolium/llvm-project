@@ -21,33 +21,27 @@ namespace aix {
 
 class LLVM_LIBRARY_VISIBILITY Assembler : public Tool {
 public:
-    Assembler(const ToolChain &TC) : Tool("aix::Assembler", "assembler", TC) {}
+  Assembler(const ToolChain &TC) : Tool("aix::Assembler", "assembler", TC) {}
 
-    bool hasIntegratedCPP() const override {
-        return false;
-    }
+  bool hasIntegratedCPP() const override { return false; }
 
-    void ConstructJob(Compilation &C, const JobAction &JA,
-                      const InputInfo &Output, const InputInfoList &Inputs,
-                      const llvm::opt::ArgList &TCArgs,
-                      const char *LinkingOutput) const override;
+  void ConstructJob(Compilation &C, const JobAction &JA,
+                    const InputInfo &Output, const InputInfoList &Inputs,
+                    const llvm::opt::ArgList &TCArgs,
+                    const char *LinkingOutput) const override;
 };
 
 class LLVM_LIBRARY_VISIBILITY Linker : public Tool {
 public:
-    Linker(const ToolChain &TC) : Tool("aix::Linker", "linker", TC) {}
+  Linker(const ToolChain &TC) : Tool("aix::Linker", "linker", TC) {}
 
-    bool hasIntegratedCPP() const override {
-        return false;
-    }
-    bool isLinkJob() const override {
-        return true;
-    }
+  bool hasIntegratedCPP() const override { return false; }
+  bool isLinkJob() const override { return true; }
 
-    void ConstructJob(Compilation &C, const JobAction &JA,
-                      const InputInfo &Output, const InputInfoList &Inputs,
-                      const llvm::opt::ArgList &TCArgs,
-                      const char *LinkingOutput) const override;
+  void ConstructJob(Compilation &C, const JobAction &JA,
+                    const InputInfo &Output, const InputInfoList &Inputs,
+                    const llvm::opt::ArgList &TCArgs,
+                    const char *LinkingOutput) const override;
 };
 
 } // end namespace aix
@@ -62,36 +56,30 @@ namespace toolchains {
 
 class LLVM_LIBRARY_VISIBILITY AIX : public ToolChain {
 public:
-    AIX(const Driver &D, const llvm::Triple &Triple,
-        const llvm::opt::ArgList &Args);
+  AIX(const Driver &D, const llvm::Triple &Triple,
+      const llvm::opt::ArgList &Args);
 
-    bool isPICDefault() const override {
-        return true;
-    }
-    bool isPIEDefault() const override {
-        return false;
-    }
-    bool isPICDefaultForced() const override {
-        return true;
-    }
+  bool isPICDefault() const override { return true; }
+  bool isPIEDefault() const override { return false; }
+  bool isPICDefaultForced() const override { return true; }
 
-    void
-    AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
-                              llvm::opt::ArgStringList &CC1Args) const override;
+  void
+  AddClangSystemIncludeArgs(const llvm::opt::ArgList &DriverArgs,
+                            llvm::opt::ArgStringList &CC1Args) const override;
 
-    void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
-                             llvm::opt::ArgStringList &CmdArgs) const override;
+  void AddCXXStdlibLibArgs(const llvm::opt::ArgList &Args,
+                           llvm::opt::ArgStringList &CmdArgs) const override;
 
-    CXXStdlibType GetDefaultCXXStdlibType() const override;
+  CXXStdlibType GetDefaultCXXStdlibType() const override;
 
-    RuntimeLibType GetDefaultRuntimeLibType() const override;
+  RuntimeLibType GetDefaultRuntimeLibType() const override;
 
 protected:
-    Tool *buildAssembler() const override;
-    Tool *buildLinker() const override;
+  Tool *buildAssembler() const override;
+  Tool *buildLinker() const override;
 
 private:
-    llvm::StringRef GetHeaderSysroot(const llvm::opt::ArgList &DriverArgs) const;
+  llvm::StringRef GetHeaderSysroot(const llvm::opt::ArgList &DriverArgs) const;
 };
 
 } // end namespace toolchains

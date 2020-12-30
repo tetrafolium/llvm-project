@@ -31,7 +31,7 @@ void timeTraceProfilerFinishThread();
 
 /// Is the time trace profiler enabled, i.e. initialized?
 inline bool timeTraceProfilerEnabled() {
-    return getTimeTraceProfilerInstance() != nullptr;
+  return getTimeTraceProfilerInstance() != nullptr;
 }
 
 /// Write profiling data to output stream.
@@ -64,28 +64,28 @@ void timeTraceProfilerEnd();
 /// is not initialized, the overhead is a single branch.
 struct TimeTraceScope {
 
-    TimeTraceScope() = delete;
-    TimeTraceScope(const TimeTraceScope &) = delete;
-    TimeTraceScope &operator=(const TimeTraceScope &) = delete;
-    TimeTraceScope(TimeTraceScope &&) = delete;
-    TimeTraceScope &operator=(TimeTraceScope &&) = delete;
+  TimeTraceScope() = delete;
+  TimeTraceScope(const TimeTraceScope &) = delete;
+  TimeTraceScope &operator=(const TimeTraceScope &) = delete;
+  TimeTraceScope(TimeTraceScope &&) = delete;
+  TimeTraceScope &operator=(TimeTraceScope &&) = delete;
 
-    TimeTraceScope(StringRef Name) {
-        if (getTimeTraceProfilerInstance() != nullptr)
-            timeTraceProfilerBegin(Name, StringRef(""));
-    }
-    TimeTraceScope(StringRef Name, StringRef Detail) {
-        if (getTimeTraceProfilerInstance() != nullptr)
-            timeTraceProfilerBegin(Name, Detail);
-    }
-    TimeTraceScope(StringRef Name, llvm::function_ref<std::string()> Detail) {
-        if (getTimeTraceProfilerInstance() != nullptr)
-            timeTraceProfilerBegin(Name, Detail);
-    }
-    ~TimeTraceScope() {
-        if (getTimeTraceProfilerInstance() != nullptr)
-            timeTraceProfilerEnd();
-    }
+  TimeTraceScope(StringRef Name) {
+    if (getTimeTraceProfilerInstance() != nullptr)
+      timeTraceProfilerBegin(Name, StringRef(""));
+  }
+  TimeTraceScope(StringRef Name, StringRef Detail) {
+    if (getTimeTraceProfilerInstance() != nullptr)
+      timeTraceProfilerBegin(Name, Detail);
+  }
+  TimeTraceScope(StringRef Name, llvm::function_ref<std::string()> Detail) {
+    if (getTimeTraceProfilerInstance() != nullptr)
+      timeTraceProfilerBegin(Name, Detail);
+  }
+  ~TimeTraceScope() {
+    if (getTimeTraceProfilerInstance() != nullptr)
+      timeTraceProfilerEnd();
+  }
 };
 
 } // end namespace llvm

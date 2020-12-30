@@ -17,10 +17,10 @@ class APInt;
 
 namespace RISCVMatInt {
 struct Inst {
-    unsigned Opc;
-    int64_t Imm;
+  unsigned Opc;
+  int64_t Imm;
 
-    Inst(unsigned Opc, int64_t Imm) : Opc(Opc), Imm(Imm) {}
+  Inst(unsigned Opc, int64_t Imm) : Opc(Opc), Imm(Imm) {}
 };
 using InstSeq = SmallVector<Inst, 8>;
 

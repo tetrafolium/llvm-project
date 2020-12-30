@@ -26,64 +26,62 @@ namespace llvm {
 namespace mca {
 
 class ExecuteStage final : public Stage {
-    Scheduler &HWS;
+  Scheduler &HWS;
 
-    unsigned NumDispatchedOpcodes;
-    unsigned NumIssuedOpcodes;
+  unsigned NumDispatchedOpcodes;
+  unsigned NumIssuedOpcodes;
 
-    // True if this stage should notify listeners of HWPressureEvents.
-    bool EnablePressureEvents;
+  // True if this stage should notify listeners of HWPressureEvents.
+  bool EnablePressureEvents;
 
-    Error issueInstruction(InstRef &IR);
+  Error issueInstruction(InstRef &IR);
 
-    // Called at the beginning of each cycle to issue already dispatched
-    // instructions to the underlying pipelines.
-    Error issueReadyInstructions();
+  // Called at the beginning of each cycle to issue already dispatched
+  // instructions to the underlying pipelines.
+  Error issueReadyInstructions();
 
-    // Used to notify instructions eliminated at register renaming stage.
-    Error handleInstructionEliminated(InstRef &IR);
+  // Used to notify instructions eliminated at register renaming stage.
+  Error handleInstructionEliminated(InstRef &IR);
 
-    ExecuteStage(const ExecuteStage &Other) = delete;
-    ExecuteStage &operator=(const ExecuteStage &Other) = delete;
+  ExecuteStage(const ExecuteStage &Other) = delete;
+  ExecuteStage &operator=(const ExecuteStage &Other) = delete;
 
 public:
-    ExecuteStage(Scheduler &S) : ExecuteStage(S, false) {}
-    ExecuteStage(Scheduler &S, bool ShouldPerformBottleneckAnalysis)
-        : Stage(), HWS(S), NumDispatchedOpcodes(0), NumIssuedOpcodes(0),
-          EnablePressureEvents(ShouldPerformBottleneckAnalysis) {}
+  ExecuteStage(Scheduler &S) : ExecuteStage(S, false) {}
+  ExecuteStage(Scheduler &S, bool ShouldPerformBottleneckAnalysis)
+      : Stage(), HWS(S), NumDispatchedOpcodes(0), NumIssuedOpcodes(0),
+        EnablePressureEvents(ShouldPerformBottleneckAnalysis) {}
 
-    // This stage works under the assumption that the Pipeline will eventually
-    // execute a retire stage. We don't need to check if pipelines and/or
-    // schedulers have instructions to process, because those instructions are
-    // also tracked by the retire control unit. That means,
-    // RetireControlUnit::hasWorkToComplete() is responsible for checking if there
-    // are still instructions in-flight in the out-of-order backend.
-    bool hasWorkToComplete() const override {
-        return false;
-    }
-    bool isAvailable(const InstRef &IR) const override;
+  // This stage works under the assumption that the Pipeline will eventually
+  // execute a retire stage. We don't need to check if pipelines and/or
+  // schedulers have instructions to process, because those instructions are
+  // also tracked by the retire control unit. That means,
+  // RetireControlUnit::hasWorkToComplete() is responsible for checking if there
+  // are still instructions in-flight in the out-of-order backend.
+  bool hasWorkToComplete() const override { return false; }
+  bool isAvailable(const InstRef &IR) const override;
 
-    // Notifies the scheduler that a new cycle just started.
-    //
-    // This method notifies the scheduler that a new cycle started.
-    // This method is also responsible for notifying listeners about instructions
-    // state changes, and processor resources freed by the scheduler.
-    // Instructions that transitioned to the 'Executed' state are automatically
-    // moved to the next stage (i.e. RetireStage).
-    Error cycleStart() override;
-    Error cycleEnd() override;
-    Error execute(InstRef &IR) override;
+  // Notifies the scheduler that a new cycle just started.
+  //
+  // This method notifies the scheduler that a new cycle started.
+  // This method is also responsible for notifying listeners about instructions
+  // state changes, and processor resources freed by the scheduler.
+  // Instructions that transitioned to the 'Executed' state are automatically
+  // moved to the next stage (i.e. RetireStage).
+  Error cycleStart() override;
+  Error cycleEnd() override;
+  Error execute(InstRef &IR) override;
 
-    void notifyInstructionIssued(
-        const InstRef &IR,
-        MutableArrayRef<std::pair<ResourceRef, ResourceCycles>> Used) const;
-    void notifyInstructionExecuted(const InstRef &IR) const;
-    void notifyInstructionPending(const InstRef &IR) const;
-    void notifyInstructionReady(const InstRef &IR) const;
-    void notifyResourceAvailable(const ResourceRef &RR) const;
+  void notifyInstructionIssued(
+      const InstRef &IR,
+      MutableArrayRef<std::pair<ResourceRef, ResourceCycles>> Used) const;
+  void notifyInstructionExecuted(const InstRef &IR) const;
+  void notifyInstructionPending(const InstRef &IR) const;
+  void notifyInstructionReady(const InstRef &IR) const;
+  void notifyResourceAvailable(const ResourceRef &RR) const;
 
-    // Notify listeners that buffered resources have been consumed or freed.
-    void notifyReservedOrReleasedBuffers(const InstRef &IR, bool Reserved) const;
+  // Notify listeners that buffered resources have been consumed or freed.
+  void notifyReservedOrReleasedBuffers(const InstRef &IR, bool Reserved) const;
 };
 
 } // namespace mca

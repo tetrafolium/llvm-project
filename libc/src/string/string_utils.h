@@ -18,32 +18,32 @@ namespace internal {
 // Returns the length of a string, denoted by the first occurrence
 // of a null terminator.
 static inline size_t string_length(const char *src) {
-    size_t length;
-    for (length = 0; *src; ++src, ++length)
-        ;
-    return length;
+  size_t length;
+  for (length = 0; *src; ++src, ++length)
+    ;
+  return length;
 }
 
 // Returns the first occurrence of 'ch' within the first 'n' characters of
 // 'src'. If 'ch' is not found, returns nullptr.
 static inline void *find_first_character(const unsigned char *src,
-        unsigned char ch, size_t n) {
-    for (; n && *src != ch; --n, ++src)
-        ;
-    return n ? const_cast<unsigned char *>(src) : nullptr;
+                                         unsigned char ch, size_t n) {
+  for (; n && *src != ch; --n, ++src)
+    ;
+  return n ? const_cast<unsigned char *>(src) : nullptr;
 }
 
 // Returns the maximum length span that contains only characters not found in
 // 'segment'. If no characters are found, returns the length of 'src'.
 static inline size_t complementary_span(const char *src, const char *segment) {
-    const char *initial = src;
-    cpp::Bitset<256> bitset;
+  const char *initial = src;
+  cpp::Bitset<256> bitset;
 
-    for (; *segment; ++segment)
-        bitset.set(*segment);
-    for (; *src && !bitset.test(*src); ++src)
-        ;
-    return src - initial;
+  for (; *segment; ++segment)
+    bitset.set(*segment);
+  for (; *src && !bitset.test(*src); ++src)
+    ;
+  return src - initial;
 }
 
 // Given the similarities between strtok and strtok_r, we can implement both
@@ -58,26 +58,26 @@ static inline size_t complementary_span(const char *src, const char *segment) {
 static inline char *string_token(char *__restrict src,
                                  const char *__restrict delimiter_string,
                                  char **__restrict saveptr) {
-    cpp::Bitset<256> delimiter_set;
-    for (; *delimiter_string; ++delimiter_string)
-        delimiter_set.set(*delimiter_string);
+  cpp::Bitset<256> delimiter_set;
+  for (; *delimiter_string; ++delimiter_string)
+    delimiter_set.set(*delimiter_string);
 
-    src = src ? src : *saveptr;
-    for (; *src && delimiter_set.test(*src); ++src)
-        ;
-    if (!*src) {
-        *saveptr = src;
-        return nullptr;
-    }
-    char *token = src;
-    for (; *src && !delimiter_set.test(*src); ++src)
-        ;
-    if (*src) {
-        *src = '\0';
-        ++src;
-    }
+  src = src ? src : *saveptr;
+  for (; *src && delimiter_set.test(*src); ++src)
+    ;
+  if (!*src) {
     *saveptr = src;
-    return token;
+    return nullptr;
+  }
+  char *token = src;
+  for (; *src && !delimiter_set.test(*src); ++src)
+    ;
+  if (*src) {
+    *src = '\0';
+    ++src;
+  }
+  *saveptr = src;
+  return token;
 }
 
 } // namespace internal

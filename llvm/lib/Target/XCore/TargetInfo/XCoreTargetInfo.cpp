@@ -11,11 +11,11 @@
 using namespace llvm;
 
 Target &llvm::getTheXCoreTarget() {
-    static Target TheXCoreTarget;
-    return TheXCoreTarget;
+  static Target TheXCoreTarget;
+  return TheXCoreTarget;
 }
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeXCoreTargetInfo() {
-    RegisterTarget<Triple::xcore> X(getTheXCoreTarget(), "xcore", "XCore",
-                                    "XCore");
+  RegisterTarget<Triple::xcore> X(getTheXCoreTarget(), "xcore", "XCore",
+                                  "XCore");
 }

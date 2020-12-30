@@ -11,8 +11,6 @@
 
 namespace __llvm_libc {
 
-int LLVM_LIBC_ENTRYPOINT(fesetround)(int m) {
-    return fputil::setRound(m);
-}
+int LLVM_LIBC_ENTRYPOINT(fesetround)(int m) { return fputil::setRound(m); }
 
 } // namespace __llvm_libc

@@ -27,12 +27,13 @@ class IRBuilderBase;
 ///
 /// Returns true if any attributes were set and false otherwise.
 bool inferLibFuncAttributes(Function &F, const TargetLibraryInfo &TLI);
-bool inferLibFuncAttributes(Module *M, StringRef Name, const TargetLibraryInfo &TLI);
+bool inferLibFuncAttributes(Module *M, StringRef Name,
+                            const TargetLibraryInfo &TLI);
 
 /// Check whether the overloaded floating point function
 /// corresponding to \a Ty is available.
-bool hasFloatFn(const TargetLibraryInfo *TLI, Type *Ty,
-                LibFunc DoubleFn, LibFunc FloatFn, LibFunc LongDoubleFn);
+bool hasFloatFn(const TargetLibraryInfo *TLI, Type *Ty, LibFunc DoubleFn,
+                LibFunc FloatFn, LibFunc LongDoubleFn);
 
 /// Get the name of the overloaded floating point function
 /// corresponding to \a Ty.
@@ -179,8 +180,7 @@ Value *emitBinaryFloatFnCall(Value *Op1, Value *Op2,
                              IRBuilderBase &B, const AttributeList &Attrs);
 
 /// Emit a call to the putchar function. This assumes that Char is an integer.
-Value *emitPutChar(Value *Char, IRBuilderBase &B,
-                   const TargetLibraryInfo *TLI);
+Value *emitPutChar(Value *Char, IRBuilderBase &B, const TargetLibraryInfo *TLI);
 
 /// Emit a call to the puts function. This assumes that Str is some pointer.
 Value *emitPutS(Value *Str, IRBuilderBase &B, const TargetLibraryInfo *TLI);
@@ -207,6 +207,6 @@ Value *emitMalloc(Value *Num, IRBuilderBase &B, const DataLayout &DL,
 /// Emit a call to the calloc function.
 Value *emitCalloc(Value *Num, Value *Size, const AttributeList &Attrs,
                   IRBuilderBase &B, const TargetLibraryInfo &TLI);
-}
+} // namespace llvm
 
 #endif

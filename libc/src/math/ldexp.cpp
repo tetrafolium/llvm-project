@@ -12,7 +12,7 @@
 namespace __llvm_libc {
 
 double LLVM_LIBC_ENTRYPOINT(ldexp)(double x, int exp) {
-    return fputil::ldexp(x, exp);
+  return fputil::ldexp(x, exp);
 }
 
 } // namespace __llvm_libc

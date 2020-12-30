@@ -20,22 +20,22 @@ namespace lldb_private {
 
 class SystemLifetimeManager {
 public:
-    SystemLifetimeManager();
-    ~SystemLifetimeManager();
+  SystemLifetimeManager();
+  ~SystemLifetimeManager();
 
-    llvm::Error Initialize(std::unique_ptr<SystemInitializer> initializer,
-                           LoadPluginCallbackType plugin_callback);
-    void Terminate();
+  llvm::Error Initialize(std::unique_ptr<SystemInitializer> initializer,
+                         LoadPluginCallbackType plugin_callback);
+  void Terminate();
 
 private:
-    std::recursive_mutex m_mutex;
-    std::unique_ptr<SystemInitializer> m_initializer;
-    bool m_initialized;
+  std::recursive_mutex m_mutex;
+  std::unique_ptr<SystemInitializer> m_initializer;
+  bool m_initialized;
 
-    // Noncopyable.
-    SystemLifetimeManager(const SystemLifetimeManager &other) = delete;
-    SystemLifetimeManager &operator=(const SystemLifetimeManager &other) = delete;
+  // Noncopyable.
+  SystemLifetimeManager(const SystemLifetimeManager &other) = delete;
+  SystemLifetimeManager &operator=(const SystemLifetimeManager &other) = delete;
 };
-}
+} // namespace lldb_private
 
 #endif

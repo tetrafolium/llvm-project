@@ -15,32 +15,31 @@ using namespace lldb_private;
 
 lldb::LanguageType
 SBLanguageRuntime::GetLanguageTypeFromString(const char *string) {
-    LLDB_RECORD_STATIC_METHOD(lldb::LanguageType, SBLanguageRuntime,
-                              GetLanguageTypeFromString, (const char *), string);
+  LLDB_RECORD_STATIC_METHOD(lldb::LanguageType, SBLanguageRuntime,
+                            GetLanguageTypeFromString, (const char *), string);
 
-    return Language::GetLanguageTypeFromString(
-               llvm::StringRef::withNullAsEmpty(string));
+  return Language::GetLanguageTypeFromString(
+      llvm::StringRef::withNullAsEmpty(string));
 }
 
 const char *
 SBLanguageRuntime::GetNameForLanguageType(lldb::LanguageType language) {
-    LLDB_RECORD_STATIC_METHOD(const char *, SBLanguageRuntime,
-                              GetNameForLanguageType, (lldb::LanguageType),
-                              language);
+  LLDB_RECORD_STATIC_METHOD(const char *, SBLanguageRuntime,
+                            GetNameForLanguageType, (lldb::LanguageType),
+                            language);
 
-    return Language::GetNameForLanguageType(language);
+  return Language::GetNameForLanguageType(language);
 }
 
 namespace lldb_private {
 namespace repro {
 
-template <>
-void RegisterMethods<SBLanguageRuntime>(Registry &R) {
-    LLDB_REGISTER_STATIC_METHOD(lldb::LanguageType, SBLanguageRuntime,
-                                GetLanguageTypeFromString, (const char *));
-    LLDB_REGISTER_STATIC_METHOD(const char *, SBLanguageRuntime,
-                                GetNameForLanguageType, (lldb::LanguageType));
+template <> void RegisterMethods<SBLanguageRuntime>(Registry &R) {
+  LLDB_REGISTER_STATIC_METHOD(lldb::LanguageType, SBLanguageRuntime,
+                              GetLanguageTypeFromString, (const char *));
+  LLDB_REGISTER_STATIC_METHOD(const char *, SBLanguageRuntime,
+                              GetNameForLanguageType, (lldb::LanguageType));
 }
 
-}
-}
+} // namespace repro
+} // namespace lldb_private

@@ -13,10 +13,10 @@
 using namespace llvm;
 
 llvm::detail::ErrorHolder llvm::detail::TakeError(llvm::Error Err) {
-    std::vector<std::shared_ptr<ErrorInfoBase>> Infos;
-    handleAllErrors(std::move(Err),
-    [&Infos](std::unique_ptr<ErrorInfoBase> Info) {
-        Infos.emplace_back(std::move(Info));
-    });
-    return {std::move(Infos)};
+  std::vector<std::shared_ptr<ErrorInfoBase>> Infos;
+  handleAllErrors(std::move(Err),
+                  [&Infos](std::unique_ptr<ErrorInfoBase> Info) {
+                    Infos.emplace_back(std::move(Info));
+                  });
+  return {std::move(Infos)};
 }

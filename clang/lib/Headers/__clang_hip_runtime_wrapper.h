@@ -36,19 +36,17 @@
 extern "C" __device__ void *__hip_malloc(size_t __size);
 extern "C" __device__ void *__hip_free(void *__ptr);
 static inline __device__ void *malloc(size_t __size) {
-    return __hip_malloc(__size);
+  return __hip_malloc(__size);
 }
-static inline __device__ void *free(void *__ptr) {
-    return __hip_free(__ptr);
-}
+static inline __device__ void *free(void *__ptr) { return __hip_free(__ptr); }
 #else
 static inline __device__ void *malloc(size_t __size) {
-    __builtin_trap();
-    return nullptr;
+  __builtin_trap();
+  return nullptr;
 }
 static inline __device__ void *free(void *__ptr) {
-    __builtin_trap();
-    return nullptr;
+  __builtin_trap();
+  return nullptr;
 }
 #endif
 
@@ -56,9 +54,9 @@ static inline __device__ void *free(void *__ptr) {
 #include <__clang_hip_math.h>
 
 #if !_OPENMP || __HIP_ENABLE_CUDA_WRAPPER_FOR_OPENMP__
+#include <__clang_cuda_complex_builtins.h>
 #include <__clang_cuda_math_forward_declares.h>
 #include <__clang_hip_cmath.h>
-#include <__clang_cuda_complex_builtins.h>
 
 #include <algorithm>
 #include <complex>

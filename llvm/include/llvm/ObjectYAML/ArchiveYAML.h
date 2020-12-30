@@ -14,43 +14,43 @@
 #ifndef LLVM_OBJECTYAML_ARCHIVEYAML_H
 #define LLVM_OBJECTYAML_ARCHIVEYAML_H
 
-#include "llvm/Support/YAMLTraits.h"
-#include "llvm/ObjectYAML/YAML.h"
 #include "llvm/ADT/MapVector.h"
+#include "llvm/ObjectYAML/YAML.h"
+#include "llvm/Support/YAMLTraits.h"
 
 namespace llvm {
 namespace ArchYAML {
 
 struct Archive {
-    struct Child {
-        struct Field {
-            Field() = default;
-            Field(StringRef Default, unsigned Length)
-                : DefaultValue(Default), MaxLength(Length) {}
-            StringRef Value;
-            StringRef DefaultValue;
-            unsigned MaxLength;
-        };
-
-        Child() {
-            Fields["Name"] = {"", 16};
-            Fields["LastModified"] = {"0", 12};
-            Fields["UID"] = {"0", 6};
-            Fields["GID"] = {"0", 6};
-            Fields["AccessMode"] = {"0", 8};
-            Fields["Size"] = {"0", 10};
-            Fields["Terminator"] = {"`\n", 2};
-        }
-
-        MapVector<StringRef, Field> Fields;
-
-        Optional<yaml::BinaryRef> Content;
-        Optional<llvm::yaml::Hex8> PaddingByte;
+  struct Child {
+    struct Field {
+      Field() = default;
+      Field(StringRef Default, unsigned Length)
+          : DefaultValue(Default), MaxLength(Length) {}
+      StringRef Value;
+      StringRef DefaultValue;
+      unsigned MaxLength;
     };
 
-    StringRef Magic;
-    Optional<std::vector<Child>> Members;
+    Child() {
+      Fields["Name"] = {"", 16};
+      Fields["LastModified"] = {"0", 12};
+      Fields["UID"] = {"0", 6};
+      Fields["GID"] = {"0", 6};
+      Fields["AccessMode"] = {"0", 8};
+      Fields["Size"] = {"0", 10};
+      Fields["Terminator"] = {"`\n", 2};
+    }
+
+    MapVector<StringRef, Field> Fields;
+
     Optional<yaml::BinaryRef> Content;
+    Optional<llvm::yaml::Hex8> PaddingByte;
+  };
+
+  StringRef Magic;
+  Optional<std::vector<Child>> Members;
+  Optional<yaml::BinaryRef> Content;
 };
 
 } // end namespace ArchYAML
@@ -62,13 +62,13 @@ namespace llvm {
 namespace yaml {
 
 template <> struct MappingTraits<ArchYAML::Archive> {
-    static void mapping(IO &IO, ArchYAML::Archive &A);
-    static std::string validate(IO &, ArchYAML::Archive &A);
+  static void mapping(IO &IO, ArchYAML::Archive &A);
+  static std::string validate(IO &, ArchYAML::Archive &A);
 };
 
 template <> struct MappingTraits<ArchYAML::Archive::Child> {
-    static void mapping(IO &IO, ArchYAML::Archive::Child &C);
-    static std::string validate(IO &, ArchYAML::Archive::Child &C);
+  static void mapping(IO &IO, ArchYAML::Archive::Child &C);
+  static std::string validate(IO &, ArchYAML::Archive::Child &C);
 };
 
 } // end namespace yaml

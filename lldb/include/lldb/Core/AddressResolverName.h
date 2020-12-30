@@ -26,36 +26,36 @@ class SymbolContext;
 
 class AddressResolverName : public AddressResolver {
 public:
-    AddressResolverName(const char *func_name,
-                        AddressResolver::MatchType type = Exact);
+  AddressResolverName(const char *func_name,
+                      AddressResolver::MatchType type = Exact);
 
-    // Creates a function breakpoint by regular expression.  Takes over control
-    // of the lifespan of func_regex.
-    AddressResolverName(RegularExpression func_regex);
+  // Creates a function breakpoint by regular expression.  Takes over control
+  // of the lifespan of func_regex.
+  AddressResolverName(RegularExpression func_regex);
 
-    AddressResolverName(const char *class_name, const char *method,
-                        AddressResolver::MatchType type);
+  AddressResolverName(const char *class_name, const char *method,
+                      AddressResolver::MatchType type);
 
-    ~AddressResolverName() override;
+  ~AddressResolverName() override;
 
-    Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
-                                            SymbolContext &context,
-                                            Address *addr) override;
+  Searcher::CallbackReturn SearchCallback(SearchFilter &filter,
+                                          SymbolContext &context,
+                                          Address *addr) override;
 
-    lldb::SearchDepth GetDepth() override;
+  lldb::SearchDepth GetDepth() override;
 
-    void GetDescription(Stream *s) override;
+  void GetDescription(Stream *s) override;
 
 protected:
-    ConstString m_func_name;
-    ConstString m_class_name; // FIXME: Not used yet.  The idea would be to stop
-    // on methods of this class.
-    RegularExpression m_regex;
-    AddressResolver::MatchType m_match_type;
+  ConstString m_func_name;
+  ConstString m_class_name; // FIXME: Not used yet.  The idea would be to stop
+  // on methods of this class.
+  RegularExpression m_regex;
+  AddressResolver::MatchType m_match_type;
 
 private:
-    AddressResolverName(const AddressResolverName &) = delete;
-    const AddressResolverName &operator=(const AddressResolverName &) = delete;
+  AddressResolverName(const AddressResolverName &) = delete;
+  const AddressResolverName &operator=(const AddressResolverName &) = delete;
 };
 
 } // namespace lldb_private

@@ -18,33 +18,29 @@ namespace lldb_private {
 
 class OptionGroupOutputFile : public OptionGroup {
 public:
-    OptionGroupOutputFile();
+  OptionGroupOutputFile();
 
-    ~OptionGroupOutputFile() override;
+  ~OptionGroupOutputFile() override;
 
-    llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
+  llvm::ArrayRef<OptionDefinition> GetDefinitions() override;
 
-    Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
-                          ExecutionContext *execution_context) override;
-    Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
+  Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_value,
+                        ExecutionContext *execution_context) override;
+  Status SetOptionValue(uint32_t, const char *, ExecutionContext *) = delete;
 
-    void OptionParsingStarting(ExecutionContext *execution_context) override;
+  void OptionParsingStarting(ExecutionContext *execution_context) override;
 
-    const OptionValueFileSpec &GetFile() {
-        return m_file;
-    }
+  const OptionValueFileSpec &GetFile() { return m_file; }
 
-    const OptionValueBoolean &GetAppend() {
-        return m_append;
-    }
+  const OptionValueBoolean &GetAppend() { return m_append; }
 
-    bool AnyOptionWasSet() const {
-        return m_file.OptionWasSet() || m_append.OptionWasSet();
-    }
+  bool AnyOptionWasSet() const {
+    return m_file.OptionWasSet() || m_append.OptionWasSet();
+  }
 
 protected:
-    OptionValueFileSpec m_file;
-    OptionValueBoolean m_append;
+  OptionValueFileSpec m_file;
+  OptionValueBoolean m_append;
 };
 
 } // namespace lldb_private

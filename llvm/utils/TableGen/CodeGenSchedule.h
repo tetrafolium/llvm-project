@@ -30,8 +30,8 @@ class CodeGenSchedModels;
 class CodeGenInstruction;
 class CodeGenRegisterClass;
 
-using RecVec = std::vector<Record*>;
-using RecIter = std::vector<Record*>::const_iterator;
+using RecVec = std::vector<Record *>;
+using RecIter = std::vector<Record *>::const_iterator;
 
 using IdxVec = std::vector<unsigned>;
 using IdxIter = std::vector<unsigned>::const_iterator;
@@ -44,60 +44,60 @@ using IdxIter = std::vector<unsigned>::const_iterator;
 /// IsVariadic controls whether the variants are expanded into multiple operands
 /// or a sequence of writes on one operand.
 struct CodeGenSchedRW {
-    unsigned Index;
-    std::string Name;
-    Record *TheDef;
-    bool IsRead;
-    bool IsAlias;
-    bool HasVariants;
-    bool IsVariadic;
-    bool IsSequence;
-    IdxVec Sequence;
-    RecVec Aliases;
+  unsigned Index;
+  std::string Name;
+  Record *TheDef;
+  bool IsRead;
+  bool IsAlias;
+  bool HasVariants;
+  bool IsVariadic;
+  bool IsSequence;
+  IdxVec Sequence;
+  RecVec Aliases;
 
-    CodeGenSchedRW()
-        : Index(0), TheDef(nullptr), IsRead(false), IsAlias(false),
-          HasVariants(false), IsVariadic(false), IsSequence(false) {}
-    CodeGenSchedRW(unsigned Idx, Record *Def)
-        : Index(Idx), TheDef(Def), IsAlias(false), IsVariadic(false) {
-        Name = std::string(Def->getName());
-        IsRead = Def->isSubClassOf("SchedRead");
-        HasVariants = Def->isSubClassOf("SchedVariant");
-        if (HasVariants)
-            IsVariadic = Def->getValueAsBit("Variadic");
+  CodeGenSchedRW()
+      : Index(0), TheDef(nullptr), IsRead(false), IsAlias(false),
+        HasVariants(false), IsVariadic(false), IsSequence(false) {}
+  CodeGenSchedRW(unsigned Idx, Record *Def)
+      : Index(Idx), TheDef(Def), IsAlias(false), IsVariadic(false) {
+    Name = std::string(Def->getName());
+    IsRead = Def->isSubClassOf("SchedRead");
+    HasVariants = Def->isSubClassOf("SchedVariant");
+    if (HasVariants)
+      IsVariadic = Def->getValueAsBit("Variadic");
 
-        // Read records don't currently have sequences, but it can be easily
-        // added. Note that implicit Reads (from ReadVariant) may have a Sequence
-        // (but no record).
-        IsSequence = Def->isSubClassOf("WriteSequence");
-    }
+    // Read records don't currently have sequences, but it can be easily
+    // added. Note that implicit Reads (from ReadVariant) may have a Sequence
+    // (but no record).
+    IsSequence = Def->isSubClassOf("WriteSequence");
+  }
 
-    CodeGenSchedRW(unsigned Idx, bool Read, ArrayRef<unsigned> Seq,
-                   const std::string &Name)
-        : Index(Idx), Name(Name), TheDef(nullptr), IsRead(Read), IsAlias(false),
-          HasVariants(false), IsVariadic(false), IsSequence(true), Sequence(Seq) {
-        assert(Sequence.size() > 1 && "implied sequence needs >1 RWs");
-    }
+  CodeGenSchedRW(unsigned Idx, bool Read, ArrayRef<unsigned> Seq,
+                 const std::string &Name)
+      : Index(Idx), Name(Name), TheDef(nullptr), IsRead(Read), IsAlias(false),
+        HasVariants(false), IsVariadic(false), IsSequence(true), Sequence(Seq) {
+    assert(Sequence.size() > 1 && "implied sequence needs >1 RWs");
+  }
 
-    bool isValid() const {
-        assert((!HasVariants || TheDef) && "Variant write needs record def");
-        assert((!IsVariadic || HasVariants) && "Variadic write needs variants");
-        assert((!IsSequence || !HasVariants) && "Sequence can't have variant");
-        assert((!IsSequence || !Sequence.empty()) && "Sequence should be nonempty");
-        assert((!IsAlias || Aliases.empty()) && "Alias cannot have aliases");
-        return TheDef || !Sequence.empty();
-    }
+  bool isValid() const {
+    assert((!HasVariants || TheDef) && "Variant write needs record def");
+    assert((!IsVariadic || HasVariants) && "Variadic write needs variants");
+    assert((!IsSequence || !HasVariants) && "Sequence can't have variant");
+    assert((!IsSequence || !Sequence.empty()) && "Sequence should be nonempty");
+    assert((!IsAlias || Aliases.empty()) && "Alias cannot have aliases");
+    return TheDef || !Sequence.empty();
+  }
 
 #ifndef NDEBUG
-    void dump() const;
+  void dump() const;
 #endif
 };
 
 /// Represent a transition between SchedClasses induced by SchedVariant.
 struct CodeGenSchedTransition {
-    unsigned ToClassIdx;
-    unsigned ProcIndex;
-    RecVec PredTerm;
+  unsigned ToClassIdx;
+  unsigned ProcIndex;
+  RecVec PredTerm;
 };
 
 /// Scheduling class.
@@ -125,42 +125,40 @@ struct CodeGenSchedTransition {
 /// itinerary class. Each inherits the processor index from the ItinRW record
 /// that mapped the itinerary class to the variant Writes or Reads.
 struct CodeGenSchedClass {
-    unsigned Index;
-    std::string Name;
-    Record *ItinClassDef;
+  unsigned Index;
+  std::string Name;
+  Record *ItinClassDef;
 
-    IdxVec Writes;
-    IdxVec Reads;
-    // Sorted list of ProcIdx, where ProcIdx==0 implies any processor.
-    IdxVec ProcIndices;
+  IdxVec Writes;
+  IdxVec Reads;
+  // Sorted list of ProcIdx, where ProcIdx==0 implies any processor.
+  IdxVec ProcIndices;
 
-    std::vector<CodeGenSchedTransition> Transitions;
+  std::vector<CodeGenSchedTransition> Transitions;
 
-    // InstRW records associated with this class. These records may refer to an
-    // Instruction no longer mapped to this class by InstrClassMap. These
-    // Instructions should be ignored by this class because they have been split
-    // off to join another inferred class.
-    RecVec InstRWs;
-    // InstRWs processor indices. Filled in inferFromInstRWs
-    DenseSet<unsigned> InstRWProcIndices;
+  // InstRW records associated with this class. These records may refer to an
+  // Instruction no longer mapped to this class by InstrClassMap. These
+  // Instructions should be ignored by this class because they have been split
+  // off to join another inferred class.
+  RecVec InstRWs;
+  // InstRWs processor indices. Filled in inferFromInstRWs
+  DenseSet<unsigned> InstRWProcIndices;
 
-    CodeGenSchedClass(unsigned Index, std::string Name, Record *ItinClassDef)
-        : Index(Index), Name(std::move(Name)), ItinClassDef(ItinClassDef) {}
+  CodeGenSchedClass(unsigned Index, std::string Name, Record *ItinClassDef)
+      : Index(Index), Name(std::move(Name)), ItinClassDef(ItinClassDef) {}
 
-    bool isKeyEqual(Record *IC, ArrayRef<unsigned> W,
-                    ArrayRef<unsigned> R) const {
-        return ItinClassDef == IC && makeArrayRef(Writes) == W &&
-               makeArrayRef(Reads) == R;
-    }
+  bool isKeyEqual(Record *IC, ArrayRef<unsigned> W,
+                  ArrayRef<unsigned> R) const {
+    return ItinClassDef == IC && makeArrayRef(Writes) == W &&
+           makeArrayRef(Reads) == R;
+  }
 
-    // Is this class generated from a variants if existing classes? Instructions
-    // are never mapped directly to inferred scheduling classes.
-    bool isInferred() const {
-        return !ItinClassDef;
-    }
+  // Is this class generated from a variants if existing classes? Instructions
+  // are never mapped directly to inferred scheduling classes.
+  bool isInferred() const { return !ItinClassDef; }
 
 #ifndef NDEBUG
-    void dump(const CodeGenSchedModels *SchedModels) const;
+  void dump(const CodeGenSchedModels *SchedModels) const;
 #endif
 };
 
@@ -170,13 +168,14 @@ struct CodeGenSchedClass {
 /// registers used by the register renamer. Register costs are defined at
 /// register class granularity.
 struct CodeGenRegisterCost {
-    Record *RCDef;
-    unsigned Cost;
-    bool AllowMoveElimination;
-    CodeGenRegisterCost(Record *RC, unsigned RegisterCost, bool AllowMoveElim = false)
-        : RCDef(RC), Cost(RegisterCost), AllowMoveElimination(AllowMoveElim) {}
-    CodeGenRegisterCost(const CodeGenRegisterCost &) = default;
-    CodeGenRegisterCost &operator=(const CodeGenRegisterCost &) = delete;
+  Record *RCDef;
+  unsigned Cost;
+  bool AllowMoveElimination;
+  CodeGenRegisterCost(Record *RC, unsigned RegisterCost,
+                      bool AllowMoveElim = false)
+      : RCDef(RC), Cost(RegisterCost), AllowMoveElimination(AllowMoveElim) {}
+  CodeGenRegisterCost(const CodeGenRegisterCost &) = default;
+  CodeGenRegisterCost &operator=(const CodeGenRegisterCost &) = delete;
 };
 
 /// A processor register file.
@@ -185,24 +184,22 @@ struct CodeGenRegisterCost {
 /// currently consumed by external tools like llvm-mca to predict dispatch
 /// stalls due to register pressure.
 struct CodeGenRegisterFile {
-    std::string Name;
-    Record *RegisterFileDef;
-    unsigned MaxMovesEliminatedPerCycle;
-    bool AllowZeroMoveEliminationOnly;
+  std::string Name;
+  Record *RegisterFileDef;
+  unsigned MaxMovesEliminatedPerCycle;
+  bool AllowZeroMoveEliminationOnly;
 
-    unsigned NumPhysRegs;
-    std::vector<CodeGenRegisterCost> Costs;
+  unsigned NumPhysRegs;
+  std::vector<CodeGenRegisterCost> Costs;
 
-    CodeGenRegisterFile(StringRef name, Record *def, unsigned MaxMoveElimPerCy = 0,
-                        bool AllowZeroMoveElimOnly = false)
-        : Name(name), RegisterFileDef(def),
-          MaxMovesEliminatedPerCycle(MaxMoveElimPerCy),
-          AllowZeroMoveEliminationOnly(AllowZeroMoveElimOnly),
-          NumPhysRegs(0) {}
+  CodeGenRegisterFile(StringRef name, Record *def,
+                      unsigned MaxMoveElimPerCy = 0,
+                      bool AllowZeroMoveElimOnly = false)
+      : Name(name), RegisterFileDef(def),
+        MaxMovesEliminatedPerCycle(MaxMoveElimPerCy),
+        AllowZeroMoveEliminationOnly(AllowZeroMoveElimOnly), NumPhysRegs(0) {}
 
-    bool hasDefaultCosts() const {
-        return Costs.empty();
-    }
+  bool hasDefaultCosts() const { return Costs.empty(); }
 };
 
 // Processor model.
@@ -220,67 +217,66 @@ struct CodeGenRegisterFile {
 //
 // ItinDefList orders this processor's InstrItinData records by SchedClass idx.
 struct CodeGenProcModel {
-    unsigned Index;
-    std::string ModelName;
-    Record *ModelDef;
-    Record *ItinsDef;
+  unsigned Index;
+  std::string ModelName;
+  Record *ModelDef;
+  Record *ItinsDef;
 
-    // Derived members...
+  // Derived members...
 
-    // Array of InstrItinData records indexed by a CodeGenSchedClass index.
-    // This list is empty if the Processor has no value for Itineraries.
-    // Initialized by collectProcItins().
-    RecVec ItinDefList;
+  // Array of InstrItinData records indexed by a CodeGenSchedClass index.
+  // This list is empty if the Processor has no value for Itineraries.
+  // Initialized by collectProcItins().
+  RecVec ItinDefList;
 
-    // Map itinerary classes to per-operand resources.
-    // This list is empty if no ItinRW refers to this Processor.
-    RecVec ItinRWDefs;
+  // Map itinerary classes to per-operand resources.
+  // This list is empty if no ItinRW refers to this Processor.
+  RecVec ItinRWDefs;
 
-    // List of unsupported feature.
-    // This list is empty if the Processor has no UnsupportedFeatures.
-    RecVec UnsupportedFeaturesDefs;
+  // List of unsupported feature.
+  // This list is empty if the Processor has no UnsupportedFeatures.
+  RecVec UnsupportedFeaturesDefs;
 
-    // All read/write resources associated with this processor.
-    RecVec WriteResDefs;
-    RecVec ReadAdvanceDefs;
+  // All read/write resources associated with this processor.
+  RecVec WriteResDefs;
+  RecVec ReadAdvanceDefs;
 
-    // Per-operand machine model resources associated with this processor.
-    RecVec ProcResourceDefs;
+  // Per-operand machine model resources associated with this processor.
+  RecVec ProcResourceDefs;
 
-    // List of Register Files.
-    std::vector<CodeGenRegisterFile> RegisterFiles;
+  // List of Register Files.
+  std::vector<CodeGenRegisterFile> RegisterFiles;
 
-    // Optional Retire Control Unit definition.
-    Record *RetireControlUnit;
+  // Optional Retire Control Unit definition.
+  Record *RetireControlUnit;
 
-    // Load/Store queue descriptors.
-    Record *LoadQueue;
-    Record *StoreQueue;
+  // Load/Store queue descriptors.
+  Record *LoadQueue;
+  Record *StoreQueue;
 
-    CodeGenProcModel(unsigned Idx, std::string Name, Record *MDef,
-                     Record *IDef) :
-        Index(Idx), ModelName(std::move(Name)), ModelDef(MDef), ItinsDef(IDef),
+  CodeGenProcModel(unsigned Idx, std::string Name, Record *MDef, Record *IDef)
+      : Index(Idx), ModelName(std::move(Name)), ModelDef(MDef), ItinsDef(IDef),
         RetireControlUnit(nullptr), LoadQueue(nullptr), StoreQueue(nullptr) {}
 
-    bool hasItineraries() const {
-        return !ItinsDef->getValueAsListOfDefs("IID").empty();
-    }
+  bool hasItineraries() const {
+    return !ItinsDef->getValueAsListOfDefs("IID").empty();
+  }
 
-    bool hasInstrSchedModel() const {
-        return !WriteResDefs.empty() || !ItinRWDefs.empty();
-    }
+  bool hasInstrSchedModel() const {
+    return !WriteResDefs.empty() || !ItinRWDefs.empty();
+  }
 
-    bool hasExtraProcessorInfo() const {
-        return RetireControlUnit || LoadQueue || StoreQueue ||
-               !RegisterFiles.empty();
-    }
+  bool hasExtraProcessorInfo() const {
+    return RetireControlUnit || LoadQueue || StoreQueue ||
+           !RegisterFiles.empty();
+  }
 
-    unsigned getProcResourceIdx(Record *PRDef) const;
+  unsigned getProcResourceIdx(Record *PRDef) const;
 
-    bool isUnsupported(const CodeGenInstruction &Inst) const;
+  bool isUnsupported(const CodeGenInstruction &Inst) const;
 
 #ifndef NDEBUG
-    void dump() const;
+  void dump() const;
 #endif
 };
 
@@ -318,16 +314,16 @@ struct CodeGenProcModel {
 /// operands of a machine instruction, and the operands subset may not be the
 /// same for all processor models.
 struct PredicateInfo {
-    llvm::APInt ProcModelMask; // A set of processor model indices.
-    llvm::APInt OperandMask;   // An operand mask.
-    const Record *Predicate;   // MCInstrPredicate definition.
-    PredicateInfo(llvm::APInt CpuMask, llvm::APInt Operands, const Record *Pred)
-        : ProcModelMask(CpuMask), OperandMask(Operands), Predicate(Pred) {}
+  llvm::APInt ProcModelMask; // A set of processor model indices.
+  llvm::APInt OperandMask;   // An operand mask.
+  const Record *Predicate;   // MCInstrPredicate definition.
+  PredicateInfo(llvm::APInt CpuMask, llvm::APInt Operands, const Record *Pred)
+      : ProcModelMask(CpuMask), OperandMask(Operands), Predicate(Pred) {}
 
-    bool operator==(const PredicateInfo &Other) const {
-        return ProcModelMask == Other.ProcModelMask &&
-               OperandMask == Other.OperandMask && Predicate == Other.Predicate;
-    }
+  bool operator==(const PredicateInfo &Other) const {
+    return ProcModelMask == Other.ProcModelMask &&
+           OperandMask == Other.OperandMask && Predicate == Other.Predicate;
+  }
 };
 
 /// A collection of PredicateInfo objects.
@@ -335,355 +331,320 @@ struct PredicateInfo {
 /// There is at least one OpcodeInfo object for every opcode specified by a
 /// TIPredicate definition.
 class OpcodeInfo {
-    std::vector<PredicateInfo> Predicates;
+  std::vector<PredicateInfo> Predicates;
 
-    OpcodeInfo(const OpcodeInfo &Other) = delete;
-    OpcodeInfo &operator=(const OpcodeInfo &Other) = delete;
+  OpcodeInfo(const OpcodeInfo &Other) = delete;
+  OpcodeInfo &operator=(const OpcodeInfo &Other) = delete;
 
 public:
-    OpcodeInfo() = default;
-    OpcodeInfo &operator=(OpcodeInfo &&Other) = default;
-    OpcodeInfo(OpcodeInfo &&Other) = default;
+  OpcodeInfo() = default;
+  OpcodeInfo &operator=(OpcodeInfo &&Other) = default;
+  OpcodeInfo(OpcodeInfo &&Other) = default;
 
-    ArrayRef<PredicateInfo> getPredicates() const {
-        return Predicates;
-    }
+  ArrayRef<PredicateInfo> getPredicates() const { return Predicates; }
 
-    void addPredicateForProcModel(const llvm::APInt &CpuMask,
-                                  const llvm::APInt &OperandMask,
-                                  const Record *Predicate);
+  void addPredicateForProcModel(const llvm::APInt &CpuMask,
+                                const llvm::APInt &OperandMask,
+                                const Record *Predicate);
 };
 
 /// Used to group together tablegen instruction definitions that are subject
 /// to a same set of constraints (identified by an instance of OpcodeInfo).
 class OpcodeGroup {
-    OpcodeInfo Info;
-    std::vector<const Record *> Opcodes;
+  OpcodeInfo Info;
+  std::vector<const Record *> Opcodes;
 
-    OpcodeGroup(const OpcodeGroup &Other) = delete;
-    OpcodeGroup &operator=(const OpcodeGroup &Other) = delete;
+  OpcodeGroup(const OpcodeGroup &Other) = delete;
+  OpcodeGroup &operator=(const OpcodeGroup &Other) = delete;
 
 public:
-    OpcodeGroup(OpcodeInfo &&OpInfo) : Info(std::move(OpInfo)) {}
-    OpcodeGroup(OpcodeGroup &&Other) = default;
+  OpcodeGroup(OpcodeInfo &&OpInfo) : Info(std::move(OpInfo)) {}
+  OpcodeGroup(OpcodeGroup &&Other) = default;
 
-    void addOpcode(const Record *Opcode) {
-        assert(!llvm::is_contained(Opcodes, Opcode) && "Opcode already in set!");
-        Opcodes.push_back(Opcode);
-    }
+  void addOpcode(const Record *Opcode) {
+    assert(!llvm::is_contained(Opcodes, Opcode) && "Opcode already in set!");
+    Opcodes.push_back(Opcode);
+  }
 
-    ArrayRef<const Record *> getOpcodes() const {
-        return Opcodes;
-    }
-    const OpcodeInfo &getOpcodeInfo() const {
-        return Info;
-    }
+  ArrayRef<const Record *> getOpcodes() const { return Opcodes; }
+  const OpcodeInfo &getOpcodeInfo() const { return Info; }
 };
 
 /// An STIPredicateFunction descriptor used by tablegen backends to
 /// auto-generate the body of a predicate function as a member of tablegen'd
 /// class XXXGenSubtargetInfo.
 class STIPredicateFunction {
-    const Record *FunctionDeclaration;
+  const Record *FunctionDeclaration;
 
-    std::vector<const Record *> Definitions;
-    std::vector<OpcodeGroup> Groups;
+  std::vector<const Record *> Definitions;
+  std::vector<OpcodeGroup> Groups;
 
-    STIPredicateFunction(const STIPredicateFunction &Other) = delete;
-    STIPredicateFunction &operator=(const STIPredicateFunction &Other) = delete;
+  STIPredicateFunction(const STIPredicateFunction &Other) = delete;
+  STIPredicateFunction &operator=(const STIPredicateFunction &Other) = delete;
 
 public:
-    STIPredicateFunction(const Record *Rec) : FunctionDeclaration(Rec) {}
-    STIPredicateFunction(STIPredicateFunction &&Other) = default;
+  STIPredicateFunction(const Record *Rec) : FunctionDeclaration(Rec) {}
+  STIPredicateFunction(STIPredicateFunction &&Other) = default;
 
-    bool isCompatibleWith(const STIPredicateFunction &Other) const {
-        return FunctionDeclaration == Other.FunctionDeclaration;
-    }
+  bool isCompatibleWith(const STIPredicateFunction &Other) const {
+    return FunctionDeclaration == Other.FunctionDeclaration;
+  }
 
-    void addDefinition(const Record *Def) {
-        Definitions.push_back(Def);
-    }
-    void addOpcode(const Record *OpcodeRec, OpcodeInfo &&Info) {
-        if (Groups.empty() ||
-                Groups.back().getOpcodeInfo().getPredicates() != Info.getPredicates())
-            Groups.emplace_back(std::move(Info));
-        Groups.back().addOpcode(OpcodeRec);
-    }
+  void addDefinition(const Record *Def) { Definitions.push_back(Def); }
+  void addOpcode(const Record *OpcodeRec, OpcodeInfo &&Info) {
+    if (Groups.empty() ||
+        Groups.back().getOpcodeInfo().getPredicates() != Info.getPredicates())
+      Groups.emplace_back(std::move(Info));
+    Groups.back().addOpcode(OpcodeRec);
+  }
 
-    StringRef getName() const {
-        return FunctionDeclaration->getValueAsString("Name");
-    }
-    const Record *getDefaultReturnPredicate() const {
-        return FunctionDeclaration->getValueAsDef("DefaultReturnValue");
-    }
+  StringRef getName() const {
+    return FunctionDeclaration->getValueAsString("Name");
+  }
+  const Record *getDefaultReturnPredicate() const {
+    return FunctionDeclaration->getValueAsDef("DefaultReturnValue");
+  }
 
-    const Record *getDeclaration() const {
-        return FunctionDeclaration;
-    }
-    ArrayRef<const Record *> getDefinitions() const {
-        return Definitions;
-    }
-    ArrayRef<OpcodeGroup> getGroups() const {
-        return Groups;
-    }
+  const Record *getDeclaration() const { return FunctionDeclaration; }
+  ArrayRef<const Record *> getDefinitions() const { return Definitions; }
+  ArrayRef<OpcodeGroup> getGroups() const { return Groups; }
 };
 
 using ProcModelMapTy = DenseMap<const Record *, unsigned>;
 
 /// Top level container for machine model data.
 class CodeGenSchedModels {
-    RecordKeeper &Records;
-    const CodeGenTarget &Target;
+  RecordKeeper &Records;
+  const CodeGenTarget &Target;
 
-    // Map dag expressions to Instruction lists.
-    SetTheory Sets;
+  // Map dag expressions to Instruction lists.
+  SetTheory Sets;
 
-    // List of unique processor models.
-    std::vector<CodeGenProcModel> ProcModels;
+  // List of unique processor models.
+  std::vector<CodeGenProcModel> ProcModels;
 
-    // Map Processor's MachineModel or ProcItin to a CodeGenProcModel index.
-    ProcModelMapTy ProcModelMap;
+  // Map Processor's MachineModel or ProcItin to a CodeGenProcModel index.
+  ProcModelMapTy ProcModelMap;
 
-    // Per-operand SchedReadWrite types.
-    std::vector<CodeGenSchedRW> SchedWrites;
-    std::vector<CodeGenSchedRW> SchedReads;
+  // Per-operand SchedReadWrite types.
+  std::vector<CodeGenSchedRW> SchedWrites;
+  std::vector<CodeGenSchedRW> SchedReads;
 
-    // List of unique SchedClasses.
-    std::vector<CodeGenSchedClass> SchedClasses;
+  // List of unique SchedClasses.
+  std::vector<CodeGenSchedClass> SchedClasses;
 
-    // Any inferred SchedClass has an index greater than NumInstrSchedClassses.
-    unsigned NumInstrSchedClasses;
+  // Any inferred SchedClass has an index greater than NumInstrSchedClassses.
+  unsigned NumInstrSchedClasses;
 
-    RecVec ProcResourceDefs;
-    RecVec ProcResGroups;
+  RecVec ProcResourceDefs;
+  RecVec ProcResGroups;
 
-    // Map each instruction to its unique SchedClass index considering the
-    // combination of it's itinerary class, SchedRW list, and InstRW records.
-    using InstClassMapTy = DenseMap<Record*, unsigned>;
-    InstClassMapTy InstrClassMap;
+  // Map each instruction to its unique SchedClass index considering the
+  // combination of it's itinerary class, SchedRW list, and InstRW records.
+  using InstClassMapTy = DenseMap<Record *, unsigned>;
+  InstClassMapTy InstrClassMap;
 
-    std::vector<STIPredicateFunction> STIPredicates;
-    std::vector<unsigned> getAllProcIndices() const;
+  std::vector<STIPredicateFunction> STIPredicates;
+  std::vector<unsigned> getAllProcIndices() const;
 
 public:
-    CodeGenSchedModels(RecordKeeper& RK, const CodeGenTarget &TGT);
+  CodeGenSchedModels(RecordKeeper &RK, const CodeGenTarget &TGT);
 
-    // iterator access to the scheduling classes.
-    using class_iterator = std::vector<CodeGenSchedClass>::iterator;
-    using const_class_iterator = std::vector<CodeGenSchedClass>::const_iterator;
-    class_iterator classes_begin() {
-        return SchedClasses.begin();
-    }
-    const_class_iterator classes_begin() const {
-        return SchedClasses.begin();
-    }
-    class_iterator classes_end() {
-        return SchedClasses.end();
-    }
-    const_class_iterator classes_end() const {
-        return SchedClasses.end();
-    }
-    iterator_range<class_iterator> classes() {
-        return make_range(classes_begin(), classes_end());
-    }
-    iterator_range<const_class_iterator> classes() const {
-        return make_range(classes_begin(), classes_end());
-    }
-    iterator_range<class_iterator> explicit_classes() {
-        return make_range(classes_begin(), classes_begin() + NumInstrSchedClasses);
-    }
-    iterator_range<const_class_iterator> explicit_classes() const {
-        return make_range(classes_begin(), classes_begin() + NumInstrSchedClasses);
-    }
+  // iterator access to the scheduling classes.
+  using class_iterator = std::vector<CodeGenSchedClass>::iterator;
+  using const_class_iterator = std::vector<CodeGenSchedClass>::const_iterator;
+  class_iterator classes_begin() { return SchedClasses.begin(); }
+  const_class_iterator classes_begin() const { return SchedClasses.begin(); }
+  class_iterator classes_end() { return SchedClasses.end(); }
+  const_class_iterator classes_end() const { return SchedClasses.end(); }
+  iterator_range<class_iterator> classes() {
+    return make_range(classes_begin(), classes_end());
+  }
+  iterator_range<const_class_iterator> classes() const {
+    return make_range(classes_begin(), classes_end());
+  }
+  iterator_range<class_iterator> explicit_classes() {
+    return make_range(classes_begin(), classes_begin() + NumInstrSchedClasses);
+  }
+  iterator_range<const_class_iterator> explicit_classes() const {
+    return make_range(classes_begin(), classes_begin() + NumInstrSchedClasses);
+  }
 
-    Record *getModelOrItinDef(Record *ProcDef) const {
-        Record *ModelDef = ProcDef->getValueAsDef("SchedModel");
-        Record *ItinsDef = ProcDef->getValueAsDef("ProcItin");
-        if (!ItinsDef->getValueAsListOfDefs("IID").empty()) {
-            assert(ModelDef->getValueAsBit("NoModel")
-                   && "Itineraries must be defined within SchedMachineModel");
-            return ItinsDef;
-        }
-        return ModelDef;
+  Record *getModelOrItinDef(Record *ProcDef) const {
+    Record *ModelDef = ProcDef->getValueAsDef("SchedModel");
+    Record *ItinsDef = ProcDef->getValueAsDef("ProcItin");
+    if (!ItinsDef->getValueAsListOfDefs("IID").empty()) {
+      assert(ModelDef->getValueAsBit("NoModel") &&
+             "Itineraries must be defined within SchedMachineModel");
+      return ItinsDef;
     }
+    return ModelDef;
+  }
 
-    const CodeGenProcModel &getModelForProc(Record *ProcDef) const {
-        Record *ModelDef = getModelOrItinDef(ProcDef);
-        ProcModelMapTy::const_iterator I = ProcModelMap.find(ModelDef);
-        assert(I != ProcModelMap.end() && "missing machine model");
-        return ProcModels[I->second];
-    }
+  const CodeGenProcModel &getModelForProc(Record *ProcDef) const {
+    Record *ModelDef = getModelOrItinDef(ProcDef);
+    ProcModelMapTy::const_iterator I = ProcModelMap.find(ModelDef);
+    assert(I != ProcModelMap.end() && "missing machine model");
+    return ProcModels[I->second];
+  }
 
-    CodeGenProcModel &getProcModel(Record *ModelDef) {
-        ProcModelMapTy::const_iterator I = ProcModelMap.find(ModelDef);
-        assert(I != ProcModelMap.end() && "missing machine model");
-        return ProcModels[I->second];
-    }
-    const CodeGenProcModel &getProcModel(Record *ModelDef) const {
-        return const_cast<CodeGenSchedModels*>(this)->getProcModel(ModelDef);
-    }
+  CodeGenProcModel &getProcModel(Record *ModelDef) {
+    ProcModelMapTy::const_iterator I = ProcModelMap.find(ModelDef);
+    assert(I != ProcModelMap.end() && "missing machine model");
+    return ProcModels[I->second];
+  }
+  const CodeGenProcModel &getProcModel(Record *ModelDef) const {
+    return const_cast<CodeGenSchedModels *>(this)->getProcModel(ModelDef);
+  }
 
-    // Iterate over the unique processor models.
-    using ProcIter = std::vector<CodeGenProcModel>::const_iterator;
-    ProcIter procModelBegin() const {
-        return ProcModels.begin();
-    }
-    ProcIter procModelEnd() const {
-        return ProcModels.end();
-    }
-    ArrayRef<CodeGenProcModel> procModels() const {
-        return ProcModels;
-    }
+  // Iterate over the unique processor models.
+  using ProcIter = std::vector<CodeGenProcModel>::const_iterator;
+  ProcIter procModelBegin() const { return ProcModels.begin(); }
+  ProcIter procModelEnd() const { return ProcModels.end(); }
+  ArrayRef<CodeGenProcModel> procModels() const { return ProcModels; }
 
-    // Return true if any processors have itineraries.
-    bool hasItineraries() const;
+  // Return true if any processors have itineraries.
+  bool hasItineraries() const;
 
-    // Get a SchedWrite from its index.
-    const CodeGenSchedRW &getSchedWrite(unsigned Idx) const {
-        assert(Idx < SchedWrites.size() && "bad SchedWrite index");
-        assert(SchedWrites[Idx].isValid() && "invalid SchedWrite");
-        return SchedWrites[Idx];
-    }
-    // Get a SchedWrite from its index.
-    const CodeGenSchedRW &getSchedRead(unsigned Idx) const {
-        assert(Idx < SchedReads.size() && "bad SchedRead index");
-        assert(SchedReads[Idx].isValid() && "invalid SchedRead");
-        return SchedReads[Idx];
-    }
+  // Get a SchedWrite from its index.
+  const CodeGenSchedRW &getSchedWrite(unsigned Idx) const {
+    assert(Idx < SchedWrites.size() && "bad SchedWrite index");
+    assert(SchedWrites[Idx].isValid() && "invalid SchedWrite");
+    return SchedWrites[Idx];
+  }
+  // Get a SchedWrite from its index.
+  const CodeGenSchedRW &getSchedRead(unsigned Idx) const {
+    assert(Idx < SchedReads.size() && "bad SchedRead index");
+    assert(SchedReads[Idx].isValid() && "invalid SchedRead");
+    return SchedReads[Idx];
+  }
 
-    const CodeGenSchedRW &getSchedRW(unsigned Idx, bool IsRead) const {
-        return IsRead ? getSchedRead(Idx) : getSchedWrite(Idx);
-    }
-    CodeGenSchedRW &getSchedRW(Record *Def) {
-        bool IsRead = Def->isSubClassOf("SchedRead");
-        unsigned Idx = getSchedRWIdx(Def, IsRead);
-        return const_cast<CodeGenSchedRW&>(
-                   IsRead ? getSchedRead(Idx) : getSchedWrite(Idx));
-    }
-    const CodeGenSchedRW &getSchedRW(Record *Def) const {
-        return const_cast<CodeGenSchedModels&>(*this).getSchedRW(Def);
-    }
+  const CodeGenSchedRW &getSchedRW(unsigned Idx, bool IsRead) const {
+    return IsRead ? getSchedRead(Idx) : getSchedWrite(Idx);
+  }
+  CodeGenSchedRW &getSchedRW(Record *Def) {
+    bool IsRead = Def->isSubClassOf("SchedRead");
+    unsigned Idx = getSchedRWIdx(Def, IsRead);
+    return const_cast<CodeGenSchedRW &>(IsRead ? getSchedRead(Idx)
+                                               : getSchedWrite(Idx));
+  }
+  const CodeGenSchedRW &getSchedRW(Record *Def) const {
+    return const_cast<CodeGenSchedModels &>(*this).getSchedRW(Def);
+  }
 
-    unsigned getSchedRWIdx(const Record *Def, bool IsRead) const;
+  unsigned getSchedRWIdx(const Record *Def, bool IsRead) const;
 
-    // Return true if the given write record is referenced by a ReadAdvance.
-    bool hasReadOfWrite(Record *WriteDef) const;
+  // Return true if the given write record is referenced by a ReadAdvance.
+  bool hasReadOfWrite(Record *WriteDef) const;
 
-    // Get a SchedClass from its index.
-    CodeGenSchedClass &getSchedClass(unsigned Idx) {
-        assert(Idx < SchedClasses.size() && "bad SchedClass index");
-        return SchedClasses[Idx];
-    }
-    const CodeGenSchedClass &getSchedClass(unsigned Idx) const {
-        assert(Idx < SchedClasses.size() && "bad SchedClass index");
-        return SchedClasses[Idx];
-    }
+  // Get a SchedClass from its index.
+  CodeGenSchedClass &getSchedClass(unsigned Idx) {
+    assert(Idx < SchedClasses.size() && "bad SchedClass index");
+    return SchedClasses[Idx];
+  }
+  const CodeGenSchedClass &getSchedClass(unsigned Idx) const {
+    assert(Idx < SchedClasses.size() && "bad SchedClass index");
+    return SchedClasses[Idx];
+  }
 
-    // Get the SchedClass index for an instruction. Instructions with no
-    // itinerary, no SchedReadWrites, and no InstrReadWrites references return 0
-    // for NoItinerary.
-    unsigned getSchedClassIdx(const CodeGenInstruction &Inst) const;
+  // Get the SchedClass index for an instruction. Instructions with no
+  // itinerary, no SchedReadWrites, and no InstrReadWrites references return 0
+  // for NoItinerary.
+  unsigned getSchedClassIdx(const CodeGenInstruction &Inst) const;
 
-    using SchedClassIter = std::vector<CodeGenSchedClass>::const_iterator;
-    SchedClassIter schedClassBegin() const {
-        return SchedClasses.begin();
-    }
-    SchedClassIter schedClassEnd() const {
-        return SchedClasses.end();
-    }
-    ArrayRef<CodeGenSchedClass> schedClasses() const {
-        return SchedClasses;
-    }
+  using SchedClassIter = std::vector<CodeGenSchedClass>::const_iterator;
+  SchedClassIter schedClassBegin() const { return SchedClasses.begin(); }
+  SchedClassIter schedClassEnd() const { return SchedClasses.end(); }
+  ArrayRef<CodeGenSchedClass> schedClasses() const { return SchedClasses; }
 
-    unsigned numInstrSchedClasses() const {
-        return NumInstrSchedClasses;
-    }
+  unsigned numInstrSchedClasses() const { return NumInstrSchedClasses; }
 
-    void findRWs(const RecVec &RWDefs, IdxVec &Writes, IdxVec &Reads) const;
-    void findRWs(const RecVec &RWDefs, IdxVec &RWs, bool IsRead) const;
-    void expandRWSequence(unsigned RWIdx, IdxVec &RWSeq, bool IsRead) const;
-    void expandRWSeqForProc(unsigned RWIdx, IdxVec &RWSeq, bool IsRead,
-                            const CodeGenProcModel &ProcModel) const;
+  void findRWs(const RecVec &RWDefs, IdxVec &Writes, IdxVec &Reads) const;
+  void findRWs(const RecVec &RWDefs, IdxVec &RWs, bool IsRead) const;
+  void expandRWSequence(unsigned RWIdx, IdxVec &RWSeq, bool IsRead) const;
+  void expandRWSeqForProc(unsigned RWIdx, IdxVec &RWSeq, bool IsRead,
+                          const CodeGenProcModel &ProcModel) const;
 
-    unsigned addSchedClass(Record *ItinDef, ArrayRef<unsigned> OperWrites,
-                           ArrayRef<unsigned> OperReads,
-                           ArrayRef<unsigned> ProcIndices);
+  unsigned addSchedClass(Record *ItinDef, ArrayRef<unsigned> OperWrites,
+                         ArrayRef<unsigned> OperReads,
+                         ArrayRef<unsigned> ProcIndices);
 
-    unsigned findOrInsertRW(ArrayRef<unsigned> Seq, bool IsRead);
+  unsigned findOrInsertRW(ArrayRef<unsigned> Seq, bool IsRead);
 
-    Record *findProcResUnits(Record *ProcResKind, const CodeGenProcModel &PM,
-                             ArrayRef<SMLoc> Loc) const;
+  Record *findProcResUnits(Record *ProcResKind, const CodeGenProcModel &PM,
+                           ArrayRef<SMLoc> Loc) const;
 
-    ArrayRef<STIPredicateFunction> getSTIPredicates() const {
-        return STIPredicates;
-    }
+  ArrayRef<STIPredicateFunction> getSTIPredicates() const {
+    return STIPredicates;
+  }
+
 private:
-    void collectProcModels();
+  void collectProcModels();
 
-    // Initialize a new processor model if it is unique.
-    void addProcModel(Record *ProcDef);
+  // Initialize a new processor model if it is unique.
+  void addProcModel(Record *ProcDef);
 
-    void collectSchedRW();
+  void collectSchedRW();
 
-    std::string genRWName(ArrayRef<unsigned> Seq, bool IsRead);
-    unsigned findRWForSequence(ArrayRef<unsigned> Seq, bool IsRead);
+  std::string genRWName(ArrayRef<unsigned> Seq, bool IsRead);
+  unsigned findRWForSequence(ArrayRef<unsigned> Seq, bool IsRead);
 
-    void collectSchedClasses();
+  void collectSchedClasses();
 
-    void collectRetireControlUnits();
+  void collectRetireControlUnits();
 
-    void collectRegisterFiles();
+  void collectRegisterFiles();
 
-    void collectOptionalProcessorInfo();
+  void collectOptionalProcessorInfo();
 
-    std::string createSchedClassName(Record *ItinClassDef,
-                                     ArrayRef<unsigned> OperWrites,
-                                     ArrayRef<unsigned> OperReads);
-    std::string createSchedClassName(const RecVec &InstDefs);
-    void createInstRWClass(Record *InstRWDef);
+  std::string createSchedClassName(Record *ItinClassDef,
+                                   ArrayRef<unsigned> OperWrites,
+                                   ArrayRef<unsigned> OperReads);
+  std::string createSchedClassName(const RecVec &InstDefs);
+  void createInstRWClass(Record *InstRWDef);
 
-    void collectProcItins();
+  void collectProcItins();
 
-    void collectProcItinRW();
+  void collectProcItinRW();
 
-    void collectProcUnsupportedFeatures();
+  void collectProcUnsupportedFeatures();
 
-    void inferSchedClasses();
+  void inferSchedClasses();
 
-    void checkMCInstPredicates() const;
+  void checkMCInstPredicates() const;
 
-    void checkSTIPredicates() const;
+  void checkSTIPredicates() const;
 
-    void collectSTIPredicates();
+  void collectSTIPredicates();
 
-    void collectLoadStoreQueueInfo();
+  void collectLoadStoreQueueInfo();
 
-    void checkCompleteness();
+  void checkCompleteness();
 
-    void inferFromRW(ArrayRef<unsigned> OperWrites, ArrayRef<unsigned> OperReads,
-                     unsigned FromClassIdx, ArrayRef<unsigned> ProcIndices);
-    void inferFromItinClass(Record *ItinClassDef, unsigned FromClassIdx);
-    void inferFromInstRWs(unsigned SCIdx);
+  void inferFromRW(ArrayRef<unsigned> OperWrites, ArrayRef<unsigned> OperReads,
+                   unsigned FromClassIdx, ArrayRef<unsigned> ProcIndices);
+  void inferFromItinClass(Record *ItinClassDef, unsigned FromClassIdx);
+  void inferFromInstRWs(unsigned SCIdx);
 
-    bool hasSuperGroup(RecVec &SubUnits, CodeGenProcModel &PM);
-    void verifyProcResourceGroups(CodeGenProcModel &PM);
+  bool hasSuperGroup(RecVec &SubUnits, CodeGenProcModel &PM);
+  void verifyProcResourceGroups(CodeGenProcModel &PM);
 
-    void collectProcResources();
+  void collectProcResources();
 
-    void collectItinProcResources(Record *ItinClassDef);
+  void collectItinProcResources(Record *ItinClassDef);
 
-    void collectRWResources(unsigned RWIdx, bool IsRead,
-                            ArrayRef<unsigned> ProcIndices);
+  void collectRWResources(unsigned RWIdx, bool IsRead,
+                          ArrayRef<unsigned> ProcIndices);
 
-    void collectRWResources(ArrayRef<unsigned> Writes, ArrayRef<unsigned> Reads,
-                            ArrayRef<unsigned> ProcIndices);
+  void collectRWResources(ArrayRef<unsigned> Writes, ArrayRef<unsigned> Reads,
+                          ArrayRef<unsigned> ProcIndices);
 
-    void addProcResource(Record *ProcResourceKind, CodeGenProcModel &PM,
-                         ArrayRef<SMLoc> Loc);
+  void addProcResource(Record *ProcResourceKind, CodeGenProcModel &PM,
+                       ArrayRef<SMLoc> Loc);
 
-    void addWriteRes(Record *ProcWriteResDef, unsigned PIdx);
+  void addWriteRes(Record *ProcWriteResDef, unsigned PIdx);
 
-    void addReadAdvance(Record *ProcReadAdvanceDef, unsigned PIdx);
+  void addReadAdvance(Record *ProcReadAdvanceDef, unsigned PIdx);
 };
 
 } // namespace llvm

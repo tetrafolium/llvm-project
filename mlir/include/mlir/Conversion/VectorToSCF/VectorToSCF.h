@@ -66,11 +66,11 @@ class Pass;
 ///    %arg0[%3, %arg1] : vector<15xf32>, memref<?x?xf32>
 /// ```
 struct VectorTransferToSCFOptions {
-    bool unroll = false;
-    VectorTransferToSCFOptions &setUnroll(bool u) {
-        unroll = u;
-        return *this;
-    }
+  bool unroll = false;
+  VectorTransferToSCFOptions &setUnroll(bool u) {
+    unroll = u;
+    return *this;
+  }
 };
 
 /// Implements lowering of TransferReadOp and TransferWriteOp to a
@@ -146,18 +146,18 @@ struct VectorTransferToSCFOptions {
 /// a TransferWriteOp is rewritten.
 template <typename TransferOpTy>
 struct VectorTransferRewriter : public RewritePattern {
-    explicit VectorTransferRewriter(VectorTransferToSCFOptions options,
-                                    MLIRContext *context);
+  explicit VectorTransferRewriter(VectorTransferToSCFOptions options,
+                                  MLIRContext *context);
 
-    /// Used for staging the transfer in a local buffer.
-    MemRefType tmpMemRefType(TransferOpTy transfer) const;
+  /// Used for staging the transfer in a local buffer.
+  MemRefType tmpMemRefType(TransferOpTy transfer) const;
 
-    /// Performs the rewrite.
-    LogicalResult matchAndRewrite(Operation *op,
-                                  PatternRewriter &rewriter) const override;
+  /// Performs the rewrite.
+  LogicalResult matchAndRewrite(Operation *op,
+                                PatternRewriter &rewriter) const override;
 
-    /// See description of `VectorTransferToSCFOptions`.
-    VectorTransferToSCFOptions options;
+  /// See description of `VectorTransferToSCFOptions`.
+  VectorTransferToSCFOptions options;
 };
 
 /// Collect a set of patterns to convert from the Vector dialect to SCF + std.

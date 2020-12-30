@@ -20,7 +20,7 @@ enum {
 #define FRONTENDSTART
 #include "clang/Basic/DiagnosticFrontendKinds.inc"
 #undef DIAG
-    NUM_BUILTIN_FRONTEND_DIAGNOSTICS
+  NUM_BUILTIN_FRONTEND_DIAGNOSTICS
 };
 } // end namespace diag
 } // end namespace clang

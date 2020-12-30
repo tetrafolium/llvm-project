@@ -29,37 +29,37 @@
 #include "llvm/Transforms/Utils/SimplifyCFGOptions.h"
 using namespace llvm;
 
-static cl::
-opt<bool> DisableMIPeephole("disable-bpf-peephole", cl::Hidden,
-                            cl::desc("Disable machine peepholes for BPF"));
+static cl::opt<bool>
+    DisableMIPeephole("disable-bpf-peephole", cl::Hidden,
+                      cl::desc("Disable machine peepholes for BPF"));
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeBPFTarget() {
-    // Register the target.
-    RegisterTargetMachine<BPFTargetMachine> X(getTheBPFleTarget());
-    RegisterTargetMachine<BPFTargetMachine> Y(getTheBPFbeTarget());
-    RegisterTargetMachine<BPFTargetMachine> Z(getTheBPFTarget());
+  // Register the target.
+  RegisterTargetMachine<BPFTargetMachine> X(getTheBPFleTarget());
+  RegisterTargetMachine<BPFTargetMachine> Y(getTheBPFbeTarget());
+  RegisterTargetMachine<BPFTargetMachine> Z(getTheBPFTarget());
 
-    PassRegistry &PR = *PassRegistry::getPassRegistry();
-    initializeBPFAbstractMemberAccessLegacyPassPass(PR);
-    initializeBPFPreserveDITypePass(PR);
-    initializeBPFAdjustOptPass(PR);
-    initializeBPFCheckAndAdjustIRPass(PR);
-    initializeBPFMIPeepholePass(PR);
-    initializeBPFMIPeepholeTruncElimPass(PR);
+  PassRegistry &PR = *PassRegistry::getPassRegistry();
+  initializeBPFAbstractMemberAccessLegacyPassPass(PR);
+  initializeBPFPreserveDITypePass(PR);
+  initializeBPFAdjustOptPass(PR);
+  initializeBPFCheckAndAdjustIRPass(PR);
+  initializeBPFMIPeepholePass(PR);
+  initializeBPFMIPeepholeTruncElimPass(PR);
 }
 
 // DataLayout: little or big endian
 static std::string computeDataLayout(const Triple &TT) {
-    if (TT.getArch() == Triple::bpfeb)
-        return "E-m:e-p:64:64-i64:64-i128:128-n32:64-S128";
-    else
-        return "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128";
+  if (TT.getArch() == Triple::bpfeb)
+    return "E-m:e-p:64:64-i64:64-i128:128-n32:64-S128";
+  else
+    return "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128";
 }
 
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
-    if (!RM.hasValue())
-        return Reloc::PIC_;
-    return *RM;
+  if (!RM.hasValue())
+    return Reloc::PIC_;
+  return *RM;
 }
 
 BPFTargetMachine::BPFTargetMachine(const Target &T, const Triple &TT,
@@ -73,106 +73,106 @@ BPFTargetMachine::BPFTargetMachine(const Target &T, const Triple &TT,
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
       Subtarget(TT, std::string(CPU), std::string(FS), *this) {
-    initAsmInfo();
+  initAsmInfo();
 
-    BPFMCAsmInfo *MAI =
-        static_cast<BPFMCAsmInfo *>(const_cast<MCAsmInfo *>(AsmInfo.get()));
-    MAI->setDwarfUsesRelocationsAcrossSections(!Subtarget.getUseDwarfRIS());
+  BPFMCAsmInfo *MAI =
+      static_cast<BPFMCAsmInfo *>(const_cast<MCAsmInfo *>(AsmInfo.get()));
+  MAI->setDwarfUsesRelocationsAcrossSections(!Subtarget.getUseDwarfRIS());
 }
 
 namespace {
 // BPF Code Generator Pass Configuration Options.
 class BPFPassConfig : public TargetPassConfig {
 public:
-    BPFPassConfig(BPFTargetMachine &TM, PassManagerBase &PM)
-        : TargetPassConfig(TM, PM) {}
+  BPFPassConfig(BPFTargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
 
-    BPFTargetMachine &getBPFTargetMachine() const {
-        return getTM<BPFTargetMachine>();
-    }
+  BPFTargetMachine &getBPFTargetMachine() const {
+    return getTM<BPFTargetMachine>();
+  }
 
-    void addIRPasses() override;
-    bool addInstSelector() override;
-    void addMachineSSAOptimization() override;
-    void addPreEmitPass() override;
+  void addIRPasses() override;
+  bool addInstSelector() override;
+  void addMachineSSAOptimization() override;
+  void addPreEmitPass() override;
 };
-}
+} // namespace
 
 TargetPassConfig *BPFTargetMachine::createPassConfig(PassManagerBase &PM) {
-    return new BPFPassConfig(*this, PM);
+  return new BPFPassConfig(*this, PM);
 }
 
 void BPFTargetMachine::adjustPassManager(PassManagerBuilder &Builder) {
-    Builder.addExtension(
-        PassManagerBuilder::EP_EarlyAsPossible,
-    [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
+  Builder.addExtension(
+      PassManagerBuilder::EP_EarlyAsPossible,
+      [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
         PM.add(createBPFAbstractMemberAccess(this));
         PM.add(createBPFPreserveDIType());
-    });
+      });
 
-    Builder.addExtension(
-        PassManagerBuilder::EP_Peephole,
-    [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
+  Builder.addExtension(
+      PassManagerBuilder::EP_Peephole,
+      [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
         PM.add(createCFGSimplificationPass(
-                   SimplifyCFGOptions().hoistCommonInsts(true)));
-    });
-    Builder.addExtension(
-        PassManagerBuilder::EP_ModuleOptimizerEarly,
-    [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
+            SimplifyCFGOptions().hoistCommonInsts(true)));
+      });
+  Builder.addExtension(
+      PassManagerBuilder::EP_ModuleOptimizerEarly,
+      [&](const PassManagerBuilder &, legacy::PassManagerBase &PM) {
         PM.add(createBPFAdjustOpt());
-    });
+      });
 }
 
 void BPFTargetMachine::registerPassBuilderCallbacks(PassBuilder &PB,
-        bool DebugPassManager) {
-    PB.registerPipelineStartEPCallback(
-    [=](ModulePassManager &MPM, PassBuilder::OptimizationLevel) {
+                                                    bool DebugPassManager) {
+  PB.registerPipelineStartEPCallback(
+      [=](ModulePassManager &MPM, PassBuilder::OptimizationLevel) {
         FunctionPassManager FPM(DebugPassManager);
         FPM.addPass(BPFAbstractMemberAccessPass(this));
         FPM.addPass(BPFPreserveDITypePass());
         MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
-    });
-    PB.registerPeepholeEPCallback([=](FunctionPassManager &FPM,
-    PassBuilder::OptimizationLevel Level) {
-        FPM.addPass(SimplifyCFGPass(SimplifyCFGOptions().hoistCommonInsts(true)));
-    });
-    PB.registerPipelineEarlySimplificationEPCallback(
-    [=](ModulePassManager &MPM, PassBuilder::OptimizationLevel) {
+      });
+  PB.registerPeepholeEPCallback([=](FunctionPassManager &FPM,
+                                    PassBuilder::OptimizationLevel Level) {
+    FPM.addPass(SimplifyCFGPass(SimplifyCFGOptions().hoistCommonInsts(true)));
+  });
+  PB.registerPipelineEarlySimplificationEPCallback(
+      [=](ModulePassManager &MPM, PassBuilder::OptimizationLevel) {
         MPM.addPass(BPFAdjustOptPass());
-    });
+      });
 }
 
 void BPFPassConfig::addIRPasses() {
-    addPass(createBPFCheckAndAdjustIR());
-    TargetPassConfig::addIRPasses();
+  addPass(createBPFCheckAndAdjustIR());
+  TargetPassConfig::addIRPasses();
 }
 
 // Install an instruction selector pass using
 // the ISelDag to gen BPF code.
 bool BPFPassConfig::addInstSelector() {
-    addPass(createBPFISelDag(getBPFTargetMachine()));
+  addPass(createBPFISelDag(getBPFTargetMachine()));
 
-    return false;
+  return false;
 }
 
 void BPFPassConfig::addMachineSSAOptimization() {
-    addPass(createBPFMISimplifyPatchablePass());
+  addPass(createBPFMISimplifyPatchablePass());
 
-    // The default implementation must be called first as we want eBPF
-    // Peephole ran at last.
-    TargetPassConfig::addMachineSSAOptimization();
+  // The default implementation must be called first as we want eBPF
+  // Peephole ran at last.
+  TargetPassConfig::addMachineSSAOptimization();
 
-    const BPFSubtarget *Subtarget = getBPFTargetMachine().getSubtargetImpl();
-    if (!DisableMIPeephole) {
-        if (Subtarget->getHasAlu32())
-            addPass(createBPFMIPeepholePass());
-        addPass(createBPFMIPeepholeTruncElimPass());
-    }
+  const BPFSubtarget *Subtarget = getBPFTargetMachine().getSubtargetImpl();
+  if (!DisableMIPeephole) {
+    if (Subtarget->getHasAlu32())
+      addPass(createBPFMIPeepholePass());
+    addPass(createBPFMIPeepholeTruncElimPass());
+  }
 }
 
 void BPFPassConfig::addPreEmitPass() {
-    addPass(createBPFMIPreEmitCheckingPass());
-    if (getOptLevel() != CodeGenOpt::None)
-        if (!DisableMIPeephole)
-            addPass(createBPFMIPreEmitPeepholePass());
+  addPass(createBPFMIPreEmitCheckingPass());
+  if (getOptLevel() != CodeGenOpt::None)
+    if (!DisableMIPeephole)
+      addPass(createBPFMIPreEmitPeepholePass());
 }

@@ -68,9 +68,9 @@ std::unique_ptr<Pass> createCSEPass();
 /// equal to `localBufSizeThreshold` are promoted to memory space
 /// `fastMemorySpace'.
 std::unique_ptr<OperationPass<FuncOp>>
-                                    createLoopFusionPass(unsigned fastMemorySpace = 0,
-                                            uint64_t localBufSizeThreshold = 0,
-                                            bool maximalFusion = false);
+createLoopFusionPass(unsigned fastMemorySpace = 0,
+                     uint64_t localBufSizeThreshold = 0,
+                     bool maximalFusion = false);
 
 /// Creates a loop invariant code motion pass that hoists loop invariant
 /// instructions out of the loop.

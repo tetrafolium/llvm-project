@@ -16,8 +16,8 @@ namespace __llvm_libc {
 
 char *LLVM_LIBC_ENTRYPOINT(strcat)(char *__restrict dest,
                                    const char *__restrict src) {
-    __llvm_libc::strcpy(dest + internal::string_length(dest), src);
-    return dest;
+  __llvm_libc::strcpy(dest + internal::string_length(dest), src);
+  return dest;
 }
 
 } // namespace __llvm_libc

@@ -27,72 +27,66 @@ namespace lldb_private {
 /// \see lldb_private::TypeSystem
 class CompilerDecl {
 public:
-    // Constructors and Destructors
-    CompilerDecl() = default;
+  // Constructors and Destructors
+  CompilerDecl() = default;
 
-    /// Creates a CompilerDecl with the given TypeSystem and opaque pointer.
-    ///
-    /// This constructor should only be called from the respective TypeSystem
-    /// implementation.
-    CompilerDecl(TypeSystem *type_system, void *decl)
-        : m_type_system(type_system), m_opaque_decl(decl) {}
+  /// Creates a CompilerDecl with the given TypeSystem and opaque pointer.
+  ///
+  /// This constructor should only be called from the respective TypeSystem
+  /// implementation.
+  CompilerDecl(TypeSystem *type_system, void *decl)
+      : m_type_system(type_system), m_opaque_decl(decl) {}
 
-    // Tests
+  // Tests
 
-    explicit operator bool() const {
-        return IsValid();
-    }
+  explicit operator bool() const { return IsValid(); }
 
-    bool operator<(const CompilerDecl &rhs) const {
-        if (m_type_system == rhs.m_type_system)
-            return m_opaque_decl < rhs.m_opaque_decl;
-        return m_type_system < rhs.m_type_system;
-    }
+  bool operator<(const CompilerDecl &rhs) const {
+    if (m_type_system == rhs.m_type_system)
+      return m_opaque_decl < rhs.m_opaque_decl;
+    return m_type_system < rhs.m_type_system;
+  }
 
-    bool IsValid() const {
-        return m_type_system != nullptr && m_opaque_decl != nullptr;
-    }
+  bool IsValid() const {
+    return m_type_system != nullptr && m_opaque_decl != nullptr;
+  }
 
-    // Accessors
+  // Accessors
 
-    TypeSystem *GetTypeSystem() const {
-        return m_type_system;
-    }
+  TypeSystem *GetTypeSystem() const { return m_type_system; }
 
-    void *GetOpaqueDecl() const {
-        return m_opaque_decl;
-    }
+  void *GetOpaqueDecl() const { return m_opaque_decl; }
 
-    void SetDecl(TypeSystem *type_system, void *decl) {
-        m_type_system = type_system;
-        m_opaque_decl = decl;
-    }
+  void SetDecl(TypeSystem *type_system, void *decl) {
+    m_type_system = type_system;
+    m_opaque_decl = decl;
+  }
 
-    void Clear() {
-        m_type_system = nullptr;
-        m_opaque_decl = nullptr;
-    }
+  void Clear() {
+    m_type_system = nullptr;
+    m_opaque_decl = nullptr;
+  }
 
-    ConstString GetName() const;
+  ConstString GetName() const;
 
-    ConstString GetMangledName() const;
+  ConstString GetMangledName() const;
 
-    CompilerDeclContext GetDeclContext() const;
+  CompilerDeclContext GetDeclContext() const;
 
-    // If this decl represents a function, return the return type
-    CompilerType GetFunctionReturnType() const;
+  // If this decl represents a function, return the return type
+  CompilerType GetFunctionReturnType() const;
 
-    // If this decl represents a function, return the number of arguments for the
-    // function
-    size_t GetNumFunctionArguments() const;
+  // If this decl represents a function, return the number of arguments for the
+  // function
+  size_t GetNumFunctionArguments() const;
 
-    // If this decl represents a function, return the argument type given a zero
-    // based argument index
-    CompilerType GetFunctionArgumentType(size_t arg_idx) const;
+  // If this decl represents a function, return the argument type given a zero
+  // based argument index
+  CompilerType GetFunctionArgumentType(size_t arg_idx) const;
 
 private:
-    TypeSystem *m_type_system = nullptr;
-    void *m_opaque_decl = nullptr;
+  TypeSystem *m_type_system = nullptr;
+  void *m_opaque_decl = nullptr;
 };
 
 bool operator==(const CompilerDecl &lhs, const CompilerDecl &rhs);

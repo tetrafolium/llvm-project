@@ -26,10 +26,10 @@ namespace {
 /// The frametable emitter is in ErlangGCPrinter.cpp.
 class ErlangGC : public GCStrategy {
 public:
-    ErlangGC() {
-        NeededSafePoints = true;
-        UsesMetadata = true;
-    }
+  ErlangGC() {
+    NeededSafePoints = true;
+    UsesMetadata = true;
+  }
 };
 
 /// An example GC which attempts to be compatible with Objective Caml 3.10.0
@@ -37,10 +37,10 @@ public:
 /// The frametable emitter is in OcamlGCPrinter.cpp.
 class OcamlGC : public GCStrategy {
 public:
-    OcamlGC() {
-        NeededSafePoints = true;
-        UsesMetadata = true;
-    }
+  OcamlGC() {
+    NeededSafePoints = true;
+    UsesMetadata = true;
+  }
 };
 
 /// A GC strategy for uncooperative targets.  This implements lowering for the
@@ -53,7 +53,7 @@ public:
 /// while introducing only minor runtime overhead.
 class ShadowStackGC : public GCStrategy {
 public:
-    ShadowStackGC() {}
+  ShadowStackGC() {}
 };
 
 /// A GCStrategy which serves as an example for the usage of a statepoint based
@@ -64,24 +64,24 @@ public:
 /// reasonable relocation semantics.
 class StatepointGC : public GCStrategy {
 public:
-    StatepointGC() {
-        UseStatepoints = true;
-        // These options are all gc.root specific, we specify them so that the
-        // gc.root lowering code doesn't run.
-        NeededSafePoints = false;
-        UsesMetadata = false;
-    }
+  StatepointGC() {
+    UseStatepoints = true;
+    // These options are all gc.root specific, we specify them so that the
+    // gc.root lowering code doesn't run.
+    NeededSafePoints = false;
+    UsesMetadata = false;
+  }
 
-    Optional<bool> isGCManagedPointer(const Type *Ty) const override {
-        // Method is only valid on pointer typed values.
-        const PointerType *PT = cast<PointerType>(Ty);
-        // For the sake of this example GC, we arbitrarily pick addrspace(1) as our
-        // GC managed heap.  We know that a pointer into this heap needs to be
-        // updated and that no other pointer does.  Note that addrspace(1) is used
-        // only as an example, it has no special meaning, and is not reserved for
-        // GC usage.
-        return (1 == PT->getAddressSpace());
-    }
+  Optional<bool> isGCManagedPointer(const Type *Ty) const override {
+    // Method is only valid on pointer typed values.
+    const PointerType *PT = cast<PointerType>(Ty);
+    // For the sake of this example GC, we arbitrarily pick addrspace(1) as our
+    // GC managed heap.  We know that a pointer into this heap needs to be
+    // updated and that no other pointer does.  Note that addrspace(1) is used
+    // only as an example, it has no special meaning, and is not reserved for
+    // GC usage.
+    return (1 == PT->getAddressSpace());
+  }
 };
 
 /// A GCStrategy for the CoreCLR Runtime. The strategy is similar to
@@ -96,20 +96,20 @@ public:
 /// checkins.
 class CoreCLRGC : public GCStrategy {
 public:
-    CoreCLRGC() {
-        UseStatepoints = true;
-        // These options are all gc.root specific, we specify them so that the
-        // gc.root lowering code doesn't run.
-        NeededSafePoints = false;
-        UsesMetadata = false;
-    }
+  CoreCLRGC() {
+    UseStatepoints = true;
+    // These options are all gc.root specific, we specify them so that the
+    // gc.root lowering code doesn't run.
+    NeededSafePoints = false;
+    UsesMetadata = false;
+  }
 
-    Optional<bool> isGCManagedPointer(const Type *Ty) const override {
-        // Method is only valid on pointer typed values.
-        const PointerType *PT = cast<PointerType>(Ty);
-        // We pick addrspace(1) as our GC managed heap.
-        return (1 == PT->getAddressSpace());
-    }
+  Optional<bool> isGCManagedPointer(const Type *Ty) const override {
+    // Method is only valid on pointer typed values.
+    const PointerType *PT = cast<PointerType>(Ty);
+    // We pick addrspace(1) as our GC managed heap.
+    return (1 == PT->getAddressSpace());
+  }
 };
 
 } // end anonymous namespace
@@ -121,7 +121,7 @@ static GCRegistry::Add<ErlangGC> A("erlang",
                                    "erlang-compatible garbage collector");
 static GCRegistry::Add<OcamlGC> B("ocaml", "ocaml 3.10-compatible GC");
 static GCRegistry::Add<ShadowStackGC>
-C("shadow-stack", "Very portable GC for uncooperative code generators");
+    C("shadow-stack", "Very portable GC for uncooperative code generators");
 static GCRegistry::Add<StatepointGC> D("statepoint-example",
                                        "an example strategy for statepoint");
 static GCRegistry::Add<CoreCLRGC> E("coreclr", "CoreCLR-compatible GC");

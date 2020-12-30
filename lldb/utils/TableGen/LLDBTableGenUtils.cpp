@@ -13,9 +13,9 @@ using namespace llvm;
 using namespace lldb_private;
 
 RecordsByName lldb_private::getRecordsByName(std::vector<Record *> Records,
-        StringRef Name) {
-    RecordsByName Result;
-    for (Record *R : Records)
-        Result[R->getValueAsString(Name).str()].push_back(R);
-    return Result;
+                                             StringRef Name) {
+  RecordsByName Result;
+  for (Record *R : Records)
+    Result[R->getValueAsString(Name).str()].push_back(R);
+  return Result;
 }

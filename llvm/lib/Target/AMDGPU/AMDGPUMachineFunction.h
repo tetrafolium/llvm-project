@@ -19,93 +19,73 @@ namespace llvm {
 class GCNSubtarget;
 
 class AMDGPUMachineFunction : public MachineFunctionInfo {
-    /// A map to keep track of local memory objects and their offsets within the
-    /// local memory space.
-    SmallDenseMap<const GlobalValue *, unsigned, 4> LocalMemoryObjects;
+  /// A map to keep track of local memory objects and their offsets within the
+  /// local memory space.
+  SmallDenseMap<const GlobalValue *, unsigned, 4> LocalMemoryObjects;
 
 protected:
-    uint64_t ExplicitKernArgSize = 0; // Cache for this.
-    Align MaxKernArgAlign;        // Cache for this.
+  uint64_t ExplicitKernArgSize = 0; // Cache for this.
+  Align MaxKernArgAlign;            // Cache for this.
 
-    /// Number of bytes in the LDS that are being used.
-    unsigned LDSSize = 0;
+  /// Number of bytes in the LDS that are being used.
+  unsigned LDSSize = 0;
 
-    /// Number of bytes in the LDS allocated statically. This field is only used
-    /// in the instruction selector and not part of the machine function info.
-    unsigned StaticLDSSize = 0;
+  /// Number of bytes in the LDS allocated statically. This field is only used
+  /// in the instruction selector and not part of the machine function info.
+  unsigned StaticLDSSize = 0;
 
-    /// Align for dynamic shared memory if any. Dynamic shared memory is
-    /// allocated directly after the static one, i.e., LDSSize. Need to pad
-    /// LDSSize to ensure that dynamic one is aligned accordingly.
-    /// The maximal alignment is updated during IR translation or lowering
-    /// stages.
-    Align DynLDSAlign;
+  /// Align for dynamic shared memory if any. Dynamic shared memory is
+  /// allocated directly after the static one, i.e., LDSSize. Need to pad
+  /// LDSSize to ensure that dynamic one is aligned accordingly.
+  /// The maximal alignment is updated during IR translation or lowering
+  /// stages.
+  Align DynLDSAlign;
 
-    // State of MODE register, assumed FP mode.
-    AMDGPU::SIModeRegisterDefaults Mode;
+  // State of MODE register, assumed FP mode.
+  AMDGPU::SIModeRegisterDefaults Mode;
 
-    // Kernels + shaders. i.e. functions called by the hardware and not called
-    // by other functions.
-    bool IsEntryFunction = false;
+  // Kernels + shaders. i.e. functions called by the hardware and not called
+  // by other functions.
+  bool IsEntryFunction = false;
 
-    // Entry points called by other functions instead of directly by the hardware.
-    bool IsModuleEntryFunction = false;
+  // Entry points called by other functions instead of directly by the hardware.
+  bool IsModuleEntryFunction = false;
 
-    bool NoSignedZerosFPMath = false;
+  bool NoSignedZerosFPMath = false;
 
-    // Function may be memory bound.
-    bool MemoryBound = false;
+  // Function may be memory bound.
+  bool MemoryBound = false;
 
-    // Kernel may need limited waves per EU for better performance.
-    bool WaveLimiter = false;
+  // Kernel may need limited waves per EU for better performance.
+  bool WaveLimiter = false;
 
 public:
-    AMDGPUMachineFunction(const MachineFunction &MF);
+  AMDGPUMachineFunction(const MachineFunction &MF);
 
-    uint64_t getExplicitKernArgSize() const {
-        return ExplicitKernArgSize;
-    }
+  uint64_t getExplicitKernArgSize() const { return ExplicitKernArgSize; }
 
-    unsigned getMaxKernArgAlign() const {
-        return MaxKernArgAlign.value();
-    }
+  unsigned getMaxKernArgAlign() const { return MaxKernArgAlign.value(); }
 
-    unsigned getLDSSize() const {
-        return LDSSize;
-    }
+  unsigned getLDSSize() const { return LDSSize; }
 
-    AMDGPU::SIModeRegisterDefaults getMode() const {
-        return Mode;
-    }
+  AMDGPU::SIModeRegisterDefaults getMode() const { return Mode; }
 
-    bool isEntryFunction() const {
-        return IsEntryFunction;
-    }
+  bool isEntryFunction() const { return IsEntryFunction; }
 
-    bool isModuleEntryFunction() const {
-        return IsModuleEntryFunction;
-    }
+  bool isModuleEntryFunction() const { return IsModuleEntryFunction; }
 
-    bool hasNoSignedZerosFPMath() const {
-        return NoSignedZerosFPMath;
-    }
+  bool hasNoSignedZerosFPMath() const { return NoSignedZerosFPMath; }
 
-    bool isMemoryBound() const {
-        return MemoryBound;
-    }
+  bool isMemoryBound() const { return MemoryBound; }
 
-    bool needsWaveLimiter() const {
-        return WaveLimiter;
-    }
+  bool needsWaveLimiter() const { return WaveLimiter; }
 
-    unsigned allocateLDSGlobal(const DataLayout &DL, const GlobalVariable &GV);
+  unsigned allocateLDSGlobal(const DataLayout &DL, const GlobalVariable &GV);
 
-    Align getDynLDSAlign() const {
-        return DynLDSAlign;
-    }
+  Align getDynLDSAlign() const { return DynLDSAlign; }
 
-    void setDynLDSAlign(const DataLayout &DL, const GlobalVariable &GV);
+  void setDynLDSAlign(const DataLayout &DL, const GlobalVariable &GV);
 };
 
-}
+} // namespace llvm
 #endif

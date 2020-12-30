@@ -35,13 +35,13 @@ LLVM_CLANG_C_EXTERN_C_BEGIN
  * with the string data, call \c clang_disposeString() to free the string.
  */
 typedef struct {
-    const void *data;
-    unsigned private_flags;
+  const void *data;
+  unsigned private_flags;
 } CXString;
 
 typedef struct {
-    CXString *Strings;
-    unsigned Count;
+  CXString *Strings;
+  unsigned Count;
 } CXStringSet;
 
 /**
@@ -66,4 +66,3 @@ CINDEX_LINKAGE void clang_disposeStringSet(CXStringSet *set);
 LLVM_CLANG_C_EXTERN_C_END
 
 #endif
-

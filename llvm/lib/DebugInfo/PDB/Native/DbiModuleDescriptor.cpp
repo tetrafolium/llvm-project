@@ -20,71 +20,67 @@ using namespace llvm::support;
 
 Error DbiModuleDescriptor::initialize(BinaryStreamRef Stream,
                                       DbiModuleDescriptor &Info) {
-    BinaryStreamReader Reader(Stream);
-    if (auto EC = Reader.readObject(Info.Layout))
-        return EC;
+  BinaryStreamReader Reader(Stream);
+  if (auto EC = Reader.readObject(Info.Layout))
+    return EC;
 
-    if (auto EC = Reader.readCString(Info.ModuleName))
-        return EC;
+  if (auto EC = Reader.readCString(Info.ModuleName))
+    return EC;
 
-    if (auto EC = Reader.readCString(Info.ObjFileName))
-        return EC;
-    return Error::success();
+  if (auto EC = Reader.readCString(Info.ObjFileName))
+    return EC;
+  return Error::success();
 }
 
 bool DbiModuleDescriptor::hasECInfo() const {
-    return (Layout->Flags & ModInfoFlags::HasECFlagMask) != 0;
+  return (Layout->Flags & ModInfoFlags::HasECFlagMask) != 0;
 }
 
 uint16_t DbiModuleDescriptor::getTypeServerIndex() const {
-    return (Layout->Flags & ModInfoFlags::TypeServerIndexMask) >>
-           ModInfoFlags::TypeServerIndexShift;
+  return (Layout->Flags & ModInfoFlags::TypeServerIndexMask) >>
+         ModInfoFlags::TypeServerIndexShift;
 }
 
 const SectionContrib &DbiModuleDescriptor::getSectionContrib() const {
-    return Layout->SC;
+  return Layout->SC;
 }
 
 uint16_t DbiModuleDescriptor::getModuleStreamIndex() const {
-    return Layout->ModDiStream;
+  return Layout->ModDiStream;
 }
 
 uint32_t DbiModuleDescriptor::getSymbolDebugInfoByteSize() const {
-    return Layout->SymBytes;
+  return Layout->SymBytes;
 }
 
 uint32_t DbiModuleDescriptor::getC11LineInfoByteSize() const {
-    return Layout->C11Bytes;
+  return Layout->C11Bytes;
 }
 
 uint32_t DbiModuleDescriptor::getC13LineInfoByteSize() const {
-    return Layout->C13Bytes;
+  return Layout->C13Bytes;
 }
 
 uint32_t DbiModuleDescriptor::getNumberOfFiles() const {
-    return Layout->NumFiles;
+  return Layout->NumFiles;
 }
 
 uint32_t DbiModuleDescriptor::getSourceFileNameIndex() const {
-    return Layout->SrcFileNameNI;
+  return Layout->SrcFileNameNI;
 }
 
 uint32_t DbiModuleDescriptor::getPdbFilePathNameIndex() const {
-    return Layout->PdbFilePathNI;
+  return Layout->PdbFilePathNI;
 }
 
-StringRef DbiModuleDescriptor::getModuleName() const {
-    return ModuleName;
-}
+StringRef DbiModuleDescriptor::getModuleName() const { return ModuleName; }
 
-StringRef DbiModuleDescriptor::getObjFileName() const {
-    return ObjFileName;
-}
+StringRef DbiModuleDescriptor::getObjFileName() const { return ObjFileName; }
 
 uint32_t DbiModuleDescriptor::getRecordLength() const {
-    uint32_t M = ModuleName.str().size() + 1;
-    uint32_t O = ObjFileName.str().size() + 1;
-    uint32_t Size = sizeof(ModuleInfoHeader) + M + O;
-    Size = alignTo(Size, 4);
-    return Size;
+  uint32_t M = ModuleName.str().size() + 1;
+  uint32_t O = ObjFileName.str().size() + 1;
+  uint32_t Size = sizeof(ModuleInfoHeader) + M + O;
+  Size = alignTo(Size, 4);
+  return Size;
 }

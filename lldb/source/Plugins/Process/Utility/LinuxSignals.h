@@ -16,10 +16,10 @@ namespace lldb_private {
 /// Linux specific set of Unix signals.
 class LinuxSignals : public UnixSignals {
 public:
-    LinuxSignals();
+  LinuxSignals();
 
 private:
-    void Reset() override;
+  void Reset() override;
 };
 
 } // namespace lldb_private

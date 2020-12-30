@@ -18,6 +18,6 @@ __isl_give isl_local *isl_local_reorder(__isl_take isl_local *local,
                                         __isl_take isl_reordering *r);
 
 __isl_give isl_vec *isl_local_extend_point_vec(__isl_keep isl_local *local,
-        __isl_take isl_vec *v);
+                                               __isl_take isl_vec *v);
 
 #endif

@@ -21,18 +21,18 @@ using namespace fuzzer;
 
 template <typename T>
 static T GetFnPtr(const char *FnName, bool WarnIfMissing) {
-    dlerror(); // Clear any previous errors.
-    void *Fn = dlsym(RTLD_DEFAULT, FnName);
-    if (Fn == nullptr) {
-        if (WarnIfMissing) {
-            const char *ErrorMsg = dlerror();
-            Printf("WARNING: Failed to find function \"%s\".", FnName);
-            if (ErrorMsg)
-                Printf(" Reason %s.", ErrorMsg);
-            Printf("\n");
-        }
+  dlerror(); // Clear any previous errors.
+  void *Fn = dlsym(RTLD_DEFAULT, FnName);
+  if (Fn == nullptr) {
+    if (WarnIfMissing) {
+      const char *ErrorMsg = dlerror();
+      Printf("WARNING: Failed to find function \"%s\".", FnName);
+      if (ErrorMsg)
+        Printf(" Reason %s.", ErrorMsg);
+      Printf("\n");
     }
-    return reinterpret_cast<T>(Fn);
+  }
+  return reinterpret_cast<T>(Fn);
 }
 
 namespace fuzzer {

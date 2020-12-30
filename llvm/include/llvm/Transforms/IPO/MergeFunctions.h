@@ -24,7 +24,7 @@ class Module;
 /// Merge identical functions.
 class MergeFunctionsPass : public PassInfoMixin<MergeFunctionsPass> {
 public:
-    PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &AM);
 };
 
 } // end namespace llvm

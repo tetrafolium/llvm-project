@@ -10,5 +10,5 @@
 #include <isl_multi_macro.h>
 
 #undef TYPE
-#define TYPE	MULTI(BASE)
+#define TYPE MULTI(BASE)
 #include "isl_unbind_params_templ.c"

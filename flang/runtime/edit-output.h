@@ -35,68 +35,66 @@ bool EditIntegerOutput(IoStatementState &, const DataEdit &, INT);
 // Encapsulates the state of a REAL output conversion.
 class RealOutputEditingBase {
 protected:
-    explicit RealOutputEditingBase(IoStatementState &io) : io_{io} {}
+  explicit RealOutputEditingBase(IoStatementState &io) : io_{io} {}
 
-    static bool IsInfOrNaN(const decimal::ConversionToDecimalResult &res) {
-        const char *p{res.str};
-        if (!p || res.length < 1) {
-            return false;
-        }
-        if (*p == '-' || *p == '+') {
-            if (res.length == 1) {
-                return false;
-            }
-            ++p;
-        }
-        return *p < '0' || *p > '9';
+  static bool IsInfOrNaN(const decimal::ConversionToDecimalResult &res) {
+    const char *p{res.str};
+    if (!p || res.length < 1) {
+      return false;
     }
+    if (*p == '-' || *p == '+') {
+      if (res.length == 1) {
+        return false;
+      }
+      ++p;
+    }
+    return *p < '0' || *p > '9';
+  }
 
-    const char *FormatExponent(int, const DataEdit &edit, int &length);
-    bool EmitPrefix(const DataEdit &, std::size_t length, std::size_t width);
-    bool EmitSuffix(const DataEdit &);
+  const char *FormatExponent(int, const DataEdit &edit, int &length);
+  bool EmitPrefix(const DataEdit &, std::size_t length, std::size_t width);
+  bool EmitSuffix(const DataEdit &);
 
-    IoStatementState &io_;
-    int trailingBlanks_{0}; // created when Gw editing maps to Fw
-    char exponent_[16];
+  IoStatementState &io_;
+  int trailingBlanks_{0}; // created when Gw editing maps to Fw
+  char exponent_[16];
 };
 
 template <int KIND> class RealOutputEditing : public RealOutputEditingBase {
 public:
-    static constexpr int binaryPrecision{common::PrecisionOfRealKind(KIND)};
-    using BinaryFloatingPoint =
-        decimal::BinaryFloatingPointNumber<binaryPrecision>;
-    template <typename A>
-    RealOutputEditing(IoStatementState &io, A x)
-        : RealOutputEditingBase{io}, x_{x} {}
-    bool Edit(const DataEdit &);
+  static constexpr int binaryPrecision{common::PrecisionOfRealKind(KIND)};
+  using BinaryFloatingPoint =
+      decimal::BinaryFloatingPointNumber<binaryPrecision>;
+  template <typename A>
+  RealOutputEditing(IoStatementState &io, A x)
+      : RealOutputEditingBase{io}, x_{x} {}
+  bool Edit(const DataEdit &);
 
 private:
-    // The DataEdit arguments here are const references or copies so that
-    // the original DataEdit can safely serve multiple array elements when
-    // it has a repeat count.
-    bool EditEorDOutput(const DataEdit &);
-    bool EditFOutput(const DataEdit &);
-    DataEdit EditForGOutput(DataEdit); // returns an E or F edit
-    bool EditEXOutput(const DataEdit &);
-    bool EditListDirectedOutput(const DataEdit &);
+  // The DataEdit arguments here are const references or copies so that
+  // the original DataEdit can safely serve multiple array elements when
+  // it has a repeat count.
+  bool EditEorDOutput(const DataEdit &);
+  bool EditFOutput(const DataEdit &);
+  DataEdit EditForGOutput(DataEdit); // returns an E or F edit
+  bool EditEXOutput(const DataEdit &);
+  bool EditListDirectedOutput(const DataEdit &);
 
-    bool IsZero() const {
-        return x_.IsZero();
-    }
+  bool IsZero() const { return x_.IsZero(); }
 
-    decimal::ConversionToDecimalResult Convert(
-        int significantDigits, const DataEdit &, int flags = 0);
+  decimal::ConversionToDecimalResult Convert(
+      int significantDigits, const DataEdit &, int flags = 0);
 
-    BinaryFloatingPoint x_;
-    char buffer_[BinaryFloatingPoint::maxDecimalConversionDigits +
-                                                                 EXTRA_DECIMAL_CONVERSION_SPACE];
+  BinaryFloatingPoint x_;
+  char buffer_[BinaryFloatingPoint::maxDecimalConversionDigits +
+      EXTRA_DECIMAL_CONVERSION_SPACE];
 };
 
 bool ListDirectedLogicalOutput(
     IoStatementState &, ListDirectedStatementState<Direction::Output> &, bool);
 bool EditLogicalOutput(IoStatementState &, const DataEdit &, bool);
 bool ListDirectedDefaultCharacterOutput(IoStatementState &,
-                                        ListDirectedStatementState<Direction::Output> &, const char *, std::size_t);
+    ListDirectedStatementState<Direction::Output> &, const char *, std::size_t);
 bool EditDefaultCharacterOutput(
     IoStatementState &, const DataEdit &, const char *, std::size_t);
 

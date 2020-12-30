@@ -1,4 +1,5 @@
-//===- llvm/Support/Host.h - Host machine characteristics --------*- C++ -*-===//
+//===- llvm/Support/Host.h - Host machine characteristics --------*- C++
+//-*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -65,8 +66,8 @@ StringRef getHostCPUNameForPowerPC(StringRef ProcCpuinfoContent);
 StringRef getHostCPUNameForARM(StringRef ProcCpuinfoContent);
 StringRef getHostCPUNameForS390x(StringRef ProcCpuinfoContent);
 StringRef getHostCPUNameForBPF();
-}
-}
-}
+} // namespace detail
+} // namespace sys
+} // namespace llvm
 
 #endif

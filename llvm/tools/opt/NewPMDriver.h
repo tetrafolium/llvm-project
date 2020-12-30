@@ -35,24 +35,15 @@ extern cl::opt<std::string> DebugifyExport;
 
 namespace opt_tool {
 enum OutputKind {
-    OK_NoOutput,
-    OK_OutputAssembly,
-    OK_OutputBitcode,
-    OK_OutputThinLTOBitcode,
+  OK_NoOutput,
+  OK_OutputAssembly,
+  OK_OutputBitcode,
+  OK_OutputThinLTOBitcode,
 };
-enum VerifierKind {
-    VK_NoVerifier,
-    VK_VerifyInAndOut,
-    VK_VerifyEachPass
-};
-enum PGOKind {
-    NoPGO,
-    InstrGen,
-    InstrUse,
-    SampleUse
-};
+enum VerifierKind { VK_NoVerifier, VK_VerifyInAndOut, VK_VerifyEachPass };
+enum PGOKind { NoPGO, InstrGen, InstrUse, SampleUse };
 enum CSPGOKind { NoCSPGO, CSInstrGen, CSInstrUse };
-}
+} // namespace opt_tool
 
 /// Driver function to run the new pass manager over a module.
 ///

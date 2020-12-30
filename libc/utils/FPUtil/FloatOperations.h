@@ -21,8 +21,8 @@ namespace fputil {
 template <typename T,
           cpp::EnableIfType<cpp::IsFloatingPointType<T>::Value, int> = 0>
 static inline typename FloatProperties<T>::BitsType valueAsBits(T x) {
-    using BitsType = typename FloatProperties<T>::BitsType;
-    return *reinterpret_cast<BitsType *>(&x);
+  using BitsType = typename FloatProperties<T>::BitsType;
+  return *reinterpret_cast<BitsType *>(&x);
 }
 
 // Return the float value from bits.
@@ -30,31 +30,31 @@ template <typename BitsType,
           cpp::EnableIfType<
               cpp::IsFloatingPointType<FloatTypeT<BitsType>>::Value, int> = 0>
 static inline FloatTypeT<BitsType> valueFromBits(BitsType bits) {
-    return *reinterpret_cast<FloatTypeT<BitsType> *>(&bits);
+  return *reinterpret_cast<FloatTypeT<BitsType> *>(&bits);
 }
 
 // Return the bits of abs(x).
 template <typename T,
           cpp::EnableIfType<cpp::IsFloatingPointType<T>::Value, int> = 0>
 static inline typename FloatProperties<T>::BitsType absBits(T x) {
-    return valueAsBits(x) & (~FloatProperties<T>::signMask);
+  return valueAsBits(x) & (~FloatProperties<T>::signMask);
 }
 
 template <typename BitsType>
 static inline int getExponentFromBits(BitsType bits) {
-    using FPType = typename FloatType<BitsType>::Type;
-    using Properties = FloatProperties<FPType>;
-    bits &= Properties::exponentMask;
-    int e = (bits >> Properties::mantissaWidth); // Shift out the mantissa.
-    e -= Properties::exponentOffset;             // Zero adjust.
-    return e;
+  using FPType = typename FloatType<BitsType>::Type;
+  using Properties = FloatProperties<FPType>;
+  bits &= Properties::exponentMask;
+  int e = (bits >> Properties::mantissaWidth); // Shift out the mantissa.
+  e -= Properties::exponentOffset;             // Zero adjust.
+  return e;
 }
 
 // Return the zero adjusted exponent value of x.
 template <typename T,
           cpp::EnableIfType<cpp::IsFloatingPointType<T>::Value, int> = 0>
 static inline int getExponent(T x) {
-    return getExponentFromBits(valueAsBits(x));
+  return getExponentFromBits(valueAsBits(x));
 }
 
 } // namespace fputil

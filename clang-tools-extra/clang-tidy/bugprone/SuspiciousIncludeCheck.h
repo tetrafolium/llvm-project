@@ -37,17 +37,17 @@ namespace bugprone {
 /// http://clang.llvm.org/extra/clang-tidy/checks/bugprone-suspicious-include.html
 class SuspiciousIncludeCheck : public ClangTidyCheck {
 public:
-    SuspiciousIncludeCheck(StringRef Name, ClangTidyContext *Context);
-    void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
-                             Preprocessor *ModuleExpanderPP) override;
-    void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
+  SuspiciousIncludeCheck(StringRef Name, ClangTidyContext *Context);
+  void registerPPCallbacks(const SourceManager &SM, Preprocessor *PP,
+                           Preprocessor *ModuleExpanderPP) override;
+  void storeOptions(ClangTidyOptions::OptionMap &Opts) override;
 
-    utils::FileExtensionsSet HeaderFileExtensions;
-    utils::FileExtensionsSet ImplementationFileExtensions;
+  utils::FileExtensionsSet HeaderFileExtensions;
+  utils::FileExtensionsSet ImplementationFileExtensions;
 
 private:
-    const std::string RawStringHeaderFileExtensions;
-    const std::string RawStringImplementationFileExtensions;
+  const std::string RawStringHeaderFileExtensions;
+  const std::string RawStringImplementationFileExtensions;
 };
 
 } // namespace bugprone

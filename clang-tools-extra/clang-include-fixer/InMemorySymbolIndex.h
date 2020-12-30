@@ -20,15 +20,15 @@ namespace include_fixer {
 /// Xref database with fixed content.
 class InMemorySymbolIndex : public SymbolIndex {
 public:
-    InMemorySymbolIndex(
-        const std::vector<find_all_symbols::SymbolAndSignals> &Symbols);
+  InMemorySymbolIndex(
+      const std::vector<find_all_symbols::SymbolAndSignals> &Symbols);
 
-    std::vector<find_all_symbols::SymbolAndSignals>
-    search(llvm::StringRef Identifier) override;
+  std::vector<find_all_symbols::SymbolAndSignals>
+  search(llvm::StringRef Identifier) override;
 
 private:
-    std::map<std::string, std::vector<find_all_symbols::SymbolAndSignals>>
-            LookupTable;
+  std::map<std::string, std::vector<find_all_symbols::SymbolAndSignals>>
+      LookupTable;
 };
 
 } // namespace include_fixer

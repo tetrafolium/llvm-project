@@ -19,72 +19,72 @@
 #include "clang/AST/DeclTemplate.h"
 
 namespace clang {
-inline StringRef getLambdaStaticInvokerName() {
-    return "__invoke";
-}
+inline StringRef getLambdaStaticInvokerName() { return "__invoke"; }
 // This function returns true if M is a specialization, a template,
 // or a non-generic lambda call operator.
 inline bool isLambdaCallOperator(const CXXMethodDecl *MD) {
-    const CXXRecordDecl *LambdaClass = MD->getParent();
-    if (!LambdaClass || !LambdaClass->isLambda()) return false;
-    return MD->getOverloadedOperator() == OO_Call;
+  const CXXRecordDecl *LambdaClass = MD->getParent();
+  if (!LambdaClass || !LambdaClass->isLambda())
+    return false;
+  return MD->getOverloadedOperator() == OO_Call;
 }
 
 inline bool isLambdaCallOperator(const DeclContext *DC) {
-    if (!DC || !isa<CXXMethodDecl>(DC)) return false;
-    return isLambdaCallOperator(cast<CXXMethodDecl>(DC));
+  if (!DC || !isa<CXXMethodDecl>(DC))
+    return false;
+  return isLambdaCallOperator(cast<CXXMethodDecl>(DC));
 }
 
 inline bool isGenericLambdaCallOperatorSpecialization(const CXXMethodDecl *MD) {
-    if (!MD) return false;
-    const CXXRecordDecl *LambdaClass = MD->getParent();
-    if (LambdaClass && LambdaClass->isGenericLambda())
-        return isLambdaCallOperator(MD) &&
-               MD->isFunctionTemplateSpecialization();
+  if (!MD)
     return false;
+  const CXXRecordDecl *LambdaClass = MD->getParent();
+  if (LambdaClass && LambdaClass->isGenericLambda())
+    return isLambdaCallOperator(MD) && MD->isFunctionTemplateSpecialization();
+  return false;
 }
 
 inline bool isLambdaConversionOperator(CXXConversionDecl *C) {
-    return C ? C->getParent()->isLambda() : false;
+  return C ? C->getParent()->isLambda() : false;
 }
 
 inline bool isLambdaConversionOperator(Decl *D) {
-    if (!D) return false;
-    if (CXXConversionDecl *Conv = dyn_cast<CXXConversionDecl>(D))
-        return isLambdaConversionOperator(Conv);
-    if (FunctionTemplateDecl *F = dyn_cast<FunctionTemplateDecl>(D))
-        if (CXXConversionDecl *Conv =
-                    dyn_cast_or_null<CXXConversionDecl>(F->getTemplatedDecl()))
-            return isLambdaConversionOperator(Conv);
+  if (!D)
     return false;
+  if (CXXConversionDecl *Conv = dyn_cast<CXXConversionDecl>(D))
+    return isLambdaConversionOperator(Conv);
+  if (FunctionTemplateDecl *F = dyn_cast<FunctionTemplateDecl>(D))
+    if (CXXConversionDecl *Conv =
+            dyn_cast_or_null<CXXConversionDecl>(F->getTemplatedDecl()))
+      return isLambdaConversionOperator(Conv);
+  return false;
 }
 
 inline bool isGenericLambdaCallOperatorSpecialization(DeclContext *DC) {
-    return isGenericLambdaCallOperatorSpecialization(
-               dyn_cast<CXXMethodDecl>(DC));
+  return isGenericLambdaCallOperatorSpecialization(dyn_cast<CXXMethodDecl>(DC));
 }
 
-inline bool isGenericLambdaCallOperatorOrStaticInvokerSpecialization(
-    DeclContext *DC) {
-    CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(DC);
-    if (!MD) return false;
-    const CXXRecordDecl *LambdaClass = MD->getParent();
-    if (LambdaClass && LambdaClass->isGenericLambda())
-        return (isLambdaCallOperator(MD) || MD->isLambdaStaticInvoker()) &&
-               MD->isFunctionTemplateSpecialization();
+inline bool
+isGenericLambdaCallOperatorOrStaticInvokerSpecialization(DeclContext *DC) {
+  CXXMethodDecl *MD = dyn_cast<CXXMethodDecl>(DC);
+  if (!MD)
     return false;
+  const CXXRecordDecl *LambdaClass = MD->getParent();
+  if (LambdaClass && LambdaClass->isGenericLambda())
+    return (isLambdaCallOperator(MD) || MD->isLambdaStaticInvoker()) &&
+           MD->isFunctionTemplateSpecialization();
+  return false;
 }
-
 
 // This returns the parent DeclContext ensuring that the correct
 // parent DeclContext is returned for Lambdas
 inline DeclContext *getLambdaAwareParentOfDeclContext(DeclContext *DC) {
-    if (isLambdaCallOperator(DC))
-        return DC->getParent()->getParent();
-    else
-        return DC->getParent();
+  if (isLambdaCallOperator(DC))
+    return DC->getParent()->getParent();
+  else
+    return DC->getParent();
 }
 
-} // clang
+} // namespace clang
 
 #endif

@@ -14,22 +14,22 @@
 
 namespace llvm {
 class RISCVAttributeParser : public ELFAttributeParser {
-    struct DisplayHandler {
-        RISCVAttrs::AttrType attribute;
-        Error (RISCVAttributeParser::*routine)(unsigned);
-    };
-    static const DisplayHandler displayRoutines[];
+  struct DisplayHandler {
+    RISCVAttrs::AttrType attribute;
+    Error (RISCVAttributeParser::*routine)(unsigned);
+  };
+  static const DisplayHandler displayRoutines[];
 
-    Error handler(uint64_t tag, bool &handled) override;
+  Error handler(uint64_t tag, bool &handled) override;
 
-    Error unalignedAccess(unsigned tag);
-    Error stackAlign(unsigned tag);
+  Error unalignedAccess(unsigned tag);
+  Error stackAlign(unsigned tag);
 
 public:
-    RISCVAttributeParser(ScopedPrinter *sw)
-        : ELFAttributeParser(sw, RISCVAttrs::RISCVAttributeTags, "riscv") {}
-    RISCVAttributeParser()
-        : ELFAttributeParser(RISCVAttrs::RISCVAttributeTags, "riscv") {}
+  RISCVAttributeParser(ScopedPrinter *sw)
+      : ELFAttributeParser(sw, RISCVAttrs::RISCVAttributeTags, "riscv") {}
+  RISCVAttributeParser()
+      : ELFAttributeParser(RISCVAttrs::RISCVAttributeTags, "riscv") {}
 };
 
 } // namespace llvm

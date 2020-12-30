@@ -24,24 +24,24 @@ namespace utils {
 // This class creates function-level namespace aliases.
 class NamespaceAliaser {
 public:
-    explicit NamespaceAliaser(const SourceManager &SourceMgr);
-    // Adds a namespace alias for \p Namespace valid near \p
-    // Statement. Picks the first available name from \p Abbreviations.
-    // Returns ``llvm::None`` if an alias already exists or there is an error.
-    llvm::Optional<FixItHint>
-    createAlias(ASTContext &Context, const Stmt &Statement,
-                llvm::StringRef Namespace,
-                const std::vector<std::string> &Abbreviations);
+  explicit NamespaceAliaser(const SourceManager &SourceMgr);
+  // Adds a namespace alias for \p Namespace valid near \p
+  // Statement. Picks the first available name from \p Abbreviations.
+  // Returns ``llvm::None`` if an alias already exists or there is an error.
+  llvm::Optional<FixItHint>
+  createAlias(ASTContext &Context, const Stmt &Statement,
+              llvm::StringRef Namespace,
+              const std::vector<std::string> &Abbreviations);
 
-    // Get an alias name for \p Namespace valid at \p Statement. Returns \p
-    // Namespace if there is no alias.
-    std::string getNamespaceName(ASTContext &Context, const Stmt &Statement,
-                                 llvm::StringRef Namespace) const;
+  // Get an alias name for \p Namespace valid at \p Statement. Returns \p
+  // Namespace if there is no alias.
+  std::string getNamespaceName(ASTContext &Context, const Stmt &Statement,
+                               llvm::StringRef Namespace) const;
 
 private:
-    const SourceManager &SourceMgr;
-    llvm::DenseMap<const FunctionDecl *, llvm::StringMap<std::string>>
-            AddedAliases;
+  const SourceManager &SourceMgr;
+  llvm::DenseMap<const FunctionDecl *, llvm::StringMap<std::string>>
+      AddedAliases;
 };
 
 } // namespace utils

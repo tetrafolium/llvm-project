@@ -81,89 +81,89 @@ extern cl::opt<bool> EnableLoopInterleaving;
 extern cl::opt<bool> EnableLoopVectorization;
 
 struct LoopVectorizeOptions {
-    /// If false, consider all loops for interleaving.
-    /// If true, only loops that explicitly request interleaving are considered.
-    bool InterleaveOnlyWhenForced;
+  /// If false, consider all loops for interleaving.
+  /// If true, only loops that explicitly request interleaving are considered.
+  bool InterleaveOnlyWhenForced;
 
-    /// If false, consider all loops for vectorization.
-    /// If true, only loops that explicitly request vectorization are considered.
-    bool VectorizeOnlyWhenForced;
+  /// If false, consider all loops for vectorization.
+  /// If true, only loops that explicitly request vectorization are considered.
+  bool VectorizeOnlyWhenForced;
 
-    /// The current defaults when creating the pass with no arguments are:
-    /// EnableLoopInterleaving = true and EnableLoopVectorization = true. This
-    /// means that interleaving default is consistent with the cl::opt flag, while
-    /// vectorization is not.
-    /// FIXME: The default for EnableLoopVectorization in the cl::opt should be
-    /// set to true, and the corresponding change to account for this be made in
-    /// opt.cpp. The initializations below will become:
-    /// InterleaveOnlyWhenForced(!EnableLoopInterleaving)
-    /// VectorizeOnlyWhenForced(!EnableLoopVectorization).
-    LoopVectorizeOptions()
-        : InterleaveOnlyWhenForced(false), VectorizeOnlyWhenForced(false) {}
-    LoopVectorizeOptions(bool InterleaveOnlyWhenForced,
-                         bool VectorizeOnlyWhenForced)
-        : InterleaveOnlyWhenForced(InterleaveOnlyWhenForced),
-          VectorizeOnlyWhenForced(VectorizeOnlyWhenForced) {}
+  /// The current defaults when creating the pass with no arguments are:
+  /// EnableLoopInterleaving = true and EnableLoopVectorization = true. This
+  /// means that interleaving default is consistent with the cl::opt flag, while
+  /// vectorization is not.
+  /// FIXME: The default for EnableLoopVectorization in the cl::opt should be
+  /// set to true, and the corresponding change to account for this be made in
+  /// opt.cpp. The initializations below will become:
+  /// InterleaveOnlyWhenForced(!EnableLoopInterleaving)
+  /// VectorizeOnlyWhenForced(!EnableLoopVectorization).
+  LoopVectorizeOptions()
+      : InterleaveOnlyWhenForced(false), VectorizeOnlyWhenForced(false) {}
+  LoopVectorizeOptions(bool InterleaveOnlyWhenForced,
+                       bool VectorizeOnlyWhenForced)
+      : InterleaveOnlyWhenForced(InterleaveOnlyWhenForced),
+        VectorizeOnlyWhenForced(VectorizeOnlyWhenForced) {}
 
-    LoopVectorizeOptions &setInterleaveOnlyWhenForced(bool Value) {
-        InterleaveOnlyWhenForced = Value;
-        return *this;
-    }
+  LoopVectorizeOptions &setInterleaveOnlyWhenForced(bool Value) {
+    InterleaveOnlyWhenForced = Value;
+    return *this;
+  }
 
-    LoopVectorizeOptions &setVectorizeOnlyWhenForced(bool Value) {
-        VectorizeOnlyWhenForced = Value;
-        return *this;
-    }
+  LoopVectorizeOptions &setVectorizeOnlyWhenForced(bool Value) {
+    VectorizeOnlyWhenForced = Value;
+    return *this;
+  }
 };
 
 /// Storage for information about made changes.
 struct LoopVectorizeResult {
-    bool MadeAnyChange;
-    bool MadeCFGChange;
+  bool MadeAnyChange;
+  bool MadeCFGChange;
 
-    LoopVectorizeResult(bool MadeAnyChange, bool MadeCFGChange)
-        : MadeAnyChange(MadeAnyChange), MadeCFGChange(MadeCFGChange) {}
+  LoopVectorizeResult(bool MadeAnyChange, bool MadeCFGChange)
+      : MadeAnyChange(MadeAnyChange), MadeCFGChange(MadeCFGChange) {}
 };
 
 /// The LoopVectorize Pass.
 struct LoopVectorizePass : public PassInfoMixin<LoopVectorizePass> {
 private:
-    /// If false, consider all loops for interleaving.
-    /// If true, only loops that explicitly request interleaving are considered.
-    bool InterleaveOnlyWhenForced;
+  /// If false, consider all loops for interleaving.
+  /// If true, only loops that explicitly request interleaving are considered.
+  bool InterleaveOnlyWhenForced;
 
-    /// If false, consider all loops for vectorization.
-    /// If true, only loops that explicitly request vectorization are considered.
-    bool VectorizeOnlyWhenForced;
+  /// If false, consider all loops for vectorization.
+  /// If true, only loops that explicitly request vectorization are considered.
+  bool VectorizeOnlyWhenForced;
 
 public:
-    LoopVectorizePass(LoopVectorizeOptions Opts = {});
+  LoopVectorizePass(LoopVectorizeOptions Opts = {});
 
-    ScalarEvolution *SE;
-    LoopInfo *LI;
-    TargetTransformInfo *TTI;
-    DominatorTree *DT;
-    BlockFrequencyInfo *BFI;
-    TargetLibraryInfo *TLI;
-    DemandedBits *DB;
-    AAResults *AA;
-    AssumptionCache *AC;
-    std::function<const LoopAccessInfo &(Loop &)> *GetLAA;
-    OptimizationRemarkEmitter *ORE;
-    ProfileSummaryInfo *PSI;
+  ScalarEvolution *SE;
+  LoopInfo *LI;
+  TargetTransformInfo *TTI;
+  DominatorTree *DT;
+  BlockFrequencyInfo *BFI;
+  TargetLibraryInfo *TLI;
+  DemandedBits *DB;
+  AAResults *AA;
+  AssumptionCache *AC;
+  std::function<const LoopAccessInfo &(Loop &)> *GetLAA;
+  OptimizationRemarkEmitter *ORE;
+  ProfileSummaryInfo *PSI;
 
-    PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM);
 
-    // Shim for old PM.
-    LoopVectorizeResult
-    runImpl(Function &F, ScalarEvolution &SE_, LoopInfo &LI_,
-            TargetTransformInfo &TTI_, DominatorTree &DT_,
-            BlockFrequencyInfo &BFI_, TargetLibraryInfo *TLI_, DemandedBits &DB_,
-            AAResults &AA_, AssumptionCache &AC_,
-            std::function<const LoopAccessInfo &(Loop &)> &GetLAA_,
-            OptimizationRemarkEmitter &ORE_, ProfileSummaryInfo *PSI_);
+  // Shim for old PM.
+  LoopVectorizeResult
+  runImpl(Function &F, ScalarEvolution &SE_, LoopInfo &LI_,
+          TargetTransformInfo &TTI_, DominatorTree &DT_,
+          BlockFrequencyInfo &BFI_, TargetLibraryInfo *TLI_, DemandedBits &DB_,
+          AAResults &AA_, AssumptionCache &AC_,
+          std::function<const LoopAccessInfo &(Loop &)> &GetLAA_,
+          OptimizationRemarkEmitter &ORE_, ProfileSummaryInfo *PSI_);
 
-    bool processLoop(Loop *L);
+  bool processLoop(Loop *L);
 };
 
 /// Reports a vectorization failure: print \p DebugMsg for debugging
@@ -172,7 +172,8 @@ public:
 /// Otherwise, the loop \p TheLoop is used for the location of the remark.
 void reportVectorizationFailure(const StringRef DebugMsg,
                                 const StringRef OREMsg, const StringRef ORETag,
-                                OptimizationRemarkEmitter *ORE, Loop *TheLoop, Instruction *I = nullptr);
+                                OptimizationRemarkEmitter *ORE, Loop *TheLoop,
+                                Instruction *I = nullptr);
 
 } // end namespace llvm
 

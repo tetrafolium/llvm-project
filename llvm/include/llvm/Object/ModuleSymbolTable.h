@@ -32,42 +32,40 @@ class Module;
 
 class ModuleSymbolTable {
 public:
-    using AsmSymbol = std::pair<std::string, uint32_t>;
-    using Symbol = PointerUnion<GlobalValue *, AsmSymbol *>;
+  using AsmSymbol = std::pair<std::string, uint32_t>;
+  using Symbol = PointerUnion<GlobalValue *, AsmSymbol *>;
 
 private:
-    Module *FirstMod = nullptr;
+  Module *FirstMod = nullptr;
 
-    SpecificBumpPtrAllocator<AsmSymbol> AsmSymbols;
-    std::vector<Symbol> SymTab;
-    Mangler Mang;
+  SpecificBumpPtrAllocator<AsmSymbol> AsmSymbols;
+  std::vector<Symbol> SymTab;
+  Mangler Mang;
 
 public:
-    ArrayRef<Symbol> symbols() const {
-        return SymTab;
-    }
-    void addModule(Module *M);
+  ArrayRef<Symbol> symbols() const { return SymTab; }
+  void addModule(Module *M);
 
-    void printSymbolName(raw_ostream &OS, Symbol S) const;
-    uint32_t getSymbolFlags(Symbol S) const;
+  void printSymbolName(raw_ostream &OS, Symbol S) const;
+  uint32_t getSymbolFlags(Symbol S) const;
 
-    /// Parse inline ASM and collect the symbols that are defined or referenced in
-    /// the current module.
-    ///
-    /// For each found symbol, call \p AsmSymbol with the name of the symbol found
-    /// and the associated flags.
-    static void CollectAsmSymbols(
-        const Module &M,
-        function_ref<void(StringRef, object::BasicSymbolRef::Flags)> AsmSymbol);
+  /// Parse inline ASM and collect the symbols that are defined or referenced in
+  /// the current module.
+  ///
+  /// For each found symbol, call \p AsmSymbol with the name of the symbol found
+  /// and the associated flags.
+  static void CollectAsmSymbols(
+      const Module &M,
+      function_ref<void(StringRef, object::BasicSymbolRef::Flags)> AsmSymbol);
 
-    /// Parse inline ASM and collect the symvers directives that are defined in
-    /// the current module.
-    ///
-    /// For each found symbol, call \p AsmSymver with the name of the symbol and
-    /// its alias.
-    static void
-    CollectAsmSymvers(const Module &M,
-                      function_ref<void(StringRef, StringRef)> AsmSymver);
+  /// Parse inline ASM and collect the symvers directives that are defined in
+  /// the current module.
+  ///
+  /// For each found symbol, call \p AsmSymver with the name of the symbol and
+  /// its alias.
+  static void
+  CollectAsmSymvers(const Module &M,
+                    function_ref<void(StringRef, StringRef)> AsmSymver);
 };
 
 } // end namespace llvm

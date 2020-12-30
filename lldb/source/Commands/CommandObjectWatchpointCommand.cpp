@@ -49,25 +49,25 @@ static constexpr OptionEnumValueElement g_script_option_enumeration[] = {
 };
 
 static constexpr OptionEnumValues ScriptOptionEnum() {
-    return OptionEnumValues(g_script_option_enumeration);
+  return OptionEnumValues(g_script_option_enumeration);
 }
 
 #define LLDB_OPTIONS_watchpoint_command_add
 #include "CommandOptions.inc"
 
 class CommandObjectWatchpointCommandAdd : public CommandObjectParsed,
-    public IOHandlerDelegateMultiline {
+                                          public IOHandlerDelegateMultiline {
 public:
-    CommandObjectWatchpointCommandAdd(CommandInterpreter &interpreter)
-        : CommandObjectParsed(interpreter, "add",
-                              "Add a set of LLDB commands to a watchpoint, to be "
-                              "executed whenever the watchpoint is hit.",
-                              nullptr, eCommandRequiresTarget),
-          IOHandlerDelegateMultiline("DONE",
-                                     IOHandlerDelegate::Completion::LLDBCommand),
-          m_options() {
-        SetHelpLong(
-            R"(
+  CommandObjectWatchpointCommandAdd(CommandInterpreter &interpreter)
+      : CommandObjectParsed(interpreter, "add",
+                            "Add a set of LLDB commands to a watchpoint, to be "
+                            "executed whenever the watchpoint is hit.",
+                            nullptr, eCommandRequiresTarget),
+        IOHandlerDelegateMultiline("DONE",
+                                   IOHandlerDelegate::Completion::LLDBCommand),
+        m_options() {
+    SetHelpLong(
+        R"(
 General information about entering watchpoint commands
 ------------------------------------------------------
 
@@ -348,14 +348,14 @@ are no syntax errors may indicate that a function was declared but never called.
         break;
 
       case 'e': {
-    bool success = false;
-    m_stop_on_error =
-        OptionArgParser::ToBoolean(option_arg, false, &success);
-    if (!success)
-      error.SetErrorStringWithFormat(
-          "invalid value for stop-on-error: \"%s\"",
-          option_arg.str().c_str());
-  } break;
+        bool success = false;
+        m_stop_on_error =
+            OptionArgParser::ToBoolean(option_arg, false, &success);
+        if (!success)
+          error.SetErrorStringWithFormat(
+              "invalid value for stop-on-error: \"%s\"",
+              option_arg.str().c_str());
+      } break;
 
       case 'F':
         m_use_one_liner = false;
@@ -457,190 +457,190 @@ protected:
           else if (!m_options.m_function_name.empty()) {
             std::string oneliner(m_options.m_function_name);
             oneliner += "(frame, wp, internal_dict)";
-            script_interp->SetWatchpointCommandCallback(
-                wp_options, oneliner.c_str());
-    } else {
-        script_interp->CollectDataForWatchpointCommandCallback(wp_options,
-                result);
+            script_interp->SetWatchpointCommandCallback(wp_options,
+                                                        oneliner.c_str());
+          } else {
+            script_interp->CollectDataForWatchpointCommandCallback(wp_options,
+                                                                   result);
+          }
+        } else {
+          // Special handling for one-liner specified inline.
+          if (m_options.m_use_one_liner)
+            SetWatchpointCommandCallback(wp_options,
+                                         m_options.m_one_liner.c_str());
+          else
+            CollectDataForWatchpointCommandCallback(wp_options, result);
+        }
+      }
     }
-} else {
-    // Special handling for one-liner specified inline.
-    if (m_options.m_use_one_liner)
-        SetWatchpointCommandCallback(wp_options,
-                                     m_options.m_one_liner.c_str());
-    else
-        CollectDataForWatchpointCommandCallback(wp_options, result);
-}
-}
-}
 
-return result.Succeeded();
-}
+    return result.Succeeded();
+  }
 
 private:
-CommandOptions m_options;
+  CommandOptions m_options;
 };
 
 // CommandObjectWatchpointCommandDelete
 
 class CommandObjectWatchpointCommandDelete : public CommandObjectParsed {
 public:
-    CommandObjectWatchpointCommandDelete(CommandInterpreter &interpreter)
-        : CommandObjectParsed(interpreter, "delete",
-                              "Delete the set of commands from a watchpoint.",
-                              nullptr, eCommandRequiresTarget) {
-        CommandArgumentEntry arg;
-        CommandArgumentData wp_id_arg;
+  CommandObjectWatchpointCommandDelete(CommandInterpreter &interpreter)
+      : CommandObjectParsed(interpreter, "delete",
+                            "Delete the set of commands from a watchpoint.",
+                            nullptr, eCommandRequiresTarget) {
+    CommandArgumentEntry arg;
+    CommandArgumentData wp_id_arg;
 
-        // Define the first (and only) variant of this arg.
-        wp_id_arg.arg_type = eArgTypeWatchpointID;
-        wp_id_arg.arg_repetition = eArgRepeatPlain;
+    // Define the first (and only) variant of this arg.
+    wp_id_arg.arg_type = eArgTypeWatchpointID;
+    wp_id_arg.arg_repetition = eArgRepeatPlain;
 
-        // There is only one variant this argument could be; put it into the
-        // argument entry.
-        arg.push_back(wp_id_arg);
+    // There is only one variant this argument could be; put it into the
+    // argument entry.
+    arg.push_back(wp_id_arg);
 
-        // Push the data for the first argument into the m_arguments vector.
-        m_arguments.push_back(arg);
-    }
+    // Push the data for the first argument into the m_arguments vector.
+    m_arguments.push_back(arg);
+  }
 
-    ~CommandObjectWatchpointCommandDelete() override = default;
+  ~CommandObjectWatchpointCommandDelete() override = default;
 
 protected:
-    bool DoExecute(Args &command, CommandReturnObject &result) override {
-        Target *target = &GetSelectedTarget();
+  bool DoExecute(Args &command, CommandReturnObject &result) override {
+    Target *target = &GetSelectedTarget();
 
-        const WatchpointList &watchpoints = target->GetWatchpointList();
-        size_t num_watchpoints = watchpoints.GetSize();
+    const WatchpointList &watchpoints = target->GetWatchpointList();
+    size_t num_watchpoints = watchpoints.GetSize();
 
-        if (num_watchpoints == 0) {
-            result.AppendError("No watchpoints exist to have commands deleted");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        if (command.GetArgumentCount() == 0) {
-            result.AppendError(
-                "No watchpoint specified from which to delete the commands");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        std::vector<uint32_t> valid_wp_ids;
-        if (!CommandObjectMultiwordWatchpoint::VerifyWatchpointIDs(target, command,
-                valid_wp_ids)) {
-            result.AppendError("Invalid watchpoints specification.");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        result.SetStatus(eReturnStatusSuccessFinishNoResult);
-        const size_t count = valid_wp_ids.size();
-        for (size_t i = 0; i < count; ++i) {
-            uint32_t cur_wp_id = valid_wp_ids.at(i);
-            if (cur_wp_id != LLDB_INVALID_WATCH_ID) {
-                Watchpoint *wp = target->GetWatchpointList().FindByID(cur_wp_id).get();
-                if (wp)
-                    wp->ClearCallback();
-            } else {
-                result.AppendErrorWithFormat("Invalid watchpoint ID: %u.\n", cur_wp_id);
-                result.SetStatus(eReturnStatusFailed);
-                return false;
-            }
-        }
-        return result.Succeeded();
+    if (num_watchpoints == 0) {
+      result.AppendError("No watchpoints exist to have commands deleted");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
     }
+
+    if (command.GetArgumentCount() == 0) {
+      result.AppendError(
+          "No watchpoint specified from which to delete the commands");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
+    }
+
+    std::vector<uint32_t> valid_wp_ids;
+    if (!CommandObjectMultiwordWatchpoint::VerifyWatchpointIDs(target, command,
+                                                               valid_wp_ids)) {
+      result.AppendError("Invalid watchpoints specification.");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
+    }
+
+    result.SetStatus(eReturnStatusSuccessFinishNoResult);
+    const size_t count = valid_wp_ids.size();
+    for (size_t i = 0; i < count; ++i) {
+      uint32_t cur_wp_id = valid_wp_ids.at(i);
+      if (cur_wp_id != LLDB_INVALID_WATCH_ID) {
+        Watchpoint *wp = target->GetWatchpointList().FindByID(cur_wp_id).get();
+        if (wp)
+          wp->ClearCallback();
+      } else {
+        result.AppendErrorWithFormat("Invalid watchpoint ID: %u.\n", cur_wp_id);
+        result.SetStatus(eReturnStatusFailed);
+        return false;
+      }
+    }
+    return result.Succeeded();
+  }
 };
 
 // CommandObjectWatchpointCommandList
 
 class CommandObjectWatchpointCommandList : public CommandObjectParsed {
 public:
-    CommandObjectWatchpointCommandList(CommandInterpreter &interpreter)
-        : CommandObjectParsed(interpreter, "list",
-                              "List the script or set of commands to be executed "
-                              "when the watchpoint is hit.",
-                              nullptr, eCommandRequiresTarget) {
-        CommandArgumentEntry arg;
-        CommandArgumentData wp_id_arg;
+  CommandObjectWatchpointCommandList(CommandInterpreter &interpreter)
+      : CommandObjectParsed(interpreter, "list",
+                            "List the script or set of commands to be executed "
+                            "when the watchpoint is hit.",
+                            nullptr, eCommandRequiresTarget) {
+    CommandArgumentEntry arg;
+    CommandArgumentData wp_id_arg;
 
-        // Define the first (and only) variant of this arg.
-        wp_id_arg.arg_type = eArgTypeWatchpointID;
-        wp_id_arg.arg_repetition = eArgRepeatPlain;
+    // Define the first (and only) variant of this arg.
+    wp_id_arg.arg_type = eArgTypeWatchpointID;
+    wp_id_arg.arg_repetition = eArgRepeatPlain;
 
-        // There is only one variant this argument could be; put it into the
-        // argument entry.
-        arg.push_back(wp_id_arg);
+    // There is only one variant this argument could be; put it into the
+    // argument entry.
+    arg.push_back(wp_id_arg);
 
-        // Push the data for the first argument into the m_arguments vector.
-        m_arguments.push_back(arg);
-    }
+    // Push the data for the first argument into the m_arguments vector.
+    m_arguments.push_back(arg);
+  }
 
-    ~CommandObjectWatchpointCommandList() override = default;
+  ~CommandObjectWatchpointCommandList() override = default;
 
 protected:
-    bool DoExecute(Args &command, CommandReturnObject &result) override {
-        Target *target = &GetSelectedTarget();
+  bool DoExecute(Args &command, CommandReturnObject &result) override {
+    Target *target = &GetSelectedTarget();
 
-        const WatchpointList &watchpoints = target->GetWatchpointList();
-        size_t num_watchpoints = watchpoints.GetSize();
+    const WatchpointList &watchpoints = target->GetWatchpointList();
+    size_t num_watchpoints = watchpoints.GetSize();
 
-        if (num_watchpoints == 0) {
-            result.AppendError("No watchpoints exist for which to list commands");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        if (command.GetArgumentCount() == 0) {
-            result.AppendError(
-                "No watchpoint specified for which to list the commands");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        std::vector<uint32_t> valid_wp_ids;
-        if (!CommandObjectMultiwordWatchpoint::VerifyWatchpointIDs(target, command,
-                valid_wp_ids)) {
-            result.AppendError("Invalid watchpoints specification.");
-            result.SetStatus(eReturnStatusFailed);
-            return false;
-        }
-
-        result.SetStatus(eReturnStatusSuccessFinishNoResult);
-        const size_t count = valid_wp_ids.size();
-        for (size_t i = 0; i < count; ++i) {
-            uint32_t cur_wp_id = valid_wp_ids.at(i);
-            if (cur_wp_id != LLDB_INVALID_WATCH_ID) {
-                Watchpoint *wp = target->GetWatchpointList().FindByID(cur_wp_id).get();
-
-                if (wp) {
-                    const WatchpointOptions *wp_options = wp->GetOptions();
-                    if (wp_options) {
-                        // Get the callback baton associated with the current watchpoint.
-                        const Baton *baton = wp_options->GetBaton();
-                        if (baton) {
-                            result.GetOutputStream().Printf("Watchpoint %u:\n", cur_wp_id);
-                            baton->GetDescription(result.GetOutputStream().AsRawOstream(),
-                                                  eDescriptionLevelFull,
-                                                  result.GetOutputStream().GetIndentLevel() +
-                                                  2);
-                        } else {
-                            result.AppendMessageWithFormat(
-                                "Watchpoint %u does not have an associated command.\n",
-                                cur_wp_id);
-                        }
-                    }
-                    result.SetStatus(eReturnStatusSuccessFinishResult);
-                } else {
-                    result.AppendErrorWithFormat("Invalid watchpoint ID: %u.\n",
-                                                 cur_wp_id);
-                    result.SetStatus(eReturnStatusFailed);
-                }
-            }
-        }
-
-        return result.Succeeded();
+    if (num_watchpoints == 0) {
+      result.AppendError("No watchpoints exist for which to list commands");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
     }
+
+    if (command.GetArgumentCount() == 0) {
+      result.AppendError(
+          "No watchpoint specified for which to list the commands");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
+    }
+
+    std::vector<uint32_t> valid_wp_ids;
+    if (!CommandObjectMultiwordWatchpoint::VerifyWatchpointIDs(target, command,
+                                                               valid_wp_ids)) {
+      result.AppendError("Invalid watchpoints specification.");
+      result.SetStatus(eReturnStatusFailed);
+      return false;
+    }
+
+    result.SetStatus(eReturnStatusSuccessFinishNoResult);
+    const size_t count = valid_wp_ids.size();
+    for (size_t i = 0; i < count; ++i) {
+      uint32_t cur_wp_id = valid_wp_ids.at(i);
+      if (cur_wp_id != LLDB_INVALID_WATCH_ID) {
+        Watchpoint *wp = target->GetWatchpointList().FindByID(cur_wp_id).get();
+
+        if (wp) {
+          const WatchpointOptions *wp_options = wp->GetOptions();
+          if (wp_options) {
+            // Get the callback baton associated with the current watchpoint.
+            const Baton *baton = wp_options->GetBaton();
+            if (baton) {
+              result.GetOutputStream().Printf("Watchpoint %u:\n", cur_wp_id);
+              baton->GetDescription(result.GetOutputStream().AsRawOstream(),
+                                    eDescriptionLevelFull,
+                                    result.GetOutputStream().GetIndentLevel() +
+                                        2);
+            } else {
+              result.AppendMessageWithFormat(
+                  "Watchpoint %u does not have an associated command.\n",
+                  cur_wp_id);
+            }
+          }
+          result.SetStatus(eReturnStatusSuccessFinishResult);
+        } else {
+          result.AppendErrorWithFormat("Invalid watchpoint ID: %u.\n",
+                                       cur_wp_id);
+          result.SetStatus(eReturnStatusFailed);
+        }
+      }
+    }
+
+    return result.Succeeded();
+  }
 };
 
 // CommandObjectWatchpointCommand
@@ -652,20 +652,20 @@ CommandObjectWatchpointCommand::CommandObjectWatchpointCommand(
           "Commands for adding, removing and examining LLDB commands "
           "executed when the watchpoint is hit (watchpoint 'commands').",
           "command <sub-command> [<sub-command-options>] <watchpoint-id>") {
-    CommandObjectSP add_command_object(
-        new CommandObjectWatchpointCommandAdd(interpreter));
-    CommandObjectSP delete_command_object(
-        new CommandObjectWatchpointCommandDelete(interpreter));
-    CommandObjectSP list_command_object(
-        new CommandObjectWatchpointCommandList(interpreter));
+  CommandObjectSP add_command_object(
+      new CommandObjectWatchpointCommandAdd(interpreter));
+  CommandObjectSP delete_command_object(
+      new CommandObjectWatchpointCommandDelete(interpreter));
+  CommandObjectSP list_command_object(
+      new CommandObjectWatchpointCommandList(interpreter));
 
-    add_command_object->SetCommandName("watchpoint command add");
-    delete_command_object->SetCommandName("watchpoint command delete");
-    list_command_object->SetCommandName("watchpoint command list");
+  add_command_object->SetCommandName("watchpoint command add");
+  delete_command_object->SetCommandName("watchpoint command delete");
+  list_command_object->SetCommandName("watchpoint command list");
 
-    LoadSubCommand("add", add_command_object);
-    LoadSubCommand("delete", delete_command_object);
-    LoadSubCommand("list", list_command_object);
+  LoadSubCommand("add", add_command_object);
+  LoadSubCommand("delete", delete_command_object);
+  LoadSubCommand("list", list_command_object);
 }
 
 CommandObjectWatchpointCommand::~CommandObjectWatchpointCommand() = default;

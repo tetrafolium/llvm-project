@@ -15,15 +15,15 @@ namespace lldb_private {
 
 class PluginInterface {
 public:
-    PluginInterface() = default;
-    virtual ~PluginInterface() = default;
+  PluginInterface() = default;
+  virtual ~PluginInterface() = default;
 
-    virtual ConstString GetPluginName() = 0;
+  virtual ConstString GetPluginName() = 0;
 
-    virtual uint32_t GetPluginVersion() = 0;
+  virtual uint32_t GetPluginVersion() = 0;
 
-    PluginInterface(const PluginInterface &) = delete;
-    PluginInterface &operator=(const PluginInterface &) = delete;
+  PluginInterface(const PluginInterface &) = delete;
+  PluginInterface &operator=(const PluginInterface &) = delete;
 };
 
 } // namespace lldb_private

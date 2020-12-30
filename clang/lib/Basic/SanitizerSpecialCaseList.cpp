@@ -18,27 +18,27 @@ std::unique_ptr<SanitizerSpecialCaseList>
 SanitizerSpecialCaseList::create(const std::vector<std::string> &Paths,
                                  llvm::vfs::FileSystem &VFS,
                                  std::string &Error) {
-    std::unique_ptr<clang::SanitizerSpecialCaseList> SSCL(
-        new SanitizerSpecialCaseList());
-    if (SSCL->createInternal(Paths, VFS, Error)) {
-        SSCL->createSanitizerSections();
-        return SSCL;
-    }
-    return nullptr;
+  std::unique_ptr<clang::SanitizerSpecialCaseList> SSCL(
+      new SanitizerSpecialCaseList());
+  if (SSCL->createInternal(Paths, VFS, Error)) {
+    SSCL->createSanitizerSections();
+    return SSCL;
+  }
+  return nullptr;
 }
 
 std::unique_ptr<SanitizerSpecialCaseList>
 SanitizerSpecialCaseList::createOrDie(const std::vector<std::string> &Paths,
                                       llvm::vfs::FileSystem &VFS) {
-    std::string Error;
-    if (auto SSCL = create(Paths, VFS, Error))
-        return SSCL;
-    llvm::report_fatal_error(Error);
+  std::string Error;
+  if (auto SSCL = create(Paths, VFS, Error))
+    return SSCL;
+  llvm::report_fatal_error(Error);
 }
 
 void SanitizerSpecialCaseList::createSanitizerSections() {
-    for (auto &S : Sections) {
-        SanitizerMask Mask;
+  for (auto &S : Sections) {
+    SanitizerMask Mask;
 
 #define SANITIZER(NAME, ID)                                                    \
   if (S.SectionMatcher->match(NAME))                                           \
@@ -49,17 +49,17 @@ void SanitizerSpecialCaseList::createSanitizerSections() {
 #undef SANITIZER
 #undef SANITIZER_GROUP
 
-        SanitizerSections.emplace_back(Mask, S.Entries);
-    }
+    SanitizerSections.emplace_back(Mask, S.Entries);
+  }
 }
 
 bool SanitizerSpecialCaseList::inSection(SanitizerMask Mask, StringRef Prefix,
-        StringRef Query,
-        StringRef Category) const {
-    for (auto &S : SanitizerSections)
-        if ((S.Mask & Mask) &&
-                SpecialCaseList::inSectionBlame(S.Entries, Prefix, Query, Category))
-            return true;
+                                         StringRef Query,
+                                         StringRef Category) const {
+  for (auto &S : SanitizerSections)
+    if ((S.Mask & Mask) &&
+        SpecialCaseList::inSectionBlame(S.Entries, Prefix, Query, Category))
+      return true;
 
-    return false;
+  return false;
 }

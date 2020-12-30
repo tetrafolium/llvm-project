@@ -19,13 +19,13 @@ namespace dwarfdump {
 
 /// Holds cumulative section sizes for an object file.
 struct SectionSizes {
-    /// Map of .debug section names and their sizes across all such-named
-    /// sections.
-    StringMap<uint64_t> DebugSectionSizes;
-    /// Total number of bytes of all sections.
-    uint64_t TotalObjectSize = 0;
-    /// Total number of bytes of all debug sections.
-    uint64_t TotalDebugSectionsSize = 0;
+  /// Map of .debug section names and their sizes across all such-named
+  /// sections.
+  StringMap<uint64_t> DebugSectionSizes;
+  /// Total number of bytes of all sections.
+  uint64_t TotalObjectSize = 0;
+  /// Total number of bytes of all debug sections.
+  uint64_t TotalDebugSectionsSize = 0;
 };
 
 /// Calculate the section sizes.

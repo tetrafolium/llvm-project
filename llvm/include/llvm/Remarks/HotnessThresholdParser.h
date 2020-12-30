@@ -29,33 +29,33 @@ namespace remarks {
 // Return None Optional if 'auto' is specified, indicating the value will
 // be filled later during PSI.
 inline Expected<Optional<uint64_t>> parseHotnessThresholdOption(StringRef Arg) {
-    if (Arg == "auto")
-        return None;
+  if (Arg == "auto")
+    return None;
 
-    int64_t Val;
-    if (Arg.getAsInteger(10, Val))
-        return createStringError(llvm::inconvertibleErrorCode(),
-                                 "Not an integer: %s", Arg.data());
+  int64_t Val;
+  if (Arg.getAsInteger(10, Val))
+    return createStringError(llvm::inconvertibleErrorCode(),
+                             "Not an integer: %s", Arg.data());
 
-    // Negative integer effectively means no threshold
-    return Val < 0 ? 0 : Val;
+  // Negative integer effectively means no threshold
+  return Val < 0 ? 0 : Val;
 }
 
 // A simple CL parser for '*-remarks-hotness-threshold='
 class HotnessThresholdParser : public cl::parser<Optional<uint64_t>> {
 public:
-    HotnessThresholdParser(cl::Option &O) : cl::parser<Optional<uint64_t>>(O) {}
+  HotnessThresholdParser(cl::Option &O) : cl::parser<Optional<uint64_t>>(O) {}
 
-    bool parse(cl::Option &O, StringRef ArgName, StringRef Arg,
-               Optional<uint64_t> &V) {
-        auto ResultOrErr = parseHotnessThresholdOption(Arg);
-        if (!ResultOrErr)
-            return O.error("Invalid argument '" + Arg +
-                           "', only integer or 'auto' is supported.");
+  bool parse(cl::Option &O, StringRef ArgName, StringRef Arg,
+             Optional<uint64_t> &V) {
+    auto ResultOrErr = parseHotnessThresholdOption(Arg);
+    if (!ResultOrErr)
+      return O.error("Invalid argument '" + Arg +
+                     "', only integer or 'auto' is supported.");
 
-        V = *ResultOrErr;
-        return false;
-    }
+    V = *ResultOrErr;
+    return false;
+  }
 };
 
 } // namespace remarks

@@ -35,20 +35,16 @@ class __buffer
     void
     operator=(const __buffer&) = delete;
 
-public:
+  public:
     __buffer(std::size_t __n) : __allocator_(), __ptr_(__allocator_.allocate(__n)), __buf_size_(__n) {}
 
-    operator bool() const {
-        return __ptr_ != nullptr;
-    }
+    operator bool() const { return __ptr_ != nullptr; }
     _Tp*
     get() const
     {
         return __ptr_;
     }
-    ~__buffer() {
-        __allocator_.deallocate(__ptr_, __buf_size_);
-    }
+    ~__buffer() { __allocator_.deallocate(__ptr_, __buf_size_); }
 };
 
 inline void

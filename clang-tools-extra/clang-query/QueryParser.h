@@ -21,46 +21,46 @@ class QuerySession;
 
 class QueryParser {
 public:
-    /// Parse \a Line as a query.
-    ///
-    /// \return A QueryRef representing the query, which may be an InvalidQuery.
-    static QueryRef parse(StringRef Line, const QuerySession &QS);
+  /// Parse \a Line as a query.
+  ///
+  /// \return A QueryRef representing the query, which may be an InvalidQuery.
+  static QueryRef parse(StringRef Line, const QuerySession &QS);
 
-    /// Compute a list of completions for \a Line assuming a cursor at
-    /// \param Pos characters past the start of \a Line, ordered from most
-    /// likely to least likely.
-    ///
-    /// \return A vector of completions for \a Line.
-    static std::vector<llvm::LineEditor::Completion>
-    complete(StringRef Line, size_t Pos, const QuerySession &QS);
+  /// Compute a list of completions for \a Line assuming a cursor at
+  /// \param Pos characters past the start of \a Line, ordered from most
+  /// likely to least likely.
+  ///
+  /// \return A vector of completions for \a Line.
+  static std::vector<llvm::LineEditor::Completion>
+  complete(StringRef Line, size_t Pos, const QuerySession &QS);
 
 private:
-    QueryParser(StringRef Line, const QuerySession &QS)
-        : Line(Line), CompletionPos(nullptr), QS(QS) {}
+  QueryParser(StringRef Line, const QuerySession &QS)
+      : Line(Line), CompletionPos(nullptr), QS(QS) {}
 
-    StringRef lexWord();
+  StringRef lexWord();
 
-    template <typename T> struct LexOrCompleteWord;
+  template <typename T> struct LexOrCompleteWord;
 
-    QueryRef parseSetBool(bool QuerySession::*Var);
-    QueryRef parseSetTraversalKind(TraversalKind QuerySession::*Var);
-    template <typename QueryType> QueryRef parseSetOutputKind();
-    QueryRef completeMatcherExpression();
+  QueryRef parseSetBool(bool QuerySession::*Var);
+  QueryRef parseSetTraversalKind(TraversalKind QuerySession::*Var);
+  template <typename QueryType> QueryRef parseSetOutputKind();
+  QueryRef completeMatcherExpression();
 
-    QueryRef endQuery(QueryRef Q);
+  QueryRef endQuery(QueryRef Q);
 
-    /// Parse [\p Begin,\p End).
-    ///
-    /// \return A reference to the parsed query object, which may be an
-    /// \c InvalidQuery if a parse error occurs.
-    QueryRef doParse();
+  /// Parse [\p Begin,\p End).
+  ///
+  /// \return A reference to the parsed query object, which may be an
+  /// \c InvalidQuery if a parse error occurs.
+  QueryRef doParse();
 
-    StringRef Line;
+  StringRef Line;
 
-    const char *CompletionPos;
-    std::vector<llvm::LineEditor::Completion> Completions;
+  const char *CompletionPos;
+  std::vector<llvm::LineEditor::Completion> Completions;
 
-    const QuerySession &QS;
+  const QuerySession &QS;
 };
 
 } // namespace query

@@ -16,8 +16,8 @@ class MachineRegisterInfo;
 class TargetInstrInfo;
 
 enum LoopPeelDirection {
-    LPD_Front, ///< Peel the first iteration of the loop.
-    LPD_Back   ///< Peel the last iteration of the loop.
+  LPD_Front, ///< Peel the first iteration of the loop.
+  LPD_Back   ///< Peel the last iteration of the loop.
 };
 
 /// Peels a single block loop. Loop must have two successors, one of which

@@ -75,19 +75,15 @@ const char *__lsan_default_options(void);
 // a string containing LSan suppressions.
 const char *__lsan_default_suppressions(void);
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 
 namespace __lsan {
 class ScopedDisabler {
 public:
-    ScopedDisabler() {
-        __lsan_disable();
-    }
-    ~ScopedDisabler() {
-        __lsan_enable();
-    }
+  ScopedDisabler() { __lsan_disable(); }
+  ~ScopedDisabler() { __lsan_enable(); }
 };
-}  // namespace __lsan
+} // namespace __lsan
 #endif
 
-#endif  // SANITIZER_LSAN_INTERFACE_H
+#endif // SANITIZER_LSAN_INTERFACE_H

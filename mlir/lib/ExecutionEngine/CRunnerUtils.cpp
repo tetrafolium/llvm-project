@@ -23,29 +23,13 @@
 // By providing elementary printing methods only, this
 // library can remain fully unaware of low-level implementation
 // details of our vectors. Also useful for direct LLVM IR output.
-extern "C" void printI64(int64_t i) {
-    fprintf(stdout, "%" PRId64, i);
-}
-extern "C" void printU64(uint64_t u) {
-    fprintf(stdout, "%" PRIu64, u);
-}
-extern "C" void printF32(float f) {
-    fprintf(stdout, "%g", f);
-}
-extern "C" void printF64(double d) {
-    fprintf(stdout, "%lg", d);
-}
-extern "C" void printOpen() {
-    fputs("( ", stdout);
-}
-extern "C" void printClose() {
-    fputs(" )", stdout);
-}
-extern "C" void printComma() {
-    fputs(", ", stdout);
-}
-extern "C" void printNewline() {
-    fputc('\n', stdout);
-}
+extern "C" void printI64(int64_t i) { fprintf(stdout, "%" PRId64, i); }
+extern "C" void printU64(uint64_t u) { fprintf(stdout, "%" PRIu64, u); }
+extern "C" void printF32(float f) { fprintf(stdout, "%g", f); }
+extern "C" void printF64(double d) { fprintf(stdout, "%lg", d); }
+extern "C" void printOpen() { fputs("( ", stdout); }
+extern "C" void printClose() { fputs(" )", stdout); }
+extern "C" void printComma() { fputs(", ", stdout); }
+extern "C" void printNewline() { fputc('\n', stdout); }
 
 #endif // MLIR_CRUNNERUTILS_DEFINE_FUNCTIONS

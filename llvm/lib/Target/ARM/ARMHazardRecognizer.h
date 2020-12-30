@@ -19,19 +19,17 @@ namespace llvm {
 
 // Hazards related to FP MLx instructions
 class ARMHazardRecognizerFPMLx : public ScheduleHazardRecognizer {
-    MachineInstr *LastMI = nullptr;
-    unsigned FpMLxStalls = 0;
+  MachineInstr *LastMI = nullptr;
+  unsigned FpMLxStalls = 0;
 
 public:
-    ARMHazardRecognizerFPMLx() : ScheduleHazardRecognizer() {
-        MaxLookAhead = 1;
-    }
+  ARMHazardRecognizerFPMLx() : ScheduleHazardRecognizer() { MaxLookAhead = 1; }
 
-    HazardType getHazardType(SUnit *SU, int Stalls) override;
-    void Reset() override;
-    void EmitInstruction(SUnit *SU) override;
-    void AdvanceCycle() override;
-    void RecedeCycle() override;
+  HazardType getHazardType(SUnit *SU, int Stalls) override;
+  void Reset() override;
+  void EmitInstruction(SUnit *SU) override;
+  void AdvanceCycle() override;
+  void RecedeCycle() override;
 };
 
 } // end namespace llvm

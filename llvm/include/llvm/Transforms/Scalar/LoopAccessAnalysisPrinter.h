@@ -17,14 +17,14 @@ namespace llvm {
 /// Printer pass for the \c LoopAccessInfo results.
 class LoopAccessInfoPrinterPass
     : public PassInfoMixin<LoopAccessInfoPrinterPass> {
-    raw_ostream &OS;
+  raw_ostream &OS;
 
 public:
-    explicit LoopAccessInfoPrinterPass(raw_ostream &OS) : OS(OS) {}
-    PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                          LoopStandardAnalysisResults &AR, LPMUpdater &U);
+  explicit LoopAccessInfoPrinterPass(raw_ostream &OS) : OS(OS) {}
+  PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
+                        LoopStandardAnalysisResults &AR, LPMUpdater &U);
 };
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

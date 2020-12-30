@@ -26,36 +26,34 @@ class PDBFile;
 
 class PublicsStream {
 public:
-    PublicsStream(std::unique_ptr<msf::MappedBlockStream> Stream);
-    ~PublicsStream();
-    Error reload();
+  PublicsStream(std::unique_ptr<msf::MappedBlockStream> Stream);
+  ~PublicsStream();
+  Error reload();
 
-    uint32_t getSymHash() const;
-    uint16_t getThunkTableSection() const;
-    uint32_t getThunkTableOffset() const;
-    const GSIHashTable &getPublicsTable() const {
-        return PublicsTable;
-    }
-    FixedStreamArray<support::ulittle32_t> getAddressMap() const {
-        return AddressMap;
-    }
-    FixedStreamArray<support::ulittle32_t> getThunkMap() const {
-        return ThunkMap;
-    }
-    FixedStreamArray<SectionOffset> getSectionOffsets() const {
-        return SectionOffsets;
-    }
+  uint32_t getSymHash() const;
+  uint16_t getThunkTableSection() const;
+  uint32_t getThunkTableOffset() const;
+  const GSIHashTable &getPublicsTable() const { return PublicsTable; }
+  FixedStreamArray<support::ulittle32_t> getAddressMap() const {
+    return AddressMap;
+  }
+  FixedStreamArray<support::ulittle32_t> getThunkMap() const {
+    return ThunkMap;
+  }
+  FixedStreamArray<SectionOffset> getSectionOffsets() const {
+    return SectionOffsets;
+  }
 
 private:
-    std::unique_ptr<msf::MappedBlockStream> Stream;
-    GSIHashTable PublicsTable;
-    FixedStreamArray<support::ulittle32_t> AddressMap;
-    FixedStreamArray<support::ulittle32_t> ThunkMap;
-    FixedStreamArray<SectionOffset> SectionOffsets;
+  std::unique_ptr<msf::MappedBlockStream> Stream;
+  GSIHashTable PublicsTable;
+  FixedStreamArray<support::ulittle32_t> AddressMap;
+  FixedStreamArray<support::ulittle32_t> ThunkMap;
+  FixedStreamArray<SectionOffset> SectionOffsets;
 
-    const PublicsStreamHeader *Header;
+  const PublicsStreamHeader *Header;
 };
-}
-}
+} // namespace pdb
+} // namespace llvm
 
 #endif

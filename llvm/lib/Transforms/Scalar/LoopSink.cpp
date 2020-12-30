@@ -92,12 +92,12 @@ static cl::opt<bool> EnableMSSAInLegacyLoopSink(
 ///     AdjustedFreq(BBs) = 99 / SinkFrequencyPercentThreshold%
 static BlockFrequency adjustedSumFreq(SmallPtrSetImpl<BasicBlock *> &BBs,
                                       BlockFrequencyInfo &BFI) {
-    BlockFrequency T = 0;
-    for (BasicBlock *B : BBs)
-        T += BFI.getBlockFreq(B);
-    if (BBs.size() > 1)
-        T /= BranchProbability(SinkFrequencyPercentThreshold, 100);
-    return T;
+  BlockFrequency T = 0;
+  for (BasicBlock *B : BBs)
+    T += BFI.getBlockFreq(B);
+  if (BBs.size() > 1)
+    T /= BranchProbability(SinkFrequencyPercentThreshold, 100);
+  return T;
 }
 
 /// Return a set of basic blocks to insert sinked instructions.
@@ -131,51 +131,51 @@ static SmallPtrSet<BasicBlock *, 2>
 findBBsToSinkInto(const Loop &L, const SmallPtrSetImpl<BasicBlock *> &UseBBs,
                   const SmallVectorImpl<BasicBlock *> &ColdLoopBBs,
                   DominatorTree &DT, BlockFrequencyInfo &BFI) {
-    SmallPtrSet<BasicBlock *, 2> BBsToSinkInto;
-    if (UseBBs.size() == 0)
-        return BBsToSinkInto;
-
-    BBsToSinkInto.insert(UseBBs.begin(), UseBBs.end());
-    SmallPtrSet<BasicBlock *, 2> BBsDominatedByColdestBB;
-
-    // For every iteration:
-    //   * Pick the ColdestBB from ColdLoopBBs
-    //   * Find the set BBsDominatedByColdestBB that satisfy:
-    //     - BBsDominatedByColdestBB is a subset of BBsToSinkInto
-    //     - Every BB in BBsDominatedByColdestBB is dominated by ColdestBB
-    //   * If Freq(ColdestBB) < Freq(BBsDominatedByColdestBB), remove
-    //     BBsDominatedByColdestBB from BBsToSinkInto, add ColdestBB to
-    //     BBsToSinkInto
-    for (BasicBlock *ColdestBB : ColdLoopBBs) {
-        BBsDominatedByColdestBB.clear();
-        for (BasicBlock *SinkedBB : BBsToSinkInto)
-            if (DT.dominates(ColdestBB, SinkedBB))
-                BBsDominatedByColdestBB.insert(SinkedBB);
-        if (BBsDominatedByColdestBB.size() == 0)
-            continue;
-        if (adjustedSumFreq(BBsDominatedByColdestBB, BFI) >
-                BFI.getBlockFreq(ColdestBB)) {
-            for (BasicBlock *DominatedBB : BBsDominatedByColdestBB) {
-                BBsToSinkInto.erase(DominatedBB);
-            }
-            BBsToSinkInto.insert(ColdestBB);
-        }
-    }
-
-    // Can't sink into blocks that have no valid insertion point.
-    for (BasicBlock *BB : BBsToSinkInto) {
-        if (BB->getFirstInsertionPt() == BB->end()) {
-            BBsToSinkInto.clear();
-            break;
-        }
-    }
-
-    // If the total frequency of BBsToSinkInto is larger than preheader frequency,
-    // do not sink.
-    if (adjustedSumFreq(BBsToSinkInto, BFI) >
-            BFI.getBlockFreq(L.getLoopPreheader()))
-        BBsToSinkInto.clear();
+  SmallPtrSet<BasicBlock *, 2> BBsToSinkInto;
+  if (UseBBs.size() == 0)
     return BBsToSinkInto;
+
+  BBsToSinkInto.insert(UseBBs.begin(), UseBBs.end());
+  SmallPtrSet<BasicBlock *, 2> BBsDominatedByColdestBB;
+
+  // For every iteration:
+  //   * Pick the ColdestBB from ColdLoopBBs
+  //   * Find the set BBsDominatedByColdestBB that satisfy:
+  //     - BBsDominatedByColdestBB is a subset of BBsToSinkInto
+  //     - Every BB in BBsDominatedByColdestBB is dominated by ColdestBB
+  //   * If Freq(ColdestBB) < Freq(BBsDominatedByColdestBB), remove
+  //     BBsDominatedByColdestBB from BBsToSinkInto, add ColdestBB to
+  //     BBsToSinkInto
+  for (BasicBlock *ColdestBB : ColdLoopBBs) {
+    BBsDominatedByColdestBB.clear();
+    for (BasicBlock *SinkedBB : BBsToSinkInto)
+      if (DT.dominates(ColdestBB, SinkedBB))
+        BBsDominatedByColdestBB.insert(SinkedBB);
+    if (BBsDominatedByColdestBB.size() == 0)
+      continue;
+    if (adjustedSumFreq(BBsDominatedByColdestBB, BFI) >
+        BFI.getBlockFreq(ColdestBB)) {
+      for (BasicBlock *DominatedBB : BBsDominatedByColdestBB) {
+        BBsToSinkInto.erase(DominatedBB);
+      }
+      BBsToSinkInto.insert(ColdestBB);
+    }
+  }
+
+  // Can't sink into blocks that have no valid insertion point.
+  for (BasicBlock *BB : BBsToSinkInto) {
+    if (BB->getFirstInsertionPt() == BB->end()) {
+      BBsToSinkInto.clear();
+      break;
+    }
+  }
+
+  // If the total frequency of BBsToSinkInto is larger than preheader frequency,
+  // do not sink.
+  if (adjustedSumFreq(BBsToSinkInto, BFI) >
+      BFI.getBlockFreq(L.getLoopPreheader()))
+    BBsToSinkInto.clear();
+  return BBsToSinkInto;
 }
 
 // Sinks \p I from the loop \p L's preheader to its uses. Returns true if
@@ -186,288 +186,288 @@ static bool sinkInstruction(
     Loop &L, Instruction &I, const SmallVectorImpl<BasicBlock *> &ColdLoopBBs,
     const SmallDenseMap<BasicBlock *, int, 16> &LoopBlockNumber, LoopInfo &LI,
     DominatorTree &DT, BlockFrequencyInfo &BFI, MemorySSAUpdater *MSSAU) {
-    // Compute the set of blocks in loop L which contain a use of I.
-    SmallPtrSet<BasicBlock *, 2> BBs;
-    for (auto &U : I.uses()) {
-        Instruction *UI = cast<Instruction>(U.getUser());
-        // We cannot sink I to PHI-uses.
-        if (dyn_cast<PHINode>(UI))
-            return false;
-        // We cannot sink I if it has uses outside of the loop.
-        if (!L.contains(LI.getLoopFor(UI->getParent())))
-            return false;
-        BBs.insert(UI->getParent());
-    }
+  // Compute the set of blocks in loop L which contain a use of I.
+  SmallPtrSet<BasicBlock *, 2> BBs;
+  for (auto &U : I.uses()) {
+    Instruction *UI = cast<Instruction>(U.getUser());
+    // We cannot sink I to PHI-uses.
+    if (dyn_cast<PHINode>(UI))
+      return false;
+    // We cannot sink I if it has uses outside of the loop.
+    if (!L.contains(LI.getLoopFor(UI->getParent())))
+      return false;
+    BBs.insert(UI->getParent());
+  }
 
-    // findBBsToSinkInto is O(BBs.size() * ColdLoopBBs.size()). We cap the max
-    // BBs.size() to avoid expensive computation.
-    // FIXME: Handle code size growth for min_size and opt_size.
-    if (BBs.size() > MaxNumberOfUseBBsForSinking)
+  // findBBsToSinkInto is O(BBs.size() * ColdLoopBBs.size()). We cap the max
+  // BBs.size() to avoid expensive computation.
+  // FIXME: Handle code size growth for min_size and opt_size.
+  if (BBs.size() > MaxNumberOfUseBBsForSinking)
+    return false;
+
+  // Find the set of BBs that we should insert a copy of I.
+  SmallPtrSet<BasicBlock *, 2> BBsToSinkInto =
+      findBBsToSinkInto(L, BBs, ColdLoopBBs, DT, BFI);
+  if (BBsToSinkInto.empty())
+    return false;
+
+  // Return if any of the candidate blocks to sink into is non-cold.
+  if (BBsToSinkInto.size() > 1) {
+    for (auto *BB : BBsToSinkInto)
+      if (!LoopBlockNumber.count(BB))
         return false;
+  }
 
-    // Find the set of BBs that we should insert a copy of I.
-    SmallPtrSet<BasicBlock *, 2> BBsToSinkInto =
-        findBBsToSinkInto(L, BBs, ColdLoopBBs, DT, BFI);
-    if (BBsToSinkInto.empty())
-        return false;
+  // Copy the final BBs into a vector and sort them using the total ordering
+  // of the loop block numbers as iterating the set doesn't give a useful
+  // order. No need to stable sort as the block numbers are a total ordering.
+  SmallVector<BasicBlock *, 2> SortedBBsToSinkInto;
+  SortedBBsToSinkInto.insert(SortedBBsToSinkInto.begin(), BBsToSinkInto.begin(),
+                             BBsToSinkInto.end());
+  llvm::sort(SortedBBsToSinkInto, [&](BasicBlock *A, BasicBlock *B) {
+    return LoopBlockNumber.find(A)->second < LoopBlockNumber.find(B)->second;
+  });
 
-    // Return if any of the candidate blocks to sink into is non-cold.
-    if (BBsToSinkInto.size() > 1) {
-        for (auto *BB : BBsToSinkInto)
-            if (!LoopBlockNumber.count(BB))
-                return false;
-    }
-
-    // Copy the final BBs into a vector and sort them using the total ordering
-    // of the loop block numbers as iterating the set doesn't give a useful
-    // order. No need to stable sort as the block numbers are a total ordering.
-    SmallVector<BasicBlock *, 2> SortedBBsToSinkInto;
-    SortedBBsToSinkInto.insert(SortedBBsToSinkInto.begin(), BBsToSinkInto.begin(),
-                               BBsToSinkInto.end());
-    llvm::sort(SortedBBsToSinkInto, [&](BasicBlock *A, BasicBlock *B) {
-        return LoopBlockNumber.find(A)->second < LoopBlockNumber.find(B)->second;
-    });
-
-    BasicBlock *MoveBB = *SortedBBsToSinkInto.begin();
-    // FIXME: Optimize the efficiency for cloned value replacement. The current
-    //        implementation is O(SortedBBsToSinkInto.size() * I.num_uses()).
-    for (BasicBlock *N : makeArrayRef(SortedBBsToSinkInto).drop_front(1)) {
-        assert(LoopBlockNumber.find(N)->second >
+  BasicBlock *MoveBB = *SortedBBsToSinkInto.begin();
+  // FIXME: Optimize the efficiency for cloned value replacement. The current
+  //        implementation is O(SortedBBsToSinkInto.size() * I.num_uses()).
+  for (BasicBlock *N : makeArrayRef(SortedBBsToSinkInto).drop_front(1)) {
+    assert(LoopBlockNumber.find(N)->second >
                LoopBlockNumber.find(MoveBB)->second &&
-               "BBs not sorted!");
-        // Clone I and replace its uses.
-        Instruction *IC = I.clone();
-        IC->setName(I.getName());
-        IC->insertBefore(&*N->getFirstInsertionPt());
+           "BBs not sorted!");
+    // Clone I and replace its uses.
+    Instruction *IC = I.clone();
+    IC->setName(I.getName());
+    IC->insertBefore(&*N->getFirstInsertionPt());
 
-        if (MSSAU && MSSAU->getMemorySSA()->getMemoryAccess(&I)) {
-            // Create a new MemoryAccess and let MemorySSA set its defining access.
-            MemoryAccess *NewMemAcc =
-                MSSAU->createMemoryAccessInBB(IC, nullptr, N, MemorySSA::Beginning);
-            if (NewMemAcc) {
-                if (auto *MemDef = dyn_cast<MemoryDef>(NewMemAcc))
-                    MSSAU->insertDef(MemDef, /*RenameUses=*/true);
-                else {
-                    auto *MemUse = cast<MemoryUse>(NewMemAcc);
-                    MSSAU->insertUse(MemUse, /*RenameUses=*/true);
-                }
-            }
+    if (MSSAU && MSSAU->getMemorySSA()->getMemoryAccess(&I)) {
+      // Create a new MemoryAccess and let MemorySSA set its defining access.
+      MemoryAccess *NewMemAcc =
+          MSSAU->createMemoryAccessInBB(IC, nullptr, N, MemorySSA::Beginning);
+      if (NewMemAcc) {
+        if (auto *MemDef = dyn_cast<MemoryDef>(NewMemAcc))
+          MSSAU->insertDef(MemDef, /*RenameUses=*/true);
+        else {
+          auto *MemUse = cast<MemoryUse>(NewMemAcc);
+          MSSAU->insertUse(MemUse, /*RenameUses=*/true);
         }
-
-        // Replaces uses of I with IC in N
-        I.replaceUsesWithIf(IC, [N](Use &U) {
-            return cast<Instruction>(U.getUser())->getParent() == N;
-        });
-        // Replaces uses of I with IC in blocks dominated by N
-        replaceDominatedUsesWith(&I, IC, DT, N);
-        LLVM_DEBUG(dbgs() << "Sinking a clone of " << I << " To: " << N->getName()
-                   << '\n');
-        NumLoopSunkCloned++;
+      }
     }
-    LLVM_DEBUG(dbgs() << "Sinking " << I << " To: " << MoveBB->getName() << '\n');
-    NumLoopSunk++;
-    I.moveBefore(&*MoveBB->getFirstInsertionPt());
 
-    if (MSSAU)
-        if (MemoryUseOrDef *OldMemAcc = cast_or_null<MemoryUseOrDef>(
-                                            MSSAU->getMemorySSA()->getMemoryAccess(&I)))
-            MSSAU->moveToPlace(OldMemAcc, MoveBB, MemorySSA::Beginning);
+    // Replaces uses of I with IC in N
+    I.replaceUsesWithIf(IC, [N](Use &U) {
+      return cast<Instruction>(U.getUser())->getParent() == N;
+    });
+    // Replaces uses of I with IC in blocks dominated by N
+    replaceDominatedUsesWith(&I, IC, DT, N);
+    LLVM_DEBUG(dbgs() << "Sinking a clone of " << I << " To: " << N->getName()
+                      << '\n');
+    NumLoopSunkCloned++;
+  }
+  LLVM_DEBUG(dbgs() << "Sinking " << I << " To: " << MoveBB->getName() << '\n');
+  NumLoopSunk++;
+  I.moveBefore(&*MoveBB->getFirstInsertionPt());
 
-    return true;
+  if (MSSAU)
+    if (MemoryUseOrDef *OldMemAcc = cast_or_null<MemoryUseOrDef>(
+            MSSAU->getMemorySSA()->getMemoryAccess(&I)))
+      MSSAU->moveToPlace(OldMemAcc, MoveBB, MemorySSA::Beginning);
+
+  return true;
 }
 
 /// Sinks instructions from loop's preheader to the loop body if the
 /// sum frequency of inserted copy is smaller than preheader's frequency.
 static bool sinkLoopInvariantInstructions(Loop &L, AAResults &AA, LoopInfo &LI,
-        DominatorTree &DT,
-        BlockFrequencyInfo &BFI,
-        ScalarEvolution *SE,
-        AliasSetTracker *CurAST,
-        MemorySSA *MSSA) {
-    BasicBlock *Preheader = L.getLoopPreheader();
-    assert(Preheader && "Expected loop to have preheader");
+                                          DominatorTree &DT,
+                                          BlockFrequencyInfo &BFI,
+                                          ScalarEvolution *SE,
+                                          AliasSetTracker *CurAST,
+                                          MemorySSA *MSSA) {
+  BasicBlock *Preheader = L.getLoopPreheader();
+  assert(Preheader && "Expected loop to have preheader");
 
-    assert(Preheader->getParent()->hasProfileData() &&
-           "Unexpected call when profile data unavailable.");
+  assert(Preheader->getParent()->hasProfileData() &&
+         "Unexpected call when profile data unavailable.");
 
-    const BlockFrequency PreheaderFreq = BFI.getBlockFreq(Preheader);
-    // If there are no basic blocks with lower frequency than the preheader then
-    // we can avoid the detailed analysis as we will never find profitable sinking
-    // opportunities.
-    if (all_of(L.blocks(), [&](const BasicBlock *BB) {
-    return BFI.getBlockFreq(BB) > PreheaderFreq;
-    }))
+  const BlockFrequency PreheaderFreq = BFI.getBlockFreq(Preheader);
+  // If there are no basic blocks with lower frequency than the preheader then
+  // we can avoid the detailed analysis as we will never find profitable sinking
+  // opportunities.
+  if (all_of(L.blocks(), [&](const BasicBlock *BB) {
+        return BFI.getBlockFreq(BB) > PreheaderFreq;
+      }))
     return false;
 
-    std::unique_ptr<MemorySSAUpdater> MSSAU;
-    std::unique_ptr<SinkAndHoistLICMFlags> LICMFlags;
-    if (MSSA) {
-        MSSAU = std::make_unique<MemorySSAUpdater>(MSSA);
-        LICMFlags =
-            std::make_unique<SinkAndHoistLICMFlags>(/*IsSink=*/true, &L, MSSA);
+  std::unique_ptr<MemorySSAUpdater> MSSAU;
+  std::unique_ptr<SinkAndHoistLICMFlags> LICMFlags;
+  if (MSSA) {
+    MSSAU = std::make_unique<MemorySSAUpdater>(MSSA);
+    LICMFlags =
+        std::make_unique<SinkAndHoistLICMFlags>(/*IsSink=*/true, &L, MSSA);
+  }
+
+  bool Changed = false;
+
+  // Sort loop's basic blocks by frequency
+  SmallVector<BasicBlock *, 10> ColdLoopBBs;
+  SmallDenseMap<BasicBlock *, int, 16> LoopBlockNumber;
+  int i = 0;
+  for (BasicBlock *B : L.blocks())
+    if (BFI.getBlockFreq(B) < BFI.getBlockFreq(L.getLoopPreheader())) {
+      ColdLoopBBs.push_back(B);
+      LoopBlockNumber[B] = ++i;
     }
+  llvm::stable_sort(ColdLoopBBs, [&](BasicBlock *A, BasicBlock *B) {
+    return BFI.getBlockFreq(A) < BFI.getBlockFreq(B);
+  });
 
-    bool Changed = false;
+  // Traverse preheader's instructions in reverse order becaue if A depends
+  // on B (A appears after B), A needs to be sinked first before B can be
+  // sinked.
+  for (auto II = Preheader->rbegin(), E = Preheader->rend(); II != E;) {
+    Instruction *I = &*II++;
+    // No need to check for instruction's operands are loop invariant.
+    assert(L.hasLoopInvariantOperands(I) &&
+           "Insts in a loop's preheader should have loop invariant operands!");
+    if (!canSinkOrHoistInst(*I, &AA, &DT, &L, CurAST, MSSAU.get(), false,
+                            LICMFlags.get()))
+      continue;
+    if (sinkInstruction(L, *I, ColdLoopBBs, LoopBlockNumber, LI, DT, BFI,
+                        MSSAU.get()))
+      Changed = true;
+  }
 
-    // Sort loop's basic blocks by frequency
-    SmallVector<BasicBlock *, 10> ColdLoopBBs;
-    SmallDenseMap<BasicBlock *, int, 16> LoopBlockNumber;
-    int i = 0;
-    for (BasicBlock *B : L.blocks())
-        if (BFI.getBlockFreq(B) < BFI.getBlockFreq(L.getLoopPreheader())) {
-            ColdLoopBBs.push_back(B);
-            LoopBlockNumber[B] = ++i;
-        }
-    llvm::stable_sort(ColdLoopBBs, [&](BasicBlock *A, BasicBlock *B) {
-        return BFI.getBlockFreq(A) < BFI.getBlockFreq(B);
-    });
-
-    // Traverse preheader's instructions in reverse order becaue if A depends
-    // on B (A appears after B), A needs to be sinked first before B can be
-    // sinked.
-    for (auto II = Preheader->rbegin(), E = Preheader->rend(); II != E;) {
-        Instruction *I = &*II++;
-        // No need to check for instruction's operands are loop invariant.
-        assert(L.hasLoopInvariantOperands(I) &&
-               "Insts in a loop's preheader should have loop invariant operands!");
-        if (!canSinkOrHoistInst(*I, &AA, &DT, &L, CurAST, MSSAU.get(), false,
-                                LICMFlags.get()))
-            continue;
-        if (sinkInstruction(L, *I, ColdLoopBBs, LoopBlockNumber, LI, DT, BFI,
-                            MSSAU.get()))
-            Changed = true;
-    }
-
-    if (Changed && SE)
-        SE->forgetLoopDispositions(&L);
-    return Changed;
+  if (Changed && SE)
+    SE->forgetLoopDispositions(&L);
+  return Changed;
 }
 
 static void computeAliasSet(Loop &L, BasicBlock &Preheader,
                             AliasSetTracker &CurAST) {
-    for (BasicBlock *BB : L.blocks())
-        CurAST.add(*BB);
-    CurAST.add(Preheader);
+  for (BasicBlock *BB : L.blocks())
+    CurAST.add(*BB);
+  CurAST.add(Preheader);
 }
 
 PreservedAnalyses LoopSinkPass::run(Function &F, FunctionAnalysisManager &FAM) {
-    LoopInfo &LI = FAM.getResult<LoopAnalysis>(F);
-    // Nothing to do if there are no loops.
-    if (LI.empty())
-        return PreservedAnalyses::all();
+  LoopInfo &LI = FAM.getResult<LoopAnalysis>(F);
+  // Nothing to do if there are no loops.
+  if (LI.empty())
+    return PreservedAnalyses::all();
 
-    AAResults &AA = FAM.getResult<AAManager>(F);
-    DominatorTree &DT = FAM.getResult<DominatorTreeAnalysis>(F);
-    BlockFrequencyInfo &BFI = FAM.getResult<BlockFrequencyAnalysis>(F);
+  AAResults &AA = FAM.getResult<AAManager>(F);
+  DominatorTree &DT = FAM.getResult<DominatorTreeAnalysis>(F);
+  BlockFrequencyInfo &BFI = FAM.getResult<BlockFrequencyAnalysis>(F);
 
-    MemorySSA *MSSA = EnableMSSAInLoopSink
-                      ? &FAM.getResult<MemorySSAAnalysis>(F).getMSSA()
-                      : nullptr;
+  MemorySSA *MSSA = EnableMSSAInLoopSink
+                        ? &FAM.getResult<MemorySSAAnalysis>(F).getMSSA()
+                        : nullptr;
 
-    // We want to do a postorder walk over the loops. Since loops are a tree this
-    // is equivalent to a reversed preorder walk and preorder is easy to compute
-    // without recursion. Since we reverse the preorder, we will visit siblings
-    // in reverse program order. This isn't expected to matter at all but is more
-    // consistent with sinking algorithms which generally work bottom-up.
-    SmallVector<Loop *, 4> PreorderLoops = LI.getLoopsInPreorder();
+  // We want to do a postorder walk over the loops. Since loops are a tree this
+  // is equivalent to a reversed preorder walk and preorder is easy to compute
+  // without recursion. Since we reverse the preorder, we will visit siblings
+  // in reverse program order. This isn't expected to matter at all but is more
+  // consistent with sinking algorithms which generally work bottom-up.
+  SmallVector<Loop *, 4> PreorderLoops = LI.getLoopsInPreorder();
 
-    bool Changed = false;
-    do {
-        Loop &L = *PreorderLoops.pop_back_val();
+  bool Changed = false;
+  do {
+    Loop &L = *PreorderLoops.pop_back_val();
 
-        BasicBlock *Preheader = L.getLoopPreheader();
-        if (!Preheader)
-            continue;
+    BasicBlock *Preheader = L.getLoopPreheader();
+    if (!Preheader)
+      continue;
 
-        // Enable LoopSink only when runtime profile is available.
-        // With static profile, the sinking decision may be sub-optimal.
-        if (!Preheader->getParent()->hasProfileData())
-            continue;
+    // Enable LoopSink only when runtime profile is available.
+    // With static profile, the sinking decision may be sub-optimal.
+    if (!Preheader->getParent()->hasProfileData())
+      continue;
 
-        std::unique_ptr<AliasSetTracker> CurAST;
-        if (!EnableMSSAInLoopSink) {
-            CurAST = std::make_unique<AliasSetTracker>(AA);
-            computeAliasSet(L, *Preheader, *CurAST.get());
-        }
-
-        // Note that we don't pass SCEV here because it is only used to invalidate
-        // loops in SCEV and we don't preserve (or request) SCEV at all making that
-        // unnecessary.
-        Changed |= sinkLoopInvariantInstructions(L, AA, LI, DT, BFI,
-                   /*ScalarEvolution*/ nullptr,
-                   CurAST.get(), MSSA);
-    } while (!PreorderLoops.empty());
-
-    if (!Changed)
-        return PreservedAnalyses::all();
-
-    PreservedAnalyses PA;
-    PA.preserveSet<CFGAnalyses>();
-
-    if (MSSA) {
-        PA.preserve<MemorySSAAnalysis>();
-
-        if (VerifyMemorySSA)
-            MSSA->verifyMemorySSA();
+    std::unique_ptr<AliasSetTracker> CurAST;
+    if (!EnableMSSAInLoopSink) {
+      CurAST = std::make_unique<AliasSetTracker>(AA);
+      computeAliasSet(L, *Preheader, *CurAST.get());
     }
 
-    return PA;
+    // Note that we don't pass SCEV here because it is only used to invalidate
+    // loops in SCEV and we don't preserve (or request) SCEV at all making that
+    // unnecessary.
+    Changed |= sinkLoopInvariantInstructions(L, AA, LI, DT, BFI,
+                                             /*ScalarEvolution*/ nullptr,
+                                             CurAST.get(), MSSA);
+  } while (!PreorderLoops.empty());
+
+  if (!Changed)
+    return PreservedAnalyses::all();
+
+  PreservedAnalyses PA;
+  PA.preserveSet<CFGAnalyses>();
+
+  if (MSSA) {
+    PA.preserve<MemorySSAAnalysis>();
+
+    if (VerifyMemorySSA)
+      MSSA->verifyMemorySSA();
+  }
+
+  return PA;
 }
 
 namespace {
 struct LegacyLoopSinkPass : public LoopPass {
-    static char ID;
-    LegacyLoopSinkPass() : LoopPass(ID) {
-        initializeLegacyLoopSinkPassPass(*PassRegistry::getPassRegistry());
+  static char ID;
+  LegacyLoopSinkPass() : LoopPass(ID) {
+    initializeLegacyLoopSinkPassPass(*PassRegistry::getPassRegistry());
+  }
+
+  bool runOnLoop(Loop *L, LPPassManager &LPM) override {
+    if (skipLoop(L))
+      return false;
+
+    BasicBlock *Preheader = L->getLoopPreheader();
+    if (!Preheader)
+      return false;
+
+    // Enable LoopSink only when runtime profile is available.
+    // With static profile, the sinking decision may be sub-optimal.
+    if (!Preheader->getParent()->hasProfileData())
+      return false;
+
+    AAResults &AA = getAnalysis<AAResultsWrapperPass>().getAAResults();
+    auto *SE = getAnalysisIfAvailable<ScalarEvolutionWrapperPass>();
+    std::unique_ptr<AliasSetTracker> CurAST;
+    MemorySSA *MSSA = nullptr;
+    if (EnableMSSAInLegacyLoopSink)
+      MSSA = &getAnalysis<MemorySSAWrapperPass>().getMSSA();
+    else {
+      CurAST = std::make_unique<AliasSetTracker>(AA);
+      computeAliasSet(*L, *Preheader, *CurAST.get());
     }
 
-    bool runOnLoop(Loop *L, LPPassManager &LPM) override {
-        if (skipLoop(L))
-            return false;
+    bool Changed = sinkLoopInvariantInstructions(
+        *L, AA, getAnalysis<LoopInfoWrapperPass>().getLoopInfo(),
+        getAnalysis<DominatorTreeWrapperPass>().getDomTree(),
+        getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI(),
+        SE ? &SE->getSE() : nullptr, CurAST.get(), MSSA);
 
-        BasicBlock *Preheader = L->getLoopPreheader();
-        if (!Preheader)
-            return false;
+    if (MSSA && VerifyMemorySSA)
+      MSSA->verifyMemorySSA();
 
-        // Enable LoopSink only when runtime profile is available.
-        // With static profile, the sinking decision may be sub-optimal.
-        if (!Preheader->getParent()->hasProfileData())
-            return false;
+    return Changed;
+  }
 
-        AAResults &AA = getAnalysis<AAResultsWrapperPass>().getAAResults();
-        auto *SE = getAnalysisIfAvailable<ScalarEvolutionWrapperPass>();
-        std::unique_ptr<AliasSetTracker> CurAST;
-        MemorySSA *MSSA = nullptr;
-        if (EnableMSSAInLegacyLoopSink)
-            MSSA = &getAnalysis<MemorySSAWrapperPass>().getMSSA();
-        else {
-            CurAST = std::make_unique<AliasSetTracker>(AA);
-            computeAliasSet(*L, *Preheader, *CurAST.get());
-        }
-
-        bool Changed = sinkLoopInvariantInstructions(
-                           *L, AA, getAnalysis<LoopInfoWrapperPass>().getLoopInfo(),
-                           getAnalysis<DominatorTreeWrapperPass>().getDomTree(),
-                           getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI(),
-                           SE ? &SE->getSE() : nullptr, CurAST.get(), MSSA);
-
-        if (MSSA && VerifyMemorySSA)
-            MSSA->verifyMemorySSA();
-
-        return Changed;
+  void getAnalysisUsage(AnalysisUsage &AU) const override {
+    AU.setPreservesCFG();
+    AU.addRequired<BlockFrequencyInfoWrapperPass>();
+    getLoopAnalysisUsage(AU);
+    if (EnableMSSAInLegacyLoopSink) {
+      AU.addRequired<MemorySSAWrapperPass>();
+      AU.addPreserved<MemorySSAWrapperPass>();
     }
-
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-        AU.setPreservesCFG();
-        AU.addRequired<BlockFrequencyInfoWrapperPass>();
-        getLoopAnalysisUsage(AU);
-        if (EnableMSSAInLegacyLoopSink) {
-            AU.addRequired<MemorySSAWrapperPass>();
-            AU.addPreserved<MemorySSAWrapperPass>();
-        }
-    }
+  }
 };
-}
+} // namespace
 
 char LegacyLoopSinkPass::ID = 0;
 INITIALIZE_PASS_BEGIN(LegacyLoopSinkPass, "loop-sink", "Loop Sink", false,
@@ -477,6 +477,4 @@ INITIALIZE_PASS_DEPENDENCY(BlockFrequencyInfoWrapperPass)
 INITIALIZE_PASS_DEPENDENCY(MemorySSAWrapperPass)
 INITIALIZE_PASS_END(LegacyLoopSinkPass, "loop-sink", "Loop Sink", false, false)
 
-Pass *llvm::createLoopSinkPass() {
-    return new LegacyLoopSinkPass();
-}
+Pass *llvm::createLoopSinkPass() { return new LegacyLoopSinkPass(); }

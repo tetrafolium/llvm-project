@@ -21,45 +21,45 @@ namespace llvm {
 class Triple;
 
 class X86MCAsmInfoDarwin : public MCAsmInfoDarwin {
-    virtual void anchor();
+  virtual void anchor();
 
 public:
-    explicit X86MCAsmInfoDarwin(const Triple &Triple);
+  explicit X86MCAsmInfoDarwin(const Triple &Triple);
 };
 
 struct X86_64MCAsmInfoDarwin : public X86MCAsmInfoDarwin {
-    explicit X86_64MCAsmInfoDarwin(const Triple &Triple);
-    const MCExpr *
-    getExprForPersonalitySymbol(const MCSymbol *Sym, unsigned Encoding,
-                                MCStreamer &Streamer) const override;
+  explicit X86_64MCAsmInfoDarwin(const Triple &Triple);
+  const MCExpr *
+  getExprForPersonalitySymbol(const MCSymbol *Sym, unsigned Encoding,
+                              MCStreamer &Streamer) const override;
 };
 
 class X86ELFMCAsmInfo : public MCAsmInfoELF {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit X86ELFMCAsmInfo(const Triple &Triple);
+  explicit X86ELFMCAsmInfo(const Triple &Triple);
 };
 
 class X86MCAsmInfoMicrosoft : public MCAsmInfoMicrosoft {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit X86MCAsmInfoMicrosoft(const Triple &Triple);
+  explicit X86MCAsmInfoMicrosoft(const Triple &Triple);
 };
 
 class X86MCAsmInfoMicrosoftMASM : public X86MCAsmInfoMicrosoft {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit X86MCAsmInfoMicrosoftMASM(const Triple &Triple);
+  explicit X86MCAsmInfoMicrosoftMASM(const Triple &Triple);
 };
 
 class X86MCAsmInfoGNUCOFF : public MCAsmInfoGNUCOFF {
-    void anchor() override;
+  void anchor() override;
 
 public:
-    explicit X86MCAsmInfoGNUCOFF(const Triple &Triple);
+  explicit X86MCAsmInfoGNUCOFF(const Triple &Triple);
 };
 } // namespace llvm
 

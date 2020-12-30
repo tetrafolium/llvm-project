@@ -26,28 +26,26 @@ namespace llvm {
 /// \post for all inst in MF: not isPreISelGenericOpcode(inst.opcode)
 class InstructionSelect : public MachineFunctionPass {
 public:
-    static char ID;
-    StringRef getPassName() const override {
-        return "InstructionSelect";
-    }
+  static char ID;
+  StringRef getPassName() const override { return "InstructionSelect"; }
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override;
+  void getAnalysisUsage(AnalysisUsage &AU) const override;
 
-    MachineFunctionProperties getRequiredProperties() const override {
-        return MachineFunctionProperties()
-               .set(MachineFunctionProperties::Property::IsSSA)
-               .set(MachineFunctionProperties::Property::Legalized)
-               .set(MachineFunctionProperties::Property::RegBankSelected);
-    }
+  MachineFunctionProperties getRequiredProperties() const override {
+    return MachineFunctionProperties()
+        .set(MachineFunctionProperties::Property::IsSSA)
+        .set(MachineFunctionProperties::Property::Legalized)
+        .set(MachineFunctionProperties::Property::RegBankSelected);
+  }
 
-    MachineFunctionProperties getSetProperties() const override {
-        return MachineFunctionProperties().set(
-                   MachineFunctionProperties::Property::Selected);
-    }
+  MachineFunctionProperties getSetProperties() const override {
+    return MachineFunctionProperties().set(
+        MachineFunctionProperties::Property::Selected);
+  }
 
-    InstructionSelect();
+  InstructionSelect();
 
-    bool runOnMachineFunction(MachineFunction &MF) override;
+  bool runOnMachineFunction(MachineFunction &MF) override;
 };
 } // End namespace llvm.
 

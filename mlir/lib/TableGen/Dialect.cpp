@@ -16,75 +16,71 @@
 using namespace mlir;
 using namespace mlir::tblgen;
 Dialect::Dialect(const llvm::Record *def) : def(def) {
-    if (def == nullptr)
-        return;
-    for (StringRef dialect : def->getValueAsListOfStrings("dependentDialects"))
-        dependentDialects.push_back(dialect);
+  if (def == nullptr)
+    return;
+  for (StringRef dialect : def->getValueAsListOfStrings("dependentDialects"))
+    dependentDialects.push_back(dialect);
 }
 
-StringRef Dialect::getName() const {
-    return def->getValueAsString("name");
-}
+StringRef Dialect::getName() const { return def->getValueAsString("name"); }
 
 StringRef Dialect::getCppNamespace() const {
-    return def->getValueAsString("cppNamespace");
+  return def->getValueAsString("cppNamespace");
 }
 
 std::string Dialect::getCppClassName() const {
-    // Simply use the name and remove any '_' tokens.
-    std::string cppName = def->getName().str();
-    llvm::erase_if(cppName, [](char c) {
-        return c == '_';
-    });
-    return cppName;
+  // Simply use the name and remove any '_' tokens.
+  std::string cppName = def->getName().str();
+  llvm::erase_if(cppName, [](char c) { return c == '_'; });
+  return cppName;
 }
 
 static StringRef getAsStringOrEmpty(const llvm::Record &record,
                                     StringRef fieldName) {
-    if (auto valueInit = record.getValueInit(fieldName)) {
-        if (llvm::isa<llvm::StringInit>(valueInit))
-            return record.getValueAsString(fieldName);
-    }
-    return "";
+  if (auto valueInit = record.getValueInit(fieldName)) {
+    if (llvm::isa<llvm::StringInit>(valueInit))
+      return record.getValueAsString(fieldName);
+  }
+  return "";
 }
 
 StringRef Dialect::getSummary() const {
-    return getAsStringOrEmpty(*def, "summary");
+  return getAsStringOrEmpty(*def, "summary");
 }
 
 StringRef Dialect::getDescription() const {
-    return getAsStringOrEmpty(*def, "description");
+  return getAsStringOrEmpty(*def, "description");
 }
 
 ArrayRef<StringRef> Dialect::getDependentDialects() const {
-    return dependentDialects;
+  return dependentDialects;
 }
 
 llvm::Optional<StringRef> Dialect::getExtraClassDeclaration() const {
-    auto value = def->getValueAsString("extraClassDeclaration");
-    return value.empty() ? llvm::Optional<StringRef>() : value;
+  auto value = def->getValueAsString("extraClassDeclaration");
+  return value.empty() ? llvm::Optional<StringRef>() : value;
 }
 
 bool Dialect::hasConstantMaterializer() const {
-    return def->getValueAsBit("hasConstantMaterializer");
+  return def->getValueAsBit("hasConstantMaterializer");
 }
 
 bool Dialect::hasOperationAttrVerify() const {
-    return def->getValueAsBit("hasOperationAttrVerify");
+  return def->getValueAsBit("hasOperationAttrVerify");
 }
 
 bool Dialect::hasRegionArgAttrVerify() const {
-    return def->getValueAsBit("hasRegionArgAttrVerify");
+  return def->getValueAsBit("hasRegionArgAttrVerify");
 }
 
 bool Dialect::hasRegionResultAttrVerify() const {
-    return def->getValueAsBit("hasRegionResultAttrVerify");
+  return def->getValueAsBit("hasRegionResultAttrVerify");
 }
 
 bool Dialect::operator==(const Dialect &other) const {
-    return def == other.def;
+  return def == other.def;
 }
 
 bool Dialect::operator<(const Dialect &other) const {
-    return getName() < other.getName();
+  return getName() < other.getName();
 }

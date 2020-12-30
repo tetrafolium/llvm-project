@@ -17,53 +17,49 @@ using namespace llvm::codeview;
 
 TypeTableCollection::TypeTableCollection(ArrayRef<ArrayRef<uint8_t>> Records)
     : NameStorage(Allocator), Records(Records) {
-    Names.resize(Records.size());
+  Names.resize(Records.size());
 }
 
 Optional<TypeIndex> TypeTableCollection::getFirst() {
-    if (empty())
-        return None;
-    return TypeIndex::fromArrayIndex(0);
+  if (empty())
+    return None;
+  return TypeIndex::fromArrayIndex(0);
 }
 
 Optional<TypeIndex> TypeTableCollection::getNext(TypeIndex Prev) {
-    assert(contains(Prev));
-    ++Prev;
-    if (Prev.toArrayIndex() == size())
-        return None;
-    return Prev;
+  assert(contains(Prev));
+  ++Prev;
+  if (Prev.toArrayIndex() == size())
+    return None;
+  return Prev;
 }
 
 CVType TypeTableCollection::getType(TypeIndex Index) {
-    assert(Index.toArrayIndex() < Records.size());
-    return CVType(Records[Index.toArrayIndex()]);
+  assert(Index.toArrayIndex() < Records.size());
+  return CVType(Records[Index.toArrayIndex()]);
 }
 
 StringRef TypeTableCollection::getTypeName(TypeIndex Index) {
-    if (Index.isNoneType() || Index.isSimple())
-        return TypeIndex::simpleTypeName(Index);
+  if (Index.isNoneType() || Index.isSimple())
+    return TypeIndex::simpleTypeName(Index);
 
-    uint32_t I = Index.toArrayIndex();
-    if (Names[I].data() == nullptr) {
-        StringRef Result = NameStorage.save(computeTypeName(*this, Index));
-        Names[I] = Result;
-    }
-    return Names[I];
+  uint32_t I = Index.toArrayIndex();
+  if (Names[I].data() == nullptr) {
+    StringRef Result = NameStorage.save(computeTypeName(*this, Index));
+    Names[I] = Result;
+  }
+  return Names[I];
 }
 
 bool TypeTableCollection::contains(TypeIndex Index) {
-    return Index.toArrayIndex() <= size();
+  return Index.toArrayIndex() <= size();
 }
 
-uint32_t TypeTableCollection::size() {
-    return Records.size();
-}
+uint32_t TypeTableCollection::size() { return Records.size(); }
 
-uint32_t TypeTableCollection::capacity() {
-    return Records.size();
-}
+uint32_t TypeTableCollection::capacity() { return Records.size(); }
 
 bool TypeTableCollection::replaceType(TypeIndex &Index, CVType Data,
                                       bool Stabilize) {
-    llvm_unreachable("Method cannot be called");
+  llvm_unreachable("Method cannot be called");
 }

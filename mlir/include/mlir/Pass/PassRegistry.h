@@ -32,8 +32,8 @@ class PassOptions;
 /// parameter corresponds to the raw location within the pipeline string. This
 /// should always return failure.
 using PassRegistryFunction = std::function<LogicalResult(
-                                 OpPassManager &, StringRef options,
-                                 function_ref<LogicalResult(const Twine &)> errorHandler)>;
+    OpPassManager &, StringRef options,
+    function_ref<LogicalResult(const Twine &)> errorHandler)>;
 using PassAllocatorFunction = std::function<std::unique_ptr<Pass>()>;
 
 //===----------------------------------------------------------------------===//
@@ -44,76 +44,72 @@ using PassAllocatorFunction = std::function<std::unique_ptr<Pass>()>;
 /// to invoke via mlir-opt, description, pass pipeline builder).
 class PassRegistryEntry {
 public:
-    /// Adds this pass registry entry to the given pass manager. `options` is
-    /// an opaque string that will be parsed by the builder. The success of
-    /// parsing will be returned.
-    LogicalResult
-    addToPipeline(OpPassManager &pm, StringRef options,
-                  function_ref<LogicalResult(const Twine &)> errorHandler) const {
-        assert(builder &&
-               "cannot call addToPipeline on PassRegistryEntry without builder");
-        return builder(pm, options, errorHandler);
-    }
+  /// Adds this pass registry entry to the given pass manager. `options` is
+  /// an opaque string that will be parsed by the builder. The success of
+  /// parsing will be returned.
+  LogicalResult
+  addToPipeline(OpPassManager &pm, StringRef options,
+                function_ref<LogicalResult(const Twine &)> errorHandler) const {
+    assert(builder &&
+           "cannot call addToPipeline on PassRegistryEntry without builder");
+    return builder(pm, options, errorHandler);
+  }
 
-    /// Returns the command line option that may be passed to 'mlir-opt' that will
-    /// cause this pass to run or null if there is no such argument.
-    StringRef getPassArgument() const {
-        return arg;
-    }
+  /// Returns the command line option that may be passed to 'mlir-opt' that will
+  /// cause this pass to run or null if there is no such argument.
+  StringRef getPassArgument() const { return arg; }
 
-    /// Returns a description for the pass, this never returns null.
-    StringRef getPassDescription() const {
-        return description;
-    }
+  /// Returns a description for the pass, this never returns null.
+  StringRef getPassDescription() const { return description; }
 
-    /// Print the help information for this pass. This includes the argument,
-    /// description, and any pass options. `descIndent` is the indent that the
-    /// descriptions should be aligned.
-    void printHelpStr(size_t indent, size_t descIndent) const;
+  /// Print the help information for this pass. This includes the argument,
+  /// description, and any pass options. `descIndent` is the indent that the
+  /// descriptions should be aligned.
+  void printHelpStr(size_t indent, size_t descIndent) const;
 
-    /// Return the maximum width required when printing the options of this entry.
-    size_t getOptionWidth() const;
+  /// Return the maximum width required when printing the options of this entry.
+  size_t getOptionWidth() const;
 
 protected:
-    PassRegistryEntry(
-        StringRef arg, StringRef description, const PassRegistryFunction &builder,
-        std::function<void(function_ref<void(const detail::PassOptions &)>)>
-        optHandler)
-        : arg(arg), description(description), builder(builder),
-          optHandler(optHandler) {}
+  PassRegistryEntry(
+      StringRef arg, StringRef description, const PassRegistryFunction &builder,
+      std::function<void(function_ref<void(const detail::PassOptions &)>)>
+          optHandler)
+      : arg(arg), description(description), builder(builder),
+        optHandler(optHandler) {}
 
 private:
-    /// The argument with which to invoke the pass via mlir-opt.
-    StringRef arg;
+  /// The argument with which to invoke the pass via mlir-opt.
+  StringRef arg;
 
-    /// Description of the pass.
-    StringRef description;
+  /// Description of the pass.
+  StringRef description;
 
-    /// Function to register this entry to a pass manager pipeline.
-    PassRegistryFunction builder;
+  /// Function to register this entry to a pass manager pipeline.
+  PassRegistryFunction builder;
 
-    /// Function to invoke a handler for a pass options instance.
-    std::function<void(function_ref<void(const detail::PassOptions &)>)>
-    optHandler;
+  /// Function to invoke a handler for a pass options instance.
+  std::function<void(function_ref<void(const detail::PassOptions &)>)>
+      optHandler;
 };
 
 /// A structure to represent the information of a registered pass pipeline.
 class PassPipelineInfo : public PassRegistryEntry {
 public:
-    PassPipelineInfo(
-        StringRef arg, StringRef description, const PassRegistryFunction &builder,
-        std::function<void(function_ref<void(const detail::PassOptions &)>)>
-        optHandler)
-        : PassRegistryEntry(arg, description, builder, optHandler) {}
+  PassPipelineInfo(
+      StringRef arg, StringRef description, const PassRegistryFunction &builder,
+      std::function<void(function_ref<void(const detail::PassOptions &)>)>
+          optHandler)
+      : PassRegistryEntry(arg, description, builder, optHandler) {}
 };
 
 /// A structure to represent the information for a derived pass class.
 class PassInfo : public PassRegistryEntry {
 public:
-    /// PassInfo constructor should not be invoked directly, instead use
-    /// PassRegistration or registerPass.
-    PassInfo(StringRef arg, StringRef description, TypeID passID,
-             const PassAllocatorFunction &allocator);
+  /// PassInfo constructor should not be invoked directly, instead use
+  /// PassRegistration or registerPass.
+  PassInfo(StringRef arg, StringRef description, TypeID passID,
+           const PassAllocatorFunction &allocator);
 };
 
 //===----------------------------------------------------------------------===//
@@ -125,7 +121,7 @@ public:
 void registerPassPipeline(
     StringRef arg, StringRef description, const PassRegistryFunction &function,
     std::function<void(function_ref<void(const detail::PassOptions &)>)>
-    optHandler);
+        optHandler);
 
 /// Register a specific dialect pass allocator function with the system,
 /// typically used through the PassRegistration template.
@@ -142,17 +138,16 @@ void registerPass(StringRef arg, StringRef description,
 ///   /// At namespace scope.
 ///   static PassRegistration<MyPass> reg("my-pass", "My Pass Description.");
 ///
-template <typename ConcretePass> struct PassRegistration {
-    PassRegistration(StringRef arg, StringRef description,
-                     const PassAllocatorFunction &constructor) {
-        registerPass(arg, description, constructor);
-    }
+template <typename ConcretePass>
+struct PassRegistration {
+  PassRegistration(StringRef arg, StringRef description,
+                   const PassAllocatorFunction &constructor) {
+    registerPass(arg, description, constructor);
+  }
 
-    PassRegistration(StringRef arg, StringRef description)
-        : PassRegistration(arg, description,
-                           [] {
-        return std::make_unique<ConcretePass>();
-    }) {}
+  PassRegistration(StringRef arg, StringRef description)
+      : PassRegistration(arg, description,
+                         [] { return std::make_unique<ConcretePass>(); }) {}
 };
 
 /// PassPipelineRegistration provides a global initializer that registers a Pass
@@ -170,41 +165,42 @@ template <typename ConcretePass> struct PassRegistration {
 ///                                          pipelineBuilder);
 template <typename Options = EmptyPipelineOptions>
 struct PassPipelineRegistration {
-    PassPipelineRegistration(
-        StringRef arg, StringRef description,
-        std::function<void(OpPassManager &, const Options &options)> builder) {
-        registerPassPipeline(
-            arg, description,
-            [builder](OpPassManager &pm, StringRef optionsStr,
-        function_ref<LogicalResult(const Twine &)> errorHandler) {
-            Options options;
-            if (failed(options.parseFromString(optionsStr)))
-                return failure();
-            builder(pm, options);
-            return success();
+  PassPipelineRegistration(
+      StringRef arg, StringRef description,
+      std::function<void(OpPassManager &, const Options &options)> builder) {
+    registerPassPipeline(
+        arg, description,
+        [builder](OpPassManager &pm, StringRef optionsStr,
+                  function_ref<LogicalResult(const Twine &)> errorHandler) {
+          Options options;
+          if (failed(options.parseFromString(optionsStr)))
+            return failure();
+          builder(pm, options);
+          return success();
         },
         [](function_ref<void(const detail::PassOptions &)> optHandler) {
-            optHandler(Options());
+          optHandler(Options());
         });
-    }
+  }
 };
 
 /// Convenience specialization of PassPipelineRegistration for EmptyPassOptions
 /// that does not pass an empty options struct to the pass builder function.
-template <> struct PassPipelineRegistration<EmptyPipelineOptions> {
-    PassPipelineRegistration(StringRef arg, StringRef description,
-                             std::function<void(OpPassManager &)> builder) {
-        registerPassPipeline(
-            arg, description,
-            [builder](OpPassManager &pm, StringRef optionsStr,
-        function_ref<LogicalResult(const Twine &)> errorHandler) {
-            if (!optionsStr.empty())
-                return failure();
-            builder(pm);
-            return success();
+template <>
+struct PassPipelineRegistration<EmptyPipelineOptions> {
+  PassPipelineRegistration(StringRef arg, StringRef description,
+                           std::function<void(OpPassManager &)> builder) {
+    registerPassPipeline(
+        arg, description,
+        [builder](OpPassManager &pm, StringRef optionsStr,
+                  function_ref<LogicalResult(const Twine &)> errorHandler) {
+          if (!optionsStr.empty())
+            return failure();
+          builder(pm);
+          return success();
         },
         [](function_ref<void(const detail::PassOptions &)>) {});
-    }
+  }
 };
 
 /// This function parses the textual representation of a pass pipeline, and adds
@@ -230,26 +226,26 @@ struct PassPipelineCLParserImpl;
 /// textual description of a pipeline.
 class PassPipelineCLParser {
 public:
-    /// Construct a pass pipeline parser with the given command line description.
-    PassPipelineCLParser(StringRef arg, StringRef description);
-    ~PassPipelineCLParser();
+  /// Construct a pass pipeline parser with the given command line description.
+  PassPipelineCLParser(StringRef arg, StringRef description);
+  ~PassPipelineCLParser();
 
-    /// Returns true if this parser contains any valid options to add.
-    bool hasAnyOccurrences() const;
+  /// Returns true if this parser contains any valid options to add.
+  bool hasAnyOccurrences() const;
 
-    /// Returns true if the given pass registry entry was registered at the
-    /// top-level of the parser, i.e. not within an explicit textual pipeline.
-    bool contains(const PassRegistryEntry *entry) const;
+  /// Returns true if the given pass registry entry was registered at the
+  /// top-level of the parser, i.e. not within an explicit textual pipeline.
+  bool contains(const PassRegistryEntry *entry) const;
 
-    /// Adds the passes defined by this parser entry to the given pass manager.
-    /// Returns failure() if the pass could not be properly constructed due
-    /// to options parsing.
-    LogicalResult
-    addToPipeline(OpPassManager &pm,
-                  function_ref<LogicalResult(const Twine &)> errorHandler) const;
+  /// Adds the passes defined by this parser entry to the given pass manager.
+  /// Returns failure() if the pass could not be properly constructed due
+  /// to options parsing.
+  LogicalResult
+  addToPipeline(OpPassManager &pm,
+                function_ref<LogicalResult(const Twine &)> errorHandler) const;
 
 private:
-    std::unique_ptr<detail::PassPipelineCLParserImpl> impl;
+  std::unique_ptr<detail::PassPipelineCLParserImpl> impl;
 };
 
 /// This class implements a command-line parser spefically for MLIR pass names.
@@ -257,19 +253,19 @@ private:
 /// a comma delimited list of pass names.
 class PassNameCLParser {
 public:
-    /// Construct a parser with the given command line description.
-    PassNameCLParser(StringRef arg, StringRef description);
-    ~PassNameCLParser();
+  /// Construct a parser with the given command line description.
+  PassNameCLParser(StringRef arg, StringRef description);
+  ~PassNameCLParser();
 
-    /// Returns true if this parser contains any valid options to add.
-    bool hasAnyOccurrences() const;
+  /// Returns true if this parser contains any valid options to add.
+  bool hasAnyOccurrences() const;
 
-    /// Returns true if the given pass registry entry was registered at the
-    /// top-level of the parser, i.e. not within an explicit textual pipeline.
-    bool contains(const PassRegistryEntry *entry) const;
+  /// Returns true if the given pass registry entry was registered at the
+  /// top-level of the parser, i.e. not within an explicit textual pipeline.
+  bool contains(const PassRegistryEntry *entry) const;
 
 private:
-    std::unique_ptr<detail::PassPipelineCLParserImpl> impl;
+  std::unique_ptr<detail::PassPipelineCLParserImpl> impl;
 };
 
 } // end namespace mlir

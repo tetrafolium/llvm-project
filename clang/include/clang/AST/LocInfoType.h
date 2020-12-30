@@ -26,34 +26,30 @@ class TypeSourceInfo;
 /// and Sema, when we want to preserve type source info for a parsed type.
 /// It will not participate in the type system semantics in any way.
 class LocInfoType : public Type {
-    enum {
-        // The last number that can fit in Type's TC.
-        // Avoids conflict with an existing Type class.
-        LocInfo = Type::TypeLast + 1
-    };
+  enum {
+    // The last number that can fit in Type's TC.
+    // Avoids conflict with an existing Type class.
+    LocInfo = Type::TypeLast + 1
+  };
 
-    TypeSourceInfo *DeclInfo;
+  TypeSourceInfo *DeclInfo;
 
-    LocInfoType(QualType ty, TypeSourceInfo *TInfo)
-        : Type((TypeClass)LocInfo, ty, ty->getDependence()), DeclInfo(TInfo) {
-        assert(getTypeClass() == (TypeClass)LocInfo && "LocInfo didn't fit in TC?");
-    }
-    friend class Sema;
+  LocInfoType(QualType ty, TypeSourceInfo *TInfo)
+      : Type((TypeClass)LocInfo, ty, ty->getDependence()), DeclInfo(TInfo) {
+    assert(getTypeClass() == (TypeClass)LocInfo && "LocInfo didn't fit in TC?");
+  }
+  friend class Sema;
 
 public:
-    QualType getType() const {
-        return getCanonicalTypeInternal();
-    }
-    TypeSourceInfo *getTypeSourceInfo() const {
-        return DeclInfo;
-    }
+  QualType getType() const { return getCanonicalTypeInternal(); }
+  TypeSourceInfo *getTypeSourceInfo() const { return DeclInfo; }
 
-    void getAsStringInternal(std::string &Str,
-                             const PrintingPolicy &Policy) const;
+  void getAsStringInternal(std::string &Str,
+                           const PrintingPolicy &Policy) const;
 
-    static bool classof(const Type *T) {
-        return T->getTypeClass() == (TypeClass)LocInfo;
-    }
+  static bool classof(const Type *T) {
+    return T->getTypeClass() == (TypeClass)LocInfo;
+  }
 };
 
 } // end namespace clang

@@ -67,7 +67,8 @@ FunctionPass *createX86OptimizeLEAs();
 /// Return a pass that transforms setcc + movzx pairs into xor + setcc.
 FunctionPass *createX86FixupSetCC();
 
-/// Return a pass that avoids creating store forward block issues in the hardware.
+/// Return a pass that avoids creating store forward block issues in the
+/// hardware.
 FunctionPass *createX86AvoidStoreForwardingBlocks();
 
 /// Return a pass that lowers EFLAGS copy pseudo instructions.
@@ -138,8 +139,8 @@ FunctionPass *createX86InsertX87waitPass();
 FunctionPass *createX86PartialReductionPass();
 
 InstructionSelector *createX86InstructionSelector(const X86TargetMachine &TM,
-        X86Subtarget &,
-        X86RegisterBankInfo &);
+                                                  X86Subtarget &,
+                                                  X86RegisterBankInfo &);
 
 FunctionPass *createX86LoadValueInjectionLoadHardeningPass();
 FunctionPass *createX86LoadValueInjectionRetHardeningPass();
@@ -172,15 +173,15 @@ void initializeX86LowerAMXTypeLegacyPassPass(PassRegistry &);
 
 namespace X86AS {
 enum : unsigned {
-    GS = 256,
-    FS = 257,
-    SS = 258,
-    PTR32_SPTR = 270,
-    PTR32_UPTR = 271,
-    PTR64 = 272
+  GS = 256,
+  FS = 257,
+  SS = 258,
+  PTR32_SPTR = 270,
+  PTR32_UPTR = 271,
+  PTR64 = 272
 };
-} // End X86AS namespace
+} // namespace X86AS
 
-} // End llvm namespace
+} // namespace llvm
 
 #endif

@@ -14,9 +14,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclObjC.h"
+#include "clang/StaticAnalyzer/Checkers/BuiltinCheckerRegistration.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugReporter.h"
 #include "clang/StaticAnalyzer/Core/BugReporter/BugType.h"
 #include "clang/StaticAnalyzer/Core/Checker.h"
@@ -29,58 +29,57 @@ using namespace clang;
 using namespace ento;
 
 namespace {
-class NSAutoreleasePoolChecker
-    : public Checker<check::PreObjCMessage> {
-    mutable std::unique_ptr<BugType> BT;
-    mutable Selector releaseS;
+class NSAutoreleasePoolChecker : public Checker<check::PreObjCMessage> {
+  mutable std::unique_ptr<BugType> BT;
+  mutable Selector releaseS;
 
 public:
-    void checkPreObjCMessage(const ObjCMethodCall &msg, CheckerContext &C) const;
+  void checkPreObjCMessage(const ObjCMethodCall &msg, CheckerContext &C) const;
 };
 
 } // end anonymous namespace
 
 void NSAutoreleasePoolChecker::checkPreObjCMessage(const ObjCMethodCall &msg,
-        CheckerContext &C) const {
-    if (!msg.isInstanceMessage())
-        return;
+                                                   CheckerContext &C) const {
+  if (!msg.isInstanceMessage())
+    return;
 
-    const ObjCInterfaceDecl *OD = msg.getReceiverInterface();
-    if (!OD)
-        return;
-    if (!OD->getIdentifier()->isStr("NSAutoreleasePool"))
-        return;
+  const ObjCInterfaceDecl *OD = msg.getReceiverInterface();
+  if (!OD)
+    return;
+  if (!OD->getIdentifier()->isStr("NSAutoreleasePool"))
+    return;
 
-    if (releaseS.isNull())
-        releaseS = GetNullarySelector("release", C.getASTContext());
-    // Sending 'release' message?
-    if (msg.getSelector() != releaseS)
-        return;
+  if (releaseS.isNull())
+    releaseS = GetNullarySelector("release", C.getASTContext());
+  // Sending 'release' message?
+  if (msg.getSelector() != releaseS)
+    return;
 
-    if (!BT)
-        BT.reset(new BugType(this, "Use -drain instead of -release",
-                             "API Upgrade (Apple)"));
+  if (!BT)
+    BT.reset(new BugType(this, "Use -drain instead of -release",
+                         "API Upgrade (Apple)"));
 
-    ExplodedNode *N = C.generateNonFatalErrorNode();
-    if (!N) {
-        assert(0);
-        return;
-    }
+  ExplodedNode *N = C.generateNonFatalErrorNode();
+  if (!N) {
+    assert(0);
+    return;
+  }
 
-    auto Report = std::make_unique<PathSensitiveBugReport>(
-                      *BT,
-                      "Use -drain instead of -release when using NSAutoreleasePool and "
-                      "garbage collection",
-                      N);
-    Report->addRange(msg.getSourceRange());
-    C.emitReport(std::move(Report));
+  auto Report = std::make_unique<PathSensitiveBugReport>(
+      *BT,
+      "Use -drain instead of -release when using NSAutoreleasePool and "
+      "garbage collection",
+      N);
+  Report->addRange(msg.getSourceRange());
+  C.emitReport(std::move(Report));
 }
 
 void ento::registerNSAutoreleasePoolChecker(CheckerManager &mgr) {
-    mgr.registerChecker<NSAutoreleasePoolChecker>();
+  mgr.registerChecker<NSAutoreleasePoolChecker>();
 }
 
 bool ento::shouldRegisterNSAutoreleasePoolChecker(const CheckerManager &mgr) {
-    const LangOptions &LO = mgr.getLangOpts();
-    return LO.getGC() != LangOptions::NonGC;
+  const LangOptions &LO = mgr.getLangOpts();
+  return LO.getGC() != LangOptions::NonGC;
 }

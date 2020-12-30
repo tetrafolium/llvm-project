@@ -24,23 +24,23 @@ namespace readability {
 /// http://clang.llvm.org/extra/clang-tidy/checks/readability-redundant-control-flow.html
 class RedundantControlFlowCheck : public ClangTidyCheck {
 public:
-    RedundantControlFlowCheck(StringRef Name, ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  RedundantControlFlowCheck(StringRef Name, ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 
 private:
-    void
-    checkRedundantReturn(const ast_matchers::MatchFinder::MatchResult &Result,
+  void
+  checkRedundantReturn(const ast_matchers::MatchFinder::MatchResult &Result,
+                       const CompoundStmt *Block);
+
+  void
+  checkRedundantContinue(const ast_matchers::MatchFinder::MatchResult &Result,
                          const CompoundStmt *Block);
 
-    void
-    checkRedundantContinue(const ast_matchers::MatchFinder::MatchResult &Result,
-                           const CompoundStmt *Block);
-
-    void issueDiagnostic(const ast_matchers::MatchFinder::MatchResult &Result,
-                         const CompoundStmt *Block, const SourceRange &StmtRange,
-                         const char *Diag);
+  void issueDiagnostic(const ast_matchers::MatchFinder::MatchResult &Result,
+                       const CompoundStmt *Block, const SourceRange &StmtRange,
+                       const char *Diag);
 };
 
 } // namespace readability

@@ -24,14 +24,15 @@ namespace sys {
 /// to handle it are provided.
 class Watchdog {
 public:
-    Watchdog(unsigned int seconds);
-    ~Watchdog();
+  Watchdog(unsigned int seconds);
+  ~Watchdog();
+
 private:
-    // Noncopyable.
-    Watchdog(const Watchdog &other) = delete;
-    Watchdog &operator=(const Watchdog &other) = delete;
+  // Noncopyable.
+  Watchdog(const Watchdog &other) = delete;
+  Watchdog &operator=(const Watchdog &other) = delete;
 };
-}
-}
+} // namespace sys
+} // namespace llvm
 
 #endif

@@ -18,88 +18,84 @@
 namespace lldb_private {
 
 class ThreadPlanTracer {
-    friend class ThreadPlan;
+  friend class ThreadPlan;
 
 public:
-    enum ThreadPlanTracerStyle {
-        eLocation = 0,
-        eStateChange,
-        eCheckFrames,
-        ePython
-    };
+  enum ThreadPlanTracerStyle {
+    eLocation = 0,
+    eStateChange,
+    eCheckFrames,
+    ePython
+  };
 
-    ThreadPlanTracer(Thread &thread, lldb::StreamSP &stream_sp);
-    ThreadPlanTracer(Thread &thread);
+  ThreadPlanTracer(Thread &thread, lldb::StreamSP &stream_sp);
+  ThreadPlanTracer(Thread &thread);
 
-    virtual ~ThreadPlanTracer() = default;
+  virtual ~ThreadPlanTracer() = default;
 
-    virtual void TracingStarted() {}
+  virtual void TracingStarted() {}
 
-    virtual void TracingEnded() {}
+  virtual void TracingEnded() {}
 
-    bool EnableTracing(bool value) {
-        bool old_value = m_enabled;
-        m_enabled = value;
-        if (old_value == false && value == true)
-            TracingStarted();
-        else if (old_value == true && value == false)
-            TracingEnded();
+  bool EnableTracing(bool value) {
+    bool old_value = m_enabled;
+    m_enabled = value;
+    if (old_value == false && value == true)
+      TracingStarted();
+    else if (old_value == true && value == false)
+      TracingEnded();
 
-        return old_value;
-    }
+    return old_value;
+  }
 
-    bool TracingEnabled() {
-        return m_enabled;
-    }
+  bool TracingEnabled() { return m_enabled; }
 
-    bool EnableSingleStep(bool value) {
-        bool old_value = m_single_step;
-        m_single_step = value;
-        return old_value;
-    }
+  bool EnableSingleStep(bool value) {
+    bool old_value = m_single_step;
+    m_single_step = value;
+    return old_value;
+  }
 
-    bool SingleStepEnabled() {
-        return m_single_step;
-    }
+  bool SingleStepEnabled() { return m_single_step; }
 
-    Thread &GetThread();
+  Thread &GetThread();
 
 protected:
-    Process &m_process;
-    lldb::tid_t m_tid;
+  Process &m_process;
+  lldb::tid_t m_tid;
 
-    Stream *GetLogStream();
+  Stream *GetLogStream();
 
-    virtual void Log();
+  virtual void Log();
 
 private:
-    bool TracerExplainsStop();
+  bool TracerExplainsStop();
 
-    bool m_single_step;
-    bool m_enabled;
-    lldb::StreamSP m_stream_sp;
-    Thread *m_thread;
+  bool m_single_step;
+  bool m_enabled;
+  lldb::StreamSP m_stream_sp;
+  Thread *m_thread;
 };
 
 class ThreadPlanAssemblyTracer : public ThreadPlanTracer {
 public:
-    ThreadPlanAssemblyTracer(Thread &thread, lldb::StreamSP &stream_sp);
-    ThreadPlanAssemblyTracer(Thread &thread);
-    ~ThreadPlanAssemblyTracer() override;
+  ThreadPlanAssemblyTracer(Thread &thread, lldb::StreamSP &stream_sp);
+  ThreadPlanAssemblyTracer(Thread &thread);
+  ~ThreadPlanAssemblyTracer() override;
 
-    void TracingStarted() override;
-    void TracingEnded() override;
-    void Log() override;
+  void TracingStarted() override;
+  void TracingEnded() override;
+  void Log() override;
 
 private:
-    Disassembler *GetDisassembler();
+  Disassembler *GetDisassembler();
 
-    TypeFromUser GetIntPointerType();
+  TypeFromUser GetIntPointerType();
 
-    lldb::DisassemblerSP m_disassembler_sp;
-    TypeFromUser m_intptr_type;
-    std::vector<RegisterValue> m_register_values;
-    lldb::DataBufferSP m_buffer_sp;
+  lldb::DisassemblerSP m_disassembler_sp;
+  TypeFromUser m_intptr_type;
+  std::vector<RegisterValue> m_register_values;
+  lldb::DataBufferSP m_buffer_sp;
 };
 
 } // namespace lldb_private

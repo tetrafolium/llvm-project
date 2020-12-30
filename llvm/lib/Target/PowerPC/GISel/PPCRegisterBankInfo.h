@@ -32,7 +32,7 @@ protected:
 
 class PPCRegisterBankInfo final : public PPCGenRegisterBankInfo {
 public:
-    PPCRegisterBankInfo(const TargetRegisterInfo &TRI);
+  PPCRegisterBankInfo(const TargetRegisterInfo &TRI);
 };
 } // namespace llvm
 

@@ -14,53 +14,43 @@
 #ifndef LLVM_MC_MACHINELOCATION_H
 #define LLVM_MC_MACHINELOCATION_H
 
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 
 namespace llvm {
 
 class MachineLocation {
 private:
-    bool IsRegister = false;              ///< True if location is a register.
-    unsigned Register = 0;                ///< gcc/gdb register number.
+  bool IsRegister = false; ///< True if location is a register.
+  unsigned Register = 0;   ///< gcc/gdb register number.
 
 public:
-    enum : uint32_t {
-        // The target register number for an abstract frame pointer. The value is
-        // an arbitrary value that doesn't collide with any real target register.
-        VirtualFP = ~0U
-    };
+  enum : uint32_t {
+    // The target register number for an abstract frame pointer. The value is
+    // an arbitrary value that doesn't collide with any real target register.
+    VirtualFP = ~0U
+  };
 
-    MachineLocation() = default;
-    /// Create a direct register location.
-    explicit MachineLocation(unsigned R, bool Indirect = false)
-        : IsRegister(!Indirect), Register(R) {}
+  MachineLocation() = default;
+  /// Create a direct register location.
+  explicit MachineLocation(unsigned R, bool Indirect = false)
+      : IsRegister(!Indirect), Register(R) {}
 
-    bool operator==(const MachineLocation &Other) const {
-        return IsRegister == Other.IsRegister && Register == Other.Register;
-    }
+  bool operator==(const MachineLocation &Other) const {
+    return IsRegister == Other.IsRegister && Register == Other.Register;
+  }
 
-    // Accessors.
-    /// \return true iff this is a register-indirect location.
-    bool isIndirect()      const {
-        return !IsRegister;
-    }
-    bool isReg()           const {
-        return IsRegister;
-    }
-    unsigned getReg()      const {
-        return Register;
-    }
-    void setIsRegister(bool Is)  {
-        IsRegister = Is;
-    }
-    void setRegister(unsigned R) {
-        Register = R;
-    }
+  // Accessors.
+  /// \return true iff this is a register-indirect location.
+  bool isIndirect() const { return !IsRegister; }
+  bool isReg() const { return IsRegister; }
+  unsigned getReg() const { return Register; }
+  void setIsRegister(bool Is) { IsRegister = Is; }
+  void setRegister(unsigned R) { Register = R; }
 };
 
 inline bool operator!=(const MachineLocation &LHS, const MachineLocation &RHS) {
-    return !(LHS == RHS);
+  return !(LHS == RHS);
 }
 
 } // end namespace llvm

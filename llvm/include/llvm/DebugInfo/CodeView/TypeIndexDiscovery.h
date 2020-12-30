@@ -18,9 +18,9 @@ namespace llvm {
 namespace codeview {
 enum class TiRefKind { TypeRef, IndexRef };
 struct TiReference {
-    TiRefKind Kind;
-    uint32_t Offset;
-    uint32_t Count;
+  TiRefKind Kind;
+  uint32_t Offset;
+  uint32_t Count;
 };
 
 void discoverTypeIndices(ArrayRef<uint8_t> RecordData,
@@ -40,7 +40,7 @@ bool discoverTypeIndicesInSymbol(ArrayRef<uint8_t> RecordData,
                                  SmallVectorImpl<TiReference> &Refs);
 bool discoverTypeIndicesInSymbol(ArrayRef<uint8_t> RecordData,
                                  SmallVectorImpl<TypeIndex> &Indices);
-}
-}
+} // namespace codeview
+} // namespace llvm
 
 #endif

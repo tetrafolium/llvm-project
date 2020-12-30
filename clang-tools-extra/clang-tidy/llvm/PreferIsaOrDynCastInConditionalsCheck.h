@@ -17,8 +17,9 @@ namespace llvm_check {
 
 /// Looks at conditionals and finds and replaces cases of ``cast<>``, which will
 /// assert rather than return a null pointer, and ``dyn_cast<>`` where
-/// the return value is not captured.  Additionally, finds and replaces cases that match the
-/// pattern ``var && isa<X>(var)``, where ``var`` is evaluated twice.
+/// the return value is not captured.  Additionally, finds and replaces cases
+/// that match the pattern ``var && isa<X>(var)``, where ``var`` is evaluated
+/// twice.
 ///
 /// Finds cases like these:
 /// \code
@@ -50,14 +51,14 @@ namespace llvm_check {
 /// http://clang.llvm.org/extra/clang-tidy/checks/llvm-prefer-isa-or-dyn-cast-in-conditionals.html
 class PreferIsaOrDynCastInConditionalsCheck : public ClangTidyCheck {
 public:
-    PreferIsaOrDynCastInConditionalsCheck(StringRef Name,
-                                          ClangTidyContext *Context)
-        : ClangTidyCheck(Name, Context) {}
-    bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
-        return LangOpts.CPlusPlus;
-    }
-    void registerMatchers(ast_matchers::MatchFinder *Finder) override;
-    void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
+  PreferIsaOrDynCastInConditionalsCheck(StringRef Name,
+                                        ClangTidyContext *Context)
+      : ClangTidyCheck(Name, Context) {}
+  bool isLanguageVersionSupported(const LangOptions &LangOpts) const override {
+    return LangOpts.CPlusPlus;
+  }
+  void registerMatchers(ast_matchers::MatchFinder *Finder) override;
+  void check(const ast_matchers::MatchFinder::MatchResult &Result) override;
 };
 
 } // namespace llvm_check

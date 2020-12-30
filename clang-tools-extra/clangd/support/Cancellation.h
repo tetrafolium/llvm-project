@@ -85,17 +85,17 @@ int isCancelled(const Context &Ctx = Context::current());
 /// Conventional error when no result is returned due to cancellation.
 class CancelledError : public llvm::ErrorInfo<CancelledError> {
 public:
-    static char ID;
-    const int Reason;
+  static char ID;
+  const int Reason;
 
-    CancelledError(int Reason) : Reason(Reason) {}
+  CancelledError(int Reason) : Reason(Reason) {}
 
-    void log(llvm::raw_ostream &OS) const override {
-        OS << "Task was cancelled.";
-    }
-    std::error_code convertToErrorCode() const override {
-        return std::make_error_code(std::errc::operation_canceled);
-    }
+  void log(llvm::raw_ostream &OS) const override {
+    OS << "Task was cancelled.";
+  }
+  std::error_code convertToErrorCode() const override {
+    return std::make_error_code(std::errc::operation_canceled);
+  }
 };
 
 } // namespace clangd

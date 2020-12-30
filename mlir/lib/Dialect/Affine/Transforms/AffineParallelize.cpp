@@ -30,36 +30,36 @@ using namespace mlir;
 namespace {
 /// Convert all parallel affine.for op into 1-D affine.parallel op.
 struct AffineParallelize : public AffineParallelizeBase<AffineParallelize> {
-    void runOnFunction() override;
+  void runOnFunction() override;
 };
 } // namespace
 
 void AffineParallelize::runOnFunction() {
-    FuncOp f = getFunction();
+  FuncOp f = getFunction();
 
-    // The walker proceeds in post-order, but we need to process outer loops first
-    // to control the number of outer parallel loops, so push candidate loops to
-    // the front of a deque.
-    std::deque<AffineForOp> parallelizableLoops;
-    f.walk([&](AffineForOp loop) {
-        if (isLoopParallel(loop))
-            parallelizableLoops.push_front(loop);
-    });
+  // The walker proceeds in post-order, but we need to process outer loops first
+  // to control the number of outer parallel loops, so push candidate loops to
+  // the front of a deque.
+  std::deque<AffineForOp> parallelizableLoops;
+  f.walk([&](AffineForOp loop) {
+    if (isLoopParallel(loop))
+      parallelizableLoops.push_front(loop);
+  });
 
-    for (AffineForOp loop : parallelizableLoops) {
-        unsigned numParentParallelOps = 0;
-        for (Operation *op = loop->getParentOp();
-                op != nullptr && !op->hasTrait<OpTrait::AffineScope>();
-                op = op->getParentOp()) {
-            if (isa<AffineParallelOp>(op))
-                ++numParentParallelOps;
-        }
-
-        if (numParentParallelOps < maxNested)
-            affineParallelize(loop);
+  for (AffineForOp loop : parallelizableLoops) {
+    unsigned numParentParallelOps = 0;
+    for (Operation *op = loop->getParentOp();
+         op != nullptr && !op->hasTrait<OpTrait::AffineScope>();
+         op = op->getParentOp()) {
+      if (isa<AffineParallelOp>(op))
+        ++numParentParallelOps;
     }
+
+    if (numParentParallelOps < maxNested)
+      affineParallelize(loop);
+  }
 }
 
 std::unique_ptr<OperationPass<FuncOp>> mlir::createAffineParallelizePass() {
-    return std::make_unique<AffineParallelize>();
+  return std::make_unique<AffineParallelize>();
 }

@@ -32,95 +32,88 @@ namespace jitlink {
 /// and their implemetations should include any necessary synchronization.
 class JITLinkMemoryManager {
 public:
-    using ProtectionFlags = sys::Memory::ProtectionFlags;
+  using ProtectionFlags = sys::Memory::ProtectionFlags;
 
-    class SegmentRequest {
-    public:
-        SegmentRequest() = default;
-        SegmentRequest(uint64_t Alignment, size_t ContentSize,
-                       uint64_t ZeroFillSize)
-            : Alignment(Alignment), ContentSize(ContentSize),
-              ZeroFillSize(ZeroFillSize) {
-            assert(isPowerOf2_32(Alignment) && "Alignment must be power of 2");
-        }
-        uint64_t getAlignment() const {
-            return Alignment;
-        }
-        size_t getContentSize() const {
-            return ContentSize;
-        }
-        uint64_t getZeroFillSize() const {
-            return ZeroFillSize;
-        }
-    private:
-        uint64_t Alignment = 0;
-        size_t ContentSize = 0;
-        uint64_t ZeroFillSize = 0;
-    };
+  class SegmentRequest {
+  public:
+    SegmentRequest() = default;
+    SegmentRequest(uint64_t Alignment, size_t ContentSize,
+                   uint64_t ZeroFillSize)
+        : Alignment(Alignment), ContentSize(ContentSize),
+          ZeroFillSize(ZeroFillSize) {
+      assert(isPowerOf2_32(Alignment) && "Alignment must be power of 2");
+    }
+    uint64_t getAlignment() const { return Alignment; }
+    size_t getContentSize() const { return ContentSize; }
+    uint64_t getZeroFillSize() const { return ZeroFillSize; }
 
-    using SegmentsRequestMap = DenseMap<unsigned, SegmentRequest>;
+  private:
+    uint64_t Alignment = 0;
+    size_t ContentSize = 0;
+    uint64_t ZeroFillSize = 0;
+  };
 
-    /// Represents an allocation created by the memory manager.
-    ///
-    /// An allocation object is responsible for allocating and owning jit-linker
-    /// working and target memory, and for transfering from working to target
-    /// memory.
-    ///
-    class Allocation {
-    public:
-        using FinalizeContinuation = std::function<void(Error)>;
+  using SegmentsRequestMap = DenseMap<unsigned, SegmentRequest>;
 
-        virtual ~Allocation();
+  /// Represents an allocation created by the memory manager.
+  ///
+  /// An allocation object is responsible for allocating and owning jit-linker
+  /// working and target memory, and for transfering from working to target
+  /// memory.
+  ///
+  class Allocation {
+  public:
+    using FinalizeContinuation = std::function<void(Error)>;
 
-        /// Should return the address of linker working memory for the segment with
-        /// the given protection flags.
-        virtual MutableArrayRef<char> getWorkingMemory(ProtectionFlags Seg) = 0;
+    virtual ~Allocation();
 
-        /// Should return the final address in the target process where the segment
-        /// will reside.
-        virtual JITTargetAddress getTargetMemory(ProtectionFlags Seg) = 0;
+    /// Should return the address of linker working memory for the segment with
+    /// the given protection flags.
+    virtual MutableArrayRef<char> getWorkingMemory(ProtectionFlags Seg) = 0;
 
-        /// Should transfer from working memory to target memory, and release
-        /// working memory.
-        virtual void finalizeAsync(FinalizeContinuation OnFinalize) = 0;
+    /// Should return the final address in the target process where the segment
+    /// will reside.
+    virtual JITTargetAddress getTargetMemory(ProtectionFlags Seg) = 0;
 
-        /// Calls finalizeAsync and waits for completion.
-        Error finalize() {
-            std::promise<MSVCPError> FinalizeResultP;
-            auto FinalizeResultF = FinalizeResultP.get_future();
-            finalizeAsync(
-            [&](Error Err) {
-                FinalizeResultP.set_value(std::move(Err));
-            });
-            return FinalizeResultF.get();
-        }
+    /// Should transfer from working memory to target memory, and release
+    /// working memory.
+    virtual void finalizeAsync(FinalizeContinuation OnFinalize) = 0;
 
-        /// Should deallocate target memory.
-        virtual Error deallocate() = 0;
-    };
+    /// Calls finalizeAsync and waits for completion.
+    Error finalize() {
+      std::promise<MSVCPError> FinalizeResultP;
+      auto FinalizeResultF = FinalizeResultP.get_future();
+      finalizeAsync(
+          [&](Error Err) { FinalizeResultP.set_value(std::move(Err)); });
+      return FinalizeResultF.get();
+    }
 
-    virtual ~JITLinkMemoryManager();
+    /// Should deallocate target memory.
+    virtual Error deallocate() = 0;
+  };
 
-    /// Create an Allocation object.
-    ///
-    /// The JD argument represents the target JITLinkDylib, and can be used by
-    /// JITLinkMemoryManager implementers to manage per-dylib allocation pools
-    /// (e.g. one pre-reserved address space slab per dylib to ensure that all
-    /// allocations for the dylib are within a certain range). The JD argument
-    /// may be null (representing an allocation not associated with any
-    /// JITDylib.
-    ///
-    /// The request argument describes the segment sizes and permisssions being
-    /// requested.
-    virtual Expected<std::unique_ptr<Allocation>>
-            allocate(const JITLinkDylib *JD, const SegmentsRequestMap &Request) = 0;
+  virtual ~JITLinkMemoryManager();
+
+  /// Create an Allocation object.
+  ///
+  /// The JD argument represents the target JITLinkDylib, and can be used by
+  /// JITLinkMemoryManager implementers to manage per-dylib allocation pools
+  /// (e.g. one pre-reserved address space slab per dylib to ensure that all
+  /// allocations for the dylib are within a certain range). The JD argument
+  /// may be null (representing an allocation not associated with any
+  /// JITDylib.
+  ///
+  /// The request argument describes the segment sizes and permisssions being
+  /// requested.
+  virtual Expected<std::unique_ptr<Allocation>>
+  allocate(const JITLinkDylib *JD, const SegmentsRequestMap &Request) = 0;
 };
 
 /// A JITLinkMemoryManager that allocates in-process memory.
 class InProcessMemoryManager : public JITLinkMemoryManager {
 public:
-    Expected<std::unique_ptr<Allocation>>
-                                       allocate(const JITLinkDylib *JD, const SegmentsRequestMap &Request) override;
+  Expected<std::unique_ptr<Allocation>>
+  allocate(const JITLinkDylib *JD, const SegmentsRequestMap &Request) override;
 };
 
 } // end namespace jitlink

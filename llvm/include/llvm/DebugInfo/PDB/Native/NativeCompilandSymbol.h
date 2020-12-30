@@ -17,20 +17,20 @@ namespace pdb {
 
 class NativeCompilandSymbol : public NativeRawSymbol {
 public:
-    NativeCompilandSymbol(NativeSession &Session, SymIndexId SymbolId,
-                          DbiModuleDescriptor MI);
+  NativeCompilandSymbol(NativeSession &Session, SymIndexId SymbolId,
+                        DbiModuleDescriptor MI);
 
-    void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
-              PdbSymbolIdField RecurseIdFields) const override;
+  void dump(raw_ostream &OS, int Indent, PdbSymbolIdField ShowIdFields,
+            PdbSymbolIdField RecurseIdFields) const override;
 
-    PDB_SymType getSymTag() const override;
-    bool isEditAndContinueEnabled() const override;
-    SymIndexId getLexicalParentId() const override;
-    std::string getLibraryName() const override;
-    std::string getName() const override;
+  PDB_SymType getSymTag() const override;
+  bool isEditAndContinueEnabled() const override;
+  SymIndexId getLexicalParentId() const override;
+  std::string getLibraryName() const override;
+  std::string getName() const override;
 
 private:
-    DbiModuleDescriptor Module;
+  DbiModuleDescriptor Module;
 };
 
 } // namespace pdb

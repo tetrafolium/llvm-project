@@ -19,16 +19,15 @@ namespace tidy {
 namespace android {
 
 void CloexecFopenCheck::registerMatchers(MatchFinder *Finder) {
-    auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
-    registerMatchersImpl(Finder,
-                         functionDecl(isExternC(), returns(asString("FILE *")),
-                                      hasName("fopen"),
-                                      hasParameter(0, CharPointerType),
-                                      hasParameter(1, CharPointerType)));
+  auto CharPointerType = hasType(pointerType(pointee(isAnyCharacter())));
+  registerMatchersImpl(
+      Finder, functionDecl(isExternC(), returns(asString("FILE *")),
+                           hasName("fopen"), hasParameter(0, CharPointerType),
+                           hasParameter(1, CharPointerType)));
 }
 
 void CloexecFopenCheck::check(const MatchFinder::MatchResult &Result) {
-    insertStringFlag(Result, /*Mode=*/'e', /*ArgPos=*/1);
+  insertStringFlag(Result, /*Mode=*/'e', /*ArgPos=*/1);
 }
 
 } // namespace android

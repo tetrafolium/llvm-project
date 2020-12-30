@@ -23,8 +23,8 @@ namespace sys {
 
 /// A time point on the system clock. This is provided for two reasons:
 /// - to insulate us agains subtle differences in behavoir to differences in
-///   system clock precision (which is implementation-defined and differs between
-///   platforms).
+///   system clock precision (which is implementation-defined and differs
+///   between platforms).
 /// - to shorten the type name
 /// The default precision is nanoseconds. If need a specific precision specify
 /// it explicitly. If unsure, use the default. If you need a time point on a
@@ -34,24 +34,22 @@ using TimePoint = std::chrono::time_point<std::chrono::system_clock, D>;
 
 /// Convert a TimePoint to std::time_t
 inline std::time_t toTimeT(TimePoint<> TP) {
-    using namespace std::chrono;
-    return system_clock::to_time_t(
-               time_point_cast<system_clock::time_point::duration>(TP));
+  using namespace std::chrono;
+  return system_clock::to_time_t(
+      time_point_cast<system_clock::time_point::duration>(TP));
 }
 
 /// Convert a std::time_t to a TimePoint
-inline TimePoint<std::chrono::seconds>
-toTimePoint(std::time_t T) {
-    using namespace std::chrono;
-    return time_point_cast<seconds>(system_clock::from_time_t(T));
+inline TimePoint<std::chrono::seconds> toTimePoint(std::time_t T) {
+  using namespace std::chrono;
+  return time_point_cast<seconds>(system_clock::from_time_t(T));
 }
 
 /// Convert a std::time_t + nanoseconds to a TimePoint
-inline TimePoint<>
-toTimePoint(std::time_t T, uint32_t nsec) {
-    using namespace std::chrono;
-    return time_point_cast<nanoseconds>(system_clock::from_time_t(T))
-           + nanoseconds(nsec);
+inline TimePoint<> toTimePoint(std::time_t T, uint32_t nsec) {
+  using namespace std::chrono;
+  return time_point_cast<nanoseconds>(system_clock::from_time_t(T)) +
+         nanoseconds(nsec);
 }
 
 } // namespace sys
@@ -66,10 +64,9 @@ raw_ostream &operator<<(raw_ostream &OS, sys::TimePoint<> TP);
 ///   - %N is nanos: 000000000 - 999999999
 ///
 /// If no options are given, the default format is "%Y-%m-%d %H:%M:%S.%N".
-template <>
-struct format_provider<sys::TimePoint<>> {
-    static void format(const sys::TimePoint<> &TP, llvm::raw_ostream &OS,
-                       StringRef Style);
+template <> struct format_provider<sys::TimePoint<>> {
+  static void format(const sys::TimePoint<> &TP, llvm::raw_ostream &OS,
+                     StringRef Style);
 };
 
 /// Implementation of format_provider<T> for duration types.
@@ -97,87 +94,73 @@ struct format_provider<sys::TimePoint<>> {
 ///  display unit or you request that the unit is not displayed.
 
 namespace detail {
-template <typename Period> struct unit {
-    static const char value[];
-};
+template <typename Period> struct unit { static const char value[]; };
 template <typename Period> const char unit<Period>::value[] = "";
 
-template <> struct unit<std::ratio<3600>> {
-    static const char value[];
-};
-template <> struct unit<std::ratio<60>> {
-    static const char value[];
-};
-template <> struct unit<std::ratio<1>> {
-    static const char value[];
-};
-template <> struct unit<std::milli> {
-    static const char value[];
-};
-template <> struct unit<std::micro> {
-    static const char value[];
-};
-template <> struct unit<std::nano> {
-    static const char value[];
-};
+template <> struct unit<std::ratio<3600>> { static const char value[]; };
+template <> struct unit<std::ratio<60>> { static const char value[]; };
+template <> struct unit<std::ratio<1>> { static const char value[]; };
+template <> struct unit<std::milli> { static const char value[]; };
+template <> struct unit<std::micro> { static const char value[]; };
+template <> struct unit<std::nano> { static const char value[]; };
 } // namespace detail
 
 template <typename Rep, typename Period>
 struct format_provider<std::chrono::duration<Rep, Period>> {
 private:
-    typedef std::chrono::duration<Rep, Period> Dur;
-    typedef std::conditional_t<std::chrono::treat_as_floating_point<Rep>::value,
-            double, intmax_t>
-            InternalRep;
+  typedef std::chrono::duration<Rep, Period> Dur;
+  typedef std::conditional_t<std::chrono::treat_as_floating_point<Rep>::value,
+                             double, intmax_t>
+      InternalRep;
 
-    template <typename AsPeriod> static InternalRep getAs(const Dur &D) {
-        using namespace std::chrono;
-        return duration_cast<duration<InternalRep, AsPeriod>>(D).count();
-    }
+  template <typename AsPeriod> static InternalRep getAs(const Dur &D) {
+    using namespace std::chrono;
+    return duration_cast<duration<InternalRep, AsPeriod>>(D).count();
+  }
 
-    static std::pair<InternalRep, StringRef> consumeUnit(StringRef &Style,
-            const Dur &D) {
-        using namespace std::chrono;
-        if (Style.consume_front("ns"))
-            return {getAs<std::nano>(D), "ns"};
-        if (Style.consume_front("us"))
-            return {getAs<std::micro>(D), "us"};
-        if (Style.consume_front("ms"))
-            return {getAs<std::milli>(D), "ms"};
-        if (Style.consume_front("s"))
-            return {getAs<std::ratio<1>>(D), "s"};
-        if (Style.consume_front("m"))
-            return {getAs<std::ratio<60>>(D), "m"};
-        if (Style.consume_front("h"))
-            return {getAs<std::ratio<3600>>(D), "h"};
-        return {D.count(), detail::unit<Period>::value};
-    }
+  static std::pair<InternalRep, StringRef> consumeUnit(StringRef &Style,
+                                                       const Dur &D) {
+    using namespace std::chrono;
+    if (Style.consume_front("ns"))
+      return {getAs<std::nano>(D), "ns"};
+    if (Style.consume_front("us"))
+      return {getAs<std::micro>(D), "us"};
+    if (Style.consume_front("ms"))
+      return {getAs<std::milli>(D), "ms"};
+    if (Style.consume_front("s"))
+      return {getAs<std::ratio<1>>(D), "s"};
+    if (Style.consume_front("m"))
+      return {getAs<std::ratio<60>>(D), "m"};
+    if (Style.consume_front("h"))
+      return {getAs<std::ratio<3600>>(D), "h"};
+    return {D.count(), detail::unit<Period>::value};
+  }
 
-    static bool consumeShowUnit(StringRef &Style) {
-        if (Style.empty())
-            return true;
-        if (Style.consume_front("-"))
-            return false;
-        if (Style.consume_front("+"))
-            return true;
-        assert(0 && "Unrecognised duration format");
-        return true;
-    }
+  static bool consumeShowUnit(StringRef &Style) {
+    if (Style.empty())
+      return true;
+    if (Style.consume_front("-"))
+      return false;
+    if (Style.consume_front("+"))
+      return true;
+    assert(0 && "Unrecognised duration format");
+    return true;
+  }
 
 public:
-    static void format(const Dur &D, llvm::raw_ostream &Stream, StringRef Style) {
-        InternalRep count;
-        StringRef unit;
-        std::tie(count, unit) = consumeUnit(Style, D);
-        bool show_unit = consumeShowUnit(Style);
+  static void format(const Dur &D, llvm::raw_ostream &Stream, StringRef Style) {
+    InternalRep count;
+    StringRef unit;
+    std::tie(count, unit) = consumeUnit(Style, D);
+    bool show_unit = consumeShowUnit(Style);
 
-        format_provider<InternalRep>::format(count, Stream, Style);
+    format_provider<InternalRep>::format(count, Stream, Style);
 
-        if (show_unit) {
-            assert(!unit.empty());
-            Stream << " " << unit;
-        }
+    if (show_unit) {
+      assert(!unit.empty());
+      Stream << " " << unit;
     }
+  }
 };
 
 } // namespace llvm

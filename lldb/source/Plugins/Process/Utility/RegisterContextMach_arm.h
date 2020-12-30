@@ -13,27 +13,27 @@
 
 class RegisterContextMach_arm : public RegisterContextDarwin_arm {
 public:
-    RegisterContextMach_arm(lldb_private::Thread &thread,
-                            uint32_t concrete_frame_idx);
+  RegisterContextMach_arm(lldb_private::Thread &thread,
+                          uint32_t concrete_frame_idx);
 
-    virtual ~RegisterContextMach_arm();
+  virtual ~RegisterContextMach_arm();
 
 protected:
-    int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
+  int DoReadGPR(lldb::tid_t tid, int flavor, GPR &gpr) override;
 
-    int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
+  int DoReadFPU(lldb::tid_t tid, int flavor, FPU &fpu) override;
 
-    int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
+  int DoReadEXC(lldb::tid_t tid, int flavor, EXC &exc) override;
 
-    int DoReadDBG(lldb::tid_t tid, int flavor, DBG &dbg) override;
+  int DoReadDBG(lldb::tid_t tid, int flavor, DBG &dbg) override;
 
-    int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
+  int DoWriteGPR(lldb::tid_t tid, int flavor, const GPR &gpr) override;
 
-    int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
+  int DoWriteFPU(lldb::tid_t tid, int flavor, const FPU &fpu) override;
 
-    int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
+  int DoWriteEXC(lldb::tid_t tid, int flavor, const EXC &exc) override;
 
-    int DoWriteDBG(lldb::tid_t tid, int flavor, const DBG &dbg) override;
+  int DoWriteDBG(lldb::tid_t tid, int flavor, const DBG &dbg) override;
 };
 
 #endif // LLDB_SOURCE_PLUGINS_PROCESS_UTILITY_REGISTERCONTEXTMACH_ARM_H

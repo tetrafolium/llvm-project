@@ -19,12 +19,12 @@ namespace Fortran::semantics {
 
 class CaseChecker : public virtual BaseChecker {
 public:
-    explicit CaseChecker(SemanticsContext &context) : context_{context} {};
+  explicit CaseChecker(SemanticsContext &context) : context_{context} {};
 
-    void Enter(const parser::CaseConstruct &);
+  void Enter(const parser::CaseConstruct &);
 
 private:
-    SemanticsContext &context_;
+  SemanticsContext &context_;
 };
 } // namespace Fortran::semantics
 #endif // FORTRAN_SEMANTICS_CHECK_CASE_H_

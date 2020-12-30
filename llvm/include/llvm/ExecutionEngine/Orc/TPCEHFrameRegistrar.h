@@ -23,29 +23,29 @@ namespace orc {
 /// TargetProcessControl instance.
 class TPCEHFrameRegistrar : public jitlink::EHFrameRegistrar {
 public:
-    /// Create from a TargetProcessControl instance alone. This will use
-    /// the TPC's lookupSymbols method to find the registration/deregistration
-    /// funciton addresses by name.
-    static Expected<std::unique_ptr<TPCEHFrameRegistrar>>
-            Create(TargetProcessControl &TPC);
+  /// Create from a TargetProcessControl instance alone. This will use
+  /// the TPC's lookupSymbols method to find the registration/deregistration
+  /// funciton addresses by name.
+  static Expected<std::unique_ptr<TPCEHFrameRegistrar>>
+  Create(TargetProcessControl &TPC);
 
-    /// Create a TPCEHFrameRegistrar with the given TargetProcessControl
-    /// object and registration/deregistration function addresses.
-    TPCEHFrameRegistrar(TargetProcessControl &TPC,
-                        JITTargetAddress RegisterEHFrameWrapperFnAddr,
-                        JITTargetAddress DeregisterEHFRameWrapperFnAddr)
-        : TPC(TPC), RegisterEHFrameWrapperFnAddr(RegisterEHFrameWrapperFnAddr),
-          DeregisterEHFrameWrapperFnAddr(DeregisterEHFRameWrapperFnAddr) {}
+  /// Create a TPCEHFrameRegistrar with the given TargetProcessControl
+  /// object and registration/deregistration function addresses.
+  TPCEHFrameRegistrar(TargetProcessControl &TPC,
+                      JITTargetAddress RegisterEHFrameWrapperFnAddr,
+                      JITTargetAddress DeregisterEHFRameWrapperFnAddr)
+      : TPC(TPC), RegisterEHFrameWrapperFnAddr(RegisterEHFrameWrapperFnAddr),
+        DeregisterEHFrameWrapperFnAddr(DeregisterEHFRameWrapperFnAddr) {}
 
-    Error registerEHFrames(JITTargetAddress EHFrameSectionAddr,
+  Error registerEHFrames(JITTargetAddress EHFrameSectionAddr,
+                         size_t EHFrameSectionSize) override;
+  Error deregisterEHFrames(JITTargetAddress EHFrameSectionAddr,
                            size_t EHFrameSectionSize) override;
-    Error deregisterEHFrames(JITTargetAddress EHFrameSectionAddr,
-                             size_t EHFrameSectionSize) override;
 
 private:
-    TargetProcessControl &TPC;
-    JITTargetAddress RegisterEHFrameWrapperFnAddr;
-    JITTargetAddress DeregisterEHFrameWrapperFnAddr;
+  TargetProcessControl &TPC;
+  JITTargetAddress RegisterEHFrameWrapperFnAddr;
+  JITTargetAddress DeregisterEHFrameWrapperFnAddr;
 };
 
 } // end namespace orc

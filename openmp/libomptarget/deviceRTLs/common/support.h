@@ -20,15 +20,15 @@
 // Execution Parameters
 ////////////////////////////////////////////////////////////////////////////////
 enum ExecutionMode {
-    Spmd = 0x00u,
-    Generic = 0x01u,
-    ModeMask = 0x01u,
+  Spmd = 0x00u,
+  Generic = 0x01u,
+  ModeMask = 0x01u,
 };
 
 enum RuntimeMode {
-    RuntimeInitialized = 0x00u,
-    RuntimeUninitialized = 0x02u,
-    RuntimeMask = 0x02u,
+  RuntimeInitialized = 0x00u,
+  RuntimeUninitialized = 0x02u,
+  RuntimeMask = 0x02u,
 };
 
 DEVICE void setExecutionParameters(ExecutionMode EMode, RuntimeMode RMode);
@@ -57,8 +57,8 @@ DEVICE int GetNumberOfWorkersInTeam();
 
 // get OpenMP thread and team ids
 DEVICE int GetOmpThreadId(int threadId,
-                          bool isSPMDExecutionMode);    // omp_thread_num
-DEVICE int GetOmpTeamId();                              // omp_team_num
+                          bool isSPMDExecutionMode); // omp_thread_num
+DEVICE int GetOmpTeamId();                           // omp_team_num
 
 // get OpenMP number of threads and team
 DEVICE int GetNumberOfOmpThreads(bool isSPMDExecutionMode); // omp_num_threads

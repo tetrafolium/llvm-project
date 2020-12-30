@@ -53,10 +53,8 @@ ParallelOp getParallelForInductionVarOwner(Value val);
 using ValueVector = std::vector<Value>;
 using LoopVector = std::vector<scf::ForOp>;
 struct LoopNest {
-    ResultRange getResults() {
-        return loops.front().getResults();
-    }
-    LoopVector loops;
+  ResultRange getResults() { return loops.front().getResults(); }
+  LoopVector loops;
 };
 
 /// Creates a perfect nest of "for" loops, i.e. all loops but the innermost
@@ -81,7 +79,7 @@ LoopNest buildLoopNest(
     OpBuilder &builder, Location loc, ValueRange lbs, ValueRange ubs,
     ValueRange steps, ValueRange iterArgs,
     function_ref<ValueVector(OpBuilder &, Location, ValueRange, ValueRange)>
-    bodyBuilder = nullptr);
+        bodyBuilder = nullptr);
 
 /// A convenience version for building loop nests without iteration arguments
 /// (like for reductions). Does not take the initial value of reductions or
@@ -90,7 +88,7 @@ LoopNest buildLoopNest(
 LoopNest buildLoopNest(OpBuilder &builder, Location loc, ValueRange lbs,
                        ValueRange ubs, ValueRange steps,
                        function_ref<void(OpBuilder &, Location, ValueRange)>
-                       bodyBuilder = nullptr);
+                           bodyBuilder = nullptr);
 
 } // end namespace scf
 } // end namespace mlir

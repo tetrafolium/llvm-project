@@ -19,28 +19,28 @@ namespace tidy {
 namespace bugprone {
 
 void TerminatingContinueCheck::registerMatchers(MatchFinder *Finder) {
-    const auto doWithFalse =
-        doStmt(hasCondition(ignoringImpCasts(
-                                anyOf(cxxBoolLiteral(equals(false)), integerLiteral(equals(0)),
-                                      cxxNullPtrLiteralExpr(), gnuNullExpr()))),
-               equalsBoundNode("closestLoop"));
+  const auto doWithFalse =
+      doStmt(hasCondition(ignoringImpCasts(
+                 anyOf(cxxBoolLiteral(equals(false)), integerLiteral(equals(0)),
+                       cxxNullPtrLiteralExpr(), gnuNullExpr()))),
+             equalsBoundNode("closestLoop"));
 
-    Finder->addMatcher(
-        continueStmt(hasAncestor(stmt(anyOf(forStmt(), whileStmt(),
-                                            cxxForRangeStmt(), doStmt()))
-                                 .bind("closestLoop")),
-                     hasAncestor(doWithFalse))
-        .bind("continue"),
-        this);
+  Finder->addMatcher(
+      continueStmt(hasAncestor(stmt(anyOf(forStmt(), whileStmt(),
+                                          cxxForRangeStmt(), doStmt()))
+                                   .bind("closestLoop")),
+                   hasAncestor(doWithFalse))
+          .bind("continue"),
+      this);
 }
 
 void TerminatingContinueCheck::check(const MatchFinder::MatchResult &Result) {
-    const auto *ContStmt = Result.Nodes.getNodeAs<ContinueStmt>("continue");
+  const auto *ContStmt = Result.Nodes.getNodeAs<ContinueStmt>("continue");
 
-    auto Diag =
-        diag(ContStmt->getBeginLoc(),
-             "'continue' in loop with false condition is equivalent to 'break'")
-        << tooling::fixit::createReplacement(*ContStmt, "break");
+  auto Diag =
+      diag(ContStmt->getBeginLoc(),
+           "'continue' in loop with false condition is equivalent to 'break'")
+      << tooling::fixit::createReplacement(*ContStmt, "break");
 }
 
 } // namespace bugprone

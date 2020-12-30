@@ -18,15 +18,15 @@ namespace pdb {
 
 class DIAEnumFrameData : public IPDBEnumChildren<IPDBFrameData> {
 public:
-    explicit DIAEnumFrameData(CComPtr<IDiaEnumFrameData> DiaEnumerator);
+  explicit DIAEnumFrameData(CComPtr<IDiaEnumFrameData> DiaEnumerator);
 
-    uint32_t getChildCount() const override;
-    ChildTypePtr getChildAtIndex(uint32_t Index) const override;
-    ChildTypePtr getNext() override;
-    void reset() override;
+  uint32_t getChildCount() const override;
+  ChildTypePtr getChildAtIndex(uint32_t Index) const override;
+  ChildTypePtr getNext() override;
+  void reset() override;
 
 private:
-    CComPtr<IDiaEnumFrameData> Enumerator;
+  CComPtr<IDiaEnumFrameData> Enumerator;
 };
 
 } // namespace pdb

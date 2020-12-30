@@ -77,9 +77,7 @@ class Pass;
   INITIALIZE_PASS_BEGIN(PassName, Arg, Name, Cfg, Analysis)                    \
   PassName::registerOptions();
 
-template <typename PassName> Pass *callDefaultCtor() {
-    return new PassName();
-}
+template <typename PassName> Pass *callDefaultCtor() { return new PassName(); }
 
 //===---------------------------------------------------------------------------
 /// RegisterPass<t> template - This template class is used to notify the system
@@ -94,14 +92,14 @@ template <typename PassName> Pass *callDefaultCtor() {
 /// This statement will cause your pass to be created by calling the default
 /// constructor exposed by the pass.
 template <typename passName> struct RegisterPass : public PassInfo {
-    // Register Pass using default constructor...
-    RegisterPass(StringRef PassArg, StringRef Name, bool CFGOnly = false,
-                 bool is_analysis = false)
-        : PassInfo(Name, PassArg, &passName::ID,
-                   PassInfo::NormalCtor_t(callDefaultCtor<passName>), CFGOnly,
-                   is_analysis) {
-        PassRegistry::getPassRegistry()->registerPass(*this);
-    }
+  // Register Pass using default constructor...
+  RegisterPass(StringRef PassArg, StringRef Name, bool CFGOnly = false,
+               bool is_analysis = false)
+      : PassInfo(Name, PassArg, &passName::ID,
+                 PassInfo::NormalCtor_t(callDefaultCtor<passName>), CFGOnly,
+                 is_analysis) {
+    PassRegistry::getPassRegistry()->registerPass(*this);
+  }
 };
 
 /// RegisterAnalysisGroup - Register a Pass as a member of an analysis _group_.
@@ -124,18 +122,18 @@ template <typename passName> struct RegisterPass : public PassInfo {
 /// a nice name with the interface.
 class RegisterAGBase : public PassInfo {
 public:
-    RegisterAGBase(StringRef Name, const void *InterfaceID,
-                   const void *PassID = nullptr, bool isDefault = false);
+  RegisterAGBase(StringRef Name, const void *InterfaceID,
+                 const void *PassID = nullptr, bool isDefault = false);
 };
 
 template <typename Interface, bool Default = false>
 struct RegisterAnalysisGroup : public RegisterAGBase {
-    explicit RegisterAnalysisGroup(PassInfo &RPB)
-        : RegisterAGBase(RPB.getPassName(), &Interface::ID, RPB.getTypeInfo(),
-                         Default) {}
+  explicit RegisterAnalysisGroup(PassInfo &RPB)
+      : RegisterAGBase(RPB.getPassName(), &Interface::ID, RPB.getTypeInfo(),
+                       Default) {}
 
-    explicit RegisterAnalysisGroup(const char *Name)
-        : RegisterAGBase(Name, &Interface::ID) {}
+  explicit RegisterAnalysisGroup(const char *Name)
+      : RegisterAGBase(Name, &Interface::ID) {}
 };
 
 #define INITIALIZE_ANALYSIS_GROUP(agName, name, defaultPass)                   \
@@ -200,20 +198,20 @@ struct RegisterAnalysisGroup : public RegisterAGBase {
 /// as the program starts up, or may be because a shared object just got
 /// loaded).
 struct PassRegistrationListener {
-    PassRegistrationListener() = default;
-    virtual ~PassRegistrationListener() = default;
+  PassRegistrationListener() = default;
+  virtual ~PassRegistrationListener() = default;
 
-    /// Callback functions - These functions are invoked whenever a pass is loaded
-    /// or removed from the current executable.
-    virtual void passRegistered(const PassInfo *) {}
+  /// Callback functions - These functions are invoked whenever a pass is loaded
+  /// or removed from the current executable.
+  virtual void passRegistered(const PassInfo *) {}
 
-    /// enumeratePasses - Iterate over the registered passes, calling the
-    /// passEnumerate callback on each PassInfo object.
-    void enumeratePasses();
+  /// enumeratePasses - Iterate over the registered passes, calling the
+  /// passEnumerate callback on each PassInfo object.
+  void enumeratePasses();
 
-    /// passEnumerate - Callback function invoked when someone calls
-    /// enumeratePasses on this PassRegistrationListener object.
-    virtual void passEnumerate(const PassInfo *) {}
+  /// passEnumerate - Callback function invoked when someone calls
+  /// enumeratePasses on this PassRegistrationListener object.
+  virtual void passEnumerate(const PassInfo *) {}
 };
 
 } // end namespace llvm
